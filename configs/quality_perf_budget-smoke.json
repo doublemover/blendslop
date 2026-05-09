@@ -81,6 +81,26 @@
       "mode": "max",
       "threshold": 250.0,
       "required": true
+    },
+    {
+      "id": "bench.geometry_metrics.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "geometry_metrics",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 250.0,
+      "required": true
+    },
+    {
+      "id": "bench.shape_program_build.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "shape_program_build",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 120.0,
+      "required": true
     }
   ],
   "comparisons": [

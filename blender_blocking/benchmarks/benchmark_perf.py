@@ -100,6 +100,8 @@ BENCHMARK_CASES: Dict[str, BenchmarkCase] = {
             "silhouette_pipeline",
             "volume_surface",
             "target_builder",
+            "geometry_metrics",
+            "shape_program_build",
         ),
         overrides={"iterations": 20, "resolution": 24, "profile_size": 96},
     ),
@@ -116,6 +118,8 @@ BENCHMARK_CASES: Dict[str, BenchmarkCase] = {
             "target_builder",
             "vertical_profile",
             "vertical_width_profile",
+            "geometry_metrics",
+            "shape_program_build",
         ),
         overrides={"iterations": 50, "repeat": 1, "resolution": 32},
     ),
@@ -139,6 +143,8 @@ BENCHMARK_CASES: Dict[str, BenchmarkCase] = {
             "silhouette_pipeline",
             "volume_surface",
             "target_builder",
+            "geometry_metrics",
+            "shape_program_build",
         ),
         overrides={
             "iterations": 200,
@@ -1236,6 +1242,154 @@ def bench_target_builder(iterations: int, progress: bool = True) -> BenchResult:
     )
 
 
+def bench_geometry_metrics(
+    iterations: int,
+    resolution: int,
+    progress: bool = True,
+) -> BenchResult:
+    try:
+        from evaluation.geometry import (
+            surface_distance_report,
+            volumetric_iou,
+        )
+    except Exception as exc:
+        return BenchResult(
+            name="geometry_metrics",
+            iterations=0,
+            elapsed_s=0.0,
+            per_iter_ms=0.0,
+            status="skip",
+            skip_reason=str(exc),
+        )
+
+    rng = np.random.default_rng(90210)
+    points = _sample_sphere_points(1.0, max(256, resolution * resolution), rng)
+    candidate = points + rng.normal(0.0, 0.0025, size=points.shape)
+    grid_ref = rng.random((resolution, resolution, resolution)) > 0.65
+    grid_cand = np.logical_or(
+        grid_ref,
+        rng.random((resolution, resolution, resolution)) > 0.995,
+    )
+    progress_handle = progress_bar(iterations, desc="geometry_metrics", enabled=progress)
+    start = _now()
+    report = None
+    volume_iou = 0.0
+    for _ in range(iterations):
+        report = surface_distance_report(points, candidate, tolerance=0.01)
+        volume_iou = volumetric_iou(grid_ref, grid_cand)
+        progress_handle.update(1)
+    progress_handle.close()
+    total = _now() - start
+    per_iter_s = total / max(iterations, 1)
+    return BenchResult(
+        name="geometry_metrics",
+        iterations=iterations,
+        elapsed_s=total,
+        per_iter_ms=per_iter_s * 1000.0,
+        meta={
+            "point_count": int(points.shape[0]),
+            "resolution": resolution,
+            "chamfer_l2": None if report is None else report.chamfer_l2,
+            "fscore_tau": None if report is None else report.fscore_tau,
+            "volumetric_iou": volume_iou,
+            "throughput": (points.shape[0] + grid_ref.size) / per_iter_s if per_iter_s > 0 else 0.0,
+            "throughput_unit": "sample",
+            "throughput_label": "geometry samples",
+        },
+    )
+
+
+def bench_shape_program_build(iterations: int, progress: bool = True) -> BenchResult:
+    try:
+        from reconstruction.backends.shape_program import build_shape_program_from_target
+        from reconstruction.types import (
+            Bounds3D,
+            OrthographicCameraSpec,
+            ProfileBand,
+            ProfileIntervalPx,
+            ReconstructionTarget,
+            ViewConstraint,
+        )
+    except Exception as exc:
+        return BenchResult(
+            name="shape_program_build",
+            iterations=0,
+            elapsed_s=0.0,
+            per_iter_ms=0.0,
+            status="skip",
+            skip_reason=str(exc),
+        )
+
+    bands = tuple(
+        ProfileBand(
+            t=index / 63.0,
+            intervals=(
+                ProfileIntervalPx(
+                    x0=28.0 + (index % 5) * 0.25,
+                    x1=68.0 - (index % 7) * 0.2,
+                    confidence=0.9,
+                ),
+            ),
+            center_x=48.0,
+            width_px=40.0,
+            confidence=0.9,
+            source_view="front",
+        )
+        for index in range(64)
+    )
+    mask = np.zeros((96, 96), dtype=bool)
+    mask[16:80, 28:68] = True
+    target = ReconstructionTarget(
+        constraints=(
+            ViewConstraint(
+                view="front",
+                mask=mask,
+                camera=OrthographicCameraSpec("front", "front", resolution=(96, 96)),
+            ),
+            ViewConstraint(
+                view="side",
+                mask=mask,
+                camera=OrthographicCameraSpec("side", "side", resolution=(96, 96)),
+            ),
+        ),
+        profile_bands={"front": bands},
+        bounds=Bounds3D(-1.0, 1.0, -0.75, 0.75, 0.0, 2.0),
+    )
+    config = {
+        "root_strategy": "hybrid_profile_bounds",
+        "residual_policy": "suggest_patches",
+        "max_nodes": 64,
+    }
+    progress_handle = progress_bar(iterations, desc="shape_program", enabled=progress)
+    start = _now()
+    program = None
+    diagnostics = {}
+    for index in range(iterations):
+        program, diagnostics = build_shape_program_from_target(
+            target,
+            config=config,
+            program_id=f"bench_shape_program_{index}",
+        )
+        progress_handle.update(1)
+    progress_handle.close()
+    total = _now() - start
+    per_iter_s = total / max(iterations, 1)
+    return BenchResult(
+        name="shape_program_build",
+        iterations=iterations,
+        elapsed_s=total,
+        per_iter_ms=per_iter_s * 1000.0,
+        meta={
+            "node_count": 0 if program is None else program.node_count(),
+            "residual_patch_count": 0 if program is None else program.residual_patch_count(),
+            "dominant_profile_band_count": diagnostics.get("dominant_profile_band_count", 0),
+            "throughput": len(bands) / per_iter_s if per_iter_s > 0 else 0.0,
+            "throughput_unit": "band",
+            "throughput_label": "profile bands",
+        },
+    )
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -1350,7 +1504,8 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
             "Comma-separated list: visual_hull,surface_voxels,vertical_profile,"
             "vertical_width_profile,profile_interpolation,combine_profiles,slice_metrics,"
             "resfit_residual,resfit_full,resfit_optimize,canonicalize,compare,extract,"
-            "silhouette_pipeline,volume_surface,target_builder"
+            "silhouette_pipeline,volume_surface,target_builder,geometry_metrics,"
+            "shape_program_build"
         ),
     )
     parser.add_argument("--all", action="store_true", help="Run all benches")
@@ -1505,6 +1660,8 @@ def _default_benches(args: argparse.Namespace) -> List[str]:
             "silhouette_pipeline",
             "volume_surface",
             "target_builder",
+            "geometry_metrics",
+            "shape_program_build",
         ]
     return [b.strip() for b in args.bench.split(",") if b.strip()]
 
@@ -1620,6 +1777,17 @@ def _run_one_benchmark(bench: str, args: argparse.Namespace) -> BenchResult:
         )
     if bench == "target_builder":
         return bench_target_builder(
+            iterations=args.iterations,
+            progress=args.progress,
+        )
+    if bench == "geometry_metrics":
+        return bench_geometry_metrics(
+            iterations=args.iterations,
+            resolution=args.resolution,
+            progress=args.progress,
+        )
+    if bench == "shape_program_build":
+        return bench_shape_program_build(
             iterations=args.iterations,
             progress=args.progress,
         )

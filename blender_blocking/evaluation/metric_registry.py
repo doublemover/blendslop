@@ -32,9 +32,14 @@ _DEFINITIONS = (
     MetricDefinition("silhouette.mean_signed_distance_loss", None, False, "Mean normalized signed-distance silhouette loss."),
     MetricDefinition("geometry.chamfer_l1", "normalized_distance", False, "Symmetric nearest-neighbor L1 Chamfer distance."),
     MetricDefinition("geometry.chamfer_l2", "normalized_distance_squared", False, "Symmetric nearest-neighbor squared Chamfer distance."),
-    MetricDefinition("geometry.f_score", None, True, "Surface F-score at configured tolerance.", ("tau",)),
+    MetricDefinition("geometry.fscore_tau", None, True, "Surface F-score at configured tolerance.", ("tau",)),
+    MetricDefinition("geometry.fscore_tolerance", "world_units", None, "Tolerance used for surface F-score."),
     MetricDefinition("geometry.volumetric_iou", None, True, "Occupancy volume intersection over union."),
     MetricDefinition("geometry.normal_consistency", None, True, "Nearest-neighbor normal consistency."),
+    MetricDefinition("geometry.surface_coverage", None, True, "Fraction of ground-truth surface covered by candidate samples."),
+    MetricDefinition("geometry.ambiguity_gap", None, False, "Estimated information gap caused by silhouette-only ambiguity."),
+    MetricDefinition("geometry.sample_count_ref", "points", None, "Ground-truth surface sample count used by geometry metrics."),
+    MetricDefinition("geometry.sample_count_candidate", "points", None, "Candidate surface sample count used by geometry metrics."),
     MetricDefinition("novel_view.psnr", "dB", True, "Novel-view peak signal-to-noise ratio."),
     MetricDefinition("novel_view.ssim", None, True, "Novel-view structural similarity."),
     MetricDefinition("novel_view.lpips", None, False, "Novel-view learned perceptual patch distance."),
@@ -58,4 +63,3 @@ def metric_definition(name: str) -> MetricDefinition | None:
 
 def registry_payload() -> dict[str, object]:
     return {name: definition.to_dict() for name, definition in METRIC_REGISTRY.items()}
-

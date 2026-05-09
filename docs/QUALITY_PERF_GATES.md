@@ -55,6 +55,11 @@ blender --background --python test_runner.py -- --phase quality-smoke --budget-j
 - `bench-budget-report.json`
 - synthetic references and per-case e2e results under `synthetic/`
 
+The quality-smoke and nightly benchmark registries include dedicated rows for:
+
+- `geometry_metrics`: Chamfer/F-score/volumetric-IoU metric throughput.
+- `shape_program_build`: editable shape-program construction from profile bands.
+
 ## E2E Synthetic Matrix
 
 The e2e validator can run a suite across multiple reconstruction modes:
@@ -69,6 +74,11 @@ blender --background --python blender_blocking/test_e2e_validation.py -- \
   --quality-report-json blender_blocking/test_output/e2e_budget_report.json \
   --no-progress
 ```
+
+For research/editability passes, add `shape_program` to `--synthetic-modes` and
+use `--validation-mode backend-status`. `research_only` is treated as an
+acceptable backend contract status because it emits a structured editable
+artifact without claiming render-IoU success.
 
 The matrix renders Blender-backed synthetic fixtures through the public synthetic builder, then calls the existing e2e custom-image path. Pure 2D synthetic definitions are marked as allowed skips unless `--synthetic-strict-skips` is set.
 

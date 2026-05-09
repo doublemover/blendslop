@@ -34,6 +34,26 @@
       "required": true
     },
     {
+      "id": "bench.nightly.geometry_metrics.max_ms",
+      "artifact": "benchmark",
+      "case": "nightly",
+      "name": "geometry_metrics",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 750.0,
+      "required": true
+    },
+    {
+      "id": "bench.nightly.shape_program_build.max_ms",
+      "artifact": "benchmark",
+      "case": "nightly",
+      "name": "shape_program_build",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 300.0,
+      "required": true
+    },
+    {
       "id": "e2e.nightly.rows.pass",
       "artifact": "e2e",
       "metric": "metrics.passed",
