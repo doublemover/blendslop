@@ -178,6 +178,15 @@ use `--validation-mode backend-status`. `research_only` is treated as an
 acceptable backend contract status because it emits a structured editable
 artifact without claiming render-IoU success.
 
+With `--shape-residual-policy suggest_patches`, profile rows that contain
+multiple foreground intervals or interior holes now become first-class editable
+residual nodes in the shape program. Multi-interval details are emitted as
+attachable residual patch objects; hole evidence is emitted as subtractive patch
+objects. The residual patch annotations still preserve source view, confidence,
+row position, and the suggested node id so Blender-side review can keep,
+resize, convert to booleans, or discard each detail patch without losing the
+audit trail.
+
 For Blender-side editable asset delivery checks, enable shape-program export
 round-trip QA:
 

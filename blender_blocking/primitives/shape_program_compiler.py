@@ -2,8 +2,8 @@
 
 The compiler intentionally keeps every generated object editable: primitives
 remain primitives where possible, bevel/smooth behavior is represented with
-modifiers, and residual patches become named markers instead of being fused into
-opaque mesh blobs.
+modifiers, and residual patches remain named, inspectable markers even when the
+program also contains editable suggested patch nodes for them.
 """
 
 from __future__ import annotations
@@ -355,6 +355,12 @@ def _compile_residual_marker(patch: ResidualPatch, *, program: ShapeProgram) -> 
     marker["blendslop_residual_source_view"] = patch.source_view
     marker["blendslop_residual_confidence"] = float(patch.confidence)
     marker["blendslop_residual_notes"] = "\n".join(patch.notes)
+    if patch.suggested_node is not None:
+        marker["blendslop_residual_suggested_node_id"] = patch.suggested_node.node_id
+        marker["blendslop_residual_suggested_operation"] = patch.suggested_node.operation
+        marker["blendslop_residual_suggested_primitive"] = (
+            patch.suggested_node.primitive_type or ""
+        )
     return marker
 
 

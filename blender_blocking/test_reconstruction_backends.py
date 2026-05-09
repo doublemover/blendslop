@@ -326,6 +326,66 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         self.assertGreater(curve[1]["radius_x_world"], curve[0]["radius_x_world"])
         self.assertGreater(curve[1]["radius_y_world"], curve[2]["radius_y_world"])
 
+    def test_shape_program_realizes_residual_patch_nodes(self) -> None:
+        bands = (
+            ProfileBand(
+                t=0.25,
+                intervals=(
+                    ProfileIntervalPx(4.0, 12.0),
+                    ProfileIntervalPx(28.0, 36.0),
+                ),
+                center_x=20.0,
+                width_px=32.0,
+                source_view="front",
+            ),
+            ProfileBand(
+                t=0.75,
+                intervals=(ProfileIntervalPx(5.0, 35.0),),
+                holes=(ProfileIntervalPx(17.0, 23.0),),
+                center_x=20.0,
+                width_px=30.0,
+                source_view="front",
+                confidence=0.7,
+            ),
+        )
+        target = ReconstructionTarget(
+            profile_bands={"front": bands},
+            bounds=Bounds3D.from_min_max((-1.0, -0.5, -1.0), (1.0, 0.5, 1.0)),
+        )
+
+        program, diagnostics = build_shape_program_from_target(
+            target,
+            config={
+                "root_strategy": "profile_lathe",
+                "residual_policy": "suggest_patches",
+                "max_nodes": 8,
+            },
+            program_id="shape-residual-node-test",
+        )
+
+        residual_nodes = [
+            node for node in program.root_nodes if node.node_id.startswith("residual_")
+        ]
+        self.assertEqual(len(program.residual_patches), 2)
+        self.assertEqual(len(residual_nodes), 2)
+        self.assertEqual(diagnostics["suggested_residual_node_count"], 2)
+        self.assertEqual(diagnostics["realized_residual_node_count"], 2)
+        self.assertEqual(
+            diagnostics["realized_residual_node_ids"],
+            [node.node_id for node in residual_nodes],
+        )
+        self.assertTrue(
+            all(patch.suggested_node is not None for patch in program.residual_patches)
+        )
+        self.assertEqual(residual_nodes[0].operation, "attach")
+        self.assertEqual(residual_nodes[1].operation, "difference")
+        self.assertEqual(residual_nodes[0].parameters["interval_count"], 2)
+        self.assertEqual(residual_nodes[1].parameters["hole_count"], 1)
+        self.assertEqual(
+            residual_nodes[1].parameters["suggested_boolean_role"],
+            "subtract",
+        )
+
     def test_duplicate_missing_and_alias_registration_errors(self) -> None:
         backend = _FakeBackend()
         register_backend(backend, aliases=("fake_alias",))
