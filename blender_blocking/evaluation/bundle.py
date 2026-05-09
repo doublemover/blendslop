@@ -14,7 +14,13 @@ from .failure_taxonomy import classify_bundle_failures
 from .geometry import report_from_mapping
 from .lineage import repo_revision
 from .novel_view import report_from_mapping as novel_view_report_from_mapping
-from .schemas import EvaluationBundle, MetricGroup, MetricValue, utc_now_iso, worst_status
+from .schemas import (
+    EvaluationBundle,
+    MetricGroup,
+    MetricValue,
+    utc_now_iso,
+    worst_status,
+)
 
 
 def bundle_from_candidate(
@@ -41,7 +47,9 @@ def bundle_from_candidate(
     warnings = tuple(str(item) for item in getattr(result, "warnings", ()) or ())
     status = _bundle_status(result, metric_groups)
     extras = getattr(metrics, "extras", {}) if metrics is not None else {}
-    dependency_state = _dependency_state(result, extras if isinstance(extras, Mapping) else {})
+    dependency_state = _dependency_state(
+        result, extras if isinstance(extras, Mapping) else {}
+    )
     degradation_state = {
         "degraded": bool(getattr(result, "degraded", False)),
         "candidate_status": str(getattr(result, "status", "")),
@@ -140,22 +148,56 @@ def _silhouette_group(metrics: Any) -> MetricGroup:
                 higher_is_better=True,
                 required=required,
                 status="pass" if passed else "fail",
-                notes=(str(payload.get("reason", "")),) if payload.get("reason") else (),
+                notes=(str(payload.get("reason", "")),)
+                if payload.get("reason")
+                else (),
             )
         )
         boundary = _float_or_none(payload.get("boundary_iou"))
         if boundary is not None:
             boundary_values.append(boundary)
-            values.append(MetricValue(f"{prefix}.boundary_iou", boundary, higher_is_better=True, required=required, status="pass" if passed else "fail"))
+            values.append(
+                MetricValue(
+                    f"{prefix}.boundary_iou",
+                    boundary,
+                    higher_is_better=True,
+                    required=required,
+                    status="pass" if passed else "fail",
+                )
+            )
         sdf = _float_or_none(payload.get("signed_distance_loss"))
         if sdf is not None:
             sdf_values.append(sdf)
-            values.append(MetricValue(f"{prefix}.signed_distance_loss", sdf, higher_is_better=False, required=required, status="pass" if passed else "fail"))
+            values.append(
+                MetricValue(
+                    f"{prefix}.signed_distance_loss",
+                    sdf,
+                    higher_is_better=False,
+                    required=required,
+                    status="pass" if passed else "fail",
+                )
+            )
     if boundary_values:
-        values.append(MetricValue("silhouette.min_boundary_iou", min(boundary_values), higher_is_better=True, status="pass"))
+        values.append(
+            MetricValue(
+                "silhouette.min_boundary_iou",
+                min(boundary_values),
+                higher_is_better=True,
+                status="pass",
+            )
+        )
     if sdf_values:
-        values.append(MetricValue("silhouette.mean_signed_distance_loss", sum(sdf_values) / len(sdf_values), higher_is_better=False, status="pass"))
-    return MetricGroup("silhouette", worst_status(view_statuses or ("pass",)), tuple(values))
+        values.append(
+            MetricValue(
+                "silhouette.mean_signed_distance_loss",
+                sum(sdf_values) / len(sdf_values),
+                higher_is_better=False,
+                status="pass",
+            )
+        )
+    return MetricGroup(
+        "silhouette", worst_status(view_statuses or ("pass",)), tuple(values)
+    )
 
 
 def _topology_group(metrics: Any) -> MetricGroup:
@@ -164,15 +206,44 @@ def _topology_group(metrics: Any) -> MetricGroup:
     extras = getattr(metrics, "extras", {}) or {}
     topology = extras.get("topology") if isinstance(extras, Mapping) else None
     values = [
-        MetricValue("topology.score", float(getattr(metrics, "topology_score", 0.0)), higher_is_better=True, status="pass"),
-        MetricValue("topology.penalty", float(getattr(metrics, "topology_penalty", 0.0)), higher_is_better=False, status="pass"),
+        MetricValue(
+            "topology.score",
+            float(getattr(metrics, "topology_score", 0.0)),
+            higher_is_better=True,
+            status="pass",
+        ),
+        MetricValue(
+            "topology.penalty",
+            float(getattr(metrics, "topology_penalty", 0.0)),
+            higher_is_better=False,
+            status="pass",
+        ),
     ]
     if isinstance(topology, Mapping):
-        for key in ("connected_components", "boundary_edges", "non_manifold_edges", "degenerate_faces"):
+        for key in (
+            "connected_components",
+            "boundary_edges",
+            "non_manifold_edges",
+            "degenerate_faces",
+        ):
             if key in topology:
-                values.append(MetricValue(f"topology.{key}", _float_or_none(topology.get(key)), higher_is_better=False, status="pass"))
+                values.append(
+                    MetricValue(
+                        f"topology.{key}",
+                        _float_or_none(topology.get(key)),
+                        higher_is_better=False,
+                        status="pass",
+                    )
+                )
         if "watertight" in topology:
-            values.append(MetricValue("topology.watertight", bool(topology.get("watertight")), higher_is_better=True, status=_pass_fail(bool(topology.get("watertight")))))
+            values.append(
+                MetricValue(
+                    "topology.watertight",
+                    bool(topology.get("watertight")),
+                    higher_is_better=True,
+                    status=_pass_fail(bool(topology.get("watertight"))),
+                )
+            )
     return MetricGroup("topology", "pass", tuple(values))
 
 
@@ -229,7 +300,9 @@ def _geometry_group(metrics: Any) -> MetricGroup:
     extras = getattr(metrics, "extras", {}) or {}
     geometry = extras.get("geometry") if isinstance(extras, Mapping) else None
     if not isinstance(geometry, Mapping):
-        geometry = extras.get("geometry_metrics") if isinstance(extras, Mapping) else None
+        geometry = (
+            extras.get("geometry_metrics") if isinstance(extras, Mapping) else None
+        )
     if not isinstance(geometry, Mapping):
         return MetricGroup("geometry", "not_applicable")
     report = report_from_mapping(geometry)
@@ -361,7 +434,15 @@ def _cost_group(result: Any) -> MetricGroup:
     return MetricGroup(
         "cost",
         "pass",
-        (MetricValue("cost.total_wall_ms", report.total_wall_ms, unit="ms", higher_is_better=False, status="pass"),),
+        (
+            MetricValue(
+                "cost.total_wall_ms",
+                report.total_wall_ms,
+                unit="ms",
+                higher_is_better=False,
+                status="pass",
+            ),
+        ),
         metadata=report.to_dict(),
     )
 
@@ -479,13 +560,45 @@ def _export_qa_group(metrics: Any) -> MetricGroup:
             )
         )
     if count_present["object"]:
-        values.append(MetricValue("export.object_count", total_objects, unit="object", higher_is_better=None, status="pass"))
+        values.append(
+            MetricValue(
+                "export.object_count",
+                total_objects,
+                unit="object",
+                higher_is_better=None,
+                status="pass",
+            )
+        )
     if count_present["vertex"]:
-        values.append(MetricValue("export.vertex_count", total_vertices, unit="vertex", higher_is_better=None, status="pass"))
+        values.append(
+            MetricValue(
+                "export.vertex_count",
+                total_vertices,
+                unit="vertex",
+                higher_is_better=None,
+                status="pass",
+            )
+        )
     if count_present["face"]:
-        values.append(MetricValue("export.face_count", total_faces, unit="face", higher_is_better=None, status="pass"))
+        values.append(
+            MetricValue(
+                "export.face_count",
+                total_faces,
+                unit="face",
+                higher_is_better=None,
+                status="pass",
+            )
+        )
     if count_present["material"]:
-        values.append(MetricValue("export.material_count", total_materials, unit="material", higher_is_better=None, status="pass"))
+        values.append(
+            MetricValue(
+                "export.material_count",
+                total_materials,
+                unit="material",
+                higher_is_better=None,
+                status="pass",
+            )
+        )
     if errors:
         group_status = "fail"
     elif statuses and all(status == "pass" for status in statuses):
@@ -505,9 +618,17 @@ def _export_qa_group(metrics: Any) -> MetricGroup:
 def _artifact_group(result: Any) -> MetricGroup:
     artifacts = _artifact_paths(result)
     values = [
-        MetricValue("artifact.count", len(artifacts), unit="count", higher_is_better=None, status="pass")
+        MetricValue(
+            "artifact.count",
+            len(artifacts),
+            unit="count",
+            higher_is_better=None,
+            status="pass",
+        )
     ]
-    return MetricGroup("artifacts", "pass", tuple(values), metadata={"artifacts": artifacts})
+    return MetricGroup(
+        "artifacts", "pass", tuple(values), metadata={"artifacts": artifacts}
+    )
 
 
 def _bundle_status(result: Any, groups: tuple[MetricGroup, ...]) -> str:
@@ -544,7 +665,9 @@ def _dependency_state(result: Any, extras: Mapping[str, Any]) -> dict[str, Any]:
         dependency_state.update(optional)
     capabilities = getattr(getattr(result, "backend", None), "capabilities", None)
     if capabilities is not None:
-        dependency_state.update(backend_dependency_state(getattr(capabilities, "optional_dependencies", ())))
+        dependency_state.update(
+            backend_dependency_state(getattr(capabilities, "optional_dependencies", ()))
+        )
     return dependency_state
 
 

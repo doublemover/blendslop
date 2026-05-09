@@ -1,4 +1,4 @@
-"""
+r"""
 Run a quick silhouette_intersection build + render in Blender.
 
 # TODO(silhouette_intersection): Keep this helper until boolean intersection
@@ -27,7 +27,7 @@ import sys
 from typing import Any, Dict, Optional
 
 try:
-    import bpy  # type: ignore
+    import bpy  # noqa: F401  # type: ignore
 
     BLENDER_AVAILABLE = True
 except ImportError:
@@ -49,12 +49,18 @@ def _add_python_paths(root: Path) -> None:
 
 
 def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Debug silhouette_intersection in Blender")
-    parser.add_argument("--base", type=str, default=None, help="Base name in test_images (e.g., car)")
+    parser = argparse.ArgumentParser(
+        description="Debug silhouette_intersection in Blender"
+    )
+    parser.add_argument(
+        "--base", type=str, default=None, help="Base name in test_images (e.g., car)"
+    )
     parser.add_argument("--front", type=str, default=None, help="Front image path")
     parser.add_argument("--side", type=str, default=None, help="Side image path")
     parser.add_argument("--top", type=str, default=None, help="Top image path")
-    parser.add_argument("--config-path", type=str, default=None, help="BlockingConfig override JSON")
+    parser.add_argument(
+        "--config-path", type=str, default=None, help="BlockingConfig override JSON"
+    )
     parser.add_argument(
         "--render-dir",
         type=str,

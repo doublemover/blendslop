@@ -7,7 +7,9 @@ from typing import Mapping
 from .schemas import EvaluationBundle, FailureObservation
 
 
-def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservation, ...]:
+def classify_bundle_failures(
+    bundle: EvaluationBundle,
+) -> tuple[FailureObservation, ...]:
     metrics = bundle.metric_index()
     failures: list[FailureObservation] = []
 
@@ -43,11 +45,19 @@ def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservati
                     "silhouette.average_iou": avg_iou,
                 },
                 likely_causes=("one required view is misaligned or missing detail",),
-                recommended_actions=("inspect per-view overlays", "run calibration diagnostics"),
+                recommended_actions=(
+                    "inspect per-view overlays",
+                    "run calibration diagnostics",
+                ),
             )
         )
     boundary = _metric_value(metrics, "silhouette.min_boundary_iou")
-    if boundary is not None and avg_iou is not None and avg_iou >= 0.85 and boundary < 0.55:
+    if (
+        boundary is not None
+        and avg_iou is not None
+        and avg_iou >= 0.85
+        and boundary < 0.55
+    ):
         failures.append(
             FailureObservation(
                 code="silhouette_boundary_blobby",
@@ -58,7 +68,10 @@ def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservati
                     "silhouette.min_boundary_iou": boundary,
                 },
                 likely_causes=("contour smoothing or missing thin features",),
-                recommended_actions=("run boundary-first refinement", "inspect boundary overlay"),
+                recommended_actions=(
+                    "run boundary-first refinement",
+                    "inspect boundary overlay",
+                ),
             )
         )
     non_manifold = _metric_value(metrics, "topology.non_manifold_edges")
@@ -69,7 +82,10 @@ def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservati
                 severity="fail",
                 subsystem="topology",
                 evidence_metrics={"topology.non_manifold_edges": non_manifold},
-                recommended_actions=("run safe topology repair", "try alternate mesh extraction"),
+                recommended_actions=(
+                    "run safe topology repair",
+                    "try alternate mesh extraction",
+                ),
             )
         )
     fscore = _metric_value(metrics, "geometry.fscore_tau")
@@ -96,7 +112,9 @@ def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservati
                 severity="fail",
                 subsystem="geometry",
                 evidence_metrics={"geometry.volumetric_iou": volumetric_iou},
-                likely_causes=("carved occupancy disagrees with synthetic ground truth",),
+                likely_causes=(
+                    "carved occupancy disagrees with synthetic ground truth",
+                ),
                 recommended_actions=(
                     "run sparse visual hull resolution climb",
                     "check camera bounds and occupancy threshold",
@@ -110,8 +128,13 @@ def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservati
                 severity="warn",
                 subsystem="geometry",
                 evidence_metrics={"geometry.chamfer_l2": chamfer},
-                likely_causes=("surface is shifted, over-smoothed, or missing thin structures",),
-                recommended_actions=("run boundary-first refinement", "inspect residual patches"),
+                likely_causes=(
+                    "surface is shifted, over-smoothed, or missing thin structures",
+                ),
+                recommended_actions=(
+                    "run boundary-first refinement",
+                    "inspect residual patches",
+                ),
             )
         )
     psnr = _metric_value(metrics, "novel_view.psnr")

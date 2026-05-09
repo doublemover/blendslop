@@ -147,7 +147,9 @@ def select_adaptive_patches(
     for size in sizes:
         window = min(size, width, height)
         radius = max(1, int(round(window * min_center_distance_fraction)))
-        peaks = _top_peaks(score, max_patches=max_patches * 4, radius=radius, min_score=min_score)
+        peaks = _top_peaks(
+            score, max_patches=max_patches * 4, radius=radius, min_score=min_score
+        )
         for y, x, value in peaks:
             half = window // 2
             box = PatchBox(
@@ -159,7 +161,9 @@ def select_adaptive_patches(
             box = _shift_box_inside(box, width=width, height=height)
             margin = int(round(window * margin_fraction))
             crop_box = box.expand(margin, width=width, height=height)
-            candidates.append((float(value), window / float(min(width, height)), box, crop_box))
+            candidates.append(
+                (float(value), window / float(min(width, height)), box, crop_box)
+            )
     candidates.sort(key=lambda item: (-item[0], item[2].y0, item[2].x0, item[2].area))
     selected: list[AdaptivePatch] = []
     for value, scale, box, crop_box in candidates:
@@ -215,12 +219,18 @@ def fuse_patch_predictions(
         raw = patch_predictions.get(patch.patch_id)
         if raw is None:
             continue
-        patch_array = _resize_nearest(np.asarray(raw, dtype=np.float64), patch.crop_box.height, patch.crop_box.width)
+        patch_array = _resize_nearest(
+            np.asarray(raw, dtype=np.float64),
+            patch.crop_box.height,
+            patch.crop_box.width,
+        )
         y0, y1 = patch.crop_box.y0, patch.crop_box.y1
         x0, x1 = patch.crop_box.x0, patch.crop_box.x1
         global_crop = global_array[y0:y1, x0:x1]
         if patch_array.shape != global_crop.shape:
-            patch_array = _resize_nearest(patch_array, global_crop.shape[0], global_crop.shape[1])
+            patch_array = _resize_nearest(
+                patch_array, global_crop.shape[0], global_crop.shape[1]
+            )
         patch_array, alignment = _align_patch_prediction(
             patch_array,
             global_crop,
@@ -231,7 +241,9 @@ def fuse_patch_predictions(
         if edge_weights is not None and edge_weight_strength > 0.0:
             edge_crop = edge_weights[y0:y1, x0:x1]
             if edge_crop.shape != weights.shape:
-                edge_crop = _resize_nearest(edge_crop, weights.shape[0], weights.shape[1])
+                edge_crop = _resize_nearest(
+                    edge_crop, weights.shape[0], weights.shape[1]
+                )
             weights = weights * (1.0 + float(edge_weight_strength) * edge_crop)
         accum[y0:y1, x0:x1] += patch_array * weights
         weight_sum[y0:y1, x0:x1] += weights
@@ -240,8 +252,12 @@ def fuse_patch_predictions(
         stack_values.append(full)
         used.append(patch.patch_id)
         alignments.append({"patch_id": patch.patch_id, **alignment})
-    fused = np.where(weight_sum > 0.0, accum / np.maximum(weight_sum, 1e-12), global_array)
-    uncertainty = _patch_disagreement(stack_values, fallback=np.zeros_like(global_array))
+    fused = np.where(
+        weight_sum > 0.0, accum / np.maximum(weight_sum, 1e-12), global_array
+    )
+    uncertainty = _patch_disagreement(
+        stack_values, fallback=np.zeros_like(global_array)
+    )
     return PatchFusionResult(
         prediction=fused,
         contribution_weight=weight_sum,
@@ -472,5 +488,7 @@ def _patch_disagreement(
     counts = np.sum(valid, axis=0)
     filled = np.where(valid, stack, 0.0)
     mean = np.sum(filled, axis=0) / np.maximum(counts, 1)
-    variance = np.sum(np.where(valid, (stack - mean) ** 2, 0.0), axis=0) / np.maximum(counts, 1)
+    variance = np.sum(np.where(valid, (stack - mean) ** 2, 0.0), axis=0) / np.maximum(
+        counts, 1
+    )
     return np.where(counts > 1, np.sqrt(variance), fallback)

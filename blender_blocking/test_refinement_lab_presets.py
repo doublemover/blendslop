@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import unittest
 
-from refinement_lab.presets import get_suite_preset, get_track_preset, list_suites, list_tracks
+from refinement_lab.presets import (
+    get_suite_preset,
+    get_track_preset,
+    list_suites,
+    list_tracks,
+)
 
 
 class RefinementLabPresetTests(unittest.TestCase):

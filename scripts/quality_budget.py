@@ -102,8 +102,7 @@ def evaluate_budget_payloads(
             )
 
     threshold_passed = all(
-        check["passed"] or not check.get("required", True)
-        for check in threshold_checks
+        check["passed"] or not check.get("required", True) for check in threshold_checks
     )
     comparison_passed = all(
         check["passed"] or not check.get("required", True)
@@ -138,9 +137,7 @@ def _evaluate_threshold(
             return [
                 _base_check(threshold, None, required, True, "artifact not present")
             ]
-        return [
-            _base_check(threshold, None, required, False, "no matching record")
-        ]
+        return [_base_check(threshold, None, required, False, "no matching record")]
 
     checks = []
     for record in matches:
@@ -176,19 +173,21 @@ def _evaluate_comparison(
     has_baseline: bool,
 ) -> list[dict[str, Any]]:
     required = bool(comparison.get("required", False))
-    matches = [record for record in current_records if _selector_matches(comparison, record)]
+    matches = [
+        record for record in current_records if _selector_matches(comparison, record)
+    ]
     if not has_baseline:
         return [
-            _base_check(comparison, None, required, not required, "baseline not provided")
+            _base_check(
+                comparison, None, required, not required, "baseline not provided"
+            )
         ]
     if not matches:
         if _selector_artifact_absent(comparison, current_records):
             return [
                 _base_check(comparison, None, required, True, "artifact not present")
             ]
-        return [
-            _base_check(comparison, None, required, False, "no matching record")
-        ]
+        return [_base_check(comparison, None, required, False, "no matching record")]
 
     checks = []
     for current in matches:
@@ -245,13 +244,19 @@ def _records_from_payload(
     if isinstance(payload.get("matrix"), list):
         records.extend(_matrix_records(payload, source_path))
     if isinstance(payload.get("bundles"), list):
-        records.extend(_evaluation_bundle_records(payload.get("bundles", ()), source_path))
+        records.extend(
+            _evaluation_bundle_records(payload.get("bundles", ()), source_path)
+        )
     if isinstance(payload.get("evaluation_bundles"), list):
         records.extend(
-            _evaluation_bundle_records(payload.get("evaluation_bundles", ()), source_path)
+            _evaluation_bundle_records(
+                payload.get("evaluation_bundles", ()), source_path
+            )
         )
     if isinstance(payload.get("evaluation_bundle"), Mapping):
-        records.append(_evaluation_bundle_record(payload["evaluation_bundle"], source_path))
+        records.append(
+            _evaluation_bundle_record(payload["evaluation_bundle"], source_path)
+        )
     backend = payload.get("backend_result")
     if isinstance(backend, Mapping):
         records.extend(_records_from_payload(backend, source_path))
@@ -318,13 +323,10 @@ def _evaluation_bundle_record(
 
 
 def _is_evaluation_bundle(payload: Mapping[str, Any]) -> bool:
-    return (
-        str(payload.get("schema_version", "")).startswith("evaluation-bundle")
-        or (
-            isinstance(payload.get("metric_groups"), list)
-            and "candidate_id" in payload
-            and "mode" in payload
-        )
+    return str(payload.get("schema_version", "")).startswith("evaluation-bundle") or (
+        isinstance(payload.get("metric_groups"), list)
+        and "candidate_id" in payload
+        and "mode" in payload
     )
 
 
@@ -481,16 +483,32 @@ def _compare_delta(
         return False, None, "missing baseline or current metric"
     if mode == "max_percent_increase":
         delta = _percent_delta(before, after)
-        return delta <= threshold, delta, "" if delta <= threshold else "percent increase regression"
+        return (
+            delta <= threshold,
+            delta,
+            "" if delta <= threshold else "percent increase regression",
+        )
     if mode == "max_percent_decrease":
         delta = ((before - after) / max(abs(before), 1e-12)) * 100.0
-        return delta <= threshold, delta, "" if delta <= threshold else "percent decrease regression"
+        return (
+            delta <= threshold,
+            delta,
+            "" if delta <= threshold else "percent decrease regression",
+        )
     if mode == "max_absolute_increase":
         delta = after - before
-        return delta <= threshold, delta, "" if delta <= threshold else "absolute increase regression"
+        return (
+            delta <= threshold,
+            delta,
+            "" if delta <= threshold else "absolute increase regression",
+        )
     if mode == "max_absolute_decrease":
         delta = before - after
-        return delta <= threshold, delta, "" if delta <= threshold else "absolute decrease regression"
+        return (
+            delta <= threshold,
+            delta,
+            "" if delta <= threshold else "absolute decrease regression",
+        )
     raise ValueError(f"unknown comparison mode {mode!r}")
 
 
@@ -538,9 +556,13 @@ def _utc_now() -> str:
 
 def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate quality/perf budget JSON.")
-    parser.add_argument("--current", required=True, help="Current benchmark/e2e JSON artifact.")
+    parser.add_argument(
+        "--current", required=True, help="Current benchmark/e2e JSON artifact."
+    )
     parser.add_argument("--budget", required=True, help="Budget JSON file.")
-    parser.add_argument("--baseline", default=None, help="Optional baseline JSON artifact.")
+    parser.add_argument(
+        "--baseline", default=None, help="Optional baseline JSON artifact."
+    )
     parser.add_argument("--report", default=None, help="Write budget report JSON.")
     parser.add_argument(
         "--warn-only",

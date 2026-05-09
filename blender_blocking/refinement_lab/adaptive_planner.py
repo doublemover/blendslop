@@ -136,7 +136,9 @@ def proposals_from_result_payload(
         proposals: list[RefinementProposal] = []
         for bundle in bundles:
             proposals.extend(proposals_from_bundle(bundle, max_proposals=max_proposals))
-        return tuple(sorted(_dedupe(proposals), key=lambda item: item.priority)[:max_proposals])
+        return tuple(
+            sorted(_dedupe(proposals), key=lambda item: item.priority)[:max_proposals]
+        )
     bundle = payload.get("evaluation_bundle")
     if isinstance(bundle, Mapping):
         return proposals_from_bundle(bundle, max_proposals=max_proposals)
@@ -435,7 +437,10 @@ def ambiguity_signal(
         ambiguity > 0.1
         or fscore < 0.5
         or min_iou < 0.45
-        or any("ambiguous" in failure or failure.startswith("geometry_") for failure in failures)
+        or any(
+            "ambiguous" in failure or failure.startswith("geometry_")
+            for failure in failures
+        )
     )
 
 

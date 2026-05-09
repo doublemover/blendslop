@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 """
 End-to-End Validation Test
 
@@ -159,8 +160,7 @@ def _print_table(rows: Sequence[Mapping[str, object]], columns: Sequence[str]) -
         print(
             "  "
             + "  ".join(
-                f"{str(row.get(column, '')):<{widths[column]}}"
-                for column in columns
+                f"{str(row.get(column, '')):<{widths[column]}}" for column in columns
             )
         )
 
@@ -268,8 +268,7 @@ def _evaluation_payload_from_result(result: object) -> Dict[str, Any]:
         if bundles:
             payload["evaluation_bundles"] = bundles
         autopsies = [
-            _to_jsonable(pack)
-            for pack in (getattr(result, "autopsy_packs", ()) or ())
+            _to_jsonable(pack) for pack in (getattr(result, "autopsy_packs", ()) or ())
         ]
         if autopsies:
             payload["autopsy_packs"] = autopsies
@@ -286,9 +285,7 @@ def _evaluation_payload_from_result(result: object) -> Dict[str, Any]:
                     autopsy_pack_from_bundle,
                 )
 
-                payload["autopsy_pack"] = _to_jsonable(
-                    autopsy_pack_from_bundle(bundle)
-                )
+                payload["autopsy_pack"] = _to_jsonable(autopsy_pack_from_bundle(bundle))
             except Exception as exc:
                 payload["autopsy_pack_error"] = str(exc)
             return payload
@@ -403,12 +400,24 @@ def _print_backend_summary(result: object) -> bool:
         (
             ("status", f"{_status_icon(passed)} {status}"),
             ("backend", summary_source.get("backend_name") if summary_source else None),
-            ("candidate", summary_source.get("candidate_id") if summary_source else None),
+            (
+                "candidate",
+                summary_source.get("candidate_id") if summary_source else None,
+            ),
             ("mesh", summary_source.get("mesh_path") if summary_source else None),
-            ("primitives", summary_source.get("primitive_path") if summary_source else None),
+            (
+                "primitives",
+                summary_source.get("primitive_path") if summary_source else None,
+            ),
             ("volume", summary_source.get("volume_path") if summary_source else None),
-            ("warnings", len(summary_source.get("warnings", [])) if summary_source else None),
-            ("errors", len(summary_source.get("errors", [])) if summary_source else None),
+            (
+                "warnings",
+                len(summary_source.get("warnings", [])) if summary_source else None,
+            ),
+            (
+                "errors",
+                len(summary_source.get("errors", [])) if summary_source else None,
+            ),
         )
     )
 
@@ -417,9 +426,9 @@ def _print_backend_summary(result: object) -> bool:
         rows = []
         for candidate in data["candidates"]:
             metric_result = candidate.get("metric_result", {}) or {}
-            mesh_path = candidate.get("mesh_path") or candidate.get("artifacts", {}).get(
-                "mesh_obj", ""
-            )
+            mesh_path = candidate.get("mesh_path") or candidate.get(
+                "artifacts", {}
+            ).get("mesh_obj", "")
             rows.append(
                 {
                     "candidate": candidate.get("candidate_id", ""),
@@ -485,9 +494,9 @@ class E2EValidator:
         self.config_label = config_label
         self.validation_mode = validation_mode
         default_render_dir = Path(__file__).parent / "test_output" / "e2e_renders"
-        self.render_output_dir = Path(
-            render_output_dir or default_render_dir
-        ).resolve(strict=False)
+        self.render_output_dir = Path(render_output_dir or default_render_dir).resolve(
+            strict=False
+        )
         self.debug_output_dir = (
             Path(debug_output_dir).resolve(strict=False)
             if debug_output_dir is not None
@@ -499,9 +508,7 @@ class E2EValidator:
             else None
         )
         self.result_json = (
-            Path(result_json).resolve(strict=False)
-            if result_json is not None
-            else None
+            Path(result_json).resolve(strict=False) if result_json is not None else None
         )
         self.run_id = run_id
         self.progress = progress
@@ -560,7 +567,9 @@ class E2EValidator:
         mode = self.workflow_config.reconstruction.reconstruction_mode
         validation_mode = self.validation_mode
         if validation_mode == "auto":
-            validation_mode = "render-iou" if mode in RENDER_IOU_MODES else "backend-status"
+            validation_mode = (
+                "render-iou" if mode in RENDER_IOU_MODES else "backend-status"
+            )
 
         _print_rule("BLENDSLOP E2E VALIDATION", width=72)
         _print_kv_table(
@@ -570,7 +579,10 @@ class E2EValidator:
                 ("label", self.config_label),
                 ("run_id", self.run_id or "<auto>"),
                 ("slices", num_slices),
-                ("render", f"{self.render_config.resolution[0]}x{self.render_config.resolution[1]} {self.render_config.engine}"),
+                (
+                    "render",
+                    f"{self.render_config.resolution[0]}x{self.render_config.resolution[1]} {self.render_config.engine}",
+                ),
             )
         )
 
@@ -604,7 +616,9 @@ class E2EValidator:
 
         backend_payload: Dict[str, Any] = {}
         if workflow.reconstruction_result is not None:
-            _, backend_payload = _candidate_status_payload(workflow.reconstruction_result)
+            _, backend_payload = _candidate_status_payload(
+                workflow.reconstruction_result
+            )
             self.backend_result = backend_payload
 
         if render_mesh is None:
@@ -629,7 +643,9 @@ class E2EValidator:
                 result_payload = backend_payload
             else:
                 mesh_data = getattr(render_mesh, "data", None)
-                vertex_count = len(mesh_data.vertices) if mesh_data is not None else None
+                vertex_count = (
+                    len(mesh_data.vertices) if mesh_data is not None else None
+                )
                 face_count = len(mesh_data.polygons) if mesh_data is not None else None
                 result_payload = {
                     "mode": mode,
@@ -813,7 +829,10 @@ class E2EValidator:
                 (
                     ("average_iou", f"{avg_iou:.3f}"),
                     ("threshold", f"{self.iou_threshold:.3f}"),
-                    ("result", f"{_status_icon(passed)} {'PASSED' if passed else 'FAILED'}"),
+                    (
+                        "result",
+                        f"{_status_icon(passed)} {'PASSED' if passed else 'FAILED'}",
+                    ),
                     ("render_output", output_dir),
                 )
             )
@@ -1184,10 +1203,18 @@ def run_synthetic_suite_matrix(
 
 def _definition_name_from_spec(spec: object) -> str:
     parameters = getattr(spec, "parameters")
-    for key in ("primitive", "profile_kind", "blockout_kind", "mask_kind", "degradation"):
+    for key in (
+        "primitive",
+        "profile_kind",
+        "blockout_kind",
+        "mask_kind",
+        "degradation",
+    ):
         if key in parameters:
             return str(parameters[key])
-    raise ValueError(f"Cannot infer registry definition for {getattr(spec, 'shape_id', '<unknown>')}")
+    raise ValueError(
+        f"Cannot infer registry definition for {getattr(spec, 'shape_id', '<unknown>')}"
+    )
 
 
 def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float]:
@@ -1199,7 +1226,9 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
     views = payload.get("views", {})
     if isinstance(views, Mapping):
         for view, view_payload in views.items():
-            if isinstance(view_payload, Mapping) and isinstance(view_payload.get("iou"), (int, float)):
+            if isinstance(view_payload, Mapping) and isinstance(
+                view_payload.get("iou"), (int, float)
+            ):
                 metrics[f"{view}_iou"] = float(view_payload["iou"])
     backend = payload.get("backend_result")
     backend_payload = backend if isinstance(backend, Mapping) else payload
@@ -1252,7 +1281,9 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
     return metrics
 
 
-def _evaluation_bundle_sequence(payload: Mapping[str, Any]) -> Tuple[Mapping[str, Any], ...]:
+def _evaluation_bundle_sequence(
+    payload: Mapping[str, Any],
+) -> Tuple[Mapping[str, Any], ...]:
     outputs = _evaluation_outputs_from_payload(payload)
     bundles = []
     value = outputs.get("evaluation_bundles")
@@ -1477,12 +1508,22 @@ Default ensemble:
         help="Camera framing margin as fraction of bounds",
     )
     render.add_argument("--color-mode", choices=("BW", "RGBA"), default=None)
-    render.add_argument("--transparent-bg", action=argparse.BooleanOptionalAction, default=None)
-    render.add_argument("--force-material", action=argparse.BooleanOptionalAction, default=None)
-    render.add_argument("--background-color", type=_parse_rgba, default=None, help="RGBA as r,g,b,a")
-    render.add_argument("--silhouette-color", type=_parse_rgba, default=None, help="RGBA as r,g,b,a")
+    render.add_argument(
+        "--transparent-bg", action=argparse.BooleanOptionalAction, default=None
+    )
+    render.add_argument(
+        "--force-material", action=argparse.BooleanOptionalAction, default=None
+    )
+    render.add_argument(
+        "--background-color", type=_parse_rgba, default=None, help="RGBA as r,g,b,a"
+    )
+    render.add_argument(
+        "--silhouette-color", type=_parse_rgba, default=None, help="RGBA as r,g,b,a"
+    )
     render.add_argument("--camera-distance-factor", type=float, default=None)
-    render.add_argument("--party-mode", action=argparse.BooleanOptionalAction, default=None)
+    render.add_argument(
+        "--party-mode", action=argparse.BooleanOptionalAction, default=None
+    )
     render.add_argument(
         "--render-output-dir",
         type=Path,
@@ -1557,19 +1598,45 @@ Default ensemble:
         default=None,
         help="Weld degenerate rings in loft mesh",
     )
-    profile.add_argument("--mesh-adaptive-radial-segments", action=argparse.BooleanOptionalAction, default=None)
+    profile.add_argument(
+        "--mesh-adaptive-radial-segments",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
     profile.add_argument("--mesh-min-adaptive-radial-segments", type=int, default=None)
     profile.add_argument("--mesh-max-adaptive-radial-segments", type=int, default=None)
-    profile.add_argument("--mesh-topology-strict", action=argparse.BooleanOptionalAction, default=None)
-    profile.add_argument("--mesh-research-allow-low-radial-segments", action=argparse.BooleanOptionalAction, default=None)
+    profile.add_argument(
+        "--mesh-topology-strict", action=argparse.BooleanOptionalAction, default=None
+    )
+    profile.add_argument(
+        "--mesh-research-allow-low-radial-segments",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
 
     silhouette = parser.add_argument_group("silhouette extraction")
-    silhouette.add_argument("--ref-prefer-alpha", action=argparse.BooleanOptionalAction, default=None)
-    silhouette.add_argument("--render-prefer-alpha", action=argparse.BooleanOptionalAction, default=None)
-    silhouette.add_argument("--ref-polarity", choices=("auto", "dark_foreground", "light_foreground", "alpha_foreground"), default=None)
-    silhouette.add_argument("--render-polarity", choices=("auto", "dark_foreground", "light_foreground", "alpha_foreground"), default=None)
-    silhouette.add_argument("--ref-invert-policy", choices=("auto", "invert", "no_invert"), default=None)
-    silhouette.add_argument("--render-invert-policy", choices=("auto", "invert", "no_invert"), default=None)
+    silhouette.add_argument(
+        "--ref-prefer-alpha", action=argparse.BooleanOptionalAction, default=None
+    )
+    silhouette.add_argument(
+        "--render-prefer-alpha", action=argparse.BooleanOptionalAction, default=None
+    )
+    silhouette.add_argument(
+        "--ref-polarity",
+        choices=("auto", "dark_foreground", "light_foreground", "alpha_foreground"),
+        default=None,
+    )
+    silhouette.add_argument(
+        "--render-polarity",
+        choices=("auto", "dark_foreground", "light_foreground", "alpha_foreground"),
+        default=None,
+    )
+    silhouette.add_argument(
+        "--ref-invert-policy", choices=("auto", "invert", "no_invert"), default=None
+    )
+    silhouette.add_argument(
+        "--render-invert-policy", choices=("auto", "invert", "no_invert"), default=None
+    )
     silhouette.add_argument("--ref-alpha-threshold", type=int, default=None)
     silhouette.add_argument("--render-alpha-threshold", type=int, default=None)
     silhouette.add_argument("--ref-alpha-min-coverage", type=float, default=None)
@@ -1580,59 +1647,137 @@ Default ensemble:
     silhouette.add_argument("--render-morph-close", type=int, default=None)
     silhouette.add_argument("--ref-morph-open", type=int, default=None)
     silhouette.add_argument("--render-morph-open", type=int, default=None)
-    silhouette.add_argument("--ref-fill-holes", action=argparse.BooleanOptionalAction, default=None)
-    silhouette.add_argument("--render-fill-holes", action=argparse.BooleanOptionalAction, default=None)
-    silhouette.add_argument("--ref-largest-component", action=argparse.BooleanOptionalAction, default=None)
-    silhouette.add_argument("--render-largest-component", action=argparse.BooleanOptionalAction, default=None)
+    silhouette.add_argument(
+        "--ref-fill-holes", action=argparse.BooleanOptionalAction, default=None
+    )
+    silhouette.add_argument(
+        "--render-fill-holes", action=argparse.BooleanOptionalAction, default=None
+    )
+    silhouette.add_argument(
+        "--ref-largest-component", action=argparse.BooleanOptionalAction, default=None
+    )
+    silhouette.add_argument(
+        "--render-largest-component",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
     silhouette.add_argument("--ref-min-area-frac", type=float, default=None)
     silhouette.add_argument("--render-min-area-frac", type=float, default=None)
     silhouette.add_argument("--ref-max-area-frac", type=float, default=None)
     silhouette.add_argument("--render-max-area-frac", type=float, default=None)
     silhouette.add_argument("--ref-max-border-contact-frac", type=float, default=None)
-    silhouette.add_argument("--render-max-border-contact-frac", type=float, default=None)
+    silhouette.add_argument(
+        "--render-max-border-contact-frac", type=float, default=None
+    )
     silhouette.add_argument("--ref-min-component-area-px", type=int, default=None)
     silhouette.add_argument("--render-min-component-area-px", type=int, default=None)
-    silhouette.add_argument("--ref-candidate-scoring", action=argparse.BooleanOptionalAction, default=None)
-    silhouette.add_argument("--render-candidate-scoring", action=argparse.BooleanOptionalAction, default=None)
-    silhouette.add_argument("--ref-emit-uncertainty", action=argparse.BooleanOptionalAction, default=None)
-    silhouette.add_argument("--render-emit-uncertainty", action=argparse.BooleanOptionalAction, default=None)
+    silhouette.add_argument(
+        "--ref-candidate-scoring", action=argparse.BooleanOptionalAction, default=None
+    )
+    silhouette.add_argument(
+        "--render-candidate-scoring",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    silhouette.add_argument(
+        "--ref-emit-uncertainty", action=argparse.BooleanOptionalAction, default=None
+    )
+    silhouette.add_argument(
+        "--render-emit-uncertainty", action=argparse.BooleanOptionalAction, default=None
+    )
 
     canonical = parser.add_argument_group("canonicalization and IoU")
     canonical.add_argument("--canonical-output-size", type=int, default=None)
     canonical.add_argument("--canonical-padding-frac", type=float, default=None)
-    canonical.add_argument("--canonical-anchor", choices=("center", "bottom_center"), default=None)
+    canonical.add_argument(
+        "--canonical-anchor", choices=("center", "bottom_center"), default=None
+    )
     canonical.add_argument("--canonical-interp", choices=("nearest",), default=None)
-    canonical.add_argument("--canonical-cache", action=argparse.BooleanOptionalAction, default=None)
+    canonical.add_argument(
+        "--canonical-cache", action=argparse.BooleanOptionalAction, default=None
+    )
     canonical.add_argument("--canonical-digest", choices=("sha256",), default=None)
-    canonical.add_argument("--canonical-fill-holes", action=argparse.BooleanOptionalAction, default=None)
-    canonical.add_argument("--canonical-largest-component", action=argparse.BooleanOptionalAction, default=None)
+    canonical.add_argument(
+        "--canonical-fill-holes", action=argparse.BooleanOptionalAction, default=None
+    )
+    canonical.add_argument(
+        "--canonical-largest-component",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
 
     join = parser.add_argument_group("mesh join and silhouette intersection")
-    join.add_argument("--mesh-join-mode", choices=("auto", "boolean", "voxel", "simple"), default=None)
-    join.add_argument("--boolean-solver", choices=("auto", "EXACT", "MANIFOLD", "FLOAT", "FAST"), default=None)
-    join.add_argument("--allow-degraded-simple-join", action=argparse.BooleanOptionalAction, default=None)
-    join.add_argument("--record-join-attempts", action=argparse.BooleanOptionalAction, default=None)
-    join.add_argument("--balanced-boolean-tree", action=argparse.BooleanOptionalAction, default=None)
+    join.add_argument(
+        "--mesh-join-mode", choices=("auto", "boolean", "voxel", "simple"), default=None
+    )
+    join.add_argument(
+        "--boolean-solver",
+        choices=("auto", "EXACT", "MANIFOLD", "FLOAT", "FAST"),
+        default=None,
+    )
+    join.add_argument(
+        "--allow-degraded-simple-join",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    join.add_argument(
+        "--record-join-attempts", action=argparse.BooleanOptionalAction, default=None
+    )
+    join.add_argument(
+        "--balanced-boolean-tree", action=argparse.BooleanOptionalAction, default=None
+    )
     join.add_argument("--silhouette-extrude-distance", type=float, default=None)
-    join.add_argument("--silhouette-contour-mode", choices=("external", "ccomp", "tree", "hierarchy"), default=None)
-    join.add_argument("--silhouette-largest-component", action=argparse.BooleanOptionalAction, default=None)
+    join.add_argument(
+        "--silhouette-contour-mode",
+        choices=("external", "ccomp", "tree", "hierarchy"),
+        default=None,
+    )
+    join.add_argument(
+        "--silhouette-largest-component",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
 
     hull = parser.add_argument_group("visual hull and volume")
-    hull.add_argument("--vh-backend", choices=("dense", "chunked", "sparse_hash", "openvdb"), default=None)
+    hull.add_argument(
+        "--vh-backend",
+        choices=("dense", "chunked", "sparse_hash", "openvdb"),
+        default=None,
+    )
     hull.add_argument("--vh-resolution", type=int, default=None)
     hull.add_argument("--vh-max-resolution", type=int, default=None)
     hull.add_argument("--vh-chunk-size", type=int, default=None)
     hull.add_argument("--vh-adaptive-max-depth", type=int, default=None)
-    hull.add_argument("--vh-boundary-refine", action=argparse.BooleanOptionalAction, default=None)
-    hull.add_argument("--vh-mesh-method", choices=("marching_cubes", "lewiner", "dual_contouring", "points"), default=None)
-    hull.add_argument("--vh-postprocess", choices=("none", "poisson", "screened_poisson"), default=None)
+    hull.add_argument(
+        "--vh-boundary-refine", action=argparse.BooleanOptionalAction, default=None
+    )
+    hull.add_argument(
+        "--vh-mesh-method",
+        choices=("marching_cubes", "lewiner", "dual_contouring", "points"),
+        default=None,
+    )
+    hull.add_argument(
+        "--vh-postprocess",
+        choices=("none", "poisson", "screened_poisson"),
+        default=None,
+    )
     hull.add_argument("--vh-memory-budget-mb", type=int, default=None)
     hull.add_argument("--vh-occupancy-threshold", type=float, default=None)
-    hull.add_argument("--vh-uncertainty-aggregation", choices=("min", "product", "logit_sum"), default=None)
-    hull.add_argument("--volume-backend", choices=("dense", "chunked", "sparse_hash", "openvdb"), default=None)
+    hull.add_argument(
+        "--vh-uncertainty-aggregation",
+        choices=("min", "product", "logit_sum"),
+        default=None,
+    )
+    hull.add_argument(
+        "--volume-backend",
+        choices=("dense", "chunked", "sparse_hash", "openvdb"),
+        default=None,
+    )
     hull.add_argument("--volume-sparse-chunk-size", type=int, default=None)
     hull.add_argument("--volume-serialization", choices=("npz",), default=None)
-    hull.add_argument("--export-openvdb", action=argparse.BooleanOptionalAction, default=None)
+    hull.add_argument(
+        "--export-openvdb", action=argparse.BooleanOptionalAction, default=None
+    )
 
     primitive = parser.add_argument_group("primitive fitting")
     primitive.add_argument("--primitive-families", type=_parse_csv, default=None)
@@ -1642,24 +1787,48 @@ Default ensemble:
     primitive.add_argument("--primitive-max", type=int, default=None)
     primitive.add_argument("--primitive-steps", type=int, default=None)
     primitive.add_argument("--primitive-checkpoint-cadence", type=int, default=None)
-    primitive.add_argument("--primitive-fail-on-regression", action=argparse.BooleanOptionalAction, default=None)
+    primitive.add_argument(
+        "--primitive-fail-on-regression",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
     primitive.add_argument("--primitive-max-runtime-s", type=float, default=None)
-    primitive.add_argument("--primitive-max-objective-evaluations", type=int, default=None)
+    primitive.add_argument(
+        "--primitive-max-objective-evaluations", type=int, default=None
+    )
 
     gaussian = parser.add_argument_group("gaussian and ellipsoid proxy")
     gaussian.add_argument("--gaussian-count", type=int, default=None)
-    gaussian.add_argument("--gaussian-initialization", choices=("farthest_point", "kmeans", "grid"), default=None)
+    gaussian.add_argument(
+        "--gaussian-initialization",
+        choices=("farthest_point", "kmeans", "grid"),
+        default=None,
+    )
     gaussian.add_argument("--gaussian-min-radius", type=float, default=None)
     gaussian.add_argument("--gaussian-max-radius", type=float, default=None)
     gaussian.add_argument("--gaussian-opacity-min", type=float, default=None)
     gaussian.add_argument("--gaussian-opacity-max", type=float, default=None)
-    gaussian.add_argument("--gaussian-renderer", choices=("cpu_projected_ellipse", "gpu_splat"), default=None)
-    gaussian.add_argument("--gaussian-export-mesh-proxy", action=argparse.BooleanOptionalAction, default=None)
+    gaussian.add_argument(
+        "--gaussian-renderer",
+        choices=("cpu_projected_ellipse", "gpu_splat"),
+        default=None,
+    )
+    gaussian.add_argument(
+        "--gaussian-export-mesh-proxy",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
 
     diff = parser.add_argument_group("differentiable refinement")
-    diff.add_argument("--diff-backend", choices=("cpu_soft_silhouette", "blender_finite_difference", "nvdiffrast"), default=None)
+    diff.add_argument(
+        "--diff-backend",
+        choices=("cpu_soft_silhouette", "blender_finite_difference", "nvdiffrast"),
+        default=None,
+    )
     diff.add_argument("--diff-optional-policy", choices=("skip", "fail"), default=None)
-    diff.add_argument("--diff-gradient-mode", choices=("finite_difference", "backend"), default=None)
+    diff.add_argument(
+        "--diff-gradient-mode", choices=("finite_difference", "backend"), default=None
+    )
     diff.add_argument("--diff-epsilon", type=float, default=None)
     diff.add_argument("--diff-loss-weights-json", type=str, default=None)
 
@@ -1705,7 +1874,12 @@ Default ensemble:
     )
 
     ensemble = parser.add_argument_group("ensemble")
-    ensemble.add_argument("--ensemble-candidates", type=_parse_csv, default=None, help="Comma-separated backend list.")
+    ensemble.add_argument(
+        "--ensemble-candidates",
+        type=_parse_csv,
+        default=None,
+        help="Comma-separated backend list.",
+    )
     ensemble.add_argument(
         "--ensemble-policy",
         choices=(
@@ -1725,17 +1899,39 @@ Default ensemble:
     ensemble.add_argument("--ensemble-max-parallel", type=int, default=None)
     ensemble.add_argument("--ensemble-timeout", type=float, default=None)
     ensemble.add_argument("--ensemble-total-timeout", type=float, default=None)
-    ensemble.add_argument("--ensemble-keep-artifacts", action=argparse.BooleanOptionalAction, default=None)
-    ensemble.add_argument("--ensemble-fail-if-no-required-views", action=argparse.BooleanOptionalAction, default=None)
+    ensemble.add_argument(
+        "--ensemble-keep-artifacts", action=argparse.BooleanOptionalAction, default=None
+    )
+    ensemble.add_argument(
+        "--ensemble-fail-if-no-required-views",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
 
     misc = parser.add_argument_group("constraints and quality")
     misc.add_argument("--constraint-file", action="append", default=None)
-    misc.add_argument("--fail-on-hard-constraints", action=argparse.BooleanOptionalAction, default=None)
-    misc.add_argument("--use-constraints-for-scoring", action=argparse.BooleanOptionalAction, default=None)
+    misc.add_argument(
+        "--fail-on-hard-constraints",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    misc.add_argument(
+        "--use-constraints-for-scoring",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
     misc.add_argument("--quality-budget-json", type=str, default=None)
     misc.add_argument("--quality-compare-baseline", type=str, default=None)
-    misc.add_argument("--quality-fail-on-regression", action=argparse.BooleanOptionalAction, default=None)
-    misc.add_argument("--environment-compatibility", choices=("warn", "strict", "ignore"), default=None)
+    misc.add_argument(
+        "--quality-fail-on-regression",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    misc.add_argument(
+        "--environment-compatibility",
+        choices=("warn", "strict", "ignore"),
+        default=None,
+    )
     misc.add_argument("--synthetic-suite", type=str, default=None)
     misc.add_argument("--synthetic-seed", type=int, default=None)
     misc.add_argument("--synthetic-output-root", type=str, default=None)
@@ -1767,8 +1963,16 @@ Default ensemble:
         default=None,
         help="Write quality budget report JSON after --synthetic-matrix.",
     )
-    misc.add_argument("--synthetic-commit-small-fixtures-only", action=argparse.BooleanOptionalAction, default=None)
-    misc.add_argument("--synthetic-keep-heavy-artifacts", action=argparse.BooleanOptionalAction, default=None)
+    misc.add_argument(
+        "--synthetic-commit-small-fixtures-only",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    misc.add_argument(
+        "--synthetic-keep-heavy-artifacts",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
     misc.add_argument(
         "--artifact-output-root",
         type=Path,
@@ -1779,7 +1983,11 @@ Default ensemble:
     refinement = parser.add_argument_group("refinement lab")
     refinement.add_argument("--refinement-suite", type=str, default=None)
     refinement.add_argument("--refinement-track", type=str, default=None)
-    refinement.add_argument("--refinement-search", choices=("grid", "random", "coordinate", "successive_halving"), default=None)
+    refinement.add_argument(
+        "--refinement-search",
+        choices=("grid", "random", "coordinate", "successive_halving"),
+        default=None,
+    )
     refinement.add_argument(
         "--refinement-objective",
         choices=(
@@ -1798,15 +2006,39 @@ Default ensemble:
     refinement.add_argument("--refinement-max-runs", type=int, default=None)
     refinement.add_argument("--refinement-top-k", type=int, default=None)
     refinement.add_argument("--refinement-seed", type=int, default=None)
-    refinement.add_argument("--refinement-html-report", action=argparse.BooleanOptionalAction, default=None)
-    refinement.add_argument("--refinement-write-overlays", action=argparse.BooleanOptionalAction, default=None)
-    refinement.add_argument("--refinement-bounds-debug", action=argparse.BooleanOptionalAction, default=None)
-    refinement.add_argument("--refinement-autopsy", action=argparse.BooleanOptionalAction, default=None)
-    refinement.add_argument("--refinement-copy-references", action=argparse.BooleanOptionalAction, default=None)
+    refinement.add_argument(
+        "--refinement-html-report", action=argparse.BooleanOptionalAction, default=None
+    )
+    refinement.add_argument(
+        "--refinement-write-overlays",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    refinement.add_argument(
+        "--refinement-bounds-debug", action=argparse.BooleanOptionalAction, default=None
+    )
+    refinement.add_argument(
+        "--refinement-autopsy", action=argparse.BooleanOptionalAction, default=None
+    )
+    refinement.add_argument(
+        "--refinement-copy-references",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
     refinement.add_argument("--refinement-stop-on-first-error", action="store_true")
-    refinement.add_argument("--refinement-fail-on-all-failed", action=argparse.BooleanOptionalAction, default=None)
-    refinement.add_argument("--refinement-append-global-index", action=argparse.BooleanOptionalAction, default=None)
-    refinement.add_argument("--refinement-report-failures", choices=("top", "all", "none"), default=None)
+    refinement.add_argument(
+        "--refinement-fail-on-all-failed",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    refinement.add_argument(
+        "--refinement-append-global-index",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    refinement.add_argument(
+        "--refinement-report-failures", choices=("top", "all", "none"), default=None
+    )
     refinement.add_argument("--refinement-subprocess", action="store_true")
     refinement.add_argument("--refinement-blender-exe", type=str, default=None)
 
@@ -1882,7 +2114,9 @@ def _apply_silhouette_cli_args(cfg: BlockingConfig, args: argparse.Namespace) ->
         ("ref", cfg.silhouette_extract_ref),
         ("render", cfg.silhouette_extract_render),
     ):
-        _set_if_not_none(target, "prefer_alpha", getattr(args, f"{prefix}_prefer_alpha"))
+        _set_if_not_none(
+            target, "prefer_alpha", getattr(args, f"{prefix}_prefer_alpha")
+        )
         _set_if_not_none(target, "polarity", getattr(args, f"{prefix}_polarity"))
         _set_if_not_none(
             target, "invert_policy", getattr(args, f"{prefix}_invert_policy")
@@ -1901,9 +2135,7 @@ def _apply_silhouette_cli_args(cfg: BlockingConfig, args: argparse.Namespace) ->
         _set_if_not_none(
             target, "morph_close_px", getattr(args, f"{prefix}_morph_close")
         )
-        _set_if_not_none(
-            target, "morph_open_px", getattr(args, f"{prefix}_morph_open")
-        )
+        _set_if_not_none(target, "morph_open_px", getattr(args, f"{prefix}_morph_open"))
         _set_if_not_none(target, "fill_holes", getattr(args, f"{prefix}_fill_holes"))
         _set_if_not_none(
             target,
@@ -1962,7 +2194,9 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
         cfg.profile_sampling, "smoothing_window", args.profile_smoothing_window
     )
 
-    _set_if_not_none(cfg.mesh_from_profile, "radial_segments", args.mesh_radial_segments)
+    _set_if_not_none(
+        cfg.mesh_from_profile, "radial_segments", args.mesh_radial_segments
+    )
     _set_if_not_none(cfg.mesh_from_profile, "cap_mode", args.mesh_cap_mode)
     _set_if_not_none(cfg.mesh_from_profile, "min_radius_u", args.mesh_min_radius)
     _set_if_not_none(
@@ -1990,7 +2224,9 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
         "max_adaptive_radial_segments",
         args.mesh_max_adaptive_radial_segments,
     )
-    _set_if_not_none(cfg.mesh_from_profile, "topology_strict", args.mesh_topology_strict)
+    _set_if_not_none(
+        cfg.mesh_from_profile, "topology_strict", args.mesh_topology_strict
+    )
     _set_if_not_none(
         cfg.mesh_from_profile,
         "research_allow_low_radial_segments",
@@ -2016,9 +2252,7 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
         cfg.mesh_join, "allow_degraded_simple_join", args.allow_degraded_simple_join
     )
     _set_if_not_none(cfg.mesh_join, "record_attempts", args.record_join_attempts)
-    _set_if_not_none(
-        cfg.mesh_join, "balanced_boolean_tree", args.balanced_boolean_tree
-    )
+    _set_if_not_none(cfg.mesh_join, "balanced_boolean_tree", args.balanced_boolean_tree)
     _set_if_not_none(
         cfg.silhouette_intersection,
         "extrude_distance",
@@ -2058,7 +2292,9 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     _set_if_not_none(cfg.primitive_fit, "primitive_families", args.primitive_families)
     if args.primitive_loss_weights_json:
         cfg.primitive_fit.loss_weights = json.loads(args.primitive_loss_weights_json)
-    _set_if_not_none(cfg.primitive_fit, "target_point_count", args.primitive_target_points)
+    _set_if_not_none(
+        cfg.primitive_fit, "target_point_count", args.primitive_target_points
+    )
     _set_if_not_none(cfg.primitive_fit, "min_primitives", args.primitive_min)
     _set_if_not_none(cfg.primitive_fit, "max_primitives", args.primitive_max)
     _set_if_not_none(cfg.primitive_fit, "optimization_steps", args.primitive_steps)
@@ -2096,7 +2332,9 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
         "optional_dependency_policy",
         args.diff_optional_policy,
     )
-    _set_if_not_none(cfg.differentiable_render, "gradient_mode", args.diff_gradient_mode)
+    _set_if_not_none(
+        cfg.differentiable_render, "gradient_mode", args.diff_gradient_mode
+    )
     _set_if_not_none(
         cfg.differentiable_render, "finite_difference_epsilon", args.diff_epsilon
     )
@@ -2106,9 +2344,7 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     _set_if_not_none(cfg.shape_program, "root_strategy", args.shape_root_strategy)
     _set_if_not_none(cfg.shape_program, "residual_policy", args.shape_residual_policy)
     _set_if_not_none(cfg.shape_program, "max_nodes", args.shape_max_nodes)
-    _set_if_not_none(
-        cfg.shape_program, "editability_bias", args.shape_editability_bias
-    )
+    _set_if_not_none(cfg.shape_program, "editability_bias", args.shape_editability_bias)
     _set_if_not_none(cfg.shape_program, "compile_blender", args.shape_compile_blender)
     _set_if_not_none(cfg.shape_program, "lathe_segments", args.shape_lathe_segments)
     _set_if_not_none(cfg.shape_program, "bevel_modifier", args.shape_bevel_modifier)
@@ -2121,7 +2357,9 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     if args.ensemble_candidates:
         cfg.ensemble.candidates = _candidate_configs(args.ensemble_candidates)
     _set_if_not_none(cfg.ensemble, "selection_policy", args.ensemble_policy)
-    _set_if_not_none(cfg.ensemble, "max_parallel_candidates", args.ensemble_max_parallel)
+    _set_if_not_none(
+        cfg.ensemble, "max_parallel_candidates", args.ensemble_max_parallel
+    )
     _set_if_not_none(cfg.ensemble, "per_candidate_timeout_s", args.ensemble_timeout)
     _set_if_not_none(cfg.ensemble, "total_timeout_s", args.ensemble_total_timeout)
     _set_if_not_none(cfg.ensemble, "keep_all_artifacts", args.ensemble_keep_artifacts)
@@ -2158,9 +2396,7 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
 
     _set_if_not_none(cfg.synthetic_factory, "suite", args.synthetic_suite)
     _set_if_not_none(cfg.synthetic_factory, "seed", args.synthetic_seed)
-    _set_if_not_none(
-        cfg.synthetic_factory, "output_root", args.synthetic_output_root
-    )
+    _set_if_not_none(cfg.synthetic_factory, "output_root", args.synthetic_output_root)
     _set_if_not_none(
         cfg.synthetic_factory,
         "commit_small_fixtures_only",
@@ -2184,12 +2420,16 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     _set_if_not_none(cfg.refinement_lab, "max_runs", args.refinement_max_runs)
     _set_if_not_none(cfg.refinement_lab, "top_k", args.refinement_top_k)
     _set_if_not_none(cfg.refinement_lab, "html_report", args.refinement_html_report)
-    _set_if_not_none(cfg.refinement_lab, "write_overlays", args.refinement_write_overlays)
+    _set_if_not_none(
+        cfg.refinement_lab, "write_overlays", args.refinement_write_overlays
+    )
     _set_if_not_none(
         cfg.refinement_lab, "write_bounds_debug", args.refinement_bounds_debug
     )
     _set_if_not_none(cfg.refinement_lab, "write_autopsy", args.refinement_autopsy)
-    _set_if_not_none(cfg.refinement_lab, "copy_references", args.refinement_copy_references)
+    _set_if_not_none(
+        cfg.refinement_lab, "copy_references", args.refinement_copy_references
+    )
     _set_if_not_none(
         cfg.refinement_lab, "fail_on_all_failed", args.refinement_fail_on_all_failed
     )
@@ -2333,7 +2573,8 @@ def _run_refinement_from_args(
     options = RunOptions(
         html_report=refinement_cfg.html_report,
         write_overlays=refinement_cfg.write_overlays or track.force_overlays,
-        write_bounds_debug=refinement_cfg.write_bounds_debug or track.force_bounds_debug,
+        write_bounds_debug=refinement_cfg.write_bounds_debug
+        or track.force_bounds_debug,
         write_autopsy=refinement_cfg.write_autopsy or track.force_autopsy,
         copy_references=refinement_cfg.copy_references,
         stop_on_first_error=refinement_cfg.stop_on_first_error,
@@ -2343,7 +2584,8 @@ def _run_refinement_from_args(
         subprocess_blender=bool(
             args.refinement_subprocess or refinement_cfg.allow_subprocess_blender
         ),
-        blender_executable=args.refinement_blender_exe or refinement_cfg.blender_executable,
+        blender_executable=args.refinement_blender_exe
+        or refinement_cfg.blender_executable,
         progress=args.progress,
     )
     _print_rule("BLENDSLOP REFINEMENT LAB", width=72)
@@ -2381,7 +2623,9 @@ if __name__ == "__main__":
             kind = "render-iou" if mode in RENDER_IOU_MODES else "backend-status"
             surface = "backend artifact" if mode in BACKEND_MODES else "Blender mesh"
             print(f"  {mode:<28} {kind:<16} {surface}")
-        print(f"\nDefault ensemble candidates: {', '.join(DEFAULT_ENSEMBLE_CANDIDATES)}")
+        print(
+            f"\nDefault ensemble candidates: {', '.join(DEFAULT_ENSEMBLE_CANDIDATES)}"
+        )
         sys.exit(0)
 
     workflow_config = BlockingConfig()
@@ -2450,7 +2694,9 @@ if __name__ == "__main__":
         )
         if not can_delegate_refinement:
             print("ERROR: This validation CLI must be run inside Blender.")
-            print("Run: blender --background --python blender_blocking/test_e2e_validation.py -- [options]")
+            print(
+                "Run: blender --background --python blender_blocking/test_e2e_validation.py -- [options]"
+            )
             print(
                 "For refinement labs from system Python, add "
                 "--refinement-subprocess --refinement-blender-exe <blender>."

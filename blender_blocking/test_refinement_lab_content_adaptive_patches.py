@@ -42,7 +42,9 @@ class ContentAdaptivePatchTests(unittest.TestCase):
         score = np.zeros((16, 16), dtype=float)
         score[6:10, 6:10] = 1.0
         patch = select_adaptive_patches(score, patch_sizes=(8,), max_patches=1)[0]
-        patch_prediction = np.ones((patch.crop_box.height, patch.crop_box.width), dtype=float) * 2.0
+        patch_prediction = (
+            np.ones((patch.crop_box.height, patch.crop_box.width), dtype=float) * 2.0
+        )
 
         fused = fuse_patch_predictions(
             global_prediction,
@@ -63,8 +65,8 @@ class ContentAdaptivePatchTests(unittest.TestCase):
         score[7:13, 7:13] = 1.0
         patch = select_adaptive_patches(score, patch_sizes=(10,), max_patches=1)[0]
         crop = global_prediction[
-            patch.crop_box.y0:patch.crop_box.y1,
-            patch.crop_box.x0:patch.crop_box.x1,
+            patch.crop_box.y0 : patch.crop_box.y1,
+            patch.crop_box.x0 : patch.crop_box.x1,
         ]
         local_prediction = (crop - 3.0) / 2.0
 
@@ -87,7 +89,9 @@ class ContentAdaptivePatchTests(unittest.TestCase):
         )
         self.assertGreater(float(np.max(fused.contribution_weight)), 1.0)
 
-    def test_adaptive_planner_proposes_content_patch_pass_for_detail_failures(self) -> None:
+    def test_adaptive_planner_proposes_content_patch_pass_for_detail_failures(
+        self,
+    ) -> None:
         bundle = {
             "status": "pass",
             "failures": [{"code": "surface_detail_underfit"}],
@@ -115,7 +119,8 @@ class ContentAdaptivePatchTests(unittest.TestCase):
 
         self.assertIn("Content-adaptive patch detail pass", titles)
         patch = next(
-            proposal for proposal in proposals
+            proposal
+            for proposal in proposals
             if proposal.title == "Content-adaptive patch detail pass"
         )
         self.assertIn("content-adaptive-patches", patch.tags)

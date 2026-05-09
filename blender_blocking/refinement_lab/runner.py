@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, is_dataclass
-from datetime import datetime, timezone
 import copy
 import json
 import platform
@@ -76,7 +75,9 @@ class BaseRunner:
             references = self._prepare_case_references(case)
             for variant in self.plan.variants:
                 counter += 1
-                print(f"[{counter:03d}/{total:03d}] {variant.variant_id} ({variant.mode})")
+                print(
+                    f"[{counter:03d}/{total:03d}] {variant.variant_id} ({variant.mode})"
+                )
                 result = self._run_one(case, variant, references)
                 result = self._postprocess_result(case, variant, result)
                 self.index.append(result)
@@ -84,7 +85,11 @@ class BaseRunner:
                 self._print_result_row(result)
                 if self.options.stop_on_first_error and result.status == "error":
                     break
-            if self.options.stop_on_first_error and results and results[-1].status == "error":
+            if (
+                self.options.stop_on_first_error
+                and results
+                and results[-1].status == "error"
+            ):
                 break
         self.index.write_leaderboards(results)
         if self.options.append_global_index:
@@ -163,7 +168,9 @@ class BaseRunner:
             return case.reference_paths
         return self._generate_synthetic_references(case)
 
-    def _generate_synthetic_references(self, case: ExperimentCase) -> Mapping[str, Path]:
+    def _generate_synthetic_references(
+        self, case: ExperimentCase
+    ) -> Mapping[str, Path]:
         try:
             from blender_blocking.synthetic.blender_builders import render_views
             from blender_blocking.synthetic.specs import SyntheticShapeSpec
@@ -171,13 +178,26 @@ class BaseRunner:
             from synthetic.blender_builders import render_views
             from synthetic.specs import SyntheticShapeSpec
 
-        spec_payload = case.metadata.get("spec", {}) if isinstance(case.metadata, Mapping) else {}
+        spec_payload = (
+            case.metadata.get("spec", {}) if isinstance(case.metadata, Mapping) else {}
+        )
         spec = SyntheticShapeSpec.from_dict(spec_payload)
         output = self.run_root / "cases" / case.case_id / "references"
-        rendered = render_views(spec, output, resolution=tuple(self.base_config.render_silhouette.resolution), include_orbit=False)
-        return {view: Path(rendered[view]) for view in ("front", "side", "top") if view in rendered}
+        rendered = render_views(
+            spec,
+            output,
+            resolution=tuple(self.base_config.render_silhouette.resolution),
+            include_orbit=False,
+        )
+        return {
+            view: Path(rendered[view])
+            for view in ("front", "side", "top")
+            if view in rendered
+        }
 
-    def _case_variant_dir(self, case: ExperimentCase, variant: ExperimentVariant) -> Path:
+    def _case_variant_dir(
+        self, case: ExperimentCase, variant: ExperimentVariant
+    ) -> Path:
         return self.run_root / "cases" / case.case_id / "variants" / variant.variant_id
 
     def _postprocess_result(
@@ -207,7 +227,8 @@ class BaseRunner:
                 bounds_debug=bounds_payload,
             )
             (variant_dir / "autopsy.json").write_text(
-                json.dumps(autopsy_payload, indent=2, sort_keys=True, default=str) + "\n",
+                json.dumps(autopsy_payload, indent=2, sort_keys=True, default=str)
+                + "\n",
                 encoding="utf-8",
             )
         scored_result = ExperimentResult.from_dict(
@@ -388,7 +409,11 @@ class SubprocessRunner(BaseRunner):
         stderr_path.write_text(completed.stderr, encoding="utf-8")
         payload = _load_json(result_json)
         status = "pass" if completed.returncode == 0 else "fail"
-        errors = (completed.stderr.strip(),) if completed.returncode and completed.stderr.strip() else ()
+        errors = (
+            (completed.stderr.strip(),)
+            if completed.returncode and completed.stderr.strip()
+            else ()
+        )
         return _result_from_payload(
             plan_id=self.plan.run_id,
             case=case,
@@ -433,12 +458,16 @@ def _result_from_payload(
     reference_paths: Mapping[str, Path],
     errors: Sequence[str] = (),
 ) -> ExperimentResult:
-    backend_result = payload.get("backend_result", {}) if isinstance(payload, Mapping) else {}
+    backend_result = (
+        payload.get("backend_result", {}) if isinstance(payload, Mapping) else {}
+    )
     metrics = _metrics_from_payload(payload)
     artifacts = _artifacts_from_payload(payload)
     render_paths = {
         key: Path(value)
-        for key, value in dict(payload.get("rendered_paths", {}) if isinstance(payload, Mapping) else {}).items()
+        for key, value in dict(
+            payload.get("rendered_paths", {}) if isinstance(payload, Mapping) else {}
+        ).items()
     }
     return ExperimentResult(
         run_id=plan_id,
@@ -457,7 +486,9 @@ def _result_from_payload(
         backend_result=backend_result if isinstance(backend_result, Mapping) else {},
         metrics=metrics,
         artifacts=artifacts,
-        warnings=tuple(payload.get("warnings", ()) if isinstance(payload, Mapping) else ()),
+        warnings=tuple(
+            payload.get("warnings", ()) if isinstance(payload, Mapping) else ()
+        ),
         errors=tuple(errors),
     )
 
@@ -478,7 +509,9 @@ def _metrics_from_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
     backend = payload.get("backend_result", {})
     selected = backend.get("selected") if isinstance(backend, Mapping) else None
     source = selected if isinstance(selected, Mapping) else backend
-    metric_result = source.get("metric_result", {}) if isinstance(source, Mapping) else {}
+    metric_result = (
+        source.get("metric_result", {}) if isinstance(source, Mapping) else {}
+    )
     if isinstance(metric_result, Mapping):
         for key in (
             "area_iou_mean",
@@ -645,7 +678,10 @@ _CONFIG_PARAM_MAP = {
     "primitive_fail_on_regression": ("primitive_fit", "fail_on_regression"),
     "primitive_loss_weights_json": ("primitive_fit", "loss_weights"),
     "primitive_max_runtime_s": ("primitive_fit", "max_runtime_s"),
-    "primitive_max_objective_evaluations": ("primitive_fit", "max_objective_evaluations"),
+    "primitive_max_objective_evaluations": (
+        "primitive_fit",
+        "max_objective_evaluations",
+    ),
     "gaussian_count": ("gaussian_ellipsoid", "primitive_count"),
     "gaussian_initialization": ("gaussian_ellipsoid", "initialization"),
     "gaussian_min_radius": ("gaussian_ellipsoid", "min_radius"),
@@ -681,7 +717,9 @@ def _apply_variant_to_config(cfg: BlockingConfig, variant: ExperimentVariant) ->
                 from config import CandidateConfig
 
             cfg.ensemble.candidates = tuple(
-                CandidateConfig(backend_name=str(name), candidate_id=f"{name}_{idx:02d}")
+                CandidateConfig(
+                    backend_name=str(name), candidate_id=f"{name}_{idx:02d}"
+                )
                 for idx, name in enumerate(value)
             )
             continue
@@ -693,7 +731,11 @@ def _apply_variant_to_config(cfg: BlockingConfig, variant: ExperimentVariant) ->
         if attr_name == "loss_weights" and isinstance(value, str):
             value = json.loads(value)
         if attr_name == "primitive_families":
-            value = tuple(value) if isinstance(value, (list, tuple)) else tuple(str(value).split(","))
+            value = (
+                tuple(value)
+                if isinstance(value, (list, tuple))
+                else tuple(str(value).split(","))
+            )
         setattr(target, attr_name, value)
     if variant.config_overrides:
         _apply_config_overrides(cfg, variant.config_overrides)
@@ -724,7 +766,10 @@ def _load_json(path: Path) -> Mapping[str, Any]:
 
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _write_text(path: Path, text: str) -> None:
@@ -750,6 +795,7 @@ def _environment_info() -> dict[str, object]:
 
 def _git_info() -> dict[str, object]:
     root = Path(__file__).resolve().parents[2]
+
     def run(*args: str) -> str:
         completed = subprocess.run(
             ("git", *args),
