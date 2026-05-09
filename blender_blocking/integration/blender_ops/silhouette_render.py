@@ -115,6 +115,7 @@ class SilhouetteRenderSession:
         self.scene.render.image_settings.color_mode = rs.color_mode
         self.scene.render.engine = rs.engine
         self.scene.render.film_transparent = rs.film_transparent
+        _update_view_layer()
 
 
 def collect_target_objects(
@@ -130,6 +131,19 @@ def collect_target_objects(
         return tagged if tagged else mesh_objects
 
     return [obj for obj in target_objects if getattr(obj, "type", None) == "MESH"]
+
+
+def _mesh_objects(scene: bpy.types.Scene) -> List[bpy.types.Object]:
+    """Return all mesh objects in the scene."""
+    return [obj for obj in scene.objects if getattr(obj, "type", None) == "MESH"]
+
+
+def _update_view_layer() -> None:
+    """Flush visibility and material changes before render or after restore."""
+    try:
+        bpy.context.view_layer.update()
+    except Exception:
+        pass
 
 
 def ensure_world_background(
@@ -420,22 +434,24 @@ def silhouette_session(
 
     silhouette_material = ensure_silhouette_material(color=silhouette_color)
 
+    mesh_objects = _mesh_objects(scene)
     hidden_objects: Dict[bpy.types.Object, bool] = {}
-    for obj in scene.objects:
-        if obj.type != "MESH":
-            continue
+    for obj in mesh_objects:
         hidden_objects[obj] = getattr(obj, "hide_render", False)
         if obj in targets:
             obj.hide_render = False
         elif hide_non_targets:
             obj.hide_render = True
+        else:
+            obj.hide_render = False
 
     original_materials: Dict[bpy.types.Object, List[Optional[bpy.types.Material]]] = {}
     if party_mode and force_material:
         print("Warning: party_mode ignored because force_material is enabled.")
         party_mode = False
+    material_objects = targets if hide_non_targets else mesh_objects
     if force_material or party_mode:
-        for obj in targets:
+        for obj in material_objects:
             if getattr(obj, "type", None) != "MESH":
                 continue
             if hasattr(obj, "hide_set"):
@@ -452,6 +468,7 @@ def silhouette_session(
     extra_lights: List[bpy.types.Object] = []
     if party_mode:
         extra_lights = _apply_party_mode(scene, targets)
+    _update_view_layer()
 
     session = SilhouetteRenderSession(
         scene=scene,
