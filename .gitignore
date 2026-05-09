@@ -13,6 +13,9 @@ stacked_cubes.py
 __pycache__/
 *.py[cod]
 *$py.class
+.venv/
+.venv*/
+venv/
 
 # Blender temp files
 *.blend1
