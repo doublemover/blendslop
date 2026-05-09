@@ -81,16 +81,51 @@ def _target_id(target: Any) -> str:
 
 def _silhouette_group(metrics: Any) -> MetricGroup:
     if metrics is None:
-        return MetricGroup("silhouette", "not_applicable")
+        return MetricGroup(
+            "silhouette",
+            "fail",
+            (
+                MetricValue(
+                    "silhouette.min_view_iou",
+                    None,
+                    higher_is_better=True,
+                    required=True,
+                    status="fail",
+                    notes=("candidate emitted no CandidateMetrics",),
+                ),
+            ),
+            warnings=("missing_candidate_metrics",),
+        )
     per_view = getattr(metrics, "per_view", {}) or {}
+    min_iou = float(getattr(metrics, "area_iou_min", 0.0))
+    avg_iou = float(getattr(metrics, "area_iou_mean", 0.0))
+    boundary_iou = float(getattr(metrics, "boundary_iou_mean", 0.0))
+    min_status = _pass_fail(min_iou > 0.0)
     values: list[MetricValue] = [
-        MetricValue("silhouette.min_view_iou", float(getattr(metrics, "area_iou_min", 0.0)), higher_is_better=True, required=True, status=_pass_fail(float(getattr(metrics, "area_iou_min", 0.0)) > 0.0)),
-        MetricValue("silhouette.average_iou", float(getattr(metrics, "area_iou_mean", 0.0)), higher_is_better=True, status="pass"),
-        MetricValue("silhouette.mean_boundary_iou", float(getattr(metrics, "boundary_iou_mean", 0.0)), higher_is_better=True, status="pass"),
+        MetricValue(
+            "silhouette.min_view_iou",
+            min_iou,
+            higher_is_better=True,
+            required=True,
+            status=min_status,
+            notes=() if min_iou > 0.0 else ("missing or zero required-view IoU",),
+        ),
+        MetricValue(
+            "silhouette.average_iou",
+            avg_iou,
+            higher_is_better=True,
+            status=_pass_fail(avg_iou > 0.0),
+        ),
+        MetricValue(
+            "silhouette.mean_boundary_iou",
+            boundary_iou,
+            higher_is_better=True,
+            status=_pass_fail(boundary_iou > 0.0),
+        ),
     ]
     boundary_values = []
     sdf_values = []
-    view_statuses = []
+    view_statuses = [min_status]
     for view, payload in per_view.items():
         if not isinstance(payload, Mapping):
             continue

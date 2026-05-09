@@ -85,6 +85,22 @@ class EvaluationBundleTests(unittest.TestCase):
         self.assertIsInstance(reports[0], ExportQAReport)
         self.assertEqual({report.target for report in reports}, {"blend", "gltf"})
 
+    def test_success_without_required_silhouette_metrics_fails_bundle(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-c",
+            backend_name="gaussian_ellipsoid_proxy",
+            status="success",
+            metric_result=CandidateMetrics(),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        codes = {failure.code for failure in bundle.failures}
+        metrics = bundle.metric_index()
+
+        self.assertEqual(bundle.status, "fail")
+        self.assertEqual(metrics["silhouette.min_view_iou"].status, "fail")
+        self.assertIn("silhouette_required_metrics_missing", codes)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,6 +13,25 @@ def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservati
 
     min_iou = _metric_value(metrics, "silhouette.min_view_iou")
     avg_iou = _metric_value(metrics, "silhouette.average_iou")
+    if bundle.status != "skip" and (min_iou is None or min_iou <= 0.0):
+        failures.append(
+            FailureObservation(
+                code="silhouette_required_metrics_missing",
+                severity="fail",
+                subsystem="silhouette",
+                evidence_metrics={
+                    "silhouette.min_view_iou": min_iou,
+                    "silhouette.average_iou": avg_iou,
+                },
+                likely_causes=(
+                    "candidate reported success without required per-view silhouette metrics",
+                ),
+                recommended_actions=(
+                    "ensure backend populates CandidateMetrics.per_view and area_iou_min",
+                    "run backend-status validation with evaluation bundle output",
+                ),
+            )
+        )
     if min_iou is not None and avg_iou is not None and min_iou < 0.5 <= avg_iou:
         failures.append(
             FailureObservation(
