@@ -110,6 +110,7 @@ BACKEND_RECONSTRUCTION_MODES = {
     "primitive_fit_refine",
     "gaussian_ellipsoid_proxy",
     "differentiable_refine",
+    "shape_program",
     "ensemble",
 }
 
@@ -1184,6 +1185,8 @@ class BlockingWorkflow:
                 "primitive_count": self.config.gaussian_ellipsoid.primitive_count,
                 "chunk_size": self.config.visual_hull.chunk_size,
             }
+        if backend_name == "shape_program":
+            return self.config.shape_program.to_dict()
         return {}
 
     def _default_ensemble_candidates(self) -> Tuple[BackendCandidateConfig, ...]:
@@ -1194,6 +1197,7 @@ class BlockingWorkflow:
             "primitive_fit_refine",
             "gaussian_ellipsoid_proxy",
             "differentiable_refine",
+            "shape_program",
         ]
         candidates = []
         for name in names:

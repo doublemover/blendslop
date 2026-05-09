@@ -16,6 +16,7 @@ _VALID_RECON_MODES = {
     "primitive_fit_refine",
     "gaussian_ellipsoid_proxy",
     "differentiable_refine",
+    "shape_program",
     "ensemble",
 }
 _VALID_JOIN_MODES = {"auto", "boolean", "voxel", "simple"}
@@ -34,10 +35,15 @@ _VALID_MESH_METHODS = {"marching_cubes", "lewiner", "dual_contouring", "points"}
 _VALID_VOLUME_BACKENDS = {"dense", "chunked", "sparse_hash", "openvdb"}
 _VALID_SELECTION_POLICIES = {
     "best_score",
+    "balanced",
+    "fidelity",
     "quality_first",
+    "editable",
     "editability_first",
+    "printable",
     "fast_preview",
     "pareto",
+    "research_fidelity",
 }
 _VALID_POSTPROCESS = {"none", "poisson", "screened_poisson"}
 _VALID_REFINEMENT_SEARCH = {"grid", "random", "coordinate", "successive_halving"}
@@ -588,6 +594,43 @@ class DifferentiableRenderConfig:
 
 
 @dataclass
+class ShapeProgramConfig:
+    """Configuration for editable shape-program research output."""
+
+    root_strategy: str = "hybrid_profile_bounds"
+    residual_policy: str = "suggest_patches"
+    max_nodes: int = 64
+    editability_bias: float = 1.0
+
+    def validate(self) -> None:
+        if self.root_strategy not in {
+            "profile_lathe",
+            "bounds_box",
+            "hybrid_profile_bounds",
+        }:
+            raise ValueError(
+                "shape_program.root_strategy must be profile_lathe/"
+                "bounds_box/hybrid_profile_bounds"
+            )
+        if self.residual_policy not in {"ignore", "report", "suggest_patches"}:
+            raise ValueError(
+                "shape_program.residual_policy must be ignore/report/suggest_patches"
+            )
+        if self.max_nodes < 1:
+            raise ValueError("shape_program.max_nodes must be >= 1")
+        if not (0.0 <= self.editability_bias <= 1.0):
+            raise ValueError("shape_program.editability_bias must be in [0, 1]")
+
+    def to_dict(self) -> Dict[str, object]:
+        return {
+            "root_strategy": self.root_strategy,
+            "residual_policy": self.residual_policy,
+            "max_nodes": self.max_nodes,
+            "editability_bias": self.editability_bias,
+        }
+
+
+@dataclass
 class ConstraintConfig:
     """Configuration for human correction constraints."""
 
@@ -822,6 +865,7 @@ class BlockingConfig:
     differentiable_render: DifferentiableRenderConfig = field(
         default_factory=DifferentiableRenderConfig
     )
+    shape_program: ShapeProgramConfig = field(default_factory=ShapeProgramConfig)
     constraints: ConstraintConfig = field(default_factory=ConstraintConfig)
     synthetic_factory: SyntheticFactoryConfig = field(default_factory=SyntheticFactoryConfig)
     quality_budget: QualityBudgetConfig = field(default_factory=QualityBudgetConfig)
@@ -844,6 +888,7 @@ class BlockingConfig:
         self.primitive_fit.validate()
         self.gaussian_ellipsoid.validate()
         self.differentiable_render.validate()
+        self.shape_program.validate()
         self.constraints.validate()
         self.synthetic_factory.validate()
         self.quality_budget.validate()
@@ -869,6 +914,7 @@ class BlockingConfig:
             "primitive_fit": self.primitive_fit.to_dict(),
             "gaussian_ellipsoid": self.gaussian_ellipsoid.to_dict(),
             "differentiable_render": self.differentiable_render.to_dict(),
+            "shape_program": self.shape_program.to_dict(),
             "constraints": self.constraints.to_dict(),
             "synthetic_factory": self.synthetic_factory.to_dict(),
             "quality_budget": self.quality_budget.to_dict(),

@@ -20,6 +20,7 @@ class CandidateScoreWeights:
     constraint: float = 60.0
     constraint_penalty: float = -120.0
     degraded_penalty: float = -50.0
+    research_only_penalty: float = -250.0
     complexity_penalty: float = -30.0
     time_penalty: float = -20.0
     failure_penalty: float = -10000.0
@@ -54,13 +55,22 @@ def score_candidate(
 ) -> CandidateScore:
     """Score a candidate with transparent weighted terms."""
     terms: list[CandidateScoreTerm] = []
-    if result.status in {"failed", "skipped"}:
+    if result.status in {"failed", "skipped", "error"}:
         terms.append(
             CandidateScoreTerm(
                 "failure",
                 1.0,
                 weights.failure_penalty,
                 f"candidate status is {result.status}",
+            )
+        )
+    if result.status == "research_only":
+        terms.append(
+            CandidateScoreTerm(
+                "research_only",
+                1.0,
+                weights.research_only_penalty,
+                "candidate emitted research artifact without validated reconstruction",
             )
         )
     metrics = result.metric_result
@@ -129,6 +139,7 @@ def rank_candidates(
     policy: str = "best_score",
     weights: CandidateScoreWeights = CandidateScoreWeights(),
 ) -> list[tuple[CandidateResult, CandidateScore]]:
+    policy = _normalize_policy(policy)
     scored = [
         (result, score_candidate(result, policy=policy, weights=weights))
         for result in results
@@ -137,7 +148,7 @@ def rank_candidates(
         return sorted(
             scored,
             key=lambda pair: (
-                pair[0].status not in {"success", "degraded"},
+                _status_rank(pair[0]),
                 pair[0].metric_result.elapsed_s,
                 -pair[1].total,
             ),
@@ -146,8 +157,53 @@ def rank_candidates(
         return sorted(
             scored,
             key=lambda pair: (
-                pair[0].status not in {"success", "degraded"},
+                _status_rank(pair[0]),
                 -pair[0].metric_result.editability_score,
+                pair[0].metric_result.complexity_penalty,
+                -pair[1].total,
+            ),
+        )
+    if policy in {"quality_first", "fidelity"}:
+        return sorted(
+            scored,
+            key=lambda pair: (
+                _status_rank(pair[0]),
+                -pair[0].metric_result.area_iou_min,
+                -pair[0].metric_result.area_iou_mean,
+                -pair[0].metric_result.boundary_iou_mean,
+                -pair[0].metric_result.topology_score,
+                pair[0].metric_result.topology_penalty,
+                -pair[1].total,
+            ),
+        )
+    if policy == "printable":
+        return sorted(
+            scored,
+            key=lambda pair: (
+                _status_rank(pair[0]),
+                -pair[0].metric_result.topology_score,
+                pair[0].metric_result.topology_penalty,
+                -pair[0].metric_result.area_iou_min,
+                -pair[0].metric_result.editability_score,
+                -pair[1].total,
+            ),
+        )
+    if policy == "research_fidelity":
+        return sorted(
+            scored,
+            key=lambda pair: (
+                _research_status_rank(pair[0]),
+                -pair[0].metric_result.area_iou_min,
+                -pair[0].metric_result.boundary_iou_mean,
+                -pair[1].total,
+            ),
+        )
+    if policy == "pareto":
+        return sorted(
+            scored,
+            key=lambda pair: (
+                _status_rank(pair[0]),
+                -_pareto_proxy(pair[0]),
                 -pair[1].total,
             ),
         )
@@ -162,5 +218,57 @@ def select_best(
 ) -> tuple[CandidateResult | None, list[tuple[CandidateResult, CandidateScore]]]:
     if not results:
         return None, []
+    policy = _normalize_policy(policy)
     ranked = rank_candidates(results, policy=policy, weights=weights)
     return ranked[0][0], ranked
+
+
+def _normalize_policy(policy: str) -> str:
+    aliases = {
+        "best_score": "best_score",
+        "balanced": "best_score",
+        "editable": "editability_first",
+        "max_editability": "editability_first",
+        "quality": "quality_first",
+    }
+    return aliases.get(policy, policy)
+
+
+def _status_rank(result: CandidateResult) -> int:
+    if result.status == "success":
+        return 0
+    if result.status == "degraded":
+        return 1
+    if result.status == "research_only":
+        return 2
+    if result.status == "skipped":
+        return 3
+    if result.status in {"failed", "error"}:
+        return 4
+    return 5
+
+
+def _research_status_rank(result: CandidateResult) -> int:
+    if result.status == "success":
+        return 0
+    if result.status == "degraded":
+        return 1
+    if result.status == "research_only":
+        return 2
+    if result.status == "skipped":
+        return 4
+    if result.status in {"failed", "error"}:
+        return 5
+    return 6
+
+
+def _pareto_proxy(result: CandidateResult) -> float:
+    metrics = result.metric_result
+    return (
+        metrics.area_iou_min
+        + metrics.boundary_iou_mean
+        + metrics.topology_score
+        + metrics.editability_score
+        - metrics.topology_penalty
+        - metrics.complexity_penalty
+    )

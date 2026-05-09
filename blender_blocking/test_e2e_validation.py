@@ -77,6 +77,7 @@ ALL_RECONSTRUCTION_MODES = (
     "primitive_fit_refine",
     "gaussian_ellipsoid_proxy",
     "differentiable_refine",
+    "shape_program",
     "ensemble",
 )
 BACKEND_MODES = {
@@ -85,6 +86,7 @@ BACKEND_MODES = {
     "primitive_fit_refine",
     "gaussian_ellipsoid_proxy",
     "differentiable_refine",
+    "shape_program",
     "ensemble",
 }
 RENDER_IOU_MODES = {
@@ -98,6 +100,7 @@ DEFAULT_ENSEMBLE_CANDIDATES = (
     "primitive_fit_refine",
     "gaussian_ellipsoid_proxy",
     "differentiable_refine",
+    "shape_program",
 )
 DEFAULT_SYNTHETIC_MATRIX_MODES = (
     "legacy",
@@ -1510,9 +1513,38 @@ Default ensemble:
     diff.add_argument("--diff-epsilon", type=float, default=None)
     diff.add_argument("--diff-loss-weights-json", type=str, default=None)
 
+    shape_program = parser.add_argument_group("editable shape program")
+    shape_program.add_argument(
+        "--shape-root-strategy",
+        choices=("profile_lathe", "bounds_box", "hybrid_profile_bounds"),
+        default=None,
+    )
+    shape_program.add_argument(
+        "--shape-residual-policy",
+        choices=("ignore", "report", "suggest_patches"),
+        default=None,
+    )
+    shape_program.add_argument("--shape-max-nodes", type=int, default=None)
+    shape_program.add_argument("--shape-editability-bias", type=float, default=None)
+
     ensemble = parser.add_argument_group("ensemble")
     ensemble.add_argument("--ensemble-candidates", type=_parse_csv, default=None, help="Comma-separated backend list.")
-    ensemble.add_argument("--ensemble-policy", choices=("best_score", "quality_first", "editability_first", "fast_preview", "pareto"), default=None)
+    ensemble.add_argument(
+        "--ensemble-policy",
+        choices=(
+            "best_score",
+            "balanced",
+            "fidelity",
+            "quality_first",
+            "editable",
+            "editability_first",
+            "printable",
+            "fast_preview",
+            "pareto",
+            "research_fidelity",
+        ),
+        default=None,
+    )
     ensemble.add_argument("--ensemble-max-parallel", type=int, default=None)
     ensemble.add_argument("--ensemble-timeout", type=float, default=None)
     ensemble.add_argument("--ensemble-total-timeout", type=float, default=None)
@@ -1893,6 +1925,13 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     )
     if args.diff_loss_weights_json:
         cfg.differentiable_render.loss_weights = json.loads(args.diff_loss_weights_json)
+
+    _set_if_not_none(cfg.shape_program, "root_strategy", args.shape_root_strategy)
+    _set_if_not_none(cfg.shape_program, "residual_policy", args.shape_residual_policy)
+    _set_if_not_none(cfg.shape_program, "max_nodes", args.shape_max_nodes)
+    _set_if_not_none(
+        cfg.shape_program, "editability_bias", args.shape_editability_bias
+    )
 
     if args.ensemble_candidates:
         cfg.ensemble.candidates = _candidate_configs(args.ensemble_candidates)

@@ -181,6 +181,8 @@ def _bundle_status(result: Any, groups: tuple[MetricGroup, ...]) -> str:
         return "fail"
     if raw_status == "skipped":
         return "skip"
+    if raw_status == "research_only":
+        return "research_only"
     if bool(getattr(result, "degraded", False)) or raw_status == "degraded":
         return "degraded"
     group_status = worst_status(tuple(group.status for group in groups))
@@ -229,4 +231,3 @@ def _float_or_none(value: Any) -> float | None:
 
 def _pass_fail(value: bool) -> str:
     return "pass" if value else "fail"
-
