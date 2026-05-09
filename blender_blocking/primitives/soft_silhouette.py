@@ -178,7 +178,7 @@ def render_multi_view_soft_silhouettes(
 
 
 def soft_mask_metrics(predicted: np.ndarray, target: np.ndarray) -> Mapping[str, float]:
-    """Return simple soft silhouette losses and hard IoU diagnostics."""
+    """Return soft silhouette losses plus boundary/SDF diagnostics."""
     pred = np.asarray(predicted, dtype=np.float64)
     tgt = np.asarray(target, dtype=np.float64)
     if pred.shape != tgt.shape:
@@ -211,12 +211,120 @@ def soft_mask_metrics(predicted: np.ndarray, target: np.ndarray) -> Mapping[str,
         else 1.0
     )
     soft_iou = intersection / union if union > 0.0 else 1.0
+    boundary_score = _boundary_iou(hard_pred, hard_tgt)
+    sdf_loss = _signed_distance_loss(hard_tgt, hard_pred)
     return {
         "soft_l1": float(np.mean(np.abs(pred - tgt))),
         "soft_l2": float(np.mean((pred - tgt) ** 2)),
         "soft_iou_loss": 1.0 - soft_iou,
         "area_iou_loss": 1.0 - hard_iou,
+        "boundary_iou": boundary_score,
+        "boundary_iou_loss": 1.0 - boundary_score,
+        "signed_distance_loss": sdf_loss,
         "pred_area_ratio": float(pred.mean()),
         "target_area_ratio": float(tgt.mean()),
         "area_abs_diff_ratio": abs(float(pred.sum() - tgt.sum())) / pixel_count,
+        "pred_boundary_area_ratio": float(_boundary_band(hard_pred).mean()),
+        "target_boundary_area_ratio": float(_boundary_band(hard_tgt).mean()),
     }
+
+
+def _boundary_iou(mask_a: np.ndarray, mask_b: np.ndarray, radius: int = 2) -> float:
+    """Boundary IoU for hard masks without requiring OpenCV at render time."""
+    a = np.asarray(mask_a, dtype=bool)
+    b = np.asarray(mask_b, dtype=bool)
+    if a.shape != b.shape:
+        raise ValueError("boundary masks must have matching shapes")
+    if not a.any() and not b.any():
+        return 1.0
+    band_a = _boundary_band(a, radius=radius)
+    band_b = _boundary_band(b, radius=radius)
+    union = float(np.logical_or(band_a, band_b).sum())
+    if union <= 0.0:
+        return 1.0 if np.array_equal(a, b) else 0.0
+    return float(np.logical_and(band_a, band_b).sum() / union)
+
+
+def _boundary_band(mask: np.ndarray, radius: int = 2) -> np.ndarray:
+    hard = np.asarray(mask, dtype=bool)
+    if not hard.any():
+        return np.zeros(hard.shape, dtype=bool)
+    radius = max(1, int(radius))
+    eroded = _binary_erosion(hard, radius=1)
+    boundary = np.logical_xor(hard, eroded)
+    return _binary_dilation(boundary, radius=radius)
+
+
+def _binary_erosion(mask: np.ndarray, radius: int = 1) -> np.ndarray:
+    result = np.asarray(mask, dtype=bool)
+    for _ in range(max(1, int(radius))):
+        padded = np.pad(result, 1, mode="constant", constant_values=False)
+        neighbors = [
+            padded[dy : dy + result.shape[0], dx : dx + result.shape[1]]
+            for dy in range(3)
+            for dx in range(3)
+        ]
+        result = np.logical_and.reduce(neighbors)
+    return result
+
+
+def _binary_dilation(mask: np.ndarray, radius: int = 1) -> np.ndarray:
+    result = np.asarray(mask, dtype=bool)
+    for _ in range(max(1, int(radius))):
+        padded = np.pad(result, 1, mode="constant", constant_values=False)
+        neighbors = [
+            padded[dy : dy + result.shape[0], dx : dx + result.shape[1]]
+            for dy in range(3)
+            for dx in range(3)
+        ]
+        result = np.logical_or.reduce(neighbors)
+    return result
+
+
+def _signed_distance_loss(reference: np.ndarray, candidate: np.ndarray) -> float:
+    ref = np.asarray(reference, dtype=bool)
+    cand = np.asarray(candidate, dtype=bool)
+    if ref.shape != cand.shape:
+        raise ValueError("signed-distance masks must have matching shapes")
+    if ref.size == 0:
+        return 0.0
+    ref_sdf = _signed_distance(ref)
+    cand_sdf = _signed_distance(cand)
+    denom = float(max(ref.shape)) if ref.shape else 1.0
+    return float(np.mean(np.abs(ref_sdf - cand_sdf)) / max(denom, 1.0))
+
+
+def _signed_distance(mask: np.ndarray) -> np.ndarray:
+    hard = np.asarray(mask, dtype=bool)
+    try:
+        from scipy import ndimage
+    except Exception:
+        inside = _nearest_distance(~hard)
+        outside = _nearest_distance(hard)
+    else:
+        inside = ndimage.distance_transform_edt(hard)
+        outside = ndimage.distance_transform_edt(~hard)
+    return inside.astype(np.float64, copy=False) - outside.astype(
+        np.float64,
+        copy=False,
+    )
+
+
+def _nearest_distance(target: np.ndarray, chunk_size: int = 2048) -> np.ndarray:
+    target_bool = np.asarray(target, dtype=bool)
+    coords = np.argwhere(target_bool)
+    output = np.zeros(target_bool.shape, dtype=np.float64)
+    if not len(coords):
+        fill = float(max(target_bool.shape) if target_bool.shape else 0.0)
+        output.fill(fill)
+        return output
+    points = np.argwhere(np.ones(target_bool.shape, dtype=bool))
+    distances = np.empty((len(points),), dtype=np.float64)
+    coords_f = coords.astype(np.float64, copy=False)
+    for start in range(0, len(points), chunk_size):
+        end = min(start + chunk_size, len(points))
+        block = points[start:end].astype(np.float64, copy=False)
+        delta = block[:, None, :] - coords_f[None, :, :]
+        distances[start:end] = np.sqrt(np.min(np.sum(delta * delta, axis=2), axis=1))
+    output[tuple(points.T)] = distances
+    return output

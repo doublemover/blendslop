@@ -77,7 +77,31 @@ class TestSoftSilhouetteDeterminism(unittest.TestCase):
         self.assertAlmostEqual(first["soft_l2"], 0.0, places=12)
         self.assertAlmostEqual(first["soft_iou_loss"], 0.0, places=12)
         self.assertAlmostEqual(first["area_iou_loss"], 0.0, places=12)
+        self.assertAlmostEqual(first["boundary_iou"], 1.0, places=12)
+        self.assertAlmostEqual(first["boundary_iou_loss"], 0.0, places=12)
+        self.assertAlmostEqual(first["signed_distance_loss"], 0.0, places=12)
         self.assertEqual(first, second)
+
+    def test_soft_metrics_include_boundary_and_signed_distance_terms(self) -> None:
+        target = np.zeros((32, 32), dtype=np.float64)
+        target[9:23, 8:22] = 1.0
+        shifted = np.zeros_like(target)
+        shifted[9:23, 10:24] = 1.0
+
+        metrics = soft_mask_metrics(shifted, target)
+
+        self.assertIn("boundary_iou", metrics)
+        self.assertIn("boundary_iou_loss", metrics)
+        self.assertIn("signed_distance_loss", metrics)
+        self.assertGreater(metrics["area_iou_loss"], 0.0)
+        self.assertGreater(metrics["boundary_iou_loss"], 0.0)
+        self.assertGreater(metrics["signed_distance_loss"], 0.0)
+        self.assertLess(metrics["boundary_iou"], 1.0)
+        self.assertAlmostEqual(
+            metrics["boundary_iou_loss"],
+            1.0 - metrics["boundary_iou"],
+            places=12,
+        )
 
 
 if __name__ == "__main__":

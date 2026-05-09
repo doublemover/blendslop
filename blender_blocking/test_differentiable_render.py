@@ -163,6 +163,13 @@ class TestDifferentiableRender(unittest.TestCase):
                     "soft_iou_loss": 0.95,
                     "soft_l2": 0.8,
                 },
+                "top": {
+                    "area_iou_loss": 0.1,
+                    "soft_iou_loss": 0.2,
+                    "soft_l2": 0.01,
+                    "boundary_iou": 0.91,
+                    "signed_distance_loss": 0.07,
+                },
             }
         )
 
@@ -174,6 +181,71 @@ class TestDifferentiableRender(unittest.TestCase):
         self.assertAlmostEqual(metrics["side"]["area_iou"], 0.0)
         self.assertFalse(metrics["side"]["passed"])
         self.assertIn("soft silhouette", metrics["side"]["reason"])
+        self.assertAlmostEqual(metrics["top"]["boundary_iou"], 0.91)
+        self.assertAlmostEqual(metrics["top"]["signed_distance_loss"], 0.07)
+
+    def test_loss_weight_aliases_cover_boundary_and_signed_distance_terms(self) -> None:
+        parsed, errors, warnings = diff_render._normalize_differentiable_config(
+            {
+                "loss_weights": {
+                    "silhouette": 2.0,
+                    "boundary": 0.75,
+                    "sdf": 0.5,
+                },
+                "area_weight": 0.4,
+                "depth_l2_weight": 0.1,
+            }
+        )
+
+        self.assertEqual(errors, ())
+        self.assertEqual(warnings, ())
+        weights = parsed["loss_weights"]
+        self.assertAlmostEqual(weights.silhouette_l2, 2.0)
+        self.assertAlmostEqual(weights.boundary_iou, 0.75)
+        self.assertAlmostEqual(weights.signed_distance, 0.5)
+        self.assertAlmostEqual(weights.area_iou, 0.4)
+        self.assertAlmostEqual(weights.depth_l2, 0.1)
+        self.assertEqual(
+            parsed["loss_weights_dict"]["signed_distance"],
+            weights.signed_distance,
+        )
+
+    def test_evaluate_render_loss_scores_boundary_and_sdf_terms(self) -> None:
+        target = np.zeros((20, 20), dtype=np.float64)
+        target[5:15, 5:15] = 1.0
+        shifted = np.zeros_like(target)
+        shifted[5:15, 7:17] = 1.0
+        batch = diff_render.RenderBatch(silhouettes={"front": shifted})
+        reconstruction_target = diff_render.ReconstructionTarget(
+            silhouettes={"front": target}
+        )
+
+        loss = diff_render.evaluate_render_loss(
+            batch,
+            reconstruction_target,
+            weights=diff_render.LossWeights(
+                silhouette_l2=0.0,
+                soft_iou=0.0,
+                area_iou=0.0,
+                boundary_iou=1.0,
+                signed_distance=2.0,
+            ),
+        )
+
+        self.assertGreater(loss.per_view["front"]["boundary_iou_loss"], 0.0)
+        self.assertGreater(loss.per_view["front"]["signed_distance_loss"], 0.0)
+        self.assertAlmostEqual(
+            loss.terms["boundary_iou"],
+            loss.per_view["front"]["boundary_iou_loss"],
+        )
+        self.assertAlmostEqual(
+            loss.terms["signed_distance"],
+            loss.per_view["front"]["signed_distance_loss"],
+        )
+        self.assertAlmostEqual(
+            loss.total,
+            loss.terms["boundary_iou"] + 2.0 * loss.terms["signed_distance"],
+        )
 
     def test_objective_regression_can_fail_strict_candidate(self) -> None:
         request = CandidateRequest(

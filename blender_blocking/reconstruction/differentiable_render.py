@@ -98,6 +98,8 @@ class LossWeights:
     silhouette_l2: float = 1.0
     soft_iou: float = 1.0
     area_iou: float = 0.25
+    boundary_iou: float = 0.35
+    signed_distance: float = 0.25
     depth_l2: float = 0.0
 
 
@@ -145,12 +147,33 @@ _DIFF_WEIGHT_DEFAULTS = {
     "silhouette_l2": 1.0,
     "soft_iou": 1.0,
     "area_iou": 0.25,
+    "boundary_iou": 0.35,
+    "signed_distance": 0.25,
     "depth_l2": 0.0,
+}
+_DIFF_WEIGHT_ALIASES = {
+    "silhouette": "silhouette_l2",
+    "l2": "silhouette_l2",
+    "area": "area_iou",
+    "mask_iou": "area_iou",
+    "boundary": "boundary_iou",
+    "boundary_iou_loss": "boundary_iou",
+    "sdf": "signed_distance",
+    "silhouette_sdf": "signed_distance",
+    "signed_distance_loss": "signed_distance",
 }
 _DIFF_WEIGHT_LEGACY_ALIASES = {
     "silhouette_l2_weight": "silhouette_l2",
+    "silhouette_weight": "silhouette_l2",
     "soft_iou_weight": "soft_iou",
     "area_iou_weight": "area_iou",
+    "area_weight": "area_iou",
+    "boundary_iou_weight": "boundary_iou",
+    "boundary_weight": "boundary_iou",
+    "sdf_weight": "signed_distance",
+    "silhouette_sdf_weight": "signed_distance",
+    "signed_distance_weight": "signed_distance",
+    "signed_distance_loss_weight": "signed_distance",
     "depth_l2_weight": "depth_l2",
 }
 
@@ -256,12 +279,14 @@ def _coerce_loss_weights(config: Mapping[str, object], errors: list[str], warnin
     parsed = dict(_DIFF_WEIGHT_DEFAULTS)
     unknown: set[str] = set()
     for key, value in dict(raw_weights).items():
-        if key not in parsed:
-            unknown.add(str(key))
+        weight_key = str(key)
+        canonical = _DIFF_WEIGHT_ALIASES.get(weight_key, weight_key)
+        if canonical not in parsed:
+            unknown.add(weight_key)
             continue
-        casted = _coerce_float(value, f"loss_weights.{key}", errors, min_value=0.0)
+        casted = _coerce_float(value, f"loss_weights.{weight_key}", errors, min_value=0.0)
         if casted is not None:
-            parsed[key] = casted
+            parsed[canonical] = casted
     for legacy_name, canonical in _DIFF_WEIGHT_LEGACY_ALIASES.items():
         if canonical in raw_weights:
             continue
@@ -477,6 +502,8 @@ def _normalize_differentiable_config(config: Mapping[str, object]) -> tuple[
         "silhouette_l2": normalized["loss_weights"].silhouette_l2,
         "soft_iou": normalized["loss_weights"].soft_iou,
         "area_iou": normalized["loss_weights"].area_iou,
+        "boundary_iou": normalized["loss_weights"].boundary_iou,
+        "signed_distance": normalized["loss_weights"].signed_distance,
         "depth_l2": normalized["loss_weights"].depth_l2,
     }
     normalized["warnings"] = tuple(warnings)
@@ -629,6 +656,9 @@ def _silhouette_view_history(
         "soft_l2": float(metrics.get("soft_l2", 0.0)),
         "soft_iou_loss": float(metrics.get("soft_iou_loss", 0.0)),
         "area_iou_loss": float(metrics.get("area_iou_loss", 0.0)),
+        "boundary_iou": float(metrics.get("boundary_iou", 0.0)),
+        "boundary_iou_loss": float(metrics.get("boundary_iou_loss", 1.0)),
+        "signed_distance_loss": float(metrics.get("signed_distance_loss", 0.0)),
     }
 
 
@@ -640,13 +670,24 @@ def _candidate_per_view_metrics(
     for view, values in per_view.items():
         area_loss = _metric_float(values, "area_iou_loss", 1.0)
         soft_loss = _metric_float(values, "soft_iou_loss", area_loss)
-        signed_distance = max(0.0, _metric_float(values, "soft_l2", soft_loss))
+        signed_distance = max(
+            0.0,
+            _metric_float(
+                values,
+                "signed_distance_loss",
+                _metric_float(values, "soft_l2", soft_loss),
+            ),
+        )
         area_iou = _clamp01(1.0 - area_loss)
         soft_iou = _clamp01(1.0 - soft_loss)
         boundary_iou = _clamp01(
             _metric_float(values, "boundary_iou", soft_iou)
         )
-        passed = bool(area_iou >= 0.5 and boundary_iou > 0.0)
+        passed = bool(
+            area_iou >= 0.5
+            and boundary_iou > 0.0
+            and math.isfinite(signed_distance)
+        )
         reason = "" if passed else "soft silhouette did not satisfy required view gate"
         converted[str(view)] = {
             **dict(values),
@@ -808,9 +849,39 @@ def evaluate_render_loss(
         )
         silhouette_l2 = float(silhouette_l2)
 
+    if silhouette_weight_sum <= 0.0 and per_view:
+        boundary_iou = float(
+            np.mean([m.get("boundary_iou_loss", 1.0) for m in per_view.values()])
+        )
+        signed_distance = float(
+            np.mean([m.get("signed_distance_loss", 0.0) for m in per_view.values()])
+        )
+    else:
+        boundary_iou = float(
+            _weighted_average(
+                [m.get("boundary_iou_loss", 1.0) for m in per_view.values()],
+                [m["weight"] for m in per_view.values()],
+            )
+            if per_view
+            else 0.0
+        )
+        signed_distance = float(
+            _weighted_average(
+                [m.get("signed_distance_loss", 0.0) for m in per_view.values()],
+                [m["weight"] for m in per_view.values()],
+            )
+            if per_view
+            else 0.0
+        )
+
     terms["silhouette_l2"] = silhouette_l2
     terms["soft_iou"] = soft_iou
     terms["area_iou"] = area_iou
+    terms["boundary_iou"] = boundary_iou
+    terms["boundary_iou_loss"] = boundary_iou
+    terms["boundary_iou_score"] = float(1.0 - boundary_iou)
+    terms["signed_distance"] = signed_distance
+    terms["signed_distance_loss"] = signed_distance
     terms["silhouette_weight_sum"] = float(silhouette_weight_sum)
 
     depth_losses = []
@@ -850,6 +921,8 @@ def evaluate_render_loss(
         weights.silhouette_l2 * silhouette_l2
         + weights.soft_iou * soft_iou
         + weights.area_iou * area_iou
+        + weights.boundary_iou * boundary_iou
+        + weights.signed_distance * signed_distance
         + weights.depth_l2 * depth_l2
     )
     return LossResult(
