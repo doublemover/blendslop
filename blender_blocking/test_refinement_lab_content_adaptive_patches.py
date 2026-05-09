@@ -8,6 +8,7 @@ import numpy as np
 
 from refinement_lab.content_adaptive_patches import (
     fuse_patch_predictions,
+    run_content_adaptive_patch_refinement,
     score_map_from_signals,
     select_adaptive_patches,
 )
@@ -91,6 +92,32 @@ class ContentAdaptivePatchTests(unittest.TestCase):
             1e-8,
         )
         self.assertGreater(float(np.max(fused.contribution_weight)), 1.0)
+
+    def test_content_adaptive_refinement_improves_residual_mask(self) -> None:
+        reference = np.zeros((48, 48), dtype=float)
+        reference[12:34, 12:34] = 1.0
+        candidate = reference.copy()
+        candidate[20:30, 26:34] = 0.0
+
+        result = run_content_adaptive_patch_refinement(
+            reference,
+            candidate_prediction=candidate,
+            patch_sizes=(16,),
+            max_patches=2,
+            threshold=0.5,
+            correction_strength=1.0,
+            min_area_iou_delta=0.01,
+        )
+
+        self.assertTrue(result.accepted)
+        self.assertGreater(result.improvement["area_iou_delta"], 0.01)
+        self.assertLess(result.improvement["signed_distance_loss_delta"], 0.0)
+        self.assertGreaterEqual(len(result.patches), 1)
+        self.assertEqual(result.refined_mask.shape, reference.shape)
+        self.assertGreater(
+            result.metric_after["area_iou"],
+            result.metric_before["area_iou"],
+        )
 
     def test_adaptive_planner_proposes_content_patch_pass_for_detail_failures(
         self,

@@ -10,9 +10,11 @@ from .adaptive_planner import (
 )
 from .content_adaptive_patches import (
     AdaptivePatch,
+    ContentAdaptiveRefinementResult,
     PatchBox,
     PatchFusionResult,
     fuse_patch_predictions,
+    run_content_adaptive_patch_refinement,
     score_map_from_signals,
     select_adaptive_patches,
 )
@@ -43,6 +45,7 @@ __all__ = [
     "EditabilityStudyItem",
     "EditabilityStudyPack",
     "AdaptivePatch",
+    "ContentAdaptiveRefinementResult",
     "ParameterSpec",
     "PatchBox",
     "PatchFusionResult",
@@ -52,6 +55,7 @@ __all__ = [
     "fuse_patch_predictions",
     "proposals_from_bundle",
     "proposals_from_result_payload",
+    "run_content_adaptive_patch_refinement",
     "score_map_from_signals",
     "score_review_row",
     "select_adaptive_patches",
