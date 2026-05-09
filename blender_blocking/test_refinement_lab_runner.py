@@ -4,24 +4,58 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 
-from config import BlockingConfig
-from refinement_lab.contracts import (
-    ExperimentCase,
-    ExperimentPlan,
-    ExperimentResult,
-    ExperimentVariant,
-)
-from refinement_lab.runner import (
-    InProcessBlenderRunner,
-    RunOptions,
-    _apply_variant_to_config,
-    _metrics_from_payload,
-    _variant_command,
-)
-from test_e2e_validation import E2EValidator, _render_filename_prefix
+BLENDER_BLOCKING_ROOT = Path(__file__).resolve().parent
+if str(BLENDER_BLOCKING_ROOT) not in sys.path:
+    sys.path.insert(0, str(BLENDER_BLOCKING_ROOT))
+
+try:
+    from config import BlockingConfig
+    from refinement_lab.contracts import (
+        ExperimentCase,
+        ExperimentPlan,
+        ExperimentResult,
+        ExperimentVariant,
+    )
+    from refinement_lab.runner import (
+        InProcessBlenderRunner,
+        RunOptions,
+        _apply_variant_to_config,
+        _metrics_from_payload,
+        _variant_command,
+    )
+    from test_e2e_validation import (
+        E2EValidator,
+        _build_refinement_plan_from_args,
+        _parse_args,
+        _refinement_requested,
+        _render_filename_prefix,
+    )
+except ModuleNotFoundError:  # pragma: no cover - package unittest path
+    from blender_blocking.config import BlockingConfig
+    from blender_blocking.refinement_lab.contracts import (
+        ExperimentCase,
+        ExperimentPlan,
+        ExperimentResult,
+        ExperimentVariant,
+    )
+    from blender_blocking.refinement_lab.runner import (
+        InProcessBlenderRunner,
+        RunOptions,
+        _apply_variant_to_config,
+        _metrics_from_payload,
+        _variant_command,
+    )
+    from blender_blocking.test_e2e_validation import (
+        E2EValidator,
+        _build_refinement_plan_from_args,
+        _parse_args,
+        _refinement_requested,
+        _render_filename_prefix,
+    )
 
 
 class RefinementLabRunnerTests(unittest.TestCase):
@@ -234,6 +268,56 @@ class RefinementLabRunnerTests(unittest.TestCase):
                 variants["variant_count"],
                 proposals["proposal_count"],
             )
+
+    def test_e2e_refinement_plan_accepts_variant_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            variant_file = root / "adaptive-variants.json"
+            variant_file.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "refinement_run_adaptive_variants_v1",
+                        "variants": [
+                            {
+                                "variant_id": "adaptive-e2e",
+                                "label": "E2E adaptive variant",
+                                "mode": "ensemble",
+                                "validation_mode": "backend-status",
+                                "parameters": {"proposal_id": "p"},
+                                "cli_args": [
+                                    "--reconstruction-mode",
+                                    "ensemble",
+                                    "--validation-mode",
+                                    "backend-status",
+                                ],
+                                "tags": ["adaptive"],
+                                "stage": "adaptive_refinement",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            args = _parse_args(
+                [
+                    "--refinement-variant-file",
+                    str(variant_file),
+                    "--refinement-variant-file-mode",
+                    "replace",
+                ]
+            )
+
+            self.assertTrue(_refinement_requested(args))
+            plan, _track, summary = _build_refinement_plan_from_args(
+                args,
+                BlockingConfig(),
+            )
+
+            self.assertEqual(
+                [variant.variant_id for variant in plan.variants], ["adaptive-e2e"]
+            )
+            self.assertEqual(summary["external_variants"], 1)
+            self.assertEqual(summary["variant_file_mode"], "replace")
 
     def test_e2e_validator_resolves_relative_output_paths(self) -> None:
         validator = E2EValidator(

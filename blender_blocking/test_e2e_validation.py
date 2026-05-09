@@ -2007,6 +2007,18 @@ Default ensemble:
     refinement.add_argument("--refinement-top-k", type=int, default=None)
     refinement.add_argument("--refinement-seed", type=int, default=None)
     refinement.add_argument(
+        "--refinement-variant-file",
+        type=Path,
+        action="append",
+        default=None,
+        help="Adaptive variant JSON file to append or replace generated variants.",
+    )
+    refinement.add_argument(
+        "--refinement-variant-file-mode",
+        choices=("append", "replace"),
+        default=None,
+    )
+    refinement.add_argument(
         "--refinement-html-report", action=argparse.BooleanOptionalAction, default=None
     )
     refinement.add_argument(
@@ -2472,6 +2484,7 @@ def _refinement_requested(args: argparse.Namespace) -> bool:
             args.refinement_objective,
             args.refinement_result_root,
             args.refinement_preset_json,
+            args.refinement_variant_file,
         )
     )
 
@@ -2482,7 +2495,10 @@ def _build_refinement_plan_from_args(
     *,
     custom_reference_paths: Optional[Mapping[str, Path]] = None,
 ):
-    from blender_blocking.refinement_lab.matrix import build_experiment_plan
+    from blender_blocking.refinement_lab.matrix import (
+        build_experiment_plan,
+        load_variants_from_files,
+    )
     from blender_blocking.refinement_lab.presets import get_track_preset
 
     refinement_cfg = workflow_config.refinement_lab
@@ -2533,6 +2549,13 @@ def _build_refinement_plan_from_args(
         if args.refinement_top_k is not None
         else int(preset_overrides.get("top_k", refinement_cfg.top_k))
     )
+    variant_files = _refinement_variant_files(args, preset_overrides)
+    variant_file_mode = (
+        args.refinement_variant_file_mode
+        or preset_overrides.get("variant_file_mode")
+        or "append"
+    )
+    external_variants = load_variants_from_files(variant_files)
     plan = build_experiment_plan(
         suite=suite,
         track=track_name,
@@ -2543,6 +2566,8 @@ def _build_refinement_plan_from_args(
         max_runs=max_runs,
         top_k=top_k,
         custom_reference_paths=custom_reference_paths,
+        external_variants=external_variants,
+        external_variant_mode=variant_file_mode,
     )
     summary = {
         "suite": suite,
@@ -2552,8 +2577,27 @@ def _build_refinement_plan_from_args(
         "seed": seed,
         "max_runs": max_runs,
         "top_k": top_k,
+        "variant_files": [path.as_posix() for path in variant_files],
+        "variant_file_mode": variant_file_mode,
+        "external_variants": len(external_variants),
     }
     return plan, track, summary
+
+
+def _refinement_variant_files(
+    args: argparse.Namespace,
+    preset_overrides: Mapping[str, Any],
+) -> tuple[Path, ...]:
+    if args.refinement_variant_file:
+        return tuple(Path(path) for path in args.refinement_variant_file)
+    value = preset_overrides.get("variant_files", preset_overrides.get("variant_file"))
+    if value is None:
+        return ()
+    if isinstance(value, (str, Path)):
+        return (Path(value),)
+    if isinstance(value, Sequence):
+        return tuple(Path(path) for path in value)
+    raise ValueError("refinement variant_files must be a path or list of paths")
 
 
 def _run_refinement_from_args(
@@ -2598,6 +2642,8 @@ def _run_refinement_from_args(
             ("run_root", plan.output_root),
             ("cases", len(plan.cases)),
             ("variants", len(plan.variants)),
+            ("external_variants", summary["external_variants"]),
+            ("variant_file_mode", summary["variant_file_mode"]),
         )
     )
     ok, _results = runner_for_plan(
