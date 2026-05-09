@@ -189,16 +189,28 @@ def fuse_patch_predictions(
     patch_predictions: Mapping[str, np.ndarray],
     *,
     align_mean: bool = True,
+    alignment_mode: str | None = None,
     feather_fraction: float = 0.12,
+    edge_weight_map: np.ndarray | None = None,
+    edge_weight_strength: float = 0.0,
+    min_alignment_pixels: int = 8,
 ) -> PatchFusionResult:
     """Fuse patch predictions into a global prediction with feathered weights."""
     global_array = np.asarray(global_prediction, dtype=np.float64)
     if global_array.ndim != 2:
         raise ValueError("global_prediction must be 2D")
+    resolved_alignment = _resolve_alignment_mode(
+        alignment_mode,
+        align_mean=align_mean,
+    )
+    edge_weights = None
+    if edge_weight_map is not None:
+        edge_weights = _normalize(_as_2d(edge_weight_map, global_array.shape))
     accum = np.zeros_like(global_array, dtype=np.float64)
     weight_sum = np.zeros_like(global_array, dtype=np.float64)
     stack_values: list[np.ndarray] = [global_array]
     used = []
+    alignments = []
     for patch in patches:
         raw = patch_predictions.get(patch.patch_id)
         if raw is None:
@@ -209,15 +221,25 @@ def fuse_patch_predictions(
         global_crop = global_array[y0:y1, x0:x1]
         if patch_array.shape != global_crop.shape:
             patch_array = _resize_nearest(patch_array, global_crop.shape[0], global_crop.shape[1])
-        if align_mean and patch_array.size and global_crop.size:
-            patch_array = patch_array + (float(np.mean(global_crop)) - float(np.mean(patch_array)))
+        patch_array, alignment = _align_patch_prediction(
+            patch_array,
+            global_crop,
+            mode=resolved_alignment,
+            min_pixels=min_alignment_pixels,
+        )
         weights = _feather_weights(patch_array.shape, feather_fraction=feather_fraction)
+        if edge_weights is not None and edge_weight_strength > 0.0:
+            edge_crop = edge_weights[y0:y1, x0:x1]
+            if edge_crop.shape != weights.shape:
+                edge_crop = _resize_nearest(edge_crop, weights.shape[0], weights.shape[1])
+            weights = weights * (1.0 + float(edge_weight_strength) * edge_crop)
         accum[y0:y1, x0:x1] += patch_array * weights
         weight_sum[y0:y1, x0:x1] += weights
         full = np.full_like(global_array, np.nan, dtype=np.float64)
         full[y0:y1, x0:x1] = patch_array
         stack_values.append(full)
         used.append(patch.patch_id)
+        alignments.append({"patch_id": patch.patch_id, **alignment})
     fused = np.where(weight_sum > 0.0, accum / np.maximum(weight_sum, 1e-12), global_array)
     uncertainty = _patch_disagreement(stack_values, fallback=np.zeros_like(global_array))
     return PatchFusionResult(
@@ -228,8 +250,11 @@ def fuse_patch_predictions(
             "patch_count": len(patches),
             "used_patch_count": len(used),
             "used_patch_ids": used,
+            "alignment_mode": resolved_alignment,
+            "alignments": alignments,
             "align_mean": align_mean,
             "feather_fraction": feather_fraction,
+            "edge_weight_strength": float(edge_weight_strength),
         },
     )
 
@@ -269,6 +294,98 @@ def _normalize(values: np.ndarray) -> np.ndarray:
     out = (array - min_value) / (max_value - min_value)
     out[~finite] = 0.0
     return np.clip(out, 0.0, 1.0)
+
+
+def _resolve_alignment_mode(
+    alignment_mode: str | None,
+    *,
+    align_mean: bool,
+) -> str:
+    if alignment_mode is None:
+        return "mean" if align_mean else "none"
+    mode = str(alignment_mode).strip().lower()
+    if mode == "shift":
+        mode = "mean"
+    if mode not in {"none", "mean", "affine"}:
+        raise ValueError("alignment_mode must be none, mean, or affine")
+    return mode
+
+
+def _align_patch_prediction(
+    patch: np.ndarray,
+    reference: np.ndarray,
+    *,
+    mode: str,
+    min_pixels: int,
+) -> tuple[np.ndarray, dict[str, object]]:
+    patch_array = np.asarray(patch, dtype=np.float64)
+    reference_array = np.asarray(reference, dtype=np.float64)
+    if mode == "none" or patch_array.size == 0 or reference_array.size == 0:
+        return patch_array, {"mode": mode, "scale": 1.0, "shift": 0.0, "pixels": 0}
+    valid = np.isfinite(patch_array) & np.isfinite(reference_array)
+    pixels = int(np.sum(valid))
+    if pixels < max(1, int(min_pixels)):
+        return patch_array, {
+            "mode": mode,
+            "scale": 1.0,
+            "shift": 0.0,
+            "pixels": pixels,
+            "status": "insufficient_overlap",
+        }
+    x = patch_array[valid].reshape(-1)
+    y = reference_array[valid].reshape(-1)
+    if mode == "mean":
+        shift = float(np.mean(y) - np.mean(x))
+        return patch_array + shift, {
+            "mode": mode,
+            "scale": 1.0,
+            "shift": shift,
+            "pixels": pixels,
+            "status": "aligned",
+        }
+    variance = float(np.var(x))
+    if variance <= 1e-12:
+        shift = float(np.mean(y) - np.mean(x))
+        return patch_array + shift, {
+            "mode": "mean",
+            "requested_mode": mode,
+            "scale": 1.0,
+            "shift": shift,
+            "pixels": pixels,
+            "status": "affine_degenerate_mean_fallback",
+        }
+    design = np.stack([x, np.ones_like(x)], axis=1)
+    try:
+        scale, shift = np.linalg.lstsq(design, y, rcond=None)[0]
+    except Exception:
+        shift = float(np.mean(y) - np.mean(x))
+        return patch_array + shift, {
+            "mode": "mean",
+            "requested_mode": mode,
+            "scale": 1.0,
+            "shift": shift,
+            "pixels": pixels,
+            "status": "affine_solve_failed_mean_fallback",
+        }
+    scale = float(scale)
+    shift = float(shift)
+    if not np.isfinite(scale) or not np.isfinite(shift) or abs(scale) > 10.0:
+        shift = float(np.mean(y) - np.mean(x))
+        return patch_array + shift, {
+            "mode": "mean",
+            "requested_mode": mode,
+            "scale": 1.0,
+            "shift": shift,
+            "pixels": pixels,
+            "status": "affine_unstable_mean_fallback",
+        }
+    return patch_array * scale + shift, {
+        "mode": mode,
+        "scale": scale,
+        "shift": shift,
+        "pixels": pixels,
+        "status": "aligned",
+    }
 
 
 def _edge_magnitude(image: np.ndarray, shape: tuple[int, int]) -> np.ndarray:

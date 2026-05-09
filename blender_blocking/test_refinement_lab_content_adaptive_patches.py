@@ -56,6 +56,37 @@ class ContentAdaptivePatchTests(unittest.TestCase):
         self.assertGreater(float(np.max(fused.prediction)), 0.0)
         self.assertEqual(fused.metadata["used_patch_count"], 1)
 
+    def test_patch_fusion_can_affine_align_local_predictions(self) -> None:
+        yy, xx = np.mgrid[0:20, 0:20]
+        global_prediction = (yy + xx).astype(float)
+        score = np.zeros((20, 20), dtype=float)
+        score[7:13, 7:13] = 1.0
+        patch = select_adaptive_patches(score, patch_sizes=(10,), max_patches=1)[0]
+        crop = global_prediction[
+            patch.crop_box.y0:patch.crop_box.y1,
+            patch.crop_box.x0:patch.crop_box.x1,
+        ]
+        local_prediction = (crop - 3.0) / 2.0
+
+        fused = fuse_patch_predictions(
+            global_prediction,
+            (patch,),
+            {patch.patch_id: local_prediction},
+            alignment_mode="affine",
+            edge_weight_map=score,
+            edge_weight_strength=1.0,
+        )
+
+        alignment = fused.metadata["alignments"][0]
+        self.assertEqual(alignment["mode"], "affine")
+        self.assertAlmostEqual(alignment["scale"], 2.0)
+        self.assertAlmostEqual(alignment["shift"], 3.0)
+        self.assertLess(
+            float(np.max(np.abs(fused.prediction - global_prediction))),
+            1e-8,
+        )
+        self.assertGreater(float(np.max(fused.contribution_weight)), 1.0)
+
     def test_adaptive_planner_proposes_content_patch_pass_for_detail_failures(self) -> None:
         bundle = {
             "status": "pass",
