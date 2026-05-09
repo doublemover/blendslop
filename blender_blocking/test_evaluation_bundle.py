@@ -339,6 +339,47 @@ class EvaluationBundleTests(unittest.TestCase):
         self.assertIn("split_or_remove_non_manifold_faces", repair_ops)
         self.assertIn("hole_fill_or_remesh_required", repair_ops)
 
+    def test_boundary_autopsy_includes_refinement_probe_plan(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-boundary",
+            backend_name="differentiable_refine",
+            status="success",
+            metric_result=CandidateMetrics(
+                area_iou_min=0.88,
+                area_iou_mean=0.90,
+                boundary_iou_mean=0.48,
+                per_view={
+                    "front": {
+                        "area_iou": 0.90,
+                        "boundary_iou": 0.44,
+                        "signed_distance_loss": 0.16,
+                        "required": True,
+                        "passed": True,
+                    },
+                    "side": {
+                        "area_iou": 0.88,
+                        "boundary_iou": 0.52,
+                        "signed_distance_loss": 0.12,
+                        "required": True,
+                        "passed": True,
+                    },
+                },
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        autopsy = autopsy_pack_from_bundle(bundle).to_dict()
+        action_ids = {action["action_id"] for action in autopsy["suggested_actions"]}
+        plan = autopsy["boundary_refinement_plan"]
+        probe_ids = {probe["probe_id"] for probe in plan["probes"]}
+
+        self.assertIn("silhouette_boundary_blobby", {failure.code for failure in bundle.failures})
+        self.assertIn("boundary_first_refinement", action_ids)
+        self.assertEqual(plan["recommended_track"], "content-adaptive-patches")
+        self.assertIn("mask_threshold_sweep", probe_ids)
+        self.assertIn("content_adaptive_patch_sweep", probe_ids)
+        self.assertIn("differentiable_boundary_weight_sweep", probe_ids)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .bundle import bundle_from_candidate
+from .boundary_refinement import boundary_refinement_plan_payload
 from .export_qa import (
     ExportQAReport,
     aggregate_score as export_qa_aggregate_score,
@@ -56,6 +57,7 @@ __all__ = [
     "SelectionEvidence",
     "active_view_plan_payload",
     "attach_selection",
+    "boundary_refinement_plan_payload",
     "bundle_from_candidate",
     "chamfer_distance",
     "evaluate_budget",

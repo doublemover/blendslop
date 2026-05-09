@@ -122,6 +122,11 @@ the same autopsy pack now carries a `calibration_plan`. That plan points at the
 `visual-hull-transform` refinement track and enumerates safe bounds-padding,
 global-scale, per-view offset, and axis-role permutation probes with explicit
 acceptance deltas.
+Boundary-specific failures also carry `boundary_refinement_plan`, which turns
+Boundary IoU and signed-distance failures into concrete mask threshold,
+morphology, boundary-band, content-adaptive patch, and differentiable loss-weight
+sweeps. Boundary IoU remains the metric that catches contour errors normal area
+IoU can hide.
 
 Visual-hull rows include `diagnostics.visual_hull.*` metrics when projection
 diagnostics are available. These flag suspected axis/transform mismatches,

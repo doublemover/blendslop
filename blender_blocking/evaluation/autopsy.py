@@ -8,6 +8,7 @@ from typing import Any, Mapping
 from .schemas import EvaluationBundle, json_safe
 from .view_planning import active_view_plan_payload
 from .calibration import calibration_refinement_plan_payload
+from .boundary_refinement import boundary_refinement_plan_payload
 
 try:
     from metrics.topology import topology_repair_plan
@@ -95,6 +96,7 @@ class AutopsyPack:
     active_view_plan: Mapping[str, object] = field(default_factory=dict)
     topology_repair_plan: Mapping[str, object] = field(default_factory=dict)
     calibration_plan: Mapping[str, object] = field(default_factory=dict)
+    boundary_refinement_plan: Mapping[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -107,6 +109,7 @@ class AutopsyPack:
             "active_view_plan": json_safe(self.active_view_plan),
             "topology_repair_plan": json_safe(self.topology_repair_plan),
             "calibration_plan": json_safe(self.calibration_plan),
+            "boundary_refinement_plan": json_safe(self.boundary_refinement_plan),
         }
 
 
@@ -149,6 +152,11 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
         if "run_calibration_sweep" in action_ids
         else {}
     )
+    boundary_plan = (
+        boundary_refinement_plan_payload(bundle)
+        if "boundary_first_refinement" in action_ids
+        else {}
+    )
     return AutopsyPack(
         candidate_id=bundle.candidate_id,
         status=bundle.status,
@@ -158,6 +166,7 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
         active_view_plan=active_view_plan,
         topology_repair_plan=repair_plan,
         calibration_plan=calibration_plan,
+        boundary_refinement_plan=boundary_plan,
     )
 
 
