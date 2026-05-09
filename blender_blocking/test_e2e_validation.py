@@ -61,6 +61,7 @@ from blender_blocking.evaluation.silhouette_eval import (
     missing_silhouette_view,
     summarize_silhouette_views,
 )
+from blender_blocking.evaluation.cost_model import CostRecorder
 from blender_blocking.validation.silhouette_iou import (
     canonicalize_mask,
     mask_from_image_array,
@@ -375,6 +376,160 @@ def _evaluation_outputs_from_payload(payload: Mapping[str, Any]) -> Dict[str, An
         for key, value in nested.items():
             outputs.setdefault(key, value)
     return outputs
+
+
+def _backend_cost_report_from_payload(payload: Mapping[str, Any]) -> Dict[str, Any]:
+    if not isinstance(payload, Mapping):
+        return {}
+    selected = payload.get("selected")
+    source = selected if isinstance(selected, Mapping) else payload
+    metric_result = source.get("metric_result") if isinstance(source, Mapping) else None
+    extras = metric_result.get("extras", {}) if isinstance(metric_result, Mapping) else {}
+    if isinstance(extras, Mapping):
+        explicit = extras.get("cost_report") or extras.get("cost")
+        if isinstance(explicit, Mapping):
+            return dict(explicit)
+    nested = payload.get("backend_result")
+    if isinstance(nested, Mapping):
+        return _backend_cost_report_from_payload(nested)
+    return {}
+
+
+def _cost_payload(
+    validation_cost: Mapping[str, Any],
+    backend_payload: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    backend_cost = (
+        _backend_cost_report_from_payload(backend_payload)
+        if backend_payload is not None
+        else {}
+    )
+    payload: Dict[str, Any] = {
+        "schema_version": "e2e_cost_report_v1",
+        "validation": dict(validation_cost),
+    }
+    if backend_cost:
+        payload["backend"] = backend_cost
+        payload["combined_total_wall_ms"] = float(
+            validation_cost.get("total_wall_ms", 0.0) or 0.0
+        ) + float(backend_cost.get("total_wall_ms", 0.0) or 0.0)
+    else:
+        payload["combined_total_wall_ms"] = float(
+            validation_cost.get("total_wall_ms", 0.0) or 0.0
+        )
+    return payload
+
+
+def _cost_gate_report(
+    cost_payload: Mapping[str, Any],
+    *,
+    max_wall_ms: Optional[float] = None,
+    max_backend_wall_ms: Optional[float] = None,
+) -> Dict[str, Any]:
+    failures: list[str] = []
+    validation = cost_payload.get("validation")
+    backend = cost_payload.get("backend")
+    validation_wall_ms = (
+        float(validation.get("total_wall_ms", 0.0) or 0.0)
+        if isinstance(validation, Mapping)
+        else 0.0
+    )
+    backend_wall_ms = (
+        float(backend.get("total_wall_ms", 0.0) or 0.0)
+        if isinstance(backend, Mapping)
+        else 0.0
+    )
+    combined = float(cost_payload.get("combined_total_wall_ms", validation_wall_ms) or 0.0)
+    if max_wall_ms is not None and combined > float(max_wall_ms):
+        failures.append(
+            f"combined_total_wall_ms {combined:.3f} exceeds {float(max_wall_ms):.3f}"
+        )
+    if max_backend_wall_ms is not None and backend_wall_ms > float(max_backend_wall_ms):
+        failures.append(
+            f"backend_total_wall_ms {backend_wall_ms:.3f} exceeds {float(max_backend_wall_ms):.3f}"
+        )
+    return {
+        "schema_version": "e2e_cost_gate_v1",
+        "passed": not failures,
+        "failures": failures,
+        "thresholds": {
+            "max_wall_ms": max_wall_ms,
+            "max_backend_wall_ms": max_backend_wall_ms,
+        },
+        "metrics": {
+            "validation_total_wall_ms": validation_wall_ms,
+            "backend_total_wall_ms": backend_wall_ms,
+            "combined_total_wall_ms": combined,
+        },
+    }
+
+
+def _matrix_cost_summary(rows: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
+    cost_rows: list[Dict[str, Any]] = []
+    combined_total = 0.0
+    backend_total = 0.0
+    validation_total = 0.0
+    max_combined = 0.0
+    max_backend = 0.0
+    failed_gates = 0
+    for row in rows:
+        cost = row.get("cost_report")
+        if not isinstance(cost, Mapping):
+            continue
+        gate = row.get("cost_gate")
+        validation = cost.get("validation")
+        backend = cost.get("backend")
+        validation_wall_ms = (
+            float(validation.get("total_wall_ms", 0.0) or 0.0)
+            if isinstance(validation, Mapping)
+            else 0.0
+        )
+        backend_wall_ms = (
+            float(backend.get("total_wall_ms", 0.0) or 0.0)
+            if isinstance(backend, Mapping)
+            else 0.0
+        )
+        combined_wall_ms = float(
+            cost.get("combined_total_wall_ms", validation_wall_ms + backend_wall_ms)
+            or 0.0
+        )
+        combined_total += combined_wall_ms
+        backend_total += backend_wall_ms
+        validation_total += validation_wall_ms
+        max_combined = max(max_combined, combined_wall_ms)
+        max_backend = max(max_backend, backend_wall_ms)
+        gate_passed = None
+        if isinstance(gate, Mapping):
+            gate_passed = bool(gate.get("passed", False))
+            if not gate_passed:
+                failed_gates += 1
+        cost_rows.append(
+            {
+                "case": row.get("case", ""),
+                "name": row.get("name", ""),
+                "mode": row.get("mode", ""),
+                "status": row.get("status", ""),
+                "passed": bool(row.get("passed", False)),
+                "gate_passed": gate_passed,
+                "validation_total_wall_ms": validation_wall_ms,
+                "backend_total_wall_ms": backend_wall_ms,
+                "combined_total_wall_ms": combined_wall_ms,
+            }
+        )
+    count = len(cost_rows)
+    return {
+        "schema_version": "e2e_matrix_cost_report_v1",
+        "count": count,
+        "passed": failed_gates == 0,
+        "failed_gate_count": failed_gates,
+        "total_validation_wall_ms": validation_total,
+        "total_backend_wall_ms": backend_total,
+        "total_combined_wall_ms": combined_total,
+        "mean_combined_wall_ms": combined_total / count if count else 0.0,
+        "max_combined_wall_ms": max_combined,
+        "max_backend_wall_ms": max_backend,
+        "rows": cost_rows,
+    }
 
 
 def _to_jsonable(value: object) -> Any:
@@ -696,6 +851,10 @@ class E2EValidator:
         novel_psnr_threshold: Optional[float] = 20.0,
         novel_ssim_threshold: Optional[float] = 0.65,
         novel_lpips_threshold: Optional[float] = None,
+        cost_report_json: Optional[Path] = None,
+        cost_track_memory: bool = False,
+        cost_fail_max_wall_ms: Optional[float] = None,
+        cost_fail_max_backend_wall_ms: Optional[float] = None,
         progress: bool = False,
     ) -> None:
         """
@@ -740,6 +899,14 @@ class E2EValidator:
         self.novel_psnr_threshold = novel_psnr_threshold
         self.novel_ssim_threshold = novel_ssim_threshold
         self.novel_lpips_threshold = novel_lpips_threshold
+        self.cost_report_json = (
+            Path(cost_report_json).resolve(strict=False)
+            if cost_report_json is not None
+            else None
+        )
+        self.cost_fail_max_wall_ms = cost_fail_max_wall_ms
+        self.cost_fail_max_backend_wall_ms = cost_fail_max_backend_wall_ms
+        self.cost_recorder = CostRecorder(track_memory=cost_track_memory)
         self.progress = progress
         self.results = {}
         self.backend_result: Optional[Dict[str, Any]] = None
@@ -834,7 +1001,14 @@ class E2EValidator:
             config=self.workflow_config,
             context=context,
         )
-        payload = workflow.run_full_workflow(num_slices=num_slices)
+        with self.cost_recorder.stage(
+            "reconstruction_workflow",
+            work_units={
+                "reference_views": float(len(reference_paths)),
+                "num_slices": float(num_slices),
+            },
+        ):
+            payload = workflow.run_full_workflow(num_slices=num_slices)
         render_mesh = _find_renderable_mesh(payload) or _find_renderable_mesh(
             workflow.reconstruction_result
         )
@@ -860,8 +1034,13 @@ class E2EValidator:
                 print("ERROR: Reconstruction returned no mesh and no backend result")
                 return False, {}
             passed = _print_backend_summary(workflow.reconstruction_result)
+            result_payload, cost_passed = self._attach_cost_outputs(
+                backend_payload,
+                backend_payload,
+            )
+            passed = passed and cost_passed
             if self.result_json:
-                _json_dump(self.result_json, backend_payload)
+                _json_dump(self.result_json, result_payload)
                 print(f"\nSaved result JSON: {self.result_json}")
             return passed, {}
 
@@ -895,6 +1074,11 @@ class E2EValidator:
                     )
                 )
                 passed = True
+            result_payload, cost_passed = self._attach_cost_outputs(
+                result_payload,
+                backend_payload,
+            )
+            passed = passed and cost_passed
             if self.result_json:
                 _json_dump(self.result_json, result_payload)
                 print(f"\nSaved result JSON: {self.result_json}")
@@ -902,7 +1086,8 @@ class E2EValidator:
 
         # Step 2: Setup rendering
         _print_section("2/4 Render Setup")
-        self.setup_render_settings()
+        with self.cost_recorder.stage("render_setup"):
+            self.setup_render_settings()
         print(f"{_status_icon(True)} Render settings configured")
 
         # Step 3: Render orthogonal views
@@ -937,23 +1122,27 @@ class E2EValidator:
         render_progress = progress_bar(
             len(render_views), desc="render_views", enabled=self.progress
         )
-        rendered_paths = render_orthogonal_views(
-            str(output_dir),
-            views=render_views,
-            target_objects=[render_mesh] if render_mesh else None,
-            resolution=self.render_config.resolution,
-            margin_frac=self.render_config.margin_frac,
-            transparent_bg=self.render_config.transparent_bg,
-            color_mode=self.render_config.color_mode,
-            force_material=self.render_config.force_material,
-            background_color=self.render_config.background_color,
-            silhouette_color=self.render_config.silhouette_color,
-            camera_distance_factor=self.render_config.camera_distance_factor,
-            party_mode=self.render_config.party_mode,
-            filename_prefix=filename_prefix,
-            start_index=1,
-            progress_callback=render_progress.update,
-        )
+        with self.cost_recorder.stage(
+            "render_views",
+            work_units={"views": float(len(render_views))},
+        ):
+            rendered_paths = render_orthogonal_views(
+                str(output_dir),
+                views=render_views,
+                target_objects=[render_mesh] if render_mesh else None,
+                resolution=self.render_config.resolution,
+                margin_frac=self.render_config.margin_frac,
+                transparent_bg=self.render_config.transparent_bg,
+                color_mode=self.render_config.color_mode,
+                force_material=self.render_config.force_material,
+                background_color=self.render_config.background_color,
+                silhouette_color=self.render_config.silhouette_color,
+                camera_distance_factor=self.render_config.camera_distance_factor,
+                party_mode=self.render_config.party_mode,
+                filename_prefix=filename_prefix,
+                start_index=1,
+                progress_callback=render_progress.update,
+            )
         render_progress.close()
 
         if not rendered_paths:
@@ -1124,28 +1313,34 @@ class E2EValidator:
             if workflow.reconstruction_result is not None:
                 print()
                 _print_backend_summary(workflow.reconstruction_result)
+            payload_out = {
+                "mode": mode,
+                "validation_mode": validation_mode,
+                "passed": passed,
+                "average_iou": avg_iou,
+                "min_view_iou": min_iou,
+                "required_views_passed": silhouette_summary[
+                    "required_views_passed"
+                ],
+                "failed_required_view_count": silhouette_summary[
+                    "failed_required_view_count"
+                ],
+                "missing_required_metric_count": silhouette_summary[
+                    "missing_required_metric_count"
+                ],
+                "silhouette_summary": silhouette_summary,
+                "views": self.results,
+                "backend_result": backend_payload,
+                "rendered_paths": rendered_paths,
+            }
+            payload_out.update(_evaluation_outputs_from_payload(backend_payload))
+            payload_out, cost_passed = self._attach_cost_outputs(
+                payload_out,
+                backend_payload,
+            )
+            passed = passed and cost_passed
+            payload_out["passed"] = passed
             if self.result_json:
-                payload_out = {
-                    "mode": mode,
-                    "validation_mode": validation_mode,
-                    "passed": passed,
-                    "average_iou": avg_iou,
-                    "min_view_iou": min_iou,
-                    "required_views_passed": silhouette_summary[
-                        "required_views_passed"
-                    ],
-                    "failed_required_view_count": silhouette_summary[
-                        "failed_required_view_count"
-                    ],
-                    "missing_required_metric_count": silhouette_summary[
-                        "missing_required_metric_count"
-                    ],
-                    "silhouette_summary": silhouette_summary,
-                    "views": self.results,
-                    "backend_result": backend_payload,
-                    "rendered_paths": rendered_paths,
-                }
-                payload_out.update(_evaluation_outputs_from_payload(backend_payload))
                 _json_dump(self.result_json, payload_out)
                 print(f"\nSaved result JSON: {self.result_json}")
 
@@ -1257,6 +1452,12 @@ class E2EValidator:
             "rendered_paths": dict(rendered_paths),
         }
         payload_out.update(_evaluation_outputs_from_payload(backend_payload))
+        payload_out, cost_passed = self._attach_cost_outputs(
+            payload_out,
+            backend_payload,
+        )
+        passed = passed and cost_passed
+        payload_out["passed"] = passed
         if self.result_json:
             _json_dump(self.result_json, payload_out)
             print(f"\nSaved result JSON: {self.result_json}")
@@ -1274,6 +1475,32 @@ class E2EValidator:
         }
         references.update(self.novel_view_reference_paths)
         return references
+
+    def _attach_cost_outputs(
+        self,
+        payload: Mapping[str, Any],
+        backend_payload: Mapping[str, Any] | None = None,
+    ) -> tuple[Dict[str, Any], bool]:
+        validation_report = self.cost_recorder.report().to_dict()
+        cost_report = _cost_payload(validation_report, backend_payload)
+        gate = _cost_gate_report(
+            cost_report,
+            max_wall_ms=self.cost_fail_max_wall_ms,
+            max_backend_wall_ms=self.cost_fail_max_backend_wall_ms,
+        )
+        merged = dict(payload)
+        merged["cost_report"] = cost_report
+        merged["cost_gate"] = gate
+        if self.cost_report_json is not None:
+            _json_dump(self.cost_report_json, cost_report)
+            print(f"\nSaved cost report JSON: {self.cost_report_json}")
+        if not gate["passed"]:
+            print("\nCost gate: FAIL")
+            for failure in gate["failures"]:
+                print(f"  - {failure}")
+        elif self.cost_fail_max_wall_ms is not None or self.cost_fail_max_backend_wall_ms is not None:
+            print("\nCost gate: PASS")
+        return merged, bool(gate["passed"])
 
     def print_detailed_results(self) -> None:
         """Print detailed comparison results."""
@@ -1341,6 +1568,10 @@ def test_with_sample_images(
     novel_psnr_threshold: Optional[float] = 20.0,
     novel_ssim_threshold: Optional[float] = 0.65,
     novel_lpips_threshold: Optional[float] = None,
+    cost_report_json: Optional[Path] = None,
+    cost_track_memory: bool = False,
+    cost_fail_max_wall_ms: Optional[float] = None,
+    cost_fail_max_backend_wall_ms: Optional[float] = None,
     progress: bool = False,
 ) -> bool:
     """Test with built-in sample images."""
@@ -1392,6 +1623,10 @@ def test_with_sample_images(
         novel_psnr_threshold=novel_psnr_threshold,
         novel_ssim_threshold=novel_ssim_threshold,
         novel_lpips_threshold=novel_lpips_threshold,
+        cost_report_json=cost_report_json,
+        cost_track_memory=cost_track_memory,
+        cost_fail_max_wall_ms=cost_fail_max_wall_ms,
+        cost_fail_max_backend_wall_ms=cost_fail_max_backend_wall_ms,
         progress=progress,
     )
     passed, results = validator.validate_reconstruction(
@@ -1431,6 +1666,10 @@ def test_with_custom_images(
     novel_psnr_threshold: Optional[float] = 20.0,
     novel_ssim_threshold: Optional[float] = 0.65,
     novel_lpips_threshold: Optional[float] = None,
+    cost_report_json: Optional[Path] = None,
+    cost_track_memory: bool = False,
+    cost_fail_max_wall_ms: Optional[float] = None,
+    cost_fail_max_backend_wall_ms: Optional[float] = None,
     progress: bool = False,
 ) -> bool:
     """
@@ -1467,6 +1706,10 @@ def test_with_custom_images(
         novel_psnr_threshold=novel_psnr_threshold,
         novel_ssim_threshold=novel_ssim_threshold,
         novel_lpips_threshold=novel_lpips_threshold,
+        cost_report_json=cost_report_json,
+        cost_track_memory=cost_track_memory,
+        cost_fail_max_wall_ms=cost_fail_max_wall_ms,
+        cost_fail_max_backend_wall_ms=cost_fail_max_backend_wall_ms,
         progress=progress,
     )
     passed, results = validator.validate_reconstruction(
@@ -1501,6 +1744,10 @@ def run_synthetic_suite_matrix(
     novel_psnr_threshold: Optional[float] = 20.0,
     novel_ssim_threshold: Optional[float] = 0.65,
     novel_lpips_threshold: Optional[float] = None,
+    cost_report_json: Optional[Path] = None,
+    cost_track_memory: bool = False,
+    cost_fail_max_wall_ms: Optional[float] = None,
+    cost_fail_max_backend_wall_ms: Optional[float] = None,
     progress: bool = False,
     strict_skips: bool = False,
 ) -> bool:
@@ -1515,6 +1762,8 @@ def run_synthetic_suite_matrix(
     output_root = Path(output_root).resolve()
     if result_json is not None:
         result_json = Path(result_json).resolve()
+    if cost_report_json is not None:
+        cost_report_json = Path(cost_report_json).resolve()
     output_root.mkdir(parents=True, exist_ok=True)
     matrix = []
     run_label = run_id or _utc_run_id(f"{suite}_matrix")
@@ -1627,6 +1876,9 @@ def run_synthetic_suite_matrix(
                     novel_psnr_threshold=novel_psnr_threshold,
                     novel_ssim_threshold=novel_ssim_threshold,
                     novel_lpips_threshold=novel_lpips_threshold,
+                    cost_track_memory=cost_track_memory,
+                    cost_fail_max_wall_ms=cost_fail_max_wall_ms,
+                    cost_fail_max_backend_wall_ms=cost_fail_max_backend_wall_ms,
                     progress=progress,
                 )
                 result_payload = _load_optional_json(case_json)
@@ -1672,6 +1924,12 @@ def run_synthetic_suite_matrix(
                 "result_json": case_json.as_posix(),
                 "message": message,
             }
+            cost_report = result_payload.get("cost_report")
+            if isinstance(cost_report, Mapping):
+                row["cost_report"] = cost_report
+            cost_gate = result_payload.get("cost_gate")
+            if isinstance(cost_gate, Mapping):
+                row["cost_gate"] = cost_gate
             row.update(_evaluation_outputs_from_payload(result_payload))
             matrix.append(row)
 
@@ -1679,6 +1937,7 @@ def run_synthetic_suite_matrix(
         row for row in matrix if row["status"] == "skip" and not row["passed"]
     ]
     failed = [row for row in matrix if row["status"] in {"fail", "error"}]
+    cost_summary = _matrix_cost_summary(matrix)
     summary = {
         "schema_version": "e2e_synthetic_matrix_v1",
         "generated_at": _utc_now(),
@@ -1694,9 +1953,16 @@ def run_synthetic_suite_matrix(
             "failed": len(failed),
             "skipped": sum(1 for row in matrix if row["status"] == "skip"),
         },
+        "cost_report": cost_summary,
         "matrix": matrix,
         "bundles": _evaluation_bundles_from_matrix(matrix),
     }
+    if cost_report_json:
+        if result_json is not None and cost_report_json == result_json:
+            print("\nCost report included in synthetic matrix JSON")
+        else:
+            _json_dump(cost_report_json, cost_summary)
+            print(f"\nSaved synthetic matrix cost report JSON: {cost_report_json}")
     if result_json:
         _json_dump(result_json, summary)
         print(f"\nSaved synthetic matrix JSON: {result_json}")
@@ -1762,6 +2028,26 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
         value = novel_summary.get("passed")
         if isinstance(value, bool):
             metrics["novel_view_passed"] = 1.0 if value else 0.0
+    cost_report = payload.get("cost_report")
+    if isinstance(cost_report, Mapping):
+        value = cost_report.get("combined_total_wall_ms")
+        if isinstance(value, (int, float)):
+            metrics["cost_combined_total_wall_ms"] = float(value)
+        validation = cost_report.get("validation")
+        if isinstance(validation, Mapping):
+            value = validation.get("total_wall_ms")
+            if isinstance(value, (int, float)):
+                metrics["cost_validation_total_wall_ms"] = float(value)
+        backend_cost = cost_report.get("backend")
+        if isinstance(backend_cost, Mapping):
+            value = backend_cost.get("total_wall_ms")
+            if isinstance(value, (int, float)):
+                metrics["cost_backend_total_wall_ms"] = float(value)
+    cost_gate = payload.get("cost_gate")
+    if isinstance(cost_gate, Mapping):
+        value = cost_gate.get("passed")
+        if isinstance(value, bool):
+            metrics["cost_gate_passed"] = 1.0 if value else 0.0
     views = payload.get("views", {})
     if isinstance(views, Mapping):
         for view, view_payload in views.items():
@@ -2928,6 +3214,30 @@ Default ensemble:
         default=None,
     )
     misc.add_argument(
+        "--cost-report-json",
+        type=Path,
+        default=None,
+        help="Write a top-level E2E cost report with validation stages and nested backend cost.",
+    )
+    misc.add_argument(
+        "--cost-track-memory",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Track peak Python allocation memory for cost stages.",
+    )
+    misc.add_argument(
+        "--cost-fail-max-wall-ms",
+        type=float,
+        default=None,
+        help="Fail the run if combined validation plus backend wall time exceeds this many milliseconds.",
+    )
+    misc.add_argument(
+        "--cost-fail-max-backend-wall-ms",
+        type=float,
+        default=None,
+        help="Fail the run if nested backend reconstruction wall time exceeds this many milliseconds.",
+    )
+    misc.add_argument(
         "--environment-compatibility",
         choices=("warn", "strict", "ignore"),
         default=None,
@@ -3871,6 +4181,10 @@ if __name__ == "__main__":
             novel_psnr_threshold=novel_psnr_threshold,
             novel_ssim_threshold=novel_ssim_threshold,
             novel_lpips_threshold=novel_lpips_threshold,
+            cost_report_json=args.cost_report_json,
+            cost_track_memory=args.cost_track_memory,
+            cost_fail_max_wall_ms=args.cost_fail_max_wall_ms,
+            cost_fail_max_backend_wall_ms=args.cost_fail_max_backend_wall_ms,
             progress=args.progress,
             strict_skips=args.synthetic_strict_skips,
         )
@@ -3921,6 +4235,10 @@ if __name__ == "__main__":
             novel_psnr_threshold=novel_psnr_threshold,
             novel_ssim_threshold=novel_ssim_threshold,
             novel_lpips_threshold=novel_lpips_threshold,
+            cost_report_json=args.cost_report_json,
+            cost_track_memory=args.cost_track_memory,
+            cost_fail_max_wall_ms=args.cost_fail_max_wall_ms,
+            cost_fail_max_backend_wall_ms=args.cost_fail_max_backend_wall_ms,
             progress=args.progress,
         )
     else:
@@ -3945,6 +4263,10 @@ if __name__ == "__main__":
             novel_psnr_threshold=novel_psnr_threshold,
             novel_ssim_threshold=novel_ssim_threshold,
             novel_lpips_threshold=novel_lpips_threshold,
+            cost_report_json=args.cost_report_json,
+            cost_track_memory=args.cost_track_memory,
+            cost_fail_max_wall_ms=args.cost_fail_max_wall_ms,
+            cost_fail_max_backend_wall_ms=args.cost_fail_max_backend_wall_ms,
             progress=args.progress,
         )
         base_dir = Path(__file__).parent
