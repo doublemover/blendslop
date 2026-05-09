@@ -36,6 +36,9 @@ class TestConfigDefaults(unittest.TestCase):
         self.assertTrue(cfg.refinement_lab.append_leaderboard)
         self.assertFalse(cfg.refinement_lab.allow_subprocess_blender)
         self.assertIn("refinement_lab", cfg.to_dict())
+        self.assertEqual(cfg.shape_program.root_strategy, "hybrid_profile_bounds")
+        self.assertTrue(cfg.shape_program.compile_blender)
+        self.assertIn("shape_program", cfg.to_dict())
 
 
 if __name__ == "__main__":

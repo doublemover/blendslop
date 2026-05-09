@@ -127,6 +127,7 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
                 "primitive_fit_refine",
                 "gaussian_ellipsoid_proxy",
                 "differentiable_refine",
+                "shape_program",
             },
         )
         self.assertEqual(list_backend_aliases(), {"loft_profile": "profile_loft"})
@@ -243,6 +244,20 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
                 "supports_gradients": True,
                 "editability_score": 0.65,
                 "optional_dependencies": ["nvdiffrast", "torch"],
+            },
+            "shape_program": {
+                "requires_blender": False,
+                "supports_pure_python": True,
+                "supports_multi_view": True,
+                "supports_top_view": True,
+                "supports_uncertainty": True,
+                "supports_constraints": True,
+                "outputs_mesh": False,
+                "outputs_volume": False,
+                "outputs_primitive_set": True,
+                "supports_gradients": False,
+                "editability_score": 0.95,
+                "optional_dependencies": [],
             },
         }
         for name, expected in expected_capabilities.items():

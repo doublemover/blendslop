@@ -108,6 +108,7 @@ DEFAULT_SYNTHETIC_MATRIX_MODES = (
     "silhouette_intersection",
     "visual_hull_voxel",
 )
+BACKEND_STATUS_OK = {"success", "degraded", "research_only"}
 
 
 def _status_icon(ok: bool) -> str:
@@ -308,7 +309,7 @@ def _print_backend_summary(result: object) -> bool:
         summary_source = selected
     else:
         summary_source = data
-    passed = status in {"success", "degraded"}
+    passed = _backend_status_ok(status)
 
     _print_section("Backend Result")
     _print_kv_table(
@@ -1113,11 +1114,11 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
                 metrics[f"{view}_iou"] = float(view_payload["iou"])
     status = payload.get("status")
     if isinstance(status, str):
-        metrics["backend_status_ok"] = 1.0 if status in {"success", "degraded"} else 0.0
+        metrics["backend_status_ok"] = 1.0 if _backend_status_ok(status) else 0.0
     selected = payload.get("selected")
     if isinstance(selected, Mapping):
         status = selected.get("status")
-        metrics["backend_status_ok"] = 1.0 if status in {"success", "degraded"} else 0.0
+        metrics["backend_status_ok"] = 1.0 if _backend_status_ok(status) else 0.0
         metric_result = selected.get("metric_result", {})
         if isinstance(metric_result, Mapping):
             for key in ("area_iou_mean", "area_iou_min", "elapsed_s"):
@@ -1125,6 +1126,10 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
                 if isinstance(value, (int, float)):
                     metrics[key] = float(value)
     return metrics
+
+
+def _backend_status_ok(status: object) -> bool:
+    return str(status) in BACKEND_STATUS_OK
 
 
 def _load_optional_json(path: Path) -> Dict[str, Any]:

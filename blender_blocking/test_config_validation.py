@@ -13,6 +13,7 @@ from config import (
     RefinementLabConfig,
     ReconstructionConfig,
     RenderConfig,
+    ShapeProgramConfig,
     SilhouetteExtractConfig,
     DifferentiableRenderConfig,
 )
@@ -71,6 +72,16 @@ class TestConfigValidation(unittest.TestCase):
 
     def test_invalid_optional_dependency_policy(self) -> None:
         cfg = DifferentiableRenderConfig(optional_dependency_policy="maybe")
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_shape_program_strategy(self) -> None:
+        cfg = ShapeProgramConfig(root_strategy="raw_mesh_blob")
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_shape_program_segments(self) -> None:
+        cfg = ShapeProgramConfig(lathe_segments=4)
         with self.assertRaises(ValueError):
             cfg.validate()
 
