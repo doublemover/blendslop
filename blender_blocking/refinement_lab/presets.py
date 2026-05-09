@@ -700,6 +700,33 @@ TRACKS: dict[str, TrackPreset] = {
                 value_type="bool",
                 group="shape_program",
             ),
+            _p(
+                "shape_evaluate_texture_materials",
+                "--evaluate-texture-materials",
+                (True, False),
+                value_type="bool",
+                group="shape_program",
+            ),
+            _p(
+                "shape_uv_strict",
+                "--uv-strict",
+                (False, True),
+                value_type="bool",
+                group="shape_program",
+            ),
+            _p(
+                "shape_material_target",
+                "--material-target",
+                ("pbr", "simple", "none"),
+                group="shape_program",
+            ),
+            _p(
+                "shape_max_texture_memory_mb",
+                "--max-texture-memory-mb",
+                (32.0, 128.0, 512.0),
+                value_type="float",
+                group="shape_program",
+            ),
             _csv_p(
                 "ensemble_candidates",
                 "--ensemble-candidates",
@@ -777,6 +804,13 @@ TRACKS: dict[str, TrackPreset] = {
                 "--shape-editability-bias",
                 (0.85, 1.0),
                 value_type="float",
+                group="shape_program",
+            ),
+            _p(
+                "shape_evaluate_texture_materials",
+                "--evaluate-texture-materials",
+                (True,),
+                value_type="bool",
                 group="shape_program",
             ),
             _p(

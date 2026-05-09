@@ -65,6 +65,14 @@ CONFIG_PARAMETER_PATHS: Mapping[str, tuple[str, str]] = {
     "shape_weighted_normals": ("shape_program", "weighted_normals"),
     "shape_run_export_qa": ("shape_program", "run_export_qa"),
     "shape_export_qa_targets": ("shape_program", "export_qa_targets"),
+    "shape_evaluate_texture_materials": (
+        "shape_program",
+        "evaluate_texture_materials",
+    ),
+    "shape_texture_reference_dir": ("shape_program", "texture_reference_dir"),
+    "shape_uv_strict": ("shape_program", "uv_strict"),
+    "shape_material_target": ("shape_program", "material_target"),
+    "shape_max_texture_memory_mb": ("shape_program", "max_texture_memory_mb"),
 }
 
 SPECIAL_PARAMETER_NAMES = frozenset({"ensemble_candidates"})

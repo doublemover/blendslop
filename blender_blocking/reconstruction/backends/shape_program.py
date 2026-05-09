@@ -104,6 +104,19 @@ class ShapeProgramBackend(BaseBackend):
         invalid_targets = set(targets) - {"obj", "glb", "gltf"}
         if invalid_targets:
             errors.append("shape_program.export_qa_targets must contain only obj/glb/gltf")
+        if not isinstance(config.get("evaluate_texture_materials", False), bool):
+            errors.append("shape_program.evaluate_texture_materials must be a boolean")
+        if not isinstance(config.get("uv_strict", False), bool):
+            errors.append("shape_program.uv_strict must be a boolean")
+        material_target = str(config.get("material_target", "pbr"))
+        if material_target not in {"pbr", "simple", "none"}:
+            errors.append("shape_program.material_target must be pbr/simple/none")
+        max_texture_memory = config.get("max_texture_memory_mb")
+        if max_texture_memory is not None and _float(max_texture_memory, -1.0) <= 0.0:
+            errors.append("shape_program.max_texture_memory_mb must be > 0 when provided")
+        texture_reference_dir = config.get("texture_reference_dir")
+        if texture_reference_dir is not None and not str(texture_reference_dir).strip():
+            errors.append("shape_program.texture_reference_dir must not be blank")
         return errors
 
     def estimate_budget(
@@ -873,6 +886,7 @@ def _compiled_appearance_summary(
             "required": True,
             "strict_uv": bool(config.get("uv_strict", False)),
             "material_target": str(config.get("material_target", "pbr")),
+            "texture_reference_dir": config.get("texture_reference_dir"),
             "has_uv_map": False,
             "uv_valid": False,
             "warnings": ["appearance evaluation requested but program was not compiled"],
@@ -912,6 +926,7 @@ def _compiled_appearance_summary(
         "required": required,
         "strict_uv": bool(config.get("uv_strict", False)),
         "material_target": str(config.get("material_target", "pbr")),
+        "texture_reference_dir": config.get("texture_reference_dir"),
         "max_texture_memory_mb": _float(config.get("max_texture_memory_mb"), None),
         "uv": {
             "has_uv_map": has_uv_map,

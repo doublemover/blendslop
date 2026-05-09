@@ -55,6 +55,26 @@ class RefinementParameterCatalogTests(unittest.TestCase):
                 "ellipsoid,superquadric",
             )
         )
+        self.assertTrue(
+            apply_variant_parameter_to_config(
+                cfg,
+                "shape_evaluate_texture_materials",
+                True,
+            )
+        )
+        self.assertTrue(
+            apply_variant_parameter_to_config(cfg, "shape_uv_strict", True)
+        )
+        self.assertTrue(
+            apply_variant_parameter_to_config(cfg, "shape_material_target", "simple")
+        )
+        self.assertTrue(
+            apply_variant_parameter_to_config(
+                cfg,
+                "shape_max_texture_memory_mb",
+                96,
+            )
+        )
         self.assertFalse(
             apply_variant_parameter_to_config(cfg, "unknown_lab_hint", True)
         )
@@ -65,6 +85,10 @@ class RefinementParameterCatalogTests(unittest.TestCase):
             cfg.primitive_fit.primitive_families,
             ("ellipsoid", "superquadric"),
         )
+        self.assertTrue(cfg.shape_program.evaluate_texture_materials)
+        self.assertTrue(cfg.shape_program.uv_strict)
+        self.assertEqual(cfg.shape_program.material_target, "simple")
+        self.assertEqual(cfg.shape_program.max_texture_memory_mb, 96)
 
     def test_runner_uses_shared_catalog_for_variants(self) -> None:
         cfg = BlockingConfig()

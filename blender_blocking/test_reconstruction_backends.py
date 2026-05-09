@@ -570,6 +570,28 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         self.assertEqual(appearance["uv_valid"], False)
         self.assertIn("compiled_blender_asset_missing", appearance["errors"])
 
+    def test_shape_program_backend_validates_appearance_options(self) -> None:
+        from reconstruction.backends.shape_program import ShapeProgramBackend
+
+        backend = ShapeProgramBackend()
+
+        self.assertEqual(
+            backend.validate_config(
+                {
+                    "evaluate_texture_materials": True,
+                    "uv_strict": True,
+                    "material_target": "pbr",
+                    "max_texture_memory_mb": 64.0,
+                    "texture_reference_dir": "temp/texture_refs",
+                }
+            ),
+            [],
+        )
+        self.assertIn(
+            "shape_program.material_target must be pbr/simple/none",
+            backend.validate_config({"material_target": "radiance"}),
+        )
+
     def test_duplicate_missing_and_alias_registration_errors(self) -> None:
         backend = _FakeBackend()
         register_backend(backend, aliases=("fake_alias",))

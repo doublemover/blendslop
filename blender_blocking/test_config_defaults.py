@@ -40,6 +40,11 @@ class TestConfigDefaults(unittest.TestCase):
         self.assertTrue(cfg.shape_program.compile_blender)
         self.assertFalse(cfg.shape_program.run_export_qa)
         self.assertEqual(cfg.shape_program.export_qa_targets, ("obj", "glb"))
+        self.assertFalse(cfg.shape_program.evaluate_texture_materials)
+        self.assertFalse(cfg.shape_program.uv_strict)
+        self.assertEqual(cfg.shape_program.material_target, "pbr")
+        self.assertIsNone(cfg.shape_program.texture_reference_dir)
+        self.assertIsNone(cfg.shape_program.max_texture_memory_mb)
         self.assertIn("shape_program", cfg.to_dict())
 
 

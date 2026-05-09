@@ -8,11 +8,14 @@ from pathlib import Path
 import unittest
 
 from integration.blender_ops.render_utils import parse_orbit_view_degrees
+from config import BlockingConfig
 from test_e2e_validation import (
     _aggregate_novel_reports,
+    _apply_cli_args,
     _novel_threshold,
     _novel_view_gate,
     _novel_view_names_from_args,
+    _parse_args,
     _parse_view_reference_entries,
 )
 
@@ -91,6 +94,33 @@ class E2ENovelViewCliTests(unittest.TestCase):
         self.assertEqual(summary["image_count"], 2)
         self.assertAlmostEqual(summary["psnr"], 29.0)
         self.assertAlmostEqual(summary["ssim"], 0.865)
+
+    def test_texture_material_cli_flags_apply_to_shape_program_config(self) -> None:
+        args = _parse_args(
+            [
+                "--reconstruction-mode",
+                "shape_program",
+                "--validation-mode",
+                "backend-status",
+                "--evaluate-texture-materials",
+                "--texture-reference-dir",
+                "temp/texture_refs",
+                "--uv-strict",
+                "--material-target",
+                "simple",
+                "--max-texture-memory-mb",
+                "64",
+            ]
+        )
+        cfg = BlockingConfig()
+
+        _apply_cli_args(cfg, args)
+
+        self.assertTrue(cfg.shape_program.evaluate_texture_materials)
+        self.assertEqual(cfg.shape_program.texture_reference_dir, "temp/texture_refs")
+        self.assertTrue(cfg.shape_program.uv_strict)
+        self.assertEqual(cfg.shape_program.material_target, "simple")
+        self.assertEqual(cfg.shape_program.max_texture_memory_mb, 64.0)
 
 
 if __name__ == "__main__":

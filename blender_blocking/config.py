@@ -672,6 +672,11 @@ class ShapeProgramConfig:
     weighted_normals: bool = True
     run_export_qa: bool = False
     export_qa_targets: Tuple[str, ...] = ("obj", "glb")
+    evaluate_texture_materials: bool = False
+    texture_reference_dir: Optional[str] = None
+    uv_strict: bool = False
+    material_target: str = "pbr"
+    max_texture_memory_mb: Optional[float] = None
 
     def validate(self) -> None:
         if self.root_strategy not in {
@@ -700,9 +705,19 @@ class ShapeProgramConfig:
             raise ValueError(
                 "shape_program.export_qa_targets must contain only obj/glb/gltf"
             )
+        if not isinstance(self.evaluate_texture_materials, bool):
+            raise ValueError("shape_program.evaluate_texture_materials must be a boolean")
+        if not isinstance(self.uv_strict, bool):
+            raise ValueError("shape_program.uv_strict must be a boolean")
+        if self.material_target not in {"pbr", "simple", "none"}:
+            raise ValueError("shape_program.material_target must be pbr/simple/none")
+        if self.texture_reference_dir is not None and not str(self.texture_reference_dir).strip():
+            raise ValueError("shape_program.texture_reference_dir must not be blank")
+        if self.max_texture_memory_mb is not None and self.max_texture_memory_mb <= 0.0:
+            raise ValueError("shape_program.max_texture_memory_mb must be > 0 when provided")
 
     def to_dict(self) -> Dict[str, object]:
-        return {
+        payload: Dict[str, object] = {
             "root_strategy": self.root_strategy,
             "residual_policy": self.residual_policy,
             "max_nodes": self.max_nodes,
@@ -713,7 +728,15 @@ class ShapeProgramConfig:
             "weighted_normals": self.weighted_normals,
             "run_export_qa": self.run_export_qa,
             "export_qa_targets": list(self.export_qa_targets),
+            "evaluate_texture_materials": self.evaluate_texture_materials,
+            "uv_strict": self.uv_strict,
+            "material_target": self.material_target,
         }
+        if self.texture_reference_dir is not None:
+            payload["texture_reference_dir"] = self.texture_reference_dir
+        if self.max_texture_memory_mb is not None:
+            payload["max_texture_memory_mb"] = self.max_texture_memory_mb
+        return payload
 
 
 @dataclass

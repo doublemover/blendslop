@@ -108,6 +108,19 @@ class TestConfigValidation(unittest.TestCase):
         with self.assertRaises(ValueError):
             cfg.validate()
 
+    def test_invalid_shape_program_appearance_options(self) -> None:
+        bad_configs = (
+            ShapeProgramConfig(material_target="radiance_field"),
+            ShapeProgramConfig(max_texture_memory_mb=0.0),
+            ShapeProgramConfig(texture_reference_dir=""),
+            ShapeProgramConfig(evaluate_texture_materials="yes"),  # type: ignore[arg-type]
+            ShapeProgramConfig(uv_strict="strict"),  # type: ignore[arg-type]
+        )
+        for cfg in bad_configs:
+            with self.subTest(cfg=cfg):
+                with self.assertRaises(ValueError):
+                    cfg.validate()
+
     def test_invalid_refinement_search(self) -> None:
         cfg = RefinementLabConfig(default_search="bad_search")
         with self.assertRaises(ValueError):

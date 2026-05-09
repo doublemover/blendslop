@@ -2692,6 +2692,31 @@ Default ensemble:
         default=None,
         help="Comma-separated editable export QA targets, e.g. obj,glb.",
     )
+    shape_program.add_argument(
+        "--evaluate-texture-materials",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Evaluate UV, texture, material, and appearance-attribution evidence for editable outputs.",
+    )
+    shape_program.add_argument(
+        "--texture-reference-dir",
+        type=str,
+        default=None,
+        help="Optional directory containing held-out texture/material reference images.",
+    )
+    shape_program.add_argument(
+        "--uv-strict",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Treat missing or invalid UV evidence as a hard appearance failure.",
+    )
+    shape_program.add_argument(
+        "--material-target",
+        choices=("pbr", "simple", "none"),
+        default=None,
+        help="Expected editable material target for appearance evaluation.",
+    )
+    shape_program.add_argument("--max-texture-memory-mb", type=float, default=None)
 
     ensemble = parser.add_argument_group("ensemble")
     ensemble.add_argument(
@@ -3228,6 +3253,21 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     _set_if_not_none(cfg.shape_program, "run_export_qa", args.shape_run_export_qa)
     _set_if_not_none(
         cfg.shape_program, "export_qa_targets", args.shape_export_qa_targets
+    )
+    _set_if_not_none(
+        cfg.shape_program,
+        "evaluate_texture_materials",
+        args.evaluate_texture_materials,
+    )
+    _set_if_not_none(
+        cfg.shape_program, "texture_reference_dir", args.texture_reference_dir
+    )
+    _set_if_not_none(cfg.shape_program, "uv_strict", args.uv_strict)
+    _set_if_not_none(cfg.shape_program, "material_target", args.material_target)
+    _set_if_not_none(
+        cfg.shape_program,
+        "max_texture_memory_mb",
+        args.max_texture_memory_mb,
     )
 
     if args.ensemble_candidates:
