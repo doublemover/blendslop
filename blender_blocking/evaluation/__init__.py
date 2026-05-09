@@ -49,6 +49,12 @@ from .lineage import (
     write_reproduce_script,
     write_run_lineage,
 )
+from .metric_sensitivity import (
+    MetricSensitivityReport,
+    SensitivityProbe,
+    sensitivity_metric_table,
+    silhouette_sensitivity_report,
+)
 from .novel_view import (
     NovelViewMetricReport,
     image_pair_report,
@@ -92,6 +98,7 @@ __all__ = [
     "BaselineQuery",
     "BaselineSlice",
     "MetricDistribution",
+    "MetricSensitivityReport",
     "NovelViewMetricReport",
     "QualityBaseline",
     "RecoverabilityReport",
@@ -103,6 +110,7 @@ __all__ = [
     "ViewDisagreementSignal",
     "SilhouetteGateConfig",
     "SelectionEvidence",
+    "SensitivityProbe",
     "active_view_plan_payload",
     "attach_selection",
     "boundary_refinement_plan_payload",
@@ -130,6 +138,8 @@ __all__ = [
     "quality_baseline_from_mapping",
     "repo_revision",
     "select_baseline_slice",
+    "sensitivity_metric_table",
+    "silhouette_sensitivity_report",
     "sota_silhouette_budget",
     "summarize_silhouette_views",
     "suggest_next_views",
