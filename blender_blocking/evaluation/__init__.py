@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .bundle import bundle_from_candidate
+from .gates import EvaluationBudget, Threshold, evaluate_budget
 from .schemas import (
     EvaluationBundle,
     MetricGroup,
@@ -16,7 +17,9 @@ __all__ = [
     "MetricGroup",
     "MetricValue",
     "STATUS_VALUES",
+    "EvaluationBudget",
+    "Threshold",
     "bundle_from_candidate",
+    "evaluate_budget",
     "json_safe",
 ]
-

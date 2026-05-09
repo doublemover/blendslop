@@ -670,6 +670,28 @@ class CandidateResult:
             "degraded": self.degraded,
         }
 
+    def to_evaluation_bundle(
+        self,
+        *,
+        target: Any = None,
+        suite: str = "",
+        run_id: str = "",
+        repo: str | None = None,
+    ) -> Any:
+        """Create a source-level EvaluationBundle without importing at module load."""
+        try:
+            from blender_blocking.evaluation import bundle_from_candidate
+        except Exception:  # pragma: no cover - script-style imports
+            from evaluation import bundle_from_candidate
+
+        return bundle_from_candidate(
+            result=self,
+            target=target,
+            suite=suite,
+            run_id=run_id,
+            repo=repo,
+        )
+
 
 @dataclass(frozen=True)
 class CandidateScoreTerm:
