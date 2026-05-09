@@ -9,6 +9,7 @@ soft-silhouette objective today.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import importlib
 import math
 from typing import Any, Callable, Dict, Mapping, Protocol, Sequence
 
@@ -861,6 +862,7 @@ class NvdiffrastBackend:
 
     def __init__(self) -> None:
         self._module = None
+        self._dr = None
         self._nvdiffrast = probe_dependency("nvdiffrast")
         self._torch = probe_dependency("torch")
         self._unmet_dependencies: list[str] = []
@@ -869,13 +871,21 @@ class NvdiffrastBackend:
         if not self._torch.available:
             self._unmet_dependencies.append(f"torch: {self._torch.error}")
         self._module = self._nvdiffrast.module if self._nvdiffrast.available else None
+        if self._module is not None:
+            try:
+                self._dr = importlib.import_module("nvdiffrast.torch")
+            except Exception as exc:
+                self._unmet_dependencies.append(f"nvdiffrast.torch: {exc}")
         self.unavailable_reason: str | None = None
         if self._unmet_dependencies:
             self.unavailable_reason = "; ".join(self._unmet_dependencies)
+        self._contexts: dict[str, object] = {}
+        self._last_render_batch: RenderBatch | None = None
+        self._last_tensors: dict[str, object] = {}
 
     @property
     def available(self) -> bool:
-        return self._module is not None and self._torch.available
+        return self._module is not None and self._dr is not None and self._torch.available
 
     @property
     def dependency_report(self) -> str:
@@ -892,10 +902,81 @@ class NvdiffrastBackend:
 
     def render(self, scene: RenderableScene, cameras: Sequence[CameraSpec]) -> RenderBatch:
         self._require_available()
-        raise RuntimeError(
-            "nvdiffrast is installed, but mesh scene translation is unavailable; "
-            "select cpu_soft_silhouette for the current pure-Python backend"
+        torch = self._torch.require()
+        dr = self._dr
+        vertices, faces = _scene_mesh_arrays(scene)
+        if len(vertices) == 0 or len(faces) == 0:
+            raise RuntimeError("nvdiffrast render requires a non-empty triangle mesh")
+        device_name = "cuda" if bool(getattr(torch, "cuda").is_available()) else "cpu"
+        device = torch.device(device_name)
+        faces_tensor = torch.as_tensor(faces, dtype=torch.int32, device=device)
+        ctx = self._context_for_device(dr, torch, device_name)
+
+        silhouettes: dict[str, np.ndarray] = {}
+        depths: dict[str, np.ndarray] = {}
+        view_stats: list[dict[str, object]] = []
+        tensor_records: dict[str, object] = {}
+        for camera in cameras:
+            width, height = (int(camera.image_size[0]), int(camera.image_size[1]))
+            clip_vertices = _project_vertices_to_clip(vertices, camera)
+            pos = torch.as_tensor(
+                clip_vertices,
+                dtype=torch.float32,
+                device=device,
+            ).unsqueeze(0)
+            rast, _ = dr.rasterize(
+                ctx,
+                pos,
+                faces_tensor,
+                resolution=[height, width],
+            )
+            hard_mask = (rast[..., 3:4] > 0).to(torch.float32)
+            try:
+                mask_tensor = dr.antialias(hard_mask, rast, pos, faces_tensor)[0, ..., 0]
+            except Exception:
+                mask_tensor = hard_mask[0, ..., 0]
+            depth_tensor = torch.where(
+                hard_mask[0, ..., 0] > 0.0,
+                rast[0, ..., 2],
+                torch.zeros_like(rast[0, ..., 2]),
+            )
+            mask_np = mask_tensor.detach().cpu().numpy().astype(np.float64, copy=False)
+            depth_np = depth_tensor.detach().cpu().numpy().astype(np.float64, copy=False)
+            silhouettes[camera.name] = mask_np
+            depths[camera.name] = depth_np
+            tensor_records[camera.name] = {
+                "position": pos,
+                "raster": rast,
+                "mask": mask_tensor,
+                "depth": depth_tensor,
+            }
+            view_stats.append(
+                {
+                    "view": camera.name,
+                    "image_size": (width, height),
+                    "coverage": float(mask_np.mean()),
+                    "area": float(mask_np.sum()),
+                    "device": device_name,
+                }
+            )
+
+        metadata = {
+            "backend": self.name,
+            "device": device_name,
+            "vertex_count": int(len(vertices)),
+            "face_count": int(len(faces)),
+            "camera_count": int(len(cameras)),
+            "view_stats": view_stats,
+            "gradient_path": "nvdiffrast.torch",
+        }
+        batch = RenderBatch(
+            silhouettes=silhouettes,
+            depths=depths,
+            metadata=metadata,
         )
+        self._last_render_batch = batch
+        self._last_tensors = tensor_records
+        return batch
 
     def loss(
         self,
@@ -909,10 +990,37 @@ class NvdiffrastBackend:
 
     def backward(self, loss: LossResult) -> GradientBatch:
         self._require_available()
-        raise RuntimeError(
-            "nvdiffrast is installed, but gradient extraction is unavailable; "
-            "select finite_difference gradient mode for the current backend"
+        _ = loss
+        return GradientBatch(
+            gradients={},
+            epsilon=0.0,
+            warnings=(
+                "nvdiffrast raster tensors were retained for external torch "
+                "optimization; scalar LossResult gradients are not materialized by "
+                "this candidate wrapper",
+            ),
         )
+
+    def _context_for_device(self, dr: Any, torch: Any, device_name: str) -> object:
+        cached = self._contexts.get(device_name)
+        if cached is not None:
+            return cached
+        errors: list[str] = []
+        if device_name == "cuda" and hasattr(dr, "RasterizeCudaContext"):
+            try:
+                context = dr.RasterizeCudaContext(device=torch.device(device_name))
+                self._contexts[device_name] = context
+                return context
+            except Exception as exc:
+                errors.append(f"RasterizeCudaContext: {exc}")
+        if hasattr(dr, "RasterizeGLContext"):
+            try:
+                context = dr.RasterizeGLContext()
+                self._contexts[device_name] = context
+                return context
+            except Exception as exc:
+                errors.append(f"RasterizeGLContext: {exc}")
+        raise RuntimeError("no usable nvdiffrast raster context: " + "; ".join(errors))
 
 
 def run_refinement_candidate(request: object) -> object:
@@ -959,13 +1067,14 @@ def run_refinement_candidate(request: object) -> object:
         target_signal_warnings,
     ) = _collect_target_view_signal_weights(target)
 
+    nvd_renderer = None
     if backend_choice == "nvdiffrast":
-        nvd = NvdiffrastBackend()
-        if not nvd.available:
+        nvd_renderer = NvdiffrastBackend()
+        if not nvd_renderer.available:
             status = "failed" if optional_dependency_policy == "fail" else "skipped"
             reason = (
-                nvd.unavailable_reason
-                or nvd.dependency_report
+                nvd_renderer.unavailable_reason
+                or nvd_renderer.dependency_report
                 or "optional GPU dependency unavailable"
             )
             return CandidateResult(
@@ -978,18 +1087,6 @@ def run_refinement_candidate(request: object) -> object:
                     *tuple(target_signal_warnings),
                 ),
             )
-        status = "failed" if optional_dependency_policy == "fail" else "skipped"
-        return CandidateResult(
-            candidate_id=candidate_id,
-            backend_name=backend_name,
-            status=status,
-            warnings=(
-                "nvdiffrast was detected, but this adapter needs explicit mesh "
-                "translation and gradient extraction before it can run",
-                *config_warnings,
-                *tuple(target_signal_warnings),
-            ),
-        )
 
     try:
         points, point_meta = target_surface_points(
@@ -1013,10 +1110,13 @@ def run_refinement_candidate(request: object) -> object:
         renderables = tuple(renderable_from_primitive(primitive) for primitive in primitives)
         scene = RenderableScene(primitives=renderables)
         cameras, silhouettes = _target_cameras_and_masks(target)
-        renderer = CpuSoftSilhouetteBackend(
-            softness=float(parsed_config["softness"]),
-            min_variance=float(parsed_config["min_variance"]),
-        )
+        if backend_choice == "nvdiffrast":
+            renderer = nvd_renderer or NvdiffrastBackend()
+        else:
+            renderer = CpuSoftSilhouetteBackend(
+                softness=float(parsed_config["softness"]),
+                min_variance=float(parsed_config["min_variance"]),
+            )
         target_record = ReconstructionTarget(
             silhouettes=silhouettes,
             surface_points=points,
@@ -1043,6 +1143,19 @@ def run_refinement_candidate(request: object) -> object:
             view_weights=target_view_weights,
         )
     except Exception as exc:
+        if backend_choice == "nvdiffrast":
+            status = "failed" if optional_dependency_policy == "fail" else "skipped"
+            if status == "skipped":
+                return CandidateResult(
+                    candidate_id=candidate_id,
+                    backend_name=backend_name,
+                    status=status,
+                    warnings=(
+                        f"nvdiffrast render path unavailable: {exc}",
+                        *config_warnings,
+                        *tuple(target_signal_warnings),
+                    ),
+                )
         return CandidateResult(
             candidate_id=candidate_id,
             backend_name=backend_name,
@@ -1342,3 +1455,78 @@ def _target_cameras_and_masks(target: object) -> tuple[tuple[CameraSpec, ...], d
         )
         silhouettes[constraint.view] = mask
     return tuple(cameras), silhouettes
+
+
+def _scene_mesh_arrays(scene: RenderableScene) -> tuple[np.ndarray, np.ndarray]:
+    vertices_blocks: list[np.ndarray] = []
+    face_blocks: list[np.ndarray] = []
+    offset = 0
+    if scene.mesh is not None:
+        vertices, faces = _mesh_arrays(scene.mesh)
+        vertices_blocks.append(vertices)
+        face_blocks.append(_triangulated_mesh_faces(faces))
+        offset += len(vertices)
+    for renderable in scene.primitives:
+        if renderable.mesh_proxy is None:
+            continue
+        vertices, faces = _mesh_arrays(renderable.mesh_proxy)
+        triangles = _triangulated_mesh_faces(faces)
+        vertices_blocks.append(vertices)
+        if len(triangles):
+            face_blocks.append(triangles + offset)
+        offset += len(vertices)
+    if not vertices_blocks:
+        return np.empty((0, 3), dtype=np.float32), np.empty((0, 3), dtype=np.int32)
+    vertices_all = np.vstack(vertices_blocks).astype(np.float32, copy=False)
+    faces_all = (
+        np.vstack(face_blocks).astype(np.int32, copy=False)
+        if face_blocks
+        else np.empty((0, 3), dtype=np.int32)
+    )
+    return vertices_all, faces_all
+
+
+def _mesh_arrays(mesh: Any) -> tuple[np.ndarray, tuple[tuple[int, ...], ...]]:
+    vertices = np.asarray(getattr(mesh, "vertices", ()), dtype=np.float32)
+    faces = tuple(tuple(int(index) for index in face) for face in getattr(mesh, "faces", ()))
+    if vertices.ndim != 2 or vertices.shape[1] != 3:
+        raise RuntimeError(f"mesh vertices must have shape (N, 3), got {vertices.shape}")
+    return vertices, faces
+
+
+def _triangulated_mesh_faces(faces: Sequence[Sequence[int]]) -> np.ndarray:
+    triangles: list[tuple[int, int, int]] = []
+    for face in faces:
+        if len(face) < 3:
+            continue
+        first = int(face[0])
+        for index in range(1, len(face) - 1):
+            tri = (first, int(face[index]), int(face[index + 1]))
+            if len(set(tri)) == 3:
+                triangles.append(tri)
+    if not triangles:
+        return np.empty((0, 3), dtype=np.int32)
+    return np.asarray(triangles, dtype=np.int32)
+
+
+def _project_vertices_to_clip(vertices: np.ndarray, camera: CameraSpec) -> np.ndarray:
+    vertex_array = np.asarray(vertices, dtype=np.float32)
+    axes = tuple(int(axis) for axis in camera.axes)
+    if len(axes) != 2 or axes[0] == axes[1] or any(axis not in (0, 1, 2) for axis in axes):
+        raise RuntimeError(f"invalid camera axes for nvdiffrast: {camera.axes!r}")
+    depth_axis = next(axis for axis in (0, 1, 2) if axis not in axes)
+    xmin, xmax, ymin, ymax = (float(value) for value in camera.world_bounds)
+    xden = max(abs(xmax - xmin), 1.0e-12)
+    yden = max(abs(ymax - ymin), 1.0e-12)
+    x_clip = ((vertex_array[:, axes[0]] - xmin) / xden) * 2.0 - 1.0
+    y_clip = ((vertex_array[:, axes[1]] - ymin) / yden) * 2.0 - 1.0
+    depth_values = vertex_array[:, depth_axis]
+    depth_min = float(np.min(depth_values)) if len(depth_values) else 0.0
+    depth_max = float(np.max(depth_values)) if len(depth_values) else 1.0
+    depth_den = max(abs(depth_max - depth_min), 1.0e-12)
+    z_clip = ((depth_values - depth_min) / depth_den) * 2.0 - 1.0
+    w_clip = np.ones_like(z_clip, dtype=np.float32)
+    return np.column_stack((x_clip, y_clip, z_clip, w_clip)).astype(
+        np.float32,
+        copy=False,
+    )

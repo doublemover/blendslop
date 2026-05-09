@@ -314,6 +314,16 @@ Store a JSON-like dict in `scene["blocktool_manifest"]` with:
 - Visual hull, primitive fitting, Gaussian/ellipsoid, and differentiable-refine paths are opt-in and must report optional dependency skips explicitly.
 - Tests are deterministic and partitioned by environment.
 
+### 18.1 Ambitious Backend Completion Requirements
+- Non-legacy reconstruction modes are routed through `reconstruction/registry.py` and backend-owned implementations under `reconstruction/backends/`; `main_integration.py` may keep direct legacy behavior only.
+- Visual hull backends must support dense, chunked, sparse-hash, and OpenVDB-labeled modes. Chunked/sparse/OpenVDB modes must build directly into chunk storage instead of requiring a dense-first conversion.
+- OpenVDB is optional. When `pyopenvdb` or `openvdb` bindings are installed, `volume/openvdb_adapter.py` must export and import direct `.vdb` grids. When bindings are absent or lack required APIs, the backend must return structured `OpenVDBStatus` data and keep NPZ sparse interchange artifacts.
+- Visual hull mesh postprocess modes `poisson` and `screened_poisson` must run Open3D Poisson reconstruction when `open3d` is installed. Missing or unusable Open3D must be an explicit skip or failure according to `postprocess_required`, `require_postprocess`, or `fail_on_postprocess_skip`.
+- Differentiable rendering must provide a deterministic CPU soft-silhouette backend and an optional `nvdiffrast.torch` backend. Missing `nvdiffrast`/`torch`, missing raster context, or unusable GPU runtime must obey `optional_dependency_policy="skip" | "fail"` and must not silently fall back to CPU when the user requested `nvdiffrast`.
+- Primitive, Gaussian/ellipsoid, visual hull, and differentiable backends must emit `CandidateResult` metrics with per-view data where views exist, topology reports for mesh-producing paths, artifacts, warnings/errors, and objective or loss histories where an objective is evaluated.
+- Synthetic fixtures must remain deterministic and generated outputs must stay under ignored artifact roots. Commit only small fixture specs, budget JSON, schemas, and docs.
+- Quality budgets must be runnable against current artifacts and optional baseline artifacts; `fail_on_regression` must produce a nonzero runner/benchmark exit when required checks fail.
+
 ## 19) Canonical Schemas (Embedded)
 These replace standalone JSON schema files.
 
@@ -460,8 +470,23 @@ These replace standalone JSON schema files.
         "backend": { "type": "string", "enum": ["dense", "chunked", "sparse_hash", "openvdb"] },
         "resolution": { "type": "integer", "minimum": 1 },
         "max_resolution": { "type": "integer", "minimum": 1 },
+        "chunk_size": { "type": ["integer", "null"], "minimum": 1 },
+        "adaptive_max_depth": { "type": "integer", "minimum": 0 },
+        "boundary_refine": { "type": "boolean" },
         "mesh_method": { "type": "string", "enum": ["marching_cubes", "lewiner", "dual_contouring", "points"] },
-        "postprocess": { "type": "string", "enum": ["none", "poisson", "screened_poisson"] }
+        "postprocess": { "type": "string", "enum": ["none", "poisson", "screened_poisson"] },
+        "postprocess_required": { "type": "boolean" },
+        "require_postprocess": { "type": "boolean" },
+        "fail_on_postprocess_skip": { "type": "boolean" },
+        "poisson_depth": { "type": "integer", "minimum": 1 },
+        "poisson_scale": { "type": "number", "exclusiveMinimum": 0.0 },
+        "poisson_linear_fit": { "type": "boolean" },
+        "poisson_crop_to_input_bounds": { "type": "boolean" },
+        "poisson_crop_scale": { "type": "number", "exclusiveMinimum": 0.0 },
+        "poisson_density_quantile": { "type": ["number", "null"], "minimum": 0.0, "maximum": 1.0 },
+        "memory_budget_mb": { "type": ["integer", "null"], "minimum": 1 },
+        "occupancy_threshold": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "uncertainty_aggregation": { "type": "string", "enum": ["min", "product", "logit_sum"] }
       }
     },
     "volume": {
@@ -469,7 +494,8 @@ These replace standalone JSON schema files.
       "properties": {
         "backend": { "type": "string", "enum": ["dense", "chunked", "sparse_hash", "openvdb"] },
         "sparse_chunk_size": { "type": "integer", "minimum": 1 },
-        "serialization": { "type": "string", "enum": ["npz"] }
+        "serialization": { "type": "string", "enum": ["npz"] },
+        "export_openvdb": { "type": "boolean" }
       }
     },
     "ensemble": {
@@ -480,9 +506,51 @@ These replace standalone JSON schema files.
         "keep_all_artifacts": { "type": "boolean" }
       }
     },
-    "primitive_fit": { "type": "object" },
-    "gaussian_ellipsoid": { "type": "object" },
-    "differentiable_render": { "type": "object" },
+    "primitive_fit": {
+      "type": "object",
+      "properties": {
+        "primitive_families": { "type": "array", "items": { "type": "string", "enum": ["superfrustum", "ellipsoid", "superquadric"] } },
+        "target_point_count": { "type": "integer", "minimum": 1 },
+        "min_primitives": { "type": "integer", "minimum": 0 },
+        "max_primitives": { "type": "integer", "minimum": 1 },
+        "optimization_steps": { "type": "integer", "minimum": 0 },
+        "checkpoint_cadence": { "type": "integer", "minimum": 1 },
+        "fail_on_regression": { "type": "boolean" },
+        "loss_weights": { "type": "object" }
+      }
+    },
+    "gaussian_ellipsoid": {
+      "type": "object",
+      "properties": {
+        "primitive_count": { "type": "integer", "minimum": 1 },
+        "initialization": { "type": "string", "enum": ["farthest_point", "kmeans", "grid"] },
+        "min_radius": { "type": "number", "exclusiveMinimum": 0.0 },
+        "max_radius": { "type": ["number", "null"] },
+        "opacity_min": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "opacity_max": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "renderer": { "type": "string", "enum": ["cpu_projected_ellipse", "gpu_splat"] },
+        "export_mesh_proxy": { "type": "boolean" }
+      }
+    },
+    "differentiable_render": {
+      "type": "object",
+      "properties": {
+        "backend": { "type": "string", "enum": ["cpu_soft_silhouette", "blender_finite_difference", "nvdiffrast"] },
+        "optional_dependency_policy": { "type": "string", "enum": ["skip", "fail"] },
+        "gradient_mode": { "type": "string", "enum": ["finite_difference", "backend"] },
+        "finite_difference_epsilon": { "type": "number", "exclusiveMinimum": 0.0 },
+        "softness": { "type": "number", "exclusiveMinimum": 0.0 },
+        "min_variance": { "type": "number", "exclusiveMinimum": 0.0 },
+        "visual_hull_resolution": { "type": "integer", "minimum": 1 },
+        "primitive_count": { "type": "integer", "minimum": 1 },
+        "target_point_count": { "type": "integer", "minimum": 1 },
+        "min_radius": { "type": "number", "exclusiveMinimum": 0.0 },
+        "covariance_floor": { "type": "number", "minimum": 0.0 },
+        "kmeans_iterations": { "type": "integer", "minimum": 1 },
+        "chunk_size": { "type": ["integer", "null"], "minimum": 1 },
+        "loss_weights": { "type": "object" }
+      }
+    },
     "constraints": { "type": "object" },
     "synthetic_factory": { "type": "object" },
     "quality_budget": {
@@ -490,7 +558,8 @@ These replace standalone JSON schema files.
       "properties": {
         "budget_json": { "type": ["string", "null"] },
         "compare_baseline": { "type": ["string", "null"] },
-        "fail_on_regression": { "type": "boolean" }
+        "fail_on_regression": { "type": "boolean" },
+        "environment_compatibility": { "type": "string", "enum": ["warn", "strict", "ignore"] }
       }
     }
   }

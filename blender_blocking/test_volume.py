@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 import tempfile
+import types
 import unittest
 
 import numpy as np
@@ -25,8 +27,11 @@ from volume import (
     DenseVolumeGrid,
     SparseHashVolumeGrid,
     OpenVDBVolumeGrid,
+    VoxelTransform,
+    export_to_openvdb,
     extract_mesh,
     extract_surface_voxels,
+    import_from_openvdb,
     load_volume,
     save_volume,
 )
@@ -237,6 +242,83 @@ class VolumeGridTests(unittest.TestCase):
         self.assertIn("npz_sha256", metadata.hashes)
         self.assertEqual(loaded.backend, "openvdb")
         np.testing.assert_array_equal(loaded.to_dense(), np.zeros((6, 6, 4), dtype=bool))
+
+    def test_openvdb_binding_export_import_round_trip_with_fake_module(self) -> None:
+        fake_module = _FakeOpenVDBModule("pyopenvdb")
+        previous_pyopenvdb = sys.modules.get("pyopenvdb")
+        previous_openvdb = sys.modules.get("openvdb")
+        sys.modules["pyopenvdb"] = fake_module
+        sys.modules.pop("openvdb", None)
+        try:
+            data = np.zeros((4, 4, 4), dtype=bool)
+            data[1:3, 1:3, 1:3] = True
+            grid = OpenVDBVolumeGrid.from_dense(
+                data,
+                self.bounds,
+                chunk_size=2,
+            )
+            with tempfile.TemporaryDirectory() as tmpdir:
+                path = Path(tmpdir) / "shape.vdb"
+                export_status = export_to_openvdb(grid, path)
+                self.assertEqual(export_status.status, "exported")
+                self.assertTrue(path.exists())
+
+                imported = import_from_openvdb(
+                    path,
+                    bounds=self.bounds,
+                    transform=VoxelTransform.from_bounds_shape(self.bounds, data.shape),
+                    chunk_size=2,
+                )
+            self.assertIsInstance(imported, OpenVDBVolumeGrid)
+            self.assertEqual(imported.openvdb_status.status, "imported")
+            np.testing.assert_array_equal(imported.to_dense(), data)
+        finally:
+            if previous_pyopenvdb is None:
+                sys.modules.pop("pyopenvdb", None)
+            else:
+                sys.modules["pyopenvdb"] = previous_pyopenvdb
+            if previous_openvdb is None:
+                sys.modules.pop("openvdb", None)
+            else:
+                sys.modules["openvdb"] = previous_openvdb
+
+
+class _FakeOpenVDBModule(types.ModuleType):
+    __version__ = "test"
+
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self._last_grid = None
+
+    class BoolGrid:
+        def __init__(self, background: bool = False) -> None:
+            self.background = background
+            self.name = ""
+            self.active_voxels = {}
+
+        def getAccessor(self):
+            return self
+
+        def setValueOn(self, coord, value) -> None:
+            self.active_voxels[tuple(int(v) for v in coord)] = bool(value)
+
+        def iter_active_values(self):
+            return tuple(self.active_voxels.items())
+
+    class FloatGrid(BoolGrid):
+        def setValueOn(self, coord, value) -> None:
+            self.active_voxels[tuple(int(v) for v in coord)] = float(value)
+
+    def createLinearTransform(self, voxelSize=1.0):
+        return {"voxelSize": float(voxelSize)}
+
+    def write(self, path: str, grids) -> None:
+        self._last_grid = list(grids)[0]
+        Path(path).write_text("fake openvdb", encoding="utf-8")
+
+    def read(self, path: str):
+        _ = Path(path).read_text(encoding="utf-8")
+        return [self._last_grid]
 
 
 if __name__ == "__main__":

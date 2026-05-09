@@ -2,7 +2,7 @@
 
 This repo keeps quality gates at the harness layer. The runner, e2e validator, and benchmark tool emit JSON artifacts, then `scripts/quality_budget.py` compares those artifacts against declarative budget files under `configs/`.
 
-`docs/IMPLEMENTATION_SPEC.md` lines 488-494 define the `quality_budget` config surface: `budget_json`, `compare_baseline`, and `fail_on_regression`. The files added here make that surface executable without adding backend dependencies.
+`docs/IMPLEMENTATION_SPEC.md` lines 556-563 define the `quality_budget` config surface: `budget_json`, `compare_baseline`, `fail_on_regression`, and `environment_compatibility`. The files added here make that surface executable without adding backend dependencies.
 
 ## Budget Files
 

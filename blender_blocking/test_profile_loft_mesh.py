@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import math
+import sys
 import unittest
+from pathlib import Path
 
 import bpy
 import bmesh
+
+sys.path.insert(0, str(Path(__file__).parent))
 
 from geometry.profile_models import EllipticalSlice
 from integration.blender_ops.profile_loft_mesh import create_loft_mesh_from_slices
@@ -106,4 +110,4 @@ class TestProfileLoftMesh(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(argv=[__file__])

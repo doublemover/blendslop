@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Mapping
 
+import numpy as np
+
 from ..backend import BackendCapabilities, BaseBackend, BackendBudget
 from ..types import CandidateMetrics, CandidateRequest, CandidateResult
 
@@ -79,8 +81,9 @@ class VisualHullBackend(BaseBackend):
             )
             if bool(openvdb_payload.get("available")):
                 warnings.append(
-                    "openvdb backend requested; using NPZ-interchange sparse backing "
-                    "because direct OpenVDB export is intentionally not implemented"
+                    "openvdb backend requested; sparse chunks are used in memory and "
+                    "direct OpenVDB artifact export will be attempted when artifacts "
+                    "are enabled"
                 )
             else:
                 warnings.append(
@@ -136,6 +139,26 @@ class VisualHullBackend(BaseBackend):
             except Exception as exc:
                 warnings.append(f"failed to save volume artifact: {exc}")
 
+            if requested_backend == "openvdb":
+                try:
+                    from volume import export_to_openvdb
+
+                    openvdb_export_path = root / "volume" / "volume.vdb"
+                    openvdb_export_status = export_to_openvdb(
+                        grid,
+                        openvdb_export_path,
+                    )
+                    mesh_metrics["openvdb_export"] = openvdb_export_status.to_dict()
+                    if openvdb_export_status.status == "exported":
+                        artifacts["volume_openvdb"] = openvdb_export_path
+                    else:
+                        warnings.append(
+                            "OpenVDB artifact export did not complete: "
+                            f"{openvdb_export_status.message}"
+                        )
+                except Exception as exc:
+                    warnings.append(f"failed to export OpenVDB artifact: {exc}")
+
         mesh_result = None
         postprocess_status: dict[str, Any] = _evaluate_postprocess(
             None,
@@ -150,7 +173,7 @@ class VisualHullBackend(BaseBackend):
                 allow_point_cloud_fallback=True,
             )
             postprocess = str(request.config.get("postprocess", "none"))
-            postprocess_status = _evaluate_postprocess(
+            final_mesh_result, postprocess_status = _postprocess_mesh(
                 mesh_result,
                 postprocess,
                 config=request.config,
@@ -166,18 +189,26 @@ class VisualHullBackend(BaseBackend):
                     f"mesh postprocess skipped: {postprocess_status['message']}"
                 )
             mesh_metrics["mesh_extraction"] = mesh_result.to_dict()
-            mesh_metrics["mesh"] = _mesh_metadata(mesh_result)
-            if mesh_result.available:
+            if final_mesh_result is not mesh_result:
+                mesh_metrics["mesh_postprocess_result"] = final_mesh_result.to_dict()
+            mesh_metrics["mesh"] = _mesh_metadata(final_mesh_result)
+            if final_mesh_result.available:
                 from metrics.topology import mesh_topology_report
 
-                topology = mesh_topology_report(mesh_result.vertices, mesh_result.faces)
+                topology = mesh_topology_report(
+                    final_mesh_result.vertices,
+                    final_mesh_result.faces,
+                )
                 mesh_metrics["topology"] = topology.to_dict()
                 if root is not None:
                     from reconstruction.mesh_io import write_obj
 
                     mesh_path = write_obj(
                         root / "mesh" / "visual_hull.obj",
-                        {"vertices": mesh_result.vertices, "faces": mesh_result.faces},
+                        {
+                            "vertices": final_mesh_result.vertices,
+                            "faces": final_mesh_result.faces,
+                        },
                         header=(f"candidate {request.candidate_id}", self.name),
                     )
                     artifacts["mesh_obj"] = mesh_path
@@ -228,24 +259,34 @@ def _evaluate_postprocess(
     *,
     config: Mapping[str, Any],
 ) -> dict[str, Any]:
+    _mesh, status = _postprocess_mesh(mesh_result, postprocess, config=config)
+    return status
+
+
+def _postprocess_mesh(
+    mesh_result: Any,
+    postprocess: str,
+    *,
+    config: Mapping[str, Any],
+) -> tuple[Any, dict[str, Any]]:
     method = str(postprocess).strip().lower()
     required = _postprocess_required(config)
     if method in {"", "none"}:
-        return {
+        return mesh_result, {
             "method": "none",
             "status": "skipped",
             "required": required,
             "message": "mesh postprocess disabled",
         }
     if method not in {"poisson", "screened_poisson"}:
-        return {
+        return mesh_result, {
             "method": method,
             "status": "failed",
             "required": required,
             "message": f"unsupported mesh postprocess mode: {method!r}",
         }
     if mesh_result is None:
-        return {
+        return mesh_result, {
             "method": method,
             "status": "skipped",
             "required": required,
@@ -253,7 +294,7 @@ def _evaluate_postprocess(
         }
     if not mesh_result.available:
         status = "failed" if required else "skipped"
-        return {
+        return mesh_result, {
             "method": method,
             "status": status,
             "required": required,
@@ -267,7 +308,7 @@ def _evaluate_postprocess(
     dependency = _optional_dependency_status("open3d")
     if not dependency["available"]:
         status = "failed" if required else "skipped"
-        return {
+        return mesh_result, {
             "method": method,
             "status": status,
             "required": required,
@@ -277,16 +318,164 @@ def _evaluate_postprocess(
                 f"{dependency['module_name']!r}"
             ),
         }
-    return {
+    try:
+        processed = _run_open3d_poisson(mesh_result, method, config)
+    except Exception as exc:
+        status = "failed" if required else "skipped"
+        return mesh_result, {
+            "method": method,
+            "status": status,
+            "required": required,
+            "dependency": dependency,
+            "message": f"postprocess {method!r} failed: {exc}",
+            "error_type": type(exc).__name__,
+        }
+    return processed, {
         "method": method,
-        "status": "skipped",
+        "status": "ok",
         "required": required,
         "dependency": dependency,
-        "message": (
-            f"postprocess {method!r} dependency is available, but backend-neutral "
-            "Poisson mesh reconstruction is not implemented"
-        ),
+        "message": f"postprocess {method!r} completed with Open3D Poisson",
+        "input_vertices": int(len(mesh_result.vertices)),
+        "input_faces": int(len(mesh_result.faces)),
+        "output_vertices": int(len(processed.vertices)),
+        "output_faces": int(len(processed.faces)),
+        "implementation": "open3d.geometry.TriangleMesh.create_from_point_cloud_poisson",
     }
+
+
+def _run_open3d_poisson(
+    mesh_result: Any,
+    method: str,
+    config: Mapping[str, Any],
+) -> Any:
+    import open3d as o3d
+    from metrics.topology import mesh_topology_report
+    from volume import MeshExtractionResult
+
+    vertices = np.asarray(mesh_result.vertices, dtype=np.float64)
+    faces = _triangulated_faces(np.asarray(mesh_result.faces, dtype=np.int64))
+    if vertices.ndim != 2 or vertices.shape[1] != 3 or len(vertices) < 4:
+        raise RuntimeError("Poisson postprocess requires at least four 3D vertices")
+
+    source_mesh = o3d.geometry.TriangleMesh()
+    source_mesh.vertices = o3d.utility.Vector3dVector(vertices)
+    if len(faces):
+        source_mesh.triangles = o3d.utility.Vector3iVector(faces)
+        source_mesh.remove_duplicated_vertices()
+        source_mesh.remove_degenerate_triangles()
+        source_mesh.remove_duplicated_triangles()
+        source_mesh.remove_non_manifold_edges()
+        source_mesh.compute_vertex_normals()
+
+    point_cloud = o3d.geometry.PointCloud()
+    point_cloud.points = source_mesh.vertices
+    normals = np.asarray(getattr(source_mesh, "vertex_normals", ()), dtype=np.float64)
+    if normals.shape == vertices.shape and np.linalg.norm(normals, axis=1).sum() > 0.0:
+        point_cloud.normals = source_mesh.vertex_normals
+    else:
+        point_cloud.estimate_normals()
+        try:
+            point_cloud.orient_normals_consistent_tangent_plane(
+                int(config.get("poisson_normal_neighbors", 16))
+            )
+        except Exception:
+            pass
+
+    depth = int(config.get("poisson_depth", config.get("postprocess_depth", 8)))
+    scale = float(config.get("poisson_scale", 1.1))
+    linear_fit = bool(config.get("poisson_linear_fit", False))
+    kwargs = {"depth": depth, "scale": scale, "linear_fit": linear_fit}
+    try:
+        processed_mesh, densities = (
+            o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
+                point_cloud,
+                **kwargs,
+            )
+        )
+    except TypeError:
+        kwargs.pop("linear_fit", None)
+        processed_mesh, densities = (
+            o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
+                point_cloud,
+                **kwargs,
+            )
+        )
+
+    if bool(config.get("poisson_crop_to_input_bounds", True)) and len(faces):
+        bbox = source_mesh.get_axis_aligned_bounding_box()
+        crop_scale = float(config.get("poisson_crop_scale", 1.05))
+        if crop_scale > 0.0:
+            bbox = bbox.scale(crop_scale, bbox.get_center())
+        processed_mesh = processed_mesh.crop(bbox)
+
+    densities_array = np.asarray(densities, dtype=np.float64)
+    density_quantile = config.get("poisson_density_quantile")
+    if density_quantile is not None and densities_array.size:
+        threshold = float(np.quantile(densities_array, float(density_quantile)))
+        processed_mesh.remove_vertices_by_mask(densities_array < threshold)
+
+    processed_mesh.remove_duplicated_vertices()
+    processed_mesh.remove_degenerate_triangles()
+    processed_mesh.remove_duplicated_triangles()
+    processed_mesh.compute_vertex_normals()
+
+    output_vertices = np.asarray(processed_mesh.vertices, dtype=np.float64)
+    output_faces = np.asarray(processed_mesh.triangles, dtype=np.int64)
+    output_normals = np.asarray(processed_mesh.vertex_normals, dtype=np.float64)
+    if len(output_vertices) == 0 or len(output_faces) == 0:
+        raise RuntimeError("Open3D Poisson produced an empty mesh")
+
+    topology = mesh_topology_report(output_vertices, output_faces).to_dict()
+    metrics = {
+        **dict(getattr(mesh_result, "metrics", {})),
+        "postprocess": method,
+        "postprocess_backend": "open3d",
+        "poisson_depth": depth,
+        "poisson_scale": scale,
+        "poisson_linear_fit": linear_fit,
+        "input_vertex_count": int(len(vertices)),
+        "input_face_count": int(len(faces)),
+        "output_vertex_count": int(len(output_vertices)),
+        "output_face_count": int(len(output_faces)),
+    }
+    if densities_array.size:
+        metrics.update(
+            {
+                "density_min": float(np.min(densities_array)),
+                "density_max": float(np.max(densities_array)),
+                "density_mean": float(np.mean(densities_array)),
+            }
+        )
+    return MeshExtractionResult(
+        status="ok",
+        method=f"{method}_open3d",
+        requested_method=getattr(mesh_result, "requested_method", mesh_result.method),
+        method_aliases=tuple(getattr(mesh_result, "method_aliases", ())),
+        vertices=output_vertices,
+        faces=output_faces,
+        normals=output_normals if output_normals.shape == output_vertices.shape else None,
+        message=f"{method} Open3D postprocess completed",
+        metrics=metrics,
+        topology=topology,
+    )
+
+
+def _triangulated_faces(faces: np.ndarray) -> np.ndarray:
+    if faces.size == 0:
+        return np.empty((0, 3), dtype=np.int64)
+    triangles: list[tuple[int, int, int]] = []
+    for face in np.asarray(faces, dtype=np.int64):
+        if len(face) < 3:
+            continue
+        first = int(face[0])
+        for index in range(1, len(face) - 1):
+            tri = (first, int(face[index]), int(face[index + 1]))
+            if len(set(tri)) == 3:
+                triangles.append(tri)
+    if not triangles:
+        return np.empty((0, 3), dtype=np.int64)
+    return np.asarray(triangles, dtype=np.int64)
 
 
 def _postprocess_required(config: Mapping[str, Any]) -> bool:

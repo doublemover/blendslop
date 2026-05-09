@@ -15,6 +15,14 @@ from typing import Any, Iterable, Mapping, Optional, Sequence
 
 
 SCHEMA_VERSION = "quality_perf_budget_v1"
+THRESHOLD_MODES = {"min", "max", "equal"}
+COMPARISON_MODES = {
+    "max_percent_increase",
+    "max_percent_decrease",
+    "max_absolute_increase",
+    "max_absolute_decrease",
+}
+OPERATOR_MODES = THRESHOLD_MODES | COMPARISON_MODES
 
 
 @dataclass(frozen=True)
@@ -138,10 +146,11 @@ def _evaluate_threshold(
     for record in matches:
         metric = str(threshold["metric"])
         value = _coerce_number(_lookup_metric(record.data, metric))
+        operator_mode = _threshold_operator_mode(threshold)
         passed, message = _compare_value(
             value,
             float(threshold["threshold"]),
-            str(threshold.get("mode", "min")),
+            operator_mode,
         )
         checks.append(
             {
@@ -150,7 +159,7 @@ def _evaluate_threshold(
                 "metric": metric,
                 "value": value,
                 "threshold": float(threshold["threshold"]),
-                "mode": str(threshold.get("mode", "min")),
+                "mode": operator_mode,
                 "required": required,
                 "passed": passed,
                 "message": message,
@@ -199,11 +208,12 @@ def _evaluate_comparison(
             continue
         before = _coerce_number(_lookup_metric(baseline.data, metric))
         after = _coerce_number(_lookup_metric(current.data, metric))
+        operator_mode = _comparison_operator_mode(comparison)
         passed, delta, message = _compare_delta(
             before,
             after,
             float(comparison["threshold"]),
-            str(comparison.get("mode", "max_percent_increase")),
+            operator_mode,
         )
         checks.append(
             {
@@ -214,7 +224,7 @@ def _evaluate_comparison(
                 "current": after,
                 "delta": delta,
                 "threshold": float(comparison["threshold"]),
-                "mode": str(comparison.get("mode", "max_percent_increase")),
+                "mode": operator_mode,
                 "required": required,
                 "passed": passed,
                 "message": message,
@@ -296,9 +306,31 @@ def _selector_matches(selector: Mapping[str, Any], record: BudgetRecord) -> bool
         expected = selector.get(key)
         if expected is None or expected == "*":
             continue
+        if key == "mode" and str(expected) in OPERATOR_MODES:
+            continue
         if str(expected) != str(actual):
             return False
     return True
+
+
+def _threshold_operator_mode(threshold: Mapping[str, Any]) -> str:
+    explicit = threshold.get("threshold_mode", threshold.get("operator"))
+    if explicit is not None:
+        return str(explicit)
+    raw_mode = str(threshold.get("mode", "min"))
+    if raw_mode in THRESHOLD_MODES:
+        return raw_mode
+    return "min"
+
+
+def _comparison_operator_mode(comparison: Mapping[str, Any]) -> str:
+    explicit = comparison.get("comparison_mode", comparison.get("operator"))
+    if explicit is not None:
+        return str(explicit)
+    raw_mode = str(comparison.get("mode", "max_percent_increase"))
+    if raw_mode in COMPARISON_MODES:
+        return raw_mode
+    return "max_percent_increase"
 
 
 def _selector_artifact_absent(

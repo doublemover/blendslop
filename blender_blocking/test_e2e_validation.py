@@ -852,6 +852,9 @@ def run_synthetic_suite_matrix(
     from blender_blocking.synthetic.blender_builders import render_views
     from blender_blocking.synthetic.registry import get_definition, specs_for_suite
 
+    output_root = Path(output_root).resolve()
+    if result_json is not None:
+        result_json = Path(result_json).resolve()
     output_root.mkdir(parents=True, exist_ok=True)
     matrix = []
     run_label = run_id or _utc_run_id(f"{suite}_matrix")
