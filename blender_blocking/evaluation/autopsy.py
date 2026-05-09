@@ -7,6 +7,7 @@ from typing import Any, Mapping
 
 from .schemas import EvaluationBundle, json_safe
 from .view_planning import active_view_plan_payload
+from .calibration import calibration_refinement_plan_payload
 
 try:
     from metrics.topology import topology_repair_plan
@@ -64,6 +65,22 @@ ACTION_CATALOG = {
         "low",
         user_input_needed=("additional silhouette view",),
     ),
+    "run_calibration_sweep": SuggestedAction(
+        "run_calibration_sweep",
+        "Run calibration sweep",
+        "Projection diagnostics suggest view role, bounds, scale, or framing mismatch.",
+        {"diagnostics.visual_hull.axis_or_transform_suspect": "decrease"},
+        "medium",
+        "low",
+        command=(
+            "python",
+            "blender_blocking/refinement_lab/cli.py",
+            "plan",
+            "--track",
+            "visual-hull-transform",
+            "--bounds-debug",
+        ),
+    ),
 }
 
 
@@ -77,6 +94,7 @@ class AutopsyPack:
     reproduce_command: tuple[str, ...] = ()
     active_view_plan: Mapping[str, object] = field(default_factory=dict)
     topology_repair_plan: Mapping[str, object] = field(default_factory=dict)
+    calibration_plan: Mapping[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -88,6 +106,7 @@ class AutopsyPack:
             "reproduce_command": list(self.reproduce_command),
             "active_view_plan": json_safe(self.active_view_plan),
             "topology_repair_plan": json_safe(self.topology_repair_plan),
+            "calibration_plan": json_safe(self.calibration_plan),
         }
 
 
@@ -98,6 +117,12 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
             action_ids.append("boundary_first_refinement")
         if "topology" in failure.code:
             action_ids.append("safe_topology_repair")
+        if (
+            "axis_or_transform" in failure.code
+            or "framing" in failure.code
+            or "calibration" in failure.code
+        ):
+            action_ids.append("run_calibration_sweep")
         if (
             "ambiguous" in failure.code
             or "calibration" in failure.code
@@ -119,6 +144,11 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
         if "safe_topology_repair" in action_ids
         else {}
     )
+    calibration_plan = (
+        calibration_refinement_plan_payload(bundle)
+        if "run_calibration_sweep" in action_ids
+        else {}
+    )
     return AutopsyPack(
         candidate_id=bundle.candidate_id,
         status=bundle.status,
@@ -127,6 +157,7 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
         artifact_paths=bundle.artifacts,
         active_view_plan=active_view_plan,
         topology_repair_plan=repair_plan,
+        calibration_plan=calibration_plan,
     )
 
 

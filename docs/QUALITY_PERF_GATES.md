@@ -117,6 +117,11 @@ Autopsy packs turn high ambiguity, calibration, and geometry failures into an
 `active_view_plan`. The plan lists concrete next captures such as diagonal or
 top-oblique silhouettes, along with expected information gain and capture notes,
 so refinement can ask for better input instead of only sweeping backend knobs.
+When visual-hull diagnostics flag axis, transform, bounds, or framing suspicion,
+the same autopsy pack now carries a `calibration_plan`. That plan points at the
+`visual-hull-transform` refinement track and enumerates safe bounds-padding,
+global-scale, per-view offset, and axis-role permutation probes with explicit
+acceptance deltas.
 
 Visual-hull rows include `diagnostics.visual_hull.*` metrics when projection
 diagnostics are available. These flag suspected axis/transform mismatches,

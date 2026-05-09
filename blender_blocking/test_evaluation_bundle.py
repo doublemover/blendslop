@@ -294,6 +294,16 @@ class EvaluationBundleTests(unittest.TestCase):
         self.assertIn("visual_hull_axis_or_transform_suspect", codes)
         self.assertIn("visual_hull_catastrophic_view_failure", codes)
         self.assertEqual(bundle.status, "fail")
+        autopsy = autopsy_pack_from_bundle(bundle).to_dict()
+        action_ids = {action["action_id"] for action in autopsy["suggested_actions"]}
+        calibration_plan = autopsy["calibration_plan"]
+        probe_ids = {probe["probe_id"] for probe in calibration_plan["probes"]}
+
+        self.assertIn("run_calibration_sweep", action_ids)
+        self.assertEqual(calibration_plan["recommended_track"], "visual-hull-transform")
+        self.assertTrue(calibration_plan["trigger_metrics"]["axis_or_transform_suspect"])
+        self.assertIn("axis_role_permutation_sweep", probe_ids)
+        self.assertIn("per_view_offset_sweep", probe_ids)
 
     def test_topology_autopsy_includes_safe_repair_plan(self) -> None:
         result = CandidateResult(
