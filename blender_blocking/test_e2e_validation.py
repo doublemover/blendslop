@@ -1926,7 +1926,13 @@ Default ensemble:
     )
     hull.add_argument(
         "--vh-postprocess",
-        choices=("none", "poisson", "screened_poisson"),
+        choices=(
+            "none",
+            "poisson",
+            "screened_poisson",
+            "smooth_guarded",
+            "topology_repair",
+        ),
         default=None,
     )
     hull.add_argument("--vh-memory-budget-mb", type=int, default=None)

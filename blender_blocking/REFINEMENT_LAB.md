@@ -145,6 +145,20 @@ Write or refresh autopsies:
 python -m blender_blocking.refinement_lab.cli autopsy --run-root temp/refinement-runs/default-vase-vh-transform
 ```
 
+Turn a result/autopsy payload into the next adaptive batch:
+
+```bash
+python -m blender_blocking.refinement_lab.cli adapt `
+  --result-json temp\refinement-runs\default-vase-vh-transform\cases\case\variants\variant\result.json `
+  --out temp\refinement-runs\adaptive-proposals.json `
+  --variants-out temp\refinement-runs\adaptive-variants.json `
+  --max-proposals 8
+```
+
+The adaptive planner consumes metric bundles plus autopsy plans such as
+`boundary_refinement_plan`, `calibration_plan`, `topology_repair_plan`, and
+`active_view_plan`, then emits runnable variants for the next plan.
+
 Append a human label:
 
 ```bash

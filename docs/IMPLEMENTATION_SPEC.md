@@ -474,7 +474,7 @@ These replace standalone JSON schema files.
         "adaptive_max_depth": { "type": "integer", "minimum": 0 },
         "boundary_refine": { "type": "boolean" },
         "mesh_method": { "type": "string", "enum": ["marching_cubes", "lewiner", "dual_contouring", "points"] },
-        "postprocess": { "type": "string", "enum": ["none", "poisson", "screened_poisson"] },
+        "postprocess": { "type": "string", "enum": ["none", "poisson", "screened_poisson", "smooth_guarded", "topology_repair"] },
         "postprocess_required": { "type": "boolean" },
         "require_postprocess": { "type": "boolean" },
         "fail_on_postprocess_skip": { "type": "boolean" },

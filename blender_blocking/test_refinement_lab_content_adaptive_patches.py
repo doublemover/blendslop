@@ -11,7 +11,10 @@ from refinement_lab.content_adaptive_patches import (
     score_map_from_signals,
     select_adaptive_patches,
 )
-from refinement_lab.adaptive_planner import proposals_from_bundle
+from refinement_lab.adaptive_planner import (
+    proposals_from_bundle,
+    proposals_from_result_payload,
+)
 
 
 class ContentAdaptivePatchTests(unittest.TestCase):
@@ -125,6 +128,63 @@ class ContentAdaptivePatchTests(unittest.TestCase):
         )
         self.assertIn("content-adaptive-patches", patch.tags)
         self.assertIn("--shape-residual-policy", patch.cli_args)
+
+    def test_adaptive_planner_promotes_autopsy_plans_to_variants(self) -> None:
+        payload = {
+            "autopsy_pack": {
+                "candidate_id": "case-a/variant-b",
+                "status": "fail",
+                "failures": (
+                    "silhouette_boundary_blobby",
+                    "visual_hull_axis_or_transform_suspect",
+                    "topology_non_manifold",
+                    "geometry_ambiguous_depth",
+                ),
+                "boundary_refinement_plan": {
+                    "schema_version": "boundary_refinement_plan_v1",
+                    "probes": [{"probe_id": "content_adaptive_patch_sweep"}],
+                },
+                "calibration_plan": {
+                    "schema_version": "calibration_refinement_plan_v1",
+                    "probes": [{"probe_id": "axis_role_permutation_sweep"}],
+                },
+                "topology_repair_plan": {
+                    "schema_version": "topology_repair_plan_v1",
+                    "safe_automatic": True,
+                    "probes": [{"probe_id": "drop_loose_vertices"}],
+                },
+                "active_view_plan": {
+                    "schema_version": "active_view_plan_v1",
+                    "requests": [{"view_id": "front_side_45", "role": "diagonal"}],
+                },
+            }
+        }
+
+        proposals = proposals_from_result_payload(payload, max_proposals=8)
+        titles = {proposal.title for proposal in proposals}
+
+        self.assertIn("Autopsy active-view capture", titles)
+        self.assertIn("Autopsy boundary refinement sweep", titles)
+        self.assertIn("Autopsy calibration sweep", titles)
+        self.assertIn("Autopsy topology repair pass", titles)
+        boundary = next(
+            proposal
+            for proposal in proposals
+            if proposal.title == "Autopsy boundary refinement sweep"
+        )
+        self.assertIn("--vh-boundary-refine", boundary.cli_args)
+        self.assertIn("--shape-residual-policy", boundary.cli_args)
+        topology = next(
+            proposal
+            for proposal in proposals
+            if proposal.title == "Autopsy topology repair pass"
+        )
+        self.assertIn("--vh-postprocess", topology.cli_args)
+        self.assertIn("topology_repair", topology.cli_args)
+        variant = topology.to_variant(parent_variant_id="baseline")
+        self.assertIn("--reconstruction-mode", variant.cli_args)
+        self.assertIn("--validation-mode", variant.cli_args)
+        self.assertEqual(variant.parent_variant_id, "baseline")
 
 
 if __name__ == "__main__":

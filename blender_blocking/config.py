@@ -45,7 +45,13 @@ _VALID_SELECTION_POLICIES = {
     "pareto",
     "research_fidelity",
 }
-_VALID_POSTPROCESS = {"none", "poisson", "screened_poisson"}
+_VALID_POSTPROCESS = {
+    "none",
+    "poisson",
+    "screened_poisson",
+    "smooth_guarded",
+    "topology_repair",
+}
 _VALID_REFINEMENT_SEARCH = {"grid", "random", "coordinate", "successive_halving"}
 _VALID_REFINEMENT_OBJECTIVES = {
     "quality_win",

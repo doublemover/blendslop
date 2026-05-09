@@ -16,6 +16,7 @@ from config import (
     ShapeProgramConfig,
     SilhouetteExtractConfig,
     DifferentiableRenderConfig,
+    VisualHullConfig,
 )
 
 
@@ -131,6 +132,11 @@ class TestConfigValidation(unittest.TestCase):
         cfg = RefinementLabConfig(report_failures="everything")
         with self.assertRaises(ValueError):
             cfg.validate()
+
+    def test_pure_visual_hull_postprocess_modes_validate(self) -> None:
+        for postprocess in ("smooth_guarded", "topology_repair"):
+            with self.subTest(postprocess=postprocess):
+                VisualHullConfig(postprocess=postprocess).validate()
 
 
 if __name__ == "__main__":
