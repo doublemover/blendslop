@@ -93,6 +93,21 @@ class MetricValue:
             "notes": list(self.notes),
         }
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "MetricValue":
+        return cls(
+            name=str(payload.get("name", "")),
+            value=payload.get("value"),
+            unit=_optional_str(payload.get("unit")),
+            higher_is_better=_optional_bool(payload.get("higher_is_better")),
+            required=bool(payload.get("required", False)),
+            status=str(payload.get("status", "not_applicable")),
+            threshold=payload.get("threshold"),
+            threshold_source=_optional_str(payload.get("threshold_source")),
+            source=str(payload.get("source", "computed")),
+            notes=_string_tuple(payload.get("notes", ())),
+        )
+
 
 @dataclass(frozen=True)
 class MetricGroup:
@@ -118,6 +133,21 @@ class MetricGroup:
             "metadata": json_safe(self.metadata),
         }
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "MetricGroup":
+        metrics = payload.get("metrics", ())
+        return cls(
+            name=str(payload.get("name", "")),
+            status=str(payload.get("status", "not_applicable")),
+            metrics=tuple(
+                MetricValue.from_dict(metric)
+                for metric in _mapping_sequence(metrics)
+            ),
+            warnings=_string_tuple(payload.get("warnings", ())),
+            errors=_string_tuple(payload.get("errors", ())),
+            metadata=_mapping_or_empty(payload.get("metadata")),
+        )
+
 
 @dataclass(frozen=True)
 class FailureObservation:
@@ -139,6 +169,18 @@ class FailureObservation:
             "likely_causes": list(self.likely_causes),
             "recommended_actions": list(self.recommended_actions),
         }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "FailureObservation":
+        return cls(
+            code=str(payload.get("code", "")),
+            severity=str(payload.get("severity", "")),
+            subsystem=str(payload.get("subsystem", "")),
+            evidence_metrics=_mapping_or_empty(payload.get("evidence_metrics")),
+            evidence_artifacts=_string_tuple(payload.get("evidence_artifacts", ())),
+            likely_causes=_string_tuple(payload.get("likely_causes", ())),
+            recommended_actions=_string_tuple(payload.get("recommended_actions", ())),
+        )
 
 
 @dataclass(frozen=True)
@@ -200,6 +242,45 @@ class EvaluationBundle:
             "lineage_path": self.lineage_path,
         }
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "EvaluationBundle":
+        metric_groups = payload.get("metric_groups", ())
+        failures = payload.get("failures", ())
+        return cls(
+            schema_version=str(payload.get("schema_version", "")),
+            run_id=str(payload.get("run_id", "")),
+            created_at_utc=str(payload.get("created_at_utc", "")),
+            repo_revision=_optional_str(payload.get("repo_revision")),
+            mode=str(payload.get("mode", "")),
+            suite=str(payload.get("suite", "")),
+            candidate_id=str(payload.get("candidate_id", "")),
+            target_id=str(payload.get("target_id", "")),
+            status=str(payload.get("status", "fail")),
+            metric_groups=tuple(
+                MetricGroup.from_dict(group)
+                for group in _mapping_sequence(metric_groups)
+            ),
+            artifacts={
+                str(key): str(value)
+                for key, value in _mapping_or_empty(payload.get("artifacts")).items()
+            },
+            dependency_state=_mapping_or_empty(payload.get("dependency_state")),
+            degradation_state=_mapping_or_empty(payload.get("degradation_state")),
+            timings_ms={
+                str(key): _float(value)
+                for key, value in _mapping_or_empty(payload.get("timings_ms")).items()
+            },
+            peak_memory_mb=_optional_float(payload.get("peak_memory_mb")),
+            failures=tuple(
+                FailureObservation.from_dict(failure)
+                for failure in _mapping_sequence(failures)
+            ),
+            errors=_string_tuple(payload.get("errors", ())),
+            warnings=_string_tuple(payload.get("warnings", ())),
+            selection=_mapping_or_empty(payload.get("selection")),
+            lineage_path=_optional_str(payload.get("lineage_path")),
+        )
+
 
 def worst_status(statuses: Sequence[str]) -> str:
     order = {
@@ -217,3 +298,39 @@ def worst_status(statuses: Sequence[str]) -> str:
         return "not_applicable"
     return min((normalize_status(status) for status in statuses), key=lambda item: order[item])
 
+
+def _mapping_sequence(value: object) -> tuple[Mapping[str, Any], ...]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        return ()
+    return tuple(item for item in value if isinstance(item, Mapping))
+
+
+def _mapping_or_empty(value: object) -> Mapping[str, Any]:
+    return value if isinstance(value, Mapping) else {}
+
+
+def _string_tuple(value: object) -> tuple[str, ...]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        return ()
+    return tuple(str(item) for item in value)
+
+
+def _optional_str(value: object) -> str | None:
+    return None if value is None else str(value)
+
+
+def _optional_bool(value: object) -> bool | None:
+    return None if value is None else bool(value)
+
+
+def _optional_float(value: object) -> float | None:
+    if value is None:
+        return None
+    return _float(value)
+
+
+def _float(value: object) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0

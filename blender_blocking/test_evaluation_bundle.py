@@ -8,10 +8,57 @@ from evaluation.autopsy import autopsy_pack_from_bundle
 from evaluation import bundle_from_candidate
 from evaluation.export_qa import ExportQAReport, reports_from_payload
 from evaluation.reporting import compact_console_summary, markdown_report
+from evaluation.schemas import EvaluationBundle
 from reconstruction.types import CandidateMetrics, CandidateResult
 
 
 class EvaluationBundleTests(unittest.TestCase):
+    def test_evaluation_bundle_round_trips_through_json_payload(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-roundtrip",
+            backend_name="visual_hull_voxel",
+            status="degraded",
+            degraded=True,
+            metric_result=CandidateMetrics(
+                area_iou_min=0.72,
+                area_iou_mean=0.8,
+                boundary_iou_mean=0.66,
+                topology_score=0.88,
+                editability_score=0.54,
+                elapsed_s=1.25,
+                per_view={
+                    "front": {
+                        "area_iou": 0.72,
+                        "boundary_iou": 0.66,
+                        "signed_distance_loss": 0.08,
+                        "required": True,
+                        "passed": True,
+                    }
+                },
+                extras={
+                    "topology": {"watertight": True, "connected_components": 1},
+                    "recoverability": {
+                        "true_geometry": {"chamfer_l2": 0.08},
+                        "recoverable_geometry": {"chamfer_l2": 0.04},
+                    },
+                },
+            ),
+            warnings=("dependency degraded",),
+        )
+
+        bundle = bundle_from_candidate(
+            result=result,
+            repo="abc123",
+            run_id="run-roundtrip",
+            suite="synthetic-smoke",
+        )
+        restored = EvaluationBundle.from_dict(bundle.to_dict())
+
+        self.assertEqual(restored.to_dict(), bundle.to_dict())
+        self.assertEqual(restored.metric_index()["silhouette.min_view_iou"].value, 0.72)
+        self.assertEqual(restored.degradation_state["degraded"], True)
+        self.assertEqual(restored.warnings, ("dependency degraded",))
+
     def test_export_qa_payload_becomes_first_class_metric_group(self) -> None:
         result = CandidateResult(
             candidate_id="candidate-a",
