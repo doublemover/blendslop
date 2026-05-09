@@ -605,6 +605,8 @@ class ShapeProgramConfig:
     lathe_segments: int = 48
     bevel_modifier: bool = True
     weighted_normals: bool = True
+    run_export_qa: bool = False
+    export_qa_targets: Tuple[str, ...] = ("obj", "glb")
 
     def validate(self) -> None:
         if self.root_strategy not in {
@@ -626,6 +628,13 @@ class ShapeProgramConfig:
             raise ValueError("shape_program.editability_bias must be in [0, 1]")
         if self.lathe_segments < 8:
             raise ValueError("shape_program.lathe_segments must be >= 8")
+        if not isinstance(self.run_export_qa, bool):
+            raise ValueError("shape_program.run_export_qa must be a boolean")
+        invalid_targets = set(self.export_qa_targets) - {"obj", "glb", "gltf"}
+        if invalid_targets:
+            raise ValueError(
+                "shape_program.export_qa_targets must contain only obj/glb/gltf"
+            )
 
     def to_dict(self) -> Dict[str, object]:
         return {
@@ -637,6 +646,8 @@ class ShapeProgramConfig:
             "lathe_segments": self.lathe_segments,
             "bevel_modifier": self.bevel_modifier,
             "weighted_normals": self.weighted_normals,
+            "run_export_qa": self.run_export_qa,
+            "export_qa_targets": list(self.export_qa_targets),
         }
 
 

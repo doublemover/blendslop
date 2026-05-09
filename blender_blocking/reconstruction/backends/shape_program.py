@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Mapping, Sequence
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -83,6 +84,12 @@ class ShapeProgramBackend(BaseBackend):
         lathe_segments = config.get("lathe_segments", 48)
         if not isinstance(lathe_segments, int) or lathe_segments < 8:
             errors.append("shape_program.lathe_segments must be an integer >= 8")
+        if not isinstance(config.get("run_export_qa", False), bool):
+            errors.append("shape_program.run_export_qa must be a boolean")
+        targets = _export_qa_targets(config)
+        invalid_targets = set(targets) - {"obj", "glb", "gltf"}
+        if invalid_targets:
+            errors.append("shape_program.export_qa_targets must contain only obj/glb/gltf")
         return errors
 
     def estimate_budget(
@@ -152,6 +159,22 @@ class ShapeProgramBackend(BaseBackend):
                 diagnostics["compiled_blender"] = compiled.to_dict()
             except Exception as exc:
                 diagnostics["compile_error"] = str(exc)
+        export_qa_reports: tuple[Any, ...] = ()
+        if compiled is not None and bool(request.config.get("run_export_qa", False)):
+            if root is None:
+                diagnostics["export_qa_skipped"] = "artifact root is required for export QA"
+            else:
+                try:
+                    export_qa_reports = _run_shape_program_export_qa(
+                        compiled,
+                        root / "shape-program" / "export-qa",
+                        targets=_export_qa_targets(request.config),
+                    )
+                    diagnostics["export_qa"] = [
+                        report.to_dict() for report in export_qa_reports
+                    ]
+                except Exception as exc:
+                    diagnostics["export_qa_error"] = str(exc)
         elapsed_s = time.perf_counter() - started
         if diagnostics_path is not None:
             artifacts["shape_program_diagnostics"] = write_json(
@@ -175,6 +198,29 @@ class ShapeProgramBackend(BaseBackend):
             degraded = True
         if compiled is not None and compiled.warnings:
             warnings = warnings + tuple(compiled.warnings)
+        extras = {
+            "shape_program": program.to_dict(),
+            "diagnostics": diagnostics,
+            "compiled_blender": None if compiled is None else compiled.to_dict(),
+            "compiled_scene_summary": compiled_scene_summary,
+            "primitive_editability": 1.0,
+            "modifier_editability": 0.8 if compiled is not None else 0.0,
+            "object_hierarchy_score": 1.0 if compiled is not None else 0.6,
+            "editability": _editability_report(
+                program,
+                request.config,
+                compiled=compiled is not None,
+                topology_score=float(compiled_topology.get("topology_score", 0.0)),
+                export_roundtrip_score=_export_qa_score(export_qa_reports),
+            ),
+            "topology": compiled_topology,
+            "research_only": compiled is None,
+            "editable_output": True,
+        }
+        if export_qa_reports:
+            extras["export_qa"] = {
+                "reports": [report.to_dict() for report in export_qa_reports],
+            }
         metrics = CandidateMetrics(
             per_view=_uncompiled_per_view_metrics(request.target),
             editability_score=_editability_score(
@@ -184,24 +230,7 @@ class ShapeProgramBackend(BaseBackend):
             ),
             complexity_penalty=_complexity_penalty(program, request.config),
             elapsed_s=elapsed_s,
-            extras={
-                "shape_program": program.to_dict(),
-                "diagnostics": diagnostics,
-                "compiled_blender": None if compiled is None else compiled.to_dict(),
-                "compiled_scene_summary": compiled_scene_summary,
-                "primitive_editability": 1.0,
-                "modifier_editability": 0.8 if compiled is not None else 0.0,
-                "object_hierarchy_score": 1.0 if compiled is not None else 0.6,
-                "editability": _editability_report(
-                    program,
-                    request.config,
-                    compiled=compiled is not None,
-                    topology_score=float(compiled_topology.get("topology_score", 0.0)),
-                ),
-                "topology": compiled_topology,
-                "research_only": compiled is None,
-                "editable_output": True,
-            },
+            extras=extras,
         )
         return CandidateResult(
             candidate_id=request.candidate_id,
@@ -506,6 +535,44 @@ def _compile_program(program: ShapeProgram, config: Mapping[str, Any]) -> Any:
     )
 
 
+def _run_shape_program_export_qa(
+    compiled: Any,
+    output_root: Path,
+    *,
+    targets: Sequence[str],
+) -> tuple[Any, ...]:
+    try:
+        from blender_blocking.integration.blender_ops.export_qa import (
+            run_export_roundtrip_qa,
+        )
+    except Exception:  # pragma: no cover - legacy script import path
+        from integration.blender_ops.export_qa import run_export_roundtrip_qa  # type: ignore
+
+    return run_export_roundtrip_qa(
+        tuple(getattr(compiled, "objects", ()) or ()),
+        output_root,
+        targets=targets,
+    )
+
+
+def _export_qa_targets(config: Mapping[str, Any]) -> tuple[str, ...]:
+    raw = config.get("export_qa_targets", ("obj", "glb"))
+    if isinstance(raw, str):
+        values = tuple(part.strip().lower() for part in raw.split(",") if part.strip())
+    elif isinstance(raw, Sequence):
+        values = tuple(str(part).strip().lower() for part in raw if str(part).strip())
+    else:
+        values = ("obj", "glb")
+    return values or ("obj", "glb")
+
+
+def _export_qa_score(reports: Sequence[Any]) -> float:
+    if not reports:
+        return 0.0
+    scores = [float(getattr(report, "qa_score", 0.0) or 0.0) for report in reports]
+    return float(sum(scores) / len(scores)) if scores else 0.0
+
+
 def _compiled_scene_summary(compiled: Any) -> dict[str, Any]:
     if compiled is None:
         return {
@@ -636,6 +703,7 @@ def _editability_report(
     *,
     compiled: bool = False,
     topology_score: float = 0.0,
+    export_roundtrip_score: float = 0.0,
 ) -> dict[str, Any]:
     node_count = max(1, program.node_count())
     residual_count = program.residual_patch_count()
@@ -646,9 +714,10 @@ def _editability_report(
         "mesh_density_score": 1.0,
         "semantic_part_score": 1.0 if all(node.name for node in program.root_nodes) else 0.65,
         "topology_score": topology_score,
-        "export_roundtrip_score": 0.0,
-        "warnings": (
-            "render/export round-trip QA has not been run for compiled shape program",
+        "export_roundtrip_score": export_roundtrip_score,
+        "warnings": _editability_report_warnings(
+            compiled=compiled,
+            export_roundtrip_score=export_roundtrip_score,
         ),
         "metadata": {
             "node_count": node_count,
@@ -664,6 +733,18 @@ def _complexity_penalty(program: ShapeProgram, config: Mapping[str, Any]) -> flo
     node_pressure = program.node_count() / float(max_nodes)
     residual_pressure = program.residual_patch_count() / float(max_nodes)
     return max(0.0, min(1.0, node_pressure * 0.5 + residual_pressure * 0.5))
+
+
+def _editability_report_warnings(
+    *,
+    compiled: bool,
+    export_roundtrip_score: float,
+) -> tuple[str, ...]:
+    if not compiled:
+        return ("Blender compilation has not run for shape program",)
+    if export_roundtrip_score > 0.0:
+        return ("render QA has not been run for compiled shape program",)
+    return ("render/export round-trip QA has not been run for compiled shape program",)
 
 
 def _mean(values: Sequence[float]) -> float:

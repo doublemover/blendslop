@@ -85,6 +85,11 @@ class TestConfigValidation(unittest.TestCase):
         with self.assertRaises(ValueError):
             cfg.validate()
 
+    def test_invalid_shape_program_export_qa_target(self) -> None:
+        cfg = ShapeProgramConfig(export_qa_targets=("obj", "fbx"))
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
     def test_invalid_refinement_search(self) -> None:
         cfg = RefinementLabConfig(default_search="bad_search")
         with self.assertRaises(ValueError):

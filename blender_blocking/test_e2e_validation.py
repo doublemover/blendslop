@@ -1547,6 +1547,17 @@ Default ensemble:
         action=argparse.BooleanOptionalAction,
         default=None,
     )
+    shape_program.add_argument(
+        "--shape-run-export-qa",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    shape_program.add_argument(
+        "--shape-export-qa-targets",
+        type=_parse_csv,
+        default=None,
+        help="Comma-separated editable export QA targets, e.g. obj,glb.",
+    )
 
     ensemble = parser.add_argument_group("ensemble")
     ensemble.add_argument("--ensemble-candidates", type=_parse_csv, default=None, help="Comma-separated backend list.")
@@ -1957,6 +1968,10 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     _set_if_not_none(cfg.shape_program, "lathe_segments", args.shape_lathe_segments)
     _set_if_not_none(cfg.shape_program, "bevel_modifier", args.shape_bevel_modifier)
     _set_if_not_none(cfg.shape_program, "weighted_normals", args.shape_weighted_normals)
+    _set_if_not_none(cfg.shape_program, "run_export_qa", args.shape_run_export_qa)
+    _set_if_not_none(
+        cfg.shape_program, "export_qa_targets", args.shape_export_qa_targets
+    )
 
     if args.ensemble_candidates:
         cfg.ensemble.candidates = _candidate_configs(args.ensemble_candidates)

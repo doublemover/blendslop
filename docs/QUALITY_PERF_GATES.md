@@ -91,6 +91,25 @@ use `--validation-mode backend-status`. `research_only` is treated as an
 acceptable backend contract status because it emits a structured editable
 artifact without claiming render-IoU success.
 
+For Blender-side editable asset delivery checks, enable shape-program export
+round-trip QA:
+
+```bash
+blender --background --python blender_blocking/test_e2e_validation.py -- \
+  --synthetic-matrix \
+  --synthetic-suite smoke \
+  --synthetic-modes shape_program \
+  --validation-mode backend-status \
+  --shape-run-export-qa \
+  --shape-export-qa-targets obj,glb \
+  --result-json blender_blocking/test_output/shape_program_export_qa.json \
+  --no-progress
+```
+
+When Blender compilation runs with an artifact root, this produces `export_qa`
+evaluation metrics such as `export.qa_score`, `export.status_ok`, and
+`export.reimport_ok`.
+
 The matrix renders Blender-backed synthetic fixtures through the public synthetic builder, then calls the existing e2e custom-image path. Pure 2D synthetic definitions are marked as allowed skips unless `--synthetic-strict-skips` is set.
 
 ## Artifact Policy

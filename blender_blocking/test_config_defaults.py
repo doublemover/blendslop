@@ -38,6 +38,8 @@ class TestConfigDefaults(unittest.TestCase):
         self.assertIn("refinement_lab", cfg.to_dict())
         self.assertEqual(cfg.shape_program.root_strategy, "hybrid_profile_bounds")
         self.assertTrue(cfg.shape_program.compile_blender)
+        self.assertFalse(cfg.shape_program.run_export_qa)
+        self.assertEqual(cfg.shape_program.export_qa_targets, ("obj", "glb"))
         self.assertIn("shape_program", cfg.to_dict())
 
 
