@@ -1,0 +1,107 @@
+{
+  "$schema": "./quality_perf_budget.schema.json",
+  "schema_version": "quality_perf_budget_v1",
+  "name": "quality-smoke",
+  "description": "Loose local/CI smoke budgets for e2e synthetic rows and short pure-Python benchmark cases.",
+  "thresholds": [
+    {
+      "id": "e2e.synthetic.rows.pass",
+      "artifact": "e2e",
+      "metric": "metrics.passed",
+      "mode": "min",
+      "threshold": 1.0,
+      "required": true,
+      "description": "Every synthetic matrix row must pass or be an allowed skip."
+    },
+    {
+      "id": "e2e.synthetic.render_iou.floor",
+      "artifact": "e2e",
+      "metric": "metrics.average_iou",
+      "mode": "min",
+      "threshold": 0.55,
+      "required": false,
+      "description": "Renderable mesh rows with IoU output should stay above the smoke floor."
+    },
+    {
+      "id": "bench.canonicalize.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "canonicalize_mask",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 100.0,
+      "required": true
+    },
+    {
+      "id": "bench.compare.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "compare_silhouettes",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 120.0,
+      "required": true
+    },
+    {
+      "id": "bench.extract.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "extract_binary_silhouette",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 60.0,
+      "required": true
+    },
+    {
+      "id": "bench.pipeline.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "silhouette_pipeline",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 250.0,
+      "required": true
+    },
+    {
+      "id": "bench.volume_surface.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "volume_surface_vectorized",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 250.0,
+      "required": true
+    },
+    {
+      "id": "bench.target_builder.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "target_builder",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 250.0,
+      "required": true
+    }
+  ],
+  "comparisons": [
+    {
+      "id": "bench.quality_smoke.per_iter.regression_pct",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max_percent_increase",
+      "threshold": 25.0,
+      "required": false,
+      "description": "Any matching benchmark may slow down by at most 25 percent versus baseline before warning/failing when regression gating is enabled."
+    },
+    {
+      "id": "e2e.synthetic.iou.regression_abs",
+      "artifact": "e2e",
+      "metric": "metrics.average_iou",
+      "mode": "max_absolute_decrease",
+      "threshold": 0.03,
+      "required": false,
+      "description": "Renderable synthetic IoU should not drop by more than 0.03 versus baseline."
+    }
+  ]
+}

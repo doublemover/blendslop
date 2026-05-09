@@ -22,6 +22,7 @@ Already configured Blender? Jump straight to the [QUICKSTART](QUICKSTART.md).
 - **[CI_CD.md](CI_CD.md)** - CI/CD testing with real Blender (GitHub Actions, Docker)
 - **[../AGENTS.md](../AGENTS.md)** - Quality gates for agents/crews (pre-commit, testing requirements)
 - **[E2E_VALIDATION_SUMMARY.md](E2E_VALIDATION_SUMMARY.md)** - Validation framework details
+- **[../docs/QUALITY_PERF_GATES.md](../docs/QUALITY_PERF_GATES.md)** - Runner phases, synthetic matrix, budget JSON, and artifact policy
 
 ## What It Does
 
@@ -115,13 +116,20 @@ blender --background --python test_runner.py
 # Quick tests (for pre-commit)
 blender --background --python test_runner.py -- --quick
 
+# Phase-based runner entry points
+python test_runner.py --phase pure
+blender --background --python test_runner.py -- --phase quick
+blender --background --python test_runner.py -- --phase blender
+python test_runner.py --phase bench --bench-case quality-smoke --budget-json ../configs/quality_perf_budget-smoke.json
+blender --background --python test_runner.py -- --phase quality-smoke --budget-json ../configs/quality_perf_budget-smoke.json
+
 # Verbose output
 blender --background --python test_runner.py -- --verbose
 ```
 
 ### Test Suite
 
-The test runner executes 7 test suites:
+The legacy test runner executes these suites:
 1. **Pure Python** - Config, geometry, and image-processing tests (no Blender required)
 2. **Version Compatibility** - Detects Blender version and validates API compatibility
 3. **Boolean Solver Enum** - Validates Blender API enums for current version
@@ -129,6 +137,8 @@ The test runner executes 7 test suites:
 5. **Full Workflow** - End-to-end procedural generation
 6. **E2E Validation** - Complete pipeline with IoU comparison (reference → 3D → render → compare)
 7. **Dependency Check** - Verifies all packages installed correctly
+
+The phase runner adds named phases for `pure`, `quick`, `blender`, `bench`, `nightly`, and `quality-smoke`. Benchmark and quality-smoke phases write JSON artifacts and optional budget reports; see [../docs/QUALITY_PERF_GATES.md](../docs/QUALITY_PERF_GATES.md).
 
 ### Supported Blender Versions
 

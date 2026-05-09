@@ -15,10 +15,12 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import copy
 import sys
 from pathlib import Path
 import json
 from dataclasses import fields, is_dataclass
+from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, Mapping, Optional, Sequence, Tuple
 
 # Add both import roots used by this legacy codebase:
@@ -94,6 +96,12 @@ DEFAULT_ENSEMBLE_CANDIDATES = (
     "primitive_fit_refine",
     "gaussian_ellipsoid_proxy",
     "differentiable_refine",
+)
+DEFAULT_SYNTHETIC_MATRIX_MODES = (
+    "legacy",
+    "loft_profile",
+    "silhouette_intersection",
+    "visual_hull_voxel",
 )
 
 
@@ -819,6 +827,245 @@ def test_with_custom_images(
     return passed
 
 
+def run_synthetic_suite_matrix(
+    *,
+    suite: str,
+    modes: Sequence[str] = DEFAULT_SYNTHETIC_MATRIX_MODES,
+    seed: int = 1234,
+    count: Optional[int] = None,
+    output_root: Path = Path("test_output/e2e_synthetic"),
+    base_config: Optional[BlockingConfig] = None,
+    iou_threshold: float = 0.7,
+    view_thresholds: Optional[Dict[str, float]] = None,
+    validation_mode: str = "auto",
+    config_label: str = "synthetic",
+    result_json: Optional[Path] = None,
+    run_id: Optional[str] = None,
+    progress: bool = False,
+    strict_skips: bool = False,
+) -> bool:
+    """Render Blender-backed synthetic fixtures and validate each mode."""
+    if not BLENDER_AVAILABLE:
+        print("ERROR: synthetic suite matrix requires Blender.")
+        return False
+
+    from blender_blocking.synthetic.blender_builders import render_views
+    from blender_blocking.synthetic.registry import get_definition, specs_for_suite
+
+    output_root.mkdir(parents=True, exist_ok=True)
+    matrix = []
+    run_label = run_id or _utc_run_id(f"{suite}_matrix")
+    base = base_config or BlockingConfig()
+    specs = specs_for_suite(suite, seed=seed, count=count)
+
+    _print_rule("SYNTHETIC E2E MATRIX", width=72)
+    _print_kv_table(
+        (
+            ("suite", suite),
+            ("seed", seed),
+            ("count", len(specs)),
+            ("modes", ",".join(modes)),
+            ("output", output_root),
+            ("run_id", run_label),
+        )
+    )
+
+    for spec_index, spec in enumerate(specs):
+        definition_name = _definition_name_from_spec(spec)
+        definition = get_definition(definition_name)
+        case = f"{suite}:{definition_name}"
+        if not definition.blender_supported:
+            row = {
+                "artifact": "e2e",
+                "case": case,
+                "suite": suite,
+                "shape_id": spec.shape_id,
+                "definition": definition_name,
+                "mode": "",
+                "name": f"{spec.shape_id}/skipped",
+                "status": "skip",
+                "passed": True,
+                "metrics": {"passed": 1.0},
+                "message": "synthetic definition has no Blender mesh",
+            }
+            matrix.append(row)
+            print(f"SKIP: {spec.shape_id}: no Blender mesh builder")
+            continue
+
+        reference_dir = output_root / "references" / spec.shape_id
+        rendered = render_views(
+            spec,
+            reference_dir,
+            resolution=tuple(base.render_silhouette.resolution),
+            include_orbit=False,
+        )
+        reference_paths = {
+            key: str(rendered[key])
+            for key in ("front", "side", "top")
+            if key in rendered
+        }
+        if set(reference_paths) != {"front", "side", "top"}:
+            row = {
+                "artifact": "e2e",
+                "case": case,
+                "suite": suite,
+                "shape_id": spec.shape_id,
+                "definition": definition_name,
+                "mode": "",
+                "name": f"{spec.shape_id}/incomplete-references",
+                "status": "skip",
+                "passed": not strict_skips,
+                "metrics": {"passed": 0.0 if strict_skips else 1.0},
+                "message": "front/side/top synthetic references were not all generated",
+            }
+            matrix.append(row)
+            continue
+
+        for mode in modes:
+            cfg = copy.deepcopy(base)
+            cfg.reconstruction.reconstruction_mode = mode
+            cfg.reconstruction.num_slices = base.reconstruction.num_slices
+            mode_label = f"{config_label}-{mode}"
+            case_run_id = f"{run_label}_{spec_index:03d}_{mode}"
+            case_dir = output_root / "results" / mode / spec.shape_id
+            case_json = case_dir / "result.json"
+            print(f"\nCase: {spec.shape_id} mode={mode}")
+            try:
+                passed = test_with_custom_images(
+                    reference_paths["front"],
+                    reference_paths["side"],
+                    reference_paths["top"],
+                    num_slices=cfg.reconstruction.num_slices,
+                    iou_threshold=iou_threshold,
+                    view_thresholds=view_thresholds,
+                    render_config=cfg.render_silhouette,
+                    workflow_config=cfg,
+                    config_label=mode_label,
+                    validation_mode=validation_mode,
+                    render_output_dir=case_dir / "renders",
+                    result_json=case_json,
+                    run_id=case_run_id,
+                    progress=progress,
+                )
+                result_payload = _load_optional_json(case_json)
+                metrics = _matrix_metrics(result_payload, passed)
+                status = "pass" if passed else "fail"
+                message = ""
+            except Exception as exc:
+                passed = False
+                result_payload = {}
+                metrics = {"passed": 0.0}
+                status = "error"
+                message = str(exc)
+                if progress:
+                    import traceback
+
+                    traceback.print_exc()
+
+            matrix.append(
+                {
+                    "artifact": "e2e",
+                    "case": case,
+                    "suite": suite,
+                    "shape_id": spec.shape_id,
+                    "definition": definition_name,
+                    "mode": mode,
+                    "name": f"{spec.shape_id}/{mode}",
+                    "status": status,
+                    "passed": passed,
+                    "metrics": metrics,
+                    "result_json": case_json.as_posix(),
+                    "message": message,
+                }
+            )
+
+    skipped_failures = [
+        row for row in matrix if row["status"] == "skip" and not row["passed"]
+    ]
+    failed = [row for row in matrix if row["status"] in {"fail", "error"}]
+    summary = {
+        "schema_version": "e2e_synthetic_matrix_v1",
+        "generated_at": _utc_now(),
+        "suite": suite,
+        "seed": seed,
+        "run_id": run_label,
+        "modes": list(modes),
+        "output_root": output_root.as_posix(),
+        "passed": not failed and not skipped_failures,
+        "counts": {
+            "total": len(matrix),
+            "passed": sum(1 for row in matrix if row["status"] == "pass"),
+            "failed": len(failed),
+            "skipped": sum(1 for row in matrix if row["status"] == "skip"),
+        },
+        "matrix": matrix,
+    }
+    if result_json:
+        _json_dump(result_json, summary)
+        print(f"\nSaved synthetic matrix JSON: {result_json}")
+    _print_section("Synthetic Matrix Summary")
+    _print_kv_table(
+        (
+            ("passed", summary["passed"]),
+            ("total", summary["counts"]["total"]),
+            ("failed", summary["counts"]["failed"]),
+            ("skipped", summary["counts"]["skipped"]),
+        )
+    )
+    return bool(summary["passed"])
+
+
+def _definition_name_from_spec(spec: object) -> str:
+    parameters = getattr(spec, "parameters")
+    for key in ("primitive", "profile_kind", "blockout_kind", "mask_kind", "degradation"):
+        if key in parameters:
+            return str(parameters[key])
+    raise ValueError(f"Cannot infer registry definition for {getattr(spec, 'shape_id', '<unknown>')}")
+
+
+def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float]:
+    metrics: Dict[str, float] = {"passed": 1.0 if passed else 0.0}
+    for key in ("average_iou",):
+        value = payload.get(key)
+        if isinstance(value, (int, float)):
+            metrics[key] = float(value)
+    views = payload.get("views", {})
+    if isinstance(views, Mapping):
+        for view, view_payload in views.items():
+            if isinstance(view_payload, Mapping) and isinstance(view_payload.get("iou"), (int, float)):
+                metrics[f"{view}_iou"] = float(view_payload["iou"])
+    status = payload.get("status")
+    if isinstance(status, str):
+        metrics["backend_status_ok"] = 1.0 if status in {"success", "degraded"} else 0.0
+    selected = payload.get("selected")
+    if isinstance(selected, Mapping):
+        status = selected.get("status")
+        metrics["backend_status_ok"] = 1.0 if status in {"success", "degraded"} else 0.0
+        metric_result = selected.get("metric_result", {})
+        if isinstance(metric_result, Mapping):
+            for key in ("area_iou_mean", "area_iou_min", "elapsed_s"):
+                value = metric_result.get(key)
+                if isinstance(value, (int, float)):
+                    metrics[key] = float(value)
+    return metrics
+
+
+def _load_optional_json(path: Path) -> Dict[str, Any]:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _utc_run_id(label: str) -> str:
+    safe = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in label)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return f"{stamp}_{safe}"
+
+
 def _parse_resolution(value: str) -> Tuple[int, int]:
     if "x" in value:
         parts = value.lower().split("x", 1)
@@ -1207,6 +1454,34 @@ Default ensemble:
     misc.add_argument("--synthetic-suite", type=str, default=None)
     misc.add_argument("--synthetic-seed", type=int, default=None)
     misc.add_argument("--synthetic-output-root", type=str, default=None)
+    misc.add_argument(
+        "--synthetic-matrix",
+        action="store_true",
+        help="Run the synthetic suite x reconstruction mode matrix instead of a single sample/custom validation.",
+    )
+    misc.add_argument(
+        "--synthetic-modes",
+        type=_parse_csv,
+        default=None,
+        help="Comma-separated reconstruction modes for --synthetic-matrix.",
+    )
+    misc.add_argument(
+        "--synthetic-count",
+        type=int,
+        default=None,
+        help="Optional synthetic spec count for --synthetic-matrix.",
+    )
+    misc.add_argument(
+        "--synthetic-strict-skips",
+        action="store_true",
+        help="Treat skipped synthetic matrix rows as failures.",
+    )
+    misc.add_argument(
+        "--quality-report-json",
+        type=Path,
+        default=None,
+        help="Write quality budget report JSON after --synthetic-matrix.",
+    )
     misc.add_argument("--synthetic-commit-small-fixtures-only", action=argparse.BooleanOptionalAction, default=None)
     misc.add_argument("--synthetic-keep-heavy-artifacts", action=argparse.BooleanOptionalAction, default=None)
     misc.add_argument(
@@ -1628,7 +1903,54 @@ if __name__ == "__main__":
         if value is not None
     }
 
-    if all(custom_paths):
+    if args.synthetic_matrix:
+        matrix_root = Path(
+            args.synthetic_output_root or workflow_config.synthetic_factory.output_root
+        )
+        matrix_json = args.result_json or matrix_root / "e2e_synthetic_matrix.json"
+        success = run_synthetic_suite_matrix(
+            suite=args.synthetic_suite or workflow_config.synthetic_factory.suite,
+            modes=args.synthetic_modes or DEFAULT_SYNTHETIC_MATRIX_MODES,
+            seed=(
+                args.synthetic_seed
+                if args.synthetic_seed is not None
+                else workflow_config.synthetic_factory.seed
+            ),
+            count=args.synthetic_count,
+            output_root=matrix_root,
+            base_config=workflow_config,
+            iou_threshold=args.iou_threshold,
+            view_thresholds=thresholds,
+            validation_mode=args.validation_mode,
+            config_label=config_label,
+            result_json=matrix_json,
+            run_id=args.run_id,
+            progress=args.progress,
+            strict_skips=args.synthetic_strict_skips,
+        )
+        if args.quality_budget_json:
+            from scripts.quality_budget import evaluate_budget_files, write_report
+
+            report = evaluate_budget_files(
+                current_path=matrix_json,
+                budget_path=args.quality_budget_json,
+                baseline_path=args.quality_compare_baseline,
+            )
+            if args.quality_report_json:
+                write_report(args.quality_report_json, report)
+                print(f"Saved quality budget report: {args.quality_report_json}")
+            threshold_passed = bool(report.get("threshold_passed", False))
+            comparison_passed = bool(report.get("comparison_passed", True))
+            print(
+                "Quality budget: "
+                f"{'PASS' if report.get('passed') else 'FAIL'} "
+                f"(thresholds={'PASS' if threshold_passed else 'FAIL'}, "
+                f"comparisons={'PASS' if comparison_passed else 'FAIL'})"
+            )
+            success = success and threshold_passed
+            if workflow_config.quality_budget.fail_on_regression:
+                success = success and comparison_passed
+    elif all(custom_paths):
         success = test_with_custom_images(
             args.front,
             args.side,

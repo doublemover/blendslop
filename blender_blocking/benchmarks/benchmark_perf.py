@@ -9,18 +9,26 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import sys
 import time
 from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
 # Ensure blender_blocking is on sys.path
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+BLENDER_BLOCKING_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = BLENDER_BLOCKING_ROOT.parent
+sys.path.insert(0, str(BLENDER_BLOCKING_ROOT))
+sys.path.insert(0, str(REPO_ROOT))
 
 from utils.progress import progress_bar
+
+
+SCHEMA_VERSION = "benchmark_perf_results_v2"
 
 
 def _now() -> float:
@@ -54,9 +62,93 @@ class BenchResult:
     iterations: int
     elapsed_s: float
     per_iter_ms: float
+    case: str = "ad-hoc"
     status: str = "ok"
     meta: Dict[str, object] = field(default_factory=dict)
     skip_reason: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class BenchmarkCase:
+    name: str
+    benches: Tuple[str, ...]
+    description: str
+    overrides: Mapping[str, object] = field(default_factory=dict)
+
+
+BENCHMARK_CASES: Dict[str, BenchmarkCase] = {
+    "smoke": BenchmarkCase(
+        name="smoke",
+        description="Short pure-Python hotspot coverage for local sanity checks.",
+        benches=(
+            "canonicalize",
+            "compare",
+            "extract",
+            "silhouette_pipeline",
+            "volume_surface",
+            "target_builder",
+        ),
+        overrides={"iterations": 10, "resolution": 16, "profile_size": 64},
+    ),
+    "quality-smoke": BenchmarkCase(
+        name="quality-smoke",
+        description="Budget-gated synthetic smoke companion benchmarks.",
+        benches=(
+            "canonicalize",
+            "compare",
+            "extract",
+            "silhouette_pipeline",
+            "volume_surface",
+            "target_builder",
+        ),
+        overrides={"iterations": 20, "resolution": 24, "profile_size": 96},
+    ),
+    "ci": BenchmarkCase(
+        name="ci",
+        description="CI-sized benchmark pass with visual hull and profile coverage.",
+        benches=(
+            "visual_hull",
+            "canonicalize",
+            "compare",
+            "extract",
+            "silhouette_pipeline",
+            "volume_surface",
+            "target_builder",
+            "vertical_profile",
+            "vertical_width_profile",
+        ),
+        overrides={"iterations": 50, "repeat": 1, "resolution": 32},
+    ),
+    "nightly": BenchmarkCase(
+        name="nightly",
+        description="Broad overnight perf coverage including residual fitting.",
+        benches=(
+            "visual_hull",
+            "surface_voxels",
+            "vertical_profile",
+            "vertical_width_profile",
+            "profile_interpolation",
+            "combine_profiles",
+            "slice_metrics",
+            "resfit_residual",
+            "resfit_full",
+            "resfit_optimize",
+            "canonicalize",
+            "compare",
+            "extract",
+            "silhouette_pipeline",
+            "volume_surface",
+            "target_builder",
+        ),
+        overrides={
+            "iterations": 200,
+            "repeat": 2,
+            "resolution": 48,
+            "resfit_full_iterations": 1,
+            "resfit_opt_iterations": 2,
+        },
+    ),
+}
 
 
 def _print_result(result: BenchResult) -> None:
@@ -1144,16 +1236,113 @@ def bench_target_builder(iterations: int, progress: bool = True) -> BenchResult:
     )
 
 
-def _write_json(path: Path, results: Sequence[BenchResult]) -> None:
-    payload = {
-        "results": [asdict(result) for result in results],
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _environment_payload() -> dict[str, object]:
+    return {
+        "python": platform.python_version(),
+        "platform": platform.platform(),
+        "machine": platform.machine(),
+        "processor": platform.processor(),
     }
+
+
+def _result_payload(result: BenchResult) -> dict[str, object]:
+    payload = asdict(result)
+    metrics = {
+        "iterations": result.iterations,
+        "elapsed_s": result.elapsed_s,
+        "per_iter_ms": result.per_iter_ms,
+        "throughput": result.meta.get("throughput"),
+        "status_ok": 1.0 if result.status == "ok" else 0.0,
+    }
+    payload["metrics"] = metrics
+    return payload
+
+
+def _results_payload(
+    results: Sequence[BenchResult],
+    *,
+    budget_report: Optional[Mapping[str, Any]] = None,
+) -> dict[str, object]:
+    cases = sorted({result.case for result in results})
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "generated_at": _utc_now(),
+        "environment": _environment_payload(),
+        "cases": cases,
+        "results": [_result_payload(result) for result in results],
+    }
+    if budget_report is not None:
+        payload["budget_report"] = dict(budget_report)
+    return payload
+
+
+def _write_json(
+    path: Path,
+    results: Sequence[BenchResult],
+    *,
+    budget_report: Optional[Mapping[str, Any]] = None,
+) -> dict[str, object]:
+    payload = _results_payload(results, budget_report=budget_report)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2))
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return payload
+
+
+def _load_budget_report(
+    *,
+    current_payload: Mapping[str, Any],
+    current_path: Optional[Path],
+    budget_path: Optional[str],
+    baseline_path: Optional[str],
+    report_path: Optional[str],
+) -> Optional[dict[str, object]]:
+    if not budget_path:
+        return None
+    try:
+        from scripts.quality_budget import evaluate_budget_payloads, write_report
+    except Exception as exc:
+        return {
+            "passed": False,
+            "error": f"failed to import scripts.quality_budget: {exc}",
+        }
+
+    baseline_payload = None
+    if baseline_path:
+        baseline_payload = json.loads(Path(baseline_path).read_text(encoding="utf-8"))
+    report = evaluate_budget_payloads(
+        current_payload,
+        json.loads(Path(budget_path).read_text(encoding="utf-8")),
+        baseline_payload=baseline_payload,
+        artifact_path=str(current_path) if current_path else None,
+        baseline_path=baseline_path,
+    )
+    if report_path:
+        write_report(Path(report_path), report)
+    return report
 
 
 def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Performance micro-benchmarks")
+    parser.add_argument(
+        "--case",
+        action="append",
+        choices=sorted(BENCHMARK_CASES),
+        help="Named benchmark case. Can be repeated. Overrides --bench unless --bench is also provided with --case-benches.",
+    )
+    parser.add_argument(
+        "--case-benches",
+        action="store_true",
+        help="Run --bench selections inside each named --case instead of the case registry benches.",
+    )
+    parser.add_argument(
+        "--list-cases",
+        action="store_true",
+        help="Print benchmark case registry as JSON and exit.",
+    )
     parser.add_argument(
         "--bench",
         default="all",
@@ -1267,13 +1456,40 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     )
     parser.set_defaults(progress=True)
     parser.add_argument("--json", type=str, default=None, help="Write results to JSON")
+    parser.add_argument(
+        "--budget-json",
+        type=str,
+        default=None,
+        help="Quality/perf budget JSON to evaluate against the result payload.",
+    )
+    parser.add_argument(
+        "--baseline-json",
+        type=str,
+        default=None,
+        help="Previous benchmark JSON used for regression comparison.",
+    )
+    parser.add_argument(
+        "--budget-report-json",
+        type=str,
+        default=None,
+        help="Write standalone budget comparison report JSON.",
+    )
+    parser.add_argument(
+        "--fail-on-budget",
+        action="store_true",
+        help="Return exit code 1 when absolute budget thresholds fail.",
+    )
+    parser.add_argument(
+        "--fail-on-regression",
+        action="store_true",
+        help="Return exit code 1 when baseline comparisons fail.",
+    )
     return parser.parse_args(argv)
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
-    args = _parse_args(argv)
+def _default_benches(args: argparse.Namespace) -> List[str]:
     if args.all:
-        benches = [
+        return [
             "visual_hull",
             "surface_voxels",
             "vertical_profile",
@@ -1290,134 +1506,204 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "volume_surface",
             "target_builder",
         ]
-    else:
-        benches = [b.strip() for b in args.bench.split(",") if b.strip()]
+    return [b.strip() for b in args.bench.split(",") if b.strip()]
 
-    results: List[BenchResult] = []
 
+def _args_for_case(args: argparse.Namespace, case: BenchmarkCase) -> argparse.Namespace:
+    case_args = argparse.Namespace(**vars(args))
+    for key, value in case.overrides.items():
+        setattr(case_args, key, value)
+    return case_args
+
+
+def _run_one_benchmark(bench: str, args: argparse.Namespace) -> BenchResult:
+    if bench == "visual_hull":
+        return bench_visual_hull(
+            resolution=args.resolution,
+            num_views=args.num_views,
+            include_top=args.include_top,
+            repeat=args.repeat,
+            progress=args.progress,
+        )
+    if bench == "surface_voxels":
+        return bench_surface_voxels(
+            iterations=args.iterations,
+            resolution=args.resolution,
+            fill_ratio=args.fill_ratio,
+            progress=args.progress,
+        )
+    if bench == "vertical_profile":
+        return bench_vertical_profile(
+            iterations=args.iterations,
+            image_size=args.profile_size,
+            num_samples=args.profile_samples,
+            progress=args.progress,
+        )
+    if bench == "vertical_width_profile":
+        return bench_vertical_width_profile(
+            iterations=args.iterations,
+            image_size=args.profile_size,
+            num_samples=args.profile_samples,
+            progress=args.progress,
+        )
+    if bench == "profile_interpolation":
+        return bench_profile_interpolation(
+            iterations=args.iterations,
+            num_samples=args.profile_samples,
+            progress=args.progress,
+        )
+    if bench == "combine_profiles":
+        return bench_combine_profiles(
+            iterations=args.iterations,
+            num_profiles=args.combine_profiles,
+            num_samples=args.profile_samples,
+            method=args.combine_method,
+            progress=args.progress,
+        )
+    if bench == "slice_metrics":
+        return bench_slice_metrics(
+            iterations=args.iterations,
+            num_profiles=args.slice_profiles,
+            progress=args.progress,
+        )
+    if bench == "resfit_residual":
+        return bench_resfit_residual(
+            iterations=args.iterations,
+            num_points=args.resfit_points,
+            num_primitives=args.resfit_primitives,
+            progress=args.progress,
+        )
+    if bench == "resfit_full":
+        return bench_resfit_full(
+            iterations=args.resfit_full_iterations,
+            num_points=args.resfit_points,
+            num_primitives=args.resfit_primitives,
+            steps=args.resfit_full_steps,
+            progress=args.progress,
+        )
+    if bench == "resfit_optimize":
+        return bench_resfit_optimize(
+            iterations=args.resfit_opt_iterations,
+            num_points=args.resfit_points,
+            num_primitives=args.resfit_primitives,
+            steps=args.resfit_opt_steps,
+            progress=args.progress,
+        )
+    if bench == "canonicalize":
+        return bench_canonicalize(
+            iterations=args.iterations,
+            output_size=args.output_size,
+            progress=args.progress,
+        )
+    if bench == "compare":
+        return bench_compare_silhouettes(
+            iterations=args.iterations,
+            output_size=args.output_size,
+            progress=args.progress,
+        )
+    if bench == "extract":
+        return bench_extract_silhouette(
+            iterations=args.iterations,
+            progress=args.progress,
+        )
+    if bench == "silhouette_pipeline":
+        return bench_silhouette_pipeline(
+            iterations=args.iterations,
+            progress=args.progress,
+        )
+    if bench == "volume_surface":
+        return bench_volume_surface_new(
+            iterations=args.iterations,
+            resolution=args.resolution,
+            fill_ratio=args.fill_ratio,
+            progress=args.progress,
+        )
+    if bench == "target_builder":
+        return bench_target_builder(
+            iterations=args.iterations,
+            progress=args.progress,
+        )
+    return BenchResult(
+        name=bench,
+        iterations=0,
+        elapsed_s=0.0,
+        per_iter_ms=0.0,
+        status="skip",
+        skip_reason="Unknown benchmark",
+    )
+
+
+def _run_case(case_name: str, args: argparse.Namespace) -> List[BenchResult]:
+    case = BENCHMARK_CASES[case_name]
+    case_args = _args_for_case(args, case)
+    benches = _default_benches(args) if args.case_benches else list(case.benches)
+    results = []
+    print(f"\n=== Benchmark case: {case.name} ===")
+    print(case.description)
     for bench in benches:
-        if bench == "visual_hull":
-            result = bench_visual_hull(
-                resolution=args.resolution,
-                num_views=args.num_views,
-                include_top=args.include_top,
-                repeat=args.repeat,
-                progress=args.progress,
-            )
-        elif bench == "surface_voxels":
-            result = bench_surface_voxels(
-                iterations=args.iterations,
-                resolution=args.resolution,
-                fill_ratio=args.fill_ratio,
-                progress=args.progress,
-            )
-        elif bench == "vertical_profile":
-            result = bench_vertical_profile(
-                iterations=args.iterations,
-                image_size=args.profile_size,
-                num_samples=args.profile_samples,
-                progress=args.progress,
-            )
-        elif bench == "vertical_width_profile":
-            result = bench_vertical_width_profile(
-                iterations=args.iterations,
-                image_size=args.profile_size,
-                num_samples=args.profile_samples,
-                progress=args.progress,
-            )
-        elif bench == "profile_interpolation":
-            result = bench_profile_interpolation(
-                iterations=args.iterations,
-                num_samples=args.profile_samples,
-                progress=args.progress,
-            )
-        elif bench == "combine_profiles":
-            result = bench_combine_profiles(
-                iterations=args.iterations,
-                num_profiles=args.combine_profiles,
-                num_samples=args.profile_samples,
-                method=args.combine_method,
-                progress=args.progress,
-            )
-        elif bench == "slice_metrics":
-            result = bench_slice_metrics(
-                iterations=args.iterations,
-                num_profiles=args.slice_profiles,
-                progress=args.progress,
-            )
-        elif bench == "resfit_residual":
-            result = bench_resfit_residual(
-                iterations=args.iterations,
-                num_points=args.resfit_points,
-                num_primitives=args.resfit_primitives,
-                progress=args.progress,
-            )
-        elif bench == "resfit_full":
-            result = bench_resfit_full(
-                iterations=args.resfit_full_iterations,
-                num_points=args.resfit_points,
-                num_primitives=args.resfit_primitives,
-                steps=args.resfit_full_steps,
-                progress=args.progress,
-            )
-        elif bench == "resfit_optimize":
-            result = bench_resfit_optimize(
-                iterations=args.resfit_opt_iterations,
-                num_points=args.resfit_points,
-                num_primitives=args.resfit_primitives,
-                steps=args.resfit_opt_steps,
-                progress=args.progress,
-            )
-        elif bench == "canonicalize":
-            result = bench_canonicalize(
-                iterations=args.iterations,
-                output_size=args.output_size,
-                progress=args.progress,
-            )
-        elif bench == "compare":
-            result = bench_compare_silhouettes(
-                iterations=args.iterations,
-                output_size=args.output_size,
-                progress=args.progress,
-            )
-        elif bench == "extract":
-            result = bench_extract_silhouette(
-                iterations=args.iterations,
-                progress=args.progress,
-            )
-        elif bench == "silhouette_pipeline":
-            result = bench_silhouette_pipeline(
-                iterations=args.iterations,
-                progress=args.progress,
-            )
-        elif bench == "volume_surface":
-            result = bench_volume_surface_new(
-                iterations=args.iterations,
-                resolution=args.resolution,
-                fill_ratio=args.fill_ratio,
-                progress=args.progress,
-            )
-        elif bench == "target_builder":
-            result = bench_target_builder(
-                iterations=args.iterations,
-                progress=args.progress,
-            )
-        else:
-            result = BenchResult(
-                name=bench,
-                iterations=0,
-                elapsed_s=0.0,
-                per_iter_ms=0.0,
-                status="skip",
-                skip_reason="Unknown benchmark",
-            )
-
+        result = _run_one_benchmark(bench, case_args)
+        result.case = case.name
         results.append(result)
         _print_result(result)
+    return results
+
+
+def _print_case_registry() -> None:
+    payload = {
+        name: {
+            "description": case.description,
+            "benches": list(case.benches),
+            "overrides": dict(case.overrides),
+        }
+        for name, case in sorted(BENCHMARK_CASES.items())
+    }
+    print(json.dumps(payload, indent=2, sort_keys=True))
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    args = _parse_args(argv)
+    if args.list_cases:
+        _print_case_registry()
+        return 0
+
+    results: List[BenchResult] = []
+    if args.case:
+        for case_name in args.case:
+            results.extend(_run_case(case_name, args))
+    else:
+        for bench in _default_benches(args):
+            result = _run_one_benchmark(bench, args)
+            results.append(result)
+            _print_result(result)
+
+    json_path = Path(args.json) if args.json else None
+    base_payload = _results_payload(results)
+    budget_report = _load_budget_report(
+        current_payload=base_payload,
+        current_path=json_path,
+        budget_path=args.budget_json,
+        baseline_path=args.baseline_json,
+        report_path=args.budget_report_json,
+    )
 
     if args.json:
-        _write_json(Path(args.json), results)
+        _write_json(Path(args.json), results, budget_report=budget_report)
         print(f"Wrote JSON results to: {args.json}")
+
+    if budget_report:
+        passed = bool(budget_report.get("passed", False))
+        comparison_passed = bool(budget_report.get("comparison_passed", passed))
+        threshold_passed = bool(budget_report.get("threshold_passed", passed))
+        print(
+            "Budget result: "
+            f"{'PASS' if passed else 'FAIL'} "
+            f"(thresholds={'PASS' if threshold_passed else 'FAIL'}, "
+            f"comparisons={'PASS' if comparison_passed else 'FAIL'})"
+        )
+        if (args.fail_on_budget and not threshold_passed) or (
+            args.fail_on_regression and not comparison_passed
+        ):
+            return 1
 
     return 0
 

@@ -10,6 +10,9 @@ Usage:
     blender --background --python test_runner.py -- --verbose
     blender --background --python test_runner.py -- --quick  # Skip slow tests
     python test_runner.py  # Pure-Python tests + dependency check (no Blender)
+    python test_runner.py --phase pure
+    python test_runner.py --phase bench --bench-case quality-smoke
+    blender --background --python test_runner.py -- --phase quality-smoke
 
 Exit codes:
     0: All required tests passed
@@ -19,6 +22,7 @@ Exit codes:
 
 from __future__ import annotations
 
+import argparse
 import sys
 import unittest
 import site
@@ -26,7 +30,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 # Add blender_blocking directory to path for test module imports
-sys.path.insert(0, str(Path(__file__).parent))
+BLENDER_BLOCKING_ROOT = Path(__file__).parent
+REPO_ROOT = BLENDER_BLOCKING_ROOT.parent
+sys.path.insert(0, str(BLENDER_BLOCKING_ROOT))
+sys.path.insert(0, str(REPO_ROOT))
 
 def _add_dependency_path(path: Path) -> None:
     """Expose optional dependency installs without shadowing bundled packages."""
@@ -76,11 +83,14 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_resfitting_metrics", "test_resfitting_metrics"),
     ("pure_visual_hull", "integration.multi_view.test_visual_hull"),
     ("pure_silhouette_pipeline", "test_silhouette_pipeline"),
+    ("pure_soft_silhouette", "test_soft_silhouette"),
+    ("pure_differentiable_render", "test_differentiable_render"),
     ("pure_constraints_package", "test_constraints_package"),
     ("pure_volume", "test_volume"),
     ("pure_synthetic_factory", "test_synthetic_factory"),
     ("pure_metrics_foundation", "test_metrics_foundation"),
     ("pure_reconstruction_contracts", "test_reconstruction_contracts"),
+    ("pure_reconstruction_backends", "test_reconstruction_backends"),
 ]
 
 
@@ -429,19 +439,247 @@ def print_summary(results: Dict[str, Optional[bool]]) -> int:
         return 0
 
 
+RUNNER_PHASES = (
+    "pure",
+    "blender",
+    "quick",
+    "nightly",
+    "bench",
+    "quality-smoke",
+    "quality-gated-smoke",
+)
+
+
+def _runner_argv() -> List[str]:
+    if "--" in sys.argv:
+        return sys.argv[sys.argv.index("--") + 1 :]
+    return sys.argv[1:]
+
+
+def _parse_csv(value: str) -> Tuple[str, ...]:
+    items = tuple(item.strip() for item in value.split(",") if item.strip())
+    if not items:
+        raise argparse.ArgumentTypeError("expected a comma-separated list")
+    return items
+
+
+def _parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run blendslop validation phases.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python test_runner.py --phase pure
+  blender --background --python test_runner.py -- --phase quick
+  blender --background --python test_runner.py -- --phase quality-smoke --budget-json ../configs/quality_perf_budget-smoke.json
+  python test_runner.py --phase bench --bench-case quality-smoke --bench-json test_output/benchmarks/quality-smoke.json
+""",
+    )
+    parser.add_argument("--verbose", "-v", action="store_true")
+    parser.add_argument("--quick", "-q", action="store_true")
+    parser.add_argument(
+        "--phase",
+        action="append",
+        choices=RUNNER_PHASES,
+        help="Validation phase to run. Can be repeated.",
+    )
+    parser.add_argument(
+        "--phases",
+        type=_parse_csv,
+        default=None,
+        help="Comma-separated validation phases.",
+    )
+    parser.add_argument(
+        "--artifact-root",
+        type=Path,
+        default=BLENDER_BLOCKING_ROOT / "test_output" / "runner",
+        help="Root for JSON artifacts emitted by bench/quality phases.",
+    )
+    parser.add_argument("--bench-case", action="append", default=None)
+    parser.add_argument("--bench-json", type=Path, default=None)
+    parser.add_argument("--budget-json", type=Path, default=None)
+    parser.add_argument("--baseline-json", type=Path, default=None)
+    parser.add_argument("--budget-report-json", type=Path, default=None)
+    parser.add_argument("--synthetic-suite", default=None)
+    parser.add_argument("--synthetic-modes", type=_parse_csv, default=None)
+    parser.add_argument("--synthetic-count", type=int, default=None)
+    parser.add_argument("--synthetic-seed", type=int, default=1234)
+    parser.add_argument("--strict-skips", action="store_true")
+    parser.add_argument("--run-id", default=None)
+    parser.add_argument(
+        "--no-progress",
+        action="store_false",
+        dest="progress",
+        default=True,
+        help="Disable progress output.",
+    )
+    return parser.parse_args(argv)
+
+
+def _selected_phases(args: argparse.Namespace) -> List[str]:
+    phases: List[str] = []
+    if args.phase:
+        phases.extend(args.phase)
+    if args.phases:
+        phases.extend(args.phases)
+    if not phases:
+        return []
+    normalized = []
+    for phase in phases:
+        if phase not in RUNNER_PHASES:
+            raise ValueError(f"unknown runner phase: {phase}")
+        normalized.append(phase)
+    return normalized
+
+
+def run_pure_phase(verbose: bool = False, progress: bool = False) -> Dict[str, Optional[bool]]:
+    print("\n" + "=" * 70)
+    print("RUNNER PHASE: pure")
+    print("=" * 70)
+    return run_unittest_modules(PURE_PYTHON_TESTS, verbose=verbose, progress=progress)
+
+
+def run_bench_phase(args: argparse.Namespace, *, case_default: str = "ci") -> Dict[str, Optional[bool]]:
+    print("\n" + "=" * 70)
+    print("RUNNER PHASE: bench")
+    print("=" * 70)
+    from benchmarks import benchmark_perf
+
+    artifact_root = args.artifact_root
+    artifact_root.mkdir(parents=True, exist_ok=True)
+    bench_json = args.bench_json or artifact_root / f"bench-{case_default}.json"
+    bench_args: List[str] = ["--json", str(bench_json), "--no-progress"]
+    selected_cases = args.bench_case or [case_default]
+    for case in selected_cases:
+        bench_args.extend(["--case", case])
+    if args.budget_json:
+        bench_args.extend(["--budget-json", str(args.budget_json)])
+    if args.baseline_json:
+        bench_args.extend(["--baseline-json", str(args.baseline_json)])
+    if args.budget_report_json:
+        bench_args.extend(["--budget-report-json", str(args.budget_report_json)])
+    bench_args.extend(["--fail-on-budget", "--fail-on-regression"])
+    exit_code = benchmark_perf.main(bench_args)
+    return {f"bench:{','.join(selected_cases)}": exit_code == 0}
+
+
+def run_quality_smoke_phase(
+    args: argparse.Namespace,
+    *,
+    progress: bool = False,
+) -> Dict[str, Optional[bool]]:
+    print("\n" + "=" * 70)
+    print("RUNNER PHASE: quality-gated synthetic smoke")
+    print("=" * 70)
+    blender_ok, _ = check_blender_available()
+    if not blender_ok:
+        print("SKIPPED - Blender required")
+        return {"quality_smoke_e2e": None}
+
+    from scripts.quality_budget import evaluate_budget_files, write_report
+    from test_e2e_validation import (
+        DEFAULT_SYNTHETIC_MATRIX_MODES,
+        run_synthetic_suite_matrix,
+    )
+
+    artifact_root = args.artifact_root / "quality-smoke"
+    artifact_root.mkdir(parents=True, exist_ok=True)
+    matrix_json = artifact_root / "e2e-matrix.json"
+    bench_json = artifact_root / "benchmarks.json"
+    budget_json = args.budget_json or REPO_ROOT / "configs" / "quality_perf_budget-smoke.json"
+    e2e_report_json = artifact_root / "e2e-budget-report.json"
+    bench_report_json = artifact_root / "bench-budget-report.json"
+    modes = args.synthetic_modes or DEFAULT_SYNTHETIC_MATRIX_MODES
+
+    e2e_ok = run_synthetic_suite_matrix(
+        suite=args.synthetic_suite or "smoke",
+        modes=modes,
+        seed=args.synthetic_seed,
+        count=args.synthetic_count,
+        output_root=artifact_root / "synthetic",
+        result_json=matrix_json,
+        run_id=args.run_id,
+        progress=progress,
+        strict_skips=args.strict_skips,
+    )
+    if budget_json.exists():
+        e2e_report = evaluate_budget_files(
+            current_path=matrix_json,
+            budget_path=budget_json,
+            baseline_path=args.baseline_json,
+        )
+        write_report(e2e_report_json, e2e_report)
+        e2e_ok = e2e_ok and bool(e2e_report.get("passed", False))
+    else:
+        print(f"WARN: budget file not found: {budget_json}")
+
+    bench_args = argparse.Namespace(**vars(args))
+    bench_args.artifact_root = artifact_root
+    bench_args.bench_case = ["quality-smoke"]
+    bench_args.bench_json = bench_json
+    bench_args.budget_report_json = bench_report_json
+    bench_args.budget_json = budget_json if budget_json.exists() else None
+    bench_result = run_bench_phase(bench_args, case_default="quality-smoke")
+    bench_ok = all(value is not False for value in bench_result.values())
+    return {
+        "quality_smoke_e2e": e2e_ok,
+        "quality_smoke_bench": bench_ok,
+    }
+
+
+def run_nightly_phase(args: argparse.Namespace) -> Dict[str, Optional[bool]]:
+    print("\n" + "=" * 70)
+    print("RUNNER PHASE: nightly")
+    print("=" * 70)
+    results = run_test_suite(
+        verbose=args.verbose,
+        quick=False,
+        progress=args.progress,
+    )
+    nightly_args = argparse.Namespace(**vars(args))
+    nightly_args.synthetic_suite = args.synthetic_suite or "nightly-heavy"
+    nightly_args.bench_case = args.bench_case or ["nightly"]
+    bench_results = run_bench_phase(nightly_args, case_default="nightly")
+    results.update(bench_results)
+    return results
+
+
+def run_named_phase(
+    phase: str,
+    args: argparse.Namespace,
+) -> Dict[str, Optional[bool]]:
+    if phase == "pure":
+        return run_pure_phase(verbose=args.verbose, progress=args.progress)
+    if phase == "quick":
+        return run_test_suite(verbose=args.verbose, quick=True, progress=args.progress)
+    if phase == "blender":
+        return run_test_suite(verbose=args.verbose, quick=False, progress=args.progress)
+    if phase == "bench":
+        return run_bench_phase(args)
+    if phase in {"quality-smoke", "quality-gated-smoke"}:
+        return run_quality_smoke_phase(args, progress=args.progress)
+    if phase == "nightly":
+        return run_nightly_phase(args)
+    raise ValueError(f"unknown runner phase: {phase}")
+
+
 def main() -> None:
     """Main entry point for test runner."""
-    # Parse arguments (simple manual parsing since we're in Blender)
-    verbose = "--verbose" in sys.argv or "-v" in sys.argv
-    quick = "--quick" in sys.argv or "-q" in sys.argv
-    progress = "--no-progress" not in sys.argv
+    args = _parse_args(_runner_argv())
+    phases = _selected_phases(args)
 
-    if "--help" in sys.argv or "-h" in sys.argv:
-        print(__doc__)
-        sys.exit(0)
-
-    # Run tests
-    results = run_test_suite(verbose=verbose, quick=quick, progress=progress)
+    if phases:
+        results: Dict[str, Optional[bool]] = {}
+        for phase in phases:
+            phase_results = run_named_phase(phase, args)
+            for key, value in phase_results.items():
+                results[f"{phase}:{key}"] = value
+    else:
+        results = run_test_suite(
+            verbose=args.verbose,
+            quick=args.quick,
+            progress=args.progress,
+        )
 
     # Print summary and exit with appropriate code
     exit_code = print_summary(results)
