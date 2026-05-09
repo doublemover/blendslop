@@ -141,6 +141,38 @@ def verify_setup() -> bool:
         warnings.append(f"open3d: {e}")
         print("  WARN: open3d not found; Poisson postprocess will skip")
 
+    # Check research-only optional dependencies without making setup fail.
+    print("\nChecking research-only optional dependencies...")
+    try:
+        from utils.optional_deps import probe_dependency
+    except Exception:
+        try:
+            from blender_blocking.utils.optional_deps import probe_dependency
+        except Exception as e:
+            probe_dependency = None
+            warnings.append(f"optional dependency probe unavailable: {e}")
+            print(f"  WARN: optional dependency probe unavailable: {e}")
+
+    if probe_dependency is not None:
+        for dep_name in ("trimesh", "torch", "torchvision", "lpips", "openvdb", "nvdiffrast"):
+            dep = probe_dependency(dep_name, cache=False)
+            payload = dep.to_dict()
+            if dep.available:
+                version = payload.get("module_version") or "unknown version"
+                resolved = payload.get("resolved_module_name") or payload.get("import_name") or dep_name
+                print(f"  OK: {dep_name} available as {resolved} ({version})")
+                continue
+            print(f"  WARN: {dep_name} unavailable")
+            install_hint = payload.get("install_hint")
+            if install_hint:
+                print(f"    Install hint: {install_hint}")
+            if payload.get("supports_rocm") is False:
+                print("    ROCm/AMD: unsupported by this dependency")
+                alternative = payload.get("rocm_alternative")
+                if alternative:
+                    print(f"    Alternative: {alternative}")
+            warnings.append(f"{dep_name}: {dep.skip_reason}")
+
     # Try importing Blender (if available)
     print("\nChecking Blender availability...")
     try:

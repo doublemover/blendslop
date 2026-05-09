@@ -5,6 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
+try:
+    from blender_blocking.utils.optional_deps import probe_dependency
+except Exception:  # pragma: no cover - script-style imports
+    from utils.optional_deps import probe_dependency
+
 
 @dataclass(frozen=True)
 class NovelViewMetricReport:
@@ -47,22 +52,32 @@ def image_pair_report(
 
     ssim_value = None
     if compute_ssim:
-        try:
-            from skimage.metrics import structural_similarity
+        skimage_dependency = probe_dependency("skimage")
+        dependencies["skimage"] = skimage_dependency.to_dict()
+        if not skimage_dependency.available:
+            warnings.append(f"SSIM unavailable: {skimage_dependency.skip_reason}")
+        else:
+            try:
+                from skimage.metrics import structural_similarity
 
-            channel_axis = -1 if ref.ndim == 3 and ref.shape[-1] > 1 else None
-            ssim_value = float(
-                structural_similarity(
-                    ref,
-                    cand,
-                    data_range=1.0,
-                    channel_axis=channel_axis,
+                channel_axis = -1 if ref.ndim == 3 and ref.shape[-1] > 1 else None
+                ssim_value = float(
+                    structural_similarity(
+                        ref,
+                        cand,
+                        data_range=1.0,
+                        channel_axis=channel_axis,
+                    )
                 )
-            )
-            dependencies["skimage"] = {"status": "available"}
-        except Exception as exc:
-            dependencies["skimage"] = {"status": "unavailable", "error": str(exc)}
-            warnings.append(f"SSIM unavailable: {exc}")
+            except Exception as exc:
+                dependencies["skimage"] = {
+                    **dependencies["skimage"],
+                    "available": False,
+                    "status": "unusable",
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                }
+                warnings.append(f"SSIM unavailable: {exc}")
 
     lpips_value = None
     if compute_lpips:
@@ -137,18 +152,37 @@ def report_from_mapping(payload: Mapping[str, Any]) -> NovelViewMetricReport:
 
 
 def _lpips_score(reference: Any, candidate: Any) -> tuple[float | None, dict[str, Any], str]:
+    torch_dependency = probe_dependency("torch")
+    lpips_dependency = probe_dependency("lpips")
+    state = {
+        "torch": torch_dependency.to_dict(),
+        "lpips": lpips_dependency.to_dict(),
+    }
+    missing = [
+        dependency.skip_reason
+        for dependency in (torch_dependency, lpips_dependency)
+        if not dependency.available
+    ]
+    if missing:
+        return None, state, "LPIPS unavailable: " + "; ".join(missing)
     try:
-        import torch
-        import lpips
+        torch = torch_dependency.require()
+        lpips = lpips_dependency.require()
 
         loss = lpips.LPIPS(net="alex")
         ref_tensor = _lpips_tensor(reference, torch)
         cand_tensor = _lpips_tensor(candidate, torch)
         with torch.no_grad():
             value = float(loss(ref_tensor, cand_tensor).item())
-        return value, {"status": "available"}, ""
+        return value, state, ""
     except Exception as exc:
-        return None, {"status": "unavailable", "error": str(exc)}, f"LPIPS unavailable: {exc}"
+        state["runtime"] = {
+            "available": False,
+            "status": "unusable",
+            "error_type": type(exc).__name__,
+            "error": str(exc),
+        }
+        return None, state, f"LPIPS unavailable: {exc}"
 
 
 def _lpips_tensor(image: Any, torch: Any) -> Any:

@@ -9,16 +9,15 @@ soft-silhouette objective today.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-import importlib
 import math
 from typing import Any, Callable, Dict, Mapping, Protocol, Sequence
 
 import numpy as np
 
 try:
-    from utils.optional_deps import probe_dependency
+    from utils.optional_deps import optional_policy_decision, probe_dependency
 except Exception:  # pragma: no cover
-    from ..utils.optional_deps import probe_dependency
+    from ..utils.optional_deps import optional_policy_decision, probe_dependency
 
 try:
     from primitives.analytic_primitives import (
@@ -865,17 +864,31 @@ class NvdiffrastBackend:
         self._dr = None
         self._nvdiffrast = probe_dependency("nvdiffrast")
         self._torch = probe_dependency("torch")
+        self._nvdiffrast_torch = None
+        self._gpu_runtime_status: dict[str, object] = {
+            "available": False,
+            "status": "not_checked",
+            "message": "GPU runtime has not been checked",
+        }
         self._unmet_dependencies: list[str] = []
         if not self._nvdiffrast.available:
-            self._unmet_dependencies.append(f"nvdiffrast: {self._nvdiffrast.error}")
+            self._unmet_dependencies.append(self._nvdiffrast.skip_reason)
         if not self._torch.available:
-            self._unmet_dependencies.append(f"torch: {self._torch.error}")
+            self._unmet_dependencies.append(self._torch.skip_reason)
+        elif self._torch.module is not None:
+            self._gpu_runtime_status = self._detect_torch_gpu_runtime(self._torch.module)
+            if not bool(self._gpu_runtime_status.get("available")):
+                self._unmet_dependencies.append(
+                    "torch GPU runtime: "
+                    f"{self._gpu_runtime_status.get('message', 'unavailable')}"
+                )
         self._module = self._nvdiffrast.module if self._nvdiffrast.available else None
         if self._module is not None:
-            try:
-                self._dr = importlib.import_module("nvdiffrast.torch")
-            except Exception as exc:
-                self._unmet_dependencies.append(f"nvdiffrast.torch: {exc}")
+            self._nvdiffrast_torch = probe_dependency("nvdiffrast.torch")
+            if self._nvdiffrast_torch.available:
+                self._dr = self._nvdiffrast_torch.module
+            else:
+                self._unmet_dependencies.append(self._nvdiffrast_torch.skip_reason)
         self.unavailable_reason: str | None = None
         if self._unmet_dependencies:
             self.unavailable_reason = "; ".join(self._unmet_dependencies)
@@ -885,13 +898,29 @@ class NvdiffrastBackend:
 
     @property
     def available(self) -> bool:
-        return self._module is not None and self._dr is not None and self._torch.available
+        return (
+            self._module is not None
+            and self._dr is not None
+            and self._torch.available
+            and bool(self._gpu_runtime_status.get("available"))
+        )
 
     @property
     def dependency_report(self) -> str:
         if self.available:
             return "dependencies satisfied"
         return "; ".join(self._unmet_dependencies)
+
+    @property
+    def dependency_state(self) -> dict[str, object]:
+        state: dict[str, object] = {
+            "nvdiffrast": self._nvdiffrast.to_dict(),
+            "torch": self._torch.to_dict(),
+            "gpu_runtime": dict(self._gpu_runtime_status),
+        }
+        if self._nvdiffrast_torch is not None:
+            state["nvdiffrast.torch"] = self._nvdiffrast_torch.to_dict()
+        return state
 
     def _require_available(self) -> None:
         if not self.available:
@@ -907,7 +936,7 @@ class NvdiffrastBackend:
         vertices, faces = _scene_mesh_arrays(scene)
         if len(vertices) == 0 or len(faces) == 0:
             raise RuntimeError("nvdiffrast render requires a non-empty triangle mesh")
-        device_name = "cuda" if bool(getattr(torch, "cuda").is_available()) else "cpu"
+        device_name = "cuda"
         device = torch.device(device_name)
         faces_tensor = torch.as_tensor(faces, dtype=torch.int32, device=device)
         ctx = self._context_for_device(dr, torch, device_name)
@@ -1022,6 +1051,71 @@ class NvdiffrastBackend:
                 errors.append(f"RasterizeGLContext: {exc}")
         raise RuntimeError("no usable nvdiffrast raster context: " + "; ".join(errors))
 
+    @staticmethod
+    def _detect_torch_gpu_runtime(torch: Any) -> dict[str, object]:
+        version = getattr(torch, "version", None)
+        cuda_version = getattr(version, "cuda", None)
+        hip_version = getattr(version, "hip", None)
+        cuda_api = getattr(torch, "cuda", None)
+        cuda_available = False
+        device_count = 0
+        try:
+            cuda_available = (
+                bool(cuda_api.is_available()) if cuda_api is not None else False
+            )
+        except Exception as exc:
+            return {
+                "available": False,
+                "status": "unusable",
+                "message": f"torch.cuda availability check failed: {exc}",
+                "error_type": type(exc).__name__,
+                "cuda_version": cuda_version,
+                "hip_version": hip_version,
+            }
+        try:
+            device_count = (
+                int(cuda_api.device_count())
+                if cuda_api is not None and cuda_available
+                else 0
+            )
+        except Exception:
+            device_count = 0
+        if hip_version and not cuda_version:
+            return {
+                "available": False,
+                "status": "rocm_unsupported",
+                "message": (
+                    "ROCm/HIP PyTorch runtime detected; nvdiffrast has no official "
+                    "ROCm backend and must not silently fall back to CPU"
+                ),
+                "cuda_version": cuda_version,
+                "hip_version": hip_version,
+                "device_count": device_count,
+                "supports_rocm": False,
+            }
+        if not cuda_available:
+            return {
+                "available": False,
+                "status": "cuda_unavailable",
+                "message": (
+                    "torch.cuda is unavailable; nvdiffrast requires an NVIDIA CUDA "
+                    "runtime for this backend"
+                ),
+                "cuda_version": cuda_version,
+                "hip_version": hip_version,
+                "device_count": device_count,
+                "supports_rocm": False,
+            }
+        return {
+            "available": True,
+            "status": "cuda_available",
+            "message": "torch CUDA runtime is available for nvdiffrast",
+            "cuda_version": cuda_version,
+            "hip_version": hip_version,
+            "device_count": device_count,
+            "supports_rocm": False,
+        }
+
 
 def run_refinement_candidate(request: object) -> object:
     """Run a CPU differentiable-rendering-inspired candidate.
@@ -1071,21 +1165,32 @@ def run_refinement_candidate(request: object) -> object:
     if backend_choice == "nvdiffrast":
         nvd_renderer = NvdiffrastBackend()
         if not nvd_renderer.available:
-            status = "failed" if optional_dependency_policy == "fail" else "skipped"
-            reason = (
-                nvd_renderer.unavailable_reason
-                or nvd_renderer.dependency_report
-                or "optional GPU dependency unavailable"
+            nvd_dependency = probe_dependency("nvdiffrast")
+            decision = optional_policy_decision(
+                nvd_dependency,
+                policy=optional_dependency_policy,
+                feature="differentiable_refine.nvdiffrast",
+            )
+            status = str(decision["result_status"])
+            reason = nvd_renderer.unavailable_reason or str(decision["message"])
+            metrics = CandidateMetrics(
+                extras={
+                    "optional_dependencies": getattr(nvd_renderer, "dependency_state", {}),
+                    "optional_dependency_policy": decision,
+                    "backend": backend_choice,
+                }
             )
             return CandidateResult(
                 candidate_id=candidate_id,
                 backend_name=backend_name,
                 status=status,
+                metric_result=metrics,
                 warnings=(
-                    f"optional dependency unavailable: {reason}",
+                    reason,
                     *config_warnings,
                     *tuple(target_signal_warnings),
                 ),
+                errors=(reason,) if status == "failed" else (),
             )
 
     try:
@@ -1144,18 +1249,36 @@ def run_refinement_candidate(request: object) -> object:
         )
     except Exception as exc:
         if backend_choice == "nvdiffrast":
+            dependency_state = (
+                nvd_renderer.dependency_state if nvd_renderer is not None else {}
+            )
             status = "failed" if optional_dependency_policy == "fail" else "skipped"
-            if status == "skipped":
-                return CandidateResult(
-                    candidate_id=candidate_id,
-                    backend_name=backend_name,
-                    status=status,
-                    warnings=(
-                        f"nvdiffrast render path unavailable: {exc}",
-                        *config_warnings,
-                        *tuple(target_signal_warnings),
-                    ),
-                )
+            message = f"nvdiffrast render path unavailable: {exc}"
+            metrics = CandidateMetrics(
+                extras={
+                    "optional_dependencies": dependency_state,
+                    "optional_dependency_policy": {
+                        "policy": optional_dependency_policy,
+                        "feature": "differentiable_refine.nvdiffrast",
+                        "status": status,
+                        "result_status": status,
+                        "message": message,
+                    },
+                    "backend": backend_choice,
+                }
+            )
+            return CandidateResult(
+                candidate_id=candidate_id,
+                backend_name=backend_name,
+                status=status,
+                metric_result=metrics,
+                warnings=(
+                    message,
+                    *config_warnings,
+                    *tuple(target_signal_warnings),
+                ),
+                errors=(message,) if status == "failed" else (),
+            )
         return CandidateResult(
             candidate_id=candidate_id,
             backend_name=backend_name,

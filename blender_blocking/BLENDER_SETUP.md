@@ -143,6 +143,18 @@ Install or repair `open3d` in Blender's Python. Poisson and screened-Poisson pos
 $BLENDER_PYTHON -m pip install open3d
 ```
 
+### OpenVDB export is skipped
+
+OpenVDB is optional. The tool probes both `pyopenvdb` and `openvdb` bindings and falls back to sparse NPZ interchange when neither binding is available. A plain `pip install openvdb` often has no Windows wheel, so direct `.vdb` export usually requires a compatible Blender-bundled binding, conda package, or source-built OpenVDB Python binding for the exact Python runtime.
+
+Use `require_openvdb=true`, `openvdb_required=true`, `fail_on_openvdb_skip=true`, or `export_openvdb_required=true` only when a missing direct `.vdb` binding should fail the candidate instead of recording a structured NPZ fallback.
+
+### nvdiffrast is unavailable
+
+`nvdiffrast` is NVIDIA's differentiable rasterizer. It is optional and not a normal dependency for this project. The `differentiable_refine` backend always has the deterministic `cpu_soft_silhouette` path; the `nvdiffrast` path is only for machines with the NVIDIA CUDA stack and the source-built NVlabs extension.
+
+There is no official ROCm version of `nvdiffrast`. On AMD/ROCm machines, keep using `cpu_soft_silhouette` for mesh/primitive refinement, or treat ROCm GSplat-style Gaussian splatting as a separate research backend instead of a drop-in replacement.
+
 ### Different Python versions
 
 If you see errors about missing extensions or binary incompatibility, your venv and Blender are using different Python versions. This is why you MUST install directly into Blender's Python - the compiled extensions must match Blender's Python version exactly.

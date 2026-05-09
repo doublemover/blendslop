@@ -11,6 +11,11 @@ import numpy as np
 from .contracts import Bounds3D, VoxelTransform
 from .sparse_hash import SparseHashVolumeGrid
 
+try:
+    from blender_blocking.utils.optional_deps import probe_dependency
+except Exception:  # pragma: no cover - script-style imports
+    from utils.optional_deps import probe_dependency
+
 
 @dataclass(frozen=True)
 class OpenVDBStatus:
@@ -278,22 +283,11 @@ class OpenVDBVolumeGrid(SparseHashVolumeGrid):
 
 
 def _import_openvdb() -> tuple[Any | None, tuple[dict[str, Any], ...]]:
-    attempts: list[dict[str, Any]] = []
-    for module_name in ("pyopenvdb", "openvdb"):
-        try:
-            module = __import__(module_name)
-            return module, tuple(attempts)
-        except Exception as exc:
-            attempts.append(
-                {
-                    "module_name": module_name,
-                    "status": "import_error",
-                    "error_type": type(exc).__name__,
-                    "error": str(exc),
-                }
-            )
-            continue
-    return None, tuple(attempts)
+    dependency = probe_dependency("openvdb", cache=False)
+    attempts = tuple(dict(attempt) for attempt in dependency.attempts)
+    if dependency.available:
+        return dependency.module, attempts
+    return None, attempts
 
 
 def _describe_module(module: Any) -> dict[str, Any]:

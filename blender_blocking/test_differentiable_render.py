@@ -39,6 +39,8 @@ class TestDifferentiableRender(unittest.TestCase):
         self.assertEqual(result.status, "skipped")
         self.assertEqual(len(result.warnings), 1)
         self.assertIn("nvdiffrast", result.warnings[0])
+        self.assertIn("optional_dependencies", result.metric_result.extras)
+        self.assertEqual(result.errors, ())
         self.assertFalse(result.succeeded)
 
     def test_optional_nvdiffrast_fail_policy(self) -> None:
@@ -54,6 +56,11 @@ class TestDifferentiableRender(unittest.TestCase):
         self.assertEqual(result.status, "failed")
         self.assertEqual(len(result.warnings), 1)
         self.assertIn("nvdiffrast", result.warnings[0])
+        self.assertIn("nvdiffrast", result.errors[0])
+        self.assertEqual(
+            result.metric_result.extras["optional_dependency_policy"]["result_status"],
+            "failed",
+        )
         self.assertFalse(result.succeeded)
 
     def test_nvdiffrast_available_backend_routes_through_renderer(self) -> None:

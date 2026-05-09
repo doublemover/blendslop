@@ -156,7 +156,20 @@ class BaseRunner:
             git=_git_info(),
             environment=_environment_info(),
             dependency_report=dependency_report(
-                ("numpy", "cv2", "PIL", "scipy", "skimage", "open3d")
+                (
+                    "numpy",
+                    "cv2",
+                    "PIL",
+                    "scipy",
+                    "skimage",
+                    "open3d",
+                    "trimesh",
+                    "torch",
+                    "torchvision",
+                    "lpips",
+                    "openvdb",
+                    "nvdiffrast",
+                )
             ),
             plan_path=self.run_root / "plan.json",
             index_path=self.run_root / "index.jsonl",

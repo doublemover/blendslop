@@ -6,7 +6,17 @@ from pathlib import Path
 from typing import Any, Mapping
 
 import numpy as np
-from utils.optional_deps import dependency_report, probe_dependency
+
+try:
+    from blender_blocking.utils.optional_deps import (
+        dependency_report,
+        probe_dependency,
+    )
+except Exception:  # pragma: no cover - script-style imports
+    from utils.optional_deps import (
+        dependency_report,
+        probe_dependency,
+    )
 
 from ..backend import BackendCapabilities, BaseBackend, BackendBudget
 from ..types import CandidateMetrics, CandidateRequest, CandidateResult
@@ -142,7 +152,9 @@ class VisualHullBackend(BaseBackend):
             except Exception as exc:
                 warnings.append(f"failed to save volume artifact: {exc}")
 
-            if requested_backend == "openvdb":
+            if requested_backend == "openvdb" or bool(
+                request.config.get("export_openvdb")
+            ):
                 try:
                     from volume import export_to_openvdb
 
@@ -161,6 +173,12 @@ class VisualHullBackend(BaseBackend):
                         )
                 except Exception as exc:
                     warnings.append(f"failed to export OpenVDB artifact: {exc}")
+                    mesh_metrics["openvdb_export"] = {
+                        "available": False,
+                        "status": "failed",
+                        "message": str(exc),
+                        "error_type": type(exc).__name__,
+                    }
 
         mesh_result = None
         postprocess_status: dict[str, Any] = _evaluate_postprocess(
@@ -253,6 +271,39 @@ class VisualHullBackend(BaseBackend):
 
         errors: list[str] = []
         status = "success"
+        if _openvdb_required(request.config):
+            openvdb_payload = mesh_metrics.get("openvdb")
+            openvdb_export_payload = mesh_metrics.get("openvdb_export")
+            if requested_backend == "openvdb" and isinstance(openvdb_payload, Mapping):
+                if not bool(openvdb_payload.get("available")):
+                    status = "failed"
+                    errors.append(
+                        str(
+                            openvdb_payload.get(
+                                "message",
+                                "OpenVDB backend was required but bindings were unavailable",
+                            )
+                        )
+                    )
+            if bool(request.config.get("export_openvdb")):
+                if (
+                    not isinstance(openvdb_export_payload, Mapping)
+                    or openvdb_export_payload.get("status") != "exported"
+                ):
+                    status = "failed"
+                    if isinstance(openvdb_export_payload, Mapping):
+                        errors.append(
+                            str(
+                                openvdb_export_payload.get(
+                                    "message",
+                                    "OpenVDB export was required but did not complete",
+                                )
+                            )
+                        )
+                    else:
+                        errors.append(
+                            "OpenVDB export was required but no export status was produced"
+                        )
         if postprocess_status.get("status") == "failed" and _postprocess_required(
             request.config
         ):
@@ -544,13 +595,27 @@ def _optional_dependency_status(module_name: str) -> dict[str, Any]:
 
 
 def _visual_hull_dependency_report() -> dict[str, Any]:
-    report: dict[str, Any] = dependency_report(("skimage", "open3d"))
+    report: dict[str, Any] = dependency_report(("skimage", "open3d", "openvdb"))
     try:
         from volume import detect_openvdb
 
-        report["openvdb"] = detect_openvdb().to_dict()
+        openvdb_status = detect_openvdb().to_dict()
+        report["openvdb"] = {
+            **report.get("openvdb", {}),
+            "binding_status": openvdb_status,
+            "available": bool(openvdb_status.get("available")),
+            "status": openvdb_status.get(
+                "status",
+                report.get("openvdb", {}).get("status"),
+            ),
+            "message": openvdb_status.get(
+                "message",
+                report.get("openvdb", {}).get("error", ""),
+            ),
+        }
     except Exception as exc:
         report["openvdb"] = {
+            **report.get("openvdb", {}),
             "module_name": "openvdb",
             "available": False,
             "status": "probe_failed",
@@ -571,3 +636,12 @@ def _mesh_metadata(mesh_result: Any) -> dict[str, Any]:
         "has_faces": bool(len(mesh_result.faces)),
         "has_normals": mesh_result.normals is not None,
     }
+
+
+def _openvdb_required(config: Mapping[str, Any]) -> bool:
+    return bool(
+        config.get("require_openvdb")
+        or config.get("openvdb_required")
+        or config.get("fail_on_openvdb_skip")
+        or config.get("export_openvdb_required")
+    )
