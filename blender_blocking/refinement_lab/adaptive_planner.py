@@ -449,6 +449,18 @@ def _fallback_proposals_from_backend(
     *,
     max_proposals: int,
 ) -> tuple[RefinementProposal, ...]:
+    nested_bundles = backend.get("evaluation_bundles")
+    if isinstance(nested_bundles, Sequence) and not isinstance(
+        nested_bundles, (str, bytes)
+    ):
+        return proposals_from_result_payload(
+            {"evaluation_bundles": nested_bundles},
+            max_proposals=max_proposals,
+        )
+    nested_bundle = backend.get("evaluation_bundle")
+    if isinstance(nested_bundle, Mapping):
+        return proposals_from_bundle(nested_bundle, max_proposals=max_proposals)
+
     status = str(backend.get("status", ""))
     metrics = backend.get("metric_result", {})
     fake_bundle = {
