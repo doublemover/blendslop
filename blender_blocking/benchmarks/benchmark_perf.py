@@ -1004,6 +1004,146 @@ def bench_extract_silhouette(iterations: int, progress: bool = True) -> BenchRes
     )
 
 
+def bench_silhouette_pipeline(iterations: int, progress: bool = True) -> BenchResult:
+    try:
+        from geometry.silhouette_pipeline import (
+            build_uncertain_mask,
+            canonicalize_silhouette,
+            extract_silhouette_candidates,
+        )
+    except Exception as exc:
+        return BenchResult(
+            name="silhouette_pipeline",
+            iterations=0,
+            elapsed_s=0.0,
+            per_iter_ms=0.0,
+            status="skip",
+            skip_reason=str(exc),
+        )
+
+    image = np.full((128, 128, 4), 255, dtype=np.uint8)
+    image[:, :, 3] = 255
+    image[28:110, 38:91, :3] = 0
+    progress_handle = progress_bar(iterations, desc="silhouette_pipeline", enabled=progress)
+    start = _now()
+    candidate_count = 0
+    for _ in range(iterations):
+        candidates = extract_silhouette_candidates(image)
+        uncertain = build_uncertain_mask(image)
+        canonicalize_silhouette(uncertain.hard_mask, output_size=256)
+        candidate_count = len(candidates)
+        progress_handle.update(1)
+    progress_handle.close()
+    total = _now() - start
+    per_iter_s = total / max(iterations, 1)
+    return BenchResult(
+        name="silhouette_pipeline",
+        iterations=iterations,
+        elapsed_s=total,
+        per_iter_ms=per_iter_s * 1000.0,
+        meta={
+            "image_shape": list(image.shape),
+            "candidate_count": candidate_count,
+            "throughput": image.shape[0] * image.shape[1] / per_iter_s
+            if per_iter_s > 0
+            else 0.0,
+            "throughput_unit": "px",
+            "throughput_label": "pipeline pixels",
+        },
+    )
+
+
+def bench_volume_surface_new(
+    iterations: int,
+    resolution: int,
+    fill_ratio: float,
+    progress: bool = True,
+) -> BenchResult:
+    try:
+        from volume import extract_surface_voxels
+    except Exception as exc:
+        return BenchResult(
+            name="volume_surface_vectorized",
+            iterations=0,
+            elapsed_s=0.0,
+            per_iter_ms=0.0,
+            status="skip",
+            skip_reason=str(exc),
+        )
+
+    rng = np.random.default_rng(424242)
+    grid = rng.random((resolution, resolution, resolution)) < fill_ratio
+    progress_handle = progress_bar(iterations, desc="volume_surface", enabled=progress)
+    start = _now()
+    surface = None
+    for _ in range(iterations):
+        surface = extract_surface_voxels(grid, prefer_scipy=True)
+        progress_handle.update(1)
+    progress_handle.close()
+    total = _now() - start
+    per_iter_s = total / max(iterations, 1)
+    return BenchResult(
+        name="volume_surface_vectorized",
+        iterations=iterations,
+        elapsed_s=total,
+        per_iter_ms=per_iter_s * 1000.0,
+        meta={
+            "resolution": resolution,
+            "fill_ratio": fill_ratio,
+            "surface_voxels": int(surface.sum()) if surface is not None else 0,
+            "throughput": grid.size / per_iter_s if per_iter_s > 0 else 0.0,
+            "throughput_unit": "vox",
+            "throughput_label": "surface checks",
+        },
+    )
+
+
+def bench_target_builder(iterations: int, progress: bool = True) -> BenchResult:
+    try:
+        from config import BlockingConfig
+        from reconstruction.target_builder import build_target_from_images
+    except Exception as exc:
+        return BenchResult(
+            name="target_builder",
+            iterations=0,
+            elapsed_s=0.0,
+            per_iter_ms=0.0,
+            status="skip",
+            skip_reason=str(exc),
+        )
+
+    cfg = BlockingConfig()
+    image = np.full((96, 96, 3), 255, dtype=np.uint8)
+    image[20:82, 30:68, :] = 0
+    views = {"front": image, "side": image}
+    progress_handle = progress_bar(iterations, desc="target_builder", enabled=progress)
+    start = _now()
+    for _ in range(iterations):
+        build_target_from_images(
+            views,
+            config=cfg,
+            bounds_minmax=((-1.0, -1.0, 0.0), (1.0, 1.0, 2.0)),
+            profile_samples=32,
+        )
+        progress_handle.update(1)
+    progress_handle.close()
+    total = _now() - start
+    per_iter_s = total / max(iterations, 1)
+    return BenchResult(
+        name="target_builder",
+        iterations=iterations,
+        elapsed_s=total,
+        per_iter_ms=per_iter_s * 1000.0,
+        meta={
+            "views": 2,
+            "profile_samples": 32,
+            "throughput": image.size * 2 / per_iter_s if per_iter_s > 0 else 0.0,
+            "throughput_unit": "px",
+            "throughput_label": "target pixels",
+        },
+    )
+
+
 def _write_json(path: Path, results: Sequence[BenchResult]) -> None:
     payload = {
         "results": [asdict(result) for result in results],
@@ -1020,7 +1160,8 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         help=(
             "Comma-separated list: visual_hull,surface_voxels,vertical_profile,"
             "vertical_width_profile,profile_interpolation,combine_profiles,slice_metrics,"
-            "resfit_residual,resfit_full,resfit_optimize,canonicalize,compare,extract"
+            "resfit_residual,resfit_full,resfit_optimize,canonicalize,compare,extract,"
+            "silhouette_pipeline,volume_surface,target_builder"
         ),
     )
     parser.add_argument("--all", action="store_true", help="Run all benches")
@@ -1145,6 +1286,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "canonicalize",
             "compare",
             "extract",
+            "silhouette_pipeline",
+            "volume_surface",
+            "target_builder",
         ]
     else:
         benches = [b.strip() for b in args.bench.split(",") if b.strip()]
@@ -1238,6 +1382,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
         elif bench == "extract":
             result = bench_extract_silhouette(
+                iterations=args.iterations,
+                progress=args.progress,
+            )
+        elif bench == "silhouette_pipeline":
+            result = bench_silhouette_pipeline(
+                iterations=args.iterations,
+                progress=args.progress,
+            )
+        elif bench == "volume_surface":
+            result = bench_volume_surface_new(
+                iterations=args.iterations,
+                resolution=args.resolution,
+                fill_ratio=args.fill_ratio,
+                progress=args.progress,
+            )
+        elif bench == "target_builder":
+            result = bench_target_builder(
                 iterations=args.iterations,
                 progress=args.progress,
             )

@@ -51,6 +51,12 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_slice_shape_metrics", "test_slice_shape_metrics"),
     ("pure_resfitting_metrics", "test_resfitting_metrics"),
     ("pure_visual_hull", "integration.multi_view.test_visual_hull"),
+    ("pure_silhouette_pipeline", "test_silhouette_pipeline"),
+    ("pure_constraints_package", "test_constraints_package"),
+    ("pure_volume", "test_volume"),
+    ("pure_synthetic_factory", "test_synthetic_factory"),
+    ("pure_metrics_foundation", "test_metrics_foundation"),
+    ("pure_reconstruction_contracts", "test_reconstruction_contracts"),
 ]
 
 
