@@ -31,6 +31,15 @@ from .serialization import (
     save_volume,
     stable_json_hash,
 )
+from .sdf_projection import (
+    SIGN_CONVENTION,
+    SDFProjectionReport,
+    SDFProjectionResult,
+    occupancy_grid_from_signed_distance,
+    occupancy_mask_from_volume,
+    signed_distance_field_from_occupancy,
+    signed_distance_grid_from_volume,
+)
 from .sparse_hash import SparseHashVolumeGrid
 
 __all__ = [
@@ -44,6 +53,9 @@ __all__ = [
     "MESH_EXTRACT_METHOD_ALIASES",
     "OpenVDBStatus",
     "OpenVDBVolumeGrid",
+    "SDFProjectionReport",
+    "SDFProjectionResult",
+    "SIGN_CONVENTION",
     "SUPPORTED_VALUE_TYPES",
     "SparseHashVolumeGrid",
     "VolumeGrid",
@@ -58,7 +70,11 @@ __all__ = [
     "file_sha256",
     "import_from_openvdb",
     "load_volume",
+    "occupancy_grid_from_signed_distance",
+    "occupancy_mask_from_volume",
     "save_volume",
+    "signed_distance_field_from_occupancy",
+    "signed_distance_grid_from_volume",
     "normalize_mesh_extraction_method",
     "stable_json_hash",
     "surface_points",

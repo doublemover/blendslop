@@ -90,6 +90,7 @@ class VisualHullBackend(BaseBackend):
 
         artifacts: dict[str, Path] = {}
         warnings: list[str] = []
+        errors: list[str] = []
         if requested_backend == "openvdb":
             openvdb_payload = (
                 openvdb_status.to_dict()
@@ -144,6 +145,62 @@ class VisualHullBackend(BaseBackend):
             volume_metadata_extra["openvdb"] = openvdb_status.to_dict()
 
         root = request.candidate_artifact_root()
+        sdf_result = None
+        mesh_source_grid = grid
+        if _sdf_projection_enabled(request.config):
+            try:
+                from volume import signed_distance_grid_from_volume
+
+                narrow_band_voxels = request.config.get("sdf_narrow_band_voxels")
+                sdf_result = signed_distance_grid_from_volume(
+                    grid,
+                    occupancy_threshold=float(
+                        request.config.get(
+                            "sdf_occupancy_threshold",
+                            request.config.get("occupancy_threshold", 0.5),
+                        )
+                    ),
+                    prefer_scipy=bool(request.config.get("sdf_prefer_scipy", True)),
+                    narrow_band_voxels=(
+                        None
+                        if narrow_band_voxels is None
+                        else int(narrow_band_voxels)
+                    ),
+                    output_backend=str(request.config.get("sdf_backend", "dense")),
+                    numpy_max_voxels=int(
+                        request.config.get("sdf_numpy_max_voxels", 250_000)
+                    ),
+                )
+                mesh_metrics["sdf_projection"] = sdf_result.report.to_dict()
+                if sdf_result.report.warnings:
+                    warnings.extend(
+                        f"SDF projection warning: {warning}"
+                        for warning in sdf_result.report.warnings
+                    )
+                if _mesh_uses_sdf(request.config):
+                    mesh_source_grid = sdf_result.grid
+                    mesh_metrics["mesh_source"] = {
+                        "kind": "signed_distance",
+                        "sign_convention": sdf_result.report.sign_convention,
+                        "source_backend": sdf_result.report.source_backend,
+                        "output_backend": sdf_result.report.output_backend,
+                    }
+                else:
+                    mesh_metrics["mesh_source"] = {"kind": "occupancy"}
+            except Exception as exc:
+                message = f"SDF projection failed: {exc}"
+                warnings.append(message)
+                mesh_metrics["sdf_projection"] = {
+                    "status": "failed",
+                    "message": str(exc),
+                    "error_type": type(exc).__name__,
+                    "required": _sdf_required(request.config),
+                }
+                if _sdf_required(request.config):
+                    errors.append(message)
+        else:
+            mesh_metrics["mesh_source"] = {"kind": "occupancy"}
+
         if root is not None:
             try:
                 metadata = save_volume(
@@ -161,6 +218,30 @@ class VisualHullBackend(BaseBackend):
                 mesh_metrics["volume_metadata"] = metadata.to_dict()
             except Exception as exc:
                 warnings.append(f"failed to save volume artifact: {exc}")
+
+            if sdf_result is not None:
+                try:
+                    sdf_metadata = save_volume(
+                        sdf_result.grid,
+                        root / "sdf_volume",
+                        source_candidate_id=request.candidate_id,
+                        source_views=tuple(
+                            constraint.view
+                            for constraint in request.target.constraints
+                        ),
+                        extra={
+                            "backend": self.name,
+                            "source": "visual_hull_occupancy",
+                            "sdf_projection": sdf_result.report.to_dict(),
+                        },
+                    )
+                    artifacts["sdf_volume_metadata"] = (
+                        root / "sdf_volume" / "volume.json"
+                    )
+                    artifacts["sdf_volume_npz"] = root / "sdf_volume" / "volume.npz"
+                    mesh_metrics["sdf_volume_metadata"] = sdf_metadata.to_dict()
+                except Exception as exc:
+                    warnings.append(f"failed to save SDF volume artifact: {exc}")
 
             if requested_backend == "openvdb" or bool(
                 request.config.get("export_openvdb")
@@ -199,7 +280,7 @@ class VisualHullBackend(BaseBackend):
         mesh_metrics["mesh_postprocess"] = postprocess_status
         try:
             mesh_result = extract_mesh(
-                grid,
+                mesh_source_grid,
                 method=str(request.config.get("mesh_method", "marching_cubes")),
                 allow_point_cloud_fallback=bool(
                     request.config.get("allow_point_cloud_fallback", False)
@@ -297,8 +378,7 @@ class VisualHullBackend(BaseBackend):
         except Exception as exc:
             warnings.append(f"projection metrics failed: {exc}")
 
-        errors: list[str] = []
-        status = "success"
+        status = "failed" if errors else "success"
         if _openvdb_required(request.config):
             openvdb_payload = mesh_metrics.get("openvdb")
             openvdb_export_payload = mesh_metrics.get("openvdb_export")
@@ -903,6 +983,32 @@ def _mesh_required(config: Mapping[str, Any]) -> bool:
         config.get("require_mesh")
         or config.get("mesh_required")
         or config.get("fail_on_mesh_skip")
+    )
+
+
+def _sdf_projection_enabled(config: Mapping[str, Any]) -> bool:
+    return bool(
+        config.get("sdf_projection")
+        or config.get("project_sdf")
+        or config.get("signed_distance_projection")
+        or _mesh_uses_sdf(config)
+    )
+
+
+def _mesh_uses_sdf(config: Mapping[str, Any]) -> bool:
+    mesh_source = str(config.get("mesh_source", "")).strip().lower()
+    return bool(
+        config.get("mesh_from_sdf")
+        or mesh_source in {"sdf", "signed_distance", "signed_distance_field"}
+    )
+
+
+def _sdf_required(config: Mapping[str, Any]) -> bool:
+    return bool(
+        config.get("require_sdf")
+        or config.get("sdf_required")
+        or config.get("fail_on_sdf_skip")
+        or _mesh_uses_sdf(config)
     )
 
 
