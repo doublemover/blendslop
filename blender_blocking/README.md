@@ -18,6 +18,7 @@ Already configured Blender? Jump straight to the [QUICKSTART](QUICKSTART.md).
 - **[BLENDER_SETUP.md](BLENDER_SETUP.md)** - Blender Python configuration guide ⭐ Start here
 - **[QUICKSTART.md](QUICKSTART.md)** - Get started in minutes
 - **[INTEGRATION.md](INTEGRATION.md)** - Detailed API and usage guide
+- **[REFINEMENT_LAB.md](REFINEMENT_LAB.md)** - Run reconstruction experiments, rank candidates, and inspect failure diagnostics
 - **Testing** - See the Testing section below for local and CI commands
 - **[CI_CD.md](CI_CD.md)** - CI/CD testing with real Blender (GitHub Actions, Docker)
 - **[../AGENTS.md](../AGENTS.md)** - Quality gates for agents/crews (pre-commit, testing requirements)
@@ -65,6 +66,7 @@ blender_blocking/
 ├── BLENDER_SETUP.md            # ⭐ Blender Python setup guide
 ├── QUICKSTART.md               # Quick start guide
 ├── INTEGRATION.md              # Detailed API guide
+├── REFINEMENT_LAB.md           # Experiment and ranking workflow
 ├── CI_CD.md                    # CI/CD guide (GitHub Actions, Docker)
 ├── main_integration.py         # Main workflow
 ├── create_test_images.py       # Test image generator
@@ -74,6 +76,7 @@ blender_blocking/
 ├── test_blender_boolean.py     # Blender API compatibility tests
 ├── test_integration.py         # Test suite
 ├── test_e2e_validation.py      # E2E validation with IoU
+├── refinement_lab/             # Experiment plans, ranking, reports, and diagnostics
 ├── requirements.txt            # Dependencies
 ├── utils/                      # Utility modules
 │   └── blender_version.py      # Version detection & compatibility
@@ -139,6 +142,23 @@ The legacy test runner executes these suites:
 7. **Dependency Check** - Verifies all packages installed correctly
 
 The phase runner adds named phases for `pure`, `quick`, `blender`, `bench`, `nightly`, and `quality-smoke`. Benchmark and quality-smoke phases write JSON artifacts and optional budget reports; see [../docs/QUALITY_PERF_GATES.md](../docs/QUALITY_PERF_GATES.md).
+
+### Refinement Experiments
+
+Use the refinement lab when tuning reconstruction output quality instead of changing one value at a time by hand:
+
+```bash
+python -m blender_blocking.refinement_lab.cli list-tracks
+python -m blender_blocking.refinement_lab.cli plan --suite default-vase --track visual-hull-transform --max-runs 4 --out temp/refinement-runs/plan-smoke.json
+```
+
+Run actual reconstruction variants through Blender:
+
+```bash
+blender --background --python blender_blocking/test_e2e_validation.py -- --refinement-suite default-vase --refinement-track profile-loft-refinement --refinement-max-runs 1 --refinement-result-root temp/refinement-runs/smoke-profile --no-progress
+```
+
+Generated lab artifacts belong under ignored `temp/refinement-runs/`; see [REFINEMENT_LAB.md](REFINEMENT_LAB.md).
 
 ### Supported Blender Versions
 

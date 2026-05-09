@@ -21,6 +21,7 @@ class OptionalDependency:
     available: bool
     module: Optional[ModuleType] = None
     error: Optional[str] = None
+    error_type: Optional[str] = None
 
     @property
     def skip_reason(self) -> str:
@@ -34,6 +35,21 @@ class OptionalDependency:
             raise RuntimeError(self.skip_reason)
         return self.module
 
+    def to_dict(self) -> Dict[str, object]:
+        """Return a JSON-safe availability record."""
+        return {
+            "module_name": self.name,
+            "available": self.available,
+            "module_version": getattr(self.module, "__version__", None)
+            if self.module is not None
+            else None,
+            "module_file": getattr(self.module, "__file__", None)
+            if self.module is not None
+            else None,
+            "error_type": self.error_type,
+            "error": self.error,
+        }
+
 
 _CACHE: Dict[str, OptionalDependency] = {}
 
@@ -46,7 +62,12 @@ def probe_dependency(import_name: str, *, cache: bool = True) -> OptionalDepende
         module = importlib.import_module(import_name)
         result = OptionalDependency(import_name, True, module=module)
     except Exception as exc:
-        result = OptionalDependency(import_name, False, error=str(exc))
+        result = OptionalDependency(
+            import_name,
+            False,
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
     if cache:
         _CACHE[import_name] = result
     return result
@@ -57,10 +78,7 @@ def dependency_report(import_names: Iterable[str]) -> Dict[str, Dict[str, object
     report: Dict[str, Dict[str, object]] = {}
     for name in import_names:
         dep = probe_dependency(name)
-        report[name] = {
-            "available": dep.available,
-            "error": dep.error,
-        }
+        report[name] = dep.to_dict()
     return report
 
 

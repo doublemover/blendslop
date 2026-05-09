@@ -37,10 +37,10 @@ jobs:
           $BLENDER_PYTHON -m pip --version
 
           # Install dependencies
-          $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+          $BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
 
           # Verify installation
-          $BLENDER_PYTHON -c "import numpy, cv2, PIL, scipy; print('Dependencies installed')"
+          $BLENDER_PYTHON -c "import numpy, cv2, PIL, scipy, skimage, open3d; print('Dependencies installed')"
 
       - name: Run test suite
         run: |
@@ -76,8 +76,8 @@ jobs:
         run: |
           BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*' | head -1)
           echo "Blender Python: $BLENDER_PYTHON"
-          $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
-          $BLENDER_PYTHON -c "import numpy, cv2, PIL, scipy; print('Dependencies installed')"
+          $BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
+          $BLENDER_PYTHON -c "import numpy, cv2, PIL, scipy, skimage, open3d; print('Dependencies installed')"
 
       - name: Run test suite
         run: |
@@ -107,7 +107,7 @@ jobs:
       - name: Install dependencies
         run: |
           BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*' | head -1)
-          $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+          $BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
 
       - name: Run quick tests
         run: |

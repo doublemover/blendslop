@@ -20,6 +20,7 @@ __pycache__/
 
 # Generated test artifacts
 temp/
+test_output/
 test_images/
 blender_blocking/test_images/
 blender_blocking/test_output/

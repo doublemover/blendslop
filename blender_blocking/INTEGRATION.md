@@ -30,6 +30,18 @@ The integration combines image processing, shape analysis, and 3D primitive plac
 ### 6. Main Integration (`main_integration.py`)
 - **BlockingWorkflow** - Main workflow class that orchestrates the entire pipeline
 
+### 7. Refinement Lab (`refinement_lab/`)
+- **contracts.py** - Typed experiment cases, variants, results, and run manifests
+- **presets.py** - Built-in suites and parameter tracks
+- **matrix.py** - Deterministic grid, random, coordinate, and successive-halving plan construction
+- **runner.py** - In-process and subprocess execution against the E2E CLI
+- **parameter_search.py** - Objective scoring and ranking
+- **candidate_autopsy.py** - Structured failure diagnosis
+- **bounds_debug.py** - Visual-hull transform, projection, and bounds diagnostics
+- **artifact_report.py** - Static HTML reports and overlay/diff assets
+- **human_labels.py** - Reviewer labels that influence human-adjusted ranking
+- **cli.py** - Pure command line interface for list/plan/run/report/rank/autopsy/label/promote
+
 ## Dependencies
 
 ### Python Packages
@@ -45,13 +57,13 @@ scipy
 
 Install Python dependencies:
 ```bash
-pip install numpy opencv-python Pillow scipy
+pip install -r requirements.txt
 ```
 
 For Blender's Python environment:
 ```bash
 # macOS example (adjust path for your Blender version)
-/Applications/Blender.app/Contents/Resources/4.2/python/bin/python3.11 -m pip install numpy opencv-python Pillow scipy
+/Applications/Blender.app/Contents/Resources/4.2/python/bin/python3.11 -m pip install -r /path/to/blendslop/blender_blocking/requirements.txt
 ```
 
 ## Usage
@@ -132,6 +144,24 @@ workflow.analyze_shapes()
 workflow.create_3d_blockout(num_slices=15, primitive_type='CYLINDER')
 ```
 
+### Refinement Lab Workflow
+
+Use the lab when comparing reconstruction strategies or diagnosing a bad output. The lab builds a plan, executes variants, writes structured results, and ranks them by objective:
+
+```bash
+python -m blender_blocking.refinement_lab.cli list-suites
+python -m blender_blocking.refinement_lab.cli list-tracks
+python -m blender_blocking.refinement_lab.cli plan --suite default-vase --track visual-hull-transform --max-runs 4 --out temp/refinement-runs/plan-smoke.json
+```
+
+Run through Blender:
+
+```bash
+blender --background --python blender_blocking/test_e2e_validation.py -- --refinement-suite default-vase --refinement-track visual-hull-transform --refinement-search coordinate --refinement-max-runs 48 --refinement-result-root temp/refinement-runs/default-vase-vh-transform --refinement-bounds-debug --refinement-autopsy --no-progress
+```
+
+The run root includes `manifest.json`, `plan.json`, `index.jsonl`, `leaderboard.md`, `report.html`, per-variant `result.json`, optional `autopsy.json`, and optional `bounds-debug.json`. Generated run roots are ignored and must not be committed.
+
 ## Workflow Steps
 
 The integration follows these steps:
@@ -153,6 +183,7 @@ The integration follows these steps:
 7. **Place Primitives** - Position and scale primitives for each slice
 8. **Boolean Union** - Join all primitives into single mesh
 9. **Scene Setup** - Add camera and lighting for rendering
+10. **Optional Refinement Loop** - Sweep candidate parameters, inspect report/autopsy output, label winners, and promote the best reproducible configuration
 
 ## Example Output
 

@@ -114,6 +114,33 @@ def verify_setup() -> bool:
         errors.append(f"scipy: {e}")
         print("  FAIL: scipy not found")
 
+    # Check scikit-image for visual hull mesh extraction
+    print("\nChecking scikit-image...")
+    try:
+        import skimage
+        from skimage import measure
+
+        print(f"  OK: scikit-image {skimage.__version__} installed")
+        print(f"    Location: {skimage.__file__}")
+        print("  OK: skimage.measure.marching_cubes available")
+    except ImportError as e:
+        errors.append(f"scikit-image: {e}")
+        print("  FAIL: scikit-image not found")
+    except AttributeError as e:
+        errors.append(f"scikit-image marching_cubes: {e}")
+        print("  FAIL: scikit-image marching_cubes not available")
+
+    # Check Open3D for optional Poisson visual hull postprocess
+    print("\nChecking Open3D...")
+    try:
+        import open3d
+
+        print(f"  OK: open3d {open3d.__version__} installed")
+        print(f"    Location: {open3d.__file__}")
+    except ImportError as e:
+        warnings.append(f"open3d: {e}")
+        print("  WARN: open3d not found; Poisson postprocess will skip")
+
     # Try importing Blender (if available)
     print("\nChecking Blender availability...")
     try:
@@ -140,13 +167,13 @@ def verify_setup() -> bool:
         for error in errors:
             print(f"  - {error}")
 
-        print("\n🔧 FIX:")
+        print("\nFIX:")
         print("Install dependencies into Blender's Python:")
         print("\n  # Find Blender's Python:")
         print("  # In Blender console: import sys; print(sys.executable)")
         print("\n  # Then run:")
         print(
-            "  /path/to/blender/python -m pip install numpy opencv-python Pillow scipy"
+            "  /path/to/blender/python -m pip install -r blender_blocking/requirements.txt"
         )
         print("\n📖 See BLENDER_SETUP.md for complete instructions")
 

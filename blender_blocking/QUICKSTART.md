@@ -159,6 +159,30 @@ mesh = workflow.run_full_workflow(num_slices=20)
 mesh = workflow.run_full_workflow(num_slices=8)
 ```
 
+## Refining Reconstruction Quality
+
+When a result is close but not good enough, use the refinement lab instead of hand-editing one knob at a time. It sweeps reconstruction modes and parameters, ranks candidates, writes autopsies, and produces an HTML report under ignored `temp/refinement-runs/`.
+
+Plan a small run without opening Blender:
+
+```bash
+python -m blender_blocking.refinement_lab.cli plan --suite default-vase --track profile-loft-refinement --max-runs 4 --out temp/refinement-runs/plan-smoke.json
+```
+
+Run one actual Blender refinement smoke:
+
+```powershell
+& "C:\Program Files\Blender Foundation\Blender 5.0\blender.exe" --background --python blender_blocking\test_e2e_validation.py -- `
+  --refinement-suite default-vase `
+  --refinement-track profile-loft-refinement `
+  --refinement-max-runs 1 `
+  --refinement-result-root temp\refinement-runs\smoke-profile `
+  --refinement-html-report `
+  --no-progress
+```
+
+See [REFINEMENT_LAB.md](REFINEMENT_LAB.md) for visual-hull diagnostics, ranking, labels, and promotion commands.
+
 ## Troubleshooting
 
 ### "No module named numpy" or dependency errors
@@ -192,6 +216,11 @@ Pillow has compiled C extensions that must match Blender's Python version exactl
 ### Boolean union fails
 - Reduce `num_slices` to 8 or 10
 - Check that your images have clear silhouettes
+
+### Visual hull mesh extraction is skipped
+- Install `scikit-image` into Blender's Python; visual hull marching cubes needs `skimage.measure`.
+- If Poisson postprocess is skipped, install `open3d` into Blender's Python.
+- Run `verify_setup.py` from Blender's Python console to confirm both packages are visible to Blender.
 
 ### Import errors
 

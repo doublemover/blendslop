@@ -4,7 +4,7 @@ Complete guide to configuring Blender's Python environment to use the blocking t
 
 ## The Challenge
 
-Blender bundles its own Python interpreter, which doesn't have access to your virtual environment by default. We need to make the dependencies (numpy, opencv-python, Pillow, scipy) available to Blender's Python.
+Blender bundles its own Python interpreter, which doesn't have access to your virtual environment by default. We need to make the dependencies (numpy, opencv-python, Pillow, scipy, scikit-image, and Open3D) available to Blender's Python.
 
 ## REQUIRED Setup: Install to Blender's Python
 
@@ -69,6 +69,8 @@ import numpy as np
 import cv2
 from PIL import Image
 import scipy
+import skimage
+import open3d
 
 print("✓ All dependencies available!")
 
@@ -122,7 +124,23 @@ Or install for user only:
 
 Version mismatch between numpy and Blender's Python. Install a compatible version:
 ```bash
-$BLENDER_PYTHON -m pip install "numpy<2.0" opencv-python Pillow scipy
+$BLENDER_PYTHON -m pip install -r /path/to/blendslop/blender_blocking/requirements.txt
+```
+
+### Visual hull only emits point clouds instead of meshes
+
+Install or repair `scikit-image` in Blender's Python. Visual hull marching-cubes extraction requires `skimage.measure.marching_cubes`.
+
+```bash
+$BLENDER_PYTHON -m pip install scikit-image
+```
+
+### Poisson postprocess is skipped
+
+Install or repair `open3d` in Blender's Python. Poisson and screened-Poisson postprocess modes are explicit optional stages and will report a structured skip when Open3D is unavailable.
+
+```bash
+$BLENDER_PYTHON -m pip install open3d
 ```
 
 ### Different Python versions
