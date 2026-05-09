@@ -13,6 +13,15 @@ import numpy as np
 SilhouetteHook = Callable[[Sequence[object]], Mapping[str, float]]
 PenaltyHook = Callable[[Sequence[object]], float]
 
+def _validate_non_negative_weight(value: float, name: str, errors: list[str]) -> float:
+    if not np.isfinite(value):
+        errors.append(f"{name} must be finite, got {value!r}")
+        return 0.0
+    if value < 0.0:
+        errors.append(f"{name} must be >= 0.0, got {value!r}")
+        return 0.0
+    return float(value)
+
 
 @dataclass(frozen=True)
 class ResFitLossWeights:
@@ -25,6 +34,23 @@ class ResFitLossWeights:
     silhouette: float = 0.0
     topology_penalty: float = 0.0
     constraint_penalty: float = 0.05
+    uncertainty_penalty: float = 0.0
+
+    def validate(self) -> tuple[str, ...]:
+        errors: list[str] = []
+        _validate_non_negative_weight(self.surface_residual, "surface_residual", errors)
+        _validate_non_negative_weight(
+            self.visual_hull_occupancy, "visual_hull_occupancy", errors
+        )
+        _validate_non_negative_weight(self.primitive_count, "primitive_count", errors)
+        _validate_non_negative_weight(self.overlap_penalty, "overlap_penalty", errors)
+        _validate_non_negative_weight(self.silhouette, "silhouette", errors)
+        _validate_non_negative_weight(self.topology_penalty, "topology_penalty", errors)
+        _validate_non_negative_weight(self.constraint_penalty, "constraint_penalty", errors)
+        _validate_non_negative_weight(
+            self.uncertainty_penalty, "uncertainty_penalty", errors
+        )
+        return tuple(errors)
 
 
 @dataclass(frozen=True)
@@ -136,6 +162,7 @@ def evaluate_resfit_objective(
     silhouette_hook: SilhouetteHook | None = None,
     topology_penalty_hook: PenaltyHook | None = None,
     constraint_penalty_hook: PenaltyHook | None = None,
+    uncertainty_penalty_hook: PenaltyHook | None = None,
 ) -> ResFitObjectiveResult:
     """Evaluate weighted objective and return a loss decomposition."""
     warnings = []
@@ -166,6 +193,11 @@ def evaluate_resfit_objective(
     )
     constraint_hook = constraint_penalty_hook or default_constraint_penalty
     terms["constraint_penalty"] = float(constraint_hook(primitives))
+    terms["uncertainty_penalty"] = (
+        float(uncertainty_penalty_hook(primitives))
+        if uncertainty_penalty_hook is not None
+        else 0.0
+    )
 
     total = (
         weights.surface_residual * terms["surface_residual"]
@@ -175,5 +207,6 @@ def evaluate_resfit_objective(
         + weights.silhouette * terms["silhouette"]
         + weights.topology_penalty * terms["topology_penalty"]
         + weights.constraint_penalty * terms["constraint_penalty"]
+        + weights.uncertainty_penalty * terms["uncertainty_penalty"]
     )
     return ResFitObjectiveResult(total=float(total), terms=terms, warnings=tuple(warnings))

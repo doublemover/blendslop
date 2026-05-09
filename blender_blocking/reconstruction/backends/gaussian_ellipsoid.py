@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from ..backend import BackendCapabilities, BaseBackend
 from ..types import CandidateRequest, CandidateResult
 
@@ -14,11 +16,19 @@ class GaussianEllipsoidBackend(BaseBackend):
                 requires_blender=False,
                 supports_pure_python=True,
                 supports_multi_view=True,
+                supports_top_view=True,
                 supports_uncertainty=True,
+                supports_constraints=True,
                 outputs_primitive_set=True,
+                outputs_mesh=True,
                 editability_score=0.75,
             ),
         )
+
+    def validate_config(self, config: Mapping[str, object]) -> list[str]:
+        from primitives.gaussian_ellipsoid import validate_gaussian_ellipsoid_config
+
+        return list(validate_gaussian_ellipsoid_config(config))
 
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
         try:

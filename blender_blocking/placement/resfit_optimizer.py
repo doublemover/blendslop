@@ -19,6 +19,32 @@ ObjectiveFn = Callable[[Sequence[object]], ResFitObjectiveResult]
 ParameterRef = Tuple[int, str, int | None]
 
 
+def _validate_finite_float(value: object, name: str, errors: list[str]) -> float | None:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        errors.append(f"{name} must be a real number, got {value!r}")
+        return None
+    if not np.isfinite(parsed):
+        errors.append(f"{name} must be finite, got {value!r}")
+        return None
+    return parsed
+
+
+def _validate_positive_int(value: object, name: str, errors: list[str]) -> int | None:
+    if isinstance(value, bool):
+        errors.append(f"{name} must be an integer, got {value!r}")
+        return None
+    try:
+        parsed = int(value)
+    except (OverflowError, TypeError, ValueError):
+        errors.append(f"{name} must be an integer, got {value!r}")
+        return None
+    if parsed <= 0:
+        errors.append(f"{name} must be > 0, got {value!r}")
+    return parsed
+
+
 @dataclass(frozen=True)
 class ParameterBounds:
     """Conservative default bounds for editable primitive parameters."""
@@ -32,6 +58,60 @@ class ParameterBounds:
     min_opacity: float = 0.0
     max_opacity: float = 1.0
 
+    def validate(self) -> tuple[str, ...]:
+        errors: list[str] = []
+        min_radius = _validate_finite_float(self.min_radius, "min_radius", errors)
+        max_radius = _validate_finite_float(self.max_radius, "max_radius", errors)
+        min_height = _validate_finite_float(self.min_height, "min_height", errors)
+        max_height = _validate_finite_float(self.max_height, "max_height", errors)
+        min_exponent = _validate_finite_float(self.min_exponent, "min_exponent", errors)
+        max_exponent = _validate_finite_float(self.max_exponent, "max_exponent", errors)
+        min_opacity = _validate_finite_float(self.min_opacity, "min_opacity", errors)
+        max_opacity = _validate_finite_float(self.max_opacity, "max_opacity", errors)
+        if len(errors):
+            return tuple(errors)
+        assert min_radius is not None
+        assert max_radius is not None
+        assert min_height is not None
+        assert max_height is not None
+        assert min_exponent is not None
+        assert max_exponent is not None
+        assert min_opacity is not None
+        assert max_opacity is not None
+        if min_radius < 0.0:
+            errors.append(f"min_radius must be >= 0.0, got {self.min_radius!r}")
+        if max_radius <= min_radius:
+            errors.append(
+                "max_radius must be greater than min_radius, got "
+                f"{self.max_radius!r} <= {self.min_radius!r}"
+            )
+        if min_height < 0.0:
+            errors.append(f"min_height must be >= 0.0, got {self.min_height!r}")
+        if max_height <= min_height:
+            errors.append(
+                "max_height must be greater than min_height, got "
+                f"{self.max_height!r} <= {self.min_height!r}"
+            )
+        if min_exponent < 0.0:
+            errors.append(
+                f"min_exponent must be >= 0.0, got {self.min_exponent!r}"
+            )
+        if max_exponent <= min_exponent:
+            errors.append(
+                "max_exponent must be greater than min_exponent, got "
+                f"{self.max_exponent!r} <= {self.min_exponent!r}"
+            )
+        if min_opacity < 0.0 or min_opacity > 1.0:
+            errors.append(
+                f"min_opacity must be in [0.0, 1.0], got {self.min_opacity!r}"
+            )
+        if max_opacity <= min_opacity or max_opacity > 1.0:
+            errors.append(
+                "max_opacity must be within (min_opacity, 1.0], got "
+                f"{self.max_opacity!r} <= {self.min_opacity!r}"
+            )
+        return tuple(errors)
+
 
 @dataclass(frozen=True)
 class CoordinateDescentConfig:
@@ -42,6 +122,31 @@ class CoordinateDescentConfig:
     step_decay: float = 0.5
     min_step: float = 1e-4
     bounds: ParameterBounds = field(default_factory=ParameterBounds)
+
+    def validate(self) -> tuple[str, ...]:
+        errors: list[str] = []
+        _validate_positive_int(self.iterations, "iterations", errors)
+        initial_step = _validate_finite_float(self.initial_step, "initial_step", errors)
+        step_decay = _validate_finite_float(self.step_decay, "step_decay", errors)
+        min_step = _validate_finite_float(self.min_step, "min_step", errors)
+        if len(errors):
+            return tuple(errors)
+        assert initial_step is not None
+        assert step_decay is not None
+        assert min_step is not None
+        if initial_step <= 0.0:
+            errors.append(f"initial_step must be > 0.0, got {self.initial_step!r}")
+        if not (0.0 < step_decay < 1.0):
+            errors.append(
+                f"step_decay must be in (0.0, 1.0), got {self.step_decay!r}"
+            )
+        if min_step <= 0.0 or min_step >= initial_step:
+            errors.append(
+                "min_step must be > 0.0 and < initial_step, got "
+                f"{self.min_step!r} >= {self.initial_step!r}"
+            )
+        errors.extend(self.bounds.validate())
+        return tuple(errors)
 
 
 @dataclass(frozen=True)
@@ -136,6 +241,9 @@ def coordinate_descent_optimize(
     refinement. It provides a stable baseline before analytic gradients exist.
     """
     working = clone_primitives(primitives)
+    config_errors = config.validate()
+    if config_errors:
+        raise ValueError("invalid optimizer config: " + ", ".join(config_errors))
     refs = discover_parameters(working)
     current = objective_fn(working)
     best_loss = current.total

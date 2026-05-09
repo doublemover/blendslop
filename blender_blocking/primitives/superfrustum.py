@@ -80,6 +80,29 @@ class SuperFrustum:
         z = np.cos(phi)
         return np.array([x, y, z], dtype=np.float64)
 
+    def _axis_rotation_matrix(self) -> np.ndarray:
+        """Cached rotation from world-space to the frustum's local z-aligned frame."""
+        axis = self.get_axis_vector()
+        return self._rotation_matrix_to_z(axis)
+
+    def radius_at_world_z(self, z_world: float) -> float:
+        """Return the interpolated profile radius at a world-space z coordinate.
+
+        The radius is derived in local frustum coordinates and clipped to the
+        nearest end-cap interpolation range for numerical stability.
+        """
+        axis_position = np.array([self.position[0], self.position[1], float(z_world)])
+        rot = self._axis_rotation_matrix()
+        local = np.asarray((axis_position - self.position) @ rot.T, dtype=np.float64)
+        local_z = float(local[2])
+        half_height = max(self.height * 0.5, 1e-9)
+        t = np.clip((local_z + half_height) / (2.0 * half_height), 0.0, 1.0)
+        return float((1.0 - t) * self.radius_bottom + t * self.radius_top)
+
+    def profile_width_at_world_z(self, z_world: float) -> float:
+        """Return an approximate world-space profile width from the local model."""
+        return float(2.0 * self.radius_at_world_z(z_world))
+
     @staticmethod
     def _rotation_matrix_to_z(axis: np.ndarray) -> np.ndarray:
         """Return a rotation matrix that aligns the given axis with +Z."""

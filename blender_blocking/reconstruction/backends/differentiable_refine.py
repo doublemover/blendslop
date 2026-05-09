@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Mapping
+
 from ..backend import BackendCapabilities, BaseBackend
 from ..types import CandidateRequest, CandidateResult
 
@@ -23,14 +25,31 @@ class DifferentiableRefinementBackend(BaseBackend):
             ),
         )
 
+    def validate_config(self, config: Mapping[str, object]) -> list[str]:
+        try:
+            from reconstruction.differentiable_render import _normalize_differentiable_config
+        except Exception:
+            return ["differentiable render module is unavailable"]
+
+        _, errors, _ = _normalize_differentiable_config(config)
+        return list(errors)
+
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
+        config_errors = self.validate_config(getattr(request, "config", {}))
+        if config_errors:
+            return CandidateResult(
+                candidate_id=request.candidate_id,
+                backend_name=self.name,
+                status="failed",
+                errors=tuple(config_errors),
+            )
         try:
             from reconstruction.differentiable_render import run_refinement_candidate
         except Exception as exc:
             return CandidateResult(
                 candidate_id=request.candidate_id,
                 backend_name=self.name,
-                status="skipped",
-                warnings=(f"differentiable refinement unavailable: {exc}",),
+                status="failed",
+                errors=(f"differentiable refinement unavailable: {exc}",),
             )
         return run_refinement_candidate(request)

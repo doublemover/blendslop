@@ -118,6 +118,58 @@ class TestResfittingMetrics(unittest.TestCase):
         primitives = fitter.initialize_from_voxels(empty_grid, num_initial=3)
         self.assertEqual(primitives, [])
 
+    def test_fit_history_captures_objective_progress(self) -> None:
+        rng = np.random.default_rng(2026)
+        theta = rng.uniform(0.0, 2 * np.pi, size=320)
+        z = rng.uniform(-1.0, 1.0, size=320)
+        target_points = np.column_stack(
+            [
+                1.4 * np.cos(theta),
+                1.4 * np.sin(theta),
+                z,
+            ]
+        )
+        initial_primitives = [
+            SuperFrustum(
+                position=(2.5, -2.1, 0.0),
+                orientation=(0.1, 0.2),
+                radius_bottom=0.2,
+                radius_top=0.2,
+                height=0.5,
+            )
+        ]
+
+        fitter = ResidualFitter(
+            max_primitives=3,
+            max_iterations=3,
+            learning_rate=0.01,
+            optimization_steps=12,
+            error_threshold=1e-5,
+        )
+        fitter.fit(target_points, initial_primitives=initial_primitives, verbose=False)
+        history = fitter.get_history()
+
+        self.assertIsNotNone(history["final_error"])
+        self.assertGreater(history["iterations"], 0)
+        self.assertEqual(history["iterations"], len(history["errors"]))
+        self.assertGreater(history["num_primitives"], 0)
+        self.assertGreater(history["final_error"], 0.0)
+        self.assertEqual(history["num_primitives"], len(fitter.primitives))
+
+        start_error = float(history["errors"][0])
+        end_error = float(history["errors"][-1])
+        self.assertGreaterEqual(start_error, 0.0)
+        self.assertGreaterEqual(end_error, 0.0)
+        self.assertLessEqual(
+            end_error,
+            start_error * 1.10 if start_error > 0 else end_error,
+            "Objective history should not degrade severely",
+        )
+
+        improvement = (start_error - end_error) / start_error if start_error > 0 else 0.0
+        self.assertGreaterEqual(improvement, -0.10)
+        self.assertLessEqual(improvement, 1.0)
+
     def test_optimize_vectorized_matches_scalar(self) -> None:
         rng = np.random.default_rng(2026)
         target_points = rng.normal(size=(40, 3))

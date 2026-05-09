@@ -23,6 +23,32 @@ except ImportError:  # pragma: no cover - package import path.
     from ..primitives.superfrustum import SuperFrustum
 
 
+def _validate_finite_float(value: object, name: str, errors: list[str]) -> float | None:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        errors.append(f"{name} must be a real number, got {value!r}")
+        return None
+    if not np.isfinite(parsed):
+        errors.append(f"{name} must be finite, got {value!r}")
+        return None
+    return parsed
+
+
+def _validate_positive_int(value: object, name: str, errors: list[str]) -> int | None:
+    if isinstance(value, bool):
+        errors.append(f"{name} must be an integer, got {value!r}")
+        return None
+    try:
+        parsed = int(value)
+    except (OverflowError, TypeError, ValueError):
+        errors.append(f"{name} must be an integer, got {value!r}")
+        return None
+    if parsed <= 0:
+        errors.append(f"{name} must be > 0, got {value!r}")
+    return parsed
+
+
 @dataclass(frozen=True)
 class PrimitiveInitializationConfig:
     """Configuration for deterministic primitive seeding."""
@@ -32,6 +58,23 @@ class PrimitiveInitializationConfig:
     min_radius: float = 0.05
     covariance_floor: float = 1e-4
     kmeans_iterations: int = 8
+
+    def validate(self) -> tuple[str, ...]:
+        errors: list[str] = []
+        _validate_positive_int(self.primitive_count, "primitive_count", errors)
+        _validate_positive_int(self.target_point_count, "target_point_count", errors)
+        _validate_positive_int(self.kmeans_iterations, "kmeans_iterations", errors)
+        min_radius = _validate_finite_float(self.min_radius, "min_radius", errors)
+        covariance_floor = _validate_finite_float(
+            self.covariance_floor, "covariance_floor", errors
+        )
+        if min_radius is not None and min_radius <= 0.0:
+            errors.append(f"min_radius must be > 0.0, got {self.min_radius!r}")
+        if covariance_floor is not None and covariance_floor < 0.0:
+            errors.append(
+                f"covariance_floor must be >= 0.0, got {self.covariance_floor!r}"
+            )
+        return tuple(errors)
 
 
 def bounded_point_sample(points: np.ndarray, limit: int) -> np.ndarray:

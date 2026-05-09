@@ -8,10 +8,12 @@ from config import (
     CanonicalizeConfig,
     LoftMeshOptions,
     MeshJoinConfig,
+    GaussianEllipsoidConfig,
     ProfileSamplingConfig,
     ReconstructionConfig,
     RenderConfig,
     SilhouetteExtractConfig,
+    DifferentiableRenderConfig,
 )
 
 
@@ -53,6 +55,21 @@ class TestConfigValidation(unittest.TestCase):
 
     def test_invalid_silhouette_threshold(self) -> None:
         cfg = SilhouetteExtractConfig(alpha_threshold=300)
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_gaussian_renderer(self) -> None:
+        cfg = GaussianEllipsoidConfig(renderer="bad_renderer")
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_differentiable_backend(self) -> None:
+        cfg = DifferentiableRenderConfig(backend="unsupported")
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_optional_dependency_policy(self) -> None:
+        cfg = DifferentiableRenderConfig(optional_dependency_policy="maybe")
         with self.assertRaises(ValueError):
             cfg.validate()
 
