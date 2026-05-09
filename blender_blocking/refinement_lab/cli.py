@@ -18,6 +18,7 @@ from .adaptive_planner import (
     merge_proposals,
     proposals_from_result_payload,
 )
+from .adaptive_loop import AdaptiveLoopOptions, run_adaptive_loop
 from .artifact_report import ReportOptions, generate_report
 from .candidate_autopsy import write_autopsy
 from .contracts import json_safe
@@ -51,6 +52,18 @@ def main(argv: list[str] | None = None) -> int:
     _add_plan_args(run_parser)
     _add_run_args(run_parser)
     run_parser.add_argument("--command-only", action="store_true")
+
+    loop_parser = subparsers.add_parser("loop")
+    _add_plan_args(loop_parser)
+    _add_run_args(loop_parser)
+    loop_parser.add_argument("--generations", type=int, default=3)
+    loop_parser.add_argument("--parent-top-k", type=int, default=3)
+    loop_parser.add_argument("--children-per-parent", type=int, default=4)
+    loop_parser.add_argument(
+        "--keep-going-without-children",
+        action="store_true",
+        help="continue until generation limit even if a generation emits no child variants",
+    )
 
     report_parser = subparsers.add_parser("report")
     report_parser.add_argument("--run-root", type=Path, required=True)
@@ -104,6 +117,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_plan(args)
     if args.command == "run":
         return _cmd_run(args)
+    if args.command == "loop":
+        return _cmd_loop(args)
     if args.command == "report":
         return _cmd_report(args)
     if args.command == "rank":
@@ -233,16 +248,71 @@ def _cmd_run(args: argparse.Namespace) -> int:
         for variant in plan.variants:
             print(" ".join(variant.cli_args))
         return 0
-    if args.blender_exe is None:
-        try:
-            import bpy  # noqa: F401
-        except Exception:
-            print(
-                "ERROR: --blender-exe is required when running outside Blender.",
-                file=sys.stderr,
-            )
-            return 2
-    options = RunOptions(
+    if not _runtime_can_execute(args):
+        return 2
+    options = _run_options_from_args(args)
+    ok, _results = runner_for_plan(
+        plan, options=options, base_config=BlockingConfig()
+    ).run()
+    return 0 if ok else 1
+
+
+def _cmd_loop(args: argparse.Namespace) -> int:
+    if not _runtime_can_execute(args):
+        return 2
+    track = get_track_preset(args.track)
+    external_variants = load_variants_from_files(args.variant_file)
+    summary = run_adaptive_loop(
+        suite=args.suite,
+        track=args.track,
+        search=args.search or track.default_search,
+        objective=args.objective or track.default_objective,
+        output_root=args.result_root,
+        seed=args.seed,
+        max_runs=args.max_runs,
+        top_k=args.top_k,
+        external_variants=external_variants,
+        external_variant_mode=args.variant_file_mode,
+        options=AdaptiveLoopOptions(
+            generations=args.generations,
+            parent_top_k=args.parent_top_k,
+            children_per_parent=args.children_per_parent,
+            stop_when_no_children=not args.keep_going_without_children,
+            run_options=_run_options_from_args(args),
+        ),
+        base_config=BlockingConfig(),
+    )
+    print(
+        json.dumps(
+            {
+                "summary": summary.summary_path.as_posix(),
+                "generations": len(summary.generations),
+                "stopped_reason": summary.stopped_reason,
+                "final_child_variants": len(summary.final_child_variants),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
+def _runtime_can_execute(args: argparse.Namespace) -> bool:
+    if args.blender_exe is not None:
+        return True
+    try:
+        import bpy  # noqa: F401
+    except Exception:
+        print(
+            "ERROR: --blender-exe is required when running outside Blender.",
+            file=sys.stderr,
+        )
+        return False
+    return True
+
+
+def _run_options_from_args(args: argparse.Namespace) -> RunOptions:
+    return RunOptions(
         html_report=args.html_report,
         write_overlays=args.write_overlays,
         write_bounds_debug=args.bounds_debug,
@@ -256,10 +326,6 @@ def _cmd_run(args: argparse.Namespace) -> int:
         subprocess_blender=args.blender_exe is not None,
         blender_executable=args.blender_exe,
     )
-    ok, _results = runner_for_plan(
-        plan, options=options, base_config=BlockingConfig()
-    ).run()
-    return 0 if ok else 1
 
 
 def _cmd_report(args: argparse.Namespace) -> int:

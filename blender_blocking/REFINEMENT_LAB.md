@@ -159,6 +159,26 @@ The adaptive planner consumes metric bundles plus autopsy plans such as
 `boundary_refinement_plan`, `calibration_plan`, `topology_repair_plan`, and
 `active_view_plan`, then emits runnable variants for the next plan.
 
+Run a closed adaptive loop when you want each generation to execute, rank the
+best parents, and feed their proposals into the next generation automatically:
+
+```bash
+python -m blender_blocking.refinement_lab.cli loop `
+  --suite synthetic-smoke `
+  --track refinement-maximal `
+  --generations 3 `
+  --parent-top-k 3 `
+  --children-per-parent 4 `
+  --result-root temp\refinement-runs\closed-loop `
+  --blender-exe "C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
+```
+
+The loop writes one `generation-XX/` run root per iteration plus
+`adaptive-loop-summary.json` at the loop root. Each generation records the
+selected parent variants, emitted proposals, and child variants. Child variants
+carry `parent_variant_id`, `adaptive-loop` tags, and generation metadata so
+reports and lineage tooling can reconstruct the search path.
+
 Append a human label:
 
 ```bash
