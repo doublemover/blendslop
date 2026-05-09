@@ -23,8 +23,9 @@ from typing import Any, Dict, Optional, Tuple
 # Add current directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Add ~/blender_python_packages for user-installed dependencies (numpy, opencv-python, Pillow, scipy)
-sys.path.insert(0, str(Path.home() / "blender_python_packages"))
+from blender_blocking.verify_setup import configure_dependency_paths
+
+configure_dependency_paths()
 
 try:
     import bpy
@@ -78,8 +79,8 @@ class E2EValidator:
         """
         self.iou_threshold = iou_threshold
         self.view_thresholds = view_thresholds or {}
-        self.render_config = render_config or RenderConfig()
-        self.workflow_config = workflow_config
+        self.workflow_config = workflow_config or BlockingConfig()
+        self.render_config = render_config or self.workflow_config.render_silhouette
         self.config_label = config_label
         self.progress = progress
         self.results = {}
