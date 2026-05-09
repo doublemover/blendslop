@@ -1,0 +1,316 @@
+"""Build typed reconstruction targets from workflow images and constraints."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Mapping, Optional, Sequence
+
+import numpy as np
+
+from constraints import (
+    ConstraintSet,
+    apply_constraints_to_masks,
+    constraint_set_hash,
+    constraint_set_to_payload,
+    load_constraint_files,
+    mask_extraction_hints,
+)
+from geometry.silhouette_pipeline import (
+    build_uncertain_mask,
+    canonicalize_silhouette,
+    extract_silhouette_mask,
+)
+
+from .artifacts import hash_json, write_json
+from .types import (
+    Bounds2D,
+    Bounds3D,
+    ProfileBand,
+    ProfileIntervalPx,
+    ReconstructionTarget,
+    ViewConstraint,
+)
+
+
+@dataclass(frozen=True)
+class TargetBuildResult:
+    """Target plus extracted intermediates needed for diagnostics."""
+
+    target: ReconstructionTarget
+    masks: Mapping[str, np.ndarray]
+    confidences: Mapping[str, np.ndarray]
+    uncertainties: Mapping[str, Any]
+    constraint_set: ConstraintSet
+    constraint_reports: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
+    warnings: tuple[str, ...] = ()
+    artifact_paths: Mapping[str, Path] = field(default_factory=dict)
+
+    def to_manifest_fragment(self) -> dict[str, object]:
+        return {
+            "target": self.target.to_dict(),
+            "views": sorted(self.masks),
+            "constraint_hash": constraint_set_hash(self.constraint_set),
+            "constraint_reports": dict(self.constraint_reports),
+            "warnings": list(self.warnings),
+            "artifact_paths": {key: str(path) for key, path in self.artifact_paths.items()},
+        }
+
+
+def build_target_from_images(
+    views: Mapping[str, np.ndarray],
+    *,
+    config: Any = None,
+    constraint_files: Sequence[str | Path] = (),
+    artifact_root: str | Path | None = None,
+    bounds_minmax: Optional[tuple[Sequence[float], Sequence[float]]] = None,
+    profile_samples: int = 100,
+) -> TargetBuildResult:
+    """Extract masks, apply constraints, and build a backend-neutral target."""
+    if not views:
+        raise ValueError("at least one view is required")
+
+    warnings: list[str] = []
+    root = Path(artifact_root) if artifact_root is not None else None
+    constraint_set = (
+        load_constraint_files(constraint_files) if constraint_files else ConstraintSet()
+    )
+    config_payload = config.to_dict() if hasattr(config, "to_dict") else {}
+    extraction_config = getattr(config, "silhouette_extract_ref", None)
+    canonical_config = getattr(config, "canonicalize", None)
+
+    raw_masks: dict[str, np.ndarray] = {}
+    uncertainties: dict[str, Any] = {}
+    confidences: dict[str, np.ndarray] = {}
+    bboxes: dict[str, Bounds2D] = {}
+    diagnostics: dict[str, Mapping[str, Any]] = {}
+
+    for view, image in sorted(views.items()):
+        overrides = mask_extraction_hints(constraint_set, view)
+        selected = extract_silhouette_mask(image, extraction_config, **overrides)
+        uncertain = build_uncertain_mask(image, extraction_config, **overrides)
+        canonical = canonicalize_silhouette(selected.mask, canonical_config)
+        raw_masks[view] = selected.mask
+        uncertainties[view] = uncertain
+        confidences[view] = uncertain.confidence
+        if selected.bbox is not None:
+            bboxes[view] = Bounds2D.from_xyxy(selected.bbox.to_xyxy())
+        diagnostics[view] = {
+            "selected": selected.to_dict(),
+            "canonical": canonical.to_dict(),
+            "uncertainty": dict(uncertain.diagnostics),
+        }
+        if selected.bbox is None:
+            warnings.append(f"{view} silhouette is empty")
+
+    constraint_reports: dict[str, Mapping[str, Any]] = {}
+    if not constraint_set.is_empty():
+        constrained = apply_constraints_to_masks(
+            raw_masks,
+            constraint_set,
+            confidences=confidences,
+        )
+        for view, result in constrained.items():
+            raw_masks[view] = result.mask
+            confidences[view] = result.confidence
+            constraint_reports[view] = result.report
+            bbox = _bbox_from_mask(result.mask)
+            if bbox is not None:
+                bboxes[view] = Bounds2D.from_xyxy(bbox)
+
+    profile_bands = {
+        view: tuple(mask_to_profile_bands(mask, sample_count=profile_samples, view=view))
+        for view, mask in raw_masks.items()
+    }
+    bounds = _bounds_from_minmax(bounds_minmax)
+    constraints_payload = constraint_set_to_payload(constraint_set)
+    target = ReconstructionTarget(
+        constraints=_view_constraints(
+            raw_masks,
+            bboxes=bboxes,
+            uncertainties=uncertainties,
+            diagnostics=diagnostics,
+        ),
+        profile_bands=profile_bands,
+        bounds=bounds,
+        config_hash=hash_json(config_payload),
+        constraint_hash=hash_json(constraints_payload),
+        artifact_root=root,
+        extras={
+            "constraint_payload": constraints_payload,
+            "view_diagnostics": diagnostics,
+            "profile_samples": int(profile_samples),
+        },
+    )
+    artifact_paths = _write_target_artifacts(
+        root,
+        target=target,
+        masks=raw_masks,
+        confidences=confidences,
+        diagnostics=diagnostics,
+        constraints_payload=constraints_payload,
+    )
+    return TargetBuildResult(
+        target=target,
+        masks=raw_masks,
+        confidences=confidences,
+        uncertainties=uncertainties,
+        constraint_set=constraint_set,
+        constraint_reports=constraint_reports,
+        warnings=tuple(warnings),
+        artifact_paths=artifact_paths,
+    )
+
+
+def mask_to_profile_bands(
+    mask: np.ndarray,
+    *,
+    sample_count: int,
+    view: str = "",
+) -> tuple[ProfileBand, ...]:
+    """Sample all foreground intervals per row instead of one width per height."""
+    mask_bool = np.asarray(mask).astype(bool, copy=False)
+    if mask_bool.ndim != 2:
+        raise ValueError("mask must be 2D")
+    height, _width = mask_bool.shape
+    if height == 0:
+        return ()
+    count = max(1, int(sample_count))
+    if count == 1:
+        rows = np.array([height // 2], dtype=np.int64)
+    else:
+        rows = np.linspace(0, height - 1, count).round().astype(np.int64)
+    bands = []
+    denom = max(1, height - 1)
+    for row in rows:
+        intervals = _row_intervals(mask_bool[int(row), :])
+        dominant = max(intervals, key=lambda item: item.width, default=None)
+        total_width = float(sum(interval.width for interval in intervals))
+        holes = _holes_between_intervals(intervals)
+        bands.append(
+            ProfileBand(
+                t=float(1.0 - float(row) / denom),
+                intervals=tuple(intervals),
+                center_x=None if dominant is None else dominant.center,
+                width_px=total_width,
+                holes=tuple(holes),
+                moments=_row_moments(intervals),
+                confidence=1.0 if intervals else 0.0,
+                source_view=view,
+            )
+        )
+    return tuple(bands)
+
+
+def _row_intervals(row: np.ndarray) -> tuple[ProfileIntervalPx, ...]:
+    values = np.asarray(row).astype(bool, copy=False)
+    if values.size == 0 or not values.any():
+        return ()
+    padded = np.pad(values.astype(np.int8), (1, 1), constant_values=0)
+    changes = np.diff(padded)
+    starts = np.where(changes == 1)[0]
+    stops = np.where(changes == -1)[0]
+    return tuple(
+        ProfileIntervalPx(float(start), float(stop), confidence=1.0, source="mask")
+        for start, stop in zip(starts, stops)
+    )
+
+
+def _holes_between_intervals(
+    intervals: Sequence[ProfileIntervalPx],
+) -> tuple[ProfileIntervalPx, ...]:
+    holes = []
+    for left, right in zip(intervals, intervals[1:]):
+        if right.x0 > left.x1:
+            holes.append(
+                ProfileIntervalPx(
+                    float(left.x1),
+                    float(right.x0),
+                    confidence=1.0,
+                    source="hole",
+                )
+            )
+    return tuple(holes)
+
+
+def _row_moments(intervals: Sequence[ProfileIntervalPx]) -> dict[str, float]:
+    if not intervals:
+        return {"component_count": 0.0, "total_width": 0.0}
+    widths = np.asarray([interval.width for interval in intervals], dtype=float)
+    centers = np.asarray([interval.center for interval in intervals], dtype=float)
+    total = float(widths.sum())
+    weighted_center = float(np.average(centers, weights=widths)) if total else 0.0
+    return {
+        "component_count": float(len(intervals)),
+        "total_width": total,
+        "weighted_center_x": weighted_center,
+    }
+
+
+def _view_constraints(
+    masks: Mapping[str, np.ndarray],
+    *,
+    bboxes: Mapping[str, Bounds2D],
+    uncertainties: Mapping[str, Any],
+    diagnostics: Mapping[str, Mapping[str, Any]],
+) -> tuple[ViewConstraint, ...]:
+    from .targets import make_axis_camera
+
+    constraints = []
+    for view, mask in sorted(masks.items()):
+        height, width = mask.shape
+        constraints.append(
+            ViewConstraint(
+                view=view,
+                mask=mask,
+                camera=make_axis_camera(view, (int(width), int(height))),
+                bbox=bboxes.get(view),
+                uncertainty=uncertainties.get(view),
+                diagnostics=diagnostics.get(view, {}),
+            )
+        )
+    return tuple(constraints)
+
+
+def _bounds_from_minmax(
+    bounds_minmax: Optional[tuple[Sequence[float], Sequence[float]]],
+) -> Optional[Bounds3D]:
+    if bounds_minmax is None:
+        return None
+    minimum, maximum = bounds_minmax
+    return Bounds3D.from_min_max(minimum, maximum)
+
+
+def _bbox_from_mask(mask: np.ndarray) -> Optional[tuple[int, int, int, int]]:
+    ys, xs = np.where(np.asarray(mask).astype(bool, copy=False))
+    if xs.size == 0 or ys.size == 0:
+        return None
+    return int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
+
+
+def _write_target_artifacts(
+    root: Optional[Path],
+    *,
+    target: ReconstructionTarget,
+    masks: Mapping[str, np.ndarray],
+    confidences: Mapping[str, np.ndarray],
+    diagnostics: Mapping[str, Mapping[str, Any]],
+    constraints_payload: Mapping[str, Any],
+) -> Mapping[str, Path]:
+    if root is None:
+        return {}
+    target_dir = root / "target"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    paths: dict[str, Path] = {}
+    paths["target"] = write_json(target_dir / "target.json", target.to_dict())
+    paths["constraints"] = write_json(target_dir / "constraints.json", constraints_payload)
+    paths["diagnostics"] = write_json(target_dir / "view-diagnostics.json", diagnostics)
+    for view, mask in masks.items():
+        mask_path = target_dir / f"{view}-mask.npy"
+        np.save(mask_path, np.asarray(mask).astype(bool, copy=False))
+        paths[f"{view}_mask"] = mask_path
+    for view, confidence in confidences.items():
+        conf_path = target_dir / f"{view}-confidence.npy"
+        np.save(conf_path, np.asarray(confidence, dtype=np.float32))
+        paths[f"{view}_confidence"] = conf_path
+    return paths

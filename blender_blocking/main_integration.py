@@ -11,7 +11,8 @@ import sys
 import math
 from pathlib import Path
 import numpy as np
-from typing import Any, Dict, List, Optional, Tuple
+from types import SimpleNamespace
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 # Add current directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -88,6 +89,11 @@ from geometry.slicing import sample_elliptical_slices
 from config import BlockingConfig
 from utils.generation_context import GenerationContext
 from utils.manifest import apply_object_tags, build_manifest, write_manifest
+from reconstruction.ensemble import CandidateConfig as BackendCandidateConfig
+from reconstruction.ensemble import EnsembleRunner
+from reconstruction.registry import get_backend, register_builtin_backends
+from reconstruction.target_builder import TargetBuildResult, build_target_from_images
+from reconstruction.types import CandidateBudget, CandidateMetrics, CandidateRequest, CandidateResult
 
 # Import Blender modules (only available when running in Blender)
 try:
@@ -143,6 +149,8 @@ class BlockingWorkflow:
         self.placement_data: Optional[List[Dict[str, Any]]] = None
         self.created_objects: List[Any] = []
         self.manifest: Optional[Dict[str, Any]] = None
+        self.target_build: Optional[TargetBuildResult] = None
+        self.reconstruction_result: Optional[Any] = None
 
     def load_images(self) -> Dict[str, np.ndarray]:
         """Load orthogonal reference images."""
@@ -547,6 +555,9 @@ class BlockingWorkflow:
                 target_name="Blockout_Mesh",
                 mode=self.config.mesh_join.mode,
                 solver=self.config.mesh_join.boolean_solver,
+                allow_degraded_simple_join=(
+                    self.config.mesh_join.allow_degraded_simple_join
+                ),
             )
 
             if (
@@ -696,6 +707,9 @@ class BlockingWorkflow:
             slices,
             name="Blockout_Mesh",
             radial_segments=self.config.mesh_from_profile.radial_segments,
+            adaptive_radial_segments=(
+                self.config.mesh_from_profile.adaptive_radial_segments
+            ),
             cap_mode=self.config.mesh_from_profile.cap_mode,
             min_radius_u=self.config.mesh_from_profile.min_radius_u,
             merge_threshold_u=self.config.mesh_from_profile.merge_threshold_u,
@@ -774,7 +788,17 @@ class BlockingWorkflow:
                 base_cfg["largest_component_only"] = (
                     self.config.silhouette_intersection.largest_component_only
                 )
-            return base_cfg
+            supported = {
+                "prefer_alpha",
+                "alpha_threshold",
+                "gray_threshold",
+                "invert_policy",
+                "morph_close_px",
+                "morph_open_px",
+                "fill_holes",
+                "largest_component_only",
+            }
+            return {key: value for key, value in base_cfg.items() if key in supported}
 
         extract_cfg = _resolve_extract_config()
         front_mask = extract_binary_silhouette(self.views["front"], **extract_cfg)
@@ -1004,9 +1028,6 @@ class BlockingWorkflow:
         clean_mesh_for_boolean(base_obj)
         clean_mesh_for_boolean(side_obj)
 
-        # FIXME(silhouette_intersection): Boolean intersection still yields empty
-        # meshes for some inputs (e.g., car/star) even after cleanup. Investigate
-        # non-manifold sources, contour winding, and solver/triangulation order.
         modifier = base_obj.modifiers.new(name="Intersect", type="BOOLEAN")
         modifier.operation = "INTERSECT"
         modifier.object = side_obj
@@ -1021,10 +1042,25 @@ class BlockingWorkflow:
             f"DEBUG silhouette_intersection intersect result verts={final_verts} faces={final_faces} solver={solver}"
         )
         if final_verts == 0 or final_faces == 0:
-            print(
-                "Warning: Intersection produced empty mesh. "
-                "Try silhouette_intersection.boolean_solver=EXACT or MANIFOLD."
+            error = (
+                "silhouette intersection produced an empty mesh; try "
+                "silhouette_intersection.boolean_solver=EXACT or MANIFOLD"
             )
+            print(f"Warning: {error}")
+            outputs = {
+                "primitives": {"count": 0, "names": []},
+                "final_mesh": {"count": 0, "name": None},
+                "bounds": {"min": list(bounds_min), "max": list(bounds_max)},
+            }
+            manifest = build_manifest(
+                self.context,
+                outputs=outputs,
+                warnings=[],
+                errors=[error],
+            )
+            write_manifest(bpy.context.scene, manifest)
+            self.manifest = manifest
+            return None
 
         apply_object_tags(base_obj, role="final", context=self.context)
         add_camera()
@@ -1041,6 +1077,218 @@ class BlockingWorkflow:
 
         print(f"✓ Created silhouette intersection mesh: {base_obj.name}")
         return base_obj
+
+    def _artifact_root(self) -> Path:
+        """Return the scoped artifact root for this workflow run."""
+        return Path("test_output") / "reconstruction" / self.context.run_id
+
+    def _target_bounds_minmax(
+        self, silhouettes: Optional[Mapping[str, np.ndarray]] = None
+    ) -> Tuple[Tuple[float, float, float], Tuple[float, float, float]]:
+        if silhouettes:
+            bounds = self._calculate_bounds_from_silhouettes(dict(silhouettes))
+            if bounds:
+                return bounds
+        return self.calculate_bounds_from_shapes()
+
+    def build_reconstruction_target(self) -> TargetBuildResult:
+        """Build and cache the typed reconstruction target for backend modes."""
+        if self.target_build is not None:
+            return self.target_build
+        artifact_root = self._artifact_root()
+        bounds = self._target_bounds_minmax()
+        self.target_build = build_target_from_images(
+            self.views,
+            config=self.config,
+            constraint_files=self.config.constraints.constraint_files,
+            artifact_root=artifact_root,
+            bounds_minmax=bounds,
+            profile_samples=self.config.profile_sampling.num_samples,
+        )
+        return self.target_build
+
+    def _config_for_backend(self, backend_name: str) -> Dict[str, Any]:
+        """Return backend-specific config payloads from BlockingConfig."""
+        if backend_name == "legacy":
+            return self.config.reconstruction.to_dict()
+        if backend_name == "profile_loft":
+            return {
+                **self.config.reconstruction.to_dict(),
+                **self.config.profile_sampling.to_dict(),
+                **self.config.mesh_from_profile.to_dict(),
+            }
+        if backend_name == "silhouette_intersection":
+            return self.config.silhouette_intersection.to_dict()
+        if backend_name == "visual_hull_voxel":
+            return self.config.visual_hull.to_dict()
+        if backend_name == "hybrid_loft_hull":
+            return {
+                **self.config.visual_hull.to_dict(),
+                "profile_sampling": self.config.profile_sampling.to_dict(),
+                "mesh_from_profile": self.config.mesh_from_profile.to_dict(),
+            }
+        if backend_name == "primitive_fit_refine":
+            return {
+                **self.config.primitive_fit.to_dict(),
+                "visual_hull_resolution": min(
+                    self.config.visual_hull.resolution,
+                    self.config.visual_hull.max_resolution,
+                ),
+                "chunk_size": self.config.visual_hull.chunk_size,
+            }
+        if backend_name == "gaussian_ellipsoid_proxy":
+            return {
+                **self.config.gaussian_ellipsoid.to_dict(),
+                "visual_hull_resolution": min(
+                    self.config.visual_hull.resolution,
+                    self.config.visual_hull.max_resolution,
+                ),
+                "chunk_size": self.config.visual_hull.chunk_size,
+            }
+        if backend_name == "differentiable_refine":
+            return {
+                **self.config.differentiable_render.to_dict(),
+                "visual_hull_resolution": min(
+                    self.config.visual_hull.resolution,
+                    self.config.visual_hull.max_resolution,
+                ),
+                "primitive_count": self.config.gaussian_ellipsoid.primitive_count,
+                "chunk_size": self.config.visual_hull.chunk_size,
+            }
+        return {}
+
+    def _default_ensemble_candidates(self) -> Tuple[BackendCandidateConfig, ...]:
+        names = [
+            "profile_loft" if BLENDER_AVAILABLE else None,
+            "silhouette_intersection" if BLENDER_AVAILABLE else None,
+            "visual_hull_voxel",
+            "primitive_fit_refine",
+            "gaussian_ellipsoid_proxy",
+            "differentiable_refine",
+        ]
+        candidates = []
+        for name in names:
+            if not name:
+                continue
+            candidates.append(
+                BackendCandidateConfig(
+                    backend_name=name,
+                    candidate_id=name,
+                    config=self._config_for_backend(name),
+                )
+            )
+        return tuple(candidates)
+
+    def _configured_ensemble_candidates(self) -> Tuple[BackendCandidateConfig, ...]:
+        configured = self.config.ensemble.candidates
+        if not configured:
+            return self._default_ensemble_candidates()
+        return tuple(
+            BackendCandidateConfig(
+                backend_name=candidate.backend_name,
+                enabled=candidate.enabled,
+                config={
+                    **self._config_for_backend(candidate.backend_name),
+                    **dict(candidate.config),
+                },
+                candidate_id=candidate.candidate_id,
+            )
+            for candidate in configured
+        )
+
+    def run_backend_reconstruction(
+        self,
+        *,
+        mode: Optional[str] = None,
+    ) -> Optional[Any]:
+        """Run the typed backend registry path for ambitious modes."""
+        selected_mode = mode or self.config.reconstruction.reconstruction_mode
+        register_builtin_backends()
+        target_build = self.build_reconstruction_target()
+        artifact_root = self._artifact_root()
+        context = SimpleNamespace(
+            workflow=self,
+            blender_available=BLENDER_AVAILABLE,
+            generation_context=self.context,
+        )
+
+        if selected_mode == "ensemble":
+            runner = EnsembleRunner(
+                selection_policy=self.config.ensemble.selection_policy
+            )
+            result = runner.run(
+                target=target_build.target,
+                candidates=self._configured_ensemble_candidates(),
+                artifact_root=artifact_root / "candidates",
+                context=context,
+                budget=CandidateBudget(
+                    timeout_s=self.config.ensemble.per_candidate_timeout_s,
+                    memory_budget_mb=self.config.visual_hull.memory_budget_mb,
+                ),
+            )
+            self.reconstruction_result = result
+            self._record_backend_manifest(result.to_dict(), target_build)
+            return result.selected.payload if result.selected else None
+
+        backend_name = "profile_loft" if selected_mode == "loft_profile" else selected_mode
+        backend = get_backend(backend_name)
+        if backend.capabilities.requires_blender and not BLENDER_AVAILABLE:
+            result = CandidateResult(
+                candidate_id=backend_name,
+                backend_name=backend_name,
+                status="skipped",
+                metric_result=CandidateMetrics(),
+                warnings=(f"{backend_name} requires Blender",),
+            )
+        else:
+            request = CandidateRequest(
+                candidate_id=backend_name,
+                backend_name=backend_name,
+                target=target_build.target,
+                config=self._config_for_backend(backend_name),
+                budget=CandidateBudget(
+                    memory_budget_mb=self.config.visual_hull.memory_budget_mb
+                ),
+                artifact_root=artifact_root / "candidates",
+                context=context,
+            )
+            errors = backend.validate_config(request.config)
+            if errors:
+                result = CandidateResult(
+                    candidate_id=backend_name,
+                    backend_name=backend_name,
+                    status="failed",
+                    errors=tuple(errors),
+                )
+            else:
+                result = backend.reconstruct(request)
+
+        self.reconstruction_result = result
+        self._record_backend_manifest(result.to_dict(), target_build)
+        if BLENDER_AVAILABLE and getattr(result.payload, "name", None):
+            apply_object_tags(result.payload, role="final", context=self.context)
+        return result.payload
+
+    def _record_backend_manifest(
+        self,
+        result_payload: Mapping[str, Any],
+        target_build: TargetBuildResult,
+    ) -> None:
+        outputs = {
+            "backend_result": result_payload,
+            "target": target_build.to_manifest_fragment(),
+        }
+        warnings = list(target_build.warnings)
+        errors = list(result_payload.get("errors", []))
+        manifest = build_manifest(
+            self.context,
+            outputs=outputs,
+            warnings=warnings,
+            errors=errors,
+        )
+        self.manifest = manifest
+        if BLENDER_AVAILABLE:
+            write_manifest(bpy.context.scene, manifest)
 
     def run_full_workflow(self, num_slices: Optional[int] = None) -> Optional[Any]:
         """
@@ -1071,30 +1319,43 @@ class BlockingWorkflow:
         with self.context.time_block("analyze_shapes"):
             self.analyze_shapes()
 
-        # Step 4: Create 3D blockout (only if Blender available)
+        # Step 4: Create 3D blockout or pure backend artifact.
         result = None
+        mode = self.config.reconstruction.reconstruction_mode
+        backend_modes = {
+            "visual_hull_voxel",
+            "hybrid_loft_hull",
+            "primitive_fit_refine",
+            "gaussian_ellipsoid_proxy",
+            "differentiable_refine",
+            "ensemble",
+        }
         if BLENDER_AVAILABLE:
-            if self.config.reconstruction.reconstruction_mode == "loft_profile":
+            if mode in {"loft_profile", "profile_loft"}:
                 with self.context.time_block("create_3d_blockout_loft"):
                     result = self.create_3d_blockout_loft(num_slices=num_slices)
-            elif (
-                self.config.reconstruction.reconstruction_mode
-                == "silhouette_intersection"
-            ):
+            elif mode == "silhouette_intersection":
                 with self.context.time_block(
                     "create_3d_blockout_silhouette_intersection"
                 ):
                     result = self.create_3d_blockout_silhouette_intersection(
                         num_slices=num_slices
                     )
+            elif mode in backend_modes:
+                with self.context.time_block(f"backend_{mode}"):
+                    result = self.run_backend_reconstruction(mode=mode)
             else:
                 with self.context.time_block("create_3d_blockout"):
                     result = self.create_3d_blockout(num_slices=num_slices)
         else:
-            print("\nShape analysis complete. Run in Blender to create 3D blockout.")
-            print(f"Analyzed views: {', '.join(self.shape_analysis.keys())}")
-            for view, shapes in self.shape_analysis.items():
-                print(f"  {view}: {len(shapes)} shapes")
+            if mode in backend_modes:
+                with self.context.time_block(f"backend_{mode}"):
+                    result = self.run_backend_reconstruction(mode=mode)
+            else:
+                print("\nShape analysis complete. Run in Blender to create 3D blockout.")
+                print(f"Analyzed views: {', '.join(self.shape_analysis.keys())}")
+                for view, shapes in self.shape_analysis.items():
+                    print(f"  {view}: {len(shapes)} shapes")
 
         print("=" * 60)
         print("WORKFLOW COMPLETE")
