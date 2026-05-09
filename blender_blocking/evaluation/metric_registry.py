@@ -67,6 +67,8 @@ _DEFINITIONS = (
     MetricDefinition("topology.connected_components", "count", False, "Mesh connected component count."),
     MetricDefinition("topology.boundary_edges", "count", False, "Mesh boundary edge count."),
     MetricDefinition("topology.non_manifold_edges", "count", False, "Mesh non-manifold edge count."),
+    MetricDefinition("topology.degenerate_faces", "count", False, "Mesh degenerate face count."),
+    MetricDefinition("topology.loose_vertices", "count", False, "Mesh loose vertex count."),
     MetricDefinition("topology.watertight", None, True, "Whether the mesh is watertight."),
     MetricDefinition("editability.editable_reconstruction_index", None, True, "Composite Blender editability score."),
     MetricDefinition("editability.object_hierarchy_score", None, True, "Object hierarchy and part separability score."),

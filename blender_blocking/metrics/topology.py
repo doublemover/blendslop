@@ -97,6 +97,36 @@ class TopologyReport:
         }
 
 
+@dataclass(frozen=True)
+class TopologyRepairResult:
+    """Result of a conservative pure-Python mesh topology repair pass."""
+
+    vertices: np.ndarray
+    faces: tuple[Face, ...]
+    before: TopologyReport
+    after: TopologyReport
+    operations: tuple[Mapping[str, object], ...]
+    changed: bool
+
+    @property
+    def improved(self) -> bool:
+        return self.after.topology_score >= self.before.topology_score and (
+            self.after.topology_score > self.before.topology_score
+            or self.after.penalty < self.before.penalty
+        )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "changed": self.changed,
+            "improved": self.improved,
+            "before": self.before.to_dict(),
+            "after": self.after.to_dict(),
+            "operations": [dict(operation) for operation in self.operations],
+            "vertex_count": int(len(self.vertices)),
+            "face_count": int(len(self.faces)),
+        }
+
+
 def normalize_faces(faces: Iterable[Sequence[int]]) -> tuple[Face, ...]:
     """Normalize faces to unique integer tuples, dropping repeated tail noise."""
     normalized = []
@@ -181,6 +211,192 @@ def topology_penalty(report: TopologyReport, weights: Mapping[str, float] | None
         + report.loose_vertices * w["loose_vertices"]
         + max(0, report.connected_components - 1) * w["connected_components"]
     )
+
+
+def safe_topology_repair(
+    vertices: np.ndarray | Sequence[Sequence[float]],
+    faces: Iterable[Sequence[int]],
+    *,
+    keep_largest_component: bool = True,
+) -> TopologyRepairResult:
+    """Perform conservative topology cleanup without inventing new surfaces.
+
+    This pass is intentionally safe for reconstruction QA loops: it removes
+    provably invalid elements, duplicate faces, loose vertices, and optionally
+    disconnected components outside the largest face-connected component. It
+    does not fill holes, remesh, smooth, or move vertices, so any quality change
+    is traceable and reversible.
+    """
+    vertex_array = _as_vertex_array(vertices)
+    original_faces = normalize_faces(faces)
+    before = mesh_topology_report(vertex_array, original_faces)
+    operations: list[Mapping[str, object]] = []
+
+    clean_faces, dropped_invalid = _valid_unique_faces(original_faces, len(vertex_array))
+    if dropped_invalid:
+        operations.append(
+            {
+                "operation": "drop_invalid_or_degenerate_faces",
+                "count": dropped_invalid,
+            }
+        )
+
+    duplicate_count = len(original_faces) - dropped_invalid - len(clean_faces)
+    if duplicate_count > 0:
+        operations.append({"operation": "drop_duplicate_faces", "count": duplicate_count})
+
+    if keep_largest_component and clean_faces:
+        clean_faces, dropped_components = _keep_largest_face_component(clean_faces)
+        if dropped_components:
+            operations.append(
+                {
+                    "operation": "drop_non_largest_components",
+                    "count": dropped_components,
+                }
+            )
+
+    compact_vertices, compact_faces, removed_vertices = _compact_vertices(
+        vertex_array,
+        clean_faces,
+    )
+    if removed_vertices:
+        operations.append({"operation": "drop_loose_vertices", "count": removed_vertices})
+
+    after = mesh_topology_report(compact_vertices, compact_faces)
+    changed = bool(operations) or len(compact_vertices) != len(vertex_array)
+    return TopologyRepairResult(
+        vertices=compact_vertices,
+        faces=compact_faces,
+        before=before,
+        after=after,
+        operations=tuple(operations),
+        changed=changed,
+    )
+
+
+def topology_repair_plan(report: TopologyReport | Mapping[str, object]) -> dict[str, object]:
+    """Return a deterministic plan for the safest next topology repair steps."""
+    data = report.to_dict() if hasattr(report, "to_dict") else dict(report)
+    steps: list[dict[str, object]] = []
+    if int(data.get("degenerate_faces", 0) or 0) > 0:
+        steps.append(
+            {
+                "operation": "drop_invalid_or_degenerate_faces",
+                "reason": "degenerate faces cannot contribute stable editable topology",
+                "risk": "low",
+            }
+        )
+    if int(data.get("loose_vertices", 0) or 0) > 0:
+        steps.append(
+            {
+                "operation": "drop_loose_vertices",
+                "reason": "loose vertices are not referenced by any surface face",
+                "risk": "low",
+            }
+        )
+    if int(data.get("connected_components", 0) or 0) > 1:
+        steps.append(
+            {
+                "operation": "drop_or_label_small_components",
+                "reason": "extra components may be floating artifacts or separate parts",
+                "risk": "medium",
+            }
+        )
+    if int(data.get("non_manifold_edges", 0) or 0) > 0:
+        steps.append(
+            {
+                "operation": "split_or_remove_non_manifold_faces",
+                "reason": "non-manifold edges block reliable boolean/edit operations",
+                "risk": "medium",
+            }
+        )
+    if int(data.get("boundary_edges", 0) or 0) > 0:
+        steps.append(
+            {
+                "operation": "hole_fill_or_remesh_required",
+                "reason": "boundary edges require surface synthesis, not safe deletion only",
+                "risk": "high",
+            }
+        )
+    return {
+        "status": "clean" if not steps else "repair_recommended",
+        "safe_automatic": all(step["risk"] == "low" for step in steps),
+        "steps": steps,
+    }
+
+
+def _as_vertex_array(vertices: np.ndarray | Sequence[Sequence[float]]) -> np.ndarray:
+    vertex_array = np.asarray(vertices, dtype=float)
+    if vertex_array.size == 0:
+        return np.empty((0, 3), dtype=float)
+    if vertex_array.ndim != 2 or vertex_array.shape[1] != 3:
+        raise ValueError("vertices must have shape (N, 3)")
+    return vertex_array
+
+
+def _valid_unique_faces(
+    faces: Sequence[Face],
+    vertex_count: int,
+) -> tuple[tuple[Face, ...], int]:
+    clean: list[Face] = []
+    seen: set[tuple[int, ...]] = set()
+    dropped = 0
+    for face in faces:
+        if len(face) < 3 or len(set(face)) < 3:
+            dropped += 1
+            continue
+        if any(vertex < 0 or vertex >= vertex_count for vertex in face):
+            dropped += 1
+            continue
+        key = tuple(sorted(face))
+        if key in seen:
+            continue
+        seen.add(key)
+        clean.append(face)
+    return tuple(clean), dropped
+
+
+def _keep_largest_face_component(faces: Sequence[Face]) -> tuple[tuple[Face, ...], int]:
+    vertex_to_faces: dict[int, set[int]] = defaultdict(set)
+    for face_index, face in enumerate(faces):
+        for vertex in face:
+            vertex_to_faces[vertex].add(face_index)
+
+    remaining = set(range(len(faces)))
+    components: list[set[int]] = []
+    while remaining:
+        start = remaining.pop()
+        component = {start}
+        queue: deque[int] = deque([start])
+        while queue:
+            face_index = queue.popleft()
+            for vertex in faces[face_index]:
+                for neighbor in vertex_to_faces[vertex]:
+                    if neighbor in remaining:
+                        remaining.remove(neighbor)
+                        component.add(neighbor)
+                        queue.append(neighbor)
+        components.append(component)
+
+    if len(components) <= 1:
+        return tuple(faces), 0
+    largest = max(components, key=len)
+    kept = tuple(face for index, face in enumerate(faces) if index in largest)
+    return kept, len(faces) - len(kept)
+
+
+def _compact_vertices(
+    vertices: np.ndarray,
+    faces: Sequence[Face],
+) -> tuple[np.ndarray, tuple[Face, ...], int]:
+    used = sorted({vertex for face in faces for vertex in face})
+    if not used:
+        return np.empty((0, 3), dtype=float), (), int(len(vertices))
+    remap = {old: new for new, old in enumerate(used)}
+    compact_faces = tuple(tuple(remap[vertex] for vertex in face) for face in faces)
+    compact_vertices = np.asarray(vertices, dtype=float)[used]
+    removed = int(len(vertices) - len(compact_vertices))
+    return compact_vertices, compact_faces, removed
 
 
 def _connected_components(

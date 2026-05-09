@@ -295,6 +295,40 @@ class EvaluationBundleTests(unittest.TestCase):
         self.assertIn("visual_hull_catastrophic_view_failure", codes)
         self.assertEqual(bundle.status, "fail")
 
+    def test_topology_autopsy_includes_safe_repair_plan(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-topology",
+            backend_name="visual_hull_voxel",
+            status="success",
+            metric_result=CandidateMetrics(
+                topology_score=0.55,
+                extras={
+                    "topology": {
+                        "connected_components": 2,
+                        "boundary_edges": 4,
+                        "non_manifold_edges": 3,
+                        "degenerate_faces": 1,
+                        "loose_vertices": 2,
+                        "watertight": False,
+                    }
+                },
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        autopsy = autopsy_pack_from_bundle(bundle).to_dict()
+        action_ids = {action["action_id"] for action in autopsy["suggested_actions"]}
+        repair_plan = autopsy["topology_repair_plan"]
+        repair_ops = {step["operation"] for step in repair_plan["steps"]}
+
+        self.assertIn("safe_topology_repair", action_ids)
+        self.assertEqual(repair_plan["status"], "repair_recommended")
+        self.assertIn("drop_invalid_or_degenerate_faces", repair_ops)
+        self.assertIn("drop_loose_vertices", repair_ops)
+        self.assertIn("drop_or_label_small_components", repair_ops)
+        self.assertIn("split_or_remove_non_manifold_faces", repair_ops)
+        self.assertIn("hole_fill_or_remesh_required", repair_ops)
+
 
 if __name__ == "__main__":
     unittest.main()

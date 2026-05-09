@@ -11,7 +11,7 @@ import unittest
 
 import numpy as np
 
-from reconstruction.backends.visual_hull import VisualHullBackend
+from reconstruction.backends.visual_hull import VisualHullBackend, _postprocess_mesh
 from reconstruction.point_cloud import visual_hull_grid_from_target
 from reconstruction.types import (
     CandidateRequest,
@@ -27,6 +27,7 @@ from volume import (
     DenseVolumeGrid,
     SparseHashVolumeGrid,
     OpenVDBVolumeGrid,
+    MeshExtractionResult,
     VoxelTransform,
     export_to_openvdb,
     extract_mesh,
@@ -227,6 +228,43 @@ class VolumeGridTests(unittest.TestCase):
                 "postprocess" in warning for warning in result.warnings
             )
             self.assertEqual(has_postprocess_warning, expect_warning)
+
+    def test_visual_hull_topology_repair_postprocess_is_pure_and_structured(self) -> None:
+        mesh = MeshExtractionResult(
+            status="ok",
+            method="fixture",
+            requested_method="fixture",
+            vertices=np.array(
+                [
+                    [0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [4.0, 4.0, 4.0],
+                ],
+                dtype=float,
+            ),
+            faces=np.array(
+                [
+                    [0, 1, 2],
+                    [0, 1, 1],
+                ],
+                dtype=np.int64,
+            ),
+        )
+
+        repaired, status = _postprocess_mesh(
+            mesh,
+            "topology_repair",
+            config={},
+        )
+
+        self.assertEqual(status["status"], "ok")
+        self.assertEqual(status["implementation"], "metrics.topology.safe_topology_repair")
+        self.assertTrue(status["repair"]["changed"])
+        self.assertEqual(status["repair"]["after"]["loose_vertices"], 0)
+        self.assertEqual(len(repaired.vertices), 3)
+        self.assertEqual(len(repaired.faces), 1)
+        self.assertEqual(repaired.topology["degenerate_faces"], 0)
 
     def test_visual_hull_mesh_unavailable_degrades_or_fails_without_point_fallback(self) -> None:
         backend = VisualHullBackend()

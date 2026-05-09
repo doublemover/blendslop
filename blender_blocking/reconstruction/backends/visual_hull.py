@@ -402,6 +402,8 @@ def _postprocess_mesh(
             "required": required,
             "message": "mesh postprocess disabled",
         }
+    if method == "topology_repair":
+        return _run_safe_topology_repair(mesh_result, config=config)
     if method not in {"poisson", "screened_poisson"}:
         return mesh_result, {
             "method": method,
@@ -465,6 +467,92 @@ def _postprocess_mesh(
         "output_vertices": int(len(processed.vertices)),
         "output_faces": int(len(processed.faces)),
         "implementation": "open3d.geometry.TriangleMesh.create_from_point_cloud_poisson",
+    }
+
+
+def _run_safe_topology_repair(
+    mesh_result: Any,
+    *,
+    config: Mapping[str, Any],
+) -> tuple[Any, dict[str, Any]]:
+    required = _postprocess_required(config)
+    method = "topology_repair"
+    if mesh_result is None:
+        return mesh_result, {
+            "method": method,
+            "status": "skipped",
+            "required": required,
+            "message": "mesh extraction has not completed",
+        }
+    if not getattr(mesh_result, "available", False):
+        status = "failed" if required else "skipped"
+        return mesh_result, {
+            "method": method,
+            "status": status,
+            "required": required,
+            "mesh_status": getattr(mesh_result, "status", "unknown"),
+            "message": (
+                "topology_repair requires a mesh, but mesh extraction status was "
+                f"{getattr(mesh_result, 'status', 'unknown')!r}"
+            ),
+        }
+
+    from metrics.topology import safe_topology_repair
+    from volume import MeshExtractionResult
+
+    repair = safe_topology_repair(
+        mesh_result.vertices,
+        mesh_result.faces,
+        keep_largest_component=bool(config.get("repair_keep_largest_component", True)),
+    )
+    before_score = float(repair.before.topology_score)
+    after_score = float(repair.after.topology_score)
+    if after_score < before_score:
+        status = "failed" if required else "skipped"
+        return mesh_result, {
+            "method": method,
+            "status": status,
+            "required": required,
+            "message": "safe topology repair would reduce topology score",
+            "repair": repair.to_dict(),
+        }
+
+    metrics = {
+        **dict(getattr(mesh_result, "metrics", {})),
+        "postprocess": method,
+        "postprocess_backend": "pure_python",
+        "repair_changed": repair.changed,
+        "repair_improved": repair.improved,
+        "repair_before_topology_score": before_score,
+        "repair_after_topology_score": after_score,
+    }
+    repair_faces = np.asarray(repair.faces, dtype=np.int64)
+    if repair_faces.size == 0:
+        repair_faces = np.empty((0, 3), dtype=np.int64)
+    repaired = MeshExtractionResult(
+        status="ok",
+        method=f"{getattr(mesh_result, 'method', 'mesh')}_topology_repair",
+        requested_method=getattr(mesh_result, "requested_method", mesh_result.method),
+        method_aliases=tuple(getattr(mesh_result, "method_aliases", ()) or ()),
+        vertices=repair.vertices,
+        faces=repair_faces,
+        normals=None,
+        values=getattr(mesh_result, "values", None),
+        message="safe topology repair completed",
+        metrics=metrics,
+        topology=repair.after.to_dict(),
+    )
+    return repaired, {
+        "method": method,
+        "status": "ok",
+        "required": required,
+        "message": "safe topology repair completed",
+        "input_vertices": int(len(mesh_result.vertices)),
+        "input_faces": int(len(mesh_result.faces)),
+        "output_vertices": int(len(repaired.vertices)),
+        "output_faces": int(len(repaired.faces)),
+        "implementation": "metrics.topology.safe_topology_repair",
+        "repair": repair.to_dict(),
     }
 
 

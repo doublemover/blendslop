@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Mapping
+from typing import Any, Mapping
 
 from .schemas import EvaluationBundle, json_safe
 from .view_planning import active_view_plan_payload
+
+try:
+    from metrics.topology import topology_repair_plan
+except Exception:  # pragma: no cover - package import fallback
+    from blender_blocking.metrics.topology import topology_repair_plan
 
 
 @dataclass(frozen=True)
@@ -71,6 +76,7 @@ class AutopsyPack:
     artifact_paths: Mapping[str, str] = field(default_factory=dict)
     reproduce_command: tuple[str, ...] = ()
     active_view_plan: Mapping[str, object] = field(default_factory=dict)
+    topology_repair_plan: Mapping[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -81,6 +87,7 @@ class AutopsyPack:
             "artifact_paths": dict(self.artifact_paths),
             "reproduce_command": list(self.reproduce_command),
             "active_view_plan": json_safe(self.active_view_plan),
+            "topology_repair_plan": json_safe(self.topology_repair_plan),
         }
 
 
@@ -107,6 +114,11 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
         if "add_active_view" in action_ids
         else {}
     )
+    repair_plan = (
+        topology_repair_plan(_topology_metric_payload(bundle))
+        if "safe_topology_repair" in action_ids
+        else {}
+    )
     return AutopsyPack(
         candidate_id=bundle.candidate_id,
         status=bundle.status,
@@ -114,6 +126,7 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
         suggested_actions=actions,
         artifact_paths=bundle.artifacts,
         active_view_plan=active_view_plan,
+        topology_repair_plan=repair_plan,
     )
 
 
@@ -126,3 +139,12 @@ def _existing_silhouette_views(bundle: EvaluationBundle) -> tuple[str, ...]:
         if len(parts) >= 4 and parts[2]:
             views.append(parts[2])
     return tuple(dict.fromkeys(views))
+
+
+def _topology_metric_payload(bundle: EvaluationBundle) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for name, metric in bundle.metric_index().items():
+        if not name.startswith("topology."):
+            continue
+        payload[name.removeprefix("topology.")] = metric.value
+    return payload

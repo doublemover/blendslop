@@ -126,6 +126,13 @@ present. Visual-hull carving also honors boundary refinement by expanding the
 silhouette boundary band before voxel rejection, which reduces quantization
 loss around thin structures and hard view edges.
 
+Visual-hull postprocess mode `topology_repair` is a pure-Python conservative
+repair pass. It drops invalid/degenerate faces, duplicate faces, loose vertices,
+and optional non-largest connected components without moving vertices or filling
+holes. The result includes before/after topology reports and an operation log;
+hole filling remains a higher-risk remesh/Poisson step and is called out in the
+autopsy `topology_repair_plan` instead of being silently synthesized.
+
 Primitive and differentiable research backends now record optimization evidence
 instead of only final proxy metrics. Primitive fit runs deterministic multistart
 attempts and writes selected-attempt, accepted-move, rejected-move, and

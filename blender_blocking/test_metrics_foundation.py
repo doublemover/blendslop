@@ -9,7 +9,12 @@ import numpy as np
 from metrics.budgets import compare_metric_delta, evaluate_budgets
 from metrics.silhouette import silhouette_metric_result
 from metrics.surface import chamfer_distance, volume_overlap
-from metrics.topology import mesh_topology_report, topology_penalty
+from metrics.topology import (
+    mesh_topology_report,
+    safe_topology_repair,
+    topology_penalty,
+    topology_repair_plan,
+)
 
 
 class MetricsFoundationTests(unittest.TestCase):
@@ -31,6 +36,43 @@ class MetricsFoundationTests(unittest.TestCase):
         self.assertTrue(report.to_dict()["passed"])
         self.assertEqual(report.to_dict()["reason"], "")
         self.assertEqual(topology_penalty(report), 0.0)
+
+    def test_safe_topology_repair_removes_invalid_loose_and_extra_components(self) -> None:
+        vertices = np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [5.0, 5.0, 5.0],
+                [6.0, 5.0, 5.0],
+                [5.0, 6.0, 5.0],
+                [9.0, 9.0, 9.0],
+            ]
+        )
+        faces = (
+            (0, 1, 2),
+            (0, 1, 1),
+            (0, 1, 2),
+            (3, 4, 5),
+            (0, 1, 99),
+        )
+
+        repair = safe_topology_repair(vertices, faces)
+        payload = repair.to_dict()
+        operations = {operation["operation"] for operation in payload["operations"]}
+
+        self.assertTrue(repair.changed)
+        self.assertGreaterEqual(repair.after.topology_score, repair.before.topology_score)
+        self.assertEqual(len(repair.faces), 1)
+        self.assertEqual(len(repair.vertices), 3)
+        self.assertIn("drop_invalid_or_degenerate_faces", operations)
+        self.assertIn("drop_duplicate_faces", operations)
+        self.assertIn("drop_non_largest_components", operations)
+        self.assertIn("drop_loose_vertices", operations)
+
+        plan = topology_repair_plan(repair.before)
+        self.assertEqual(plan["status"], "repair_recommended")
+        self.assertTrue(plan["steps"])
 
     def test_silhouette_metric_contract_contains_required_pass_reason(self) -> None:
         reference = np.zeros((8, 8), dtype=bool)

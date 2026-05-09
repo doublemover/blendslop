@@ -15,7 +15,10 @@ from metrics.surface import (
 )
 from metrics.topology import (
     TopologyReport,
+    TopologyRepairResult,
     mesh_topology_report,
+    safe_topology_repair,
+    topology_repair_plan,
     topology_penalty,
 )
 from metrics.budgets import (
@@ -34,6 +37,7 @@ __all__ = [
     "SilhouetteMetricResult",
     "SurfaceDistanceReport",
     "TopologyReport",
+    "TopologyRepairResult",
     "VolumeOverlapReport",
     "boundary_iou",
     "chamfer_distance",
@@ -41,9 +45,11 @@ __all__ = [
     "evaluate_budgets",
     "load_budget_file",
     "mesh_topology_report",
+    "safe_topology_repair",
     "signed_distance_silhouette_loss",
     "soft_iou",
     "surface_score",
     "topology_penalty",
+    "topology_repair_plan",
     "volume_overlap",
 ]

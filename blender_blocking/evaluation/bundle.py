@@ -326,6 +326,7 @@ def _topology_group(metrics: Any) -> MetricGroup:
             "boundary_edges",
             "non_manifold_edges",
             "degenerate_faces",
+            "loose_vertices",
         ):
             if key in topology:
                 values.append(
