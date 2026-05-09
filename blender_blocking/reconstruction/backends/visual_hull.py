@@ -500,6 +500,7 @@ def _run_guarded_smooth(
         }
 
     from metrics.topology import mesh_topology_report
+    from metrics.topology_guard import evaluate_mesh_change, guard_policy_from_config
     from volume import MeshExtractionResult
 
     vertices = np.asarray(mesh_result.vertices, dtype=float)
@@ -514,16 +515,26 @@ def _run_guarded_smooth(
         freeze_boundary=bool(config.get("smooth_freeze_boundary", True)),
     )
     after = mesh_topology_report(smoothed, faces)
-    if after.topology_score < before.topology_score:
+    guard = evaluate_mesh_change(
+        before=before,
+        after=after,
+        before_vertex_count=int(len(vertices)),
+        after_vertex_count=int(len(smoothed)),
+        before_face_count=int(len(faces)),
+        after_face_count=int(len(faces)),
+        policy=guard_policy_from_config(config),
+    )
+    if not guard.accepted:
         status = "failed" if required else "skipped"
         return mesh_result, {
             "method": method,
             "status": status,
             "required": required,
-            "message": "guarded smoothing would reduce topology score",
+            "message": f"guarded smoothing rejected: {guard.reason}",
             "before": before.to_dict(),
             "after": after.to_dict(),
             "smooth": smooth_meta,
+            "guard": guard.to_dict(),
         }
     metrics = {
         **dict(getattr(mesh_result, "metrics", {})),
@@ -557,6 +568,7 @@ def _run_guarded_smooth(
         "before": before.to_dict(),
         "after": after.to_dict(),
         "smooth": smooth_meta,
+        "guard": guard.to_dict(),
     }
 
 
@@ -673,6 +685,7 @@ def _run_safe_topology_repair(
         }
 
     from metrics.topology import safe_topology_repair
+    from metrics.topology_guard import evaluate_mesh_change, guard_policy_from_config
     from volume import MeshExtractionResult
 
     repair = safe_topology_repair(
@@ -682,14 +695,24 @@ def _run_safe_topology_repair(
     )
     before_score = float(repair.before.topology_score)
     after_score = float(repair.after.topology_score)
-    if after_score < before_score:
+    guard = evaluate_mesh_change(
+        before=repair.before,
+        after=repair.after,
+        before_vertex_count=int(len(mesh_result.vertices)),
+        after_vertex_count=int(len(repair.vertices)),
+        before_face_count=int(len(mesh_result.faces)),
+        after_face_count=int(len(repair.faces)),
+        policy=guard_policy_from_config(config),
+    )
+    if not guard.accepted:
         status = "failed" if required else "skipped"
         return mesh_result, {
             "method": method,
             "status": status,
             "required": required,
-            "message": "safe topology repair would reduce topology score",
+            "message": f"safe topology repair rejected: {guard.reason}",
             "repair": repair.to_dict(),
+            "guard": guard.to_dict(),
         }
 
     metrics = {
@@ -700,6 +723,7 @@ def _run_safe_topology_repair(
         "repair_improved": repair.improved,
         "repair_before_topology_score": before_score,
         "repair_after_topology_score": after_score,
+        "repair_guard": guard.to_dict(),
     }
     repair_faces = np.asarray(repair.faces, dtype=np.int64)
     if repair_faces.size == 0:
@@ -728,6 +752,7 @@ def _run_safe_topology_repair(
         "output_faces": int(len(repaired.faces)),
         "implementation": "metrics.topology.safe_topology_repair",
         "repair": repair.to_dict(),
+        "guard": guard.to_dict(),
     }
 
 

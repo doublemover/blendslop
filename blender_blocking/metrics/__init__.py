@@ -21,6 +21,12 @@ from metrics.topology import (
     topology_repair_plan,
     topology_penalty,
 )
+from metrics.topology_guard import (
+    MeshChangeGuardDecision,
+    MeshChangeGuardPolicy,
+    evaluate_mesh_change,
+    guard_policy_from_config,
+)
 from metrics.budgets import (
     BudgetCheck,
     BudgetReport,
@@ -38,11 +44,15 @@ __all__ = [
     "SurfaceDistanceReport",
     "TopologyReport",
     "TopologyRepairResult",
+    "MeshChangeGuardDecision",
+    "MeshChangeGuardPolicy",
     "VolumeOverlapReport",
     "boundary_iou",
     "chamfer_distance",
     "compare_metric_delta",
     "evaluate_budgets",
+    "evaluate_mesh_change",
+    "guard_policy_from_config",
     "load_budget_file",
     "mesh_topology_report",
     "safe_topology_repair",

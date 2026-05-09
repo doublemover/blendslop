@@ -260,6 +260,7 @@ class VolumeGridTests(unittest.TestCase):
 
         self.assertEqual(status["status"], "ok")
         self.assertEqual(status["implementation"], "metrics.topology.safe_topology_repair")
+        self.assertTrue(status["guard"]["accepted"])
         self.assertTrue(status["repair"]["changed"])
         self.assertEqual(status["repair"]["after"]["loose_vertices"], 0)
         self.assertEqual(len(repaired.vertices), 3)
@@ -300,6 +301,7 @@ class VolumeGridTests(unittest.TestCase):
 
         self.assertEqual(status["status"], "ok")
         self.assertEqual(status["implementation"], "visual_hull._guarded_laplacian_smooth")
+        self.assertTrue(status["guard"]["accepted"])
         self.assertEqual(status["before"]["topology_score"], status["after"]["topology_score"])
         np.testing.assert_allclose(smoothed.vertices[:4], mesh.vertices[:4])
         self.assertLess(smoothed.vertices[4, 2], mesh.vertices[4, 2])
