@@ -22,7 +22,7 @@ from .artifact_report import ReportOptions, generate_report
 from .candidate_autopsy import write_autopsy
 from .contracts import json_safe
 from .human_labels import HumanLabel, append_label
-from .matrix import build_experiment_plan, write_plan
+from .matrix import build_experiment_plan, load_variants_from_files, write_plan
 from .presets import get_suite_preset, get_track_preset, list_suites, list_tracks
 from .result_index import load_index, write_leaderboard_json, write_leaderboard_md
 from .runner import RunOptions, runner_for_plan
@@ -125,6 +125,12 @@ def _add_plan_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--seed", type=int, default=1234)
     parser.add_argument("--max-runs", type=int, default=None)
     parser.add_argument("--top-k", type=int, default=10)
+    parser.add_argument("--variant-file", type=Path, action="append", default=[])
+    parser.add_argument(
+        "--variant-file-mode",
+        choices=("append", "replace"),
+        default="append",
+    )
 
 
 def _add_run_args(parser: argparse.ArgumentParser) -> None:
@@ -170,6 +176,7 @@ def _cmd_list_tracks() -> int:
 
 def _cmd_plan(args: argparse.Namespace) -> int:
     track = get_track_preset(args.track)
+    external_variants = load_variants_from_files(args.variant_file)
     plan = build_experiment_plan(
         suite=args.suite,
         track=args.track,
@@ -179,6 +186,8 @@ def _cmd_plan(args: argparse.Namespace) -> int:
         seed=args.seed,
         max_runs=args.max_runs,
         top_k=args.top_k,
+        external_variants=external_variants,
+        external_variant_mode=args.variant_file_mode,
     )
     write_plan(plan, args.out)
     print(
@@ -187,6 +196,8 @@ def _cmd_plan(args: argparse.Namespace) -> int:
                 "plan": args.out.as_posix(),
                 "cases": len(plan.cases),
                 "variants": len(plan.variants),
+                "external_variants": len(external_variants),
+                "variant_file_mode": args.variant_file_mode,
             },
             indent=2,
         )
@@ -196,6 +207,7 @@ def _cmd_plan(args: argparse.Namespace) -> int:
 
 def _cmd_run(args: argparse.Namespace) -> int:
     track = get_track_preset(args.track)
+    external_variants = load_variants_from_files(args.variant_file)
     plan = build_experiment_plan(
         suite=args.suite,
         track=args.track,
@@ -205,6 +217,8 @@ def _cmd_run(args: argparse.Namespace) -> int:
         seed=args.seed,
         max_runs=args.max_runs,
         top_k=args.top_k,
+        external_variants=external_variants,
+        external_variant_mode=args.variant_file_mode,
     )
     if args.command_only:
         for variant in plan.variants:

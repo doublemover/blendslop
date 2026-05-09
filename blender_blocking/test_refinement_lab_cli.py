@@ -45,6 +45,61 @@ class RefinementLabCliTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertTrue(out.exists())
 
+    def test_plan_command_can_replace_with_variant_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            variant_file = root / "adaptive-variants.json"
+            out = root / "plan.json"
+            variant_file.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "refinement_run_adaptive_variants_v1",
+                        "variants": [
+                            {
+                                "variant_id": "adaptive-boundary",
+                                "label": "Boundary pass",
+                                "mode": "ensemble",
+                                "validation_mode": "backend-status",
+                                "parameters": {"proposal_id": "p"},
+                                "cli_args": [
+                                    "--reconstruction-mode",
+                                    "ensemble",
+                                    "--validation-mode",
+                                    "backend-status",
+                                ],
+                                "tags": ["adaptive"],
+                                "stage": "adaptive_refinement",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with redirect_stdout(io.StringIO()):
+                code = cli.main(
+                    [
+                        "plan",
+                        "--suite",
+                        "default-vase",
+                        "--track",
+                        "visual-hull-transform",
+                        "--search",
+                        "coordinate",
+                        "--variant-file",
+                        str(variant_file),
+                        "--variant-file-mode",
+                        "replace",
+                        "--out",
+                        str(out),
+                    ]
+                )
+
+            self.assertEqual(code, 0)
+            payload = json.loads(out.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["variants"]), 1)
+            self.assertEqual(payload["variants"][0]["variant_id"], "adaptive-boundary")
+
     def test_adapt_command_writes_proposals_and_variants(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import itertools
+import json
 import random
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -38,6 +39,8 @@ def build_experiment_plan(
     max_runs: int | None = None,
     top_k: int = 10,
     custom_reference_paths: Mapping[str, Path] | None = None,
+    external_variants: Sequence[ExperimentVariant | Mapping[str, Any]] | None = None,
+    external_variant_mode: str = "append",
 ) -> ExperimentPlan:
     suite_preset = get_suite_preset(suite)
     track_preset = get_track_preset(track)
@@ -49,13 +52,20 @@ def build_experiment_plan(
         custom_reference_paths=custom_reference_paths,
     )
     effective_modes = tuple(modes or track_preset.modes)
-    effective_max_runs = max_runs if max_runs is not None else track_preset.max_runs_hint
+    effective_max_runs = (
+        max_runs if max_runs is not None else track_preset.max_runs_hint
+    )
     variants = build_variants_for_track(
         track_preset,
         search=search,
         modes=effective_modes,
         seed=seed,
         max_runs=effective_max_runs,
+    )
+    variants = combine_variants(
+        variants,
+        _coerce_variants(external_variants or ()),
+        mode=external_variant_mode,
     )
     plan_id = stable_hash(
         {
@@ -86,6 +96,8 @@ def build_experiment_plan(
             "suite": suite_preset.to_dict(),
             "track": track_preset.to_dict(),
             "requested_modes": list(effective_modes),
+            "external_variant_mode": external_variant_mode,
+            "external_variant_count": len(tuple(external_variants or ())),
         },
     )
 
@@ -103,7 +115,9 @@ def resolve_suite_cases(
                 case_id="custom-images",
                 suite=suite.name,
                 source="custom_images",
-                reference_paths={key: Path(value) for key, value in custom_reference_paths.items()},
+                reference_paths={
+                    key: Path(value) for key, value in custom_reference_paths.items()
+                },
                 metadata={"suite_preset": suite.to_dict()},
             ),
         )
@@ -125,7 +139,9 @@ def resolve_suite_cases(
     cases: list[ExperimentCase] = []
     suite_count = count
     for suite_name in suite.synthetic_suites:
-        for spec in specs_for_suite(suite_name, seed=seed + len(cases), count=suite_count):
+        for spec in specs_for_suite(
+            suite_name, seed=seed + len(cases), count=suite_count
+        ):
             definition = _definition_name_from_spec(spec)
             case_id = safe_slug(f"{suite_name}-{getattr(spec, 'shape_id', definition)}")
             cases.append(
@@ -136,7 +152,9 @@ def resolve_suite_cases(
                     synthetic_shape_id=str(getattr(spec, "shape_id", case_id)),
                     synthetic_definition=definition,
                     expected_targets=quality_targets_for(spec),
-                    known_ambiguity_notes=tuple(getattr(spec, "expected_failure_modes", ())),
+                    known_ambiguity_notes=tuple(
+                        getattr(spec, "expected_failure_modes", ())
+                    ),
                     metadata={
                         "synthetic_suite": suite_name,
                         "spec": spec.to_dict() if hasattr(spec, "to_dict") else {},
@@ -167,6 +185,44 @@ def build_variants_for_track(
     if max_runs is not None:
         variants = variants[: max(1, int(max_runs))]
     return tuple(variants)
+
+
+def load_variants(path: Path) -> tuple[ExperimentVariant, ...]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    return variants_from_payload(payload)
+
+
+def load_variants_from_files(paths: Sequence[Path]) -> tuple[ExperimentVariant, ...]:
+    variants: list[ExperimentVariant] = []
+    for path in paths:
+        variants.extend(load_variants(path))
+    return tuple(variants)
+
+
+def variants_from_payload(payload: Any) -> tuple[ExperimentVariant, ...]:
+    if isinstance(payload, Mapping):
+        if "variants" in payload:
+            return variants_from_payload(payload["variants"])
+        if "variant_id" in payload:
+            return (ExperimentVariant.from_dict(payload),)
+    if isinstance(payload, Sequence) and not isinstance(payload, (str, bytes)):
+        return _coerce_variants(payload)
+    raise ValueError("variant payload must contain a variant or variants list")
+
+
+def combine_variants(
+    base_variants: Sequence[ExperimentVariant],
+    external_variants: Sequence[ExperimentVariant],
+    *,
+    mode: str = "append",
+) -> tuple[ExperimentVariant, ...]:
+    if not external_variants:
+        return tuple(base_variants)
+    if mode == "append":
+        return tuple(_dedupe_variants(tuple(base_variants) + tuple(external_variants)))
+    if mode == "replace":
+        return tuple(_dedupe_variants(tuple(external_variants)))
+    raise ValueError(f"unknown external variant mode: {mode}")
 
 
 def write_plan(plan: ExperimentPlan, path: Path | None = None) -> Path:
@@ -222,7 +278,9 @@ def _random_variants(
                 values = parameter.values or parameter.choices
                 if values:
                     parameter_values[parameter.name] = rng.choice(tuple(values))
-                elif parameter.min_value is not None and parameter.max_value is not None:
+                elif (
+                    parameter.min_value is not None and parameter.max_value is not None
+                ):
                     parameter_values[parameter.name] = _sample_range(parameter, rng)
             variant = _variant_from_values(
                 track,
@@ -241,12 +299,16 @@ def _random_variants(
     return variants
 
 
-def _coordinate_variants(track: TrackPreset, modes: Sequence[str]) -> list[ExperimentVariant]:
+def _coordinate_variants(
+    track: TrackPreset, modes: Sequence[str]
+) -> list[ExperimentVariant]:
     variants = [_baseline_variant(track, mode) for mode in modes]
     for mode in modes:
         parent = f"{mode}-baseline"
         for parameter in track.parameters:
-            for value_index, value in enumerate(parameter.values or (parameter.default,)):
+            for value_index, value in enumerate(
+                parameter.values or (parameter.default,)
+            ):
                 variants.append(
                     _variant_from_values(
                         track,
@@ -293,7 +355,12 @@ def _baseline_variant(track: TrackPreset, mode: str) -> ExperimentVariant:
         mode=mode,
         validation_mode=track.default_validation_mode,
         parameters={},
-        cli_args=("--reconstruction-mode", mode, "--validation-mode", track.default_validation_mode),
+        cli_args=(
+            "--reconstruction-mode",
+            mode,
+            "--validation-mode",
+            track.default_validation_mode,
+        ),
         tags=("baseline",) + track.tags,
         stage="baseline",
     )
@@ -308,13 +375,20 @@ def _variant_from_values(
     stage: str,
     parent_variant_id: str = "",
 ) -> ExperimentVariant:
-    cli_args: list[str] = ["--reconstruction-mode", mode, "--validation-mode", track.default_validation_mode]
+    cli_args: list[str] = [
+        "--reconstruction-mode",
+        mode,
+        "--validation-mode",
+        track.default_validation_mode,
+    ]
     parameter_map = dict(values)
     by_name = {parameter.name: parameter for parameter in track.parameters}
     for name in sorted(parameter_map):
         parameter = by_name[name]
         cli_args.extend(parameter.cli_tokens_for_value(parameter_map[name]))
-    digest = stable_hash({"mode": mode, "parameters": parameter_map, "track": track.name}, length=8)
+    digest = stable_hash(
+        {"mode": mode, "parameters": parameter_map, "track": track.name}, length=8
+    )
     variant_id = safe_slug(f"{label_prefix}-{digest}")
     return ExperimentVariant(
         variant_id=variant_id,
@@ -360,6 +434,17 @@ def _dedupe_variants(variants: Sequence[ExperimentVariant]) -> list[ExperimentVa
     return deduped
 
 
+def _coerce_variants(
+    variants: Sequence[ExperimentVariant | Mapping[str, Any]],
+) -> tuple[ExperimentVariant, ...]:
+    return tuple(
+        variant
+        if isinstance(variant, ExperimentVariant)
+        else ExperimentVariant.from_dict(variant)
+        for variant in variants
+    )
+
+
 def _sample_range(parameter: ParameterSpec, rng: random.Random) -> int | float:
     assert parameter.min_value is not None and parameter.max_value is not None
     if parameter.scale == "log":
@@ -377,7 +462,13 @@ def _sample_range(parameter: ParameterSpec, rng: random.Random) -> int | float:
 
 def _definition_name_from_spec(spec: object) -> str:
     parameters = getattr(spec, "parameters", {})
-    for key in ("primitive", "profile_kind", "blockout_kind", "mask_kind", "degradation"):
+    for key in (
+        "primitive",
+        "profile_kind",
+        "blockout_kind",
+        "mask_kind",
+        "degradation",
+    ):
         if key in parameters:
             return str(parameters[key])
     return safe_slug(str(getattr(spec, "shape_id", "synthetic")))
