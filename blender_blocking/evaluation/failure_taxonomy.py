@@ -307,6 +307,72 @@ def classify_bundle_failures(
                 recommended_actions=("inspect perceptual novel-view mismatch",),
             )
         )
+    uv_valid = _metric_value(metrics, "appearance.uv_valid")
+    pbr_coverage = _metric_value(metrics, "appearance.pbr_channel_coverage_ratio")
+    texture_memory = _metric_value(metrics, "appearance.texture_memory_mb")
+    texture_only = _metric_value(
+        metrics,
+        "appearance.attribution_texture_only_detail_score",
+    )
+    geometry_detail = _metric_value(
+        metrics,
+        "appearance.attribution_geometry_detail_score",
+    )
+    hallucination = _metric_value(
+        metrics,
+        "appearance.image_space_hallucination_warning",
+    )
+    if uv_valid is not None and uv_valid <= 0.0:
+        failures.append(
+            FailureObservation(
+                code="appearance_uv_invalid",
+                severity="fail",
+                subsystem="appearance",
+                evidence_metrics={"appearance.uv_valid": uv_valid},
+                likely_causes=(
+                    "asset has missing, overlapping, out-of-bounds, or incomplete UVs",
+                ),
+                recommended_actions=(
+                    "inspect UV report metadata and unwrap before texture evaluation",
+                    "do not let novel-view scores promote an asset with invalid UVs",
+                ),
+            )
+        )
+    if pbr_coverage is not None and pbr_coverage < 0.75:
+        failures.append(
+            FailureObservation(
+                code="appearance_pbr_channels_incomplete",
+                severity="warn",
+                subsystem="appearance",
+                evidence_metrics={
+                    "appearance.pbr_channel_coverage_ratio": pbr_coverage,
+                },
+                likely_causes=("material export lacks required editable PBR channels",),
+                recommended_actions=(
+                    "fill base color, roughness, metallic, and normal channels or lower the material target",
+                ),
+            )
+        )
+    if hallucination is not None and hallucination > 0.0:
+        failures.append(
+            FailureObservation(
+                code="appearance_texture_hides_geometry",
+                severity="warn",
+                subsystem="appearance",
+                evidence_metrics={
+                    "appearance.attribution_texture_only_detail_score": texture_only,
+                    "appearance.attribution_geometry_detail_score": geometry_detail,
+                    "appearance.texture_memory_mb": texture_memory,
+                },
+                likely_causes=(
+                    "high image-space detail appears to come from texture or view-dependent appearance rather than editable geometry",
+                ),
+                recommended_actions=(
+                    "score geometry/editability separately from novel-view image quality",
+                    "try shape-program or primitive refinement before accepting texture-only detail",
+                ),
+            )
+        )
     export_score = _metric_value(metrics, "export.qa_score")
     editability = _metric_value(metrics, "editability.editable_reconstruction_index")
     if editability is not None and editability < 0.35:

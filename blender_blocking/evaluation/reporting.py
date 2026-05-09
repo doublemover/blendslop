@@ -21,6 +21,7 @@ def compact_console_summary(bundle: EvaluationBundle) -> str:
         f"  true_fscore={_metric(metrics, 'geometry.true.fscore_tau')} recoverable_fscore={_metric(metrics, 'geometry.recoverable.fscore_tau')} ambiguity_gap={_metric(metrics, 'geometry.ambiguity_gap_chamfer_l2')}",
         f"  psnr={_metric(metrics, 'novel_view.psnr')} ssim={_metric(metrics, 'novel_view.ssim')} lpips={_metric(metrics, 'novel_view.lpips')}",
         f"  editable={_metric(metrics, 'editability.editable_reconstruction_index')}",
+        f"  uv={_metric(metrics, 'appearance.uv_valid')} pbr={_metric(metrics, 'appearance.pbr_channel_coverage_ratio')} texture_only={_metric(metrics, 'appearance.attribution_texture_only_detail_score')}",
         f"  export={_metric(metrics, 'export.qa_score')} cost_ms={_metric(metrics, 'cost.total_wall_ms')}",
         f"  deps={_dependency_summary(bundle)}",
         f"  failures={len(bundle.failures)}",
@@ -34,7 +35,7 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
     for bundle in bundle_tuple:
         metrics = bundle.metric_index()
         rows.append(
-            "| {candidate} | {mode} | {status} | {rank} | {selected} | {score} | {min_iou} | {avg_iou} | {boundary} | {sdf} | {true_fscore} | {recoverable_fscore} | {gap} | {chamfer} | {fscore} | {vol_iou} | {psnr} | {ssim} | {lpips} | {editable} | {export} | {cost} | {failures} |".format(
+            "| {candidate} | {mode} | {status} | {rank} | {selected} | {score} | {min_iou} | {avg_iou} | {boundary} | {sdf} | {true_fscore} | {recoverable_fscore} | {gap} | {chamfer} | {fscore} | {vol_iou} | {psnr} | {ssim} | {lpips} | {editable} | {uv} | {pbr} | {texture_only} | {export} | {cost} | {failures} |".format(
                 candidate=bundle.candidate_id,
                 mode=bundle.mode,
                 status=bundle.status,
@@ -55,6 +56,9 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
                 ssim=_metric(metrics, "novel_view.ssim"),
                 lpips=_metric(metrics, "novel_view.lpips"),
                 editable=_metric(metrics, "editability.editable_reconstruction_index"),
+                uv=_metric(metrics, "appearance.uv_valid"),
+                pbr=_metric(metrics, "appearance.pbr_channel_coverage_ratio"),
+                texture_only=_metric(metrics, "appearance.attribution_texture_only_detail_score"),
                 export=_metric(metrics, "export.qa_score"),
                 cost=_metric(metrics, "cost.total_wall_ms"),
                 failures=len(bundle.failures),
@@ -64,8 +68,8 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
         [
             f"# {title}",
             "",
-            "| Candidate | Mode | Status | Rank | Selected | Score | Min IoU | Avg IoU | Boundary | SDF Loss | True F-score | Recoverable F-score | Ambiguity Gap | Chamfer | F-score | Vol IoU | PSNR | SSIM | LPIPS | Editable | Export | Cost ms | Failures |",
-            "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+            "| Candidate | Mode | Status | Rank | Selected | Score | Min IoU | Avg IoU | Boundary | SDF Loss | True F-score | Recoverable F-score | Ambiguity Gap | Chamfer | F-score | Vol IoU | PSNR | SSIM | LPIPS | Editable | UV | PBR | Texture-only | Export | Cost ms | Failures |",
+            "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: |",
             *rows,
             "",
             *_failure_lines(bundle_tuple),

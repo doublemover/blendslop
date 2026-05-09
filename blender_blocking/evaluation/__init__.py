@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 from .bundle import bundle_from_candidate
+from .appearance import (
+    TextureMaterialReport,
+    report_from_mapping as appearance_report_from_mapping,
+    reports_from_payload as appearance_reports_from_payload,
+)
 from .boundary_refinement import boundary_refinement_plan_payload
 from .baselines import (
     BaselineMatch,
@@ -131,6 +136,7 @@ __all__ = [
     "ArtifactRecord",
     "RunLineage",
     "Threshold",
+    "TextureMaterialReport",
     "ViewRolePermutationReport",
     "ViewRequest",
     "ViewDisagreementSignal",
@@ -140,6 +146,8 @@ __all__ = [
     "StageCost",
     "StageTimer",
     "active_view_plan_payload",
+    "appearance_report_from_mapping",
+    "appearance_reports_from_payload",
     "attach_cost_report_to_candidate",
     "attach_selection",
     "boundary_refinement_plan_payload",

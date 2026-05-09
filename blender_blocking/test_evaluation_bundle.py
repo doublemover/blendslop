@@ -6,6 +6,10 @@ import unittest
 
 from evaluation.autopsy import autopsy_pack_from_bundle
 from evaluation import bundle_from_candidate
+from evaluation.appearance import (
+    report_from_mapping as appearance_report_from_mapping,
+    reports_from_payload as appearance_reports_from_payload,
+)
 from evaluation.export_qa import ExportQAReport, reports_from_payload
 from evaluation.reporting import compact_console_summary, markdown_report
 from evaluation.schemas import EvaluationBundle
@@ -132,6 +136,154 @@ class EvaluationBundleTests(unittest.TestCase):
         self.assertEqual(len(reports), 2)
         self.assertIsInstance(reports[0], ExportQAReport)
         self.assertEqual({report.target for report in reports}, {"blend", "gltf"})
+
+    def test_appearance_payload_becomes_first_class_metric_group(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-textured",
+            backend_name="shape_program",
+            status="success",
+            metric_result=CandidateMetrics(
+                area_iou_min=0.9,
+                area_iou_mean=0.93,
+                boundary_iou_mean=0.82,
+                editability_score=0.86,
+                extras={
+                    "appearance": {
+                        "source": "blend_export",
+                        "required": True,
+                        "uv": {
+                            "has_uv_map": True,
+                            "uv_valid": True,
+                            "uv_island_count": 4,
+                            "uv_overlap_ratio": 0.01,
+                            "uv_out_of_bounds_ratio": 0.0,
+                            "texel_density_cv": 0.22,
+                        },
+                        "texture": {
+                            "texture_width": 1024,
+                            "texture_height": 1024,
+                            "texture_file_count": 2,
+                            "texture_memory_mb": 8.0,
+                            "reprojection_metrics": {
+                                "psnr": 31.0,
+                                "ssim": 0.91,
+                                "lpips": 0.12,
+                            },
+                        },
+                        "materials": {
+                            "material_slot_count": 3,
+                            "named_material_ratio": 1.0,
+                            "pbr_channel_coverage": {
+                                "base_color": True,
+                                "roughness": True,
+                                "metallic": True,
+                                "normal": True,
+                            },
+                        },
+                        "appearance_attribution": {
+                            "boundary_geometry_fidelity": 0.86,
+                            "texture_only_detail_score": 0.18,
+                            "geometry_detail_score": 0.82,
+                        },
+                    }
+                },
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        metrics = bundle.metric_index()
+
+        self.assertEqual(bundle.status, "pass")
+        self.assertTrue(metrics["appearance.uv_valid"].value)
+        self.assertEqual(metrics["appearance.texture_resolution"].value, 1024 * 1024)
+        self.assertEqual(metrics["appearance.reprojection_psnr"].value, 31.0)
+        self.assertEqual(metrics["appearance.pbr_channel_coverage_ratio"].value, 1.0)
+        self.assertIn("uv=True", compact_console_summary(bundle))
+        self.assertIn("| UV | PBR | Texture-only |", markdown_report([bundle]))
+
+    def test_invalid_appearance_cannot_hide_behind_image_metrics(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-texture-cheat",
+            backend_name="differentiable_refine",
+            status="success",
+            metric_result=CandidateMetrics(
+                area_iou_min=0.91,
+                area_iou_mean=0.94,
+                boundary_iou_mean=0.8,
+                editability_score=0.74,
+                extras={
+                    "appearance": {
+                        "required": True,
+                        "strict_uv": True,
+                        "has_uv_map": True,
+                        "uv_valid": False,
+                        "uv_overlap_ratio": 0.35,
+                        "texture_memory_mb": 512.0,
+                        "max_texture_memory_mb": 128.0,
+                        "materials": {
+                            "pbr_channel_coverage": {
+                                "base_color": True,
+                                "roughness": True,
+                                "metallic": True,
+                                "normal": True,
+                            }
+                        },
+                        "appearance_attribution": {
+                            "texture_only_detail_score": 0.92,
+                            "geometry_detail_score": 0.30,
+                            "boundary_geometry_fidelity": 0.42,
+                        },
+                    },
+                    "novel_view": {
+                        "psnr": 34.0,
+                        "ssim": 0.94,
+                        "lpips": 0.08,
+                        "image_count": 2,
+                    },
+                },
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        metrics = bundle.metric_index()
+        codes = {failure.code for failure in bundle.failures}
+
+        self.assertEqual(bundle.status, "fail")
+        self.assertEqual(metrics["appearance.uv_valid"].status, "fail")
+        self.assertEqual(metrics["appearance.texture_memory_mb"].status, "fail")
+        self.assertTrue(metrics["appearance.image_space_hallucination_warning"].value)
+        self.assertIn("appearance_uv_invalid", codes)
+        self.assertIn("appearance_texture_hides_geometry", codes)
+        self.assertNotIn("novel_view_psnr_low", codes)
+
+    def test_appearance_report_payload_accepts_target_collections(self) -> None:
+        reports = appearance_reports_from_payload(
+            {
+                "targets": {
+                    "blend": {
+                        "has_uv_map": True,
+                        "uv_valid": True,
+                        "materials": {
+                            "pbr_channel_coverage": {
+                                "base_color": True,
+                                "roughness": True,
+                            }
+                        },
+                    },
+                    "glb": {
+                        "has_uv_map": False,
+                        "required": True,
+                        "warnings": ["glb_missing_uv"],
+                    },
+                }
+            }
+        )
+        direct = appearance_report_from_mapping({"texture_width": 64, "texture_height": 32})
+
+        self.assertEqual(len(reports), 2)
+        self.assertTrue(reports[0].has_uv_map)
+        self.assertIn("required_uv_map_missing", reports[1].errors)
+        self.assertEqual(direct.texture_resolution, 2048)
 
     def test_success_without_required_silhouette_metrics_fails_bundle(self) -> None:
         result = CandidateResult(
