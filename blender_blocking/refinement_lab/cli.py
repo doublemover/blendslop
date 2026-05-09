@@ -13,7 +13,11 @@ BLENDER_BLOCKING_ROOT = Path(__file__).resolve().parents[1]
 if str(BLENDER_BLOCKING_ROOT) not in sys.path:
     sys.path.insert(0, str(BLENDER_BLOCKING_ROOT))
 
-from .adaptive_planner import RefinementProposal, proposals_from_result_payload
+from .adaptive_planner import (
+    RefinementProposal,
+    merge_proposals,
+    proposals_from_result_payload,
+)
 from .artifact_report import ReportOptions, generate_report
 from .candidate_autopsy import write_autopsy
 from .contracts import json_safe
@@ -143,6 +147,10 @@ def _add_run_args(parser: argparse.ArgumentParser) -> None:
         "--append-global-index", action=argparse.BooleanOptionalAction, default=True
     )
     parser.add_argument(
+        "--adaptive-proposals", action=argparse.BooleanOptionalAction, default=True
+    )
+    parser.add_argument("--adaptive-max-proposals", type=int, default=12)
+    parser.add_argument(
         "--report-failures", choices=("top", "all", "none"), default="top"
     )
     parser.add_argument("--blender-exe", default=None)
@@ -219,6 +227,8 @@ def _cmd_run(args: argparse.Namespace) -> int:
         fail_on_all_failed=args.fail_on_all_failed,
         append_global_index=args.append_global_index,
         report_failures=args.report_failures,
+        write_adaptive_proposals=args.adaptive_proposals,
+        adaptive_max_proposals=args.adaptive_max_proposals,
         subprocess_blender=args.blender_exe is not None,
         blender_executable=args.blender_exe,
     )
@@ -352,7 +362,7 @@ def _adaptive_proposals_from_files(
                 max_proposals=max_proposals,
             )
         )
-    return _dedupe_proposals(proposals, max_proposals=max_proposals)
+    return list(merge_proposals(proposals, max_proposals=max_proposals))
 
 
 def _adaptive_proposals_from_payload(
@@ -373,21 +383,6 @@ def _adaptive_proposals_from_payload(
     if not isinstance(payload, dict):
         return []
     return list(proposals_from_result_payload(payload, max_proposals=max_proposals))
-
-
-def _dedupe_proposals(
-    proposals: list[RefinementProposal],
-    *,
-    max_proposals: int,
-) -> list[RefinementProposal]:
-    by_id: dict[str, RefinementProposal] = {}
-    for proposal in proposals:
-        current = by_id.get(proposal.proposal_id)
-        if current is None or proposal.priority < current.priority:
-            by_id[proposal.proposal_id] = proposal
-    return sorted(by_id.values(), key=lambda proposal: proposal.priority)[
-        :max_proposals
-    ]
 
 
 def _cmd_label(args: argparse.Namespace) -> int:

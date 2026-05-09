@@ -2,11 +2,18 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
+import tempfile
 import unittest
 
 from config import BlockingConfig
-from refinement_lab.contracts import ExperimentCase, ExperimentPlan, ExperimentVariant
+from refinement_lab.contracts import (
+    ExperimentCase,
+    ExperimentPlan,
+    ExperimentResult,
+    ExperimentVariant,
+)
 from refinement_lab.runner import (
     InProcessBlenderRunner,
     RunOptions,
@@ -166,6 +173,67 @@ class RefinementLabRunnerTests(unittest.TestCase):
         runner = InProcessBlenderRunner(plan=plan, options=RunOptions())
 
         self.assertTrue(runner.run_root.is_absolute())
+
+    def test_runner_writes_adaptive_outputs_from_metrics(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            case = ExperimentCase(
+                "case",
+                "default-vase",
+                "builtin_sample",
+                reference_paths={
+                    "front": Path("front.png"),
+                    "side": Path("side.png"),
+                    "top": Path("top.png"),
+                },
+            )
+            variant = ExperimentVariant("baseline", "baseline", "ensemble")
+            plan = ExperimentPlan(
+                plan_id="p",
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="grid",
+                objective="quality_win",
+                output_root=Path(tmp),
+                run_id="run",
+                cases=(case,),
+                variants=(variant,),
+            )
+            runner = InProcessBlenderRunner(plan=plan, options=RunOptions())
+            result = ExperimentResult(
+                run_id="run",
+                case_id="case",
+                variant_id="baseline",
+                mode="ensemble",
+                status="fail",
+                exit_code=1,
+                started_utc="2026-01-01T00:00:00Z",
+                finished_utc="2026-01-01T00:00:01Z",
+                elapsed_s=1.0,
+                metrics={
+                    "area_iou_min": 0.41,
+                    "boundary_iou_mean": 0.19,
+                    "editability_score": 0.25,
+                    "topology_score": 0.4,
+                },
+            )
+
+            proposal_path, variant_path = runner._write_adaptive_outputs([result])
+
+            proposals = json.loads(proposal_path.read_text(encoding="utf-8"))
+            variants = json.loads(variant_path.read_text(encoding="utf-8"))
+            self.assertEqual(
+                proposals["schema_version"],
+                "refinement_run_adaptive_proposals_v1",
+            )
+            self.assertGreater(proposals["proposal_count"], 0)
+            self.assertEqual(
+                variants["schema_version"],
+                "refinement_run_adaptive_variants_v1",
+            )
+            self.assertEqual(
+                variants["variant_count"],
+                proposals["proposal_count"],
+            )
 
     def test_e2e_validator_resolves_relative_output_paths(self) -> None:
         validator = E2EValidator(

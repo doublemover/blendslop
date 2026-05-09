@@ -14,6 +14,23 @@ from typing import Any, Mapping, Sequence
 from .contracts import ExperimentVariant, safe_slug, stable_hash
 
 
+_DIRECT_METRIC_ALIASES = {
+    "area_iou_min": "silhouette.min_view_iou",
+    "area_iou_mean": "silhouette.average_iou",
+    "average_iou": "silhouette.average_iou",
+    "boundary_iou_mean": "silhouette.mean_boundary_iou",
+    "signed_distance_loss_mean": "silhouette.mean_signed_distance_loss",
+    "topology_score": "topology.score",
+    "topology_penalty": "topology.penalty",
+    "editability_score": "editability.editable_reconstruction_index",
+    "complexity_penalty": "editability.complexity_penalty",
+    "geometry_fscore_tau": "geometry.fscore_tau",
+    "geometry_volumetric_iou": "geometry.volumetric_iou",
+    "geometry_chamfer_l2": "geometry.chamfer_l2",
+    "geometry_surface_coverage": "geometry.surface_coverage",
+}
+
+
 @dataclass(frozen=True)
 class RefinementProposal:
     proposal_id: str
@@ -123,6 +140,21 @@ def variants_from_bundle(
     return tuple(
         proposal.to_variant(parent_variant_id=parent_variant_id)
         for proposal in proposals_from_bundle(bundle, max_proposals=max_proposals)
+    )
+
+
+def merge_proposals(
+    proposals: Sequence[RefinementProposal],
+    *,
+    max_proposals: int = 8,
+) -> tuple[RefinementProposal, ...]:
+    by_id: dict[str, RefinementProposal] = {}
+    for proposal in proposals:
+        current = by_id.get(proposal.proposal_id)
+        if current is None or proposal.priority < current.priority:
+            by_id[proposal.proposal_id] = proposal
+    return tuple(
+        sorted(by_id.values(), key=lambda proposal: proposal.priority)[:max_proposals]
     )
 
 
@@ -510,7 +542,13 @@ def _metric_index(bundle: Any) -> Mapping[str, float]:
         metrics: dict[str, float] = {}
         direct = bundle.get("metrics")
         if isinstance(direct, Mapping):
-            metrics.update({str(key): _float(value) for key, value in direct.items()})
+            for key, value in direct.items():
+                metric_name = str(key)
+                numeric = _float(value)
+                metrics[metric_name] = numeric
+                alias = _DIRECT_METRIC_ALIASES.get(metric_name)
+                if alias:
+                    metrics.setdefault(alias, numeric)
         for group in bundle.get("metric_groups", ()) or ():
             if not isinstance(group, Mapping):
                 continue

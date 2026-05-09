@@ -12,6 +12,7 @@ import sys
 import time
 from typing import Any, Mapping, Sequence
 
+from .adaptive_planner import merge_proposals, proposals_from_result_payload
 from .artifact_report import ReportOptions, generate_report
 from .bounds_debug import build_bounds_debug_report
 from .candidate_autopsy import autopsy_candidate
@@ -46,6 +47,8 @@ class RunOptions:
     fail_on_all_failed: bool = True
     append_global_index: bool = True
     report_failures: str = "top"
+    write_adaptive_proposals: bool = True
+    adaptive_max_proposals: int = 12
     subprocess_blender: bool = False
     blender_executable: str | None = None
     progress: bool = False
@@ -109,6 +112,8 @@ class BaseRunner:
                     write_overlays=self.options.write_overlays,
                 ),
             )
+        if self.options.write_adaptive_proposals:
+            self._write_adaptive_outputs(results)
         passed_any = any(result.status == "pass" for result in results)
         return (passed_any or not self.options.fail_on_all_failed), results
 
@@ -271,6 +276,50 @@ class BaseRunner:
             f"  {result.status:<5} avg={result.avg_iou:.3f} min={result.min_iou:.3f} "
             f"elapsed={result.elapsed_s:.2f}s {category}"
         )
+
+    def _write_adaptive_outputs(
+        self,
+        results: Sequence[ExperimentResult],
+    ) -> tuple[Path, Path]:
+        proposals = []
+        for result in results:
+            payload = {
+                "status": result.status,
+                "metrics": result.metrics,
+                "backend_result": result.backend_result,
+            }
+            proposals.extend(
+                proposals_from_result_payload(
+                    payload,
+                    max_proposals=self.options.adaptive_max_proposals,
+                )
+            )
+        ranked = merge_proposals(
+            proposals,
+            max_proposals=self.options.adaptive_max_proposals,
+        )
+        proposal_path = self.run_root / "adaptive-proposals.json"
+        variant_path = self.run_root / "adaptive-variants.json"
+        proposal_payload = {
+            "schema_version": "refinement_run_adaptive_proposals_v1",
+            "run_id": self.plan.run_id,
+            "suite": self.plan.suite,
+            "track": self.plan.track,
+            "objective": self.plan.objective,
+            "source_result_count": len(results),
+            "proposal_count": len(ranked),
+            "proposals": [proposal.to_dict() for proposal in ranked],
+        }
+        variant_payload = {
+            "schema_version": "refinement_run_adaptive_variants_v1",
+            "run_id": self.plan.run_id,
+            "source_result_count": len(results),
+            "variant_count": len(ranked),
+            "variants": [proposal.to_variant().to_dict() for proposal in ranked],
+        }
+        _write_json(proposal_path, proposal_payload)
+        _write_json(variant_path, variant_payload)
+        return proposal_path, variant_path
 
 
 class InProcessBlenderRunner(BaseRunner):
