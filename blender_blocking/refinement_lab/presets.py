@@ -243,6 +243,13 @@ SUITES: dict[str, SuitePreset] = {
         synthetic_suites=("silhouette-edge-cases", "degradation-stress"),
         tags=("synthetic", "adversarial"),
     ),
+    "synthetic-material-appearance": SuitePreset(
+        name="synthetic-material-appearance",
+        source="synthetic",
+        description="Synthetic material, UV, PBR-channel, and texture-only detail fixtures for editable Blender output scoring.",
+        synthetic_suites=("material-appearance",),
+        tags=("synthetic", "appearance", "materials", "uv", "editable"),
+    ),
     "synthetic-nightly": SuitePreset(
         name="synthetic-nightly",
         source="synthetic",

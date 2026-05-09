@@ -22,6 +22,7 @@ class RefinementLabPresetTests(unittest.TestCase):
             "synthetic-profile-band",
             "synthetic-primitive-fit",
             "synthetic-adversarial",
+            "synthetic-material-appearance",
             "synthetic-nightly",
         ):
             self.assertIn(name, suites)

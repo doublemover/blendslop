@@ -68,6 +68,26 @@ class RefinementLabMatrixTests(unittest.TestCase):
         self.assertGreaterEqual(len(plan.cases), 1)
         self.assertEqual(plan.cases[0].source, "synthetic")
 
+    def test_material_appearance_suite_carries_appearance_targets(self) -> None:
+        plan = build_experiment_plan(
+            suite="synthetic-material-appearance",
+            track="shape-program-editability",
+            search="coordinate",
+            objective="profile_editable",
+            output_root=Path("temp/material-appearance"),
+            max_runs=2,
+        )
+
+        self.assertGreaterEqual(len(plan.cases), 1)
+        first_case = plan.cases[0]
+        self.assertEqual(first_case.source, "synthetic")
+        self.assertIn("material_", first_case.synthetic_shape_id)
+        self.assertIn("appearance", first_case.expected_targets["targets"])
+        self.assertEqual(
+            first_case.metadata["synthetic_suite"],
+            "material-appearance",
+        )
+
     def test_external_variants_can_replace_generated_track(self) -> None:
         variant = ExperimentVariant(
             "adaptive-boundary",
