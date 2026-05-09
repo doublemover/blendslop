@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import unittest
 
+from evaluation.autopsy import autopsy_pack_from_bundle
 from evaluation import bundle_from_candidate
 from evaluation.export_qa import ExportQAReport, reports_from_payload
 from evaluation.reporting import compact_console_summary, markdown_report
@@ -233,6 +234,21 @@ class EvaluationBundleTests(unittest.TestCase):
         self.assertEqual(metrics["geometry.recoverable.fscore_tau"].value, 0.82)
         self.assertAlmostEqual(metrics["geometry.ambiguity_gap_chamfer_l2"].value, 0.06)
         self.assertIn("geometry_true_recoverable_gap_large", codes)
+        autopsy = autopsy_pack_from_bundle(bundle).to_dict()
+        self.assertTrue(
+            any(
+                action["action_id"] == "add_active_view"
+                for action in autopsy["suggested_actions"]
+            )
+        )
+        self.assertGreater(
+            len(autopsy["active_view_plan"]["requests"]),
+            0,
+        )
+        self.assertEqual(
+            autopsy["active_view_plan"]["requests"][0]["view_id"],
+            "front_side_45",
+        )
 
     def test_visual_hull_diagnostics_are_first_class_failures(self) -> None:
         result = CandidateResult(

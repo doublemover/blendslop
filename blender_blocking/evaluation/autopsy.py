@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Mapping
 
 from .schemas import EvaluationBundle, json_safe
+from .view_planning import active_view_plan_payload
 
 
 @dataclass(frozen=True)
@@ -69,6 +70,7 @@ class AutopsyPack:
     suggested_actions: tuple[SuggestedAction, ...]
     artifact_paths: Mapping[str, str] = field(default_factory=dict)
     reproduce_command: tuple[str, ...] = ()
+    active_view_plan: Mapping[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -78,6 +80,7 @@ class AutopsyPack:
             "suggested_actions": [action.to_dict() for action in self.suggested_actions],
             "artifact_paths": dict(self.artifact_paths),
             "reproduce_command": list(self.reproduce_command),
+            "active_view_plan": json_safe(self.active_view_plan),
         }
 
 
@@ -91,14 +94,35 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
         if (
             "ambiguous" in failure.code
             or "calibration" in failure.code
+            or "recoverable_gap" in failure.code
             or failure.code in {"geometry_surface_fscore_low", "geometry_volume_iou_low"}
         ):
             action_ids.append("add_active_view")
     actions = tuple(ACTION_CATALOG[action_id] for action_id in dict.fromkeys(action_ids) if action_id in ACTION_CATALOG)
+    active_view_plan = (
+        active_view_plan_payload(
+            bundle,
+            existing_views=_existing_silhouette_views(bundle),
+        )
+        if "add_active_view" in action_ids
+        else {}
+    )
     return AutopsyPack(
         candidate_id=bundle.candidate_id,
         status=bundle.status,
         failures=tuple(failure.code for failure in bundle.failures),
         suggested_actions=actions,
         artifact_paths=bundle.artifacts,
+        active_view_plan=active_view_plan,
     )
+
+
+def _existing_silhouette_views(bundle: EvaluationBundle) -> tuple[str, ...]:
+    views: list[str] = []
+    for name in bundle.metric_index():
+        if not name.startswith("silhouette.per_view."):
+            continue
+        parts = name.split(".")
+        if len(parts) >= 4 and parts[2]:
+            views.append(parts[2])
+    return tuple(dict.fromkeys(views))

@@ -107,6 +107,17 @@ occupancy grids. Candidate scoring and reports can then compare true geometry,
 recoverable geometry, and editable output without conflating them into one
 opaque score.
 
+Synthetic e2e matrix rows compute a recoverable visual-hull envelope from the
+same rendered reference silhouettes used by the reconstruction run. Matrix JSON
+therefore includes `synthetic_geometry_recoverable_*` and
+`synthetic_recoverability_ambiguity_gap_*` fields when a candidate mesh is
+available, making silhouette-only ambiguity measurable instead of subjective.
+
+Autopsy packs turn high ambiguity, calibration, and geometry failures into an
+`active_view_plan`. The plan lists concrete next captures such as diagonal or
+top-oblique silhouettes, along with expected information gain and capture notes,
+so refinement can ask for better input instead of only sweeping backend knobs.
+
 Visual-hull rows include `diagnostics.visual_hull.*` metrics when projection
 diagnostics are available. These flag suspected axis/transform mismatches,
 catastrophic per-view collapse, failed view counts, and top-like failures.
