@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import math
-from typing import Iterable, List, Optional, Sequence, Tuple
+import json
+from typing import List, Optional, Sequence, Tuple
 
 from geometry.profile_models import EllipticalSlice
+from integration.blender_ops.mesh_quality import collect_mesh_quality
 
 try:
     import bpy
@@ -14,6 +16,95 @@ try:
     BLENDER_AVAILABLE = True
 except ImportError:
     BLENDER_AVAILABLE = False
+
+
+def _is_degenerate_slice(
+    slice_data: EllipticalSlice,
+    min_radius_u: float,
+    weld_degenerate_rings: bool,
+) -> bool:
+    if not weld_degenerate_rings:
+        return False
+    return float(slice_data.rx) <= min_radius_u or float(slice_data.ry) <= min_radius_u
+
+
+def _collapse_degenerate_slice_run(run: Sequence[EllipticalSlice]) -> EllipticalSlice:
+    count = float(len(run))
+    cx = sum(float(item.cx) if item.cx is not None else 0.0 for item in run) / count
+    cy = sum(float(item.cy) if item.cy is not None else 0.0 for item in run) / count
+    z = sum(float(item.z) for item in run) / count
+    return EllipticalSlice(z=z, rx=0.0, ry=0.0, cx=cx, cy=cy)
+
+
+def _prepare_slices(
+    slices: Sequence[EllipticalSlice],
+    min_radius_u: float,
+    weld_degenerate_rings: bool,
+) -> Tuple[List[EllipticalSlice], int]:
+    prepared: List[EllipticalSlice] = []
+    degenerate_count = 0
+    run: List[EllipticalSlice] = []
+
+    def flush_run() -> None:
+        nonlocal run
+        if run:
+            prepared.append(_collapse_degenerate_slice_run(run))
+            run = []
+
+    for slice_data in slices:
+        if _is_degenerate_slice(slice_data, min_radius_u, weld_degenerate_rings):
+            degenerate_count += 1
+            run.append(slice_data)
+            continue
+        flush_run()
+        prepared.append(slice_data)
+    flush_run()
+
+    if not any(
+        not _is_degenerate_slice(slice_data, min_radius_u, weld_degenerate_rings)
+        for slice_data in prepared
+    ):
+        raise ValueError("At least one non-degenerate slice is required")
+
+    for idx, slice_data in enumerate(prepared):
+        if not _is_degenerate_slice(slice_data, min_radius_u, weld_degenerate_rings):
+            continue
+        if idx not in {0, len(prepared) - 1}:
+            raise ValueError(
+                "Interior zero-radius slices are not supported in a single loft lobe"
+            )
+
+    return prepared, degenerate_count
+
+
+def _resolve_radial_segments(
+    slices: Sequence[EllipticalSlice],
+    radial_segments: int,
+    adaptive_radial_segments: bool,
+    target_edge_error_u: Optional[float],
+) -> Tuple[int, Tuple[str, ...]]:
+    if radial_segments < 3:
+        raise ValueError("radial_segments must be >= 3")
+
+    warnings: List[str] = []
+    resolved = radial_segments
+    if radial_segments < 16:
+        warnings.append("radial_segments_below_recommended_minimum:16")
+
+    if adaptive_radial_segments:
+        max_radius = max(
+            max(abs(float(slice_data.rx)), abs(float(slice_data.ry)))
+            for slice_data in slices
+        )
+        edge_error = (
+            float(target_edge_error_u)
+            if target_edge_error_u is not None and target_edge_error_u > 0
+            else max(max_radius / 12.0, 1e-6)
+        )
+        adaptive_segments = int(math.ceil((2.0 * math.pi * max_radius) / edge_error))
+        resolved = max(resolved, min(max(adaptive_segments, 3), 256))
+
+    return resolved, tuple(warnings)
 
 
 def _ring_vertices(
@@ -123,6 +214,8 @@ def create_loft_mesh_from_slices(
     *,
     name: str = "LoftMesh",
     radial_segments: int = 24,
+    adaptive_radial_segments: bool = False,
+    target_edge_error_u: Optional[float] = None,
     cap_mode: str = "fan",
     min_radius_u: float = 0.0,
     merge_threshold_u: float = 0.0,
@@ -141,10 +234,17 @@ def create_loft_mesh_from_slices(
     if not slices:
         raise ValueError("slices must not be empty")
 
+    radial_segments, radial_warnings = _resolve_radial_segments(
+        slices, radial_segments, adaptive_radial_segments, target_edge_error_u
+    )
+    prepared_slices, degenerate_count = _prepare_slices(
+        slices, min_radius_u, weld_degenerate_rings
+    )
+
     bm = bmesh.new()
 
     rings: List[List[bmesh.types.BMVert]] = []
-    for slice_data in slices:
+    for slice_data in prepared_slices:
         ring, _ = _ring_vertices(
             bm,
             slice_data,
@@ -177,5 +277,24 @@ def create_loft_mesh_from_slices(
     if shade_smooth:
         for polygon in obj.data.polygons:
             polygon.use_smooth = True
+
+    quality = collect_mesh_quality(obj)
+    metadata = {
+        "radial_segments": radial_segments,
+        "adaptive_radial_segments": adaptive_radial_segments,
+        "target_edge_error_u": target_edge_error_u,
+        "ring_count": len(rings),
+        "input_slice_count": len(slices),
+        "prepared_slice_count": len(prepared_slices),
+        "degenerate_count": degenerate_count,
+        "face_count": len(obj.data.polygons),
+        "cap_mode": cap_mode,
+        "weld_threshold": merge_threshold_u,
+        "min_radius_u": min_radius_u,
+        "warnings": list(radial_warnings),
+        "quality": quality.to_dict(),
+    }
+    obj["loft_metadata_json"] = json.dumps(metadata, sort_keys=True)
+    obj["mesh_quality_json"] = json.dumps(quality.to_dict(), sort_keys=True)
 
     return obj
