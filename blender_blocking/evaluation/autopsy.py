@@ -88,7 +88,11 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
             action_ids.append("boundary_first_refinement")
         if "topology" in failure.code:
             action_ids.append("safe_topology_repair")
-        if "ambiguous" in failure.code or "calibration" in failure.code:
+        if (
+            "ambiguous" in failure.code
+            or "calibration" in failure.code
+            or failure.code in {"geometry_surface_fscore_low", "geometry_volume_iou_low"}
+        ):
             action_ids.append("add_active_view")
     actions = tuple(ACTION_CATALOG[action_id] for action_id in dict.fromkeys(action_ids) if action_id in ACTION_CATALOG)
     return AutopsyPack(
@@ -98,4 +102,3 @@ def autopsy_pack_from_bundle(bundle: EvaluationBundle) -> AutopsyPack:
         suggested_actions=actions,
         artifact_paths=bundle.artifacts,
     )
-

@@ -1368,6 +1368,10 @@ class BlockingWorkflow:
         if hasattr(result_obj, "evaluation_bundles"):
             bundles = getattr(result_obj, "evaluation_bundles", ()) or ()
             autopsy_packs = getattr(result_obj, "autopsy_packs", ()) or ()
+            active_view_plans = [
+                self._active_view_plan(bundle, target_build=target_build)
+                for bundle in bundles
+            ]
             return {
                 "evaluation_bundles": [
                     bundle.to_dict() if hasattr(bundle, "to_dict") else bundle
@@ -1377,6 +1381,7 @@ class BlockingWorkflow:
                     pack.to_dict() if hasattr(pack, "to_dict") else pack
                     for pack in autopsy_packs
                 ],
+                "active_view_plans": active_view_plans,
             }
         if hasattr(result_obj, "to_evaluation_bundle"):
             try:
@@ -1395,10 +1400,32 @@ class BlockingWorkflow:
                 return {
                     "evaluation_bundle": bundle.to_dict(),
                     "autopsy_pack": autopsy_pack_from_bundle(bundle).to_dict(),
+                    "active_view_plan": self._active_view_plan(
+                        bundle,
+                        target_build=target_build,
+                    ),
                 }
             except Exception as exc:
                 return {"evaluation_bundle_error": str(exc)}
         return {}
+
+    def _active_view_plan(
+        self,
+        bundle: Any,
+        *,
+        target_build: TargetBuildResult,
+    ) -> Dict[str, Any]:
+        try:
+            from blender_blocking.evaluation.view_planning import (
+                active_view_plan_payload,
+            )
+        except Exception:  # pragma: no cover - legacy script import path
+            from evaluation.view_planning import active_view_plan_payload  # type: ignore
+
+        return active_view_plan_payload(
+            bundle,
+            existing_views=target_build.target.views(),
+        )
 
     def run_full_workflow(self, num_slices: Optional[int] = None) -> Optional[Any]:
         """

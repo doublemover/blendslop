@@ -96,6 +96,8 @@ def proposals_from_bundle(
         proposals.append(_proxy_grounding(metrics, failures))
     if _status(bundle) in {"research_only", "degraded"}:
         proposals.append(_compile_or_crosscheck(metrics, failures, _status(bundle)))
+    if ambiguity_signal(metrics, failures):
+        proposals.append(_active_view_capture(metrics, failures))
 
     deduped = _dedupe(proposals)
     return tuple(sorted(deduped, key=lambda item: item.priority)[:max_proposals])
@@ -342,6 +344,49 @@ def _compile_or_crosscheck(
         tags=("research", "crosscheck", "ensemble"),
         priority=70,
         source={"metrics": metrics, "failures": failures, "status": status},
+    )
+
+
+def _active_view_capture(
+    metrics: Mapping[str, float],
+    failures: Sequence[str],
+) -> RefinementProposal:
+    return _proposal(
+        "active-view-capture",
+        "Capture another high-information silhouette view",
+        "The current silhouette set is likely underconstrained; add a diagonal or oblique view before overfitting backend parameters.",
+        mode="ensemble",
+        cli_args=(
+            "--ensemble-candidates",
+            "visual_hull_voxel,primitive_fit_refine,shape_program",
+            "--ensemble-policy",
+            "fidelity",
+            "--validation-mode",
+            "backend-status",
+        ),
+        expected_win={
+            "geometry.ambiguity_gap": "decrease",
+            "silhouette.min_view_iou": "increase",
+        },
+        tags=("active-view", "ambiguity", "human-input"),
+        priority=15,
+        risk="low",
+        source={"metrics": metrics, "failures": failures},
+    )
+
+
+def ambiguity_signal(
+    metrics: Mapping[str, float],
+    failures: Sequence[str],
+) -> bool:
+    ambiguity = _metric(metrics, "geometry.ambiguity_gap")
+    fscore = _metric(metrics, "geometry.fscore_tau", default=1.0)
+    min_iou = _metric(metrics, "silhouette.min_view_iou")
+    return (
+        ambiguity > 0.1
+        or fscore < 0.5
+        or min_iou < 0.45
+        or any("ambiguous" in failure or failure.startswith("geometry_") for failure in failures)
     )
 
 

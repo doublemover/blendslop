@@ -20,6 +20,7 @@ from .schemas import (
     STATUS_VALUES,
     json_safe,
 )
+from .view_planning import ViewRequest, active_view_plan_payload, suggest_next_views
 
 __all__ = [
     "EvaluationBundle",
@@ -29,7 +30,9 @@ __all__ = [
     "EvaluationBudget",
     "GeometryMetricReport",
     "Threshold",
+    "ViewRequest",
     "SelectionEvidence",
+    "active_view_plan_payload",
     "attach_selection",
     "bundle_from_candidate",
     "chamfer_distance",
@@ -37,6 +40,7 @@ __all__ = [
     "fscore_at_tolerance",
     "normal_consistency",
     "pareto_front",
+    "suggest_next_views",
     "surface_distance_report",
     "volumetric_iou",
     "json_safe",
