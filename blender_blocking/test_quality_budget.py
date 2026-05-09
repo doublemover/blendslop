@@ -232,6 +232,42 @@ class QualityBudgetTests(unittest.TestCase):
         self.assertEqual(report["checks"][0]["value"], 0.74)
         self.assertEqual(report["checks"][1]["mode"], "max")
 
+    def test_synthetic_geometry_matrix_metrics_are_budgetable(self) -> None:
+        current = {
+            "schema_version": "e2e_synthetic_matrix_v1",
+            "matrix": [
+                {
+                    "artifact": "e2e",
+                    "suite": "smoke",
+                    "shape_id": "analytic-sphere",
+                    "mode": "visual_hull_voxel",
+                    "metrics": {
+                        "passed": 1.0,
+                        "synthetic_geometry_true_chamfer_l1": 0.08,
+                    },
+                }
+            ],
+        }
+        budget = {
+            "schema_version": "quality_perf_budget_v1",
+            "name": "synthetic-geometry",
+            "thresholds": [
+                {
+                    "id": "true.chamfer",
+                    "artifact": "e2e",
+                    "metric": "metrics.synthetic_geometry_true_chamfer_l1",
+                    "mode": "max",
+                    "threshold": 0.1,
+                    "required": True,
+                }
+            ],
+        }
+
+        report = evaluate_budget_payloads(current, budget)
+
+        self.assertTrue(report["passed"])
+        self.assertEqual(report["checks"][0]["value"], 0.08)
+
 
 if __name__ == "__main__":
     unittest.main()

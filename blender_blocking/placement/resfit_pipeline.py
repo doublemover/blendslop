@@ -4,7 +4,7 @@ Orchestration for modular residual primitive fitting.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import time
 from typing import Any, Callable, Mapping, Sequence
 
@@ -86,6 +86,8 @@ class ResFitPipelineResult:
     optimization_termination_reason: str = "not_run"
     objective_evaluations: int = 0
     optimizer_elapsed_s: float = 0.0
+    selected_attempt: str = "default"
+    attempts: tuple[Mapping[str, Any], ...] = ()
 
     def primitive_dicts(self) -> tuple[Mapping[str, object], ...]:
         return tuple(
@@ -177,6 +179,134 @@ def fit_residual_primitives(
         objective_evaluations=optimization.objective_evaluations,
         optimizer_elapsed_s=optimization.elapsed_s,
     )
+
+
+def fit_residual_primitives_multistart(
+    target_points: np.ndarray,
+    config: ResFitPipelineConfig,
+    *,
+    profile_primitives: Sequence[object] | None = None,
+    occupied_points: np.ndarray | None = None,
+    silhouette_hook: SilhouetteHook | None = None,
+    topology_penalty_hook: PenaltyHook | None = None,
+    constraint_penalty_hook: PenaltyHook | None = None,
+    uncertainty_penalty_hook: PenaltyHook | None = None,
+    max_attempts: int = 4,
+) -> ResFitPipelineResult:
+    """Run deterministic multi-start/schedule fitting and return the best result."""
+    attempts: list[tuple[str, ResFitPipelineConfig, Sequence[object] | None]] = []
+    attempts.append(("default_seed_default_step", config, None))
+    if profile_primitives:
+        attempts.append(("profile_seed_default_step", config, tuple(profile_primitives)))
+
+    if config.optimizer.iterations > 0:
+        smaller = replace(
+            config,
+            optimizer=replace(
+                config.optimizer,
+                initial_step=max(config.optimizer.min_step * 2.0, config.optimizer.initial_step * 0.5),
+            ),
+        )
+        wider = replace(
+            config,
+            optimizer=replace(
+                config.optimizer,
+                initial_step=min(1.0, config.optimizer.initial_step * 1.75),
+                step_decay=max(0.2, min(0.85, config.optimizer.step_decay * 0.9)),
+            ),
+        )
+        if profile_primitives:
+            attempts.append(("profile_seed_small_step", smaller, tuple(profile_primitives)))
+        attempts.append(("default_seed_wide_step", wider, None))
+
+    bounded_attempts = attempts[: max(1, int(max_attempts))]
+    summaries: list[Mapping[str, Any]] = []
+    best: ResFitPipelineResult | None = None
+    best_label = ""
+    errors: list[str] = []
+    for label, attempt_config, seed in bounded_attempts:
+        attempt_start = time.perf_counter()
+        try:
+            attempt_result = fit_residual_primitives(
+                target_points,
+                attempt_config,
+                initial_primitives=seed,
+                occupied_points=occupied_points,
+                silhouette_hook=silhouette_hook,
+                topology_penalty_hook=topology_penalty_hook,
+                constraint_penalty_hook=constraint_penalty_hook,
+                uncertainty_penalty_hook=uncertainty_penalty_hook,
+            )
+        except Exception as exc:
+            errors.append(f"{label}: {exc}")
+            summaries.append(
+                {
+                    "label": label,
+                    "status": "failed",
+                    "error": str(exc),
+                    "elapsed_s": time.perf_counter() - attempt_start,
+                }
+            )
+            continue
+        improvement = attempt_result.initial_loss.total - attempt_result.final_loss.total
+        summaries.append(
+            {
+                "label": label,
+                "status": "ok",
+                "initial_total": attempt_result.initial_loss.total,
+                "final_total": attempt_result.final_loss.total,
+                "improvement": improvement,
+                "history_length": len(attempt_result.history),
+                "accepted_moves": sum(record.accepted_moves for record in attempt_result.history),
+                "rejected_moves": sum(getattr(record, "rejected_moves", 0) for record in attempt_result.history),
+                "termination_reason": attempt_result.optimization_termination_reason,
+                "objective_evaluations": attempt_result.objective_evaluations,
+                "elapsed_s": time.perf_counter() - attempt_start,
+            }
+        )
+        if best is None or _attempt_is_better(attempt_result, best):
+            best = attempt_result
+            best_label = label
+
+    if best is None:
+        raise RuntimeError("all primitive fitting attempts failed: " + "; ".join(errors))
+
+    warnings = list(best.warnings)
+    if errors:
+        warnings.extend(errors)
+    return ResFitPipelineResult(
+        primitives=best.primitives,
+        initial_loss=best.initial_loss,
+        final_loss=best.final_loss,
+        history=best.history,
+        warnings=tuple(warnings),
+        optimization_termination_reason=best.optimization_termination_reason,
+        objective_evaluations=sum(
+            int(summary.get("objective_evaluations", 0))
+            for summary in summaries
+            if isinstance(summary, Mapping)
+        ),
+        optimizer_elapsed_s=sum(
+            float(summary.get("elapsed_s", 0.0))
+            for summary in summaries
+            if isinstance(summary, Mapping)
+        ),
+        selected_attempt=best_label or "default",
+        attempts=tuple(summaries),
+    )
+
+
+def _attempt_is_better(
+    candidate: ResFitPipelineResult,
+    incumbent: ResFitPipelineResult,
+) -> bool:
+    candidate_improvement = candidate.initial_loss.total - candidate.final_loss.total
+    incumbent_improvement = incumbent.initial_loss.total - incumbent.final_loss.total
+    if candidate.final_loss.total < incumbent.final_loss.total:
+        return True
+    if candidate.final_loss.total > incumbent.final_loss.total:
+        return False
+    return candidate_improvement > incumbent_improvement
 
 
 def run_primitive_fit_pipeline(request: object) -> object:
@@ -393,6 +523,14 @@ def run_primitive_fit_pipeline(request: object) -> object:
         max_objective_evaluations=max_objective_evaluations,
         max_elapsed_s=max_runtime_s,
     )
+    max_multistart_attempts = _coerce_int(
+        config.get("max_multistart_attempts", 4),
+        "max_multistart_attempts",
+        default=4,
+        min_value=1,
+        max_value=16,
+        errors=errors,
+    )
 
     pipeline_config = ResFitPipelineConfig(
         primitive_family=primitive_family,
@@ -472,15 +610,16 @@ def run_primitive_fit_pipeline(request: object) -> object:
     uncertainty_penalty_hook = _build_uncertainty_penalty_hook(uncertainty_signal)
 
     try:
-        result = fit_residual_primitives(
+        result = fit_residual_primitives_multistart(
             surface,
             pipeline_config,
-            initial_primitives=initial_primitives,
+            profile_primitives=initial_primitives,
             occupied_points=occupied,
             silhouette_hook=silhouette_hook,
             topology_penalty_hook=topology_penalty_hook,
             constraint_penalty_hook=constraint_penalty_hook,
             uncertainty_penalty_hook=uncertainty_penalty_hook,
+            max_attempts=max_multistart_attempts,
         )
     except Exception as exc:
         return CandidateResult(
@@ -552,6 +691,8 @@ def run_primitive_fit_pipeline(request: object) -> object:
                     "termination_reason": result.optimization_termination_reason,
                     "objective_evaluations": result.objective_evaluations,
                     "elapsed_s": result.optimizer_elapsed_s,
+                    "selected_attempt": result.selected_attempt,
+                    "attempts": list(result.attempts),
                     "max_runtime_s": max_runtime_s,
                     "max_objective_evaluations": max_objective_evaluations,
                 },
@@ -561,6 +702,8 @@ def run_primitive_fit_pipeline(request: object) -> object:
                         "total": record.total,
                         "terms": dict(record.terms),
                         "accepted_moves": record.accepted_moves,
+                        "rejected_moves": getattr(record, "rejected_moves", 0),
+                        "reason": getattr(record, "reason", ""),
                         "step_size": record.step_size,
                     }
                     for record in result.history
@@ -577,6 +720,8 @@ def run_primitive_fit_pipeline(request: object) -> object:
             "total": record.total,
             "terms": dict(record.terms),
             "accepted_moves": record.accepted_moves,
+            "rejected_moves": getattr(record, "rejected_moves", 0),
+            "reason": getattr(record, "reason", ""),
             "step_size": record.step_size,
         }
         for record in result.history
@@ -695,6 +840,8 @@ def run_primitive_fit_pipeline(request: object) -> object:
                 "termination_reason": result.optimization_termination_reason,
                 "objective_evaluations": result.objective_evaluations,
                 "history_length": len(history_records),
+                "selected_attempt": result.selected_attempt,
+                "attempts": list(result.attempts),
             },
             "initial_primitive_count": (
                 len(initial_primitives) if initial_primitives is not None else None
@@ -708,6 +855,8 @@ def run_primitive_fit_pipeline(request: object) -> object:
             "surface_proxy_iou": surface_proxy_iou,
             "silhouette_proxy_iou": silhouette_proxy_iou,
             "optimization_termination_reason": result.optimization_termination_reason,
+            "selected_attempt": result.selected_attempt,
+            "optimization_attempts": list(result.attempts),
             "objective_evaluations": result.objective_evaluations,
             "optimizer_elapsed_s": result.optimizer_elapsed_s,
             "max_runtime_s": max_runtime_s,

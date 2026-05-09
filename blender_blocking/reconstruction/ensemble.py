@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from dataclasses import replace
 from pathlib import Path
+import time
 from typing import Any, Mapping, Sequence
 
 from .candidate_scoring import rank_candidates, select_best
 from .registry import get_backend
 from .types import (
     CandidateBudget,
+    CandidateMetrics,
     CandidateRequest,
     CandidateResult,
     ReconstructionTarget,
@@ -81,28 +84,67 @@ class EnsembleRunner:
             )
         return requests
 
-    def run_requests(self, requests: Sequence[CandidateRequest]) -> EnsembleRunResult:
+    def run_requests(
+        self,
+        requests: Sequence[CandidateRequest],
+        *,
+        total_timeout_s: float | None = None,
+    ) -> EnsembleRunResult:
         results: list[CandidateResult] = []
+        started_at = time.perf_counter()
         for request in requests:
-            try:
-                backend = get_backend(request.backend_name)
-                errors = backend.validate_config(request.config)
-                if errors:
+            effective_request = request
+            if total_timeout_s is not None:
+                elapsed = time.perf_counter() - started_at
+                remaining = float(total_timeout_s) - elapsed
+                if remaining <= 0.0:
                     results.append(
                         CandidateResult(
                             candidate_id=request.candidate_id,
                             backend_name=request.backend_name,
+                            status="skipped",
+                            warnings=("ensemble total timeout exhausted before candidate",),
+                            metric_result=CandidateMetrics(),
+                        )
+                    )
+                    continue
+                timeout_s = request.budget.timeout_s
+                if timeout_s is None or timeout_s > remaining:
+                    effective_request = replace(
+                        request,
+                        budget=replace(request.budget, timeout_s=remaining),
+                    )
+            try:
+                backend = get_backend(effective_request.backend_name)
+                errors = backend.validate_config(effective_request.config)
+                if errors:
+                    results.append(
+                        CandidateResult(
+                            candidate_id=effective_request.candidate_id,
+                            backend_name=effective_request.backend_name,
                             status="failed",
                             errors=tuple(errors),
                         )
                     )
                     continue
-                results.append(backend.reconstruct(request))
+                result = backend.reconstruct(effective_request)
+                if effective_request.budget.timeout_s is not None:
+                    elapsed = time.perf_counter() - started_at
+                    if total_timeout_s is not None and elapsed > total_timeout_s:
+                        result = replace(
+                            result,
+                            warnings=(
+                                *result.warnings,
+                                "ensemble total timeout elapsed during candidate",
+                            ),
+                            degraded=True,
+                        )
+                results.append(result)
             except Exception as exc:
                 results.append(
                     CandidateResult(
-                        candidate_id=request.candidate_id,
-                        backend_name=request.backend_name,
+                        candidate_id=effective_request.candidate_id,
+                        backend_name=effective_request.backend_name,
                         status="failed",
                         errors=(str(exc),),
                     )
@@ -132,6 +174,7 @@ class EnsembleRunner:
         artifact_root: str | Path | None = None,
         context: Any = None,
         budget: CandidateBudget = CandidateBudget(),
+        total_timeout_s: float | None = None,
     ) -> EnsembleRunResult:
         requests = self.build_requests(
             target=target,
@@ -140,7 +183,7 @@ class EnsembleRunner:
             context=context,
             budget=budget,
         )
-        return self.run_requests(requests)
+        return self.run_requests(requests, total_timeout_s=total_timeout_s)
 
 
 def _evaluation_outputs(

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 
 import numpy as np
 
@@ -60,6 +60,8 @@ def visual_hull_grid_from_target(
     chunk_size: Optional[int] = None,
     use_vectorized: bool = True,
     backend: str = "dense",
+    boundary_refine: bool = False,
+    boundary_dilate_px: Optional[int] = None,
 ) -> (
     DenseVolumeGrid
     | ChunkedVolumeGrid
@@ -74,6 +76,8 @@ def visual_hull_grid_from_target(
             resolution=resolution,
             chunk_size=chunk_size,
             use_vectorized=use_vectorized,
+            boundary_refine=boundary_refine,
+            boundary_dilate_px=boundary_dilate_px,
         )
     if requested_backend == "chunked":
         return visual_hull_chunked_grid_from_target(
@@ -81,6 +85,8 @@ def visual_hull_grid_from_target(
             resolution=resolution,
             chunk_size=chunk_size,
             use_vectorized=use_vectorized,
+            boundary_refine=boundary_refine,
+            boundary_dilate_px=boundary_dilate_px,
         )
     if requested_backend == "sparse_hash":
         return visual_hull_sparse_hash_grid_from_target(
@@ -88,6 +94,8 @@ def visual_hull_grid_from_target(
             resolution=resolution,
             chunk_size=chunk_size,
             use_vectorized=use_vectorized,
+            boundary_refine=boundary_refine,
+            boundary_dilate_px=boundary_dilate_px,
         )
     if requested_backend == "openvdb":
         return visual_hull_openvdb_grid_from_target(
@@ -95,6 +103,8 @@ def visual_hull_grid_from_target(
             resolution=resolution,
             chunk_size=chunk_size,
             use_vectorized=use_vectorized,
+            boundary_refine=boundary_refine,
+            boundary_dilate_px=boundary_dilate_px,
         )
     raise ValueError(f"unsupported visual hull backend: {requested_backend!r}")
 
@@ -105,12 +115,16 @@ def visual_hull_dense_grid_from_target(
     resolution: int = 64,
     chunk_size: Optional[int] = None,
     use_vectorized: bool = True,
+    boundary_refine: bool = False,
+    boundary_dilate_px: Optional[int] = None,
 ) -> DenseVolumeGrid:
     """Build a DenseVolumeGrid by intersecting target silhouette cones."""
     hull = _build_visual_hull_from_target(
         target,
         resolution=resolution,
         chunk_size=chunk_size,
+        boundary_refine=boundary_refine,
+        boundary_dilate_px=boundary_dilate_px,
     )
     voxels = hull.reconstruct(
         verbose=False,
@@ -132,6 +146,8 @@ def visual_hull_chunked_grid_from_target(
     resolution: int = 64,
     chunk_size: Optional[int] = None,
     use_vectorized: bool = True,
+    boundary_refine: bool = False,
+    boundary_dilate_px: Optional[int] = None,
 ) -> ChunkedVolumeGrid:
     """Build a ChunkedVolumeGrid by intersecting target silhouette cones."""
     return _visual_hull_chunked_grid_from_target(
@@ -140,6 +156,8 @@ def visual_hull_chunked_grid_from_target(
         resolution=resolution,
         chunk_size=chunk_size,
         use_vectorized=use_vectorized,
+        boundary_refine=boundary_refine,
+        boundary_dilate_px=boundary_dilate_px,
     )
 
 
@@ -149,6 +167,8 @@ def visual_hull_sparse_hash_grid_from_target(
     resolution: int = 64,
     chunk_size: Optional[int] = None,
     use_vectorized: bool = True,
+    boundary_refine: bool = False,
+    boundary_dilate_px: Optional[int] = None,
 ) -> SparseHashVolumeGrid:
     """Build a SparseHashVolumeGrid by intersecting target silhouette cones."""
     return _visual_hull_chunked_grid_from_target(
@@ -157,6 +177,8 @@ def visual_hull_sparse_hash_grid_from_target(
         resolution=resolution,
         chunk_size=chunk_size,
         use_vectorized=use_vectorized,
+        boundary_refine=boundary_refine,
+        boundary_dilate_px=boundary_dilate_px,
     )
 
 
@@ -166,6 +188,8 @@ def visual_hull_openvdb_grid_from_target(
     resolution: int = 64,
     chunk_size: Optional[int] = None,
     use_vectorized: bool = True,
+    boundary_refine: bool = False,
+    boundary_dilate_px: Optional[int] = None,
 ) -> OpenVDBVolumeGrid:
     """Build an OpenVDB-labeled sparse interchange grid directly from views."""
     return _visual_hull_chunked_grid_from_target(
@@ -174,6 +198,8 @@ def visual_hull_openvdb_grid_from_target(
         resolution=resolution,
         chunk_size=chunk_size,
         use_vectorized=use_vectorized,
+        boundary_refine=boundary_refine,
+        boundary_dilate_px=boundary_dilate_px,
         openvdb_status=detect_openvdb(),
     )
 
@@ -329,6 +355,8 @@ def _build_visual_hull_from_target(
     *,
     resolution: int,
     chunk_size: Optional[int] = None,
+    boundary_refine: bool = False,
+    boundary_dilate_px: Optional[int] = None,
 ):
     from integration.multi_view.visual_hull import MultiViewVisualHull
 
@@ -347,6 +375,10 @@ def _build_visual_hull_from_target(
         mask = np.asarray(getattr(constraint.mask, "mask", constraint.mask)).astype(bool)
         if mask.ndim != 2:
             continue
+        original_mask = mask
+        if boundary_refine:
+            radius = _auto_boundary_radius(mask, resolution, boundary_dilate_px)
+            mask = _dilate_rect(mask, radius_x=radius, radius_y=radius)
         image_bounds = None
         bbox = getattr(constraint, "bbox", None)
         if bbox is not None and hasattr(bbox, "to_xyxy"):
@@ -357,9 +389,115 @@ def _build_visual_hull_from_target(
             view_type="top" if constraint.view == "top" else "lateral",
             image_bounds=image_bounds,
         )
+        hull.views[-1].source_mask_area = int(original_mask.sum())
+        hull.views[-1].refined_mask_area = int(mask.sum())
+        hull.views[-1].boundary_refine = bool(boundary_refine)
+        hull.views[-1].boundary_dilate_px = (
+            _auto_boundary_radius(original_mask, resolution, boundary_dilate_px)
+            if boundary_refine
+            else 0
+        )
     if not hull.views:
         raise ValueError("target does not contain any 2D silhouette constraints")
     return hull
+
+
+def visual_hull_view_diagnostics_from_target(
+    target: ReconstructionTarget,
+    grid: (
+        DenseVolumeGrid
+        | ChunkedVolumeGrid
+        | SparseHashVolumeGrid
+        | OpenVDBVolumeGrid
+    ),
+    *,
+    per_view_metrics: Mapping[str, Mapping[str, Any]] | None = None,
+    boundary_refine: bool = False,
+    boundary_dilate_px: Optional[int] = None,
+) -> dict[str, Any]:
+    """Return view-level transform and projection diagnostics for visual hulls."""
+    shape = tuple(int(v) for v in getattr(grid, "shape", ()))
+    resolution = shape[0] if len(shape) == 3 else 0
+    hull = _build_visual_hull_from_target(
+        target,
+        resolution=max(1, resolution),
+        chunk_size=getattr(grid, "chunk_size", None),
+        boundary_refine=boundary_refine,
+        boundary_dilate_px=boundary_dilate_px,
+    )
+    view_names = _target_view_names_with_masks(target)
+    if len(view_names) != len(hull.views):
+        view_names = [f"view_{idx}" for idx in range(len(hull.views))]
+    metric_map = per_view_metrics or {}
+    diagnostics: dict[str, Any] = {
+        "view_count": len(hull.views),
+        "required_view_count": len(view_names),
+        "views": {},
+    }
+    ious: list[float] = []
+    failed: list[str] = []
+    top_like_failures: list[str] = []
+    centroid_deltas: list[float] = []
+    for name, view in zip(view_names, hull.views):
+        payload = dict(metric_map.get(name, {}))
+        area_iou = _optional_float(payload.get("area_iou"))
+        boundary_iou = _optional_float(payload.get("boundary_iou"))
+        signed_distance_loss = _optional_float(payload.get("signed_distance_loss"))
+        if area_iou is not None:
+            ious.append(area_iou)
+        if area_iou is not None and area_iou < 0.35:
+            failed.append(name)
+            if name == "top" or getattr(view, "view_type", "") == "top":
+                top_like_failures.append(name)
+        source_bbox = _mask_bbox(view.silhouette)
+        source_centroid = _mask_centroid(view.silhouette)
+        centroid_delta = None
+        if "reference_centroid" in payload and "candidate_centroid" in payload:
+            try:
+                ref = np.asarray(payload["reference_centroid"], dtype=float)
+                cand = np.asarray(payload["candidate_centroid"], dtype=float)
+                centroid_delta = float(np.linalg.norm(ref - cand))
+                centroid_deltas.append(centroid_delta)
+            except Exception:
+                centroid_delta = None
+        diagnostics["views"][name] = {
+            "view_type": getattr(view, "view_type", ""),
+            "angle_deg": float(getattr(view, "angle", 0.0)),
+            "mask_shape": [int(view.height), int(view.width)],
+            "image_bounds": [float(v) for v in getattr(view, "image_bounds", ())],
+            "source_mask_area": int(getattr(view, "source_mask_area", view.silhouette.sum())),
+            "refined_mask_area": int(getattr(view, "refined_mask_area", view.silhouette.sum())),
+            "boundary_refine": bool(getattr(view, "boundary_refine", False)),
+            "boundary_dilate_px": int(getattr(view, "boundary_dilate_px", 0)),
+            "source_bbox": source_bbox,
+            "source_centroid": source_centroid,
+            "area_iou": area_iou,
+            "boundary_iou": boundary_iou,
+            "signed_distance_loss": signed_distance_loss,
+            "centroid_delta_px": centroid_delta,
+            "passed": bool(payload.get("passed", payload.get("pass", False))),
+            "reason": str(payload.get("reason", "")),
+        }
+    min_iou = min(ious) if ious else None
+    diagnostics["min_area_iou"] = min_iou
+    diagnostics["average_iou"] = (sum(ious) / len(ious)) if ious else None
+    diagnostics["failed_views"] = failed
+    diagnostics["top_like_failures"] = top_like_failures
+    diagnostics["mean_centroid_delta_px"] = (
+        sum(centroid_deltas) / len(centroid_deltas) if centroid_deltas else None
+    )
+    diagnostics["axis_or_transform_suspect"] = bool(
+        (min_iou is not None and min_iou < 0.35 and len(ious) >= 2)
+        or top_like_failures
+        or (
+            diagnostics["mean_centroid_delta_px"] is not None
+            and diagnostics["mean_centroid_delta_px"] > 0.2 * max(1, max(view.height for view in hull.views))
+        )
+    )
+    diagnostics["catastrophic_view_failure"] = bool(
+        min_iou is not None and min_iou < 0.2
+    )
+    return diagnostics
 
 
 def _target_view_names_with_masks(target: ReconstructionTarget) -> list[str]:
@@ -429,6 +567,45 @@ def _project_points_to_view_mask(
     return _dilate_rect(mask, radius_x=radius_x, radius_y=radius_y)
 
 
+def _auto_boundary_radius(
+    mask: np.ndarray,
+    resolution: int,
+    configured: Optional[int],
+) -> int:
+    if configured is not None:
+        return max(0, int(configured))
+    height, width = mask.shape
+    if resolution <= 0:
+        return 1
+    return max(1, int(round(min(height, width) / max(1, int(resolution)) * 0.35)))
+
+
+def _mask_bbox(mask: np.ndarray) -> list[int] | None:
+    indices = np.argwhere(mask)
+    if indices.size == 0:
+        return None
+    y0, x0 = indices.min(axis=0)
+    y1, x1 = indices.max(axis=0)
+    return [int(x0), int(y0), int(x1) + 1, int(y1) + 1]
+
+
+def _mask_centroid(mask: np.ndarray) -> list[float] | None:
+    indices = np.argwhere(mask)
+    if indices.size == 0:
+        return None
+    yx = indices.mean(axis=0)
+    return [float(yx[1]), float(yx[0])]
+
+
+def _optional_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _projected_horizontal_bounds(
     view: Any,
     bounds_min: np.ndarray,
@@ -494,6 +671,8 @@ def _visual_hull_chunked_grid_from_target(
     resolution: int = 64,
     chunk_size: Optional[int] = None,
     use_vectorized: bool = True,
+    boundary_refine: bool = False,
+    boundary_dilate_px: Optional[int] = None,
     openvdb_status: Any = None,
 ) -> ChunkedVolumeGrid:
     # Non-vectorized behavior remains available for compatibility, but the direct
@@ -508,6 +687,8 @@ def _visual_hull_chunked_grid_from_target(
         target,
         resolution=resolution,
         chunk_size=chunk_size,
+        boundary_refine=boundary_refine,
+        boundary_dilate_px=boundary_dilate_px,
     )
     bounds_min = hull.bounds_min
     bounds_max = hull.bounds_max

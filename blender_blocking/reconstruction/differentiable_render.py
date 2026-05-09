@@ -213,6 +213,39 @@ def _coerce_optional_int(
     return _coerce_int(value, name, errors, min_value=min_value)
 
 
+def _coerce_optional_float(
+    value: object,
+    name: str,
+    errors: list[str],
+    *,
+    min_value: float | None = None,
+    max_value: float | None = None,
+) -> float | None:
+    if value is None:
+        return None
+    return _coerce_float(
+        value,
+        name,
+        errors,
+        min_value=min_value,
+        max_value=max_value,
+    )
+
+
+def _minimum_positive_float(*values: object) -> float | None:
+    positives: list[float] = []
+    for value in values:
+        if value is None:
+            continue
+        try:
+            casted = float(value)
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(casted) and casted > 0.0:
+            positives.append(casted)
+    return min(positives) if positives else None
+
+
 def _coerce_loss_weights(config: Mapping[str, object], errors: list[str], warnings: list[str]) -> LossWeights:
     raw_weights = config.get("loss_weights", {})
     if raw_weights is None:
@@ -380,6 +413,64 @@ def _normalize_differentiable_config(config: Mapping[str, object]) -> tuple[
         normalized["chunk_size"] = chunk_size
     else:
         normalized["chunk_size"] = None
+    optimization_steps = _coerce_int(
+        config.get("optimization_steps", config.get("refinement_steps", 6)),
+        "optimization_steps",
+        errors,
+        min_value=0,
+    )
+    if optimization_steps is None:
+        optimization_steps = 6
+    normalized["optimization_steps"] = int(optimization_steps)
+
+    optimization_initial_step = _coerce_float(
+        config.get("optimization_initial_step", config.get("initial_step", 0.05)),
+        "optimization_initial_step",
+        errors,
+        min_value=1.0e-9,
+        max_value=1.0,
+    )
+    if optimization_initial_step is None:
+        optimization_initial_step = 0.05
+    normalized["optimization_initial_step"] = float(optimization_initial_step)
+
+    optimization_step_decay = _coerce_float(
+        config.get("optimization_step_decay", config.get("step_decay", 0.5)),
+        "optimization_step_decay",
+        errors,
+        min_value=1.0e-9,
+        max_value=0.999999,
+    )
+    if optimization_step_decay is None:
+        optimization_step_decay = 0.5
+    normalized["optimization_step_decay"] = float(optimization_step_decay)
+
+    optimization_min_step = _coerce_float(
+        config.get("optimization_min_step", config.get("min_step", 1.0e-4)),
+        "optimization_min_step",
+        errors,
+        min_value=1.0e-12,
+        max_value=1.0,
+    )
+    if optimization_min_step is None:
+        optimization_min_step = 1.0e-4
+    normalized["optimization_min_step"] = float(optimization_min_step)
+
+    max_objective_evaluations = _coerce_optional_int(
+        config.get("max_objective_evaluations", 256),
+        "max_objective_evaluations",
+        errors,
+        min_value=1,
+    )
+    normalized["max_objective_evaluations"] = max_objective_evaluations
+
+    max_runtime_s = _coerce_optional_float(
+        config.get("max_runtime_s", 20.0),
+        "max_runtime_s",
+        errors,
+        min_value=1.0e-6,
+    )
+    normalized["max_runtime_s"] = max_runtime_s
 
     normalized["loss_weights"] = _coerce_loss_weights(config, errors, warnings)
     normalized["loss_weights_dict"] = {
@@ -1208,6 +1299,11 @@ def run_refinement_candidate(request: object) -> object:
     """
     import time
 
+    from placement.resfit_objective import ResFitObjectiveResult
+    from placement.resfit_optimizer import (
+        CoordinateDescentConfig,
+        coordinate_descent_optimize,
+    )
     from placement.resfit_initialization import (
         PrimitiveInitializationConfig,
         initialize_ellipsoids_from_points,
@@ -1236,6 +1332,8 @@ def run_refinement_candidate(request: object) -> object:
     candidate_id = getattr(request, "candidate_id")
     backend_name = getattr(request, "backend_name", "differentiable_refine")
     target = getattr(request, "target")
+    request_budget = getattr(request, "budget", None)
+    request_timeout_s = getattr(request_budget, "timeout_s", None)
     optional_dependency_policy = str(parsed_config["optional_dependency_policy"])
     (
         target_view_weights,
@@ -1322,13 +1420,125 @@ def run_refinement_candidate(request: object) -> object:
             parsed_config["loss_weights"],
             view_weights=target_view_weights,
         )
-        render_batch = renderer.render(scene, cameras)
-        loss = renderer.loss(
-            render_batch,
+        initial_render_batch = renderer.render(scene, cameras)
+        initial_loss = renderer.loss(
+            initial_render_batch,
             target_record,
             parsed_config["loss_weights"],
             view_weights=target_view_weights,
         )
+        optimized_primitives = primitives
+        optimization_history: list[dict[str, object]] = []
+        optimization_summary: dict[str, object] = {
+            "enabled": False,
+            "reason": "not_run",
+            "objective_evaluations": 0,
+            "elapsed_s": 0.0,
+            "initial_total": float(initial_loss.total),
+            "final_total": float(initial_loss.total),
+        }
+        if (
+            backend_choice == "cpu_soft_silhouette"
+            and int(parsed_config["optimization_steps"]) > 0
+            and primitives
+            and cameras
+        ):
+            max_elapsed_s = _minimum_positive_float(
+                parsed_config.get("max_runtime_s"),
+                request_timeout_s,
+            )
+            optimizer_config = CoordinateDescentConfig(
+                iterations=int(parsed_config["optimization_steps"]),
+                initial_step=float(parsed_config["optimization_initial_step"]),
+                step_decay=float(parsed_config["optimization_step_decay"]),
+                min_step=float(parsed_config["optimization_min_step"]),
+                max_objective_evaluations=parsed_config["max_objective_evaluations"],
+                max_elapsed_s=max_elapsed_s,
+            )
+
+            def objective(primitives_to_score: Sequence[object]) -> ResFitObjectiveResult:
+                trial_scene = RenderableScene(
+                    primitives=tuple(
+                        renderable_from_primitive(primitive)
+                        for primitive in primitives_to_score
+                    )
+                )
+                trial_batch = renderer.render(trial_scene, cameras)
+                trial_loss = renderer.loss(
+                    trial_batch,
+                    target_record,
+                    parsed_config["loss_weights"],
+                    view_weights=target_view_weights,
+                )
+                return ResFitObjectiveResult(
+                    total=float(trial_loss.total),
+                    terms=dict(trial_loss.terms),
+                    warnings=tuple(trial_loss.warnings),
+                )
+
+            optimization = coordinate_descent_optimize(
+                primitives,
+                objective,
+                optimizer_config,
+            )
+            optimized_primitives = optimization.primitives
+            optimization_history = [
+                {
+                    "iteration": record.iteration,
+                    "total": record.total,
+                    "terms": dict(record.terms),
+                    "accepted_moves": record.accepted_moves,
+                    "rejected_moves": getattr(record, "rejected_moves", 0),
+                    "step_size": record.step_size,
+                    "reason": getattr(record, "reason", ""),
+                }
+                for record in optimization.history
+            ]
+            optimization_summary = {
+                "enabled": True,
+                "reason": optimization.termination_reason,
+                "objective_evaluations": optimization.objective_evaluations,
+                "elapsed_s": optimization.elapsed_s,
+                "initial_total": float(initial_loss.total),
+                "best_total": float(optimization.best_loss),
+                "accepted_moves": sum(
+                    int(record.accepted_moves) for record in optimization.history
+                ),
+                "history_length": len(optimization_history),
+                "config": {
+                    "iterations": int(parsed_config["optimization_steps"]),
+                    "initial_step": float(parsed_config["optimization_initial_step"]),
+                    "step_decay": float(parsed_config["optimization_step_decay"]),
+                    "min_step": float(parsed_config["optimization_min_step"]),
+                    "max_objective_evaluations": parsed_config["max_objective_evaluations"],
+                    "max_elapsed_s": max_elapsed_s,
+                },
+            }
+        elif int(parsed_config["optimization_steps"]) <= 0:
+            optimization_summary["reason"] = "optimization_steps_zero"
+        elif backend_choice != "cpu_soft_silhouette":
+            optimization_summary["reason"] = f"optimizer disabled for backend {backend_choice}"
+        elif not cameras:
+            optimization_summary["reason"] = "no target cameras"
+        elif not primitives:
+            optimization_summary["reason"] = "no primitives"
+
+        if optimization_summary.get("enabled"):
+            renderables = tuple(
+                renderable_from_primitive(primitive) for primitive in optimized_primitives
+            )
+            scene = RenderableScene(primitives=renderables)
+            render_batch = renderer.render(scene, cameras)
+            loss = renderer.loss(
+                render_batch,
+                target_record,
+                parsed_config["loss_weights"],
+                view_weights=target_view_weights,
+            )
+        else:
+            render_batch = initial_render_batch
+            loss = initial_loss
+        optimization_summary["final_total"] = float(loss.total)
     except Exception as exc:
         if backend_choice == "nvdiffrast":
             dependency_state = (
@@ -1372,7 +1582,7 @@ def run_refinement_candidate(request: object) -> object:
     primitive_path = None
     mesh_path = None
     artifacts = {}
-    mesh_proxy = combine_primitive_meshes(primitives, resolution=20)
+    mesh_proxy = combine_primitive_meshes(optimized_primitives, resolution=20)
     try:
         topology_report = mesh_topology_report(mesh_proxy.vertices, mesh_proxy.faces)
         topology_payload = topology_report.to_dict()
@@ -1410,7 +1620,8 @@ def run_refinement_candidate(request: object) -> object:
         )
         for name, target_mask in silhouettes.items()
     ]
-    objective_improvement = float(baseline_loss.total - loss.total)
+    objective_improvement = float(initial_loss.total - loss.total)
+    zero_baseline_improvement = float(baseline_loss.total - loss.total)
     objective_history = [
         {
             "stage": "baseline_zero",
@@ -1421,18 +1632,38 @@ def run_refinement_candidate(request: object) -> object:
             "views": baseline_refinement_history,
         },
         {
-            "stage": "render_and_score",
+            "stage": "initial_render_and_score",
+            "loss_total": float(initial_loss.total),
+            "loss_terms": dict(initial_loss.terms),
+            "loss_warnings": tuple(initial_loss.warnings),
+            "loss_view_weights": dict(target_view_weights),
+            "views": [
+                _silhouette_view_history(
+                    name=name,
+                    predicted=np.asarray(initial_render_batch.silhouettes[name], dtype=np.float64),
+                    target=np.asarray(target_mask, dtype=np.float64),
+                    metrics=dict(initial_loss.per_view.get(name, {})),
+                )
+                for name, target_mask in silhouettes.items()
+                if name in initial_render_batch.silhouettes
+            ],
+        },
+        {
+            "stage": "optimized_render_and_score",
             "loss_total": float(loss.total),
             "loss_terms": dict(loss.terms),
             "loss_warnings": tuple(loss.warnings),
             "loss_view_weights": dict(target_view_weights),
             "views": refinement_history,
+            "optimization": optimization_summary,
         },
     ]
     objective_improvement_record = {
         "baseline_total": float(baseline_loss.total),
+        "initial_candidate_total": float(initial_loss.total),
         "objective_total": float(loss.total),
         "objective_improvement": float(objective_improvement),
+        "zero_baseline_improvement": float(zero_baseline_improvement),
         "weight_sum": {
             "silhouette_weight_sum": float(sum(weight for weight in target_view_weights.values())),
             "depth_weight_sum": float(sum(weight for weight in target_view_weights.values())),
@@ -1440,6 +1671,7 @@ def run_refinement_candidate(request: object) -> object:
         "history": objective_history,
         "view_signal_weights": dict(target_view_weights),
         "view_signal_details": dict(view_signal_details),
+        "optimization": optimization_summary,
     }
     history_payload = [
         {
@@ -1455,7 +1687,29 @@ def run_refinement_candidate(request: object) -> object:
             "render_metadata": dict(getattr(baseline_render_batch, "metadata", {})),
         },
         {
-            "step": "render_and_score",
+            "step": "initial_render_and_score",
+            "backend": backend_choice,
+            "softness": float(parsed_config["softness"]),
+            "min_variance": float(parsed_config["min_variance"]),
+            "loss_total": float(initial_loss.total),
+            "loss_terms": dict(initial_loss.terms),
+            "loss_warnings": tuple(initial_loss.warnings),
+            "loss_view_weights": dict(target_view_weights),
+            "view_signal_details": dict(view_signal_details),
+            "views": [
+                _silhouette_view_history(
+                    name=name,
+                    predicted=np.asarray(initial_render_batch.silhouettes[name], dtype=np.float64),
+                    target=np.asarray(target_mask, dtype=np.float64),
+                    metrics=dict(initial_loss.per_view.get(name, {})),
+                )
+                for name, target_mask in silhouettes.items()
+                if name in initial_render_batch.silhouettes
+            ],
+            "render_metadata": dict(getattr(initial_render_batch, "metadata", {})),
+        },
+        {
+            "step": "optimized_render_and_score",
             "backend": backend_choice,
             "softness": float(parsed_config["softness"]),
             "min_variance": float(parsed_config["min_variance"]),
@@ -1466,18 +1720,21 @@ def run_refinement_candidate(request: object) -> object:
             "view_signal_details": dict(view_signal_details),
             "views": refinement_history,
             "render_metadata": dict(getattr(render_batch, "metadata", {})),
+            "optimization": optimization_summary,
+            "optimization_history": optimization_history,
         }
     ]
     if root is not None:
         primitive_path = write_primitive_set(
             root / "primitives" / "differentiable-refine.json",
-            primitives,
+            optimized_primitives,
             metadata={
                 "backend": backend_choice,
                 "loss": loss.terms,
                 "per_view": loss.per_view,
                 "surface_points": point_meta,
                 "topology": topology_payload,
+                "optimization": optimization_summary,
             },
         )
         artifacts["primitive_json"] = primitive_path
@@ -1509,15 +1766,25 @@ def run_refinement_candidate(request: object) -> object:
                     "covariance_floor": float(parsed_config["covariance_floor"]),
                     "kmeans_iterations": int(parsed_config["kmeans_iterations"]),
                     "chunk_size": parsed_config["chunk_size"],
+                    "optimization_steps": int(parsed_config["optimization_steps"]),
+                    "optimization_initial_step": float(parsed_config["optimization_initial_step"]),
+                    "optimization_step_decay": float(parsed_config["optimization_step_decay"]),
+                    "optimization_min_step": float(parsed_config["optimization_min_step"]),
+                    "max_objective_evaluations": parsed_config["max_objective_evaluations"],
+                    "max_runtime_s": parsed_config["max_runtime_s"],
                     "loss_weights": dict(parsed_config["loss_weights_dict"]),
                     "warnings": tuple(config_warnings),
                 },
                 "loss": {
                     "baseline_total": float(baseline_loss.total),
+                    "initial_total": float(initial_loss.total),
                     "final_total": float(loss.total),
                     "baseline_terms": dict(baseline_loss.terms),
+                    "initial_terms": dict(initial_loss.terms),
                     "final_terms": dict(loss.terms),
                 },
+                "optimization": optimization_summary,
+                "optimization_history": optimization_history,
                 "view_signal_weights": dict(target_view_weights),
                 "view_signal_details": dict(view_signal_details),
                 "view_signal_warnings": tuple(target_signal_warnings),
@@ -1544,12 +1811,20 @@ def run_refinement_candidate(request: object) -> object:
                     "covariance_floor": float(parsed_config["covariance_floor"]),
                     "kmeans_iterations": int(parsed_config["kmeans_iterations"]),
                     "chunk_size": parsed_config["chunk_size"],
+                    "optimization_steps": int(parsed_config["optimization_steps"]),
+                    "optimization_initial_step": float(parsed_config["optimization_initial_step"]),
+                    "optimization_step_decay": float(parsed_config["optimization_step_decay"]),
+                    "optimization_min_step": float(parsed_config["optimization_min_step"]),
+                    "max_objective_evaluations": parsed_config["max_objective_evaluations"],
+                    "max_runtime_s": parsed_config["max_runtime_s"],
                     "loss_weights": dict(parsed_config["loss_weights_dict"]),
                     "warnings": tuple(config_warnings),
                 },
                 "history": history_payload,
                 "objective_improvement": objective_improvement_record,
                 "objective_history": objective_history,
+                "optimization": optimization_summary,
+                "optimization_history": optimization_history,
                 "loss": {
                     "total": float(loss.total),
                     "terms": dict(loss.terms),
@@ -1591,7 +1866,7 @@ def run_refinement_candidate(request: object) -> object:
         topology_score=topology_score,
         topology_penalty=topology_penalty,
         editability_score=0.65,
-        complexity_penalty=min(1.0, len(primitives) / 96.0),
+        complexity_penalty=min(1.0, len(optimized_primitives) / 96.0),
         elapsed_s=elapsed,
         per_view=candidate_per_view,
         extras={
@@ -1599,17 +1874,23 @@ def run_refinement_candidate(request: object) -> object:
             "loss_total": loss.total,
             "loss_terms": loss.terms,
             "loss_warnings": loss.warnings,
-            "primitive_count": len(primitives),
+            "primitive_count": len(optimized_primitives),
             "surface_points": point_meta,
             "render_metadata": dict(getattr(render_batch, "metadata", {})),
             "topology": topology_payload,
             "baseline_loss": dict(baseline_loss.terms),
             "baseline_total": float(baseline_loss.total),
             "baseline_warnings": tuple(baseline_loss.warnings),
+            "initial_loss": dict(initial_loss.terms),
+            "initial_total": float(initial_loss.total),
+            "initial_warnings": tuple(initial_loss.warnings),
             "objective_total": float(loss.total),
             "objective_improvement": float(objective_improvement),
+            "zero_baseline_improvement": float(zero_baseline_improvement),
             "objective_improvement_record": objective_improvement_record,
             "objective_history": objective_history,
+            "optimization": optimization_summary,
+            "optimization_history": optimization_history,
             "view_signal_weights": dict(target_view_weights),
             "view_signal_details": dict(view_signal_details),
             "view_signal_warnings": tuple(target_signal_warnings),
@@ -1619,23 +1900,36 @@ def run_refinement_candidate(request: object) -> object:
             "validation_warnings": tuple(config_warnings),
         },
     )
-    warnings = tuple(loss.warnings) + tuple(baseline_loss.warnings) + tuple(config_warnings) + tuple(target_signal_warnings)
+    warnings = (
+        tuple(loss.warnings)
+        + tuple(initial_loss.warnings)
+        + tuple(baseline_loss.warnings)
+        + tuple(config_warnings)
+        + tuple(target_signal_warnings)
+    )
     errors: tuple[str, ...] = ()
-    status = "success" if primitives else "skipped"
+    status = "success" if optimized_primitives else "skipped"
     degraded = False
-    if objective_improvement < 0.0:
-        regression_message = "objective worsened relative to baseline zero silhouette"
+    require_improvement = bool(
+        config.get("fail_on_objective_regression")
+        or config.get("require_objective_improvement")
+    )
+    if objective_improvement < 0.0 or (
+        require_improvement and objective_improvement <= 0.0
+    ):
+        regression_message = (
+            "objective worsened relative to initial differentiable candidate"
+            if objective_improvement < 0.0
+            else "objective did not improve relative to initial differentiable candidate"
+        )
         warnings = warnings + (regression_message,)
-        if bool(
-            config.get("fail_on_objective_regression")
-            or config.get("require_objective_improvement")
-        ):
+        if require_improvement:
             status = "failed"
             errors = (regression_message,)
-        elif primitives:
+        elif optimized_primitives:
             status = "degraded"
             degraded = True
-    if primitives and failed_required_views and status == "success":
+    if optimized_primitives and failed_required_views and status == "success":
         status = "degraded"
         degraded = True
         warnings = warnings + (
@@ -1653,7 +1947,7 @@ def run_refinement_candidate(request: object) -> object:
         errors=errors,
         degraded=degraded,
         payload={
-            "primitives": primitives,
+            "primitives": optimized_primitives,
             "loss": loss,
             "baseline_loss": baseline_loss,
             "history": history_payload,

@@ -42,6 +42,7 @@ def bundle_from_candidate(
         _topology_group(metrics),
         _editability_group(metrics),
         _export_qa_group(metrics),
+        _diagnostic_group(metrics),
         _cost_group(result),
         _artifact_group(result),
     )
@@ -708,6 +709,70 @@ def _cost_group(result: Any) -> MetricGroup:
         "pass",
         tuple(values),
         metadata=report.to_dict(),
+    )
+
+
+def _diagnostic_group(metrics: Any) -> MetricGroup:
+    if metrics is None:
+        return MetricGroup("diagnostics", "not_applicable")
+    extras = getattr(metrics, "extras", {}) or {}
+    diagnostics = (
+        extras.get("visual_hull_view_diagnostics")
+        if isinstance(extras, Mapping)
+        else None
+    )
+    if not isinstance(diagnostics, Mapping):
+        return MetricGroup("diagnostics", "not_applicable")
+    failed_views = diagnostics.get("failed_views", ())
+    if not isinstance(failed_views, (list, tuple)):
+        failed_views = ()
+    top_failures = diagnostics.get("top_like_failures", ())
+    if not isinstance(top_failures, (list, tuple)):
+        top_failures = ()
+    axis_suspect = bool(diagnostics.get("axis_or_transform_suspect"))
+    catastrophic = bool(diagnostics.get("catastrophic_view_failure"))
+    values = (
+        MetricValue(
+            "diagnostics.visual_hull.axis_or_transform_suspect",
+            axis_suspect,
+            higher_is_better=False,
+            status=_pass_fail(not axis_suspect),
+            source="visual_hull_view_diagnostics",
+        ),
+        MetricValue(
+            "diagnostics.visual_hull.catastrophic_view_failure",
+            catastrophic,
+            higher_is_better=False,
+            status=_pass_fail(not catastrophic),
+            source="visual_hull_view_diagnostics",
+        ),
+        MetricValue(
+            "diagnostics.visual_hull.failed_view_count",
+            len(failed_views),
+            unit="view",
+            higher_is_better=False,
+            status=_pass_fail(len(failed_views) == 0),
+            source="visual_hull_view_diagnostics",
+        ),
+        MetricValue(
+            "diagnostics.visual_hull.top_like_failure_count",
+            len(top_failures),
+            unit="view",
+            higher_is_better=False,
+            status=_pass_fail(len(top_failures) == 0),
+            source="visual_hull_view_diagnostics",
+        ),
+    )
+    status = worst_status(tuple(value.status for value in values))
+    return MetricGroup(
+        "diagnostics",
+        status,
+        values,
+        warnings=(
+            ("axis_or_transform_suspect",) if axis_suspect else ()
+        )
+        + (("catastrophic_view_failure",) if catastrophic else ()),
+        metadata={"visual_hull": diagnostics},
     )
 
 

@@ -130,6 +130,58 @@ def classify_bundle_failures(
                 ),
             )
         )
+    axis_suspect = _metric_value(
+        metrics,
+        "diagnostics.visual_hull.axis_or_transform_suspect",
+    )
+    catastrophic_view = _metric_value(
+        metrics,
+        "diagnostics.visual_hull.catastrophic_view_failure",
+    )
+    failed_view_count = _metric_value(
+        metrics,
+        "diagnostics.visual_hull.failed_view_count",
+    )
+    if axis_suspect is not None and axis_suspect > 0:
+        failures.append(
+            FailureObservation(
+                code="visual_hull_axis_or_transform_suspect",
+                severity="warn",
+                subsystem="visual_hull",
+                evidence_metrics={
+                    "diagnostics.visual_hull.axis_or_transform_suspect": axis_suspect,
+                    "diagnostics.visual_hull.failed_view_count": failed_view_count,
+                    "silhouette.min_view_iou": min_iou,
+                },
+                likely_causes=(
+                    "view role, camera azimuth, image bounds, or volume projection axes are inconsistent",
+                ),
+                recommended_actions=(
+                    "inspect visual_hull_view_diagnostics metadata for failed view roles",
+                    "run a synthetic axis fixture before increasing resolution",
+                ),
+            )
+        )
+    if catastrophic_view is not None and catastrophic_view > 0:
+        failures.append(
+            FailureObservation(
+                code="visual_hull_catastrophic_view_failure",
+                severity="fail",
+                subsystem="visual_hull",
+                evidence_metrics={
+                    "diagnostics.visual_hull.catastrophic_view_failure": catastrophic_view,
+                    "diagnostics.visual_hull.failed_view_count": failed_view_count,
+                    "silhouette.min_view_iou": min_iou,
+                },
+                likely_causes=(
+                    "one or more view projections collapsed or rejected the recoverable hull",
+                ),
+                recommended_actions=(
+                    "enable boundary_refine and inspect per-view projection overlays",
+                    "verify top/front/side role assignment and target bounds",
+                ),
+            )
+        )
     non_manifold = _metric_value(metrics, "topology.non_manifold_edges")
     if non_manifold is not None and non_manifold > 0:
         failures.append(

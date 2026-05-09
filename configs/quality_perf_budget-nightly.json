@@ -110,6 +110,22 @@
       "required": false
     },
     {
+      "id": "evaluation.nightly.visual_hull.catastrophic_view.max",
+      "artifact": "evaluation",
+      "metric": "metrics.diagnostics.visual_hull.catastrophic_view_failure",
+      "mode": "max",
+      "threshold": 0.0,
+      "required": false
+    },
+    {
+      "id": "e2e.nightly.synthetic.true_chamfer_l1.max",
+      "artifact": "e2e",
+      "metric": "metrics.synthetic_geometry_true_chamfer_l1",
+      "mode": "max",
+      "threshold": 0.18,
+      "required": false
+    },
+    {
       "id": "evaluation.nightly.true_volume_iou.floor",
       "artifact": "evaluation",
       "metric": "metrics.geometry.true.volumetric_iou",

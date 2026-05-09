@@ -65,11 +65,17 @@ class VisualHullBackend(BaseBackend):
             from reconstruction.point_cloud import visual_hull_grid_from_target
             from volume import extract_mesh, save_volume
 
+            boundary_refine = bool(request.config.get("boundary_refine", True))
+            boundary_dilate_px = request.config.get("boundary_dilate_px")
             grid = visual_hull_grid_from_target(
                 request.target,
                 resolution=resolution,
                 chunk_size=request.config.get("chunk_size"),
                 backend=requested_backend,
+                boundary_refine=boundary_refine,
+                boundary_dilate_px=(
+                    None if boundary_dilate_px is None else int(boundary_dilate_px)
+                ),
             )
 
             openvdb_status = getattr(grid, "openvdb_status", None)
@@ -104,7 +110,11 @@ class VisualHullBackend(BaseBackend):
         volume_path = None
         mesh_path = None
         mesh_metrics: dict[str, Any] = {
-            "optional_dependencies": _visual_hull_dependency_report()
+            "optional_dependencies": _visual_hull_dependency_report(),
+            "boundary_refinement": {
+                "enabled": bool(request.config.get("boundary_refine", True)),
+                "boundary_dilate_px": request.config.get("boundary_dilate_px"),
+            },
         }
         if requested_backend == "openvdb" and openvdb_status is not None:
             mesh_metrics["openvdb"] = (
@@ -252,6 +262,7 @@ class VisualHullBackend(BaseBackend):
         per_view_metrics: dict[str, Any] = {}
         try:
             from reconstruction.point_cloud import (
+                visual_hull_view_diagnostics_from_target,
                 visual_hull_projection_metrics_from_target,
             )
 
@@ -266,6 +277,23 @@ class VisualHullBackend(BaseBackend):
             if skipped_metric:
                 mesh_metrics["projection_metrics_skipped"] = skipped_metric
                 warnings.append(str(skipped_metric.get("reason", "projection metrics skipped")))
+            else:
+                diagnostics = visual_hull_view_diagnostics_from_target(
+                    request.target,
+                    grid,
+                    per_view_metrics=per_view_metrics,
+                    boundary_refine=bool(request.config.get("boundary_refine", True)),
+                    boundary_dilate_px=(
+                        None
+                        if request.config.get("boundary_dilate_px") is None
+                        else int(request.config.get("boundary_dilate_px"))
+                    ),
+                )
+                mesh_metrics["visual_hull_view_diagnostics"] = diagnostics
+                if diagnostics.get("axis_or_transform_suspect"):
+                    warnings.append("visual hull view diagnostics flagged axis_or_transform_suspect")
+                if diagnostics.get("catastrophic_view_failure"):
+                    warnings.append("visual hull view diagnostics flagged catastrophic_view_failure")
         except Exception as exc:
             warnings.append(f"projection metrics failed: {exc}")
 

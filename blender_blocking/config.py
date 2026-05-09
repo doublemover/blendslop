@@ -571,6 +571,15 @@ class DifferentiableRenderConfig:
     optional_dependency_policy: str = "skip"
     gradient_mode: str = "finite_difference"
     finite_difference_epsilon: float = 1e-4
+    primitive_count: Optional[int] = None
+    target_point_count: int = 2048
+    visual_hull_resolution: Optional[int] = None
+    optimization_steps: int = 6
+    optimization_initial_step: float = 0.05
+    optimization_step_decay: float = 0.5
+    optimization_min_step: float = 1.0e-4
+    max_objective_evaluations: Optional[int] = 256
+    max_runtime_s: Optional[float] = 20.0
     loss_weights: Dict[str, float] = field(default_factory=dict)
 
     def validate(self) -> None:
@@ -582,15 +591,51 @@ class DifferentiableRenderConfig:
             raise ValueError("gradient_mode must be finite_difference/backend")
         if self.finite_difference_epsilon <= 0:
             raise ValueError("finite_difference_epsilon must be > 0")
+        if self.primitive_count is not None and self.primitive_count < 1:
+            raise ValueError("differentiable_render.primitive_count must be >= 1 when provided")
+        if self.target_point_count < 1:
+            raise ValueError("differentiable_render.target_point_count must be >= 1")
+        if self.visual_hull_resolution is not None and self.visual_hull_resolution < 1:
+            raise ValueError("differentiable_render.visual_hull_resolution must be >= 1 when provided")
+        if self.optimization_steps < 0:
+            raise ValueError("differentiable_render.optimization_steps must be >= 0")
+        if self.optimization_initial_step <= 0.0:
+            raise ValueError("differentiable_render.optimization_initial_step must be > 0")
+        if not (0.0 < self.optimization_step_decay < 1.0):
+            raise ValueError("differentiable_render.optimization_step_decay must be in (0, 1)")
+        if self.optimization_min_step <= 0.0 or self.optimization_min_step >= self.optimization_initial_step:
+            raise ValueError(
+                "differentiable_render.optimization_min_step must be > 0 and "
+                "< optimization_initial_step"
+            )
+        if (
+            self.max_objective_evaluations is not None
+            and self.max_objective_evaluations < 1
+        ):
+            raise ValueError("differentiable_render.max_objective_evaluations must be >= 1 when provided")
+        if self.max_runtime_s is not None and self.max_runtime_s <= 0.0:
+            raise ValueError("differentiable_render.max_runtime_s must be > 0 when provided")
 
     def to_dict(self) -> Dict[str, object]:
-        return {
+        payload: Dict[str, object] = {
             "backend": self.backend,
             "optional_dependency_policy": self.optional_dependency_policy,
             "gradient_mode": self.gradient_mode,
             "finite_difference_epsilon": self.finite_difference_epsilon,
+            "target_point_count": self.target_point_count,
+            "optimization_steps": self.optimization_steps,
+            "optimization_initial_step": self.optimization_initial_step,
+            "optimization_step_decay": self.optimization_step_decay,
+            "optimization_min_step": self.optimization_min_step,
+            "max_objective_evaluations": self.max_objective_evaluations,
+            "max_runtime_s": self.max_runtime_s,
             "loss_weights": self.loss_weights,
         }
+        if self.primitive_count is not None:
+            payload["primitive_count"] = self.primitive_count
+        if self.visual_hull_resolution is not None:
+            payload["visual_hull_resolution"] = self.visual_hull_resolution
+        return payload
 
 
 @dataclass

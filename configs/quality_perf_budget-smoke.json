@@ -148,6 +148,24 @@
       "description": "Backends should not omit required per-view Boundary IoU or signed-distance loss fields."
     },
     {
+      "id": "evaluation.visual_hull.catastrophic_view.max",
+      "artifact": "evaluation",
+      "metric": "metrics.diagnostics.visual_hull.catastrophic_view_failure",
+      "mode": "max",
+      "threshold": 0.0,
+      "required": false,
+      "description": "Visual-hull candidates should not hide catastrophic per-view projection collapse."
+    },
+    {
+      "id": "e2e.synthetic.true_chamfer_l1.smoke",
+      "artifact": "e2e",
+      "metric": "metrics.synthetic_geometry_true_chamfer_l1",
+      "mode": "max",
+      "threshold": 0.35,
+      "required": false,
+      "description": "Analytic synthetic rows with mesh artifacts should expose true-geometry Chamfer L1 and stay within a loose smoke ceiling."
+    },
+    {
       "id": "evaluation.geometry.recoverable_fscore.floor",
       "artifact": "evaluation",
       "metric": "metrics.geometry.recoverable.fscore_tau",

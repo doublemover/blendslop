@@ -9,6 +9,7 @@ from typing import Any, Mapping
 
 from config import ReconstructionConfig
 from reconstruction.backend import BackendBudget, BackendCapabilities, BaseBackend
+from reconstruction.candidate_scoring import select_best
 from reconstruction.ensemble import CandidateConfig, EnsembleRunner
 from reconstruction.registry import (
     clear_backends_for_tests,
@@ -65,6 +66,11 @@ class _FakeBackend(BaseBackend):
         return BackendBudget(estimated_seconds=0.01, notes=("fake budget",))
 
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
+        sleep_s = float(request.config.get("sleep_s", 0.0) or 0.0)
+        if sleep_s > 0.0:
+            import time
+
+            time.sleep(sleep_s)
         dependency_report = {
             name: {
                 "available": False,
@@ -104,7 +110,10 @@ class _FakeBackend(BaseBackend):
             metric_result=CandidateMetrics(
                 per_view={"front": {"area_iou": 0.75, "boundary_iou": 0.5}},
                 elapsed_s=0.01,
-                extras={"optional_dependencies": dependency_report},
+                extras={
+                    "optional_dependencies": dependency_report,
+                    "request_budget": request.budget.to_dict(),
+                },
             ),
             artifacts=artifacts,
             warnings=("fake-warning",),
@@ -393,6 +402,40 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         self.assertIn("__blendslop_missing_optional__", by_id["fail-missing"].errors[0])
         self.assertFalse(by_id["fail-missing"].succeeded)
 
+    def test_ensemble_total_timeout_bounds_candidates_and_skips_remaining(self) -> None:
+        register_backend(_FakeBackend())
+        runner = EnsembleRunner()
+        requests = runner.build_requests(
+            target=ReconstructionTarget(),
+            candidates=(
+                CandidateConfig(
+                    backend_name="fake_plugin",
+                    candidate_id="slow-first",
+                    config={"sleep_s": 0.02},
+                ),
+                CandidateConfig(
+                    backend_name="fake_plugin",
+                    candidate_id="skipped-second",
+                ),
+            ),
+        )
+
+        result = runner.run_requests(requests, total_timeout_s=0.001)
+        by_id = {candidate.candidate_id: candidate for candidate in result.candidates}
+
+        self.assertEqual(by_id["slow-first"].status, "success")
+        self.assertTrue(by_id["slow-first"].degraded)
+        self.assertIn(
+            "ensemble total timeout elapsed during candidate",
+            by_id["slow-first"].warnings,
+        )
+        self.assertLessEqual(
+            by_id["slow-first"].metric_result.extras["request_budget"]["timeout_s"],
+            0.001,
+        )
+        self.assertEqual(by_id["skipped-second"].status, "skipped")
+        self.assertIn("total timeout exhausted", by_id["skipped-second"].warnings[0])
+
     def test_candidate_artifact_root_is_scoped_and_rejects_escape(self) -> None:
         self.assertIsNone(
             CandidateRequest(
@@ -470,6 +513,68 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         self.assertEqual(payload["warnings"], ["fake-warning"])
         self.assertEqual(payload["errors"], [])
         self.assertTrue(payload["degraded"])
+
+    def test_quality_first_selection_penalizes_hidden_view_failures(self) -> None:
+        pretty_bad = CandidateResult(
+            candidate_id="pretty-bad",
+            backend_name="gaussian_ellipsoid_proxy",
+            status="success",
+            metric_result=CandidateMetrics(
+                per_view={
+                    "front": {
+                        "area_iou": 0.95,
+                        "boundary_iou": 0.80,
+                        "signed_distance_loss": 0.04,
+                        "required": True,
+                        "passed": True,
+                    },
+                    "top": {
+                        "area_iou": 0.05,
+                        "boundary_iou": 0.02,
+                        "signed_distance_loss": 0.70,
+                        "required": True,
+                        "passed": False,
+                    },
+                },
+                editability_score=0.9,
+            ),
+        )
+        boring_good = CandidateResult(
+            candidate_id="boring-good",
+            backend_name="visual_hull_voxel",
+            status="success",
+            metric_result=CandidateMetrics(
+                per_view={
+                    "front": {
+                        "area_iou": 0.76,
+                        "boundary_iou": 0.62,
+                        "signed_distance_loss": 0.10,
+                        "required": True,
+                        "passed": True,
+                    },
+                    "top": {
+                        "area_iou": 0.74,
+                        "boundary_iou": 0.60,
+                        "signed_distance_loss": 0.11,
+                        "required": True,
+                        "passed": True,
+                    },
+                },
+                topology_score=0.7,
+                editability_score=0.4,
+            ),
+        )
+
+        selected, ranked = select_best(
+            (pretty_bad, boring_good),
+            policy="quality_first",
+        )
+
+        self.assertIsNotNone(selected)
+        self.assertEqual(selected.candidate_id, "boring-good")
+        scores = {score.candidate_id: score for _, score in ranked}
+        bad_terms = {term.name: term.weighted for term in scores["pretty-bad"].terms}
+        self.assertLess(bad_terms["failed_required_views"], 0.0)
 
 
 if __name__ == "__main__":

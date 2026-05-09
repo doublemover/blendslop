@@ -75,6 +75,23 @@ class TestConfigValidation(unittest.TestCase):
         with self.assertRaises(ValueError):
             cfg.validate()
 
+    def test_invalid_differentiable_optimizer_budget(self) -> None:
+        bad_configs = (
+            DifferentiableRenderConfig(primitive_count=0),
+            DifferentiableRenderConfig(target_point_count=0),
+            DifferentiableRenderConfig(visual_hull_resolution=0),
+            DifferentiableRenderConfig(optimization_steps=-1),
+            DifferentiableRenderConfig(optimization_initial_step=0.0),
+            DifferentiableRenderConfig(optimization_step_decay=1.0),
+            DifferentiableRenderConfig(optimization_min_step=0.1),
+            DifferentiableRenderConfig(max_objective_evaluations=0),
+            DifferentiableRenderConfig(max_runtime_s=0.0),
+        )
+        for cfg in bad_configs:
+            with self.subTest(cfg=cfg):
+                with self.assertRaises(ValueError):
+                    cfg.validate()
+
     def test_invalid_shape_program_strategy(self) -> None:
         cfg = ShapeProgramConfig(root_strategy="raw_mesh_blob")
         with self.assertRaises(ValueError):

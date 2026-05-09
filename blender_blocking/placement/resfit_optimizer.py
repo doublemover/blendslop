@@ -197,6 +197,8 @@ class OptimizationRecord:
     terms: dict[str, float]
     accepted_moves: int
     step_size: float
+    rejected_moves: int = 0
+    reason: str = ""
 
 
 @dataclass(frozen=True)
@@ -323,6 +325,7 @@ def coordinate_descent_optimize(
             termination_reason = reason
             break
         accepted = 0
+        rejected = 0
         for ref in refs:
             reason = budget_reason()
             if reason is not None:
@@ -351,6 +354,7 @@ def coordinate_descent_optimize(
                 best_loss = local_best
                 accepted += 1
             else:
+                rejected += 2
                 _set_value(working, ref, original, config.bounds)
 
         if stopped:
@@ -364,6 +368,8 @@ def coordinate_descent_optimize(
                 terms=dict(current.terms),
                 accepted_moves=accepted,
                 step_size=step,
+                rejected_moves=rejected,
+                reason="accepted" if accepted else "no_coordinate_improved",
             )
         )
         if accepted == 0:

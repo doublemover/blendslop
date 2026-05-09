@@ -10,7 +10,14 @@ from unittest.mock import patch
 import numpy as np
 
 from reconstruction import differentiable_render as diff_render
-from reconstruction.types import CandidateRequest, ReconstructionTarget
+from reconstruction.types import (
+    Bounds3D,
+    CandidateBudget,
+    CandidateRequest,
+    OrthographicCameraSpec,
+    ReconstructionTarget,
+    ViewConstraint,
+)
 
 
 class TestDifferentiableRender(unittest.TestCase):
@@ -25,6 +32,25 @@ class TestDifferentiableRender(unittest.TestCase):
             dtype=np.float64,
         )
         return ReconstructionTarget(extras={"surface_points": points})
+
+    def make_silhouette_target(self) -> ReconstructionTarget:
+        mask = np.zeros((16, 16), dtype=np.float32)
+        mask[4:12, 5:11] = 1.0
+        return ReconstructionTarget(
+            constraints=(
+                ViewConstraint(
+                    view="front",
+                    mask=mask,
+                    camera=OrthographicCameraSpec(
+                        view_name="front",
+                        axis="front",
+                        resolution=(16, 16),
+                    ),
+                ),
+            ),
+            bounds=Bounds3D(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0),
+            extras={"surface_points": self.make_target().extras["surface_points"]},
+        )
 
     def test_optional_nvdiffrast_skip_policy(self) -> None:
         request = CandidateRequest(
@@ -171,7 +197,33 @@ class TestDifferentiableRender(unittest.TestCase):
 
         self.assertEqual(result.status, "failed")
         self.assertFalse(result.succeeded)
-        self.assertIn("objective worsened", "\n".join(result.errors))
+        self.assertIn("objective did not improve", "\n".join(result.errors))
+
+    def test_cpu_optimizer_honors_request_runtime_budget(self) -> None:
+        request = CandidateRequest(
+            candidate_id="cpu-soft-budgeted",
+            backend_name="differentiable_refine",
+            target=self.make_silhouette_target(),
+            config={
+                "backend": "cpu_soft_silhouette",
+                "primitive_count": 1,
+                "target_point_count": 4,
+                "optimization_steps": 8,
+                "max_runtime_s": 5.0,
+                "max_objective_evaluations": 128,
+            },
+            budget=CandidateBudget(timeout_s=0.001),
+        )
+
+        result = diff_render.run_refinement_candidate(request)
+        optimization = result.metric_result.extras["optimization"]
+
+        self.assertTrue(optimization["enabled"])
+        self.assertLessEqual(optimization["config"]["max_elapsed_s"], 0.001)
+        self.assertIn(
+            optimization["reason"],
+            {"elapsed_time_budget", "objective_evaluation_budget", "max_iterations"},
+        )
 
 
 class _MissingNvdiffrastBackend:

@@ -91,6 +91,14 @@ editable Blender delivery checks. The group records export target count,
 round-trip status, object/vertex/face/material counts, per-target QA scores,
 and the aggregate `export.qa_score` used by reports and quality budgets.
 
+Selection now uses those bundle metrics directly. Ensemble policies such as
+`quality_first`, `editability_first`, `fast_preview`, and `research_explore`
+score required-view failures, missing required metrics, Boundary IoU,
+signed-distance loss, geometry/recoverability metrics, topology, editability,
+export QA, warnings, failures, and wall time. A candidate can no longer win
+only because its backend returned `success`; hard silhouette/view failures and
+missing required fields carry explicit score penalties.
+
 Evaluation bundles also expose first-class `geometry` and `recoverability`
 groups. For analytic synthetic fixtures, `synthetic.ground_truth` can build a
 bundle-ready extras payload containing Chamfer L1/L2, F-score at tolerance,
@@ -98,6 +106,46 @@ volumetric IoU, and recoverability-gap metrics from the deterministic SDF and
 occupancy grids. Candidate scoring and reports can then compare true geometry,
 recoverable geometry, and editable output without conflating them into one
 opaque score.
+
+Visual-hull rows include `diagnostics.visual_hull.*` metrics when projection
+diagnostics are available. These flag suspected axis/transform mismatches,
+catastrophic per-view collapse, failed view counts, and top-like failures.
+The smoke and nightly budgets gate catastrophic view collapse when the metric is
+present. Visual-hull carving also honors boundary refinement by expanding the
+silhouette boundary band before voxel rejection, which reduces quantization
+loss around thin structures and hard view edges.
+
+Primitive and differentiable research backends now record optimization evidence
+instead of only final proxy metrics. Primitive fit runs deterministic multistart
+attempts and writes selected-attempt, accepted-move, rejected-move, and
+per-attempt objective data. CPU differentiable refinement performs a bounded
+coordinate-search loop over primitive parameters and reports initial, final,
+and zero-baseline losses separately.
+
+Ensemble runtime budgets are part of the contract, not just CLI decoration.
+`--ensemble-timeout` is passed to each candidate as `CandidateBudget.timeout_s`,
+and `--ensemble-total-timeout` bounds the remaining candidates in serial
+ensemble runs. CPU differentiable refinement honors the smaller of
+`--diff-max-runtime` and the request budget as its optimizer elapsed-time
+limit. For bounded e2e acceptance runs that still exercise the research stack:
+
+```bash
+blender --background --python blender_blocking/test_e2e_validation.py -- \
+  --reconstruction-mode ensemble \
+  --validation-mode backend-status \
+  --ensemble-candidates visual_hull_voxel,primitive_fit_refine,gaussian_ellipsoid_proxy,differentiable_refine \
+  --ensemble-policy quality_first \
+  --ensemble-timeout 20 \
+  --ensemble-total-timeout 120 \
+  --diff-primitive-count 6 \
+  --diff-target-points 512 \
+  --diff-visual-hull-resolution 24 \
+  --diff-optimization-steps 3 \
+  --diff-max-objective-evaluations 96 \
+  --diff-max-runtime 15 \
+  --result-json temp/validation/ensemble-quality-push.json \
+  --no-progress
+```
 
 ## E2E Synthetic Matrix
 
@@ -139,6 +187,12 @@ evaluation metrics such as `export.qa_score`, `export.status_ok`, and
 `export.reimport_ok`.
 
 The matrix renders Blender-backed synthetic fixtures through the public synthetic builder, then calls the existing e2e custom-image path. Pure 2D synthetic definitions are marked as allowed skips unless `--synthetic-strict-skips` is set.
+
+Synthetic matrix rows also carry a `ground_truth` object. For analytic fixtures
+with readable mesh artifacts, the row metrics include flattened true-geometry
+measurements such as `synthetic_geometry_true_chamfer_l1`; non-analytic rows
+still report quality targets and the ground-truth level so failures can be
+separated from known silhouette-only ambiguity.
 
 ## Artifact Policy
 

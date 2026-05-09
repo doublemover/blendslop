@@ -1134,12 +1134,15 @@ def run_synthetic_suite_matrix(
                 )
                 result_payload = _load_optional_json(case_json)
                 metrics = _matrix_metrics(result_payload, passed)
+                ground_truth = _synthetic_ground_truth_row(spec, result_payload)
+                metrics.update(ground_truth.get("metrics", {}))
                 status = "pass" if passed else "fail"
                 message = ""
             except Exception as exc:
                 passed = False
                 result_payload = {}
                 metrics = {"passed": 0.0}
+                ground_truth = _synthetic_ground_truth_row(spec, result_payload)
                 status = "error"
                 message = str(exc)
                 if progress:
@@ -1158,6 +1161,7 @@ def run_synthetic_suite_matrix(
                 "status": status,
                 "passed": passed,
                 "metrics": metrics,
+                "ground_truth": ground_truth,
                 "result_json": case_json.as_posix(),
                 "message": message,
             }
@@ -1278,6 +1282,129 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
                 value = metric.get("value")
                 if name and isinstance(value, (int, float, bool)):
                     metrics[name] = float(value)
+    return metrics
+
+
+def _synthetic_ground_truth_row(
+    spec: object,
+    result_payload: Mapping[str, Any],
+) -> Dict[str, Any]:
+    try:
+        from blender_blocking.synthetic.ground_truth import (
+            build_pure_artifacts,
+            geometry_payload_from_candidate,
+        )
+    except Exception:
+        return {"available": False, "reason": "synthetic ground truth module unavailable"}
+
+    try:
+        reference = build_pure_artifacts(spec, volume_resolution=48)  # type: ignore[arg-type]
+    except Exception as exc:
+        return {"available": False, "reason": str(exc)}
+
+    metadata = dict(reference.get("metadata", {}) or {})
+    quality_targets = reference.get("quality_targets", {})
+    row: Dict[str, Any] = {
+        "available": True,
+        "shape_id": getattr(spec, "shape_id", ""),
+        "ground_truth_level": metadata.get("ground_truth_level", ""),
+        "metadata": metadata,
+        "quality_targets": quality_targets,
+        "metrics": {},
+    }
+    if not reference.get("sdf_samples"):
+        row["reason"] = "no analytic SDF geometry for this synthetic fixture"
+        return row
+
+    mesh_path = _mesh_path_from_payload(result_payload)
+    if mesh_path is None:
+        row["reason"] = "candidate mesh artifact not found"
+        return row
+    candidate_points = _obj_vertices(mesh_path, max_points=8192)
+    if candidate_points is None or len(candidate_points) == 0:
+        row["reason"] = f"candidate mesh had no readable vertices: {mesh_path}"
+        return row
+
+    try:
+        payload = geometry_payload_from_candidate(
+            reference,
+            candidate_surface_points=candidate_points,
+            tolerance=0.03,
+        )
+    except Exception as exc:
+        row["reason"] = str(exc)
+        return row
+
+    row["geometry_payload"] = payload
+    row["mesh_path"] = mesh_path.as_posix()
+    row["metrics"] = _flatten_geometry_payload(payload)
+    return row
+
+
+def _mesh_path_from_payload(payload: Mapping[str, Any]) -> Optional[Path]:
+    candidates: list[str] = []
+
+    def visit(value: Any) -> None:
+        if isinstance(value, Mapping):
+            for key, item in value.items():
+                if key in {"mesh_path", "mesh_obj"} and item:
+                    candidates.append(str(item))
+                else:
+                    visit(item)
+        elif isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+            for item in value:
+                visit(item)
+
+    visit(payload)
+    for candidate in candidates:
+        path = Path(candidate)
+        if path.exists():
+            return path
+    return None
+
+
+def _obj_vertices(path: Path, *, max_points: int) -> Optional[Any]:
+    try:
+        import numpy as np
+
+        points: list[tuple[float, float, float]] = []
+        with path.open("r", encoding="utf-8", errors="ignore") as handle:
+            for line in handle:
+                if not line.startswith("v "):
+                    continue
+                parts = line.split()
+                if len(parts) < 4:
+                    continue
+                try:
+                    points.append((float(parts[1]), float(parts[2]), float(parts[3])))
+                except ValueError:
+                    continue
+        if not points:
+            return None
+        array = np.asarray(points, dtype=np.float32)
+        if len(array) > max_points:
+            indices = np.linspace(0, len(array) - 1, int(max_points)).round().astype(int)
+            array = array[indices]
+        return array
+    except Exception:
+        return None
+
+
+def _flatten_geometry_payload(payload: Mapping[str, Any]) -> Dict[str, float]:
+    metrics: Dict[str, float] = {}
+
+    def visit(prefix: str, value: Any) -> None:
+        if isinstance(value, Mapping):
+            for key, item in value.items():
+                next_prefix = f"{prefix}_{key}" if prefix else str(key)
+                visit(next_prefix, item)
+            return
+        if isinstance(value, bool):
+            metrics[prefix] = 1.0 if value else 0.0
+        elif isinstance(value, (int, float)):
+            metrics[prefix] = float(value)
+
+    visit("synthetic", payload)
     return metrics
 
 
@@ -1830,6 +1957,15 @@ Default ensemble:
         "--diff-gradient-mode", choices=("finite_difference", "backend"), default=None
     )
     diff.add_argument("--diff-epsilon", type=float, default=None)
+    diff.add_argument("--diff-primitive-count", type=int, default=None)
+    diff.add_argument("--diff-target-points", type=int, default=None)
+    diff.add_argument("--diff-visual-hull-resolution", type=int, default=None)
+    diff.add_argument("--diff-optimization-steps", type=int, default=None)
+    diff.add_argument("--diff-initial-step", type=float, default=None)
+    diff.add_argument("--diff-step-decay", type=float, default=None)
+    diff.add_argument("--diff-min-step", type=float, default=None)
+    diff.add_argument("--diff-max-objective-evaluations", type=int, default=None)
+    diff.add_argument("--diff-max-runtime", type=float, default=None)
     diff.add_argument("--diff-loss-weights-json", type=str, default=None)
 
     shape_program = parser.add_argument_group("editable shape program")
@@ -2349,6 +2485,45 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     )
     _set_if_not_none(
         cfg.differentiable_render, "finite_difference_epsilon", args.diff_epsilon
+    )
+    _set_if_not_none(
+        cfg.differentiable_render, "primitive_count", args.diff_primitive_count
+    )
+    _set_if_not_none(
+        cfg.differentiable_render, "target_point_count", args.diff_target_points
+    )
+    _set_if_not_none(
+        cfg.differentiable_render,
+        "visual_hull_resolution",
+        args.diff_visual_hull_resolution,
+    )
+    _set_if_not_none(
+        cfg.differentiable_render,
+        "optimization_steps",
+        args.diff_optimization_steps,
+    )
+    _set_if_not_none(
+        cfg.differentiable_render,
+        "optimization_initial_step",
+        args.diff_initial_step,
+    )
+    _set_if_not_none(
+        cfg.differentiable_render,
+        "optimization_step_decay",
+        args.diff_step_decay,
+    )
+    _set_if_not_none(
+        cfg.differentiable_render,
+        "optimization_min_step",
+        args.diff_min_step,
+    )
+    _set_if_not_none(
+        cfg.differentiable_render,
+        "max_objective_evaluations",
+        args.diff_max_objective_evaluations,
+    )
+    _set_if_not_none(
+        cfg.differentiable_render, "max_runtime_s", args.diff_max_runtime
     )
     if args.diff_loss_weights_json:
         cfg.differentiable_render.loss_weights = json.loads(args.diff_loss_weights_json)

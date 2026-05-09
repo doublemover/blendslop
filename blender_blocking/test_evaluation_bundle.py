@@ -234,6 +234,51 @@ class EvaluationBundleTests(unittest.TestCase):
         self.assertAlmostEqual(metrics["geometry.ambiguity_gap_chamfer_l2"].value, 0.06)
         self.assertIn("geometry_true_recoverable_gap_large", codes)
 
+    def test_visual_hull_diagnostics_are_first_class_failures(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-vh-diag",
+            backend_name="visual_hull_voxel",
+            status="success",
+            metric_result=CandidateMetrics(
+                per_view={
+                    "front": {
+                        "area_iou": 0.91,
+                        "boundary_iou": 0.7,
+                        "signed_distance_loss": 0.05,
+                        "required": True,
+                        "passed": True,
+                    },
+                    "top": {
+                        "area_iou": 0.12,
+                        "boundary_iou": 0.04,
+                        "signed_distance_loss": 0.8,
+                        "required": True,
+                        "passed": False,
+                    },
+                },
+                extras={
+                    "visual_hull_view_diagnostics": {
+                        "axis_or_transform_suspect": True,
+                        "catastrophic_view_failure": True,
+                        "failed_views": ["top"],
+                        "top_like_failures": ["top"],
+                    }
+                },
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        metrics = bundle.metric_index()
+        codes = {failure.code for failure in bundle.failures}
+
+        self.assertEqual(
+            metrics["diagnostics.visual_hull.catastrophic_view_failure"].value,
+            True,
+        )
+        self.assertIn("visual_hull_axis_or_transform_suspect", codes)
+        self.assertIn("visual_hull_catastrophic_view_failure", codes)
+        self.assertEqual(bundle.status, "fail")
+
 
 if __name__ == "__main__":
     unittest.main()

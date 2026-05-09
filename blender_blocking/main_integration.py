@@ -1176,15 +1176,20 @@ class BlockingWorkflow:
                 "chunk_size": self.config.visual_hull.chunk_size,
             }
         if backend_name == "differentiable_refine":
-            return {
-                **self.config.differentiable_render.to_dict(),
-                "visual_hull_resolution": min(
+            config = self.config.differentiable_render.to_dict()
+            config.setdefault(
+                "visual_hull_resolution",
+                min(
                     self.config.visual_hull.resolution,
                     self.config.visual_hull.max_resolution,
                 ),
-                "primitive_count": self.config.gaussian_ellipsoid.primitive_count,
-                "chunk_size": self.config.visual_hull.chunk_size,
-            }
+            )
+            config.setdefault(
+                "primitive_count",
+                self.config.gaussian_ellipsoid.primitive_count,
+            )
+            config.setdefault("chunk_size", self.config.visual_hull.chunk_size)
+            return config
         if backend_name == "shape_program":
             return self.config.shape_program.to_dict()
         return {}
@@ -1262,6 +1267,7 @@ class BlockingWorkflow:
                     timeout_s=self.config.ensemble.per_candidate_timeout_s,
                     memory_budget_mb=self.config.visual_hull.memory_budget_mb,
                 ),
+                total_timeout_s=self.config.ensemble.total_timeout_s,
             )
             self.reconstruction_result = result
             self._record_backend_manifest(
