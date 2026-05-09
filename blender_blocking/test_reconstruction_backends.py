@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 import tempfile
 import unittest
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 
@@ -22,7 +22,10 @@ from reconstruction.registry import (
     register_backend,
     register_builtin_backends,
 )
-from reconstruction.backends.shape_program import build_shape_program_from_target
+from reconstruction.backends.shape_program import (
+    _compiled_appearance_summary,
+    build_shape_program_from_target,
+)
 from reconstruction.types import (
     Bounds3D,
     CandidateMetrics,
@@ -123,6 +126,76 @@ class _FakeBackend(BaseBackend):
             errors=(),
             degraded=degraded,
         )
+
+
+class _FakeUVLayers:
+    def __init__(self, count: int) -> None:
+        self._count = count
+
+    def __len__(self) -> int:
+        return self._count
+
+
+class _FakeMeshData:
+    def __init__(self, *, polygons: int, uv_layers: int) -> None:
+        self.polygons = [object() for _ in range(polygons)]
+        self.uv_layers = _FakeUVLayers(uv_layers)
+
+
+class _FakeImage:
+    def __init__(self, width: int, height: int) -> None:
+        self.size = (width, height)
+
+
+class _FakeNode:
+    def __init__(self, node_type: str, name: str, image: Any = None) -> None:
+        self.type = node_type
+        self.name = name
+        self.image = image
+
+
+class _FakeNodeTree:
+    def __init__(self, nodes: Sequence[Any]) -> None:
+        self.nodes = tuple(nodes)
+
+
+class _FakeMaterial:
+    def __init__(self, name: str, *, image: Any = None) -> None:
+        self.name = name
+        self.diffuse_color = (1.0, 1.0, 1.0, 1.0)
+        self.roughness = 0.5
+        self.metallic = 0.0
+        self.node_tree = _FakeNodeTree(
+            (
+                _FakeNode("TEX_IMAGE", "Base Color", image=image),
+                _FakeNode("NORMAL_MAP", "Normal Map"),
+            )
+        )
+
+
+class _FakeMaterialSlot:
+    def __init__(self, material: Any) -> None:
+        self.material = material
+
+
+class _FakeObject:
+    def __init__(
+        self,
+        *,
+        name: str,
+        polygons: int,
+        uv_layers: int,
+        materials: Sequence[Any] = (),
+    ) -> None:
+        self.name = name
+        self.type = "MESH"
+        self.data = _FakeMeshData(polygons=polygons, uv_layers=uv_layers)
+        self.material_slots = tuple(_FakeMaterialSlot(material) for material in materials)
+
+
+class _FakeCompiled:
+    def __init__(self, objects: Sequence[Any]) -> None:
+        self.objects = tuple(objects)
 
 
 class ReconstructionBackendRegistryTests(unittest.TestCase):
@@ -442,6 +515,60 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         distillation = result.metric_result.extras["proxy_distillation"]
         self.assertGreater(distillation["arbitration_score"], 0.0)
         self.assertEqual(distillation["primitive_count"], 2)
+
+    def test_shape_program_compiled_appearance_summary_reads_uv_materials(self) -> None:
+        image = _FakeImage(256, 128)
+        material = _FakeMaterial("BodyPaint", image=image)
+        compiled = _FakeCompiled(
+            (
+                _FakeObject(
+                    name="body",
+                    polygons=12,
+                    uv_layers=1,
+                    materials=(material,),
+                ),
+            )
+        )
+
+        appearance = _compiled_appearance_summary(
+            compiled,
+            {
+                "evaluate_texture_materials": True,
+                "uv_strict": True,
+                "material_target": "pbr",
+                "max_texture_memory_mb": 1.0,
+            },
+        )
+
+        self.assertIsNotNone(appearance)
+        self.assertEqual(appearance["uv"]["has_uv_map"], True)
+        self.assertEqual(appearance["uv"]["missing_uv_faces"], 0)
+        self.assertEqual(appearance["materials"]["material_slot_count"], 1)
+        self.assertEqual(appearance["materials"]["named_material_ratio"], 1.0)
+        self.assertEqual(
+            appearance["materials"]["pbr_channel_coverage"],
+            {
+                "base_color": True,
+                "roughness": True,
+                "metallic": True,
+                "normal": True,
+            },
+        )
+        self.assertGreater(appearance["texture"]["texture_memory_mb"], 0.0)
+        self.assertNotIn("errors", appearance)
+
+    def test_shape_program_appearance_summary_fails_required_uncompiled_asset(self) -> None:
+        appearance = _compiled_appearance_summary(
+            None,
+            {
+                "evaluate_texture_materials": True,
+                "uv_strict": True,
+                "material_target": "pbr",
+            },
+        )
+
+        self.assertEqual(appearance["uv_valid"], False)
+        self.assertIn("compiled_blender_asset_missing", appearance["errors"])
 
     def test_duplicate_missing_and_alias_registration_errors(self) -> None:
         backend = _FakeBackend()
