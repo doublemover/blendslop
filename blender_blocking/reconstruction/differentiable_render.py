@@ -541,6 +541,88 @@ def _silhouette_view_history(
     }
 
 
+def _candidate_per_view_metrics(
+    per_view: Mapping[str, Mapping[str, float]],
+) -> dict[str, dict[str, object]]:
+    """Convert soft-renderer losses into the shared CandidateMetrics contract."""
+    converted: dict[str, dict[str, object]] = {}
+    for view, values in per_view.items():
+        area_loss = _metric_float(values, "area_iou_loss", 1.0)
+        soft_loss = _metric_float(values, "soft_iou_loss", area_loss)
+        signed_distance = max(0.0, _metric_float(values, "soft_l2", soft_loss))
+        area_iou = _clamp01(1.0 - area_loss)
+        soft_iou = _clamp01(1.0 - soft_loss)
+        boundary_iou = _clamp01(
+            _metric_float(values, "boundary_iou", soft_iou)
+        )
+        passed = bool(area_iou >= 0.5 and boundary_iou > 0.0)
+        reason = "" if passed else "soft silhouette did not satisfy required view gate"
+        converted[str(view)] = {
+            **dict(values),
+            "area_iou": area_iou,
+            "soft_iou": soft_iou,
+            "boundary_iou": boundary_iou,
+            "signed_distance_loss": signed_distance,
+            "required": True,
+            "passed": passed,
+            "pass": passed,
+            "reason": reason,
+        }
+    return converted
+
+
+def _mean_candidate_metric(
+    per_view: Mapping[str, Mapping[str, object]],
+    name: str,
+    fallback: float,
+) -> float:
+    values = []
+    for payload in per_view.values():
+        value = payload.get(name)
+        try:
+            values.append(float(value))
+        except (TypeError, ValueError):
+            continue
+    if not values:
+        return fallback
+    return float(np.mean(values))
+
+
+def _min_candidate_metric(
+    per_view: Mapping[str, Mapping[str, object]],
+    name: str,
+    fallback: float,
+) -> float:
+    values = []
+    for payload in per_view.values():
+        value = payload.get(name)
+        try:
+            values.append(float(value))
+        except (TypeError, ValueError):
+            continue
+    if not values:
+        return fallback
+    return float(min(values))
+
+
+def _metric_float(
+    values: Mapping[str, float],
+    name: str,
+    default: float,
+) -> float:
+    try:
+        value = float(values.get(name, default))
+    except (TypeError, ValueError):
+        return default
+    if not math.isfinite(value):
+        return default
+    return value
+
+
+def _clamp01(value: float) -> float:
+    return float(np.clip(value, 0.0, 1.0))
+
+
 def primitive_from_renderable(renderable: RenderablePrimitive) -> object:
     """Create a known primitive object from a renderable primitive record."""
     ptype = renderable.primitive_type.lower()
@@ -1481,23 +1563,37 @@ def run_refinement_candidate(request: object) -> object:
     elapsed = time.perf_counter() - start
     area_iou_mean = 1.0 - float(loss.terms.get("area_iou", 1.0))
     soft_iou_mean = 1.0 - float(loss.terms.get("soft_iou", 1.0))
+    candidate_per_view = _candidate_per_view_metrics(loss.per_view)
+    area_iou_mean = _mean_candidate_metric(
+        candidate_per_view,
+        "area_iou",
+        fallback=max(0.0, area_iou_mean),
+    )
+    area_iou_min = _min_candidate_metric(
+        candidate_per_view,
+        "area_iou",
+        fallback=max(0.0, min(area_iou_mean, soft_iou_mean)),
+    )
+    boundary_iou_mean = _mean_candidate_metric(
+        candidate_per_view,
+        "boundary_iou",
+        fallback=max(0.0, soft_iou_mean),
+    )
+    failed_required_views = sum(
+        1
+        for payload in candidate_per_view.values()
+        if bool(payload.get("required", True)) and not bool(payload.get("passed", False))
+    )
     metrics = CandidateMetrics(
-        area_iou_min=max(0.0, min(area_iou_mean, soft_iou_mean)),
+        area_iou_min=max(0.0, area_iou_min),
         area_iou_mean=max(0.0, area_iou_mean),
-        boundary_iou_mean=max(0.0, soft_iou_mean),
+        boundary_iou_mean=max(0.0, boundary_iou_mean),
         topology_score=topology_score,
         topology_penalty=topology_penalty,
         editability_score=0.65,
         complexity_penalty=min(1.0, len(primitives) / 96.0),
         elapsed_s=elapsed,
-        per_view={
-            view: {
-                "passed": values.get("area_iou_loss", 1.0) <= 0.5,
-                "required": True,
-                **dict(values),
-            }
-            for view, values in loss.per_view.items()
-        },
+        per_view=candidate_per_view,
         extras={
             "backend": backend_choice,
             "loss_total": loss.total,
@@ -1539,6 +1635,12 @@ def run_refinement_candidate(request: object) -> object:
         elif primitives:
             status = "degraded"
             degraded = True
+    if primitives and failed_required_views and status == "success":
+        status = "degraded"
+        degraded = True
+        warnings = warnings + (
+            f"{failed_required_views} required soft-silhouette view(s) failed metric gates",
+        )
     return CandidateResult(
         candidate_id=candidate_id,
         backend_name=backend_name,

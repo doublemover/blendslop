@@ -180,6 +180,58 @@ class QualityBudgetTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["checks"][0]["value"], 0.76)
 
+    def test_evaluation_bundle_recoverability_metrics_are_budgetable(self) -> None:
+        current = {
+            "schema_version": "evaluation-bundle-v1",
+            "suite": "smoke",
+            "candidate_id": "visual-hull",
+            "target_id": "sphere",
+            "mode": "visual_hull_voxel",
+            "metric_groups": [
+                {
+                    "name": "geometry",
+                    "status": "pass",
+                    "metrics": [
+                        {
+                            "name": "geometry.recoverable.fscore_tau",
+                            "value": 0.74,
+                        },
+                        {
+                            "name": "geometry.ambiguity_gap_chamfer_l2",
+                            "value": 0.015,
+                        },
+                    ],
+                }
+            ],
+        }
+        budget = {
+            "schema_version": "quality_perf_budget_v1",
+            "name": "recoverability",
+            "thresholds": [
+                {
+                    "id": "recoverable.fscore",
+                    "artifact": "evaluation",
+                    "metric": "metrics.geometry.recoverable.fscore_tau",
+                    "threshold": 0.7,
+                    "required": True,
+                },
+                {
+                    "id": "ambiguity.gap",
+                    "artifact": "evaluation",
+                    "metric": "metrics.geometry.ambiguity_gap_chamfer_l2",
+                    "mode": "max",
+                    "threshold": 0.02,
+                    "required": True,
+                },
+            ],
+        }
+
+        report = evaluate_budget_payloads(current, budget)
+
+        self.assertTrue(report["passed"])
+        self.assertEqual(report["checks"][0]["value"], 0.74)
+        self.assertEqual(report["checks"][1]["mode"], "max")
+
 
 if __name__ == "__main__":
     unittest.main()

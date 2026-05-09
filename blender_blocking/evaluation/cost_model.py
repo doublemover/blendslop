@@ -73,6 +73,9 @@ def cost_report_from_candidate(result: Any) -> CostReport:
     elapsed_s = float(getattr(metrics, "elapsed_s", 0.0) or 0.0)
     extras = getattr(metrics, "extras", {}) or {}
     optimization = extras.get("optimization") if isinstance(extras, Mapping) else None
+    objective = extras.get("objective") if isinstance(extras, Mapping) else None
+    visual_hull = extras.get("visual_hull_stats") if isinstance(extras, Mapping) else None
+    mesh_extraction = extras.get("mesh_extraction") if isinstance(extras, Mapping) else None
     stages = []
     if elapsed_s > 0.0:
         stages.append(StageCost("backend_reconstruct", "pass", elapsed_s * 1000.0))
@@ -88,6 +91,49 @@ def cost_report_from_candidate(result: Any) -> CostReport:
                 },
             )
         )
+    if isinstance(objective, Mapping) and not isinstance(optimization, Mapping):
+        opt_elapsed = float(
+            extras.get("optimizer_elapsed_s", objective.get("elapsed_s", 0.0)) or 0.0
+        )
+        stages.append(
+            StageCost(
+                "primitive_objective",
+                "pass" if bool(objective.get("improved", True)) else "warn",
+                opt_elapsed * 1000.0,
+                work_units={
+                    "objective_evaluations": float(objective.get("objective_evaluations", 0.0) or 0.0),
+                    "history_length": float(objective.get("history_length", 0.0) or 0.0),
+                },
+                notes=(str(objective.get("termination_reason", "")),)
+                if objective.get("termination_reason")
+                else (),
+            )
+        )
+    if isinstance(mesh_extraction, Mapping):
+        elapsed = float(mesh_extraction.get("elapsed_s", 0.0) or 0.0)
+        stages.append(
+            StageCost(
+                "mesh_extraction",
+                str(mesh_extraction.get("status", "pass")),
+                elapsed * 1000.0,
+                work_units={
+                    "vertices": float(
+                        mesh_extraction.get("vertex_count", mesh_extraction.get("vertices", 0.0)) or 0.0
+                    ),
+                    "faces": float(
+                        mesh_extraction.get("face_count", mesh_extraction.get("faces", 0.0)) or 0.0
+                    ),
+                },
+            )
+        )
     total = sum(stage.wall_ms for stage in stages)
-    return CostReport(total_wall_ms=total, stages=tuple(stages))
-
+    throughput = {}
+    if isinstance(visual_hull, Mapping):
+        elapsed_ms = max(total, 1e-9)
+        active = float(visual_hull.get("active_voxels", 0.0) or 0.0)
+        total_voxels = float(visual_hull.get("total_voxels", 0.0) or 0.0)
+        if active:
+            throughput["active_voxels_per_ms"] = active / elapsed_ms
+        if total_voxels:
+            throughput["voxels_per_ms"] = total_voxels / elapsed_ms
+    return CostReport(total_wall_ms=total, stages=tuple(stages), throughput=throughput)

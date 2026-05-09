@@ -32,6 +32,26 @@ The budget reader expands bundle metric names into dotted paths, so
 `editability.editable_reconstruction_index` is selected as
 `metrics.editability.editable_reconstruction_index`.
 
+The SOTA-oriented evaluation contract is intentionally multi-axis:
+
+- Silhouette gates use `silhouette.min_view_iou`, `silhouette.average_iou`,
+  `silhouette.mean_boundary_iou`, and
+  `silhouette.mean_signed_distance_loss`. Boundary IoU catches contour and
+  thin-feature errors that area IoU can hide, while signed-distance loss keeps
+  near-miss boundaries visible.
+- Synthetic geometry gates use `geometry.true.*` for exact ground-truth
+  distance and `geometry.recoverable.*` for the best silhouette-recoverable
+  envelope. `geometry.ambiguity_gap_*` records how much of the error is caused
+  by silhouette-only underdetermination rather than backend failure.
+- Editable-output gates use `editability.editable_reconstruction_index` plus
+  topology/export metrics because a dense visual result is not enough when the
+  deliverable is an editable Blender asset.
+
+This lines up with `docs/IMPLEMENTATION_SPEC.md` lines 314-324: optional paths
+must be explicit, visual-hull and research paths must emit structured metrics,
+and synthetic artifacts must be deterministic enough to support measured
+regression gates.
+
 ## Runner Phases
 
 From `blender_blocking/`:
@@ -70,6 +90,14 @@ Evaluation bundles now expose a first-class `export_qa` metric group for
 editable Blender delivery checks. The group records export target count,
 round-trip status, object/vertex/face/material counts, per-target QA scores,
 and the aggregate `export.qa_score` used by reports and quality budgets.
+
+Evaluation bundles also expose first-class `geometry` and `recoverability`
+groups. For analytic synthetic fixtures, `synthetic.ground_truth` can build a
+bundle-ready extras payload containing Chamfer L1/L2, F-score at tolerance,
+volumetric IoU, and recoverability-gap metrics from the deterministic SDF and
+occupancy grids. Candidate scoring and reports can then compare true geometry,
+recoverable geometry, and editable output without conflating them into one
+opaque score.
 
 ## E2E Synthetic Matrix
 

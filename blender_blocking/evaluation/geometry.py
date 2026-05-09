@@ -8,6 +8,7 @@ from typing import Any, Mapping
 
 @dataclass(frozen=True)
 class GeometryMetricReport:
+    chamfer_l1: float | None = None
     chamfer_l2: float | None = None
     fscore_tau: float | None = None
     fscore_tolerance: float | None = None
@@ -21,6 +22,7 @@ class GeometryMetricReport:
 
     def to_dict(self) -> dict[str, object]:
         return {
+            "chamfer_l1": self.chamfer_l1,
             "chamfer_l2": self.chamfer_l2,
             "fscore_tau": self.fscore_tau,
             "fscore_tolerance": self.fscore_tolerance,
@@ -56,7 +58,8 @@ def surface_distance_report(
         )
     ref_to_cand = nearest_distances(ref, cand)
     cand_to_ref = nearest_distances(cand, ref)
-    chamfer = float(np.mean(ref_to_cand ** 2) + np.mean(cand_to_ref ** 2))
+    chamfer_l1 = float(np.mean(ref_to_cand) + np.mean(cand_to_ref))
+    chamfer_l2 = float(np.mean(ref_to_cand ** 2) + np.mean(cand_to_ref ** 2))
     recall = float(np.mean(ref_to_cand <= tolerance))
     precision = float(np.mean(cand_to_ref <= tolerance))
     fscore = 0.0 if precision + recall <= 0 else 2.0 * precision * recall / (precision + recall)
@@ -71,7 +74,8 @@ def surface_distance_report(
         )
     coverage = float(recall)
     return GeometryMetricReport(
-        chamfer_l2=chamfer,
+        chamfer_l1=chamfer_l1,
+        chamfer_l2=chamfer_l2,
         fscore_tau=float(fscore),
         fscore_tolerance=float(tolerance),
         normal_consistency=normal,
@@ -198,6 +202,7 @@ def nearest_indices(points: Any, reference: Any, *, chunk_size: int = 4096) -> A
 
 def report_from_mapping(payload: Mapping[str, Any]) -> GeometryMetricReport:
     return GeometryMetricReport(
+        chamfer_l1=_optional_float(payload.get("chamfer_l1")),
         chamfer_l2=_optional_float(payload.get("chamfer_l2", payload.get("chamfer"))),
         fscore_tau=_optional_float(payload.get("fscore_tau", payload.get("f_score"))),
         fscore_tolerance=_optional_float(payload.get("fscore_tolerance", payload.get("tau"))),

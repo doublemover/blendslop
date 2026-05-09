@@ -124,6 +124,31 @@ class TestDifferentiableRender(unittest.TestCase):
             self.assertEqual(result.artifacts["primitive_json"], result.primitive_path)
             self.assertEqual(result.artifacts["mesh_obj"], result.mesh_path)
 
+    def test_soft_renderer_per_view_losses_fill_required_candidate_metrics(self) -> None:
+        metrics = diff_render._candidate_per_view_metrics(
+            {
+                "front": {
+                    "area_iou_loss": 0.2,
+                    "soft_iou_loss": 0.3,
+                    "soft_l2": 0.04,
+                },
+                "side": {
+                    "area_iou_loss": 1.0,
+                    "soft_iou_loss": 0.95,
+                    "soft_l2": 0.8,
+                },
+            }
+        )
+
+        self.assertAlmostEqual(metrics["front"]["area_iou"], 0.8)
+        self.assertAlmostEqual(metrics["front"]["boundary_iou"], 0.7)
+        self.assertAlmostEqual(metrics["front"]["signed_distance_loss"], 0.04)
+        self.assertTrue(metrics["front"]["passed"])
+        self.assertEqual(metrics["front"]["pass"], metrics["front"]["passed"])
+        self.assertAlmostEqual(metrics["side"]["area_iou"], 0.0)
+        self.assertFalse(metrics["side"]["passed"])
+        self.assertIn("soft silhouette", metrics["side"]["reason"])
+
     def test_objective_regression_can_fail_strict_candidate(self) -> None:
         request = CandidateRequest(
             candidate_id="cpu-soft-regression",

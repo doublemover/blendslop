@@ -16,7 +16,13 @@ from .geometry import (
     surface_distance_report,
     volumetric_iou,
 )
-from .gates import EvaluationBudget, Threshold, evaluate_budget
+from .gates import (
+    EvaluationBudget,
+    RegressionBudget,
+    Threshold,
+    evaluate_budget,
+    sota_silhouette_budget,
+)
 from .novel_view import (
     NovelViewMetricReport,
     image_pair_report,
@@ -24,6 +30,7 @@ from .novel_view import (
     psnr_from_mse,
 )
 from .selection import SelectionEvidence, attach_selection, pareto_front
+from .recoverability import RecoverabilityReport
 from .schemas import (
     EvaluationBundle,
     MetricGroup,
@@ -42,6 +49,8 @@ __all__ = [
     "ExportQAReport",
     "GeometryMetricReport",
     "NovelViewMetricReport",
+    "RecoverabilityReport",
+    "RegressionBudget",
     "Threshold",
     "ViewRequest",
     "SelectionEvidence",
@@ -58,6 +67,7 @@ __all__ = [
     "normal_consistency",
     "pareto_front",
     "psnr_from_mse",
+    "sota_silhouette_budget",
     "suggest_next_views",
     "surface_distance_report",
     "volumetric_iou",

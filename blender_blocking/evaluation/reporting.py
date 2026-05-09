@@ -16,21 +16,25 @@ def compact_console_summary(bundle: EvaluationBundle) -> str:
         f"  min_iou={_metric(metrics, 'silhouette.min_view_iou')}",
         f"  avg_iou={_metric(metrics, 'silhouette.average_iou')}",
         f"  boundary={_metric(metrics, 'silhouette.mean_boundary_iou')}",
+        f"  sdf={_metric(metrics, 'silhouette.mean_signed_distance_loss')} missing_required={_metric(metrics, 'silhouette.missing_required_metric_count')}",
         f"  chamfer={_metric(metrics, 'geometry.chamfer_l2')} fscore={_metric(metrics, 'geometry.fscore_tau')} vol_iou={_metric(metrics, 'geometry.volumetric_iou')}",
+        f"  true_fscore={_metric(metrics, 'geometry.true.fscore_tau')} recoverable_fscore={_metric(metrics, 'geometry.recoverable.fscore_tau')} ambiguity_gap={_metric(metrics, 'geometry.ambiguity_gap_chamfer_l2')}",
         f"  psnr={_metric(metrics, 'novel_view.psnr')} ssim={_metric(metrics, 'novel_view.ssim')} lpips={_metric(metrics, 'novel_view.lpips')}",
         f"  editable={_metric(metrics, 'editability.editable_reconstruction_index')}",
-        f"  export={_metric(metrics, 'export.qa_score')}",
+        f"  export={_metric(metrics, 'export.qa_score')} cost_ms={_metric(metrics, 'cost.total_wall_ms')}",
+        f"  deps={_dependency_summary(bundle)}",
         f"  failures={len(bundle.failures)}",
     ]
     return "\n".join(parts)
 
 
 def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evaluation Report") -> str:
+    bundle_tuple = tuple(bundles)
     rows = []
-    for bundle in bundles:
+    for bundle in bundle_tuple:
         metrics = bundle.metric_index()
         rows.append(
-            "| {candidate} | {mode} | {status} | {rank} | {selected} | {score} | {min_iou} | {avg_iou} | {boundary} | {chamfer} | {fscore} | {vol_iou} | {psnr} | {ssim} | {lpips} | {editable} | {export} | {failures} |".format(
+            "| {candidate} | {mode} | {status} | {rank} | {selected} | {score} | {min_iou} | {avg_iou} | {boundary} | {sdf} | {true_fscore} | {recoverable_fscore} | {gap} | {chamfer} | {fscore} | {vol_iou} | {psnr} | {ssim} | {lpips} | {editable} | {export} | {cost} | {failures} |".format(
                 candidate=bundle.candidate_id,
                 mode=bundle.mode,
                 status=bundle.status,
@@ -40,6 +44,10 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
                 min_iou=_metric(metrics, "silhouette.min_view_iou"),
                 avg_iou=_metric(metrics, "silhouette.average_iou"),
                 boundary=_metric(metrics, "silhouette.mean_boundary_iou"),
+                sdf=_metric(metrics, "silhouette.mean_signed_distance_loss"),
+                true_fscore=_metric(metrics, "geometry.true.fscore_tau"),
+                recoverable_fscore=_metric(metrics, "geometry.recoverable.fscore_tau"),
+                gap=_metric(metrics, "geometry.ambiguity_gap_chamfer_l2"),
                 chamfer=_metric(metrics, "geometry.chamfer_l2"),
                 fscore=_metric(metrics, "geometry.fscore_tau"),
                 vol_iou=_metric(metrics, "geometry.volumetric_iou"),
@@ -48,6 +56,7 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
                 lpips=_metric(metrics, "novel_view.lpips"),
                 editable=_metric(metrics, "editability.editable_reconstruction_index"),
                 export=_metric(metrics, "export.qa_score"),
+                cost=_metric(metrics, "cost.total_wall_ms"),
                 failures=len(bundle.failures),
             )
         )
@@ -55,10 +64,11 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
         [
             f"# {title}",
             "",
-            "| Candidate | Mode | Status | Rank | Selected | Score | Min IoU | Avg IoU | Boundary | Chamfer | F-score | Vol IoU | PSNR | SSIM | LPIPS | Editable | Export | Failures |",
-            "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+            "| Candidate | Mode | Status | Rank | Selected | Score | Min IoU | Avg IoU | Boundary | SDF Loss | True F-score | Recoverable F-score | Ambiguity Gap | Chamfer | F-score | Vol IoU | PSNR | SSIM | LPIPS | Editable | Export | Cost ms | Failures |",
+            "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
             *rows,
             "",
+            *_failure_lines(bundle_tuple),
         ]
     )
 
@@ -93,3 +103,36 @@ def _selection(bundle: EvaluationBundle, key: str) -> str:
     if isinstance(value, float):
         return f"{value:.3f}"
     return str(value)
+
+
+def _dependency_summary(bundle: EvaluationBundle) -> str:
+    if not bundle.dependency_state:
+        return "n/a"
+    parts = []
+    for name, payload in sorted(bundle.dependency_state.items()):
+        available = None
+        if isinstance(payload, dict):
+            available = payload.get("available")
+        if available is None:
+            parts.append(str(name))
+        else:
+            parts.append(f"{name}={'ok' if available else 'missing'}")
+    return ", ".join(parts)
+
+
+def _failure_lines(bundles: tuple[EvaluationBundle, ...]) -> list[str]:
+    lines = ["## Failure Notes", ""]
+    emitted = False
+    for bundle in bundles:
+        for failure in bundle.failures:
+            emitted = True
+            metrics = ", ".join(
+                f"{key}={value}" for key, value in failure.evidence_metrics.items()
+            )
+            lines.append(
+                f"- `{bundle.candidate_id}` `{failure.code}` ({failure.severity}, {failure.subsystem}) {metrics}".rstrip()
+            )
+    if not emitted:
+        return []
+    lines.append("")
+    return lines

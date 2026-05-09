@@ -78,6 +78,46 @@
       "required": false
     },
     {
+      "id": "evaluation.nightly.min_view_iou.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.min_view_iou",
+      "mode": "min",
+      "threshold": 0.70,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.boundary_iou.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_boundary_iou",
+      "mode": "min",
+      "threshold": 0.58,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.sdf_loss.max",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_signed_distance_loss",
+      "mode": "max",
+      "threshold": 0.18,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.recoverable_fscore.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.geometry.recoverable.fscore_tau",
+      "mode": "min",
+      "threshold": 0.70,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.true_volume_iou.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.geometry.true.volumetric_iou",
+      "mode": "min",
+      "threshold": 0.40,
+      "required": false
+    },
+    {
       "id": "evaluation.nightly.export_qa.floor",
       "artifact": "evaluation",
       "metric": "metrics.export.qa_score",
@@ -102,6 +142,22 @@
       "metric": "metrics.average_iou",
       "mode": "max_absolute_decrease",
       "threshold": 0.02,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.boundary.regression_abs",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_boundary_iou",
+      "mode": "max_absolute_decrease",
+      "threshold": 0.03,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.editability.regression_abs",
+      "artifact": "evaluation",
+      "metric": "metrics.editability.editable_reconstruction_index",
+      "mode": "max_absolute_decrease",
+      "threshold": 0.04,
       "required": false
     }
   ]

@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from synthetic.artifact_writer import validate_manifest, validate_manifest_tree, write_artifact_set
-from synthetic.ground_truth import build_pure_artifacts
+from synthetic.ground_truth import build_pure_artifacts, geometry_payload_from_candidate
 from synthetic.registry import get_definition, list_suites, specs_for_suite
 from synthetic.specs import SyntheticShapeSpec
 
@@ -27,12 +27,35 @@ class SyntheticFactoryTests(unittest.TestCase):
         spec = get_definition("sphere").create(3)
         artifacts = build_pure_artifacts(spec, volume_resolution=12)
         self.assertIn("occupancy-r12", artifacts["volumes"])
+        self.assertIn("surface_samples", artifacts)
+        self.assertIn("geometry_reference", artifacts["metadata"])
         self.assertIn("deterministic_signature", artifacts["metadata"])
         self.assertIn("sample_summary", artifacts["metadata"])
         with tempfile.TemporaryDirectory() as tmp:
             artifact_set = write_artifact_set(spec, artifacts, Path(tmp))
             result = validate_manifest_tree(artifact_set.manifest_path)
         self.assertTrue(result["ok"])
+
+    def test_analytic_ground_truth_builds_geometry_metric_payload(self) -> None:
+        spec = get_definition("sphere").create(3)
+        artifacts = build_pure_artifacts(spec, volume_resolution=10)
+        occupancy = artifacts["volumes"]["occupancy-r10"]
+        surface = artifacts["surface_samples"]
+
+        payload = geometry_payload_from_candidate(
+            artifacts,
+            candidate_surface_points=surface,
+            candidate_occupancy=occupancy,
+            recoverable_surface_points=surface,
+            recoverable_occupancy=occupancy,
+            tolerance=0.05,
+        )
+
+        self.assertIn("geometry_true", payload)
+        self.assertIn("geometry_recoverable", payload)
+        self.assertIn("recoverability", payload)
+        self.assertAlmostEqual(payload["geometry_true"]["volumetric_iou"], 1.0)
+        self.assertGreaterEqual(payload["geometry_true"]["fscore_tau"], 0.99)
 
     def test_generated_artifact_policy_records_skips(self) -> None:
         spec = get_definition("single_outlier_pixel").create(4)

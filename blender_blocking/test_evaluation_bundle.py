@@ -101,6 +101,139 @@ class EvaluationBundleTests(unittest.TestCase):
         self.assertEqual(metrics["silhouette.min_view_iou"].status, "fail")
         self.assertIn("silhouette_required_metrics_missing", codes)
 
+    def test_required_per_view_boundary_and_sdf_are_first_class(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-d",
+            backend_name="visual_hull_voxel",
+            status="success",
+            metric_result=CandidateMetrics(
+                topology_score=0.9,
+                editability_score=0.8,
+                per_view={
+                    "front": {
+                        "area_iou": 0.82,
+                        "boundary_iou": 0.62,
+                        "signed_distance_loss": 0.12,
+                        "required": True,
+                        "passed": True,
+                    },
+                    "side": {
+                        "area_iou": 0.78,
+                        "boundary_iou": 0.55,
+                        "signed_distance_loss": 0.16,
+                        "required": True,
+                        "passed": True,
+                    },
+                },
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        metrics = bundle.metric_index()
+
+        self.assertEqual(bundle.status, "pass")
+        self.assertEqual(metrics["silhouette.required_view_count"].value, 2)
+        self.assertEqual(metrics["silhouette.missing_required_metric_count"].value, 0)
+        self.assertAlmostEqual(metrics["silhouette.min_boundary_iou"].value, 0.55)
+        self.assertAlmostEqual(
+            metrics["silhouette.mean_signed_distance_loss"].value,
+            0.14,
+        )
+
+    def test_zero_iou_required_views_are_not_reported_as_missing_metrics(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-zero-view",
+            backend_name="differentiable_refine",
+            status="degraded",
+            degraded=True,
+            metric_result=CandidateMetrics(
+                per_view={
+                    "front": {
+                        "area_iou": 0.0,
+                        "boundary_iou": 0.05,
+                        "signed_distance_loss": 0.9,
+                        "required": True,
+                        "passed": False,
+                        "reason": "soft silhouette did not satisfy required view gate",
+                    }
+                },
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        codes = {failure.code for failure in bundle.failures}
+
+        self.assertIn("silhouette_required_views_failed", codes)
+        self.assertNotIn("silhouette_required_metrics_missing", codes)
+        self.assertEqual(bundle.status, "fail")
+
+    def test_classified_failures_influence_bundle_status(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-boundary",
+            backend_name="gaussian_ellipsoid_proxy",
+            status="success",
+            metric_result=CandidateMetrics(
+                per_view={
+                    "front": {
+                        "area_iou": 0.92,
+                        "boundary_iou": 0.30,
+                        "signed_distance_loss": 0.05,
+                        "required": True,
+                        "passed": True,
+                    },
+                    "side": {
+                        "area_iou": 0.91,
+                        "boundary_iou": 0.32,
+                        "signed_distance_loss": 0.05,
+                        "required": True,
+                        "passed": True,
+                    },
+                },
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        codes = {failure.code for failure in bundle.failures}
+
+        self.assertIn("silhouette_boundary_blobby", codes)
+        self.assertEqual(bundle.status, "fail")
+
+    def test_recoverability_payload_splits_true_and_envelope_geometry(self) -> None:
+        result = CandidateResult(
+            candidate_id="candidate-e",
+            backend_name="visual_hull_voxel",
+            status="success",
+            metric_result=CandidateMetrics(
+                area_iou_min=0.8,
+                area_iou_mean=0.84,
+                boundary_iou_mean=0.7,
+                extras={
+                    "recoverability": {
+                        "source": "synthetic-test",
+                        "true_geometry": {
+                            "chamfer_l2": 0.08,
+                            "fscore_tau": 0.42,
+                            "volumetric_iou": 0.5,
+                        },
+                        "recoverable_geometry": {
+                            "chamfer_l2": 0.02,
+                            "fscore_tau": 0.82,
+                            "volumetric_iou": 0.76,
+                        },
+                    }
+                },
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        metrics = bundle.metric_index()
+        codes = {failure.code for failure in bundle.failures}
+
+        self.assertEqual(metrics["geometry.true.fscore_tau"].value, 0.42)
+        self.assertEqual(metrics["geometry.recoverable.fscore_tau"].value, 0.82)
+        self.assertAlmostEqual(metrics["geometry.ambiguity_gap_chamfer_l2"].value, 0.06)
+        self.assertIn("geometry_true_recoverable_gap_large", codes)
+
 
 if __name__ == "__main__":
     unittest.main()

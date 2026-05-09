@@ -15,7 +15,39 @@ def classify_bundle_failures(
 
     min_iou = _metric_value(metrics, "silhouette.min_view_iou")
     avg_iou = _metric_value(metrics, "silhouette.average_iou")
-    if bundle.status != "skip" and (min_iou is None or min_iou <= 0.0):
+    required_views = _metric_value(metrics, "silhouette.required_view_count")
+    failed_required = _metric_value(metrics, "silhouette.failed_required_view_count")
+    missing_required = _metric_value(metrics, "silhouette.missing_required_metric_count")
+    if (
+        bundle.status != "skip"
+        and min_iou is not None
+        and min_iou <= 0.0
+        and required_views is not None
+        and required_views > 0
+        and failed_required is not None
+        and failed_required > 0
+    ):
+        failures.append(
+            FailureObservation(
+                code="silhouette_required_views_failed",
+                severity="fail",
+                subsystem="silhouette",
+                evidence_metrics={
+                    "silhouette.min_view_iou": min_iou,
+                    "silhouette.average_iou": avg_iou,
+                    "silhouette.required_view_count": required_views,
+                    "silhouette.failed_required_view_count": failed_required,
+                },
+                likely_causes=(
+                    "one or more required views have near-zero overlap with the reference silhouette",
+                ),
+                recommended_actions=(
+                    "inspect per-view overlays and active view calibration",
+                    "run boundary-first or signed-distance refinement before candidate selection",
+                ),
+            )
+        )
+    elif bundle.status != "skip" and (min_iou is None or min_iou <= 0.0):
         failures.append(
             FailureObservation(
                 code="silhouette_required_metrics_missing",
@@ -24,6 +56,8 @@ def classify_bundle_failures(
                 evidence_metrics={
                     "silhouette.min_view_iou": min_iou,
                     "silhouette.average_iou": avg_iou,
+                    "silhouette.required_view_count": required_views,
+                    "silhouette.missing_required_metric_count": missing_required,
                 },
                 likely_causes=(
                     "candidate reported success without required per-view silhouette metrics",
@@ -52,6 +86,28 @@ def classify_bundle_failures(
             )
         )
     boundary = _metric_value(metrics, "silhouette.min_boundary_iou")
+    sdf = _metric_value(metrics, "silhouette.mean_signed_distance_loss")
+    if missing_required is not None and missing_required > 0:
+        failures.append(
+            FailureObservation(
+                code="silhouette_required_metric_fields_missing",
+                severity="fail",
+                subsystem="silhouette",
+                evidence_metrics={
+                    "silhouette.missing_required_metric_count": missing_required,
+                    "silhouette.failed_required_view_count": failed_required,
+                    "silhouette.mean_signed_distance_loss": sdf,
+                    "silhouette.min_boundary_iou": boundary,
+                },
+                likely_causes=(
+                    "backend emitted aggregate IoU but did not emit Boundary IoU or signed-distance loss for every required view",
+                ),
+                recommended_actions=(
+                    "populate per-view area_iou, boundary_iou, signed_distance_loss, required, passed, and reason",
+                    "use the shared silhouette metric adapter before building CandidateMetrics",
+                ),
+            )
+        )
     if (
         boundary is not None
         and avg_iou is not None
@@ -91,6 +147,9 @@ def classify_bundle_failures(
     fscore = _metric_value(metrics, "geometry.fscore_tau")
     volumetric_iou = _metric_value(metrics, "geometry.volumetric_iou")
     chamfer = _metric_value(metrics, "geometry.chamfer_l2")
+    true_fscore = _metric_value(metrics, "geometry.true.fscore_tau")
+    recoverable_fscore = _metric_value(metrics, "geometry.recoverable.fscore_tau")
+    ambiguity_gap = _metric_value(metrics, "geometry.ambiguity_gap_chamfer_l2")
     if fscore is not None and fscore < 0.5:
         failures.append(
             FailureObservation(
@@ -137,6 +196,31 @@ def classify_bundle_failures(
                 ),
             )
         )
+    if (
+        true_fscore is not None
+        and recoverable_fscore is not None
+        and recoverable_fscore >= 0.75
+        and true_fscore < 0.45
+    ):
+        failures.append(
+            FailureObservation(
+                code="geometry_true_recoverable_gap_large",
+                severity="warn",
+                subsystem="geometry",
+                evidence_metrics={
+                    "geometry.true.fscore_tau": true_fscore,
+                    "geometry.recoverable.fscore_tau": recoverable_fscore,
+                    "geometry.ambiguity_gap_chamfer_l2": ambiguity_gap,
+                },
+                likely_causes=(
+                    "provided silhouettes underdetermine hidden concavity or internal detail",
+                ),
+                recommended_actions=(
+                    "score this case against the recoverable envelope before treating it as a backend regression",
+                    "request an additional discriminating view from the active view planner",
+                ),
+            )
+        )
     psnr = _metric_value(metrics, "novel_view.psnr")
     ssim = _metric_value(metrics, "novel_view.ssim")
     lpips = _metric_value(metrics, "novel_view.lpips")
@@ -172,6 +256,27 @@ def classify_bundle_failures(
             )
         )
     export_score = _metric_value(metrics, "export.qa_score")
+    editability = _metric_value(metrics, "editability.editable_reconstruction_index")
+    if editability is not None and editability < 0.35:
+        failures.append(
+            FailureObservation(
+                code="editability_low",
+                severity="warn",
+                subsystem="editability",
+                evidence_metrics={
+                    "editability.editable_reconstruction_index": editability,
+                    "topology.non_manifold_edges": non_manifold,
+                    "export.qa_score": export_score,
+                },
+                likely_causes=(
+                    "result is a dense or unstructured mesh rather than a clean editable Blender asset",
+                ),
+                recommended_actions=(
+                    "prefer primitive, shape-program, or modifier-backed candidates when silhouette metrics tie",
+                    "run mesh simplification and semantic part separation before export",
+                ),
+            )
+        )
     if export_score is not None and export_score < 0.6:
         failures.append(
             FailureObservation(

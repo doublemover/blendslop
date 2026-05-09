@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Mapping
+from typing import Any, Iterable, Mapping, Sequence
 
 from .gates import Threshold
-from .schemas import json_safe
+from .schemas import EvaluationBundle, MetricValue, json_safe, utc_now_iso
 
 
 @dataclass(frozen=True)
@@ -145,6 +145,93 @@ def baseline_payload(baseline: QualityBaseline) -> Mapping[str, Any]:
     return json_safe(baseline.to_dict())
 
 
+def baseline_from_bundles(
+    bundles: Sequence[EvaluationBundle],
+    *,
+    suite: str = "",
+    mode: str = "",
+    shape_family: str = "",
+    view_count: int = 0,
+    mask_noise_profile: str = "",
+    resolution: int = 0,
+    dependency_profile: str = "",
+    repo_revision: str | None = None,
+    environment_hash: str = "",
+    metric_names: Sequence[str] | None = None,
+) -> QualityBaseline:
+    """Create a baseline slice from already-built EvaluationBundle records."""
+
+    if not bundles:
+        raise ValueError("baseline_from_bundles requires at least one bundle")
+    metrics_by_name: dict[str, list[tuple[float, MetricValue]]] = {}
+    for bundle in bundles:
+        for metric in bundle.metric_index().values():
+            if metric_names is not None and metric.name not in metric_names:
+                continue
+            value = _numeric_or_none(metric.value)
+            if value is None:
+                continue
+            metrics_by_name.setdefault(metric.name, []).append((value, metric))
+    distributions = []
+    for metric_name, values in sorted(metrics_by_name.items()):
+        first_metric = values[0][1]
+        higher = first_metric.higher_is_better
+        distributions.append(
+            distribution_from_values(
+                metric_name,
+                (value for value, _metric in values),
+                higher_is_better=True if higher is None else bool(higher),
+                unit=first_metric.unit,
+            )
+        )
+    slice_ = BaselineSlice(
+        suite=suite or _common_value(bundle.suite for bundle in bundles),
+        mode=mode or _common_value(bundle.mode for bundle in bundles),
+        shape_family=shape_family,
+        view_count=view_count,
+        mask_noise_profile=mask_noise_profile,
+        resolution=resolution,
+        dependency_profile=dependency_profile,
+        distributions=tuple(distributions),
+        case_ids=tuple(bundle.target_id for bundle in bundles),
+        generated_from_runs=tuple(bundle.run_id for bundle in bundles),
+    )
+    return QualityBaseline(
+        schema_version="quality-baseline-v1",
+        created_at_utc=utc_now_iso(),
+        repo_revision=repo_revision or bundles[0].repo_revision,
+        environment_hash=environment_hash,
+        slices=(slice_,),
+    )
+
+
+def thresholds_from_baseline(
+    baseline: QualityBaseline,
+    *,
+    severity: str = "fail",
+    source: str = "derived_baseline",
+) -> tuple[Threshold, ...]:
+    thresholds = []
+    for slice_ in baseline.slices:
+        for distribution in slice_.distributions:
+            thresholds.append(
+                threshold_from_distribution(
+                    distribution,
+                    severity=severity,
+                    source=source,
+                )
+            )
+    return tuple(thresholds)
+
+
+def baseline_metric_map(slice_: BaselineSlice, statistic: str = "median") -> dict[str, float]:
+    return {
+        distribution.metric: float(getattr(distribution, statistic))
+        for distribution in slice_.distributions
+        if hasattr(distribution, statistic)
+    }
+
+
 def _percentile(values: list[float], q: float) -> float:
     if len(values) == 1:
         return values[0]
@@ -154,3 +241,16 @@ def _percentile(values: list[float], q: float) -> float:
     frac = pos - lower
     return values[lower] * (1.0 - frac) + values[upper] * frac
 
+
+def _numeric_or_none(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _common_value(values: Iterable[str]) -> str:
+    unique = tuple(dict.fromkeys(str(value) for value in values))
+    return unique[0] if len(unique) == 1 else ""

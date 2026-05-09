@@ -112,6 +112,51 @@
       "description": "When evaluation bundles are provided, editable Blender output should clear a loose smoke floor."
     },
     {
+      "id": "evaluation.silhouette.min_view_iou.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.min_view_iou",
+      "mode": "min",
+      "threshold": 0.55,
+      "required": false,
+      "description": "Required-view area IoU smoke floor; catches missing or badly aligned reference views."
+    },
+    {
+      "id": "evaluation.silhouette.boundary.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_boundary_iou",
+      "mode": "min",
+      "threshold": 0.35,
+      "required": false,
+      "description": "Boundary IoU smoke floor; catches blobby boundaries that area IoU can hide."
+    },
+    {
+      "id": "evaluation.silhouette.sdf.max",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_signed_distance_loss",
+      "mode": "max",
+      "threshold": 0.35,
+      "required": false,
+      "description": "Signed-distance silhouette loss smoke ceiling."
+    },
+    {
+      "id": "evaluation.silhouette.missing_required.max",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.missing_required_metric_count",
+      "mode": "max",
+      "threshold": 0.0,
+      "required": false,
+      "description": "Backends should not omit required per-view Boundary IoU or signed-distance loss fields."
+    },
+    {
+      "id": "evaluation.geometry.recoverable_fscore.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.geometry.recoverable.fscore_tau",
+      "mode": "min",
+      "threshold": 0.55,
+      "required": false,
+      "description": "When recoverability evidence exists, surface fit to the silhouette-recoverable envelope should clear the smoke floor."
+    },
+    {
       "id": "evaluation.export_qa.floor",
       "artifact": "evaluation",
       "metric": "metrics.export.qa_score",

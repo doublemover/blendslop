@@ -11,9 +11,10 @@ from .editability import report_from_candidate_metrics
 from .export_qa import aggregate_score as export_qa_aggregate_score
 from .export_qa import reports_from_payload as export_qa_reports_from_payload
 from .failure_taxonomy import classify_bundle_failures
-from .geometry import report_from_mapping
+from .geometry import GeometryMetricReport, report_from_mapping
 from .lineage import repo_revision
 from .novel_view import report_from_mapping as novel_view_report_from_mapping
+from .recoverability import report_from_mapping as recoverability_report_from_mapping
 from .schemas import (
     EvaluationBundle,
     MetricGroup,
@@ -36,6 +37,7 @@ def bundle_from_candidate(
     metric_groups = (
         _silhouette_group(metrics),
         _geometry_group(metrics),
+        _recoverability_group(metrics),
         _novel_view_group(metrics),
         _topology_group(metrics),
         _editability_group(metrics),
@@ -74,7 +76,11 @@ def bundle_from_candidate(
         warnings=warnings,
     )
     failures = classify_bundle_failures(bundle)
-    return replace(bundle, failures=failures)
+    return replace(
+        bundle,
+        failures=failures,
+        status=_status_with_failures(bundle.status, failures),
+    )
 
 
 def _target_id(target: Any) -> str:
@@ -109,6 +115,10 @@ def _silhouette_group(metrics: Any) -> MetricGroup:
     avg_iou = float(getattr(metrics, "area_iou_mean", 0.0))
     boundary_iou = float(getattr(metrics, "boundary_iou_mean", 0.0))
     min_status = _pass_fail(min_iou > 0.0)
+    required_view_count = 0
+    failed_required_view_count = 0
+    missing_required_metric_count = 0
+    warnings: list[str] = []
     values: list[MetricValue] = [
         MetricValue(
             "silhouette.min_view_iou",
@@ -128,18 +138,28 @@ def _silhouette_group(metrics: Any) -> MetricGroup:
             "silhouette.mean_boundary_iou",
             boundary_iou,
             higher_is_better=True,
+            required=True,
             status=_pass_fail(boundary_iou > 0.0),
+            notes=()
+            if boundary_iou > 0.0
+            else ("missing or zero required-view Boundary IoU",),
         ),
     ]
     boundary_values = []
     sdf_values = []
     view_statuses = [min_status]
+    if not per_view and (min_iou > 0.0 or avg_iou > 0.0 or boundary_iou > 0.0):
+        warnings.append("per_view_metrics_missing_aggregate_only")
     for view, payload in per_view.items():
         if not isinstance(payload, Mapping):
             continue
         prefix = f"silhouette.per_view.{view}"
         required = bool(payload.get("required", True))
+        if required:
+            required_view_count += 1
         passed = bool(payload.get("passed", payload.get("pass", not required)))
+        if required and not passed:
+            failed_required_view_count += 1
         view_statuses.append("pass" if passed else "fail")
         values.append(
             MetricValue(
@@ -165,6 +185,18 @@ def _silhouette_group(metrics: Any) -> MetricGroup:
                     status="pass" if passed else "fail",
                 )
             )
+        elif required:
+            missing_required_metric_count += 1
+            values.append(
+                MetricValue(
+                    f"{prefix}.boundary_iou",
+                    None,
+                    higher_is_better=True,
+                    required=True,
+                    status="fail",
+                    notes=("required Boundary IoU missing",),
+                )
+            )
         sdf = _float_or_none(payload.get("signed_distance_loss"))
         if sdf is not None:
             sdf_values.append(sdf)
@@ -177,13 +209,37 @@ def _silhouette_group(metrics: Any) -> MetricGroup:
                     status="pass" if passed else "fail",
                 )
             )
+        elif required:
+            missing_required_metric_count += 1
+            values.append(
+                MetricValue(
+                    f"{prefix}.signed_distance_loss",
+                    None,
+                    higher_is_better=False,
+                    required=True,
+                    status="fail",
+                    notes=("required signed-distance loss missing",),
+                )
+            )
     if boundary_values:
         values.append(
             MetricValue(
                 "silhouette.min_boundary_iou",
                 min(boundary_values),
                 higher_is_better=True,
-                status="pass",
+                required=True,
+                status=_pass_fail(min(boundary_values) > 0.0),
+            )
+        )
+    elif per_view:
+        values.append(
+            MetricValue(
+                "silhouette.min_boundary_iou",
+                None,
+                higher_is_better=True,
+                required=True,
+                status="fail",
+                notes=("no per-view Boundary IoU values were emitted",),
             )
         )
     if sdf_values:
@@ -192,11 +248,55 @@ def _silhouette_group(metrics: Any) -> MetricGroup:
                 "silhouette.mean_signed_distance_loss",
                 sum(sdf_values) / len(sdf_values),
                 higher_is_better=False,
+                required=True,
                 status="pass",
             )
         )
+    elif per_view:
+        values.append(
+            MetricValue(
+                "silhouette.mean_signed_distance_loss",
+                None,
+                higher_is_better=False,
+                required=True,
+                status="fail",
+                notes=("no per-view signed-distance losses were emitted",),
+            )
+        )
+    values.extend(
+        (
+            MetricValue(
+                "silhouette.required_view_count",
+                required_view_count,
+                unit="view",
+                higher_is_better=None,
+                status="not_applicable",
+            ),
+            MetricValue(
+                "silhouette.failed_required_view_count",
+                failed_required_view_count,
+                unit="view",
+                higher_is_better=False,
+                status=_pass_fail(failed_required_view_count == 0),
+            ),
+            MetricValue(
+                "silhouette.missing_required_metric_count",
+                missing_required_metric_count,
+                unit="metric",
+                higher_is_better=False,
+                status=_pass_fail(missing_required_metric_count == 0),
+            ),
+        )
+    )
+    if missing_required_metric_count:
+        view_statuses.append("fail")
+    if failed_required_view_count:
+        view_statuses.append("fail")
     return MetricGroup(
-        "silhouette", worst_status(view_statuses or ("pass",)), tuple(values)
+        "silhouette",
+        worst_status(view_statuses or ("pass",)),
+        tuple(values),
+        warnings=tuple(warnings),
     )
 
 
@@ -303,17 +403,111 @@ def _geometry_group(metrics: Any) -> MetricGroup:
         geometry = (
             extras.get("geometry_metrics") if isinstance(extras, Mapping) else None
         )
-    if not isinstance(geometry, Mapping):
+    recoverability = (
+        extras.get("recoverability") if isinstance(extras, Mapping) else None
+    )
+    true_geometry = (
+        extras.get("geometry_true", extras.get("true_geometry"))
+        if isinstance(extras, Mapping)
+        else None
+    )
+    recoverable_geometry = (
+        extras.get("geometry_recoverable", extras.get("recoverable_geometry"))
+        if isinstance(extras, Mapping)
+        else None
+    )
+    if isinstance(recoverability, Mapping):
+        true_geometry = true_geometry or recoverability.get("true_geometry") or recoverability.get("true")
+        recoverable_geometry = (
+            recoverable_geometry
+            or recoverability.get("recoverable_geometry")
+            or recoverability.get("recoverable")
+            or recoverability.get("visual_hull_envelope")
+        )
+    if (
+        not isinstance(geometry, Mapping)
+        and not isinstance(true_geometry, Mapping)
+        and not isinstance(recoverable_geometry, Mapping)
+    ):
         return MetricGroup("geometry", "not_applicable")
-    report = report_from_mapping(geometry)
-    values = []
+    values: list[MetricValue] = []
+    warnings: list[str] = []
+    metadata: dict[str, Any] = {}
+    if isinstance(geometry, Mapping):
+        report = report_from_mapping(geometry)
+        values.extend(
+            _geometry_metric_values(
+                "geometry",
+                report,
+                source=str(geometry.get("source", "computed")),
+            )
+        )
+        warnings.extend(report.warnings)
+        metadata["geometry"] = report.to_dict()
+    if isinstance(true_geometry, Mapping):
+        report = report_from_mapping(true_geometry)
+        values.extend(
+            _geometry_metric_values(
+                "geometry.true",
+                report,
+                source=str(true_geometry.get("source", "synthetic_ground_truth")),
+            )
+        )
+        warnings.extend(report.warnings)
+        metadata["true_geometry"] = report.to_dict()
+    if isinstance(recoverable_geometry, Mapping):
+        report = report_from_mapping(recoverable_geometry)
+        values.extend(
+            _geometry_metric_values(
+                "geometry.recoverable",
+                report,
+                source=str(recoverable_geometry.get("source", "recoverable_envelope")),
+            )
+        )
+        warnings.extend(report.warnings)
+        metadata["recoverable_geometry"] = report.to_dict()
+    if isinstance(recoverability, Mapping):
+        report = recoverability_report_from_mapping(recoverability)
+        metadata["recoverability"] = report.to_dict()
+        for name, value in (
+            ("geometry.ambiguity_gap_chamfer_l1", report.ambiguity_gap_chamfer_l1),
+            ("geometry.ambiguity_gap_chamfer_l2", report.ambiguity_gap_chamfer_l2),
+            ("geometry.ambiguity_gap_volume_iou", report.ambiguity_gap_volume_iou),
+        ):
+            if value is not None:
+                values.append(
+                    MetricValue(
+                        name,
+                        value,
+                        higher_is_better=False,
+                        status="pass",
+                        source=report.source,
+                    )
+                )
+        warnings.extend(report.warnings)
+    status = "pass" if values else "not_applicable"
+    return MetricGroup(
+        "geometry",
+        status,
+        tuple(values),
+        warnings=tuple(dict.fromkeys(warnings)),
+        metadata=metadata,
+    )
+
+
+def _recoverability_group(metrics: Any) -> MetricGroup:
+    if metrics is None:
+        return MetricGroup("recoverability", "not_applicable")
+    extras = getattr(metrics, "extras", {}) or {}
+    payload = extras.get("recoverability") if isinstance(extras, Mapping) else None
+    if not isinstance(payload, Mapping):
+        return MetricGroup("recoverability", "not_applicable")
+    report = recoverability_report_from_mapping(payload)
+    values: list[MetricValue] = []
     for name, value, higher in (
-        ("geometry.chamfer_l2", report.chamfer_l2, False),
-        ("geometry.fscore_tau", report.fscore_tau, True),
-        ("geometry.volumetric_iou", report.volumetric_iou, True),
-        ("geometry.normal_consistency", report.normal_consistency, True),
-        ("geometry.surface_coverage", report.surface_coverage, True),
-        ("geometry.ambiguity_gap", report.ambiguity_gap, False),
+        ("recoverability.ambiguity_gap_chamfer_l1", report.ambiguity_gap_chamfer_l1, False),
+        ("recoverability.ambiguity_gap_chamfer_l2", report.ambiguity_gap_chamfer_l2, False),
+        ("recoverability.ambiguity_gap_volume_iou", report.ambiguity_gap_volume_iou, False),
     ):
         if value is not None:
             values.append(
@@ -322,64 +516,114 @@ def _geometry_group(metrics: Any) -> MetricGroup:
                     value,
                     higher_is_better=higher,
                     status="pass",
-                    source=str(geometry.get("source", "computed")),
+                    source=report.source,
                 )
             )
-    if report.fscore_tolerance is not None:
-        values.append(
-            MetricValue(
-                "geometry.fscore_tolerance",
-                report.fscore_tolerance,
-                higher_is_better=None,
-                status="not_applicable",
+    if report.true_geometry is not None:
+        values.extend(
+            _geometry_metric_values(
+                "recoverability.true",
+                report.true_geometry,
+                source=report.source,
             )
         )
-    if report.sample_count_ref:
-        values.append(
-            MetricValue(
-                "geometry.sample_count_ref",
-                report.sample_count_ref,
-                unit="points",
-                higher_is_better=None,
-                status="not_applicable",
+    if report.recoverable_geometry is not None:
+        values.extend(
+            _geometry_metric_values(
+                "recoverability.recoverable",
+                report.recoverable_geometry,
+                source=report.source,
             )
         )
-    if report.sample_count_candidate:
-        values.append(
-            MetricValue(
-                "geometry.sample_count_candidate",
-                report.sample_count_candidate,
-                unit="points",
-                higher_is_better=None,
-                status="not_applicable",
-            )
-        )
-    status = "pass" if values else "not_applicable"
     return MetricGroup(
-        "geometry",
-        status,
+        "recoverability",
+        "pass" if values else "not_applicable",
         tuple(values),
         warnings=report.warnings,
         metadata=report.to_dict(),
     )
 
 
+def _geometry_metric_values(
+    prefix: str,
+    report: GeometryMetricReport,
+    *,
+    source: str,
+) -> tuple[MetricValue, ...]:
+    values: list[MetricValue] = []
+    for name, value, higher in (
+        (f"{prefix}.chamfer_l1", report.chamfer_l1, False),
+        (f"{prefix}.chamfer_l2", report.chamfer_l2, False),
+        (f"{prefix}.fscore_tau", report.fscore_tau, True),
+        (f"{prefix}.volumetric_iou", report.volumetric_iou, True),
+        (f"{prefix}.normal_consistency", report.normal_consistency, True),
+        (f"{prefix}.surface_coverage", report.surface_coverage, True),
+        (f"{prefix}.ambiguity_gap", report.ambiguity_gap, False),
+    ):
+        if value is not None:
+            values.append(
+                MetricValue(
+                    name,
+                    value,
+                    higher_is_better=higher,
+                    status="pass",
+                    source=source,
+                )
+            )
+    if report.fscore_tolerance is not None:
+        values.append(
+            MetricValue(
+                f"{prefix}.fscore_tolerance",
+                report.fscore_tolerance,
+                higher_is_better=None,
+                status="not_applicable",
+                source=source,
+            )
+        )
+    if report.sample_count_ref:
+        values.append(
+            MetricValue(
+                f"{prefix}.sample_count_ref",
+                report.sample_count_ref,
+                unit="points",
+                higher_is_better=None,
+                status="not_applicable",
+                source=source,
+            )
+        )
+    if report.sample_count_candidate:
+        values.append(
+            MetricValue(
+                f"{prefix}.sample_count_candidate",
+                report.sample_count_candidate,
+                unit="points",
+                higher_is_better=None,
+                status="not_applicable",
+                source=source,
+            )
+        )
+    return tuple(values)
+
+
 def _editability_group(metrics: Any) -> MetricGroup:
     if metrics is None:
         return MetricGroup("editability", "not_applicable")
     report = report_from_candidate_metrics(metrics)
-    index = report.editable_reconstruction_index
-    if index <= 0.0:
-        index = float(getattr(metrics, "editability_score", 0.0))
+    index = max(
+        report.editable_reconstruction_index,
+        float(getattr(metrics, "editability_score", 0.0) or 0.0),
+    )
+    status = _score_status(index, warn_floor=0.35, fail_floor=0.05)
     return MetricGroup(
         "editability",
-        "pass",
+        status,
         (
             MetricValue(
                 "editability.editable_reconstruction_index",
                 index,
                 higher_is_better=True,
-                status="pass",
+                required=True,
+                status=status,
             ),
             MetricValue(
                 "editability.object_hierarchy_score",
@@ -431,18 +675,38 @@ def _editability_group(metrics: Any) -> MetricGroup:
 
 def _cost_group(result: Any) -> MetricGroup:
     report = cost_report_from_candidate(result)
+    values = [
+        MetricValue(
+            "cost.total_wall_ms",
+            report.total_wall_ms,
+            unit="ms",
+            higher_is_better=False,
+            status="pass",
+        ),
+    ]
+    if report.peak_memory_mb is not None:
+        values.append(
+            MetricValue(
+                "cost.peak_memory_mb",
+                report.peak_memory_mb,
+                unit="MiB",
+                higher_is_better=False,
+                status="pass",
+            )
+        )
+    for name, value in report.throughput.items():
+        values.append(
+            MetricValue(
+                f"cost.throughput.{name}",
+                float(value),
+                higher_is_better=True,
+                status="pass",
+            )
+        )
     return MetricGroup(
         "cost",
         "pass",
-        (
-            MetricValue(
-                "cost.total_wall_ms",
-                report.total_wall_ms,
-                unit="ms",
-                higher_is_better=False,
-                status="pass",
-            ),
-        ),
+        tuple(values),
         metadata=report.to_dict(),
     )
 
@@ -645,6 +909,13 @@ def _bundle_status(result: Any, groups: tuple[MetricGroup, ...]) -> str:
     return "pass" if group_status in {"pass", "not_applicable"} else group_status
 
 
+def _status_with_failures(status: str, failures: tuple[Any, ...]) -> str:
+    if not failures:
+        return status
+    severities = tuple(str(getattr(failure, "severity", "")) for failure in failures)
+    return worst_status((status, *severities))
+
+
 def _artifact_paths(result: Any) -> dict[str, str]:
     artifacts: dict[str, str] = {}
     for attr in ("mesh_path", "primitive_path", "volume_path"):
@@ -689,6 +960,14 @@ def _float_or_none(value: Any) -> float | None:
 
 def _pass_fail(value: bool) -> str:
     return "pass" if value else "fail"
+
+
+def _score_status(value: float, *, warn_floor: float, fail_floor: float) -> str:
+    if value < fail_floor:
+        return "fail"
+    if value < warn_floor:
+        return "warn"
+    return "pass"
 
 
 def _metric_key_fragment(value: object) -> str:
