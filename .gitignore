@@ -19,6 +19,7 @@ __pycache__/
 *.blend2
 
 # Generated test artifacts
+temp/
 test_images/
 blender_blocking/test_images/
 blender_blocking/test_output/
