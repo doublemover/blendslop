@@ -108,6 +108,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_reconstruction_contracts", "test_reconstruction_contracts"),
     ("pure_reconstruction_backends", "test_reconstruction_backends"),
     ("pure_refinement_lab_contracts", "test_refinement_lab_contracts"),
+    ("pure_refinement_lab_parameters", "test_refinement_lab_parameters"),
     ("pure_refinement_lab_presets", "test_refinement_lab_presets"),
     ("pure_refinement_lab_matrix", "test_refinement_lab_matrix"),
     ("pure_refinement_lab_parameter_search", "test_refinement_lab_parameter_search"),

@@ -35,6 +35,12 @@ from .editability_study import (
     summarize_review_rows,
     write_editability_study_pack,
 )
+from .parameters import (
+    CONFIG_PARAMETER_PATHS,
+    ParameterCatalogIssue,
+    apply_variant_parameter_to_config,
+    validate_parameter_catalog,
+)
 
 __all__ = [
     "ExperimentCase",
@@ -45,12 +51,15 @@ __all__ = [
     "EditabilityStudyItem",
     "EditabilityStudyPack",
     "AdaptivePatch",
+    "CONFIG_PARAMETER_PATHS",
     "ContentAdaptiveRefinementResult",
+    "ParameterCatalogIssue",
     "ParameterSpec",
     "PatchBox",
     "PatchFusionResult",
     "RefinementProposal",
     "RefinementRunManifest",
+    "apply_variant_parameter_to_config",
     "build_editability_study_pack",
     "fuse_patch_predictions",
     "proposals_from_bundle",
@@ -60,6 +69,7 @@ __all__ = [
     "score_review_row",
     "select_adaptive_patches",
     "summarize_review_rows",
+    "validate_parameter_catalog",
     "variants_from_bundle",
     "write_editability_study_pack",
 ]
