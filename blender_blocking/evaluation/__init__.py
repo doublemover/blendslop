@@ -24,6 +24,7 @@ from .cost_model import (
     CostReport,
     StageCost,
     StageTimer,
+    attach_cost_report_to_candidate,
     cost_report_from_mapping,
 )
 from .calibration import (
@@ -139,6 +140,7 @@ __all__ = [
     "StageCost",
     "StageTimer",
     "active_view_plan_payload",
+    "attach_cost_report_to_candidate",
     "attach_selection",
     "boundary_refinement_plan_payload",
     "baseline_from_bundles",

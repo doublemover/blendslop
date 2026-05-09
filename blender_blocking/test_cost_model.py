@@ -8,6 +8,7 @@ import unittest
 from evaluation import bundle_from_candidate
 from evaluation.cost_model import (
     CostRecorder,
+    attach_cost_report_to_candidate,
     cost_report_from_candidate,
     cost_report_from_mapping,
 )
@@ -112,6 +113,36 @@ class CostModelTests(unittest.TestCase):
             metrics["cost.stage.mesh_extraction.work_units.faces"].value,
             64.0,
         )
+
+    def test_cost_report_attachment_preserves_candidate_metrics(self) -> None:
+        result = CandidateResult(
+            candidate_id="cost-attach",
+            backend_name="profile_loft",
+            status="success",
+            metric_result=CandidateMetrics(
+                area_iou_min=0.8,
+                editability_score=0.7,
+                extras={"existing": {"ok": True}},
+            ),
+        )
+        recorder = CostRecorder(track_memory=False)
+        with recorder.stage("build_target", work_units={"views": 2}):
+            pass
+        with recorder.stage("backend_reconstruct", work_units={"constraints": 2}):
+            pass
+
+        attached = attach_cost_report_to_candidate(result, recorder.report())
+        report = cost_report_from_candidate(attached)
+
+        self.assertIsNot(attached, result)
+        self.assertEqual(attached.metric_result.area_iou_min, 0.8)
+        self.assertEqual(attached.metric_result.extras["existing"], {"ok": True})
+        self.assertIn("cost_report", attached.metric_result.extras)
+        self.assertGreater(attached.metric_result.elapsed_s, 0.0)
+        self.assertEqual([stage.stage for stage in report.stages[:2]], [
+            "build_target",
+            "backend_reconstruct",
+        ])
 
 
 if __name__ == "__main__":

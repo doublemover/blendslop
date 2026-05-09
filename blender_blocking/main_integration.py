@@ -95,6 +95,7 @@ from reconstruction.ensemble import EnsembleRunner
 from reconstruction.registry import get_backend, register_builtin_backends
 from reconstruction.target_builder import TargetBuildResult, build_target_from_images
 from reconstruction.types import CandidateBudget, CandidateMetrics, CandidateRequest, CandidateResult
+from evaluation.cost_model import CostRecorder, attach_cost_report_to_candidate
 
 
 BACKEND_MODE_ALIASES = {
@@ -1243,7 +1244,21 @@ class BlockingWorkflow:
         selected_mode = mode or self.config.reconstruction.reconstruction_mode
         backend_name = self._backend_name_for_mode(selected_mode)
         register_builtin_backends()
-        target_build = self.build_reconstruction_target()
+        cost_recorder = CostRecorder()
+        with cost_recorder.stage(
+            "build_target",
+            work_units={
+                "views": float(len(self.views)),
+                "input_pixels": float(
+                    sum(
+                        int(image.shape[0]) * int(image.shape[1])
+                        for image in self.views.values()
+                        if hasattr(image, "shape") and len(image.shape) >= 2
+                    )
+                ),
+            },
+        ):
+            target_build = self.build_reconstruction_target()
         artifact_root = self._artifact_root()
         artifact_root.mkdir(parents=True, exist_ok=True)
         context = SimpleNamespace(
@@ -1258,17 +1273,22 @@ class BlockingWorkflow:
             runner = EnsembleRunner(
                 selection_policy=self.config.ensemble.selection_policy
             )
-            result = runner.run(
-                target=target_build.target,
-                candidates=self._configured_ensemble_candidates(),
-                artifact_root=artifact_root / "candidates",
-                context=context,
-                budget=CandidateBudget(
-                    timeout_s=self.config.ensemble.per_candidate_timeout_s,
-                    memory_budget_mb=self.config.visual_hull.memory_budget_mb,
-                ),
-                total_timeout_s=self.config.ensemble.total_timeout_s,
-            )
+            candidates = self._configured_ensemble_candidates()
+            with cost_recorder.stage(
+                "ensemble_reconstruct",
+                work_units={"candidates": float(len(candidates))},
+            ):
+                result = runner.run(
+                    target=target_build.target,
+                    candidates=candidates,
+                    artifact_root=artifact_root / "candidates",
+                    context=context,
+                    budget=CandidateBudget(
+                        timeout_s=self.config.ensemble.per_candidate_timeout_s,
+                        memory_budget_mb=self.config.visual_hull.memory_budget_mb,
+                    ),
+                    total_timeout_s=self.config.ensemble.total_timeout_s,
+                )
             self.reconstruction_result = result
             self._record_backend_manifest(
                 result.to_dict(),
@@ -1307,7 +1327,8 @@ class BlockingWorkflow:
                 artifact_root=artifact_root / "candidates",
                 context=context,
             )
-            errors = backend.validate_config(request.config)
+            with cost_recorder.stage("validate_config"):
+                errors = backend.validate_config(request.config)
             if errors:
                 result = CandidateResult(
                     candidate_id=backend_name,
@@ -1317,8 +1338,15 @@ class BlockingWorkflow:
                     warnings=(f"requested mode was {selected_mode}",),
                 )
             else:
-                result = backend.reconstruct(request)
+                with cost_recorder.stage(
+                    "backend_reconstruct",
+                    work_units={
+                        "constraints": float(len(target_build.target.constraints)),
+                    },
+                ):
+                    result = backend.reconstruct(request)
 
+        result = attach_cost_report_to_candidate(result, cost_recorder.report())
         self.reconstruction_result = result
         self._record_backend_manifest(
             result.to_dict(),

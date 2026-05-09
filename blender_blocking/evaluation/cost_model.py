@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from time import perf_counter
 from typing import Any, Mapping
 import tracemalloc
@@ -236,6 +236,29 @@ class CostRecorder:
             cache=cache_payload,
             throughput=dict(throughput or {}),
         )
+
+
+def attach_cost_report_to_candidate(
+    result: Any,
+    report: CostReport,
+    *,
+    key: str = "cost_report",
+) -> Any:
+    """Return a CandidateResult-like object with a serialized cost report attached."""
+    metrics = getattr(result, "metric_result", None)
+    if metrics is None:
+        return result
+    extras = getattr(metrics, "extras", {}) or {}
+    extras_payload = dict(extras) if isinstance(extras, Mapping) else {}
+    extras_payload[key] = report.to_dict()
+    elapsed_s = float(getattr(metrics, "elapsed_s", 0.0) or 0.0)
+    if elapsed_s <= 0.0 and report.total_wall_ms > 0.0:
+        elapsed_s = float(report.total_wall_ms / 1000.0)
+    try:
+        updated_metrics = replace(metrics, extras=extras_payload, elapsed_s=elapsed_s)
+        return replace(result, metric_result=updated_metrics)
+    except TypeError:
+        return result
 
 
 def cost_report_from_candidate(result: Any) -> CostReport:
