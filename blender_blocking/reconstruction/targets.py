@@ -34,10 +34,15 @@ def make_view_constraints(
     *,
     bboxes_by_view: Optional[Mapping[str, Bounds2D]] = None,
     uncertainties_by_view: Optional[Mapping[str, Any]] = None,
+    diagnostics_by_view: Optional[Mapping[str, Mapping[str, Any]]] = None,
 ) -> tuple[ViewConstraint, ...]:
     constraints: list[ViewConstraint] = []
     for view, mask in sorted(masks_by_view.items()):
-        shape = getattr(mask, "shape", None)
+        uncertainty = (uncertainties_by_view or {}).get(view)
+        mask_value = getattr(mask, "hard_mask", mask)
+        if uncertainty is None and hasattr(mask, "foreground_prob"):
+            uncertainty = mask
+        shape = getattr(mask_value, "shape", None)
         if shape is not None and len(shape) >= 2:
             resolution = (int(shape[1]), int(shape[0]))
         else:
@@ -45,10 +50,11 @@ def make_view_constraints(
         constraints.append(
             ViewConstraint(
                 view=view,
-                mask=mask,
+                mask=mask_value,
                 camera=make_axis_camera(view, resolution),
                 bbox=(bboxes_by_view or {}).get(view),
-                uncertainty=(uncertainties_by_view or {}).get(view),
+                uncertainty=uncertainty,
+                diagnostics=(diagnostics_by_view or {}).get(view, {}),
             )
         )
     return tuple(constraints)
@@ -58,6 +64,9 @@ def make_reconstruction_target(
     *,
     masks_by_view: Mapping[str, Any],
     profile_bands: Optional[Mapping[str, Sequence[ProfileBand]]] = None,
+    bboxes_by_view: Optional[Mapping[str, Bounds2D]] = None,
+    uncertainties_by_view: Optional[Mapping[str, Any]] = None,
+    diagnostics_by_view: Optional[Mapping[str, Mapping[str, Any]]] = None,
     bounds: Optional[Bounds3D] = None,
     config: Optional[Mapping[str, Any]] = None,
     constraints_payload: Optional[Mapping[str, Any]] = None,
@@ -67,7 +76,12 @@ def make_reconstruction_target(
     config_hash = hash_json(config or {})
     constraint_hash = hash_json(constraints_payload or {})
     return ReconstructionTarget(
-        constraints=make_view_constraints(masks_by_view),
+        constraints=make_view_constraints(
+            masks_by_view,
+            bboxes_by_view=bboxes_by_view,
+            uncertainties_by_view=uncertainties_by_view,
+            diagnostics_by_view=diagnostics_by_view,
+        ),
         profile_bands={
             view: tuple(bands) for view, bands in (profile_bands or {}).items()
         },

@@ -319,6 +319,7 @@ def apply_constraints_to_objective_scores(
     penalty = (1.0 - float(report["score"])) * float(constraint_weight)
     scores["constraint_satisfaction"] = float(report["score"])
     scores["constraint_penalty"] = penalty
+    scores["constraint_required_pass"] = 0.0 if report["hard_failed"] else 1.0
 
     if total_key is not None and total_key in scores:
         scores[total_key] = scores[total_key] + penalty
@@ -330,6 +331,7 @@ def apply_constraints_to_objective_scores(
     hard_failed = bool(report["hard_failed"]) and fail_on_unsatisfied_hard_constraints
     report["constraint_weight"] = float(constraint_weight)
     report["constraint_penalty"] = penalty
+    report["weighted_penalty"] = penalty
     report["hard_failed"] = hard_failed
     return ObjectiveConstraintResult(
         scores=scores,

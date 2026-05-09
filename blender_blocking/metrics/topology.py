@@ -42,6 +42,40 @@ class TopologyReport:
         score -= min(0.20, max(0, self.connected_components - 1) * 0.05)
         return max(0.0, score)
 
+    @property
+    def required(self) -> bool:
+        return True
+
+    @property
+    def passed(self) -> bool:
+        return (
+            self.watertight
+            and self.non_manifold_edges == 0
+            and self.degenerate_faces == 0
+            and self.loose_vertices == 0
+        )
+
+    @property
+    def reason(self) -> str:
+        if self.passed:
+            return ""
+        reasons = []
+        if self.boundary_edges:
+            reasons.append(f"{self.boundary_edges} boundary edges")
+        if self.non_manifold_edges:
+            reasons.append(f"{self.non_manifold_edges} non-manifold edges")
+        if self.degenerate_faces:
+            reasons.append(f"{self.degenerate_faces} degenerate faces")
+        if self.loose_vertices:
+            reasons.append(f"{self.loose_vertices} loose vertices")
+        if self.connected_components > 1:
+            reasons.append(f"{self.connected_components} connected components")
+        return "; ".join(reasons)
+
+    @property
+    def penalty(self) -> float:
+        return max(0.0, 1.0 - self.topology_score)
+
     def to_dict(self) -> dict[str, object]:
         return {
             "vertex_count": self.vertex_count,
@@ -55,6 +89,11 @@ class TopologyReport:
             "euler_characteristic": self.euler_characteristic,
             "watertight": self.watertight,
             "topology_score": self.topology_score,
+            "penalty": self.penalty,
+            "required": self.required,
+            "passed": self.passed,
+            "pass": self.passed,
+            "reason": self.reason,
         }
 
 

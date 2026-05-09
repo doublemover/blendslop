@@ -12,7 +12,7 @@ from config import BlockingConfig
 from reconstruction.ensemble import CandidateConfig, EnsembleRunner
 from reconstruction.registry import get_backend, list_backends, register_builtin_backends
 from reconstruction.target_builder import build_target_from_images, mask_to_profile_bands
-from reconstruction.types import CandidateBudget
+from reconstruction.types import CandidateBudget, UncertainProfileBand
 
 
 def _rgb_rect() -> np.ndarray:
@@ -38,6 +38,16 @@ class ReconstructionContractsTests(unittest.TestCase):
         self.assertGreater(len(result.target.profile_bands["front"]), 0)
         self.assertTrue(any(path.name.endswith(".npy") for path in result.artifact_paths.values()))
         self.assertEqual(result.target.bounds.size, (2.0, 2.0, 2.0))
+        self.assertIn("front", result.probabilities)
+        self.assertEqual(result.probabilities["front"].shape, result.masks["front"].shape)
+        self.assertIsNotNone(result.target.constraints[0].uncertainty)
+        self.assertTrue(
+            any(
+                path.name.endswith("-probability.npy")
+                for path in result.artifact_paths.values()
+            )
+        )
+        self.assertIsInstance(result.target.profile_bands["front"][0], UncertainProfileBand)
 
     def test_profile_bands_capture_multiple_intervals(self) -> None:
         mask = np.zeros((10, 20), dtype=bool)
@@ -48,6 +58,25 @@ class ReconstructionContractsTests(unittest.TestCase):
         self.assertEqual(len(bands), 3)
         self.assertEqual(len(bands[1].intervals), 2)
         self.assertEqual(len(bands[1].holes), 1)
+
+    def test_profile_bands_preserve_uncertainty_moments(self) -> None:
+        mask = np.zeros((10, 20), dtype=bool)
+        mask[:, 4:14] = True
+        probability = mask.astype(np.float32) * 0.75
+        confidence = np.full(mask.shape, 0.5, dtype=np.float32)
+
+        bands = mask_to_profile_bands(
+            mask,
+            sample_count=3,
+            view="front",
+            probability=probability,
+            confidence=confidence,
+        )
+
+        self.assertIsInstance(bands[1], UncertainProfileBand)
+        self.assertIn("probability_width_px", bands[1].moments)
+        self.assertGreater(bands[1].width_std, 0.0)
+        self.assertAlmostEqual(bands[1].confidence, 0.5)
 
     def test_builtin_registry_and_visual_hull_candidate(self) -> None:
         register_builtin_backends()

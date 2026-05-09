@@ -30,6 +30,93 @@ def _json_value(value: Any) -> Any:
     return value
 
 
+def _optional_float(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _metric_bool(value: Any, default: bool) -> bool:
+    if value is None:
+        return bool(default)
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "pass", "passed"}
+    return bool(value)
+
+
+def _normalize_per_view_metrics(
+    per_view: Mapping[str, Mapping[str, Any]],
+) -> Dict[str, Dict[str, Any]]:
+    normalized: Dict[str, Dict[str, Any]] = {}
+    if per_view is None:
+        return normalized
+    for view, metrics in per_view.items():
+        if hasattr(metrics, "to_dict"):
+            data = dict(metrics.to_dict())
+        elif isinstance(metrics, Mapping):
+            data = dict(metrics)
+        else:
+            data = {}
+
+        if "area_iou" not in data and "area_iou_loss" in data:
+            value = _optional_float(data.get("area_iou_loss"))
+            data["area_iou"] = None if value is None else max(0.0, 1.0 - value)
+        if "soft_iou" not in data and "soft_iou_loss" in data:
+            value = _optional_float(data.get("soft_iou_loss"))
+            data["soft_iou"] = None if value is None else max(0.0, 1.0 - value)
+
+        data.setdefault("area_iou", 0.0)
+        data.setdefault("boundary_iou", None)
+        data.setdefault("soft_iou", None)
+        data.setdefault("signed_distance_loss", None)
+
+        required = _metric_bool(data.get("required", data.get("pass_required")), True)
+        passed = _metric_bool(data.get("passed", data.get("pass")), not required)
+        reason = str(data.get("reason", ""))
+        if required and not passed and not reason:
+            reason = "required per-view metrics failed"
+
+        data["required"] = required
+        data["passed"] = passed
+        data["pass"] = passed
+        data["reason"] = reason
+        normalized[str(view)] = data
+    return normalized
+
+
+def _mean(values: Sequence[float]) -> float:
+    return sum(values) / float(len(values)) if values else 0.0
+
+
+def _shape_of(value: Any) -> Optional[Tuple[int, ...]]:
+    shape = getattr(value, "shape", None)
+    if shape is None:
+        return None
+    try:
+        return tuple(int(part) for part in shape)
+    except (TypeError, ValueError):
+        return None
+
+
+def _uncertainty_summary(value: Any) -> Optional[JsonMap]:
+    if value is None:
+        return None
+    return {
+        "source": getattr(value, "source", ""),
+        "threshold": getattr(value, "threshold", None),
+        "foreground_prob_shape": _shape_of(getattr(value, "foreground_prob", None)),
+        "hard_mask_shape": _shape_of(getattr(value, "hard_mask", None)),
+        "confidence_shape": _shape_of(getattr(value, "confidence", None)),
+        "boundary_uncertainty_shape": _shape_of(
+            getattr(value, "boundary_uncertainty", None)
+        ),
+        "diagnostics": _json_value(getattr(value, "diagnostics", {})),
+    }
+
+
 @dataclass(frozen=True)
 class Bounds2D:
     """Exclusive 2D bounds in pixel or normalized coordinates."""
@@ -176,6 +263,7 @@ class ViewConstraint:
             "bbox": _json_value(self.bbox),
             "diagnostics": _json_value(self.diagnostics),
             "has_uncertainty": self.uncertainty is not None,
+            "uncertainty": _uncertainty_summary(self.uncertainty),
         }
 
 
@@ -430,7 +518,15 @@ class CandidateRequest:
     def candidate_artifact_root(self) -> Optional[Path]:
         if self.artifact_root is None:
             return None
-        return self.artifact_root / self.candidate_id
+        artifact_root = self.artifact_root.resolve(strict=False)
+        candidate_root = (artifact_root / self.candidate_id).resolve(strict=False)
+        try:
+            candidate_root.relative_to(artifact_root)
+        except ValueError as exc:
+            raise ValueError(
+                f"candidate_id escapes artifact root: {self.candidate_id!r}"
+            ) from exc
+        return candidate_root
 
     def to_dict(self) -> JsonMap:
         return {
@@ -450,13 +546,73 @@ class CandidateMetrics:
     area_iou_mean: float = 0.0
     boundary_iou_mean: float = 0.0
     topology_score: float = 0.0
+    topology_penalty: float = 0.0
     uncertainty_consistency: float = 0.0
     constraint_score: float = 0.0
+    constraint_penalty: float = 0.0
+    constraint_report: Mapping[str, Any] = field(default_factory=dict)
     editability_score: float = 0.0
     complexity_penalty: float = 0.0
     elapsed_s: float = 0.0
     mesh_quality: Optional[MeshQualityReport] = None
     extras: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        per_view = _normalize_per_view_metrics(self.per_view)
+        object.__setattr__(self, "per_view", per_view)
+
+        area_values = [
+            value
+            for value in (_optional_float(item.get("area_iou")) for item in per_view.values())
+            if value is not None
+        ]
+        if area_values and self.area_iou_min == 0.0:
+            object.__setattr__(self, "area_iou_min", min(area_values))
+        if area_values and self.area_iou_mean == 0.0:
+            object.__setattr__(self, "area_iou_mean", _mean(area_values))
+
+        boundary_values = [
+            value
+            for value in (
+                _optional_float(item.get("boundary_iou")) for item in per_view.values()
+            )
+            if value is not None
+        ]
+        if boundary_values and self.boundary_iou_mean == 0.0:
+            object.__setattr__(self, "boundary_iou_mean", _mean(boundary_values))
+
+        extras = dict(self.extras) if isinstance(self.extras, Mapping) else {}
+        topology = extras.get("topology")
+        if isinstance(topology, Mapping):
+            topology_score = _optional_float(topology.get("topology_score"))
+            if topology_score is not None and self.topology_score == 0.0:
+                object.__setattr__(self, "topology_score", topology_score)
+            topology_penalty = _optional_float(topology.get("penalty"))
+            if topology_penalty is None and topology_score is not None:
+                topology_penalty = max(0.0, 1.0 - topology_score)
+            if topology_penalty is not None and self.topology_penalty == 0.0:
+                object.__setattr__(self, "topology_penalty", topology_penalty)
+        extra_topology_penalty = _optional_float(extras.get("topology_penalty"))
+        if extra_topology_penalty is not None and self.topology_penalty == 0.0:
+            object.__setattr__(self, "topology_penalty", extra_topology_penalty)
+
+        report = (
+            dict(self.constraint_report)
+            if isinstance(self.constraint_report, Mapping)
+            else {}
+        )
+        extra_report = extras.get("constraint_report")
+        if not report and isinstance(extra_report, Mapping):
+            report = dict(extra_report)
+            object.__setattr__(self, "constraint_report", report)
+        report_score = _optional_float(report.get("score"))
+        if report_score is not None and self.constraint_score == 0.0:
+            object.__setattr__(self, "constraint_score", report_score)
+        report_penalty = _optional_float(
+            report.get("constraint_penalty", report.get("penalty"))
+        )
+        if report_penalty is not None and self.constraint_penalty == 0.0:
+            object.__setattr__(self, "constraint_penalty", report_penalty)
 
     def to_dict(self) -> JsonMap:
         return {
@@ -465,8 +621,11 @@ class CandidateMetrics:
             "area_iou_mean": self.area_iou_mean,
             "boundary_iou_mean": self.boundary_iou_mean,
             "topology_score": self.topology_score,
+            "topology_penalty": self.topology_penalty,
             "uncertainty_consistency": self.uncertainty_consistency,
             "constraint_score": self.constraint_score,
+            "constraint_penalty": self.constraint_penalty,
+            "constraint_report": _json_value(self.constraint_report),
             "editability_score": self.editability_score,
             "complexity_penalty": self.complexity_penalty,
             "elapsed_s": self.elapsed_s,

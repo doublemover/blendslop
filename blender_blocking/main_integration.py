@@ -95,6 +95,23 @@ from reconstruction.registry import get_backend, register_builtin_backends
 from reconstruction.target_builder import TargetBuildResult, build_target_from_images
 from reconstruction.types import CandidateBudget, CandidateMetrics, CandidateRequest, CandidateResult
 
+
+BACKEND_MODE_ALIASES = {
+    "loft_profile": "profile_loft",
+}
+
+BACKEND_RECONSTRUCTION_MODES = {
+    "loft_profile",
+    "profile_loft",
+    "silhouette_intersection",
+    "visual_hull_voxel",
+    "hybrid_loft_hull",
+    "primitive_fit_refine",
+    "gaussian_ellipsoid_proxy",
+    "differentiable_refine",
+    "ensemble",
+}
+
 # Import Blender modules (only available when running in Blender)
 try:
     import bpy
@@ -1082,6 +1099,14 @@ class BlockingWorkflow:
         """Return the scoped artifact root for this workflow run."""
         return Path("test_output") / "reconstruction" / self.context.run_id
 
+    def _backend_name_for_mode(self, mode: str) -> str:
+        """Return the canonical backend name for a reconstruction mode."""
+        return BACKEND_MODE_ALIASES.get(mode, mode)
+
+    def _is_backend_mode(self, mode: str) -> bool:
+        """Return whether a mode must route through the backend contract."""
+        return mode in BACKEND_RECONSTRUCTION_MODES
+
     def _target_bounds_minmax(
         self, silhouettes: Optional[Mapping[str, np.ndarray]] = None
     ) -> Tuple[Tuple[float, float, float], Tuple[float, float, float]]:
@@ -1109,6 +1134,7 @@ class BlockingWorkflow:
 
     def _config_for_backend(self, backend_name: str) -> Dict[str, Any]:
         """Return backend-specific config payloads from BlockingConfig."""
+        backend_name = self._backend_name_for_mode(backend_name)
         if backend_name == "legacy":
             return self.config.reconstruction.to_dict()
         if backend_name == "profile_loft":
@@ -1124,6 +1150,7 @@ class BlockingWorkflow:
         if backend_name == "hybrid_loft_hull":
             return {
                 **self.config.visual_hull.to_dict(),
+                **self.config.reconstruction.to_dict(),
                 "profile_sampling": self.config.profile_sampling.to_dict(),
                 "mesh_from_profile": self.config.mesh_from_profile.to_dict(),
             }
@@ -1203,13 +1230,17 @@ class BlockingWorkflow:
     ) -> Optional[Any]:
         """Run the typed backend registry path for ambitious modes."""
         selected_mode = mode or self.config.reconstruction.reconstruction_mode
+        backend_name = self._backend_name_for_mode(selected_mode)
         register_builtin_backends()
         target_build = self.build_reconstruction_target()
         artifact_root = self._artifact_root()
+        artifact_root.mkdir(parents=True, exist_ok=True)
         context = SimpleNamespace(
             workflow=self,
             blender_available=BLENDER_AVAILABLE,
             generation_context=self.context,
+            requested_mode=selected_mode,
+            backend_name=backend_name,
         )
 
         if selected_mode == "ensemble":
@@ -1230,7 +1261,6 @@ class BlockingWorkflow:
             self._record_backend_manifest(result.to_dict(), target_build)
             return result.selected.payload if result.selected else None
 
-        backend_name = "profile_loft" if selected_mode == "loft_profile" else selected_mode
         backend = get_backend(backend_name)
         if backend.capabilities.requires_blender and not BLENDER_AVAILABLE:
             result = CandidateResult(
@@ -1238,7 +1268,10 @@ class BlockingWorkflow:
                 backend_name=backend_name,
                 status="skipped",
                 metric_result=CandidateMetrics(),
-                warnings=(f"{backend_name} requires Blender",),
+                warnings=(
+                    f"{backend_name} requires Blender",
+                    f"requested mode was {selected_mode}",
+                ),
             )
         else:
             request = CandidateRequest(
@@ -1259,6 +1292,7 @@ class BlockingWorkflow:
                     backend_name=backend_name,
                     status="failed",
                     errors=tuple(errors),
+                    warnings=(f"requested mode was {selected_mode}",),
                 )
             else:
                 result = backend.reconstruct(request)
@@ -1277,6 +1311,7 @@ class BlockingWorkflow:
         outputs = {
             "backend_result": result_payload,
             "target": target_build.to_manifest_fragment(),
+            "artifact_root": str(self._artifact_root()),
         }
         warnings = list(target_build.warnings)
         errors = list(result_payload.get("errors", []))
@@ -1322,33 +1357,15 @@ class BlockingWorkflow:
         # Step 4: Create 3D blockout or pure backend artifact.
         result = None
         mode = self.config.reconstruction.reconstruction_mode
-        backend_modes = {
-            "visual_hull_voxel",
-            "hybrid_loft_hull",
-            "primitive_fit_refine",
-            "gaussian_ellipsoid_proxy",
-            "differentiable_refine",
-            "ensemble",
-        }
         if BLENDER_AVAILABLE:
-            if mode in {"loft_profile", "profile_loft"}:
-                with self.context.time_block("create_3d_blockout_loft"):
-                    result = self.create_3d_blockout_loft(num_slices=num_slices)
-            elif mode == "silhouette_intersection":
-                with self.context.time_block(
-                    "create_3d_blockout_silhouette_intersection"
-                ):
-                    result = self.create_3d_blockout_silhouette_intersection(
-                        num_slices=num_slices
-                    )
-            elif mode in backend_modes:
+            if self._is_backend_mode(mode):
                 with self.context.time_block(f"backend_{mode}"):
                     result = self.run_backend_reconstruction(mode=mode)
             else:
                 with self.context.time_block("create_3d_blockout"):
                     result = self.create_3d_blockout(num_slices=num_slices)
         else:
-            if mode in backend_modes:
+            if self._is_backend_mode(mode):
                 with self.context.time_block(f"backend_{mode}"):
                     result = self.run_backend_reconstruction(mode=mode)
             else:

@@ -325,6 +325,6 @@ def compute_silhouette_metrics(
         union=area.union,
         ref_area=area.ref_area,
         render_area=area.candidate_area,
-        pass_required=pass_required,
+        required=pass_required,
         warnings=warnings,
     )

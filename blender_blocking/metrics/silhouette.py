@@ -15,15 +15,21 @@ class SilhouetteMetricResult:
 
     view: str
     area_iou: float
-    boundary_iou: Optional[float]
-    soft_iou: Optional[float]
-    signed_distance_loss: Optional[float]
-    intersection: int
-    union: int
-    ref_area: int
-    render_area: int
-    pass_required: bool
-    warnings: Tuple[str, ...]
+    boundary_iou: Optional[float] = None
+    soft_iou: Optional[float] = None
+    signed_distance_loss: Optional[float] = None
+    intersection: int = 0
+    union: int = 0
+    ref_area: int = 0
+    render_area: int = 0
+    required: bool = True
+    passed: bool = True
+    reason: str = ""
+    warnings: Tuple[str, ...] = ()
+
+    @property
+    def pass_required(self) -> bool:
+        return self.required
 
     def to_dict(self) -> Dict[str, object]:
         return {
@@ -36,7 +42,10 @@ class SilhouetteMetricResult:
             "union": self.union,
             "ref_area": self.ref_area,
             "render_area": self.render_area,
-            "pass_required": self.pass_required,
+            "required": self.required,
+            "passed": self.passed,
+            "pass": self.passed,
+            "reason": self.reason,
             "warnings": list(self.warnings),
         }
 
@@ -57,6 +66,23 @@ def _boundary_band(mask: np.ndarray, dilation_radius: int) -> np.ndarray:
     boundary = np.logical_xor(mask_bool, eroded.astype(bool))
     dilated = cv2.dilate(boundary.astype(np.uint8), kernel)
     return dilated.astype(bool)
+
+
+def area_iou(
+    mask_a: np.ndarray,
+    mask_b: np.ndarray,
+) -> Tuple[float, int, int, int, int]:
+    """Compute hard-mask area IoU plus raw area counts."""
+    a = _as_bool(mask_a)
+    b = _as_bool(mask_b)
+    if a.shape != b.shape:
+        raise ValueError("Masks must have matching shapes for area IoU")
+    intersection = int(np.logical_and(a, b).sum())
+    union = int(np.logical_or(a, b).sum())
+    area_a = int(a.sum())
+    area_b = int(b.sum())
+    value = float(intersection / union) if union else 0.0
+    return value, intersection, union, area_a, area_b
 
 
 def boundary_iou(
@@ -151,3 +177,78 @@ def signed_distance_silhouette_loss(
         denom = float(max(ref.shape)) if ref.shape else 1.0
         loss /= max(denom, 1.0)
     return loss
+
+
+def silhouette_metric_result(
+    reference_mask: np.ndarray,
+    candidate_mask: np.ndarray,
+    *,
+    view: str = "",
+    required: bool = True,
+    min_area_iou: float = 0.0,
+    min_boundary_iou: Optional[float] = None,
+    max_signed_distance_loss: Optional[float] = None,
+    reference_probability: Optional[np.ndarray] = None,
+    candidate_probability: Optional[np.ndarray] = None,
+    reference_confidence: Optional[np.ndarray] = None,
+    candidate_confidence: Optional[np.ndarray] = None,
+    boundary_dilation_radius: int = 2,
+) -> SilhouetteMetricResult:
+    """Build the standard per-view silhouette metric contract."""
+    area, intersection, union, ref_area, render_area = area_iou(
+        reference_mask, candidate_mask
+    )
+    b_iou, warnings = boundary_iou(
+        reference_mask,
+        candidate_mask,
+        dilation_radius=boundary_dilation_radius,
+        confidence_a=reference_confidence,
+        confidence_b=candidate_confidence,
+    )
+    s_iou = None
+    if reference_probability is not None or candidate_probability is not None:
+        ref_prob = (
+            reference_probability
+            if reference_probability is not None
+            else _as_bool(reference_mask).astype(np.float32)
+        )
+        cand_prob = (
+            candidate_probability
+            if candidate_probability is not None
+            else _as_bool(candidate_mask).astype(np.float32)
+        )
+        s_iou = soft_iou(ref_prob, cand_prob)
+
+    sdf_loss = signed_distance_silhouette_loss(reference_mask, candidate_mask)
+
+    reasons = []
+    if area < float(min_area_iou):
+        reasons.append(f"area_iou {area:.4f} below {float(min_area_iou):.4f}")
+    if min_boundary_iou is not None and b_iou < float(min_boundary_iou):
+        reasons.append(
+            f"boundary_iou {b_iou:.4f} below {float(min_boundary_iou):.4f}"
+        )
+    if (
+        max_signed_distance_loss is not None
+        and sdf_loss > float(max_signed_distance_loss)
+    ):
+        reasons.append(
+            "signed_distance_loss "
+            f"{sdf_loss:.4f} above {float(max_signed_distance_loss):.4f}"
+        )
+
+    return SilhouetteMetricResult(
+        view=view,
+        area_iou=area,
+        boundary_iou=b_iou,
+        soft_iou=s_iou,
+        signed_distance_loss=sdf_loss,
+        intersection=intersection,
+        union=union,
+        ref_area=ref_area,
+        render_area=render_area,
+        required=bool(required),
+        passed=not reasons,
+        reason="; ".join(reasons),
+        warnings=warnings,
+    )

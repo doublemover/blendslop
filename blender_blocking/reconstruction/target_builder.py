@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
@@ -29,6 +29,7 @@ from .types import (
     ProfileBand,
     ProfileIntervalPx,
     ReconstructionTarget,
+    UncertainProfileBand,
     ViewConstraint,
 )
 
@@ -40,6 +41,7 @@ class TargetBuildResult:
     target: ReconstructionTarget
     masks: Mapping[str, np.ndarray]
     confidences: Mapping[str, np.ndarray]
+    probabilities: Mapping[str, np.ndarray]
     uncertainties: Mapping[str, Any]
     constraint_set: ConstraintSet
     constraint_reports: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
@@ -50,6 +52,7 @@ class TargetBuildResult:
         return {
             "target": self.target.to_dict(),
             "views": sorted(self.masks),
+            "probability_views": sorted(self.probabilities),
             "constraint_hash": constraint_set_hash(self.constraint_set),
             "constraint_reports": dict(self.constraint_reports),
             "warnings": list(self.warnings),
@@ -82,6 +85,7 @@ def build_target_from_images(
     raw_masks: dict[str, np.ndarray] = {}
     uncertainties: dict[str, Any] = {}
     confidences: dict[str, np.ndarray] = {}
+    probabilities: dict[str, np.ndarray] = {}
     bboxes: dict[str, Bounds2D] = {}
     diagnostics: dict[str, Mapping[str, Any]] = {}
 
@@ -93,6 +97,7 @@ def build_target_from_images(
         raw_masks[view] = selected.mask
         uncertainties[view] = uncertain
         confidences[view] = uncertain.confidence
+        probabilities[view] = uncertain.foreground_prob
         if selected.bbox is not None:
             bboxes[view] = Bounds2D.from_xyxy(selected.bbox.to_xyxy())
         diagnostics[view] = {
@@ -113,13 +118,37 @@ def build_target_from_images(
         for view, result in constrained.items():
             raw_masks[view] = result.mask
             confidences[view] = result.confidence
+            uncertainties[view] = _replace_uncertain_mask(
+                uncertainties.get(view),
+                hard_mask=result.mask,
+                confidence=result.confidence,
+                constraint_report=result.report,
+            )
+            probability = getattr(uncertainties[view], "foreground_prob", None)
+            if probability is not None:
+                probabilities[view] = probability
             constraint_reports[view] = result.report
+            diagnostics[view] = {
+                **dict(diagnostics.get(view, {})),
+                "constraints": result.report,
+                "uncertainty": dict(
+                    getattr(uncertainties[view], "diagnostics", {}) or {}
+                ),
+            }
             bbox = _bbox_from_mask(result.mask)
             if bbox is not None:
                 bboxes[view] = Bounds2D.from_xyxy(bbox)
 
     profile_bands = {
-        view: tuple(mask_to_profile_bands(mask, sample_count=profile_samples, view=view))
+        view: tuple(
+            mask_to_profile_bands(
+                mask,
+                sample_count=profile_samples,
+                view=view,
+                probability=probabilities.get(view),
+                confidence=confidences.get(view),
+            )
+        )
         for view, mask in raw_masks.items()
     }
     bounds = _bounds_from_minmax(bounds_minmax)
@@ -139,6 +168,8 @@ def build_target_from_images(
         extras={
             "constraint_payload": constraints_payload,
             "view_diagnostics": diagnostics,
+            "uncertainty_views": sorted(uncertainties),
+            "probability_views": sorted(probabilities),
             "profile_samples": int(profile_samples),
         },
     )
@@ -147,6 +178,7 @@ def build_target_from_images(
         target=target,
         masks=raw_masks,
         confidences=confidences,
+        probabilities=probabilities,
         diagnostics=diagnostics,
         constraints_payload=constraints_payload,
     )
@@ -154,6 +186,7 @@ def build_target_from_images(
         target=target,
         masks=raw_masks,
         confidences=confidences,
+        probabilities=probabilities,
         uncertainties=uncertainties,
         constraint_set=constraint_set,
         constraint_reports=constraint_reports,
@@ -167,11 +200,15 @@ def mask_to_profile_bands(
     *,
     sample_count: int,
     view: str = "",
+    probability: Optional[np.ndarray] = None,
+    confidence: Optional[np.ndarray] = None,
 ) -> tuple[ProfileBand, ...]:
     """Sample all foreground intervals per row instead of one width per height."""
     mask_bool = np.asarray(mask).astype(bool, copy=False)
     if mask_bool.ndim != 2:
         raise ValueError("mask must be 2D")
+    probability_map = _optional_profile_map(probability, mask_bool.shape, "probability")
+    confidence_map = _optional_profile_map(confidence, mask_bool.shape, "confidence")
     height, _width = mask_bool.shape
     if height == 0:
         return ()
@@ -183,50 +220,111 @@ def mask_to_profile_bands(
     bands = []
     denom = max(1, height - 1)
     for row in rows:
-        intervals = _row_intervals(mask_bool[int(row), :])
+        row_index = int(row)
+        row_mask = mask_bool[row_index, :]
+        probability_row = None if probability_map is None else probability_map[row_index, :]
+        confidence_row = None if confidence_map is None else confidence_map[row_index, :]
+        intervals = _row_intervals(row_mask, confidence=confidence_row)
         dominant = max(intervals, key=lambda item: item.width, default=None)
         total_width = float(sum(interval.width for interval in intervals))
-        holes = _holes_between_intervals(intervals)
-        bands.append(
-            ProfileBand(
-                t=float(1.0 - float(row) / denom),
-                intervals=tuple(intervals),
-                center_x=None if dominant is None else dominant.center,
-                width_px=total_width,
-                holes=tuple(holes),
-                moments=_row_moments(intervals),
-                confidence=1.0 if intervals else 0.0,
-                source_view=view,
-            )
+        holes = _holes_between_intervals(intervals, confidence=confidence_row)
+        moments = _row_moments(intervals)
+        uncertainty_moments, center_std, width_std = _row_uncertainty_moments(
+            row_mask,
+            probability=probability_row,
+            confidence=confidence_row,
         )
+        moments.update(uncertainty_moments)
+        band_kwargs = dict(
+            t=float(1.0 - float(row) / denom),
+            intervals=tuple(intervals),
+            center_x=None if dominant is None else dominant.center,
+            width_px=total_width,
+            holes=tuple(holes),
+            moments=moments,
+            confidence=_row_band_confidence(row_mask, confidence_row),
+            source_view=view,
+        )
+        if probability_map is not None or confidence_map is not None:
+            bands.append(
+                UncertainProfileBand(
+                    **band_kwargs,
+                    center_std=center_std,
+                    width_std=width_std,
+                )
+            )
+        else:
+            bands.append(ProfileBand(**band_kwargs))
     return tuple(bands)
 
 
-def _row_intervals(row: np.ndarray) -> tuple[ProfileIntervalPx, ...]:
+def _optional_profile_map(
+    values: Optional[np.ndarray],
+    shape: tuple[int, int],
+    name: str,
+) -> Optional[np.ndarray]:
+    if values is None:
+        return None
+    array = np.asarray(values, dtype=np.float32)
+    if array.shape != shape:
+        raise ValueError(f"{name} shape must match mask shape")
+    return np.clip(array, 0.0, 1.0)
+
+
+def _row_intervals(
+    row: np.ndarray,
+    *,
+    confidence: Optional[np.ndarray] = None,
+) -> tuple[ProfileIntervalPx, ...]:
     values = np.asarray(row).astype(bool, copy=False)
     if values.size == 0 or not values.any():
         return ()
+    confidence_values = (
+        None if confidence is None else np.asarray(confidence, dtype=np.float32)
+    )
+    if confidence_values is not None and confidence_values.shape != values.shape:
+        raise ValueError("confidence row shape must match mask row shape")
     padded = np.pad(values.astype(np.int8), (1, 1), constant_values=0)
     changes = np.diff(padded)
     starts = np.where(changes == 1)[0]
     stops = np.where(changes == -1)[0]
-    return tuple(
-        ProfileIntervalPx(float(start), float(stop), confidence=1.0, source="mask")
-        for start, stop in zip(starts, stops)
-    )
+    intervals = []
+    for start, stop in zip(starts, stops):
+        interval_confidence = 1.0
+        if confidence_values is not None and stop > start:
+            interval_confidence = float(np.mean(confidence_values[start:stop]))
+        intervals.append(
+            ProfileIntervalPx(
+                float(start),
+                float(stop),
+                confidence=interval_confidence,
+                source="mask",
+            )
+        )
+    return tuple(intervals)
 
 
 def _holes_between_intervals(
     intervals: Sequence[ProfileIntervalPx],
+    *,
+    confidence: Optional[np.ndarray] = None,
 ) -> tuple[ProfileIntervalPx, ...]:
     holes = []
+    confidence_values = (
+        None if confidence is None else np.asarray(confidence, dtype=np.float32)
+    )
     for left, right in zip(intervals, intervals[1:]):
         if right.x0 > left.x1:
+            start = int(round(left.x1))
+            stop = int(round(right.x0))
+            hole_confidence = 1.0
+            if confidence_values is not None and stop > start:
+                hole_confidence = float(np.mean(confidence_values[start:stop]))
             holes.append(
                 ProfileIntervalPx(
                     float(left.x1),
                     float(right.x0),
-                    confidence=1.0,
+                    confidence=hole_confidence,
                     source="hole",
                 )
             )
@@ -245,6 +343,95 @@ def _row_moments(intervals: Sequence[ProfileIntervalPx]) -> dict[str, float]:
         "total_width": total,
         "weighted_center_x": weighted_center,
     }
+
+
+def _row_band_confidence(
+    row_mask: np.ndarray,
+    confidence: Optional[np.ndarray],
+) -> float:
+    mask = np.asarray(row_mask).astype(bool, copy=False)
+    if not mask.any():
+        return 0.0
+    if confidence is None:
+        return 1.0
+    values = np.asarray(confidence, dtype=np.float32)
+    return float(np.mean(values[mask])) if values.shape == mask.shape else 0.0
+
+
+def _row_uncertainty_moments(
+    row_mask: np.ndarray,
+    *,
+    probability: Optional[np.ndarray],
+    confidence: Optional[np.ndarray],
+) -> tuple[dict[str, float], float, float]:
+    moments: dict[str, float] = {}
+    mask = np.asarray(row_mask).astype(bool, copy=False)
+    center_std = 0.0
+    width_std = 0.0
+
+    if probability is not None:
+        prob = np.clip(np.asarray(probability, dtype=np.float64), 0.0, 1.0)
+        mass = float(prob.sum())
+        width_variance = float(np.sum(prob * (1.0 - prob)))
+        width_std = float(np.sqrt(max(0.0, width_variance)))
+        moments["probability_width_px"] = mass
+        moments["probability_width_variance"] = width_variance
+        if mass > 0.0:
+            positions = np.arange(prob.size, dtype=np.float64) + 0.5
+            center = float(np.average(positions, weights=prob))
+            variance = float(np.average((positions - center) ** 2, weights=prob))
+            center_std = float(np.sqrt(max(0.0, variance / max(mass, 1.0))))
+            moments["probability_center_x"] = center
+            moments["probability_center_variance"] = variance
+
+    if confidence is not None:
+        conf = np.clip(np.asarray(confidence, dtype=np.float64), 0.0, 1.0)
+        moments["row_confidence_mean"] = float(np.mean(conf)) if conf.size else 0.0
+        if mask.any() and conf.shape == mask.shape:
+            moments["foreground_confidence_mean"] = float(np.mean(conf[mask]))
+        if probability is None and mask.any() and conf.shape == mask.shape:
+            width_std = float(
+                np.sqrt(max(0.0, np.sum((1.0 - conf[mask]) * conf[mask])))
+            )
+
+    return moments, center_std, width_std
+
+
+def _replace_uncertain_mask(
+    uncertain: Any,
+    *,
+    hard_mask: np.ndarray,
+    confidence: np.ndarray,
+    constraint_report: Optional[Mapping[str, Any]] = None,
+) -> Any:
+    if uncertain is None:
+        return None
+    hard = np.asarray(hard_mask).astype(bool, copy=True)
+    conf = np.asarray(confidence, dtype=np.float32).copy()
+    probability = np.asarray(
+        getattr(uncertain, "foreground_prob", hard.astype(np.float32)),
+        dtype=np.float32,
+    ).copy()
+    if probability.shape == hard.shape:
+        previous_hard = np.asarray(
+            getattr(uncertain, "hard_mask", hard),
+        ).astype(bool, copy=False)
+        if previous_hard.shape == hard.shape:
+            probability[hard & ~previous_hard] = 1.0
+            probability[~hard & previous_hard] = 0.0
+    diagnostics = dict(getattr(uncertain, "diagnostics", {}) or {})
+    if constraint_report is not None:
+        diagnostics["constraint_report"] = dict(constraint_report)
+    try:
+        return replace(
+            uncertain,
+            foreground_prob=probability,
+            hard_mask=hard,
+            confidence=conf,
+            diagnostics=diagnostics,
+        )
+    except TypeError:
+        return uncertain
 
 
 def _view_constraints(
@@ -294,6 +481,7 @@ def _write_target_artifacts(
     target: ReconstructionTarget,
     masks: Mapping[str, np.ndarray],
     confidences: Mapping[str, np.ndarray],
+    probabilities: Mapping[str, np.ndarray],
     diagnostics: Mapping[str, Mapping[str, Any]],
     constraints_payload: Mapping[str, Any],
 ) -> Mapping[str, Path]:
@@ -313,4 +501,8 @@ def _write_target_artifacts(
         conf_path = target_dir / f"{view}-confidence.npy"
         np.save(conf_path, np.asarray(confidence, dtype=np.float32))
         paths[f"{view}_confidence"] = conf_path
+    for view, probability in probabilities.items():
+        prob_path = target_dir / f"{view}-probability.npy"
+        np.save(prob_path, np.asarray(probability, dtype=np.float32))
+        paths[f"{view}_probability"] = prob_path
     return paths

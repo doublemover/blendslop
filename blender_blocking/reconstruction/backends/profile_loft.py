@@ -1,11 +1,26 @@
-"""Profile-loft backend wrapper."""
+"""Backend-owned profile-loft reconstruction."""
 
 from __future__ import annotations
 
+import time
 from typing import Any, Mapping
 
+import numpy as np
+
+from geometry.dual_profile import build_elliptical_profile_from_views
+from geometry.profile_models import PixelScale
+from geometry.slicing import sample_elliptical_slices
+
 from ..backend import BackendCapabilities, BaseBackend, BackendBudget
-from ..types import CandidateMetrics, CandidateRequest, CandidateResult
+from ..types import CandidateRequest, CandidateResult
+from .blender_metrics import candidate_metrics_from_blender_object
+
+
+def _mask_for_view(request: CandidateRequest, view: str) -> np.ndarray | None:
+    for constraint in request.target.constraints:
+        if constraint.view == view:
+            return np.asarray(constraint.mask, dtype=bool)
+    return None
 
 
 class ProfileLoftBackend(BaseBackend):
@@ -31,15 +46,86 @@ class ProfileLoftBackend(BaseBackend):
             notes=("profile loft avoids legacy sequential boolean unions",),
         )
 
+    def validate_config(self, config: Mapping[str, Any]) -> list[str]:
+        errors: list[str] = []
+        if int(config.get("num_slices", 0)) < 1:
+            errors.append("num_slices must be >= 1")
+        if float(config.get("unit_scale", 0.0)) <= 0:
+            errors.append("unit_scale must be > 0")
+        if int(config.get("num_samples", 0)) < 2:
+            errors.append("num_samples must be >= 2")
+        if int(config.get("radial_segments", 0)) < 3:
+            errors.append("radial_segments must be >= 3")
+        return errors
+
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
-        workflow = getattr(request.context, "workflow", None)
-        if workflow is None:
-            return self.unavailable(
-                request,
-                "ProfileLoftBackend requires a live BlockingWorkflow context.",
+        if not getattr(request.context, "blender_available", False):
+            return self.unavailable(request, "profile_loft requires Blender mesh APIs")
+
+        started = time.perf_counter()
+        warnings: list[str] = []
+        front_mask = _mask_for_view(request, "front")
+        side_mask = _mask_for_view(request, "side")
+        if front_mask is None and side_mask is None:
+            return CandidateResult(
+                candidate_id=request.candidate_id,
+                backend_name=self.name,
+                status="failed",
+                errors=("profile_loft requires at least one front or side mask",),
             )
+        if front_mask is None or side_mask is None:
+            warnings.append("single_view_profile_loft_used_circular_fallback")
+
         try:
-            obj = workflow.create_3d_blockout_loft()
+            from integration.blender_ops.profile_loft_mesh import (
+                create_loft_mesh_from_slices,
+            )
+            from integration.blender_ops.scene_setup import add_camera, add_lighting, setup_scene
+            from utils.manifest import apply_object_tags
+
+            setup_scene(clear_existing=True)
+            scale = PixelScale(unit_per_px=float(request.config.get("unit_scale", 0.01)))
+            profile = build_elliptical_profile_from_views(
+                front_mask,
+                side_mask,
+                scale,
+                num_samples=int(request.config.get("num_samples", 100)),
+                z0=0.0,
+                height_strategy=str(request.config.get("height_strategy", "front")),
+                fallback_policy=str(request.config.get("fallback_policy", "circular")),
+                min_radius_u=float(request.config.get("min_radius_u", 0.0)),
+                sample_policy=str(request.config.get("sample_policy", "endpoints")),
+                fill_strategy=str(request.config.get("fill_strategy", "interp_linear")),
+                smoothing_window=int(request.config.get("smoothing_window", 3)),
+                enable_offsets=bool(request.config.get("enable_offsets", False)),
+            )
+            slices = sample_elliptical_slices(
+                profile,
+                num_slices=int(request.config.get("num_slices", 10)),
+                sampling=str(request.config.get("sample_policy", "endpoints")),
+            )
+            obj = create_loft_mesh_from_slices(
+                slices,
+                name="Blockout_Mesh",
+                radial_segments=int(request.config.get("radial_segments", 24)),
+                adaptive_radial_segments=bool(
+                    request.config.get("adaptive_radial_segments", False)
+                ),
+                cap_mode=str(request.config.get("cap_mode", "fan")),
+                min_radius_u=float(request.config.get("min_radius_u", 0.0)),
+                merge_threshold_u=float(request.config.get("merge_threshold_u", 0.0)),
+                recalc_normals=bool(request.config.get("recalc_normals", True)),
+                shade_smooth=bool(request.config.get("shade_smooth", True)),
+                weld_degenerate_rings=bool(
+                    request.config.get("weld_degenerate_rings", True)
+                ),
+            )
+            if obj is not None:
+                generation_context = getattr(request.context, "generation_context", None)
+                if generation_context is not None:
+                    apply_object_tags(obj, role="final", context=generation_context)
+                add_camera()
+                add_lighting()
         except Exception as exc:
             return CandidateResult(
                 candidate_id=request.candidate_id,
@@ -47,11 +133,30 @@ class ProfileLoftBackend(BaseBackend):
                 status="failed",
                 errors=(str(exc),),
             )
+        elapsed_s = time.perf_counter() - started
+        if obj is None:
+            return CandidateResult(
+                candidate_id=request.candidate_id,
+                backend_name=self.name,
+                status="failed",
+                errors=("profile loft mesh generation returned no object",),
+                warnings=tuple(warnings),
+            )
+        metrics = candidate_metrics_from_blender_object(
+            obj,
+            editability_score=0.55,
+            elapsed_s=elapsed_s,
+            extras={
+                "slice_count": int(request.config.get("num_slices", 10)),
+                "front_mask_available": front_mask is not None,
+                "side_mask_available": side_mask is not None,
+            },
+        )
         return CandidateResult(
             candidate_id=request.candidate_id,
             backend_name=self.name,
-            status="success" if obj is not None else "failed",
-            metric_result=CandidateMetrics(editability_score=0.55),
+            status="success",
+            metric_result=metrics,
             payload=obj,
-            warnings=() if obj is not None else ("profile loft returned no object",),
+            warnings=tuple(warnings),
         )

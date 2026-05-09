@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 from .types import CandidateResult, CandidateScore, CandidateScoreTerm
 
@@ -14,13 +14,22 @@ class CandidateScoreWeights:
     min_area_iou: float = 200.0
     mean_boundary_iou: float = 150.0
     topology: float = 100.0
+    topology_penalty: float = -100.0
     uncertainty: float = 80.0
     editability: float = 60.0
     constraint: float = 60.0
+    constraint_penalty: float = -120.0
     degraded_penalty: float = -50.0
     complexity_penalty: float = -30.0
     time_penalty: float = -20.0
     failure_penalty: float = -10000.0
+
+
+def _metric_bool(metrics: Mapping[str, Any], key: str, default: bool) -> bool:
+    value = metrics.get(key, default)
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "pass", "passed"}
+    return bool(value)
 
 
 def _required_views_pass(result: CandidateResult) -> float:
@@ -28,7 +37,11 @@ def _required_views_pass(result: CandidateResult) -> float:
     if not per_view:
         return 0.0
     for metrics in per_view.values():
-        if metrics.get("required", True) and not metrics.get("passed", False):
+        if not isinstance(metrics, Mapping):
+            return 0.0
+        required = _metric_bool(metrics, "required", True)
+        passed = _metric_bool(metrics, "passed", _metric_bool(metrics, "pass", False))
+        if required and not passed:
             return 0.0
     return 1.0
 
@@ -66,12 +79,22 @@ def score_candidate(
             ),
             CandidateScoreTerm("topology", metrics.topology_score, weights.topology),
             CandidateScoreTerm(
+                "topology_penalty",
+                metrics.topology_penalty,
+                weights.topology_penalty,
+            ),
+            CandidateScoreTerm(
                 "uncertainty_consistency",
                 metrics.uncertainty_consistency,
                 weights.uncertainty,
             ),
             CandidateScoreTerm(
                 "constraint_score", metrics.constraint_score, weights.constraint
+            ),
+            CandidateScoreTerm(
+                "constraint_penalty",
+                metrics.constraint_penalty,
+                weights.constraint_penalty,
             ),
             CandidateScoreTerm(
                 "editability", metrics.editability_score, weights.editability

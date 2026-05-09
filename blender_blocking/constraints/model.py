@@ -555,14 +555,35 @@ class ConstraintSatisfaction:
         object.__setattr__(self, "message", str(self.message))
         object.__setattr__(self, "details", _json_safe(dict(self.details)))
 
+    @property
+    def required(self) -> bool:
+        return self.hard
+
+    @property
+    def passed(self) -> bool:
+        return self.satisfied
+
+    @property
+    def reason(self) -> str:
+        return self.message
+
+    @property
+    def penalty(self) -> float:
+        return max(0.0, 1.0 - self.score)
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "constraint_id": self.constraint_id,
             "constraint_type": self.constraint_type,
             "satisfied": self.satisfied,
+            "passed": self.passed,
+            "pass": self.passed,
             "hard": self.hard,
+            "required": self.required,
             "score": self.score,
+            "penalty": self.penalty,
             "message": self.message,
+            "reason": self.reason,
             "details": _json_safe(dict(self.details)),
         }
 
@@ -763,14 +784,26 @@ def summarize_satisfaction(
     entries = tuple(satisfaction)
     hard_unsatisfied = [entry for entry in entries if entry.hard and not entry.satisfied]
     soft_unsatisfied = [entry for entry in entries if not entry.hard and not entry.satisfied]
+    penalties = [entry.penalty for entry in entries]
     if entries:
         score = sum(entry.score for entry in entries) / float(len(entries))
+        penalty = sum(penalties) / float(len(entries))
     else:
         score = 1.0
+        penalty = 0.0
+    passed = not hard_unsatisfied and not soft_unsatisfied
+    first_failed = next((entry for entry in entries if not entry.satisfied), None)
     return {
         "score": score,
-        "satisfied": not hard_unsatisfied and not soft_unsatisfied,
+        "penalty": penalty,
+        "satisfied": passed,
+        "passed": passed,
+        "pass": passed,
+        "required": any(entry.hard for entry in entries),
+        "reason": "" if first_failed is None else first_failed.message,
         "hard_failed": bool(hard_unsatisfied),
+        "hard_penalty": sum(entry.penalty for entry in entries if entry.hard),
+        "soft_penalty": sum(entry.penalty for entry in entries if not entry.hard),
         "total": len(entries),
         "satisfied_count": sum(1 for entry in entries if entry.satisfied),
         "unsatisfied_count": sum(1 for entry in entries if not entry.satisfied),

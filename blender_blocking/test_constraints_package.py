@@ -18,6 +18,8 @@ from constraints import (
     dumps_constraint_set,
     loads_constraint_set,
 )
+from reconstruction.candidate_scoring import score_candidate
+from reconstruction.types import CandidateMetrics, CandidateResult
 
 
 class ConstraintPackageTests(unittest.TestCase):
@@ -102,6 +104,44 @@ class ConstraintPackageTests(unittest.TestCase):
 
         self.assertFalse(result.hard_failed)
         self.assertGreater(result.scores["score"], 1.0)
+
+    def test_constraint_penalty_report_feeds_candidate_scoring(self) -> None:
+        constraints = ConstraintSet.from_constraints(
+            [DimensionConstraint(name="height", value_u=4.0, tolerance_u=0.1)]
+        )
+        objective = apply_constraints_to_objective_scores(
+            {"score": 1.0},
+            constraints,
+            candidate={"dimensions": {"height": 2.0}},
+            constraint_weight=2.0,
+        )
+        metrics = CandidateMetrics(
+            constraint_report=objective.report,
+            per_view={
+                "front": {
+                    "area_iou": 1.0,
+                    "boundary_iou": 1.0,
+                    "soft_iou": 1.0,
+                    "signed_distance_loss": 0.0,
+                    "required": True,
+                    "pass": True,
+                    "reason": "",
+                }
+            },
+        )
+        result = CandidateResult(
+            candidate_id="candidate",
+            backend_name="backend",
+            status="success",
+            metric_result=metrics,
+        )
+
+        score = score_candidate(result)
+        terms = {term.name: term for term in score.terms}
+
+        self.assertGreater(objective.report["constraint_penalty"], 0.0)
+        self.assertGreater(metrics.constraint_penalty, 0.0)
+        self.assertLess(terms["constraint_penalty"].weighted, 0.0)
 
 
 if __name__ == "__main__":
