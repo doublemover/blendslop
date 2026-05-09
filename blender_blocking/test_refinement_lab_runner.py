@@ -11,6 +11,7 @@ from refinement_lab.runner import (
     InProcessBlenderRunner,
     RunOptions,
     _apply_variant_to_config,
+    _metrics_from_payload,
     _variant_command,
 )
 from test_e2e_validation import E2EValidator, _render_filename_prefix
@@ -95,6 +96,48 @@ class RefinementLabRunnerTests(unittest.TestCase):
         self.assertIn("--top", command)
         self.assertIn("--render-output-dir", command)
         self.assertIn("--artifact-output-root", command)
+
+    def test_metrics_from_payload_reads_nested_evaluation_bundles(self) -> None:
+        payload = {
+            "validation_mode": "backend-status",
+            "backend_result": {
+                "evaluation_bundles": [
+                    {
+                        "metric_groups": [
+                            {
+                                "name": "silhouette",
+                                "metrics": [
+                                    {
+                                        "name": "silhouette.min_view_iou",
+                                        "value": 0.74,
+                                    },
+                                    {
+                                        "name": "silhouette.mean_boundary_iou",
+                                        "value": 0.62,
+                                    },
+                                ],
+                            },
+                            {
+                                "name": "editability",
+                                "metrics": [
+                                    {
+                                        "name": "editability.editable_reconstruction_index",
+                                        "value": 0.81,
+                                    }
+                                ],
+                            },
+                        ]
+                    }
+                ]
+            },
+        }
+
+        metrics = _metrics_from_payload(payload)
+
+        self.assertEqual(metrics["area_iou_min"], 0.74)
+        self.assertEqual(metrics["boundary_iou_mean"], 0.62)
+        self.assertEqual(metrics["editability_score"], 0.81)
+        self.assertEqual(metrics["silhouette_min_view_iou"], 0.74)
 
     def test_runner_resolves_relative_run_root(self) -> None:
         case = ExperimentCase(

@@ -491,7 +491,56 @@ def _metrics_from_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
         ):
             if isinstance(metric_result.get(key), (int, float)):
                 metrics[key] = float(metric_result[key])
+    for bundle in _evaluation_bundles_from_payload(payload):
+        for group in bundle.get("metric_groups", ()) or ():
+            if not isinstance(group, Mapping):
+                continue
+            for metric in group.get("metrics", ()) or ():
+                if not isinstance(metric, Mapping):
+                    continue
+                name = str(metric.get("name", ""))
+                value = metric.get("value")
+                if not name or not isinstance(value, (int, float, bool)):
+                    continue
+                numeric = float(value)
+                metrics[name.replace(".", "_")] = numeric
+                alias = _bundle_metric_alias(name)
+                if alias:
+                    metrics.setdefault(alias, numeric)
     return metrics
+
+
+def _evaluation_bundles_from_payload(
+    payload: Mapping[str, Any],
+) -> tuple[Mapping[str, Any], ...]:
+    bundles = []
+    direct = payload.get("evaluation_bundles")
+    if isinstance(direct, Sequence) and not isinstance(direct, (str, bytes)):
+        bundles.extend(item for item in direct if isinstance(item, Mapping))
+    single = payload.get("evaluation_bundle")
+    if isinstance(single, Mapping):
+        bundles.append(single)
+    backend = payload.get("backend_result")
+    if isinstance(backend, Mapping):
+        bundles.extend(_evaluation_bundles_from_payload(backend))
+    return tuple(bundles)
+
+
+def _bundle_metric_alias(name: str) -> str:
+    aliases = {
+        "silhouette.min_view_iou": "area_iou_min",
+        "silhouette.average_iou": "area_iou_mean",
+        "silhouette.mean_boundary_iou": "boundary_iou_mean",
+        "topology.score": "topology_score",
+        "topology.penalty": "topology_penalty",
+        "editability.editable_reconstruction_index": "editability_score",
+        "editability.complexity_penalty": "complexity_penalty",
+        "geometry.fscore_tau": "geometry_fscore_tau",
+        "geometry.volumetric_iou": "geometry_volumetric_iou",
+        "geometry.chamfer_l2": "geometry_chamfer_l2",
+        "geometry.surface_coverage": "geometry_surface_coverage",
+    }
+    return aliases.get(name, "")
 
 
 def _artifacts_from_payload(payload: Mapping[str, Any]) -> dict[str, Path]:
