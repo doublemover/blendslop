@@ -25,6 +25,7 @@ from integration.blender_ops.camera_framing import (
 from integration.blender_ops.silhouette_render import (
     collect_target_objects,
     render_silhouette_frame,
+    set_camera_orbit,
     silhouette_session,
 )
 
@@ -404,19 +405,17 @@ def render_orthogonal_views_detailed(
                 warnings.extend(sample_warnings)
                 _apply_deterministic_view_settings(scene)
                 for view in views:
-                    if view not in {"front", "side", "top"}:
-                        warnings.append(f"unsupported_view_skipped:{view}")
-                        continue
-
-                    configure_ortho_camera_for_view(
+                    if not _configure_validation_camera(
                         session.camera,
                         view,
                         bounds_min,
                         bounds_max,
                         margin_frac=margin_frac,
                         resolution=resolution,
-                        distance_factor=camera_distance_factor,
-                    )
+                        camera_distance_factor=camera_distance_factor,
+                    ):
+                        warnings.append(f"unsupported_view_skipped:{view}")
+                        continue
 
                     if filename_prefix:
                         stem = f"{filename_prefix}{view}_{start_index}"
@@ -461,6 +460,63 @@ def render_orthogonal_views_detailed(
         views=tuple(view_records),
         warnings=tuple(warnings),
     )
+
+
+def _configure_validation_camera(
+    camera: object,
+    view: str,
+    bounds_min: object,
+    bounds_max: object,
+    *,
+    margin_frac: float,
+    resolution: Tuple[int, int],
+    camera_distance_factor: float,
+) -> bool:
+    if view in {"front", "side", "top"}:
+        configure_ortho_camera_for_view(
+            camera,
+            view,
+            bounds_min,
+            bounds_max,
+            margin_frac=margin_frac,
+            resolution=resolution,
+            distance_factor=camera_distance_factor,
+        )
+        return True
+
+    angle = parse_orbit_view_degrees(view)
+    if angle is None:
+        return False
+
+    center = (bounds_min + bounds_max) / 2.0
+    width = float(bounds_max.x - bounds_min.x)
+    depth = float(bounds_max.y - bounds_min.y)
+    height = float(bounds_max.z - bounds_min.z)
+    max_dim = max(width, depth, height, 1e-3)
+    distance = max_dim * float(camera_distance_factor)
+    ortho_scale = max_dim * (1.0 + 2.0 * float(margin_frac))
+    import math
+
+    set_camera_orbit(
+        camera,
+        center,
+        distance,
+        math.radians(float(angle)),
+        ortho_scale,
+    )
+    return True
+
+
+def parse_orbit_view_degrees(view: str) -> Optional[float]:
+    """Parse a named orbit validation view such as orbit_045 or azimuth-135."""
+    value = str(view).strip().lower()
+    match = re.match(
+        r"^(?:orbit|azimuth|view|angle)[_-]?(-?\d+(?:\.\d+)?)$",
+        value,
+    )
+    if not match:
+        return None
+    return float(match.group(1)) % 360.0
 
 
 def render_orthogonal_views(

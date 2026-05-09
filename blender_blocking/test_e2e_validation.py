@@ -51,6 +51,7 @@ from blender_blocking.config import RenderConfig
 from blender_blocking.utils.generation_context import GenerationContext
 from blender_blocking.utils.progress import progress_bar
 from blender_blocking.integration.blender_ops.render_utils import (
+    parse_orbit_view_degrees,
     render_orthogonal_views,
 )
 from blender_blocking.integration.image_processing.image_loader import load_image
@@ -115,6 +116,7 @@ DEFAULT_SYNTHETIC_MATRIX_MODES = (
     "visual_hull_voxel",
 )
 BACKEND_STATUS_OK = {"success", "degraded", "research_only"}
+VALIDATION_MODES = ("auto", "render-iou", "backend-status", "novel-view")
 
 
 def _status_icon(ok: bool) -> str:
@@ -179,6 +181,49 @@ def _print_candidate_table(rows: Sequence[Mapping[str, object]]) -> None:
         rows,
         ("candidate", "backend", "status", "score", "warnings", "errors", "artifact"),
     )
+
+
+def _ordered_unique(values: Iterable[str]) -> Tuple[str, ...]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for value in values:
+        text = str(value).strip()
+        if text and text not in seen:
+            seen.add(text)
+            ordered.append(text)
+    return tuple(ordered)
+
+
+def _format_metric(value: object, *, precision: int) -> str:
+    if value is None:
+        return ""
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    if np.isinf(numeric):
+        return "inf"
+    return f"{numeric:.{precision}f}"
+
+
+def _optional_float(value: object) -> Optional[float]:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _mean_optional(values: Iterable[object]) -> Optional[float]:
+    filtered = [
+        float(value)
+        for value in values
+        if value is not None and _optional_float(value) is not None
+    ]
+    if not filtered:
+        return None
+    return float(sum(filtered) / len(filtered))
 
 
 def _json_dump(path: Path, payload: Mapping[str, Any]) -> None:
@@ -375,9 +420,167 @@ def _import_obj_for_render(path: Path) -> Optional[object]:
     return active if _is_renderable_mesh(active) else None
 
 
+def _load_novel_pair(reference_path: str, rendered_path: str) -> tuple[Any, Any, tuple[str, ...]]:
+    reference = load_image(reference_path)
+    rendered = load_image(rendered_path)
+    warnings: list[str] = []
+    if np.asarray(reference).shape != np.asarray(rendered).shape:
+        if not PIL_AVAILABLE:
+            raise ValueError(
+                "novel-view reference/render image shapes differ and Pillow is unavailable"
+            )
+        rendered = _resize_image_like(rendered, reference)
+        warnings.append("rendered image resized to match reference for image metrics")
+    return reference, rendered, tuple(warnings)
+
+
+def _resize_image_like(image: Any, reference: Any) -> np.ndarray:
+    reference_shape = np.asarray(reference).shape
+    if len(reference_shape) < 2:
+        raise ValueError("reference image must have at least two dimensions")
+    height, width = int(reference_shape[0]), int(reference_shape[1])
+    array = np.asarray(image)
+    mode = None
+    if array.ndim == 2:
+        mode = "L"
+    pil_image = Image.fromarray(array.astype(np.uint8), mode=mode)
+    resample = getattr(getattr(Image, "Resampling", Image), "BILINEAR")
+    resized = pil_image.resize((width, height), resample=resample)
+    return np.asarray(resized)
+
+
+def _novel_view_gate(
+    report: Mapping[str, Any],
+    *,
+    psnr_threshold: Optional[float],
+    ssim_threshold: Optional[float],
+    lpips_threshold: Optional[float],
+) -> Dict[str, Any]:
+    failures: list[str] = []
+    _threshold_min(
+        report,
+        "psnr",
+        psnr_threshold,
+        failures,
+        label="PSNR",
+    )
+    _threshold_min(
+        report,
+        "ssim",
+        ssim_threshold,
+        failures,
+        label="SSIM",
+    )
+    _threshold_max(
+        report,
+        "lpips",
+        lpips_threshold,
+        failures,
+        label="LPIPS",
+    )
+    return {
+        "passed": not failures,
+        "failures": failures,
+        "thresholds": {
+            "psnr_min": psnr_threshold,
+            "ssim_min": ssim_threshold,
+            "lpips_max": lpips_threshold,
+        },
+    }
+
+
+def _threshold_min(
+    report: Mapping[str, Any],
+    key: str,
+    threshold: Optional[float],
+    failures: list[str],
+    *,
+    label: str,
+) -> None:
+    if threshold is None:
+        return
+    value = _optional_float(report.get(key))
+    if value is None:
+        failures.append(f"{label} missing")
+    elif value < float(threshold):
+        failures.append(f"{label} {value:.4g} below {float(threshold):.4g}")
+
+
+def _threshold_max(
+    report: Mapping[str, Any],
+    key: str,
+    threshold: Optional[float],
+    failures: list[str],
+    *,
+    label: str,
+) -> None:
+    if threshold is None:
+        return
+    value = _optional_float(report.get(key))
+    if value is None:
+        failures.append(f"{label} missing")
+    elif value > float(threshold):
+        failures.append(f"{label} {value:.4g} above {float(threshold):.4g}")
+
+
+def _aggregate_novel_reports(
+    pair_reports: Mapping[str, Mapping[str, Any]],
+    *,
+    missing_views: Sequence[str],
+    psnr_threshold: Optional[float],
+    ssim_threshold: Optional[float],
+    lpips_threshold: Optional[float],
+) -> Dict[str, Any]:
+    metrics = {
+        key: _mean_optional(
+            report.get(key)
+            for report in pair_reports.values()
+            if isinstance(report, Mapping)
+        )
+        for key in ("psnr", "ssim", "lpips", "mse")
+    }
+    gate = _novel_view_gate(
+        metrics,
+        psnr_threshold=psnr_threshold,
+        ssim_threshold=ssim_threshold,
+        lpips_threshold=lpips_threshold,
+    )
+    failed_views = [
+        view
+        for view, report in pair_reports.items()
+        if not bool(report.get("gate", {}).get("passed", False))
+    ]
+    warnings = [
+        str(warning)
+        for report in pair_reports.values()
+        for warning in report.get("warnings", [])
+    ]
+    dependency_state = {
+        view: dict(report.get("dependency_state", {}))
+        for view, report in pair_reports.items()
+        if isinstance(report.get("dependency_state"), Mapping)
+        and report.get("dependency_state")
+    }
+    return {
+        **metrics,
+        "image_count": len(pair_reports),
+        "missing_views": list(missing_views),
+        "failed_views": failed_views,
+        "passed": bool(pair_reports) and not missing_views and not failed_views and gate["passed"],
+        "gate": gate,
+        "thresholds": gate["thresholds"],
+        "warnings": warnings,
+        "dependency_state": dependency_state,
+    }
+
+
 def _candidate_status_payload(result: object) -> Tuple[str, Dict[str, Any]]:
     if result is None:
         return "missing", {}
+    if isinstance(result, Mapping):
+        data = dict(result)
+        status = str(data.get("status", "unstructured"))
+        return status, data
     if hasattr(result, "selected") and hasattr(result, "candidates"):
         data = result.to_dict() if hasattr(result, "to_dict") else {}
         data = _e2e_payload_with_evaluation(data, result)
@@ -486,6 +689,13 @@ class E2EValidator:
         artifact_root: Optional[Path] = None,
         result_json: Optional[Path] = None,
         run_id: Optional[str] = None,
+        novel_view_reference_paths: Optional[Mapping[str, str | Path]] = None,
+        novel_view_names: Sequence[str] = (),
+        novel_compute_ssim: bool = True,
+        novel_compute_lpips: bool = False,
+        novel_psnr_threshold: Optional[float] = 20.0,
+        novel_ssim_threshold: Optional[float] = 0.65,
+        novel_lpips_threshold: Optional[float] = None,
         progress: bool = False,
     ) -> None:
         """
@@ -520,6 +730,16 @@ class E2EValidator:
             Path(result_json).resolve(strict=False) if result_json is not None else None
         )
         self.run_id = run_id
+        self.novel_view_reference_paths = {
+            str(view): str(path)
+            for view, path in (novel_view_reference_paths or {}).items()
+        }
+        self.novel_view_names = tuple(str(view) for view in novel_view_names)
+        self.novel_compute_ssim = bool(novel_compute_ssim)
+        self.novel_compute_lpips = bool(novel_compute_lpips)
+        self.novel_psnr_threshold = novel_psnr_threshold
+        self.novel_ssim_threshold = novel_ssim_threshold
+        self.novel_lpips_threshold = novel_lpips_threshold
         self.progress = progress
         self.results = {}
         self.backend_result: Optional[Dict[str, Any]] = None
@@ -631,7 +851,7 @@ class E2EValidator:
             self.backend_result = backend_payload
 
         if render_mesh is None:
-            if validation_mode == "render-iou":
+            if validation_mode in {"render-iou", "novel-view"}:
                 print("ERROR: Reconstruction did not produce a renderable Blender mesh")
                 if workflow.reconstruction_result is not None:
                     _print_backend_summary(workflow.reconstruction_result)
@@ -688,7 +908,14 @@ class E2EValidator:
         # Step 3: Render orthogonal views
         _print_section("3/4 Render Views")
         output_dir = self.render_output_dir
-        views = ["front", "side", "top"]
+        silhouette_views = ["front", "side", "top"]
+        render_views = list(
+            _ordered_unique(
+                tuple(silhouette_views)
+                + tuple(self.novel_view_names)
+                + tuple(self.novel_view_reference_paths.keys())
+            )
+        )
         base_name = None
         for view in ("front", "side", "top"):
             path = reference_paths.get(view)
@@ -708,11 +935,11 @@ class E2EValidator:
         config_label = self.config_label or "default"
         filename_prefix = _render_filename_prefix(base_name, technique, config_label)
         render_progress = progress_bar(
-            len(views), desc="render_views", enabled=self.progress
+            len(render_views), desc="render_views", enabled=self.progress
         )
         rendered_paths = render_orthogonal_views(
             str(output_dir),
-            views=views,
+            views=render_views,
             target_objects=[render_mesh] if render_mesh else None,
             resolution=self.render_config.resolution,
             margin_frac=self.render_config.margin_frac,
@@ -736,6 +963,16 @@ class E2EValidator:
         for view, path in rendered_paths.items():
             print(f"{_status_icon(True)} Rendered {view:<5} {path}")
 
+        if validation_mode == "novel-view":
+            passed, novel_payload = self._validate_novel_views(
+                mode=mode,
+                rendered_paths=rendered_paths,
+                reference_paths=reference_paths,
+                backend_payload=backend_payload,
+                render_output_dir=output_dir,
+            )
+            return passed, novel_payload.get("views", {})
+
         # Step 4: Compare with references
         _print_section("4/4 Compare Silhouettes")
         self.results = {}
@@ -745,13 +982,13 @@ class E2EValidator:
             per_view_min_area_iou=self.view_thresholds,
             min_boundary_iou=self.boundary_iou_threshold,
             max_signed_distance_loss=self.signed_distance_loss_threshold,
-            required_views=tuple(views),
+            required_views=tuple(silhouette_views),
         )
 
         compare_progress = progress_bar(
-            len(views), desc="compare_views", enabled=self.progress
+            len(silhouette_views), desc="compare_views", enabled=self.progress
         )
-        for view in views:
+        for view in silhouette_views:
             if view not in reference_paths or view not in rendered_paths:
                 reason = "missing_reference_or_render"
                 print(f"{_status_icon(False)} {view} {reason}")
@@ -917,10 +1154,149 @@ class E2EValidator:
             print("ERROR: No views to compare")
             return False, {}
 
+    def _validate_novel_views(
+        self,
+        *,
+        mode: str,
+        rendered_paths: Mapping[str, str],
+        reference_paths: Mapping[str, str],
+        backend_payload: Mapping[str, Any],
+        render_output_dir: Path,
+    ) -> Tuple[bool, Dict[str, Any]]:
+        _print_section("4/4 Compare Novel/Image Views")
+        from blender_blocking.evaluation.novel_view import image_pair_report
+
+        references = self._novel_reference_map(reference_paths)
+        pair_reports: Dict[str, Dict[str, Any]] = {}
+        missing_views: list[str] = []
+        table_rows: list[dict[str, object]] = []
+
+        for view, reference_path in references.items():
+            rendered_path = rendered_paths.get(view)
+            if not rendered_path:
+                missing_views.append(view)
+                continue
+            ref_image, render_image, warnings = _load_novel_pair(
+                reference_path,
+                rendered_path,
+            )
+            report = image_pair_report(
+                ref_image,
+                render_image,
+                compute_ssim=self.novel_compute_ssim,
+                compute_lpips=self.novel_compute_lpips,
+            ).to_dict()
+            if warnings:
+                report["warnings"] = list(report.get("warnings", [])) + list(warnings)
+            gate = _novel_view_gate(
+                report,
+                psnr_threshold=self.novel_psnr_threshold,
+                ssim_threshold=self.novel_ssim_threshold,
+                lpips_threshold=self.novel_lpips_threshold,
+            )
+            report["gate"] = gate
+            report["reference_path"] = str(reference_path)
+            report["rendered_path"] = str(rendered_path)
+            pair_reports[view] = report
+            table_rows.append(
+                {
+                    "view": view,
+                    "psnr": _format_metric(report.get("psnr"), precision=2),
+                    "ssim": _format_metric(report.get("ssim"), precision=3),
+                    "lpips": _format_metric(report.get("lpips"), precision=3),
+                    "status": "PASS" if gate["passed"] else "FAIL",
+                }
+            )
+
+        if table_rows:
+            _print_table(table_rows, ("view", "psnr", "ssim", "lpips", "status"))
+
+        summary = _aggregate_novel_reports(
+            pair_reports,
+            missing_views=missing_views,
+            psnr_threshold=self.novel_psnr_threshold,
+            ssim_threshold=self.novel_ssim_threshold,
+            lpips_threshold=self.novel_lpips_threshold,
+        )
+        passed = bool(summary["passed"])
+        _print_section("Summary")
+        _print_kv_table(
+            (
+                ("image_pairs", summary["image_count"]),
+                ("missing_views", ",".join(missing_views) if missing_views else None),
+                ("psnr", _format_metric(summary.get("psnr"), precision=2)),
+                ("ssim", _format_metric(summary.get("ssim"), precision=3)),
+                ("lpips", _format_metric(summary.get("lpips"), precision=3)),
+                (
+                    "result",
+                    f"{_status_icon(passed)} {'PASSED' if passed else 'FAILED'}",
+                ),
+                ("render_output", render_output_dir),
+            )
+        )
+        if backend_payload:
+            _print_backend_summary(backend_payload)
+
+        payload_out = {
+            "mode": mode,
+            "validation_mode": "novel-view",
+            "passed": passed,
+            "novel_view": {
+                "psnr": summary.get("psnr"),
+                "ssim": summary.get("ssim"),
+                "lpips": summary.get("lpips"),
+                "mse": summary.get("mse"),
+                "image_count": summary.get("image_count", 0),
+                "warnings": summary.get("warnings", []),
+                "dependency_state": summary.get("dependency_state", {}),
+            },
+            "novel_view_summary": summary,
+            "views": pair_reports,
+            "missing_views": missing_views,
+            "backend_result": dict(backend_payload),
+            "rendered_paths": dict(rendered_paths),
+        }
+        payload_out.update(_evaluation_outputs_from_payload(backend_payload))
+        if self.result_json:
+            _json_dump(self.result_json, payload_out)
+            print(f"\nSaved result JSON: {self.result_json}")
+        self.results = pair_reports
+        return passed, payload_out
+
+    def _novel_reference_map(
+        self,
+        reference_paths: Mapping[str, str],
+    ) -> Dict[str, str]:
+        references: Dict[str, str] = {
+            view: str(path)
+            for view, path in reference_paths.items()
+            if view in {"front", "side", "top"} and path
+        }
+        references.update(self.novel_view_reference_paths)
+        return references
+
     def print_detailed_results(self) -> None:
         """Print detailed comparison results."""
         if not self.results:
             print("No results to display")
+            return
+
+        first = next(iter(self.results.values()))
+        if isinstance(first, Mapping) and "psnr" in first:
+            print("\nDetailed Novel/Image Metrics:")
+            _print_table(
+                [
+                    {
+                        "view": view,
+                        "psnr": _format_metric(metrics.get("psnr"), precision=2),
+                        "ssim": _format_metric(metrics.get("ssim"), precision=3),
+                        "lpips": _format_metric(metrics.get("lpips"), precision=3),
+                        "mse": _format_metric(metrics.get("mse"), precision=5),
+                    }
+                    for view, metrics in self.results.items()
+                ],
+                ("view", "psnr", "ssim", "lpips", "mse"),
+            )
             return
 
         print("\nDetailed Results:")
@@ -958,6 +1334,13 @@ def test_with_sample_images(
     artifact_root: Optional[Path] = None,
     result_json: Optional[Path] = None,
     run_id: Optional[str] = None,
+    novel_view_reference_paths: Optional[Mapping[str, str | Path]] = None,
+    novel_view_names: Sequence[str] = (),
+    novel_compute_ssim: bool = True,
+    novel_compute_lpips: bool = False,
+    novel_psnr_threshold: Optional[float] = 20.0,
+    novel_ssim_threshold: Optional[float] = 0.65,
+    novel_lpips_threshold: Optional[float] = None,
     progress: bool = False,
 ) -> bool:
     """Test with built-in sample images."""
@@ -1002,6 +1385,13 @@ def test_with_sample_images(
         artifact_root=artifact_root,
         result_json=result_json,
         run_id=run_id,
+        novel_view_reference_paths=novel_view_reference_paths,
+        novel_view_names=novel_view_names,
+        novel_compute_ssim=novel_compute_ssim,
+        novel_compute_lpips=novel_compute_lpips,
+        novel_psnr_threshold=novel_psnr_threshold,
+        novel_ssim_threshold=novel_ssim_threshold,
+        novel_lpips_threshold=novel_lpips_threshold,
         progress=progress,
     )
     passed, results = validator.validate_reconstruction(
@@ -1034,6 +1424,13 @@ def test_with_custom_images(
     artifact_root: Optional[Path] = None,
     result_json: Optional[Path] = None,
     run_id: Optional[str] = None,
+    novel_view_reference_paths: Optional[Mapping[str, str | Path]] = None,
+    novel_view_names: Sequence[str] = (),
+    novel_compute_ssim: bool = True,
+    novel_compute_lpips: bool = False,
+    novel_psnr_threshold: Optional[float] = 20.0,
+    novel_ssim_threshold: Optional[float] = 0.65,
+    novel_lpips_threshold: Optional[float] = None,
     progress: bool = False,
 ) -> bool:
     """
@@ -1063,6 +1460,13 @@ def test_with_custom_images(
         artifact_root=artifact_root,
         result_json=result_json,
         run_id=run_id,
+        novel_view_reference_paths=novel_view_reference_paths,
+        novel_view_names=novel_view_names,
+        novel_compute_ssim=novel_compute_ssim,
+        novel_compute_lpips=novel_compute_lpips,
+        novel_psnr_threshold=novel_psnr_threshold,
+        novel_ssim_threshold=novel_ssim_threshold,
+        novel_lpips_threshold=novel_lpips_threshold,
         progress=progress,
     )
     passed, results = validator.validate_reconstruction(
@@ -1091,6 +1495,12 @@ def run_synthetic_suite_matrix(
     config_label: str = "synthetic",
     result_json: Optional[Path] = None,
     run_id: Optional[str] = None,
+    novel_view_names: Sequence[str] = (),
+    novel_compute_ssim: bool = True,
+    novel_compute_lpips: bool = False,
+    novel_psnr_threshold: Optional[float] = 20.0,
+    novel_ssim_threshold: Optional[float] = 0.65,
+    novel_lpips_threshold: Optional[float] = None,
     progress: bool = False,
     strict_skips: bool = False,
 ) -> bool:
@@ -1146,15 +1556,24 @@ def run_synthetic_suite_matrix(
             continue
 
         reference_dir = output_root / "references" / spec.shape_id
+        include_orbit = bool(
+            validation_mode == "novel-view"
+            and any(parse_orbit_view_degrees(view) is not None for view in novel_view_names)
+        )
         rendered = render_views(
             spec,
             reference_dir,
             resolution=tuple(base.render_silhouette.resolution),
-            include_orbit=False,
+            include_orbit=include_orbit,
         )
         reference_paths = {
             key: str(rendered[key])
             for key in ("front", "side", "top")
+            if key in rendered
+        }
+        novel_reference_paths = {
+            key: str(rendered[key])
+            for key in novel_view_names
             if key in rendered
         }
         if set(reference_paths) != {"front", "side", "top"}:
@@ -1201,6 +1620,13 @@ def run_synthetic_suite_matrix(
                     artifact_root=case_dir / "artifacts",
                     result_json=case_json,
                     run_id=case_run_id,
+                    novel_view_reference_paths=novel_reference_paths,
+                    novel_view_names=novel_view_names,
+                    novel_compute_ssim=novel_compute_ssim,
+                    novel_compute_lpips=novel_compute_lpips,
+                    novel_psnr_threshold=novel_psnr_threshold,
+                    novel_ssim_threshold=novel_ssim_threshold,
+                    novel_lpips_threshold=novel_lpips_threshold,
                     progress=progress,
                 )
                 result_payload = _load_optional_json(case_json)
@@ -1325,6 +1751,17 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
             value = summary.get(key)
             if isinstance(value, (int, float)):
                 metrics[f"silhouette_{key}"] = float(value)
+    novel = payload.get("novel_view")
+    if isinstance(novel, Mapping):
+        for key in ("psnr", "ssim", "lpips", "mse", "image_count"):
+            value = novel.get(key)
+            if isinstance(value, (int, float)):
+                metrics[f"novel_view_{key}"] = float(value)
+    novel_summary = payload.get("novel_view_summary")
+    if isinstance(novel_summary, Mapping):
+        value = novel_summary.get("passed")
+        if isinstance(value, bool):
+            metrics["novel_view_passed"] = 1.0 if value else 0.0
     views = payload.get("views", {})
     if isinstance(views, Mapping):
         for view, view_payload in views.items():
@@ -1620,6 +2057,50 @@ def _parse_rgba(value: str) -> Tuple[float, float, float, float]:
     return rgba  # type: ignore[return-value]
 
 
+def _parse_view_reference_entries(entries: Iterable[str]) -> Dict[str, Path]:
+    references: Dict[str, Path] = {}
+    for entry in entries or ():
+        if "=" not in str(entry):
+            raise argparse.ArgumentTypeError(
+                "--novel-view-reference must use VIEW=PATH"
+            )
+        view, path = str(entry).split("=", 1)
+        view = view.strip()
+        if not view:
+            raise argparse.ArgumentTypeError("novel view name cannot be empty")
+        if view not in {"front", "side", "top"} and parse_orbit_view_degrees(view) is None:
+            raise argparse.ArgumentTypeError(
+                "novel view names must be front, side, top, or orbit/azimuth names"
+            )
+        references[view] = Path(path.strip())
+    return references
+
+
+def _novel_view_names_from_args(args: argparse.Namespace) -> Tuple[str, ...]:
+    angle_views = []
+    for angle_text in args.novel_view_angles or ():
+        try:
+            angle = float(angle_text)
+        except ValueError as exc:
+            raise argparse.ArgumentTypeError(
+                f"invalid --novel-view-angles value: {angle_text!r}"
+            ) from exc
+        angle_views.append(f"orbit_{int(round(angle % 360.0)):03d}")
+    references = _parse_view_reference_entries(args.novel_view_reference)
+    return _ordered_unique(
+        tuple(args.novel_view or ())
+        + tuple(angle_views)
+        + tuple(references.keys())
+    )
+
+
+def _novel_threshold(value: Optional[float]) -> Optional[float]:
+    if value is None:
+        return None
+    value = float(value)
+    return None if value <= 0.0 else value
+
+
 def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Validate blendslop reconstruction modes from reference silhouettes.",
@@ -1629,6 +2110,7 @@ Examples:
   blender --background --python blender_blocking/test_e2e_validation.py -- --reconstruction-mode legacy --no-progress
   blender --background --python blender_blocking/test_e2e_validation.py -- --reconstruction-mode loft_profile --mesh-radial-segments 32 --profile-samples 120 --no-progress
   blender --background --python blender_blocking/test_e2e_validation.py -- --reconstruction-mode visual_hull_voxel --validation-mode backend-status --vh-resolution 32 --vh-backend chunked --vh-chunk-size 16 --vh-mesh-method points --no-progress
+  blender --background --python blender_blocking/test_e2e_validation.py -- --reconstruction-mode legacy --validation-mode novel-view --novel-view-angles 45,135 --no-progress
   blender --background --python blender_blocking/test_e2e_validation.py -- --reconstruction-mode ensemble --validation-mode backend-status --ensemble-candidates visual_hull_voxel,primitive_fit_refine,gaussian_ellipsoid_proxy --primitive-max 6 --gaussian-count 8 --no-progress
   python blender_blocking/test_e2e_validation.py --reconstruction-mode ensemble --print-config --dry-run
 
@@ -1706,9 +2188,9 @@ Default ensemble:
     )
     core.add_argument(
         "--validation-mode",
-        choices=("auto", "render-iou", "backend-status"),
+        choices=VALIDATION_MODES,
         default="auto",
-        help="auto renders mesh modes and checks backend status for artifact-only modes.",
+        help="auto renders mesh modes, checks backend status for artifact-only modes, or run novel-view image metrics explicitly.",
     )
     core.add_argument(
         "--iou-threshold",
@@ -1730,6 +2212,56 @@ Default ensemble:
         type=float,
         default=None,
         help="Optional maximum per-view signed-distance silhouette loss.",
+    )
+    core.add_argument(
+        "--novel-view-reference",
+        action="append",
+        default=(),
+        metavar="VIEW=PATH",
+        help="Reference image for image metrics. Repeat for views like orbit_045=path/to/ref.png.",
+    )
+    core.add_argument(
+        "--novel-view",
+        action="append",
+        default=(),
+        metavar="VIEW",
+        help="Additional rendered view name for novel-view validation, e.g. orbit_045.",
+    )
+    core.add_argument(
+        "--novel-view-angles",
+        type=_parse_csv,
+        default=(),
+        help="Comma-separated orbit degrees to render as orbit_XXX views for novel-view validation.",
+    )
+    core.add_argument(
+        "--novel-compute-ssim",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Compute SSIM for novel-view/image validation.",
+    )
+    core.add_argument(
+        "--novel-compute-lpips",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Compute LPIPS for novel-view/image validation when torch/lpips are available.",
+    )
+    core.add_argument(
+        "--novel-psnr-threshold",
+        type=float,
+        default=20.0,
+        help="Minimum aggregate and per-view PSNR for novel-view validation; use 0 to disable.",
+    )
+    core.add_argument(
+        "--novel-ssim-threshold",
+        type=float,
+        default=0.65,
+        help="Minimum aggregate and per-view SSIM for novel-view validation; use 0 to disable.",
+    )
+    core.add_argument(
+        "--novel-lpips-threshold",
+        type=float,
+        default=None,
+        help="Optional maximum aggregate and per-view LPIPS for novel-view validation.",
     )
     core.add_argument(
         "--reconstruction-mode",
@@ -2994,6 +3526,10 @@ if __name__ == "__main__":
         print(
             f"\nDefault ensemble candidates: {', '.join(DEFAULT_ENSEMBLE_CANDIDATES)}"
         )
+        print(
+            "Validation modes: auto, render-iou, backend-status, novel-view "
+            "(PSNR/SSIM/optional LPIPS)"
+        )
         sys.exit(0)
 
     workflow_config = BlockingConfig()
@@ -3031,6 +3567,17 @@ if __name__ == "__main__":
             "side": Path(args.side),
             "top": Path(args.top),
         }
+    try:
+        novel_reference_paths = _parse_view_reference_entries(
+            args.novel_view_reference
+        )
+        novel_view_names = _novel_view_names_from_args(args)
+    except argparse.ArgumentTypeError as exc:
+        print(f"ERROR: {exc}")
+        sys.exit(2)
+    novel_psnr_threshold = _novel_threshold(args.novel_psnr_threshold)
+    novel_ssim_threshold = _novel_threshold(args.novel_ssim_threshold)
+    novel_lpips_threshold = _novel_threshold(args.novel_lpips_threshold)
 
     if args.dry_run:
         if refinement_requested:
@@ -3111,6 +3658,12 @@ if __name__ == "__main__":
             config_label=config_label,
             result_json=matrix_json,
             run_id=args.run_id,
+            novel_view_names=novel_view_names,
+            novel_compute_ssim=args.novel_compute_ssim,
+            novel_compute_lpips=args.novel_compute_lpips,
+            novel_psnr_threshold=novel_psnr_threshold,
+            novel_ssim_threshold=novel_ssim_threshold,
+            novel_lpips_threshold=novel_lpips_threshold,
             progress=args.progress,
             strict_skips=args.synthetic_strict_skips,
         )
@@ -3154,6 +3707,13 @@ if __name__ == "__main__":
             artifact_root=args.artifact_output_root,
             result_json=args.result_json,
             run_id=args.run_id,
+            novel_view_reference_paths=novel_reference_paths,
+            novel_view_names=novel_view_names,
+            novel_compute_ssim=args.novel_compute_ssim,
+            novel_compute_lpips=args.novel_compute_lpips,
+            novel_psnr_threshold=novel_psnr_threshold,
+            novel_ssim_threshold=novel_ssim_threshold,
+            novel_lpips_threshold=novel_lpips_threshold,
             progress=args.progress,
         )
     else:
@@ -3171,6 +3731,13 @@ if __name__ == "__main__":
             artifact_root=args.artifact_output_root,
             result_json=args.result_json,
             run_id=args.run_id,
+            novel_view_reference_paths=novel_reference_paths,
+            novel_view_names=novel_view_names,
+            novel_compute_ssim=args.novel_compute_ssim,
+            novel_compute_lpips=args.novel_compute_lpips,
+            novel_psnr_threshold=novel_psnr_threshold,
+            novel_ssim_threshold=novel_ssim_threshold,
+            novel_lpips_threshold=novel_lpips_threshold,
             progress=args.progress,
         )
         base_dir = Path(__file__).parent
