@@ -47,6 +47,7 @@ class RunOptions:
     fail_on_all_failed: bool = True
     append_global_index: bool = True
     report_failures: str = "top"
+    write_lineage: bool = True
     write_adaptive_proposals: bool = True
     adaptive_max_proposals: int = 12
     subprocess_blender: bool = False
@@ -114,6 +115,8 @@ class BaseRunner:
             )
         if self.options.write_adaptive_proposals:
             self._write_adaptive_outputs(results)
+        if self.options.write_lineage:
+            self._write_lineage_outputs(results)
         passed_any = any(result.status == "pass" for result in results)
         return (passed_any or not self.options.fail_on_all_failed), results
 
@@ -333,6 +336,113 @@ class BaseRunner:
         _write_json(proposal_path, proposal_payload)
         _write_json(variant_path, variant_payload)
         return proposal_path, variant_path
+
+    def _write_lineage_outputs(
+        self,
+        results: Sequence[ExperimentResult],
+    ) -> tuple[Path, Path]:
+        try:
+            from blender_blocking.evaluation.lineage import (
+                ArtifactRecord,
+                RunLineage,
+                capture_environment,
+                dirty_worktree,
+                hash_file,
+                hash_json_payload,
+                repo_revision,
+                write_reproduce_script,
+                write_run_lineage,
+            )
+        except ImportError:  # pragma: no cover
+            from evaluation.lineage import (
+                ArtifactRecord,
+                RunLineage,
+                capture_environment,
+                dirty_worktree,
+                hash_file,
+                hash_json_payload,
+                repo_revision,
+                write_reproduce_script,
+                write_run_lineage,
+            )
+
+        root = self.run_root.resolve(strict=False)
+        artifacts: list[ArtifactRecord] = []
+        for key, path in _run_artifact_paths(root).items():
+            if path.exists():
+                artifacts.append(
+                    ArtifactRecord.from_path(
+                        path,
+                        key=key,
+                        root=root,
+                        generated=True,
+                        committed_allowed=False,
+                    )
+                )
+        for result in results:
+            result_key = f"{result.case_id}.{result.variant_id}"
+            if result.result_json and result.result_json.exists():
+                artifacts.append(
+                    ArtifactRecord.from_path(
+                        result.result_json,
+                        key=f"{result_key}.result_json",
+                        root=root,
+                    )
+                )
+            for view, path in result.render_paths.items():
+                if path.exists():
+                    artifacts.append(
+                        ArtifactRecord.from_path(
+                            path,
+                            key=f"{result_key}.render.{view}",
+                            root=root,
+                        )
+                    )
+            for artifact_key, path in result.artifacts.items():
+                if path.exists():
+                    artifacts.append(
+                        ArtifactRecord.from_path(
+                            path,
+                            key=f"{result_key}.artifact.{artifact_key}",
+                            root=root,
+                        )
+                    )
+        input_hashes = {
+            f"{case.case_id}.{view}": hash_file(path)
+            for case in self.plan.cases
+            for view, path in case.reference_paths.items()
+            if Path(path).exists()
+        }
+        command = _lineage_reproduce_command(self.plan)
+        reproduce_path = root / "reproduce.ps1"
+        write_reproduce_script(command, reproduce_path, cwd=Path(__file__).resolve().parents[2])
+        artifacts.append(
+            ArtifactRecord.from_path(
+                reproduce_path,
+                key="reproduce_script",
+                root=root,
+                generated=True,
+                committed_allowed=False,
+            )
+        )
+        lineage = RunLineage(
+            schema_version="run_lineage_v1",
+            run_id=self.plan.run_id,
+            parent_run_id=_parent_run_id(self.plan.metadata),
+            repo_revision=repo_revision(Path(__file__).resolve().parents[2]),
+            dirty_worktree=dirty_worktree(Path(__file__).resolve().parents[2]),
+            command=command,
+            environment=capture_environment(),
+            input_hashes=input_hashes,
+            config_hashes={
+                "plan": hash_json_payload(self.plan.to_dict()),
+                "base_config": hash_json_payload(self.base_config.to_dict()),
+            },
+            random_seeds={"plan_seed": int(self.plan.seed)},
+            artifacts=tuple(artifacts),
+        )
+        lineage_path = write_run_lineage(lineage, root / "lineage.json")
+        return lineage_path, reproduce_path
 
 
 class InProcessBlenderRunner(BaseRunner):
@@ -837,6 +947,54 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
 def _write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def _run_artifact_paths(run_root: Path) -> Mapping[str, Path]:
+    return {
+        "plan": run_root / "plan.json",
+        "manifest": run_root / "manifest.json",
+        "index": run_root / "index.jsonl",
+        "leaderboard_json": run_root / "leaderboard.json",
+        "leaderboard_md": run_root / "leaderboard.md",
+        "report_html": run_root / "report.html",
+        "adaptive_proposals": run_root / "adaptive-proposals.json",
+        "adaptive_variants": run_root / "adaptive-variants.json",
+        "global_index": run_root.parent / "global-index.jsonl",
+    }
+
+
+def _lineage_reproduce_command(plan: ExperimentPlan) -> tuple[str, ...]:
+    command = [
+        "python",
+        "-m",
+        "blender_blocking.refinement_lab.cli",
+        "run",
+        "--suite",
+        plan.suite,
+        "--track",
+        plan.track,
+        "--search",
+        plan.search,
+        "--objective",
+        plan.objective,
+        "--result-root",
+        str(plan.output_root),
+        "--seed",
+        str(plan.seed),
+        "--top-k",
+        str(plan.top_k),
+    ]
+    if plan.max_runs is not None:
+        command.extend(("--max-runs", str(plan.max_runs)))
+    return tuple(command)
+
+
+def _parent_run_id(metadata: Mapping[str, Any]) -> str | None:
+    for key in ("parent_run_id", "source_run_id", "previous_run_id"):
+        value = metadata.get(key)
+        if value:
+            return str(value)
+    return None
 
 
 def _environment_info() -> dict[str, object]:

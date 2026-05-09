@@ -269,6 +269,74 @@ class RefinementLabRunnerTests(unittest.TestCase):
                 proposals["proposal_count"],
             )
 
+    def test_runner_writes_lineage_with_artifact_hashes_and_reproduce_script(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            refs = root / "refs"
+            refs.mkdir()
+            for view in ("front", "side", "top"):
+                (refs / f"{view}.png").write_bytes(f"{view}-mask".encode("utf-8"))
+            case = ExperimentCase(
+                "case",
+                "default-vase",
+                "builtin_sample",
+                reference_paths={
+                    "front": refs / "front.png",
+                    "side": refs / "side.png",
+                    "top": refs / "top.png",
+                },
+            )
+            variant = ExperimentVariant("baseline", "baseline", "profile_loft")
+            plan = ExperimentPlan(
+                plan_id="p",
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="grid",
+                objective="quality_win",
+                output_root=root / "run",
+                run_id="run-lineage",
+                cases=(case,),
+                variants=(variant,),
+                seed=99,
+                metadata={"parent_run_id": "parent-run"},
+            )
+            runner = InProcessBlenderRunner(plan=plan, options=RunOptions())
+            runner._prepare_run_root()
+            result_json = runner.run_root / "cases" / "case" / "variants" / "baseline" / "result.json"
+            result_json.parent.mkdir(parents=True, exist_ok=True)
+            result_json.write_text('{"passed": true}\n', encoding="utf-8")
+            result = ExperimentResult(
+                run_id="run-lineage",
+                case_id="case",
+                variant_id="baseline",
+                mode="profile_loft",
+                status="pass",
+                exit_code=0,
+                started_utc="2026-01-01T00:00:00Z",
+                finished_utc="2026-01-01T00:00:01Z",
+                elapsed_s=1.0,
+                command=("python", "example.py"),
+                result_json=result_json,
+                metrics={"average_iou": 0.9},
+            )
+
+            lineage_path, reproduce_path = runner._write_lineage_outputs([result])
+
+            lineage = json.loads(lineage_path.read_text(encoding="utf-8"))
+            artifact_by_key = {
+                artifact["key"]: artifact for artifact in lineage["artifacts"]
+            }
+            self.assertEqual(lineage["parent_run_id"], "parent-run")
+            self.assertEqual(lineage["random_seeds"]["plan_seed"], 99)
+            self.assertIn("case.front", lineage["input_hashes"])
+            self.assertIn("case.baseline.result_json", artifact_by_key)
+            self.assertTrue(artifact_by_key["case.baseline.result_json"]["sha256"])
+            self.assertIn("reproduce_script", artifact_by_key)
+            self.assertTrue(reproduce_path.exists())
+            self.assertIn("blender_blocking.refinement_lab.cli", reproduce_path.read_text(encoding="utf-8"))
+
     def test_e2e_refinement_plan_accepts_variant_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

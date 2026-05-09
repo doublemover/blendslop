@@ -155,6 +155,9 @@ def _add_run_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--adaptive-proposals", action=argparse.BooleanOptionalAction, default=True
     )
+    parser.add_argument(
+        "--lineage", action=argparse.BooleanOptionalAction, default=True
+    )
     parser.add_argument("--adaptive-max-proposals", type=int, default=12)
     parser.add_argument(
         "--report-failures", choices=("top", "all", "none"), default="top"
@@ -242,6 +245,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
         append_global_index=args.append_global_index,
         report_failures=args.report_failures,
         write_adaptive_proposals=args.adaptive_proposals,
+        write_lineage=args.lineage,
         adaptive_max_proposals=args.adaptive_max_proposals,
         subprocess_blender=args.blender_exe is not None,
         blender_executable=args.blender_exe,
