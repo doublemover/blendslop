@@ -50,6 +50,10 @@ class EditabilityReport:
 
 def report_from_candidate_metrics(metrics: Any) -> EditabilityReport:
     extras = getattr(metrics, "extras", {}) or {}
+    if isinstance(extras, Mapping):
+        explicit = extras.get("editability")
+        if isinstance(explicit, Mapping):
+            return report_from_mapping(explicit)
     topology_score = float(getattr(metrics, "topology_score", 0.0) or 0.0)
     primitive_score = 0.0
     modifier_score = 0.0
@@ -67,3 +71,25 @@ def report_from_candidate_metrics(metrics: Any) -> EditabilityReport:
         topology_score=topology_score,
     )
 
+
+def report_from_mapping(payload: Mapping[str, Any]) -> EditabilityReport:
+    return EditabilityReport(
+        object_hierarchy_score=_float(payload.get("object_hierarchy_score")),
+        primitive_score=_float(payload.get("primitive_score")),
+        modifier_score=_float(payload.get("modifier_score")),
+        mesh_density_score=_float(payload.get("mesh_density_score")),
+        semantic_part_score=_float(payload.get("semantic_part_score")),
+        topology_score=_float(payload.get("topology_score")),
+        export_roundtrip_score=_float(payload.get("export_roundtrip_score")),
+        warnings=tuple(str(item) for item in payload.get("warnings", ()) or ()),
+        metadata=payload.get("metadata", {})
+        if isinstance(payload.get("metadata", {}), Mapping)
+        else {},
+    )
+
+
+def _float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(default if value is None else value)
+    except (TypeError, ValueError):
+        return default

@@ -176,6 +176,14 @@ class ShapeProgramBackend(BaseBackend):
                 "shape_program": program.to_dict(),
                 "diagnostics": diagnostics,
                 "compiled_blender": None if compiled is None else compiled.to_dict(),
+                "primitive_editability": 1.0,
+                "modifier_editability": 0.8 if compiled is not None else 0.0,
+                "object_hierarchy_score": 1.0 if compiled is not None else 0.6,
+                "editability": _editability_report(
+                    program,
+                    request.config,
+                    compiled=compiled is not None,
+                ),
                 "topology": {
                     "status": "not_applicable",
                     "reason": "compiled object render/topology QA was not executed",
@@ -440,6 +448,34 @@ def _editability_score(
     residual_penalty = min(0.2, program.residual_patch_count() * 0.01)
     compile_bonus = 0.08 if compiled else 0.0
     return max(0.0, min(1.0, (0.75 + 0.25 * base + compile_bonus - residual_penalty) * bias))
+
+
+def _editability_report(
+    program: ShapeProgram,
+    config: Mapping[str, Any],
+    *,
+    compiled: bool = False,
+) -> dict[str, Any]:
+    node_count = max(1, program.node_count())
+    residual_count = program.residual_patch_count()
+    return {
+        "object_hierarchy_score": 1.0 if compiled else 0.6,
+        "primitive_score": sum(1 for node in program.root_nodes if node.editable) / float(node_count),
+        "modifier_score": 0.8 if compiled else 0.0,
+        "mesh_density_score": 1.0,
+        "semantic_part_score": 1.0 if all(node.name for node in program.root_nodes) else 0.65,
+        "topology_score": 0.0,
+        "export_roundtrip_score": 0.0,
+        "warnings": (
+            "render/topology/export QA has not been run for compiled shape program",
+        ),
+        "metadata": {
+            "node_count": node_count,
+            "residual_patch_count": residual_count,
+            "compiled": compiled,
+            "max_nodes": int(config.get("max_nodes", 64)),
+        },
+    }
 
 
 def _complexity_penalty(program: ShapeProgram, config: Mapping[str, Any]) -> float:
