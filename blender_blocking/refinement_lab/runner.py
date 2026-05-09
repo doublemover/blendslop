@@ -609,6 +609,16 @@ _CONFIG_PARAM_MAP = {
     "diff_epsilon": ("differentiable_render", "finite_difference_epsilon"),
     "diff_loss_weights_json": ("differentiable_render", "loss_weights"),
     "ensemble_policy": ("ensemble", "selection_policy"),
+    "shape_root_strategy": ("shape_program", "root_strategy"),
+    "shape_residual_policy": ("shape_program", "residual_policy"),
+    "shape_max_nodes": ("shape_program", "max_nodes"),
+    "shape_editability_bias": ("shape_program", "editability_bias"),
+    "shape_compile_blender": ("shape_program", "compile_blender"),
+    "shape_lathe_segments": ("shape_program", "lathe_segments"),
+    "shape_bevel_modifier": ("shape_program", "bevel_modifier"),
+    "shape_weighted_normals": ("shape_program", "weighted_normals"),
+    "shape_run_export_qa": ("shape_program", "run_export_qa"),
+    "shape_export_qa_targets": ("shape_program", "export_qa_targets"),
 }
 
 

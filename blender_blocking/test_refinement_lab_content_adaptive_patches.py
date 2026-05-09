@@ -11,6 +11,7 @@ from refinement_lab.content_adaptive_patches import (
     score_map_from_signals,
     select_adaptive_patches,
 )
+from refinement_lab.adaptive_planner import proposals_from_bundle
 
 
 class ContentAdaptivePatchTests(unittest.TestCase):
@@ -54,6 +55,40 @@ class ContentAdaptivePatchTests(unittest.TestCase):
         self.assertGreater(float(np.max(fused.contribution_weight)), 0.0)
         self.assertGreater(float(np.max(fused.prediction)), 0.0)
         self.assertEqual(fused.metadata["used_patch_count"], 1)
+
+    def test_adaptive_planner_proposes_content_patch_pass_for_detail_failures(self) -> None:
+        bundle = {
+            "status": "pass",
+            "failures": [{"code": "surface_detail_underfit"}],
+            "metric_groups": [
+                {
+                    "name": "silhouette",
+                    "metrics": [
+                        {"name": "silhouette.min_view_iou", "value": 0.82},
+                        {"name": "silhouette.mean_boundary_iou", "value": 0.42},
+                        {"name": "silhouette.mean_signed_distance_loss", "value": 0.12},
+                    ],
+                },
+                {
+                    "name": "geometry",
+                    "metrics": [
+                        {"name": "geometry.fscore_tau", "value": 0.4},
+                        {"name": "geometry.surface_coverage", "value": 0.55},
+                    ],
+                },
+            ],
+        }
+
+        proposals = proposals_from_bundle(bundle)
+        titles = {proposal.title for proposal in proposals}
+
+        self.assertIn("Content-adaptive patch detail pass", titles)
+        patch = next(
+            proposal for proposal in proposals
+            if proposal.title == "Content-adaptive patch detail pass"
+        )
+        self.assertIn("content-adaptive-patches", patch.tags)
+        self.assertIn("--shape-residual-policy", patch.cli_args)
 
 
 if __name__ == "__main__":

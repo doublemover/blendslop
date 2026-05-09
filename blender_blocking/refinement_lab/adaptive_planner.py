@@ -82,9 +82,20 @@ def proposals_from_bundle(
     editable = _metric(metrics, "editability.editable_reconstruction_index")
     topology = _metric(metrics, "topology.score")
     penalty = _metric(metrics, "topology.penalty")
+    sdf_loss = _metric(metrics, "silhouette.mean_signed_distance_loss")
+    fscore = _metric(metrics, "geometry.fscore_tau", default=1.0)
+    coverage = _metric(metrics, "geometry.surface_coverage", default=1.0)
 
     if boundary < max(0.35, min_iou - 0.15) or any("boundary" in f for f in failures):
         proposals.append(_boundary_first(metrics, failures))
+    if (
+        boundary < 0.55
+        or sdf_loss > 0.08
+        or fscore < 0.65
+        or coverage < 0.72
+        or any("detail" in f or "surface" in f for f in failures)
+    ):
+        proposals.append(_content_adaptive_patches(metrics, failures))
     if min_iou < 0.7 or any("silhouette" in f for f in failures):
         proposals.append(_visual_hull_resolution(metrics, failures))
         proposals.append(_uncertainty_sweep(metrics, failures))
@@ -162,6 +173,44 @@ def _boundary_first(
         },
         tags=("boundary", "sdf", "silhouette"),
         priority=10,
+        source={"metrics": metrics, "failures": failures},
+    )
+
+
+def _content_adaptive_patches(
+    metrics: Mapping[str, float],
+    failures: Sequence[str],
+) -> RefinementProposal:
+    return _proposal(
+        "content-adaptive-patches",
+        "Content-adaptive patch detail pass",
+        "Boundary/detail metrics suggest local high-frequency error; run a global candidate plus focused residual patches, then fuse patch corrections back into the editable candidate.",
+        mode="ensemble",
+        cli_args=(
+            "--ensemble-candidates",
+            "visual_hull_voxel,primitive_fit_refine,shape_program,differentiable_refine",
+            "--ensemble-policy",
+            "research_fidelity",
+            "--validation-mode",
+            "backend-status",
+            "--shape-residual-policy",
+            "suggest_patches",
+            "--primitive-loss-weights-json",
+            '{"silhouette":1.0,"boundary":0.35,"sdf":0.3,"surface":0.5}',
+            "--diff-loss-weights-json",
+            '{"silhouette":1.0,"boundary":0.35,"sdf":0.35}',
+            "--vh-mesh-method",
+            "lewiner",
+        ),
+        expected_win={
+            "silhouette.mean_boundary_iou": "increase",
+            "silhouette.mean_signed_distance_loss": "decrease",
+            "geometry.fscore_tau": "increase",
+            "geometry.surface_coverage": "increase",
+        },
+        tags=("content-adaptive-patches", "residual", "detail", "fusion"),
+        priority=12,
+        risk="high",
         source={"metrics": metrics, "failures": failures},
     )
 

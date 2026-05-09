@@ -32,6 +32,9 @@ class RefinementLabPresetTests(unittest.TestCase):
             "gaussian-proxy",
             "differentiable-refine",
             "ensemble-selection",
+            "shape-program-editability",
+            "content-adaptive-patches",
+            "sota-metric-bundle",
         ):
             preset = get_track_preset(name)
             self.assertIn(name, tracks)

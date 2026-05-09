@@ -41,6 +41,36 @@ class RefinementLabRunnerTests(unittest.TestCase):
         self.assertEqual(cfg.mesh_from_profile.radial_segments, 48)
         self.assertEqual(cfg.render_silhouette.resolution, (256, 256))
 
+    def test_apply_variant_to_config_uses_shape_program_parameters(self) -> None:
+        cfg = BlockingConfig()
+        variant = ExperimentVariant(
+            "v",
+            "variant",
+            "shape_program",
+            parameters={
+                "shape_root_strategy": "profile_lathe",
+                "shape_residual_policy": "report",
+                "shape_max_nodes": 96,
+                "shape_editability_bias": 0.85,
+                "shape_compile_blender": False,
+                "shape_lathe_segments": 64,
+                "shape_bevel_modifier": False,
+                "shape_weighted_normals": False,
+            },
+        )
+
+        _apply_variant_to_config(cfg, variant)
+
+        self.assertEqual(cfg.reconstruction.reconstruction_mode, "shape_program")
+        self.assertEqual(cfg.shape_program.root_strategy, "profile_lathe")
+        self.assertEqual(cfg.shape_program.residual_policy, "report")
+        self.assertEqual(cfg.shape_program.max_nodes, 96)
+        self.assertEqual(cfg.shape_program.editability_bias, 0.85)
+        self.assertFalse(cfg.shape_program.compile_blender)
+        self.assertEqual(cfg.shape_program.lathe_segments, 64)
+        self.assertFalse(cfg.shape_program.bevel_modifier)
+        self.assertFalse(cfg.shape_program.weighted_normals)
+
     def test_variant_command_records_reference_paths(self) -> None:
         variant = ExperimentVariant(
             "v",
