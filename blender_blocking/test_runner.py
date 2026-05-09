@@ -92,6 +92,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_differentiable_render", "test_differentiable_render"),
     ("pure_constraints_package", "test_constraints_package"),
     ("pure_volume", "test_volume"),
+    ("pure_volume_chunk_cache", "test_volume_chunk_cache"),
     ("pure_sdf_projection", "test_sdf_projection"),
     ("pure_synthetic_factory", "test_synthetic_factory"),
     ("pure_quality_budget", "test_quality_budget"),

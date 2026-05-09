@@ -355,6 +355,11 @@ class VisualHullConfig:
     memory_budget_mb: Optional[int] = None
     occupancy_threshold: float = 0.5
     uncertainty_aggregation: str = "min"
+    enable_cache: bool = False
+    cache_directory: Optional[str] = None
+    cache_namespace: str = "visual_hull"
+    cache_read: bool = True
+    cache_write: bool = True
 
     def validate(self) -> None:
         if self.backend not in _VALID_VOLUME_BACKENDS:
@@ -377,6 +382,10 @@ class VisualHullConfig:
             raise ValueError("occupancy_threshold must be in [0, 1]")
         if self.uncertainty_aggregation not in {"min", "product", "logit_sum"}:
             raise ValueError("uncertainty_aggregation must be min/product/logit_sum")
+        if not self.cache_namespace:
+            raise ValueError("cache_namespace must not be empty")
+        if self.cache_directory is not None and not str(self.cache_directory).strip():
+            raise ValueError("cache_directory must not be blank when provided")
 
     def to_dict(self) -> Dict[str, object]:
         return {
@@ -391,6 +400,11 @@ class VisualHullConfig:
             "memory_budget_mb": self.memory_budget_mb,
             "occupancy_threshold": self.occupancy_threshold,
             "uncertainty_aggregation": self.uncertainty_aggregation,
+            "enable_cache": self.enable_cache,
+            "cache_directory": self.cache_directory,
+            "cache_namespace": self.cache_namespace,
+            "cache_read": self.cache_read,
+            "cache_write": self.cache_write,
         }
 
 

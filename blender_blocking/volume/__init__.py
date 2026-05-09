@@ -1,6 +1,12 @@
 """Volume grid backends and interchange helpers."""
 
 from .chunks import ChunkedVolumeGrid
+from .chunk_cache import (
+    ChunkCacheKey,
+    ChunkCacheStats,
+    VolumeChunkCache,
+    chunk_cache_key,
+)
 from .contracts import (
     Bounds3D,
     Chunk,
@@ -45,6 +51,8 @@ from .sparse_hash import SparseHashVolumeGrid
 __all__ = [
     "Bounds3D",
     "Chunk",
+    "ChunkCacheKey",
+    "ChunkCacheStats",
     "ChunkKey",
     "ChunkedVolumeGrid",
     "DenseVolumeGrid",
@@ -59,10 +67,12 @@ __all__ = [
     "SUPPORTED_VALUE_TYPES",
     "SparseHashVolumeGrid",
     "VolumeGrid",
+    "VolumeChunkCache",
     "VolumeMetadata",
     "VolumeStats",
     "VoxelTransform",
     "array_sha256",
+    "chunk_cache_key",
     "detect_openvdb",
     "export_to_openvdb",
     "extract_mesh",

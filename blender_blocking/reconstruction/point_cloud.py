@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import math
+from pathlib import Path
 from typing import Any, Mapping, Optional
 
 import numpy as np
@@ -14,6 +16,8 @@ from volume import (
     DenseVolumeGrid,
     OpenVDBVolumeGrid,
     SparseHashVolumeGrid,
+    VolumeChunkCache,
+    chunk_cache_key,
     detect_openvdb,
     extract_surface_voxels,
     surface_points,
@@ -62,6 +66,10 @@ def visual_hull_grid_from_target(
     backend: str = "dense",
     boundary_refine: bool = False,
     boundary_dilate_px: Optional[int] = None,
+    cache_directory: Optional[str | Path] = None,
+    cache_namespace: str = "visual_hull",
+    cache_read: bool = True,
+    cache_write: bool = True,
 ) -> (
     DenseVolumeGrid
     | ChunkedVolumeGrid
@@ -87,6 +95,10 @@ def visual_hull_grid_from_target(
             use_vectorized=use_vectorized,
             boundary_refine=boundary_refine,
             boundary_dilate_px=boundary_dilate_px,
+            cache_directory=cache_directory,
+            cache_namespace=cache_namespace,
+            cache_read=cache_read,
+            cache_write=cache_write,
         )
     if requested_backend == "sparse_hash":
         return visual_hull_sparse_hash_grid_from_target(
@@ -96,6 +108,10 @@ def visual_hull_grid_from_target(
             use_vectorized=use_vectorized,
             boundary_refine=boundary_refine,
             boundary_dilate_px=boundary_dilate_px,
+            cache_directory=cache_directory,
+            cache_namespace=cache_namespace,
+            cache_read=cache_read,
+            cache_write=cache_write,
         )
     if requested_backend == "openvdb":
         return visual_hull_openvdb_grid_from_target(
@@ -105,6 +121,10 @@ def visual_hull_grid_from_target(
             use_vectorized=use_vectorized,
             boundary_refine=boundary_refine,
             boundary_dilate_px=boundary_dilate_px,
+            cache_directory=cache_directory,
+            cache_namespace=cache_namespace,
+            cache_read=cache_read,
+            cache_write=cache_write,
         )
     raise ValueError(f"unsupported visual hull backend: {requested_backend!r}")
 
@@ -148,6 +168,10 @@ def visual_hull_chunked_grid_from_target(
     use_vectorized: bool = True,
     boundary_refine: bool = False,
     boundary_dilate_px: Optional[int] = None,
+    cache_directory: Optional[str | Path] = None,
+    cache_namespace: str = "visual_hull",
+    cache_read: bool = True,
+    cache_write: bool = True,
 ) -> ChunkedVolumeGrid:
     """Build a ChunkedVolumeGrid by intersecting target silhouette cones."""
     return _visual_hull_chunked_grid_from_target(
@@ -158,6 +182,10 @@ def visual_hull_chunked_grid_from_target(
         use_vectorized=use_vectorized,
         boundary_refine=boundary_refine,
         boundary_dilate_px=boundary_dilate_px,
+        cache_directory=cache_directory,
+        cache_namespace=cache_namespace,
+        cache_read=cache_read,
+        cache_write=cache_write,
     )
 
 
@@ -169,6 +197,10 @@ def visual_hull_sparse_hash_grid_from_target(
     use_vectorized: bool = True,
     boundary_refine: bool = False,
     boundary_dilate_px: Optional[int] = None,
+    cache_directory: Optional[str | Path] = None,
+    cache_namespace: str = "visual_hull",
+    cache_read: bool = True,
+    cache_write: bool = True,
 ) -> SparseHashVolumeGrid:
     """Build a SparseHashVolumeGrid by intersecting target silhouette cones."""
     return _visual_hull_chunked_grid_from_target(
@@ -179,6 +211,10 @@ def visual_hull_sparse_hash_grid_from_target(
         use_vectorized=use_vectorized,
         boundary_refine=boundary_refine,
         boundary_dilate_px=boundary_dilate_px,
+        cache_directory=cache_directory,
+        cache_namespace=cache_namespace,
+        cache_read=cache_read,
+        cache_write=cache_write,
     )
 
 
@@ -190,6 +226,10 @@ def visual_hull_openvdb_grid_from_target(
     use_vectorized: bool = True,
     boundary_refine: bool = False,
     boundary_dilate_px: Optional[int] = None,
+    cache_directory: Optional[str | Path] = None,
+    cache_namespace: str = "visual_hull",
+    cache_read: bool = True,
+    cache_write: bool = True,
 ) -> OpenVDBVolumeGrid:
     """Build an OpenVDB-labeled sparse interchange grid directly from views."""
     return _visual_hull_chunked_grid_from_target(
@@ -201,6 +241,10 @@ def visual_hull_openvdb_grid_from_target(
         boundary_refine=boundary_refine,
         boundary_dilate_px=boundary_dilate_px,
         openvdb_status=detect_openvdb(),
+        cache_directory=cache_directory,
+        cache_namespace=cache_namespace,
+        cache_read=cache_read,
+        cache_write=cache_write,
     )
 
 
@@ -674,6 +718,10 @@ def _visual_hull_chunked_grid_from_target(
     boundary_refine: bool = False,
     boundary_dilate_px: Optional[int] = None,
     openvdb_status: Any = None,
+    cache_directory: Optional[str | Path] = None,
+    cache_namespace: str = "visual_hull",
+    cache_read: bool = True,
+    cache_write: bool = True,
 ) -> ChunkedVolumeGrid:
     # Non-vectorized behavior remains available for compatibility, but the direct
     # chunk path intentionally preserves projection semantics from the existing
@@ -722,6 +770,24 @@ def _visual_hull_chunked_grid_from_target(
         chunk_size=slab_size,
         **grid_kwargs,
     )
+    cache = (
+        VolumeChunkCache(
+            cache_directory,
+            namespace=cache_namespace,
+            read=cache_read,
+            write=cache_write,
+        )
+        if cache_directory is not None
+        else None
+    )
+    cache_base = _visual_hull_cache_payload(
+        hull,
+        target=target,
+        resolution=resolution_i,
+        slab_size=slab_size,
+        boundary_refine=boundary_refine,
+        boundary_dilate_px=boundary_dilate_px,
+    )
 
     for z_start in range(0, resolution_i, slab_size):
         z_end = min(resolution_i, z_start + slab_size)
@@ -733,39 +799,126 @@ def _visual_hull_chunked_grid_from_target(
             for cy in y_indices:
                 y_end = min(resolution_i, cy + slab_size)
                 yy = y_coords[cy:y_end][None, :, None]
-                chunk_slice = np.ones(
-                    (x_end - cx, y_end - cy, z_end - z_start),
-                    dtype=bool,
-                )
-                for view in hull.views:
-                    view_mask = hull._project_view_mask(
-                        view=view,
-                        xx=xx,
-                        yy=yy,
-                        zz=zz,
-                        bounds_min=bounds_min,
-                        bounds_max=bounds_max,
-                        center=center,
+                cache_key = None
+                chunk = None
+                key = ChunkKey(cx // slab_size, cy // slab_size, z_start // slab_size)
+                if cache is not None:
+                    cache_key = chunk_cache_key(
+                        cache.namespace,
+                        {
+                            **cache_base,
+                            "chunk_key": key.to_tuple(),
+                            "origin_index": (cx, cy, z_start),
+                            "valid_shape": (
+                                x_end - cx,
+                                y_end - cy,
+                                z_end - z_start,
+                            ),
+                        },
                     )
-                    chunk_slice &= view_mask
-                    if not chunk_slice.any():
-                        break
+                    chunk = cache.load(
+                        cache_key,
+                        expected_shape=(slab_size, slab_size, slab_size),
+                        expected_dtype=bool,
+                    )
+                if chunk is None:
+                    chunk_slice = np.ones(
+                        (x_end - cx, y_end - cy, z_end - z_start),
+                        dtype=bool,
+                    )
+                    for view in hull.views:
+                        view_mask = hull._project_view_mask(
+                            view=view,
+                            xx=xx,
+                            yy=yy,
+                            zz=zz,
+                            bounds_min=bounds_min,
+                            bounds_max=bounds_max,
+                            center=center,
+                        )
+                        chunk_slice &= view_mask
+                        if not chunk_slice.any():
+                            break
 
-                if sparse_hash_mode and not chunk_slice.any():
+                    chunk = np.full(
+                        (slab_size, slab_size, slab_size),
+                        grid.default_value,
+                        dtype=bool,
+                    )
+                    chunk[: x_end - cx, : y_end - cy, : z_end - z_start] = chunk_slice
+                    if cache is not None and cache_key is not None:
+                        cache.store(
+                            cache_key,
+                            chunk,
+                            metadata={
+                                "origin_index": [cx, cy, z_start],
+                                "valid_shape": [x_end - cx, y_end - cy, z_end - z_start],
+                                "resolution": resolution_i,
+                                "chunk_size": slab_size,
+                            },
+                        )
+
+                if sparse_hash_mode and not chunk[: x_end - cx, : y_end - cy, : z_end - z_start].any():
                     continue
 
-                chunk = np.full(
-                    (slab_size, slab_size, slab_size),
-                    grid.default_value,
-                    dtype=bool,
-                )
-                chunk[: x_end - cx, : y_end - cy, : z_end - z_start] = chunk_slice
-                grid.set_chunk(
-                    ChunkKey(cx // slab_size, cy // slab_size, z_start // slab_size),
-                    chunk,
-                )
+                grid.set_chunk(key, chunk)
 
+    if cache is not None:
+        setattr(grid, "chunk_cache_status", cache.stats())
     return grid
+
+
+def _visual_hull_cache_payload(
+    hull: Any,
+    *,
+    target: ReconstructionTarget,
+    resolution: int,
+    slab_size: int,
+    boundary_refine: bool,
+    boundary_dilate_px: Optional[int],
+) -> dict[str, Any]:
+    bounds = target_bounds(target)
+    return {
+        "kind": "visual_hull_chunk",
+        "resolution": int(resolution),
+        "chunk_size": int(slab_size),
+        "bounds": {
+            "min_x": bounds.min_x,
+            "max_x": bounds.max_x,
+            "min_y": bounds.min_y,
+            "max_y": bounds.max_y,
+            "min_z": bounds.min_z,
+            "max_z": bounds.max_z,
+        },
+        "boundary_refine": bool(boundary_refine),
+        "boundary_dilate_px": boundary_dilate_px,
+        "views": [
+            {
+                "view_type": str(getattr(view, "view_type", "")),
+                "angle": float(getattr(view, "angle", 0.0)),
+                "image_bounds": [float(v) for v in getattr(view, "image_bounds", ())],
+                "height": int(getattr(view, "height", 0)),
+                "width": int(getattr(view, "width", 0)),
+                "mask_sha256": _mask_sha256(getattr(view, "silhouette", None)),
+                "source_mask_area": int(
+                    getattr(view, "source_mask_area", np.asarray(view.silhouette).sum())
+                ),
+                "refined_mask_area": int(
+                    getattr(view, "refined_mask_area", np.asarray(view.silhouette).sum())
+                ),
+            }
+            for view in hull.views
+        ],
+    }
+
+
+def _mask_sha256(mask: Any) -> str:
+    array = np.ascontiguousarray(np.asarray(mask, dtype=bool))
+    digest = hashlib.sha256()
+    digest.update(str(array.dtype).encode("utf-8"))
+    digest.update(str(tuple(int(v) for v in array.shape)).encode("utf-8"))
+    digest.update(np.packbits(array.reshape(-1)).tobytes())
+    return digest.hexdigest()
 
 
 def _bounded(points: np.ndarray, max_points: int) -> np.ndarray:

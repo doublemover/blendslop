@@ -76,6 +76,22 @@ class VisualHullBackend(BaseBackend):
                 boundary_dilate_px=(
                     None if boundary_dilate_px is None else int(boundary_dilate_px)
                 ),
+                cache_directory=_visual_hull_cache_directory(request.config),
+                cache_namespace=str(
+                    request.config.get("cache_namespace", "visual_hull")
+                ),
+                cache_read=bool(
+                    request.config.get(
+                        "cache_read",
+                        not bool(request.config.get("cache_write_only", False)),
+                    )
+                ),
+                cache_write=bool(
+                    request.config.get(
+                        "cache_write",
+                        not bool(request.config.get("cache_read_only", False)),
+                    )
+                ),
             )
 
             openvdb_status = getattr(grid, "openvdb_status", None)
@@ -143,6 +159,15 @@ class VisualHullBackend(BaseBackend):
         }
         if openvdb_status is not None:
             volume_metadata_extra["openvdb"] = openvdb_status.to_dict()
+        cache_status = getattr(grid, "chunk_cache_status", None)
+        if cache_status is not None:
+            cache_payload = (
+                cache_status.to_dict()
+                if hasattr(cache_status, "to_dict")
+                else dict(cache_status)
+            )
+            mesh_metrics["chunk_cache"] = cache_payload
+            volume_metadata_extra["chunk_cache"] = cache_payload
 
         root = request.candidate_artifact_root()
         sdf_result = None
@@ -1010,6 +1035,19 @@ def _sdf_required(config: Mapping[str, Any]) -> bool:
         or config.get("fail_on_sdf_skip")
         or _mesh_uses_sdf(config)
     )
+
+
+def _visual_hull_cache_directory(config: Mapping[str, Any]) -> Path | None:
+    raw = (
+        config.get("cache_directory")
+        or config.get("volume_cache_directory")
+        or config.get("vh_cache_directory")
+    )
+    if raw:
+        return Path(str(raw))
+    if bool(config.get("enable_cache") or config.get("cache_chunks")):
+        return Path("temp") / "volume-chunk-cache"
+    return None
 
 
 def _optional_dependency_status(module_name: str) -> dict[str, Any]:

@@ -2574,6 +2574,11 @@ Default ensemble:
         choices=("min", "product", "logit_sum"),
         default=None,
     )
+    hull.add_argument("--vh-cache", action=argparse.BooleanOptionalAction, default=None)
+    hull.add_argument("--vh-cache-dir", type=str, default=None)
+    hull.add_argument("--vh-cache-namespace", type=str, default=None)
+    hull.add_argument("--vh-cache-read", action=argparse.BooleanOptionalAction, default=None)
+    hull.add_argument("--vh-cache-write", action=argparse.BooleanOptionalAction, default=None)
     hull.add_argument(
         "--volume-backend",
         choices=("dense", "chunked", "sparse_hash", "openvdb"),
@@ -3111,6 +3116,11 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
         "uncertainty_aggregation",
         args.vh_uncertainty_aggregation,
     )
+    _set_if_not_none(cfg.visual_hull, "enable_cache", args.vh_cache)
+    _set_if_not_none(cfg.visual_hull, "cache_directory", args.vh_cache_dir)
+    _set_if_not_none(cfg.visual_hull, "cache_namespace", args.vh_cache_namespace)
+    _set_if_not_none(cfg.visual_hull, "cache_read", args.vh_cache_read)
+    _set_if_not_none(cfg.visual_hull, "cache_write", args.vh_cache_write)
     _set_if_not_none(cfg.volume, "backend", args.volume_backend)
     _set_if_not_none(cfg.volume, "sparse_chunk_size", args.volume_sparse_chunk_size)
     _set_if_not_none(cfg.volume, "serialization", args.volume_serialization)
