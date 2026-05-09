@@ -7,9 +7,12 @@ import tempfile
 import unittest
 from typing import Any, Mapping
 
+import numpy as np
+
 from config import ReconstructionConfig
 from reconstruction.backend import BackendBudget, BackendCapabilities, BaseBackend
 from reconstruction.candidate_scoring import select_best
+from reconstruction.backends.gaussian_ellipsoid import GaussianEllipsoidBackend
 from reconstruction.ensemble import CandidateConfig, EnsembleRunner
 from reconstruction.registry import (
     clear_backends_for_tests,
@@ -385,6 +388,55 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
             residual_nodes[1].parameters["suggested_boolean_role"],
             "subtract",
         )
+
+    def test_gaussian_proxy_distills_to_editable_shape_program(self) -> None:
+        surface_points = np.array(
+            [
+                [-1.0, -0.5, -0.25],
+                [-1.0, 0.5, -0.25],
+                [1.0, -0.5, 0.25],
+                [1.0, 0.5, 0.25],
+                [-0.5, 0.0, 0.75],
+                [0.5, 0.0, 0.75],
+                [0.0, -0.25, -0.75],
+                [0.0, 0.25, -0.75],
+            ],
+            dtype=float,
+        )
+        target = ReconstructionTarget(extras={"surface_points": surface_points})
+
+        with tempfile.TemporaryDirectory() as tmp:
+            result = GaussianEllipsoidBackend().reconstruct(
+                CandidateRequest(
+                    candidate_id="gaussian-editable",
+                    backend_name="gaussian_ellipsoid_proxy",
+                    target=target,
+                    config={
+                        "family": "gaussian",
+                        "primitive_count": 2,
+                        "target_point_count": 8,
+                        "export_mesh_proxy": False,
+                    },
+                    artifact_root=Path(tmp),
+                )
+            )
+
+        editable = result.metric_result.extras["editable_proxy"]
+        program = editable["shape_program"]
+        node = program["root_nodes"][0]
+        stages = {
+            record["stage"]
+            for record in result.metric_result.extras["objective_history"]
+        }
+
+        self.assertEqual(result.status, "success")
+        self.assertIn("editable_proxy_shape_program", result.artifacts)
+        self.assertEqual(editable["node_count"], 2)
+        self.assertEqual(editable["validation_errors"], [])
+        self.assertEqual(node["primitive_type"], "ellipsoid")
+        self.assertEqual(len(node["parameters"]["rotation_row_major"]), 9)
+        self.assertGreater(result.metric_result.editability_score, 0.7)
+        self.assertIn("editable_proxy_distillation", stages)
 
     def test_duplicate_missing_and_alias_registration_errors(self) -> None:
         backend = _FakeBackend()

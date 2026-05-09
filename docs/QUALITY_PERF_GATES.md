@@ -140,6 +140,15 @@ per-attempt objective data. CPU differentiable refinement performs a bounded
 coordinate-search loop over primitive parameters and reports initial, final,
 and zero-baseline losses separately.
 
+Gaussian/ellipsoid proxy runs also distill their fitted splats into an editable
+shape-program artifact. Each Gaussian becomes a parameterized ellipsoid node
+with center, radii, rotation metadata, density/opacity, and confidence, so the
+research proxy can be inspected or rebuilt as Blender primitives instead of
+remaining only a dense visual mesh/proxy. The evaluation extras expose
+`editable_proxy` with node counts, validation errors, and the embedded
+shape-program payload; artifact runs write
+`shape-program/gaussian-ellipsoid-editable-proxy.json`.
+
 Ensemble runtime budgets are part of the contract, not just CLI decoration.
 `--ensemble-timeout` is passed to each candidate as `CandidateBudget.timeout_s`,
 and `--ensemble-total-timeout` bounds the remaining candidates in serial
