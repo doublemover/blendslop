@@ -3,22 +3,47 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import tempfile
 import unittest
 
 import numpy as np
 
+from reconstruction.backends.visual_hull import VisualHullBackend
+from reconstruction.point_cloud import visual_hull_grid_from_target
+from reconstruction.types import (
+    CandidateRequest,
+    OrthographicCameraSpec,
+    Bounds3D as ReconBounds3D,
+    ReconstructionTarget,
+    ViewConstraint,
+)
 from volume import (
     Bounds3D,
     ChunkKey,
     ChunkedVolumeGrid,
     DenseVolumeGrid,
     SparseHashVolumeGrid,
+    OpenVDBVolumeGrid,
     extract_mesh,
     extract_surface_voxels,
     load_volume,
     save_volume,
 )
+
+
+def _build_full_view_target() -> ReconstructionTarget:
+    camera = OrthographicCameraSpec(view_name="front", axis="z", azimuth_deg=0.0)
+    return ReconstructionTarget(
+        constraints=(
+            ViewConstraint(
+                view="front",
+                mask=np.ones((8, 8), dtype=bool),
+                camera=camera,
+            ),
+        ),
+        bounds=ReconBounds3D(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0),
+    )
 
 
 class VolumeGridTests(unittest.TestCase):
@@ -75,8 +100,143 @@ class VolumeGridTests(unittest.TestCase):
         result = extract_mesh(grid, method="point_cloud_only")
 
         self.assertEqual(result.status, "skipped")
-        self.assertEqual(result.method, "point_cloud_only")
+        self.assertEqual(result.method, "points")
+        self.assertEqual(result.requested_method, "point_cloud_only")
         self.assertEqual(result.faces.shape, (0, 3))
+
+    def test_direct_visual_hull_chunked_sparse_creation(self) -> None:
+        target = _build_full_view_target()
+        dense_grid = visual_hull_grid_from_target(
+            target,
+            resolution=6,
+            chunk_size=2,
+            use_vectorized=True,
+            backend="dense",
+        )
+        dense_data = dense_grid.to_dense()
+
+        chunked = visual_hull_grid_from_target(
+            target,
+            resolution=6,
+            chunk_size=2,
+            use_vectorized=True,
+            backend="chunked",
+        )
+        sparse = visual_hull_grid_from_target(
+            target,
+            resolution=6,
+            chunk_size=2,
+            use_vectorized=True,
+            backend="sparse_hash",
+        )
+
+        self.assertIsInstance(chunked, ChunkedVolumeGrid)
+        self.assertIsInstance(sparse, SparseHashVolumeGrid)
+        self.assertNotIsInstance(chunked, DenseVolumeGrid)
+        self.assertNotIsInstance(sparse, DenseVolumeGrid)
+        np.testing.assert_array_equal(chunked.to_dense(), dense_data)
+        np.testing.assert_array_equal(sparse.to_dense(), dense_data)
+        self.assertEqual(chunked.active_voxel_count(), dense_grid.active_voxel_count())
+        self.assertEqual(sparse.active_voxel_count(), dense_grid.active_voxel_count())
+
+    def test_direct_visual_hull_openvdb_creation_marks_interchange(self) -> None:
+        target = _build_full_view_target()
+        grid = visual_hull_grid_from_target(
+            target,
+            resolution=6,
+            chunk_size=2,
+            use_vectorized=True,
+            backend="openvdb",
+        )
+
+        self.assertIsInstance(grid, OpenVDBVolumeGrid)
+        self.assertEqual(grid.backend, "openvdb")
+        metadata = grid.openvdb_metadata()
+        self.assertEqual(metadata["storage_backend"], "sparse_hash")
+        self.assertEqual(metadata["serialization"], "npz_interchange")
+
+    def test_mesh_extraction_method_normalization_and_metadata(self) -> None:
+        data = np.zeros((3, 3, 3), dtype=bool)
+        data[1, 1, 1] = True
+        grid = DenseVolumeGrid(data, self.bounds)
+        result = extract_mesh(grid, method="POiNT_CLOUD")
+
+        self.assertEqual(result.status, "skipped")
+        self.assertEqual(result.method, "points")
+        self.assertEqual(result.requested_method, "POiNT_CLOUD")
+        payload = result.to_dict()
+
+        self.assertEqual(payload["status"], "skipped")
+        self.assertEqual(payload["method"], "points")
+        self.assertEqual(payload["requested_method"], "POiNT_CLOUD")
+        self.assertEqual(payload["vertices"], int(result.vertices.shape[0]))
+        self.assertIn("surface_points", payload["metrics"])
+        self.assertEqual(payload["topology"]["topology_style"], "none")
+
+    def test_visual_hull_postprocess_warning_status(self) -> None:
+        backend = VisualHullBackend()
+        target = _build_full_view_target()
+
+        for postprocess, expect_warning in (("none", False), ("poisson", True)):
+            with (
+                self.subTest(postprocess=postprocess),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                request = CandidateRequest(
+                    candidate_id=f"vh-post-{postprocess}",
+                    backend_name="visual_hull_voxel",
+                    target=target,
+                    config={
+                        "resolution": 6,
+                        "chunk_size": 2,
+                        "backend": "chunked",
+                        "mesh_method": "points",
+                        "postprocess": postprocess,
+                    },
+                    artifact_root=Path(tmpdir),
+                )
+                result = backend.reconstruct(request)
+            self.assertEqual(result.status, "success")
+            postprocess_status = result.metric_result.extras["mesh_postprocess"]
+            self.assertEqual(postprocess_status["method"], postprocess)
+            self.assertEqual(postprocess_status["status"], "skipped")
+            has_postprocess_warning = any(
+                "postprocess" in warning for warning in result.warnings
+            )
+            self.assertEqual(has_postprocess_warning, expect_warning)
+
+    def test_openvdb_metadata_round_trip(self) -> None:
+        grid = OpenVDBVolumeGrid.unavailable(
+            shape=(6, 6, 4),
+            bounds=self.bounds,
+            chunk_size=2,
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            metadata = save_volume(
+                grid,
+                tmpdir,
+                source_candidate_id="openvdb-case",
+                source_masks=("front",),
+                source_views=("front",),
+                generation_seed=123,
+                extra={"backend": "openvdb-test"},
+            )
+            loaded = load_volume(tmpdir)
+
+        self.assertEqual(metadata.backend, "openvdb")
+        self.assertEqual(metadata.source_candidate_id, "openvdb-case")
+        self.assertEqual(metadata.source_masks, ("front",))
+        self.assertEqual(metadata.source_views, ("front",))
+        self.assertEqual(metadata.generation_seed, 123)
+        self.assertEqual(metadata.extra["backend"], "openvdb-test")
+        self.assertEqual(metadata.extra["storage_backend"], "sparse_hash")
+        self.assertEqual(metadata.extra["serialization"], "npz_interchange")
+        self.assertIn("openvdb", metadata.extra)
+        self.assertIn("metadata_without_hashes", metadata.hashes)
+        self.assertIn("npz_sha256", metadata.hashes)
+        self.assertEqual(loaded.backend, "openvdb")
+        np.testing.assert_array_equal(loaded.to_dense(), np.zeros((6, 6, 4), dtype=bool))
 
 
 if __name__ == "__main__":

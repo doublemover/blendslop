@@ -40,7 +40,7 @@ class VisualHullBackend(BaseBackend):
 
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
         resolution = int(request.config.get("resolution", 64))
-        requested_backend = str(request.config.get("backend", "dense"))
+        requested_backend = str(request.config.get("backend", "dense")).strip().lower()
         if not request.target.constraints:
             return CandidateResult(
                 candidate_id=request.candidate_id,
@@ -50,32 +50,16 @@ class VisualHullBackend(BaseBackend):
             )
         try:
             from reconstruction.point_cloud import visual_hull_grid_from_target
-            from volume import (
-                ChunkedVolumeGrid,
-                SparseHashVolumeGrid,
-                extract_mesh,
-                save_volume,
-            )
+            from volume import extract_mesh, save_volume
 
             grid = visual_hull_grid_from_target(
                 request.target,
                 resolution=resolution,
                 chunk_size=request.config.get("chunk_size"),
+                backend=requested_backend,
             )
-            if requested_backend == "chunked":
-                grid = ChunkedVolumeGrid.from_dense(
-                    grid.to_dense(),
-                    grid.bounds,
-                    transform=grid.transform,
-                    chunk_size=int(request.config.get("chunk_size") or grid.chunk_size),
-                )
-            elif requested_backend in {"sparse_hash", "openvdb"}:
-                grid = SparseHashVolumeGrid.from_dense(
-                    grid.to_dense(),
-                    grid.bounds,
-                    transform=grid.transform,
-                    chunk_size=int(request.config.get("chunk_size") or grid.chunk_size),
-                )
+
+            openvdb_status = getattr(grid, "openvdb_status", None)
             stats = grid.stats().to_dict()
         except Exception as exc:
             return CandidateResult(
@@ -88,13 +72,51 @@ class VisualHullBackend(BaseBackend):
         artifacts: dict[str, Path] = {}
         warnings: list[str] = []
         if requested_backend == "openvdb":
-            warnings.append(
-                "openvdb backend requested; using sparse_hash interchange because "
-                "Python OpenVDB bindings are optional"
+            openvdb_payload = (
+                openvdb_status.to_dict()
+                if hasattr(openvdb_status, "to_dict")
+                else dict(openvdb_status or {})
             )
+            if bool(openvdb_payload.get("available")):
+                warnings.append(
+                    "openvdb backend requested; using NPZ-interchange sparse backing "
+                    "because direct OpenVDB export is intentionally not implemented"
+                )
+            else:
+                warnings.append(
+                    "openvdb backend requested but direct OpenVDB export is unavailable; "
+                    "using NPZ-interchange sparse backing"
+                )
         volume_path = None
         mesh_path = None
         mesh_metrics: dict[str, Any] = {}
+        if requested_backend == "openvdb" and openvdb_status is not None:
+            mesh_metrics["openvdb"] = (
+                openvdb_status.to_dict()
+                if hasattr(openvdb_status, "to_dict")
+                else dict(openvdb_status)
+            )
+
+        direct_sparse_builder = requested_backend in {
+            "chunked",
+            "sparse_hash",
+            "openvdb",
+        }
+        volume_backend_metadata = {
+            "requested": requested_backend,
+            "storage": getattr(grid, "backend", type(grid).__name__),
+            "direct_sparse_builder": direct_sparse_builder,
+        }
+        mesh_metrics["volume_backend"] = volume_backend_metadata
+
+        volume_metadata_extra = {
+            "backend": self.name,
+            "config": dict(request.config),
+            "volume_backend": volume_backend_metadata,
+        }
+        if openvdb_status is not None:
+            volume_metadata_extra["openvdb"] = openvdb_status.to_dict()
+
         root = request.candidate_artifact_root()
         if root is not None:
             try:
@@ -105,7 +127,7 @@ class VisualHullBackend(BaseBackend):
                     source_views=tuple(
                         constraint.view for constraint in request.target.constraints
                     ),
-                    extra={"backend": self.name, "config": dict(request.config)},
+                    extra=volume_metadata_extra,
                 )
                 volume_path = root / "volume"
                 artifacts["volume_metadata"] = root / "volume" / "volume.json"
@@ -115,6 +137,12 @@ class VisualHullBackend(BaseBackend):
                 warnings.append(f"failed to save volume artifact: {exc}")
 
         mesh_result = None
+        postprocess_status: dict[str, Any] = _evaluate_postprocess(
+            None,
+            str(request.config.get("postprocess", "none")),
+            config=request.config,
+        )
+        mesh_metrics["mesh_postprocess"] = postprocess_status
         try:
             mesh_result = extract_mesh(
                 grid,
@@ -122,24 +150,39 @@ class VisualHullBackend(BaseBackend):
                 allow_point_cloud_fallback=True,
             )
             postprocess = str(request.config.get("postprocess", "none"))
-            if postprocess != "none":
+            postprocess_status = _evaluate_postprocess(
+                mesh_result,
+                postprocess,
+                config=request.config,
+            )
+            mesh_metrics["mesh_postprocess"] = postprocess_status
+            if postprocess_status["status"] == "failed":
+                warnings.append(f"mesh postprocess failed: {postprocess_status['message']}")
+            elif (
+                postprocess_status["status"] == "skipped"
+                and postprocess_status["method"] != "none"
+            ):
                 warnings.append(
-                    f"postprocess {postprocess!r} requested but optional surface "
-                    "postprocessors are not available in this environment"
+                    f"mesh postprocess skipped: {postprocess_status['message']}"
                 )
             mesh_metrics["mesh_extraction"] = mesh_result.to_dict()
-            if mesh_result.available and root is not None:
-                from reconstruction.mesh_io import write_obj
+            mesh_metrics["mesh"] = _mesh_metadata(mesh_result)
+            if mesh_result.available:
                 from metrics.topology import mesh_topology_report
 
-                mesh_path = write_obj(
-                    root / "mesh" / "visual_hull.obj",
-                    {"vertices": mesh_result.vertices, "faces": mesh_result.faces},
-                    header=(f"candidate {request.candidate_id}", self.name),
-                )
-                artifacts["mesh_obj"] = mesh_path
                 topology = mesh_topology_report(mesh_result.vertices, mesh_result.faces)
                 mesh_metrics["topology"] = topology.to_dict()
+                if root is not None:
+                    from reconstruction.mesh_io import write_obj
+
+                    mesh_path = write_obj(
+                        root / "mesh" / "visual_hull.obj",
+                        {"vertices": mesh_result.vertices, "faces": mesh_result.faces},
+                        header=(f"candidate {request.candidate_id}", self.name),
+                    )
+                    artifacts["mesh_obj"] = mesh_path
+            elif getattr(mesh_result, "topology", None):
+                mesh_metrics["topology"] = dict(mesh_result.topology)
         except Exception as exc:
             warnings.append(f"mesh extraction failed: {exc}")
 
@@ -147,6 +190,14 @@ class VisualHullBackend(BaseBackend):
         topology_score = float(
             mesh_metrics.get("topology", {}).get("topology_score", 0.0)
         )
+        errors: list[str] = []
+        status = "success"
+        if postprocess_status.get("status") == "failed" and _postprocess_required(
+            request.config
+        ):
+            status = "failed"
+            errors.append(str(postprocess_status.get("message", "mesh postprocess failed")))
+
         metrics = CandidateMetrics(
             editability_score=0.15,
             topology_score=topology_score,
@@ -160,11 +211,117 @@ class VisualHullBackend(BaseBackend):
         return CandidateResult(
             candidate_id=request.candidate_id,
             backend_name=self.name,
-            status="success",
+            status=status,
             metric_result=metrics,
             volume_path=volume_path,
             mesh_path=mesh_path,
             artifacts=artifacts,
             warnings=tuple(warnings),
+            errors=tuple(errors),
             payload=grid,
         )
+
+
+def _evaluate_postprocess(
+    mesh_result: Any,
+    postprocess: str,
+    *,
+    config: Mapping[str, Any],
+) -> dict[str, Any]:
+    method = str(postprocess).strip().lower()
+    required = _postprocess_required(config)
+    if method in {"", "none"}:
+        return {
+            "method": "none",
+            "status": "skipped",
+            "required": required,
+            "message": "mesh postprocess disabled",
+        }
+    if method not in {"poisson", "screened_poisson"}:
+        return {
+            "method": method,
+            "status": "failed",
+            "required": required,
+            "message": f"unsupported mesh postprocess mode: {method!r}",
+        }
+    if mesh_result is None:
+        return {
+            "method": method,
+            "status": "skipped",
+            "required": required,
+            "message": "mesh extraction has not completed",
+        }
+    if not mesh_result.available:
+        status = "failed" if required else "skipped"
+        return {
+            "method": method,
+            "status": status,
+            "required": required,
+            "mesh_status": mesh_result.status,
+            "message": (
+                f"postprocess {method!r} requires a mesh, but mesh extraction "
+                f"status was {mesh_result.status!r}"
+            ),
+        }
+
+    dependency = _optional_dependency_status("open3d")
+    if not dependency["available"]:
+        status = "failed" if required else "skipped"
+        return {
+            "method": method,
+            "status": status,
+            "required": required,
+            "dependency": dependency,
+            "message": (
+                f"postprocess {method!r} requires optional dependency "
+                f"{dependency['module_name']!r}"
+            ),
+        }
+    return {
+        "method": method,
+        "status": "skipped",
+        "required": required,
+        "dependency": dependency,
+        "message": (
+            f"postprocess {method!r} dependency is available, but backend-neutral "
+            "Poisson mesh reconstruction is not implemented"
+        ),
+    }
+
+
+def _postprocess_required(config: Mapping[str, Any]) -> bool:
+    return bool(
+        config.get("postprocess_required")
+        or config.get("require_postprocess")
+        or config.get("fail_on_postprocess_skip")
+    )
+
+
+def _optional_dependency_status(module_name: str) -> dict[str, Any]:
+    try:
+        module = __import__(module_name)
+    except Exception as exc:
+        return {
+            "module_name": module_name,
+            "available": False,
+            "error_type": type(exc).__name__,
+            "error": str(exc),
+        }
+    return {
+        "module_name": module_name,
+        "available": True,
+        "module_version": getattr(module, "__version__", None),
+    }
+
+
+def _mesh_metadata(mesh_result: Any) -> dict[str, Any]:
+    return {
+        "available": bool(mesh_result.available),
+        "status": mesh_result.status,
+        "method": mesh_result.method,
+        "requested_method": getattr(mesh_result, "requested_method", mesh_result.method),
+        "vertex_count": int(len(mesh_result.vertices)),
+        "face_count": int(len(mesh_result.faces)),
+        "has_faces": bool(len(mesh_result.faces)),
+        "has_normals": mesh_result.normals is not None,
+    }

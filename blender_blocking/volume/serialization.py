@@ -60,6 +60,7 @@ def save_volume(
     arrays, payload_extra = _arrays_for_grid(grid, backend)
     np.savez_compressed(npz_path, **arrays)
 
+    metadata_extra = {**payload_extra, **dict(extra or {})}
     metadata = _metadata_for_grid(
         grid,
         backend=backend,
@@ -67,7 +68,7 @@ def save_volume(
         source_masks=source_masks,
         source_views=source_views,
         generation_seed=generation_seed,
-        extra={**payload_extra, **dict(extra or {})},
+        extra=_normalize_metadata(metadata_extra),
     )
     metadata_dict = metadata.to_dict()
     metadata_dict["hashes"] = {
@@ -167,10 +168,25 @@ def _arrays_for_grid(
 
     key_array = np.asarray(keys, dtype=np.int64).reshape((-1, 3))
     dtype = _grid_dtype(grid)
-    if backend == "sparse_hash" and dtype == np.dtype(bool):
+    payload_extra: dict[str, Any] = {}
+    if backend == "openvdb":
+        openvdb_metadata = getattr(grid, "openvdb_metadata", None)
+        if callable(openvdb_metadata):
+            payload_extra["openvdb"] = openvdb_metadata()
+        else:
+            status = getattr(grid, "openvdb_status", None)
+            if status is not None:
+                payload_extra["openvdb"] = status
+        payload_extra["storage_backend"] = "sparse_hash"
+        payload_extra["serialization"] = "npz_interchange"
+
+    if backend in {"sparse_hash", "openvdb"} and dtype == np.dtype(bool):
         if chunks:
             chunk_stack = np.asarray(
-                [np.packbits(np.asarray(chunk, dtype=bool).reshape(-1)) for chunk in chunks],
+                [
+                    np.packbits(np.asarray(chunk, dtype=bool).reshape(-1))
+                    for chunk in chunks
+                ],
                 dtype=np.uint8,
             )
         else:
@@ -180,7 +196,7 @@ def _arrays_for_grid(
             "keys": key_array,
             "packed_chunks": chunk_stack,
             "packed": np.array(True),
-        }, {"packed_bool_chunks": True}
+        }, {**payload_extra, "packed_bool_chunks": True}
 
     if chunks:
         chunk_array = np.asarray(chunks, dtype=dtype)
@@ -189,7 +205,39 @@ def _arrays_for_grid(
             (0, grid.chunk_size, grid.chunk_size, grid.chunk_size),
             dtype=dtype,
         )
-    return {"keys": key_array, "chunks": chunk_array, "packed": np.array(False)}, {}
+    return {
+        "keys": key_array,
+        "chunks": chunk_array,
+        "packed": np.array(False),
+    }, payload_extra
+
+
+def _normalize_metadata(value: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        str(key): _normalize_metadata_value(item)
+        for key, item in dict(value).items()
+    }
+
+
+def _normalize_metadata_value(value: Any) -> Any:
+    if hasattr(value, "to_dict") and callable(getattr(value, "to_dict")):
+        return _normalize_metadata_value(value.to_dict())
+    if isinstance(value, Mapping):
+        return {str(key): _normalize_metadata_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_normalize_metadata_value(item) for item in value]
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, bytes):
+        try:
+            return value.decode("utf-8")
+        except Exception:
+            return value.hex()
+    return value
 
 
 def _grid_dtype(grid: VolumeGrid) -> np.dtype:
@@ -218,6 +266,21 @@ def _load_chunked(
     else:
         for key, chunk in zip(keys, npz["chunks"]):
             chunks[key] = np.asarray(chunk, dtype=np.dtype(metadata.dtype))
+
+    if metadata.backend == "openvdb":
+        from .openvdb_adapter import OpenVDBVolumeGrid
+
+        return OpenVDBVolumeGrid(
+            chunks=chunks,
+            shape=metadata.shape,
+            bounds=metadata.bounds,
+            transform=metadata.transform,
+            value_type=metadata.value_type,
+            dtype=np.dtype(metadata.dtype),
+            default_value=metadata.default_value,
+            chunk_size=metadata.chunk_size,
+            openvdb_status=metadata.extra.get("openvdb"),
+        )
 
     grid_cls = SparseHashVolumeGrid if sparse else ChunkedVolumeGrid
     return grid_cls(

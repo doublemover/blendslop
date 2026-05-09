@@ -17,6 +17,24 @@ SUPPORTED_VALUE_TYPES = {
     "surface_flag",
 }
 
+MESH_EXTRACT_METHOD_ALIASES: Dict[str, str] = {
+    "marching_cubes": "marching_cubes",
+    "marching_cubes_lewiner": "marching_cubes",
+    "lewiner": "marching_cubes",
+    "lorensen": "marching_cubes",
+    "marching_cubes_lorensen": "marching_cubes",
+    "dual_contouring": "dual_contouring",
+    "points": "points",
+    "point_cloud": "points",
+    "point_cloud_only": "points",
+    "pointcloud": "points",
+}
+
+
+def normalize_mesh_extraction_method(method: str) -> str:
+    normalized = str(method).strip().lower().replace("-", "_").replace(" ", "_")
+    return MESH_EXTRACT_METHOD_ALIASES.get(normalized, normalized)
+
 
 @dataclass(frozen=True)
 class Bounds3D:
@@ -292,42 +310,70 @@ class MeshExtractionResult:
     method: str
     vertices: np.ndarray
     faces: np.ndarray
+    requested_method: str = ""
+    method_aliases: Tuple[str, ...] = ()
     normals: Optional[np.ndarray] = None
     values: Optional[np.ndarray] = None
     message: str = ""
     metrics: Mapping[str, Any] = field(default_factory=dict)
+    topology: Mapping[str, Any] = field(default_factory=dict)
 
     @property
     def available(self) -> bool:
         return self.status == "ok"
 
     @classmethod
-    def unavailable(cls, method: str, message: str) -> "MeshExtractionResult":
+    def unavailable(
+        cls,
+        method: str,
+        message: str,
+        *,
+        requested_method: str = "",
+        method_aliases: Tuple[str, ...] = (),
+        topology: Optional[Mapping[str, Any]] = None,
+    ) -> "MeshExtractionResult":
         return cls(
             status="unavailable",
             method=method,
+            requested_method=requested_method or method,
+            method_aliases=method_aliases,
             vertices=np.empty((0, 3), dtype=float),
             faces=np.empty((0, 3), dtype=np.int64),
             message=message,
+            topology={} if topology is None else topology,
         )
 
     @classmethod
-    def skipped(cls, method: str, message: str) -> "MeshExtractionResult":
+    def skipped(
+        cls,
+        method: str,
+        message: str,
+        *,
+        requested_method: str = "",
+        method_aliases: Tuple[str, ...] = (),
+        topology: Optional[Mapping[str, Any]] = None,
+    ) -> "MeshExtractionResult":
         return cls(
             status="skipped",
             method=method,
+            requested_method=requested_method or method,
+            method_aliases=method_aliases,
             vertices=np.empty((0, 3), dtype=float),
             faces=np.empty((0, 3), dtype=np.int64),
             message=message,
+            topology={} if topology is None else topology,
         )
 
     def to_dict(self) -> Dict[str, object]:
         return {
             "status": self.status,
             "method": self.method,
+            "requested_method": self.requested_method,
+            "method_aliases": list(self.method_aliases),
             "vertices": int(len(self.vertices)),
             "faces": int(len(self.faces)),
             "has_normals": self.normals is not None,
+            "topology": dict(self.topology),
             "message": self.message,
             "metrics": dict(self.metrics),
         }
