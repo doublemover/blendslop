@@ -22,6 +22,7 @@ class RefinementLabPresetTests(unittest.TestCase):
             "synthetic-profile-band",
             "synthetic-primitive-fit",
             "synthetic-adversarial",
+            "synthetic-adversarial-curriculum",
             "synthetic-material-appearance",
             "synthetic-nightly",
         ):
@@ -40,6 +41,7 @@ class RefinementLabPresetTests(unittest.TestCase):
             "ensemble-selection",
             "shape-program-editability",
             "content-adaptive-patches",
+            "adversarial-curriculum-hardening",
             "sota-metric-bundle",
         ):
             preset = get_track_preset(name)
@@ -47,6 +49,18 @@ class RefinementLabPresetTests(unittest.TestCase):
             self.assertTrue(preset.modes)
             for parameter in preset.parameters:
                 parameter.validate()
+
+    def test_adversarial_curriculum_preset_targets_progressive_suites(self) -> None:
+        suite = get_suite_preset("synthetic-adversarial-curriculum")
+        track = get_track_preset("adversarial-curriculum-hardening")
+
+        self.assertEqual(
+            suite.synthetic_suites,
+            ("adversarial-level-1", "adversarial-level-2", "adversarial-level-3"),
+        )
+        self.assertEqual(track.default_search, "successive_halving")
+        self.assertIn("ensemble", track.modes)
+        self.assertIn("moonshot", track.tags)
 
     def test_unknown_suite_fails(self) -> None:
         with self.assertRaises(KeyError):

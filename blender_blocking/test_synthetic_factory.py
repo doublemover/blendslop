@@ -11,6 +11,11 @@ import numpy as np
 from config import BlockingConfig
 from evaluation.appearance import report_from_mapping
 from synthetic.artifact_writer import validate_manifest, validate_manifest_tree, write_artifact_set
+from synthetic.curriculum import (
+    curriculum_cases_for_suite,
+    curriculum_summary,
+    expectation_for_spec,
+)
 from synthetic.ground_truth import (
     build_pure_artifacts,
     geometry_payload_from_candidate,
@@ -136,6 +141,9 @@ class SyntheticFactoryTests(unittest.TestCase):
         self.assertEqual(artifacts["metadata"]["shape_id"], spec.shape_id)
 
     def test_suite_registry_contains_required_entries(self) -> None:
+        self.assertIn("adversarial-level-1", list_suites())
+        self.assertIn("adversarial-level-2", list_suites())
+        self.assertIn("adversarial-level-3", list_suites())
         self.assertIn("adversarial-silhouettes", list_suites())
         self.assertIn("blender-smoke", list_suites())
         self.assertIn("capture-noise", list_suites())
@@ -143,6 +151,29 @@ class SyntheticFactoryTests(unittest.TestCase):
         self.assertIn("deterministic-micro", list_suites())
         self.assertIn("material-appearance", list_suites())
         self.assertIn("silhouette-edge-cases", list_suites())
+
+    def test_adversarial_curriculum_declares_progressive_expectations(self) -> None:
+        level_one = curriculum_cases_for_suite("adversarial-level-1")
+        level_three = curriculum_cases_for_suite("adversarial-level-3")
+        summary = curriculum_summary(("adversarial-level-1", "adversarial-level-3"))
+
+        self.assertGreater(len(level_one), 0)
+        self.assertTrue(all(item.level == 1 for item in level_one))
+        self.assertTrue(all(item.level == 3 for item in level_three))
+        self.assertIn("missing_top_view", [item.definition for item in level_three])
+        self.assertEqual(summary["level_counts"]["1"], len(level_one))
+        self.assertIn("active_view_needed", summary["failure_label_counts"])
+
+    def test_curriculum_expectations_are_exposed_in_quality_targets(self) -> None:
+        spec = get_definition("missing_top_view").create(19)
+        expectation = expectation_for_spec(spec)
+        targets = quality_targets_for(spec)
+
+        self.assertIsNotNone(expectation)
+        self.assertEqual(targets["curriculum"]["level"], 3)  # type: ignore[index]
+        curriculum_targets = targets["targets"]["curriculum"]  # type: ignore[index]
+        self.assertEqual(curriculum_targets["required_views"], ["front", "side"])
+        self.assertIn("active_view_recommendation", curriculum_targets["expected_best_backends"])
 
     def test_new_degradation_families_are_registered(self) -> None:
         mask_spec = get_definition("checkerboard_breakup").create(5)

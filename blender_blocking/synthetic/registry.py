@@ -13,6 +13,7 @@ from .random_params import (
     material_fixture_spec,
     profile_lathe_spec,
 )
+from .curriculum import CURRICULUM_SUITES
 from .materials import MATERIAL_FIXTURE_KINDS
 from .specs import ShapeFamily, SyntheticShapeSpec
 
@@ -196,6 +197,7 @@ REGISTRY = _build_registry()
 
 
 SUITES: dict[str, tuple[str, ...]] = {
+    **CURRICULUM_SUITES,
     "capture-noise": CAPTURE_NOISE,
     "deterministic-micro": DETERMINISTIC_MICRO,
     "smoke": ("box", "sphere", "vase", "table", "single_outlier_pixel"),
