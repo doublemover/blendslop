@@ -255,6 +255,91 @@ def _mesh_path_from_backend_result(result: object) -> Optional[Path]:
     return path if path.exists() else None
 
 
+def _evaluation_payload_from_result(result: object) -> Dict[str, Any]:
+    """Expose EvaluationBundle data in e2e JSON, even for single candidates."""
+    if result is None:
+        return {}
+    if hasattr(result, "evaluation_bundles"):
+        bundles = [
+            _to_jsonable(bundle)
+            for bundle in (getattr(result, "evaluation_bundles", ()) or ())
+        ]
+        payload: Dict[str, Any] = {}
+        if bundles:
+            payload["evaluation_bundles"] = bundles
+        autopsies = [
+            _to_jsonable(pack)
+            for pack in (getattr(result, "autopsy_packs", ()) or ())
+        ]
+        if autopsies:
+            payload["autopsy_packs"] = autopsies
+        return payload
+    if hasattr(result, "to_evaluation_bundle"):
+        try:
+            bundle = result.to_evaluation_bundle(
+                suite=str(getattr(result, "backend_name", "")),
+                run_id=str(getattr(result, "candidate_id", "")),
+            )
+            payload = {"evaluation_bundle": _to_jsonable(bundle)}
+            try:
+                from blender_blocking.evaluation.autopsy import (
+                    autopsy_pack_from_bundle,
+                )
+
+                payload["autopsy_pack"] = _to_jsonable(
+                    autopsy_pack_from_bundle(bundle)
+                )
+            except Exception as exc:
+                payload["autopsy_pack_error"] = str(exc)
+            return payload
+        except Exception as exc:
+            return {"evaluation_bundle_error": str(exc)}
+    return {}
+
+
+def _e2e_payload_with_evaluation(
+    payload: Mapping[str, Any],
+    result: object,
+) -> Dict[str, Any]:
+    merged = dict(payload)
+    evaluation = _evaluation_payload_from_result(result)
+    if evaluation:
+        merged.update(evaluation)
+    return merged
+
+
+def _evaluation_outputs_from_payload(payload: Mapping[str, Any]) -> Dict[str, Any]:
+    outputs: Dict[str, Any] = {}
+    if not isinstance(payload, Mapping):
+        return outputs
+    bundles = payload.get("evaluation_bundles")
+    if isinstance(bundles, Sequence) and not isinstance(bundles, (str, bytes)):
+        outputs["evaluation_bundles"] = list(bundles)
+    bundle = payload.get("evaluation_bundle")
+    if isinstance(bundle, Mapping):
+        outputs["evaluation_bundle"] = dict(bundle)
+    for key in ("autopsy_packs", "autopsy_pack"):
+        value = payload.get(key)
+        if value:
+            outputs[key] = value
+    backend = payload.get("backend_result")
+    if isinstance(backend, Mapping):
+        nested = _evaluation_outputs_from_payload(backend)
+        for key, value in nested.items():
+            outputs.setdefault(key, value)
+    return outputs
+
+
+def _to_jsonable(value: object) -> Any:
+    if hasattr(value, "to_dict"):
+        return value.to_dict()
+    if isinstance(value, Mapping):
+        return {str(key): _to_jsonable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_to_jsonable(item) for item in value]
+    return value
+
+
 def _import_obj_for_render(path: Path) -> Optional[object]:
     before = {obj.name for obj in bpy.context.scene.objects}
     try:
@@ -293,11 +378,13 @@ def _candidate_status_payload(result: object) -> Tuple[str, Dict[str, Any]]:
         return "missing", {}
     if hasattr(result, "selected") and hasattr(result, "candidates"):
         data = result.to_dict() if hasattr(result, "to_dict") else {}
+        data = _e2e_payload_with_evaluation(data, result)
         selected = getattr(result, "selected", None)
         status = getattr(selected, "status", "missing") if selected else "missing"
         return str(status), data
     if hasattr(result, "status"):
         data = result.to_dict() if hasattr(result, "to_dict") else {}
+        data = _e2e_payload_with_evaluation(data, result)
         return str(getattr(result, "status")), data
     return "unstructured", {"type": type(result).__name__, "repr": repr(result)}
 
@@ -743,6 +830,7 @@ class E2EValidator:
                     "backend_result": backend_payload,
                     "rendered_paths": rendered_paths,
                 }
+                payload_out.update(_evaluation_outputs_from_payload(backend_payload))
                 _json_dump(self.result_json, payload_out)
                 print(f"\nSaved result JSON: {self.result_json}")
 
@@ -1040,22 +1128,22 @@ def run_synthetic_suite_matrix(
 
                     traceback.print_exc()
 
-            matrix.append(
-                {
-                    "artifact": "e2e",
-                    "case": case,
-                    "suite": suite,
-                    "shape_id": spec.shape_id,
-                    "definition": definition_name,
-                    "mode": mode,
-                    "name": f"{spec.shape_id}/{mode}",
-                    "status": status,
-                    "passed": passed,
-                    "metrics": metrics,
-                    "result_json": case_json.as_posix(),
-                    "message": message,
-                }
-            )
+            row = {
+                "artifact": "e2e",
+                "case": case,
+                "suite": suite,
+                "shape_id": spec.shape_id,
+                "definition": definition_name,
+                "mode": mode,
+                "name": f"{spec.shape_id}/{mode}",
+                "status": status,
+                "passed": passed,
+                "metrics": metrics,
+                "result_json": case_json.as_posix(),
+                "message": message,
+            }
+            row.update(_evaluation_outputs_from_payload(result_payload))
+            matrix.append(row)
 
     skipped_failures = [
         row for row in matrix if row["status"] == "skip" and not row["passed"]
@@ -1077,6 +1165,7 @@ def run_synthetic_suite_matrix(
             "skipped": sum(1 for row in matrix if row["status"] == "skip"),
         },
         "matrix": matrix,
+        "bundles": _evaluation_bundles_from_matrix(matrix),
     }
     if result_json:
         _json_dump(result_json, summary)
@@ -1112,20 +1201,76 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
         for view, view_payload in views.items():
             if isinstance(view_payload, Mapping) and isinstance(view_payload.get("iou"), (int, float)):
                 metrics[f"{view}_iou"] = float(view_payload["iou"])
-    status = payload.get("status")
+    backend = payload.get("backend_result")
+    backend_payload = backend if isinstance(backend, Mapping) else payload
+    status = backend_payload.get("status")
     if isinstance(status, str):
         metrics["backend_status_ok"] = 1.0 if _backend_status_ok(status) else 0.0
-    selected = payload.get("selected")
+    selected = backend_payload.get("selected")
     if isinstance(selected, Mapping):
         status = selected.get("status")
         metrics["backend_status_ok"] = 1.0 if _backend_status_ok(status) else 0.0
         metric_result = selected.get("metric_result", {})
         if isinstance(metric_result, Mapping):
-            for key in ("area_iou_mean", "area_iou_min", "elapsed_s"):
+            for key in (
+                "area_iou_mean",
+                "area_iou_min",
+                "boundary_iou_mean",
+                "topology_score",
+                "editability_score",
+                "complexity_penalty",
+                "elapsed_s",
+            ):
                 value = metric_result.get(key)
                 if isinstance(value, (int, float)):
                     metrics[key] = float(value)
+    elif isinstance(backend_payload.get("metric_result"), Mapping):
+        metric_result = backend_payload["metric_result"]
+        for key in (
+            "area_iou_mean",
+            "area_iou_min",
+            "boundary_iou_mean",
+            "topology_score",
+            "editability_score",
+            "complexity_penalty",
+            "elapsed_s",
+        ):
+            value = metric_result.get(key)
+            if isinstance(value, (int, float)):
+                metrics[key] = float(value)
+    for bundle in _evaluation_bundle_sequence(payload):
+        for group in bundle.get("metric_groups", ()) or ():
+            if not isinstance(group, Mapping):
+                continue
+            for metric in group.get("metrics", ()) or ():
+                if not isinstance(metric, Mapping):
+                    continue
+                name = str(metric.get("name", "")).replace(".", "_")
+                value = metric.get("value")
+                if name and isinstance(value, (int, float, bool)):
+                    metrics[name] = float(value)
     return metrics
+
+
+def _evaluation_bundle_sequence(payload: Mapping[str, Any]) -> Tuple[Mapping[str, Any], ...]:
+    outputs = _evaluation_outputs_from_payload(payload)
+    bundles = []
+    value = outputs.get("evaluation_bundles")
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        bundles.extend(item for item in value if isinstance(item, Mapping))
+    single = outputs.get("evaluation_bundle")
+    if isinstance(single, Mapping):
+        bundles.append(single)
+    return tuple(bundles)
+
+
+def _evaluation_bundles_from_matrix(
+    matrix: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    bundles: list[Mapping[str, Any]] = []
+    for row in matrix:
+        bundles.extend(_evaluation_bundle_sequence(row))
+    return bundles
 
 
 def _backend_status_ok(status: object) -> bool:

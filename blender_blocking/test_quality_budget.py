@@ -129,6 +129,57 @@ class QualityBudgetTests(unittest.TestCase):
         self.assertEqual(len(report["checks"]), 2)
         self.assertEqual(report["checks"][0]["value"], 0.82)
 
+    def test_nested_e2e_evaluation_bundles_are_budgetable(self) -> None:
+        current = {
+            "validation_mode": "backend-status",
+            "mode": "ensemble",
+            "backend_result": {
+                "selected": {"status": "success"},
+                "evaluation_bundles": [
+                    {
+                        "schema_version": "evaluation-bundle-v1",
+                        "suite": "smoke",
+                        "candidate_id": "shape-program",
+                        "target_id": "chair",
+                        "mode": "shape_program",
+                        "metric_groups": [
+                            {
+                                "name": "silhouette",
+                                "status": "pass",
+                                "metrics": [
+                                    {
+                                        "name": "silhouette.min_view_iou",
+                                        "value": 0.76,
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            },
+        }
+        budget = {
+            "schema_version": "quality_perf_budget_v1",
+            "name": "nested",
+            "thresholds": [
+                {
+                    "id": "min-view",
+                    "artifact": "evaluation",
+                    "case": "smoke",
+                    "mode": "shape_program",
+                    "shape_id": "chair",
+                    "metric": "metrics.silhouette.min_view_iou",
+                    "threshold": 0.75,
+                    "required": True,
+                }
+            ],
+        }
+
+        report = evaluate_budget_payloads(current, budget)
+
+        self.assertTrue(report["passed"])
+        self.assertEqual(report["checks"][0]["value"], 0.76)
+
 
 if __name__ == "__main__":
     unittest.main()

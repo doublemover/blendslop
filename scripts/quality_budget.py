@@ -239,16 +239,26 @@ def _records_from_payload(
 ) -> Iterable[BudgetRecord]:
     if not payload:
         return ()
+    records: list[BudgetRecord] = []
     if isinstance(payload.get("results"), list):
-        return tuple(_benchmark_records(payload, source_path))
+        records.extend(_benchmark_records(payload, source_path))
     if isinstance(payload.get("matrix"), list):
-        return tuple(_matrix_records(payload, source_path))
+        records.extend(_matrix_records(payload, source_path))
     if isinstance(payload.get("bundles"), list):
-        return tuple(_evaluation_bundle_records(payload.get("bundles", ()), source_path))
+        records.extend(_evaluation_bundle_records(payload.get("bundles", ()), source_path))
+    if isinstance(payload.get("evaluation_bundles"), list):
+        records.extend(
+            _evaluation_bundle_records(payload.get("evaluation_bundles", ()), source_path)
+        )
+    if isinstance(payload.get("evaluation_bundle"), Mapping):
+        records.append(_evaluation_bundle_record(payload["evaluation_bundle"], source_path))
+    backend = payload.get("backend_result")
+    if isinstance(backend, Mapping):
+        records.extend(_records_from_payload(backend, source_path))
     if _is_evaluation_bundle(payload):
-        return (_evaluation_bundle_record(payload, source_path),)
+        records.append(_evaluation_bundle_record(payload, source_path))
     if "validation_mode" in payload or "average_iou" in payload:
-        return (
+        records.append(
             BudgetRecord(
                 artifact="e2e",
                 case=str(payload.get("mode", "single")),
@@ -256,8 +266,10 @@ def _records_from_payload(
                 mode=str(payload.get("mode", "")),
                 data=dict(payload),
                 source_path=source_path,
-            ),
+            )
         )
+    if records:
+        return tuple(_dedupe_records(records))
     return (
         BudgetRecord(
             artifact=str(payload.get("artifact", "json")),
@@ -266,7 +278,17 @@ def _records_from_payload(
             data=dict(payload),
             source_path=source_path,
         ),
-        )
+    )
+
+
+def _dedupe_records(records: Sequence[BudgetRecord]) -> Iterable[BudgetRecord]:
+    seen: set[tuple[tuple[str, str, str, str, str], str | None]] = set()
+    for record in records:
+        key = (record.identity, record.source_path)
+        if key in seen:
+            continue
+        seen.add(key)
+        yield record
 
 
 def _evaluation_bundle_records(
