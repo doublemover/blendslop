@@ -266,6 +266,45 @@ class VolumeGridTests(unittest.TestCase):
         self.assertEqual(len(repaired.faces), 1)
         self.assertEqual(repaired.topology["degenerate_faces"], 0)
 
+    def test_visual_hull_guarded_smooth_preserves_boundary_and_topology(self) -> None:
+        mesh = MeshExtractionResult(
+            status="ok",
+            method="fixture",
+            requested_method="fixture",
+            vertices=np.array(
+                [
+                    [0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [1.0, 1.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.5, 0.5, 1.0],
+                ],
+                dtype=float,
+            ),
+            faces=np.array(
+                [
+                    [0, 1, 4],
+                    [1, 2, 4],
+                    [2, 3, 4],
+                    [3, 0, 4],
+                ],
+                dtype=np.int64,
+            ),
+        )
+
+        smoothed, status = _postprocess_mesh(
+            mesh,
+            "smooth_guarded",
+            config={"smooth_iterations": 2, "smooth_alpha": 0.5},
+        )
+
+        self.assertEqual(status["status"], "ok")
+        self.assertEqual(status["implementation"], "visual_hull._guarded_laplacian_smooth")
+        self.assertEqual(status["before"]["topology_score"], status["after"]["topology_score"])
+        np.testing.assert_allclose(smoothed.vertices[:4], mesh.vertices[:4])
+        self.assertLess(smoothed.vertices[4, 2], mesh.vertices[4, 2])
+        self.assertGreater(status["smooth"]["smooth_moved_vertices"], 0)
+
     def test_visual_hull_mesh_unavailable_degrades_or_fails_without_point_fallback(self) -> None:
         backend = VisualHullBackend()
         target = _build_full_view_target()

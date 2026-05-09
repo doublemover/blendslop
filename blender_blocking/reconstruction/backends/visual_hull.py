@@ -404,6 +404,8 @@ def _postprocess_mesh(
         }
     if method == "topology_repair":
         return _run_safe_topology_repair(mesh_result, config=config)
+    if method == "smooth_guarded":
+        return _run_guarded_smooth(mesh_result, config=config)
     if method not in {"poisson", "screened_poisson"}:
         return mesh_result, {
             "method": method,
@@ -468,6 +470,179 @@ def _postprocess_mesh(
         "output_faces": int(len(processed.faces)),
         "implementation": "open3d.geometry.TriangleMesh.create_from_point_cloud_poisson",
     }
+
+
+def _run_guarded_smooth(
+    mesh_result: Any,
+    *,
+    config: Mapping[str, Any],
+) -> tuple[Any, dict[str, Any]]:
+    required = _postprocess_required(config)
+    method = "smooth_guarded"
+    if mesh_result is None:
+        return mesh_result, {
+            "method": method,
+            "status": "skipped",
+            "required": required,
+            "message": "mesh extraction has not completed",
+        }
+    if not getattr(mesh_result, "available", False):
+        status = "failed" if required else "skipped"
+        return mesh_result, {
+            "method": method,
+            "status": status,
+            "required": required,
+            "mesh_status": getattr(mesh_result, "status", "unknown"),
+            "message": (
+                "smooth_guarded requires a mesh, but mesh extraction status was "
+                f"{getattr(mesh_result, 'status', 'unknown')!r}"
+            ),
+        }
+
+    from metrics.topology import mesh_topology_report
+    from volume import MeshExtractionResult
+
+    vertices = np.asarray(mesh_result.vertices, dtype=float)
+    faces = np.asarray(mesh_result.faces, dtype=np.int64)
+    before = mesh_topology_report(vertices, faces)
+    smoothed, smooth_meta = _guarded_laplacian_smooth(
+        vertices,
+        faces,
+        iterations=int(config.get("smooth_iterations", 2)),
+        alpha=float(config.get("smooth_alpha", 0.25)),
+        max_displacement_ratio=float(config.get("smooth_max_displacement_ratio", 0.02)),
+        freeze_boundary=bool(config.get("smooth_freeze_boundary", True)),
+    )
+    after = mesh_topology_report(smoothed, faces)
+    if after.topology_score < before.topology_score:
+        status = "failed" if required else "skipped"
+        return mesh_result, {
+            "method": method,
+            "status": status,
+            "required": required,
+            "message": "guarded smoothing would reduce topology score",
+            "before": before.to_dict(),
+            "after": after.to_dict(),
+            "smooth": smooth_meta,
+        }
+    metrics = {
+        **dict(getattr(mesh_result, "metrics", {})),
+        "postprocess": method,
+        "postprocess_backend": "pure_python",
+        **smooth_meta,
+    }
+    repaired = MeshExtractionResult(
+        status="ok",
+        method=f"{getattr(mesh_result, 'method', 'mesh')}_smooth_guarded",
+        requested_method=getattr(mesh_result, "requested_method", mesh_result.method),
+        method_aliases=tuple(getattr(mesh_result, "method_aliases", ()) or ()),
+        vertices=smoothed,
+        faces=faces,
+        normals=None,
+        values=getattr(mesh_result, "values", None),
+        message="guarded Laplacian smoothing completed",
+        metrics=metrics,
+        topology=after.to_dict(),
+    )
+    return repaired, {
+        "method": method,
+        "status": "ok",
+        "required": required,
+        "message": "guarded Laplacian smoothing completed",
+        "input_vertices": int(len(vertices)),
+        "input_faces": int(len(faces)),
+        "output_vertices": int(len(repaired.vertices)),
+        "output_faces": int(len(repaired.faces)),
+        "implementation": "visual_hull._guarded_laplacian_smooth",
+        "before": before.to_dict(),
+        "after": after.to_dict(),
+        "smooth": smooth_meta,
+    }
+
+
+def _guarded_laplacian_smooth(
+    vertices: np.ndarray,
+    faces: np.ndarray,
+    *,
+    iterations: int,
+    alpha: float,
+    max_displacement_ratio: float,
+    freeze_boundary: bool,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    vertices = np.asarray(vertices, dtype=float)
+    faces = np.asarray(faces, dtype=np.int64)
+    if vertices.ndim != 2 or vertices.shape[1] != 3 or len(vertices) == 0:
+        return np.empty((0, 3), dtype=float), {
+            "smooth_iterations": 0,
+            "smooth_alpha": float(alpha),
+            "smooth_moved_vertices": 0,
+            "smooth_max_displacement": 0.0,
+        }
+    adjacency, boundary_vertices = _mesh_adjacency_and_boundary(faces, len(vertices))
+    output = vertices.copy()
+    iterations = max(0, int(iterations))
+    alpha = float(np.clip(alpha, 0.0, 1.0))
+    bbox_diag = float(np.linalg.norm(vertices.max(axis=0) - vertices.min(axis=0)))
+    max_displacement = max(0.0, bbox_diag * max(0.0, float(max_displacement_ratio)))
+    movable = {
+        index
+        for index, neighbors in adjacency.items()
+        if neighbors and (not freeze_boundary or index not in boundary_vertices)
+    }
+    for _ in range(iterations):
+        updated = output.copy()
+        for index in movable:
+            neighbors = tuple(adjacency[index])
+            if not neighbors:
+                continue
+            target = output[list(neighbors)].mean(axis=0)
+            delta = (target - output[index]) * alpha
+            length = float(np.linalg.norm(delta))
+            if max_displacement > 0.0 and length > max_displacement:
+                delta *= max_displacement / max(length, 1e-12)
+            updated[index] = output[index] + delta
+        output = updated
+    displacement = np.linalg.norm(output - vertices, axis=1)
+    return output, {
+        "smooth_iterations": iterations,
+        "smooth_alpha": alpha,
+        "smooth_freeze_boundary": freeze_boundary,
+        "smooth_boundary_vertex_count": len(boundary_vertices),
+        "smooth_movable_vertex_count": len(movable),
+        "smooth_moved_vertices": int(np.count_nonzero(displacement > 1e-12)),
+        "smooth_mean_displacement": float(np.mean(displacement)) if displacement.size else 0.0,
+        "smooth_max_displacement": float(np.max(displacement)) if displacement.size else 0.0,
+        "smooth_max_displacement_ratio": float(max_displacement_ratio),
+    }
+
+
+def _mesh_adjacency_and_boundary(
+    faces: np.ndarray,
+    vertex_count: int,
+) -> tuple[dict[int, set[int]], set[int]]:
+    adjacency: dict[int, set[int]] = {index: set() for index in range(vertex_count)}
+    edge_counts: dict[tuple[int, int], int] = {}
+    for face in np.asarray(faces, dtype=np.int64):
+        if len(face) < 3:
+            continue
+        clean = [int(vertex) for vertex in face if 0 <= int(vertex) < vertex_count]
+        if len(set(clean)) < 3:
+            continue
+        for index, start in enumerate(clean):
+            end = clean[(index + 1) % len(clean)]
+            if start == end:
+                continue
+            adjacency[start].add(end)
+            adjacency[end].add(start)
+            edge = (start, end) if start < end else (end, start)
+            edge_counts[edge] = edge_counts.get(edge, 0) + 1
+    boundary = {
+        vertex
+        for edge, count in edge_counts.items()
+        if count == 1
+        for vertex in edge
+    }
+    return adjacency, boundary
 
 
 def _run_safe_topology_repair(

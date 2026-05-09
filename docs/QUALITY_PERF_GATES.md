@@ -137,6 +137,9 @@ and optional non-largest connected components without moving vertices or filling
 holes. The result includes before/after topology reports and an operation log;
 hole filling remains a higher-risk remesh/Poisson step and is called out in the
 autopsy `topology_repair_plan` instead of being silently synthesized.
+Postprocess mode `smooth_guarded` is also pure-Python: it runs bounded Laplacian
+smoothing, freezes boundary vertices by default, clamps per-iteration
+displacement, and rejects the result if topology score would regress.
 
 Primitive and differentiable research backends now record optimization evidence
 instead of only final proxy metrics. Primitive fit runs deterministic multistart
