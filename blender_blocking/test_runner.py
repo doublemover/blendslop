@@ -79,6 +79,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_silhouette_iou", "test_silhouette_iou"),
     ("pure_contour_analyzer", "test_contour_analyzer"),
     ("pure_shape_matcher", "test_shape_matcher"),
+    ("pure_shape_program_grammar", "test_shape_program_grammar"),
     ("pure_profile_combination", "test_profile_combination"),
     ("pure_slice_shape_metrics", "test_slice_shape_metrics"),
     ("pure_resfitting_metrics", "test_resfitting_metrics"),

@@ -33,6 +33,9 @@ try:  # Package import when called as blender_blocking.*
         ShapeProgram,
         validate_shape_program,
     )
+    from blender_blocking.primitives.grammar import default_shape_program_grammar
+    from blender_blocking.primitives.program_search import search_shape_program_candidates
+    from blender_blocking.primitives.shape_dsl import program_to_dsl
 except Exception:  # pragma: no cover - legacy script import path
     from primitives.shape_program import (  # type: ignore
         ResidualPatch,
@@ -41,6 +44,9 @@ except Exception:  # pragma: no cover - legacy script import path
         ShapeProgram,
         validate_shape_program,
     )
+    from primitives.grammar import default_shape_program_grammar  # type: ignore
+    from primitives.program_search import search_shape_program_candidates  # type: ignore
+    from primitives.shape_dsl import program_to_dsl  # type: ignore
 
 
 _ROOT_STRATEGIES = {"profile_lathe", "bounds_box", "hybrid_profile_bounds"}
@@ -86,6 +92,14 @@ class ShapeProgramBackend(BaseBackend):
             errors.append("shape_program.lathe_segments must be an integer >= 8")
         if not isinstance(config.get("run_export_qa", False), bool):
             errors.append("shape_program.run_export_qa must be a boolean")
+        search_candidates = config.get("program_search_candidates", 4)
+        if not isinstance(search_candidates, int) or search_candidates < 1:
+            errors.append("shape_program.program_search_candidates must be an integer >= 1")
+        search_objective = str(config.get("program_search_objective", "editable_balanced"))
+        if search_objective not in {"editable_balanced", "minimal", "part_aware"}:
+            errors.append(
+                "shape_program.program_search_objective must be editable_balanced, minimal, or part_aware"
+            )
         targets = _export_qa_targets(config)
         invalid_targets = set(targets) - {"obj", "glb", "gltf"}
         if invalid_targets:
@@ -354,6 +368,7 @@ def build_shape_program_from_target(
         "bounds": None if target.bounds is None else target.bounds.to_dict(),
         "config_hash": target.config_hash,
         "constraint_hash": target.constraint_hash,
+        "dominant_profile_view": dominant_view,
     }
     program = ShapeProgram(
         schema_version="shape-program-v1",
@@ -362,6 +377,26 @@ def build_shape_program_from_target(
         constraints=tuple(constraints),
         residual_patches=tuple(residuals[:max_nodes]),
         metadata=metadata,
+    )
+    grammar = default_shape_program_grammar()
+    search_result = search_shape_program_candidates(
+        program,
+        grammar=grammar,
+        max_candidates=int(config.get("program_search_candidates", 4)),
+        objective=str(config.get("program_search_objective", "editable_balanced")),
+    )
+    program = search_result.selected.program
+    program = ShapeProgram(
+        schema_version=program.schema_version,
+        program_id=program.program_id,
+        root_nodes=program.root_nodes[:max_nodes],
+        constraints=program.constraints,
+        residual_patches=program.residual_patches[:max_nodes],
+        metadata={
+            **dict(program.metadata),
+            "grammar_id": search_result.grammar.grammar_id,
+            "program_dsl": program_to_dsl(program),
+        },
     )
     diagnostics = {
         "dominant_profile_view": dominant_view,
@@ -375,6 +410,8 @@ def build_shape_program_from_target(
         "realized_residual_node_count": len(realized_residual_node_ids),
         "realized_residual_node_ids": realized_residual_node_ids,
         "has_uncertainty": _has_uncertainty(target),
+        "grammar_search": search_result.to_dict(),
+        "selected_grammar_candidate": search_result.selected.candidate_id,
         "program_validation_errors": list(validate_shape_program(program)),
     }
     return program, diagnostics
