@@ -177,6 +177,40 @@ class RefinementLabCliTests(unittest.TestCase):
                 self.assertIn("--reconstruction-mode", variant["cli_args"])
                 self.assertIn("--validation-mode", variant["cli_args"])
 
+    def test_calibrate_masks_command_writes_executable_sweep(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ref = root / "ref.png"
+            cand = root / "cand.png"
+            out = root / "calibration.json"
+            _write_square_mask(ref, x0=10, y0=12, size=14)
+            _write_square_mask(cand, x0=12, y0=13, size=14)
+
+            with redirect_stdout(io.StringIO()):
+                code = cli.main(
+                    [
+                        "calibrate-masks",
+                        "--reference",
+                        f"front={ref}",
+                        "--candidate",
+                        f"front={cand}",
+                        "--max-offset-px",
+                        "3",
+                        "--step-px",
+                        "1",
+                        "--out",
+                        str(out),
+                    ]
+                )
+
+            self.assertEqual(code, 0)
+            payload = json.loads(out.read_text(encoding="utf-8"))
+            self.assertEqual(payload["status"], "improved")
+            self.assertEqual(
+                payload["mask_alignment"]["best_by_view"]["front"]["offset_px"],
+                [-2, -1],
+            )
+
     def test_module_entrypoint_help_runs_from_repo_root(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]
         completed = subprocess.run(
@@ -276,6 +310,17 @@ class RefinementLabCliTests(unittest.TestCase):
             self.assertEqual(code, 0)
             payload = json.loads(out.read_text(encoding="utf-8"))
             self.assertEqual(payload["promotion"]["tier"], "degraded")
+
+
+def _write_square_mask(path: Path, *, x0: int, y0: int, size: int) -> None:
+    from PIL import Image
+
+    image = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
+    pixels = image.load()
+    for y in range(y0, y0 + size):
+        for x in range(x0, x0 + size):
+            pixels[x, y] = (255, 255, 255, 255)
+    image.save(path)
 
 
 if __name__ == "__main__":

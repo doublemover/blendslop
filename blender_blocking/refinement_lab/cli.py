@@ -93,6 +93,33 @@ def main(argv: list[str] | None = None) -> int:
     adapt_parser.add_argument("--parent-variant", default="")
     adapt_parser.add_argument("--max-proposals", type=int, default=8)
 
+    calibrate_parser = subparsers.add_parser("calibrate-masks")
+    calibrate_parser.add_argument(
+        "--reference",
+        action="append",
+        required=True,
+        help="Reference mask as VIEW=PATH. Repeat once per view.",
+    )
+    calibrate_parser.add_argument(
+        "--candidate",
+        action="append",
+        required=True,
+        help="Candidate/render mask as VIEW=PATH. Repeat once per view.",
+    )
+    calibrate_parser.add_argument("--out", type=Path, default=None)
+    calibrate_parser.add_argument("--max-offset-px", type=int, default=12)
+    calibrate_parser.add_argument("--step-px", type=int, default=4)
+    calibrate_parser.add_argument("--min-area-iou-delta", type=float, default=0.01)
+    calibrate_parser.add_argument("--min-boundary-iou-delta", type=float, default=0.01)
+    calibrate_parser.add_argument(
+        "--max-sdf-loss-increase",
+        type=float,
+        default=0.0,
+    )
+    calibrate_parser.add_argument("--min-area-iou", type=float, default=0.0)
+    calibrate_parser.add_argument("--min-boundary-iou", type=float, default=None)
+    calibrate_parser.add_argument("--max-sdf-loss", type=float, default=None)
+
     label_parser = subparsers.add_parser("label")
     label_parser.add_argument("--run-root", type=Path, required=True)
     label_parser.add_argument("--run-id", default="")
@@ -144,6 +171,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_autopsy(args)
     if args.command == "adapt":
         return _cmd_adapt(args)
+    if args.command == "calibrate-masks":
+        return _cmd_calibrate_masks(args)
     if args.command == "label":
         return _cmd_label(args)
     if args.command == "study-pack":
@@ -459,6 +488,36 @@ def _cmd_adapt(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_calibrate_masks(args: argparse.Namespace) -> int:
+    from evaluation.calibration import executable_calibration_sweep
+
+    references = _load_view_masks(args.reference)
+    candidates = _load_view_masks(args.candidate)
+    report = executable_calibration_sweep(
+        references,
+        candidates,
+        max_offset_px=args.max_offset_px,
+        step_px=args.step_px,
+        min_area_iou_delta=args.min_area_iou_delta,
+        min_boundary_iou_delta=args.min_boundary_iou_delta,
+        max_signed_distance_loss_increase=args.max_sdf_loss_increase,
+        min_area_iou=args.min_area_iou,
+        min_boundary_iou=args.min_boundary_iou,
+        max_signed_distance_loss=args.max_sdf_loss,
+    )
+    payload = report.to_dict()
+    if args.out is not None:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(
+            json.dumps(json_safe(payload), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        print(args.out.as_posix())
+    else:
+        print(json.dumps(json_safe(payload), indent=2, sort_keys=True))
+    return 0 if report.status in {"improved", "no_improvement"} else 1
+
+
 def _adaptive_proposals_from_files(
     paths: list[Path],
     *,
@@ -494,6 +553,40 @@ def _adaptive_proposals_from_payload(
     if not isinstance(payload, dict):
         return []
     return list(proposals_from_result_payload(payload, max_proposals=max_proposals))
+
+
+def _load_view_masks(entries: list[str]) -> dict[str, object]:
+    masks = {}
+    for entry in entries:
+        view, path = _parse_view_path(entry)
+        masks[view] = _load_mask_image(path)
+    return masks
+
+
+def _parse_view_path(entry: str) -> tuple[str, Path]:
+    if "=" not in entry:
+        raise SystemExit(f"expected VIEW=PATH, got {entry!r}")
+    view, raw_path = entry.split("=", 1)
+    view = view.strip()
+    if not view:
+        raise SystemExit(f"empty view name in {entry!r}")
+    path = Path(raw_path)
+    if not path.exists():
+        raise SystemExit(f"mask path does not exist: {path}")
+    return view, path
+
+
+def _load_mask_image(path: Path) -> object:
+    try:
+        from PIL import Image
+        import numpy as np
+    except Exception as exc:  # pragma: no cover - dependency check covers this
+        raise SystemExit(f"Pillow/numpy are required to load masks: {exc}") from exc
+    image = Image.open(path).convert("RGBA")
+    array = np.asarray(image)
+    alpha = array[..., 3]
+    rgb = array[..., :3].mean(axis=2)
+    return (alpha > 0) & (rgb > 8)
 
 
 def _cmd_label(args: argparse.Namespace) -> int:
