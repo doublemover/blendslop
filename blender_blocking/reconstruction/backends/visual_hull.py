@@ -157,6 +157,15 @@ class VisualHullBackend(BaseBackend):
             "config": dict(request.config),
             "volume_backend": volume_backend_metadata,
         }
+        try:
+            from evaluation.uncertainty import uncertainty_report_from_target
+
+            uncertainty_report = uncertainty_report_from_target(request.target).to_dict()
+            mesh_metrics["uncertainty_report"] = uncertainty_report
+            volume_metadata_extra["uncertainty_report"] = uncertainty_report
+        except Exception as exc:
+            uncertainty_report = {"status": "unavailable", "message": str(exc)}
+            mesh_metrics["uncertainty_report"] = uncertainty_report
         if openvdb_status is not None:
             volume_metadata_extra["openvdb"] = openvdb_status.to_dict()
         cache_status = getattr(grid, "chunk_cache_status", None)
@@ -475,6 +484,14 @@ class VisualHullBackend(BaseBackend):
             per_view=per_view_metrics,
             editability_score=0.15,
             topology_score=topology_score,
+            uncertainty_consistency=float(
+                mesh_metrics.get("uncertainty_report", {}).get(
+                    "consistency_score",
+                    0.0,
+                )
+                if isinstance(mesh_metrics.get("uncertainty_report"), Mapping)
+                else 0.0
+            ),
             complexity_penalty=min(1.0, resolution / 256.0),
             extras={
                 "visual_hull_stats": stats,

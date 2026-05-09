@@ -87,6 +87,12 @@ from .novel_view import (
 )
 from .selection import SelectionEvidence, attach_selection, pareto_front
 from .recoverability import RecoverabilityReport
+from .uncertainty import (
+    UncertaintyReport,
+    ViewUncertaintyReport,
+    uncertainty_metric_payload_from_target,
+    uncertainty_report_from_target,
+)
 from .schemas import (
     EvaluationBundle,
     MetricGroup,
@@ -137,9 +143,11 @@ __all__ = [
     "RunLineage",
     "Threshold",
     "TextureMaterialReport",
+    "UncertaintyReport",
     "ViewRolePermutationReport",
     "ViewRequest",
     "ViewDisagreementSignal",
+    "ViewUncertaintyReport",
     "SilhouetteGateConfig",
     "SelectionEvidence",
     "SensitivityProbe",
@@ -188,6 +196,8 @@ __all__ = [
     "surface_distance_report",
     "thresholds_for_query",
     "thresholds_from_baseline",
+    "uncertainty_metric_payload_from_target",
+    "uncertainty_report_from_target",
     "volumetric_iou",
     "write_reproduce_script",
     "write_run_lineage",

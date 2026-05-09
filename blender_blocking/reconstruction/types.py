@@ -596,6 +596,14 @@ class CandidateMetrics:
         if extra_topology_penalty is not None and self.topology_penalty == 0.0:
             object.__setattr__(self, "topology_penalty", extra_topology_penalty)
 
+        uncertainty = extras.get("uncertainty_report", extras.get("uncertainty"))
+        if isinstance(uncertainty, Mapping) and self.uncertainty_consistency == 0.0:
+            uncertainty_score = _optional_float(
+                uncertainty.get("consistency_score", uncertainty.get("confidence_score"))
+            )
+            if uncertainty_score is not None:
+                object.__setattr__(self, "uncertainty_consistency", uncertainty_score)
+
         report = (
             dict(self.constraint_report)
             if isinstance(self.constraint_report, Mapping)
