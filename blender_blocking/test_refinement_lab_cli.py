@@ -169,6 +169,9 @@ class RefinementLabCliTests(unittest.TestCase):
                     for variant in variants["variants"]
                 )
             )
+            for variant in variants["variants"]:
+                self.assertIn("--reconstruction-mode", variant["cli_args"])
+                self.assertIn("--validation-mode", variant["cli_args"])
 
     def test_module_entrypoint_help_runs_from_repo_root(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]

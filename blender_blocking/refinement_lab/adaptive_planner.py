@@ -75,7 +75,11 @@ class RefinementProposal:
                 "priority": self.priority,
                 "risk": self.risk,
             },
-            cli_args=self.cli_args,
+            cli_args=_complete_cli_args(
+                mode=self.mode,
+                validation_mode=self.validation_mode,
+                cli_args=self.cli_args,
+            ),
             config_overrides=self.config_overrides,
             expected_artifacts=("evaluation_bundle", "autopsy_pack"),
             tags=("adaptive",) + self.tags,
@@ -156,6 +160,21 @@ def merge_proposals(
     return tuple(
         sorted(by_id.values(), key=lambda proposal: proposal.priority)[:max_proposals]
     )
+
+
+def _complete_cli_args(
+    *,
+    mode: str,
+    validation_mode: str,
+    cli_args: Sequence[str],
+) -> tuple[str, ...]:
+    args = list(str(arg) for arg in cli_args)
+    prefix: list[str] = []
+    if "--reconstruction-mode" not in args:
+        prefix.extend(("--reconstruction-mode", mode))
+    if "--validation-mode" not in args:
+        prefix.extend(("--validation-mode", validation_mode))
+    return tuple(prefix + args)
 
 
 def proposals_from_result_payload(
