@@ -1264,7 +1264,12 @@ class BlockingWorkflow:
                 ),
             )
             self.reconstruction_result = result
-            self._record_backend_manifest(result.to_dict(), target_build)
+            self._record_backend_manifest(
+                result.to_dict(),
+                target_build,
+                result_obj=result,
+                suite=selected_mode,
+            )
             return result.selected.payload if result.selected else None
 
         backend = get_backend(backend_name)
@@ -1309,7 +1314,12 @@ class BlockingWorkflow:
                 result = backend.reconstruct(request)
 
         self.reconstruction_result = result
-        self._record_backend_manifest(result.to_dict(), target_build)
+        self._record_backend_manifest(
+            result.to_dict(),
+            target_build,
+            result_obj=result,
+            suite=selected_mode,
+        )
         if BLENDER_AVAILABLE and getattr(result.payload, "name", None):
             apply_object_tags(result.payload, role="final", context=self.context)
         return result.payload
@@ -1318,12 +1328,22 @@ class BlockingWorkflow:
         self,
         result_payload: Mapping[str, Any],
         target_build: TargetBuildResult,
+        *,
+        result_obj: Any = None,
+        suite: str = "",
     ) -> None:
         outputs = {
             "backend_result": result_payload,
             "target": target_build.to_manifest_fragment(),
             "artifact_root": str(self._artifact_root()),
         }
+        outputs.update(
+            self._evaluation_manifest_outputs(
+                result_obj=result_obj,
+                target_build=target_build,
+                suite=suite,
+            )
+        )
         warnings = list(target_build.warnings)
         errors = list(result_payload.get("errors", []))
         manifest = build_manifest(
@@ -1335,6 +1355,50 @@ class BlockingWorkflow:
         self.manifest = manifest
         if BLENDER_AVAILABLE:
             write_manifest(bpy.context.scene, manifest)
+
+    def _evaluation_manifest_outputs(
+        self,
+        *,
+        result_obj: Any,
+        target_build: TargetBuildResult,
+        suite: str,
+    ) -> Dict[str, Any]:
+        if result_obj is None:
+            return {}
+        if hasattr(result_obj, "evaluation_bundles"):
+            bundles = getattr(result_obj, "evaluation_bundles", ()) or ()
+            autopsy_packs = getattr(result_obj, "autopsy_packs", ()) or ()
+            return {
+                "evaluation_bundles": [
+                    bundle.to_dict() if hasattr(bundle, "to_dict") else bundle
+                    for bundle in bundles
+                ],
+                "autopsy_packs": [
+                    pack.to_dict() if hasattr(pack, "to_dict") else pack
+                    for pack in autopsy_packs
+                ],
+            }
+        if hasattr(result_obj, "to_evaluation_bundle"):
+            try:
+                bundle = result_obj.to_evaluation_bundle(
+                    target=target_build.target,
+                    suite=suite,
+                    run_id=str(getattr(result_obj, "candidate_id", suite)),
+                )
+                try:
+                    from blender_blocking.evaluation.autopsy import (
+                        autopsy_pack_from_bundle,
+                    )
+                except Exception:  # pragma: no cover - legacy script import path
+                    from evaluation.autopsy import autopsy_pack_from_bundle  # type: ignore
+
+                return {
+                    "evaluation_bundle": bundle.to_dict(),
+                    "autopsy_pack": autopsy_pack_from_bundle(bundle).to_dict(),
+                }
+            except Exception as exc:
+                return {"evaluation_bundle_error": str(exc)}
+        return {}
 
     def run_full_workflow(self, num_slices: Optional[int] = None) -> Optional[Any]:
         """

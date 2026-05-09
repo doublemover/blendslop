@@ -12,6 +12,7 @@ def compact_console_summary(bundle: EvaluationBundle) -> str:
     metrics = bundle.metric_index()
     parts = [
         f"Candidate {bundle.candidate_id} [{bundle.mode}] status={bundle.status}",
+        f"  rank={_selection(bundle, 'rank')} selected={_selection(bundle, 'selected')} score={_selection(bundle, 'score_total')}",
         f"  min_iou={_metric(metrics, 'silhouette.min_view_iou')}",
         f"  avg_iou={_metric(metrics, 'silhouette.average_iou')}",
         f"  boundary={_metric(metrics, 'silhouette.mean_boundary_iou')}",
@@ -26,10 +27,13 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
     for bundle in bundles:
         metrics = bundle.metric_index()
         rows.append(
-            "| {candidate} | {mode} | {status} | {min_iou} | {avg_iou} | {boundary} | {editable} | {failures} |".format(
+            "| {candidate} | {mode} | {status} | {rank} | {selected} | {score} | {min_iou} | {avg_iou} | {boundary} | {editable} | {failures} |".format(
                 candidate=bundle.candidate_id,
                 mode=bundle.mode,
                 status=bundle.status,
+                rank=_selection(bundle, "rank"),
+                selected=_selection(bundle, "selected"),
+                score=_selection(bundle, "score_total"),
                 min_iou=_metric(metrics, "silhouette.min_view_iou"),
                 avg_iou=_metric(metrics, "silhouette.average_iou"),
                 boundary=_metric(metrics, "silhouette.mean_boundary_iou"),
@@ -41,8 +45,8 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
         [
             f"# {title}",
             "",
-            "| Candidate | Mode | Status | Min IoU | Avg IoU | Boundary | Editable | Failures |",
-            "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
+            "| Candidate | Mode | Status | Rank | Selected | Score | Min IoU | Avg IoU | Boundary | Editable | Failures |",
+            "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
             *rows,
             "",
         ]
@@ -71,3 +75,11 @@ def _metric(metrics: dict[str, object], name: str) -> str:
         return f"{value:.3f}"
     return str(value)
 
+
+def _selection(bundle: EvaluationBundle, key: str) -> str:
+    value = bundle.selection.get(key)
+    if value is None:
+        return "n/a"
+    if isinstance(value, float):
+        return f"{value:.3f}"
+    return str(value)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Mapping
 
 from .capabilities import backend_dependency_state
@@ -57,9 +58,7 @@ def bundle_from_candidate(
         warnings=warnings,
     )
     failures = classify_bundle_failures(bundle)
-    return EvaluationBundle(
-        **{**bundle.to_dict(), "metric_groups": metric_groups, "failures": failures}
-    )
+    return replace(bundle, failures=failures)
 
 
 def _target_id(target: Any) -> str:
