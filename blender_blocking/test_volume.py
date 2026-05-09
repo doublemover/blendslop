@@ -228,6 +228,37 @@ class VolumeGridTests(unittest.TestCase):
             )
             self.assertEqual(has_postprocess_warning, expect_warning)
 
+    def test_visual_hull_mesh_unavailable_degrades_or_fails_without_point_fallback(self) -> None:
+        backend = VisualHullBackend()
+        target = _build_full_view_target()
+
+        for require_mesh, expected_status in ((False, "degraded"), (True, "failed")):
+            with (
+                self.subTest(require_mesh=require_mesh),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                request = CandidateRequest(
+                    candidate_id=f"vh-mesh-required-{require_mesh}",
+                    backend_name="visual_hull_voxel",
+                    target=target,
+                    config={
+                        "resolution": 6,
+                        "chunk_size": 2,
+                        "backend": "chunked",
+                        "mesh_method": "dual_contouring",
+                        "require_mesh": require_mesh,
+                    },
+                    artifact_root=Path(tmpdir),
+                )
+                result = backend.reconstruct(request)
+
+            self.assertEqual(result.status, expected_status)
+            self.assertEqual(result.degraded, expected_status == "degraded")
+            self.assertIn("mesh_extraction", result.metric_result.extras)
+            self.assertIn("mesh extraction did not produce a mesh", "\n".join(result.warnings))
+            if require_mesh:
+                self.assertTrue(result.errors)
+
     def test_openvdb_metadata_round_trip(self) -> None:
         grid = OpenVDBVolumeGrid.unavailable(
             shape=(6, 6, 4),

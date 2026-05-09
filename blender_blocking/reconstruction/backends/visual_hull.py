@@ -173,7 +173,9 @@ class VisualHullBackend(BaseBackend):
             mesh_result = extract_mesh(
                 grid,
                 method=str(request.config.get("mesh_method", "marching_cubes")),
-                allow_point_cloud_fallback=True,
+                allow_point_cloud_fallback=bool(
+                    request.config.get("allow_point_cloud_fallback", False)
+                ),
             )
             postprocess = str(request.config.get("postprocess", "none"))
             final_mesh_result, postprocess_status = _postprocess_mesh(
@@ -217,6 +219,11 @@ class VisualHullBackend(BaseBackend):
                     artifacts["mesh_obj"] = mesh_path
             elif getattr(mesh_result, "topology", None):
                 mesh_metrics["topology"] = dict(mesh_result.topology)
+                if str(getattr(mesh_result, "method", "")) != "points":
+                    warnings.append(
+                        "mesh extraction did not produce a mesh: "
+                        f"{getattr(mesh_result, 'message', 'unknown reason')}"
+                    )
         except Exception as exc:
             warnings.append(f"mesh extraction failed: {exc}")
 
@@ -251,6 +258,19 @@ class VisualHullBackend(BaseBackend):
         ):
             status = "failed"
             errors.append(str(postprocess_status.get("message", "mesh postprocess failed")))
+        if (
+            mesh_result is not None
+            and not mesh_result.available
+            and str(getattr(mesh_result, "method", "")) != "points"
+        ):
+            message = str(
+                getattr(mesh_result, "message", "mesh extraction did not produce a mesh")
+            )
+            if _mesh_required(request.config):
+                status = "failed"
+                errors.append(message)
+            elif status == "success":
+                status = "degraded"
 
         metrics = CandidateMetrics(
             per_view=per_view_metrics,
@@ -273,6 +293,7 @@ class VisualHullBackend(BaseBackend):
             artifacts=artifacts,
             warnings=tuple(warnings),
             errors=tuple(errors),
+            degraded=status == "degraded",
             payload=grid,
         )
 
@@ -507,6 +528,14 @@ def _postprocess_required(config: Mapping[str, Any]) -> bool:
         config.get("postprocess_required")
         or config.get("require_postprocess")
         or config.get("fail_on_postprocess_skip")
+    )
+
+
+def _mesh_required(config: Mapping[str, Any]) -> bool:
+    return bool(
+        config.get("require_mesh")
+        or config.get("mesh_required")
+        or config.get("fail_on_mesh_skip")
     )
 
 
