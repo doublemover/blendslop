@@ -186,7 +186,7 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
                 "outputs_primitive_set": False,
                 "supports_gradients": False,
                 "editability_score": 0.15,
-                "optional_dependencies": ["skimage"],
+                "optional_dependencies": ["skimage", "open3d", "openvdb"],
             },
             "hybrid_loft_hull": {
                 "requires_blender": False,

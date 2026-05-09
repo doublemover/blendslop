@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 import numpy as np
+from utils.optional_deps import dependency_report, probe_dependency
 
 from ..backend import BackendCapabilities, BaseBackend, BackendBudget
 from ..types import CandidateMetrics, CandidateRequest, CandidateResult
@@ -23,7 +24,7 @@ class VisualHullBackend(BaseBackend):
                 supports_uncertainty=True,
                 outputs_volume=True,
                 outputs_mesh=True,
-                optional_dependencies=("skimage",),
+                optional_dependencies=("skimage", "open3d", "openvdb"),
                 editability_score=0.15,
             ),
         )
@@ -92,7 +93,9 @@ class VisualHullBackend(BaseBackend):
                 )
         volume_path = None
         mesh_path = None
-        mesh_metrics: dict[str, Any] = {}
+        mesh_metrics: dict[str, Any] = {
+            "optional_dependencies": _visual_hull_dependency_report()
+        }
         if requested_backend == "openvdb" and openvdb_status is not None:
             mesh_metrics["openvdb"] = (
                 openvdb_status.to_dict()
@@ -221,6 +224,26 @@ class VisualHullBackend(BaseBackend):
         topology_score = float(
             mesh_metrics.get("topology", {}).get("topology_score", 0.0)
         )
+        per_view_metrics: dict[str, Any] = {}
+        try:
+            from reconstruction.point_cloud import (
+                visual_hull_projection_metrics_from_target,
+            )
+
+            per_view_metrics = visual_hull_projection_metrics_from_target(
+                request.target,
+                grid,
+                max_metric_voxels=int(
+                    request.config.get("projection_metric_max_voxels", 4_000_000)
+                ),
+            )
+            skipped_metric = per_view_metrics.pop("_skipped", None)
+            if skipped_metric:
+                mesh_metrics["projection_metrics_skipped"] = skipped_metric
+                warnings.append(str(skipped_metric.get("reason", "projection metrics skipped")))
+        except Exception as exc:
+            warnings.append(f"projection metrics failed: {exc}")
+
         errors: list[str] = []
         status = "success"
         if postprocess_status.get("status") == "failed" and _postprocess_required(
@@ -230,6 +253,7 @@ class VisualHullBackend(BaseBackend):
             errors.append(str(postprocess_status.get("message", "mesh postprocess failed")))
 
         metrics = CandidateMetrics(
+            per_view=per_view_metrics,
             editability_score=0.15,
             topology_score=topology_score,
             complexity_penalty=min(1.0, resolution / 256.0),
@@ -487,20 +511,24 @@ def _postprocess_required(config: Mapping[str, Any]) -> bool:
 
 
 def _optional_dependency_status(module_name: str) -> dict[str, Any]:
+    return probe_dependency(module_name).to_dict()
+
+
+def _visual_hull_dependency_report() -> dict[str, Any]:
+    report: dict[str, Any] = dependency_report(("skimage", "open3d"))
     try:
-        module = __import__(module_name)
+        from volume import detect_openvdb
+
+        report["openvdb"] = detect_openvdb().to_dict()
     except Exception as exc:
-        return {
-            "module_name": module_name,
+        report["openvdb"] = {
+            "module_name": "openvdb",
             "available": False,
+            "status": "probe_failed",
             "error_type": type(exc).__name__,
             "error": str(exc),
         }
-    return {
-        "module_name": module_name,
-        "available": True,
-        "module_version": getattr(module, "__version__", None),
-    }
+    return report
 
 
 def _mesh_metadata(mesh_result: Any) -> dict[str, Any]:

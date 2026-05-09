@@ -49,6 +49,21 @@ class ReconstructionContractsTests(unittest.TestCase):
         )
         self.assertIsInstance(result.target.profile_bands["front"][0], UncertainProfileBand)
 
+    def test_target_builder_infers_bounds_from_extracted_masks(self) -> None:
+        cfg = BlockingConfig()
+        result = build_target_from_images(
+            {"front": _rgb_rect(), "side": _rgb_rect(), "top": _rgb_rect()},
+            config=cfg,
+            profile_samples=4,
+        )
+
+        bounds = result.target.bounds
+        self.assertIsNotNone(bounds)
+        self.assertEqual(result.target.extras["bounds_source"], "mask_bboxes")
+        self.assertAlmostEqual(bounds.size[0], 0.13)
+        self.assertAlmostEqual(bounds.size[1], 0.13)
+        self.assertAlmostEqual(bounds.size[2], 0.18)
+
     def test_profile_bands_capture_multiple_intervals(self) -> None:
         mask = np.zeros((10, 20), dtype=bool)
         mask[:, 2:5] = True
@@ -107,6 +122,9 @@ class ReconstructionContractsTests(unittest.TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertGreater(result.metric_result.extras["occupied_voxels"], 0)
+        self.assertGreater(result.metric_result.area_iou_mean, 0.0)
+        self.assertIn("front", result.metric_result.per_view)
+        self.assertIn("candidate_projection_source", result.metric_result.per_view["front"])
 
 
 if __name__ == "__main__":

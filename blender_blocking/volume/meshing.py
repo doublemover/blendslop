@@ -147,6 +147,10 @@ def extract_mesh(
 
     dense = grid.to_dense(max_voxels=max_voxels)
     field = _field_for_marching_cubes(dense, grid.value_type, grid.default_value)
+    index_offset = np.zeros(3, dtype=float)
+    if _should_pad_marching_field(field, grid.value_type):
+        field = np.pad(field, 1, mode="constant", constant_values=0.0)
+        index_offset[:] = -1.0
     if level is None:
         level = 0.0 if grid.value_type == "signed_distance" else 0.5
 
@@ -205,7 +209,7 @@ def extract_mesh(
             ),
         )
 
-    world_vertices = grid.transform.index_to_world(vertices)
+    world_vertices = grid.transform.index_to_world(vertices + index_offset)
     topology = _mesh_topology_summary(world_vertices.astype(float), faces.astype(np.int64))
     return MeshExtractionResult(
         status="ok",
@@ -249,6 +253,13 @@ def _field_for_marching_cubes(
     if value_type in {"occupancy_prob", "confidence", "view_agreement"}:
         return np.asarray(dense, dtype=np.float32)
     return (np.asarray(dense) != default_value).astype(np.float32)
+
+
+def _should_pad_marching_field(field: np.ndarray, value_type: str) -> bool:
+    """Pad occupancy-like fields so boundary/full volumes expose an isosurface."""
+    if value_type == "signed_distance":
+        return False
+    return np.asarray(field).ndim == 3 and np.asarray(field).size > 0
 
 
 def _mesh_topology_summary(

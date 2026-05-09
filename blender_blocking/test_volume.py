@@ -109,6 +109,24 @@ class VolumeGridTests(unittest.TestCase):
         self.assertEqual(result.requested_method, "point_cloud_only")
         self.assertEqual(result.faces.shape, (0, 3))
 
+    def test_marching_cubes_pads_full_occupancy_volume(self) -> None:
+        try:
+            import skimage  # noqa: F401
+        except Exception as exc:
+            self.skipTest(f"skimage unavailable: {exc}")
+
+        data = np.ones((4, 4, 4), dtype=bool)
+        grid = DenseVolumeGrid(data, self.bounds)
+        result = extract_mesh(grid, method="marching_cubes")
+
+        self.assertEqual(result.status, "ok")
+        self.assertGreater(int(result.vertices.shape[0]), 0)
+        self.assertGreater(int(result.faces.shape[0]), 0)
+        mins = result.vertices.min(axis=0)
+        maxs = result.vertices.max(axis=0)
+        np.testing.assert_allclose(mins, np.array([-1.0, -1.0, -1.0]), atol=1e-6)
+        np.testing.assert_allclose(maxs, np.array([1.0, 1.0, 1.0]), atol=1e-6)
+
     def test_direct_visual_hull_chunked_sparse_creation(self) -> None:
         target = _build_full_view_target()
         dense_grid = visual_hull_grid_from_target(

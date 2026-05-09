@@ -320,16 +320,46 @@ def _gear_mesh(bpy: Any, part: dict[str, Any]) -> Any:
     root = float(part["root_radius"])
     tip = float(part["tip_radius"])
     height = float(part["height"])
+    hole_radius = float(part.get("hole_radius", 0.0))
+    center = tuple(float(value) for value in part.get("center", (0.0, 0.0, 0.0)))
+    inner = max(0.0, min(hole_radius, root * 0.9))
+    n = teeth * 2
     verts = []
     for z in (-height / 2.0, height / 2.0):
-        for i in range(teeth * 2):
+        for i in range(n):
             radius = tip if i % 2 == 0 else root
             theta = 2.0 * math.pi * i / (teeth * 2)
-            verts.append((math.cos(theta) * radius, math.sin(theta) * radius, z))
+            verts.append(
+                (
+                    center[0] + math.cos(theta) * radius,
+                    center[1] + math.sin(theta) * radius,
+                    center[2] + z,
+                )
+            )
+        for i in range(n):
+            theta = 2.0 * math.pi * i / n
+            verts.append(
+                (
+                    center[0] + math.cos(theta) * inner,
+                    center[1] + math.sin(theta) * inner,
+                    center[2] + z,
+                )
+            )
     faces = []
-    n = teeth * 2
+    bottom_outer = 0
+    bottom_inner = n
+    top_outer = n * 2
+    top_inner = n * 3
     for i in range(n):
-        faces.append((i, (i + 1) % n, n + (i + 1) % n, n + i))
+        j = (i + 1) % n
+        faces.append((bottom_outer + i, bottom_outer + j, top_outer + j, top_outer + i))
+        if inner > 0.0:
+            faces.append((bottom_inner + j, bottom_inner + i, top_inner + i, top_inner + j))
+            faces.append((top_outer + i, top_outer + j, top_inner + j, top_inner + i))
+            faces.append((bottom_outer + j, bottom_outer + i, bottom_inner + i, bottom_inner + j))
+        else:
+            faces.append((top_outer + i, top_outer + j, top_inner + j))
+            faces.append((bottom_outer + j, bottom_outer + i, bottom_inner + i))
     mesh = bpy.data.meshes.new("synthetic_gear")
     mesh.from_pydata(verts, [], faces)
     mesh.update()

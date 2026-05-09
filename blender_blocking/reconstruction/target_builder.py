@@ -151,7 +151,16 @@ def build_target_from_images(
         )
         for view, mask in raw_masks.items()
     }
-    bounds = _bounds_from_minmax(bounds_minmax)
+    explicit_bounds = _bounds_from_minmax(bounds_minmax)
+    inferred_bounds = _bounds_from_view_bboxes(bboxes, config)
+    bounds = explicit_bounds or inferred_bounds
+    bounds_source = (
+        "explicit_minmax"
+        if explicit_bounds is not None
+        else "mask_bboxes"
+        if inferred_bounds is not None
+        else "missing"
+    )
     constraints_payload = constraint_set_to_payload(constraint_set)
     target = ReconstructionTarget(
         constraints=_view_constraints(
@@ -171,6 +180,7 @@ def build_target_from_images(
             "uncertainty_views": sorted(uncertainties),
             "probability_views": sorted(probabilities),
             "profile_samples": int(profile_samples),
+            "bounds_source": bounds_source,
         },
     )
     artifact_paths = _write_target_artifacts(
@@ -466,6 +476,66 @@ def _bounds_from_minmax(
         return None
     minimum, maximum = bounds_minmax
     return Bounds3D.from_min_max(minimum, maximum)
+
+
+def _bounds_from_view_bboxes(
+    bboxes: Mapping[str, Bounds2D],
+    config: Any,
+) -> Optional[Bounds3D]:
+    if not bboxes:
+        return None
+    scale = _unit_scale(config)
+
+    front = bboxes.get("front")
+    side = bboxes.get("side")
+    top = bboxes.get("top")
+
+    width = float(front.width) * scale if front is not None else None
+    depth = float(side.width) * scale if side is not None else None
+    height_candidates = []
+    if front is not None:
+        height_candidates.append(float(front.height) * scale)
+    if side is not None:
+        height_candidates.append(float(side.height) * scale)
+    height = max(height_candidates) if height_candidates else None
+
+    if top is not None:
+        top_width = float(top.width) * scale
+        top_depth = float(top.height) * scale
+        if width is None:
+            width = top_width
+        if depth is None:
+            depth = top_depth
+
+    if width is None and depth is not None:
+        width = depth
+    if depth is None and width is not None:
+        depth = width
+    if height is None and (width is not None or depth is not None):
+        height = max(float(width or 0.0), float(depth or 0.0), scale)
+
+    if width is None or depth is None or height is None:
+        return None
+    if width <= 0.0 or depth <= 0.0 or height <= 0.0:
+        return None
+    return Bounds3D(
+        min_x=-float(width) * 0.5,
+        max_x=float(width) * 0.5,
+        min_y=-float(depth) * 0.5,
+        max_y=float(depth) * 0.5,
+        min_z=0.0,
+        max_z=float(height),
+    )
+
+
+def _unit_scale(config: Any) -> float:
+    reconstruction = getattr(config, "reconstruction", None)
+    value = getattr(reconstruction, "unit_scale", 0.01)
+    try:
+        scale = float(value)
+    except (TypeError, ValueError):
+        scale = 0.01
+    return scale if scale > 0.0 else 0.01
 
 
 def _bbox_from_mask(mask: np.ndarray) -> Optional[tuple[int, int, int, int]]:

@@ -48,7 +48,7 @@ def check_setup() -> None:
             print("  # In Blender console: import sys; print(sys.executable)")
             print("\n  # Then install:")
             print(
-                "  /path/to/blender/python -m pip install numpy opencv-python Pillow scipy"
+                "  /path/to/blender/python -m pip install -r blender_blocking/requirements.txt"
             )
             print("\n📖 See BLENDER_SETUP.md for detailed instructions")
             print("=" * 70 + "\n")
@@ -57,6 +57,7 @@ def check_setup() -> None:
         # Check other critical imports
         import cv2
         import scipy
+        import skimage
 
     except ImportError as e:
         if "PIL" not in str(e):
@@ -70,7 +71,7 @@ def check_setup() -> None:
             print("  # In Blender console: import sys; print(sys.executable)")
             print("\n  # Then install:")
             print(
-                "  /path/to/blender/python -m pip install numpy opencv-python Pillow scipy"
+                "  /path/to/blender/python -m pip install -r blender_blocking/requirements.txt"
             )
             print("\n📖 See BLENDER_SETUP.md for complete setup guide")
             print("=" * 70 + "\n")
@@ -1097,6 +1098,9 @@ class BlockingWorkflow:
 
     def _artifact_root(self) -> Path:
         """Return the scoped artifact root for this workflow run."""
+        artifact_root = getattr(self.context, "artifact_root", None)
+        if artifact_root:
+            return Path(str(artifact_root))
         return Path("test_output") / "reconstruction" / self.context.run_id
 
     def _backend_name_for_mode(self, mode: str) -> str:
@@ -1121,13 +1125,11 @@ class BlockingWorkflow:
         if self.target_build is not None:
             return self.target_build
         artifact_root = self._artifact_root()
-        bounds = self._target_bounds_minmax()
         self.target_build = build_target_from_images(
             self.views,
             config=self.config,
             constraint_files=self.config.constraints.constraint_files,
             artifact_root=artifact_root,
-            bounds_minmax=bounds,
             profile_samples=self.config.profile_sampling.num_samples,
         )
         return self.target_build
@@ -1280,6 +1282,11 @@ class BlockingWorkflow:
                 target=target_build.target,
                 config=self._config_for_backend(backend_name),
                 budget=CandidateBudget(
+                    timeout_s=(
+                        self.config.primitive_fit.max_runtime_s
+                        if backend_name == "primitive_fit_refine"
+                        else None
+                    ),
                     memory_budget_mb=self.config.visual_hull.memory_budget_mb
                 ),
                 artifact_root=artifact_root / "candidates",

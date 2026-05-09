@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 from pathlib import Path
 import re
 import time
@@ -366,6 +367,20 @@ def render_orthogonal_views_detailed(
                 return candidate
         return base_path.with_name(f"{base_stem}_{uuid.uuid4().hex[:8]}{suffix}")
 
+    def _bounded_output_path(base_path: Path, *, max_chars: int = 240) -> Path:
+        path_text = str(base_path)
+        if len(path_text) <= max_chars:
+            return base_path
+        parent_text = str(base_path.parent)
+        suffix = base_path.suffix
+        name_budget = max_chars - len(parent_text) - 1 - len(suffix)
+        if name_budget < 16:
+            return base_path
+        stem = base_path.stem
+        digest = hashlib.sha1(stem.encode("utf-8")).hexdigest()[:8]
+        head_len = max(1, name_budget - len(digest) - 1)
+        return base_path.with_name(f"{stem[:head_len]}-{digest}{suffix}")
+
     try:
         with silhouette_session(
             scene=scene,
@@ -407,7 +422,9 @@ def render_orthogonal_views_detailed(
                         stem = f"{filename_prefix}{view}_{start_index}"
                     else:
                         stem = view
-                    output_file = _unique_path(output_path / f"{stem}.png")
+                    output_file = _unique_path(
+                        _bounded_output_path(output_path / f"{stem}.png")
+                    )
                     render_start = time.perf_counter()
                     render_silhouette_frame(session, output_file)
                     elapsed_s = time.perf_counter() - render_start

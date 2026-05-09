@@ -93,7 +93,9 @@ def configure_ortho_camera_for_view(
         location = mathutils.Vector(
             (center.x, center.y, center.z + height_extent * distance_factor)
         )
-        rotation = (0.0, 0.0, 0.0)
+        # Match the reference-image convention used by target builders: world Y
+        # reads left/right in top silhouettes, while world X reads vertical.
+        rotation = (0.0, 0.0, math.radians(90))
     else:
         raise ValueError(f"Unknown view: {view}")
 
