@@ -101,6 +101,24 @@
       "mode": "max",
       "threshold": 120.0,
       "required": true
+    },
+    {
+      "id": "evaluation.editability.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.editability.editable_reconstruction_index",
+      "mode": "min",
+      "threshold": 0.5,
+      "required": false,
+      "description": "When evaluation bundles are provided, editable Blender output should clear a loose smoke floor."
+    },
+    {
+      "id": "evaluation.export_qa.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.export.qa_score",
+      "mode": "min",
+      "threshold": 0.6,
+      "required": false,
+      "description": "When export QA evidence is present, the asset round-trip score should not be empty or failing."
     }
   ],
   "comparisons": [

@@ -68,6 +68,22 @@
       "mode": "min",
       "threshold": 0.6,
       "required": false
+    },
+    {
+      "id": "evaluation.nightly.editability.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.editability.editable_reconstruction_index",
+      "mode": "min",
+      "threshold": 0.65,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.export_qa.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.export.qa_score",
+      "mode": "min",
+      "threshold": 0.75,
+      "required": false
     }
   ],
   "comparisons": [

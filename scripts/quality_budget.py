@@ -243,6 +243,10 @@ def _records_from_payload(
         return tuple(_benchmark_records(payload, source_path))
     if isinstance(payload.get("matrix"), list):
         return tuple(_matrix_records(payload, source_path))
+    if isinstance(payload.get("bundles"), list):
+        return tuple(_evaluation_bundle_records(payload.get("bundles", ()), source_path))
+    if _is_evaluation_bundle(payload):
+        return (_evaluation_bundle_record(payload, source_path),)
     if "validation_mode" in payload or "average_iou" in payload:
         return (
             BudgetRecord(
@@ -262,7 +266,73 @@ def _records_from_payload(
             data=dict(payload),
             source_path=source_path,
         ),
+        )
+
+
+def _evaluation_bundle_records(
+    bundles: Iterable[Any],
+    source_path: Optional[str],
+) -> Iterable[BudgetRecord]:
+    for item in bundles:
+        if isinstance(item, Mapping) and _is_evaluation_bundle(item):
+            yield _evaluation_bundle_record(item, source_path)
+
+
+def _evaluation_bundle_record(
+    payload: Mapping[str, Any],
+    source_path: Optional[str],
+) -> BudgetRecord:
+    data = dict(payload)
+    data["metrics"] = _bundle_metric_payload(payload)
+    return BudgetRecord(
+        artifact="evaluation",
+        case=str(payload.get("suite", "default")),
+        name=str(payload.get("candidate_id", payload.get("name", "bundle"))),
+        mode=str(payload.get("mode", "")),
+        shape_id=str(payload.get("target_id", "")),
+        data=data,
+        source_path=source_path,
     )
+
+
+def _is_evaluation_bundle(payload: Mapping[str, Any]) -> bool:
+    return (
+        str(payload.get("schema_version", "")).startswith("evaluation-bundle")
+        or (
+            isinstance(payload.get("metric_groups"), list)
+            and "candidate_id" in payload
+            and "mode" in payload
+        )
+    )
+
+
+def _bundle_metric_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
+    metrics: dict[str, Any] = {}
+    for group in payload.get("metric_groups", ()) or ():
+        if not isinstance(group, Mapping):
+            continue
+        for metric in group.get("metrics", ()) or ():
+            if not isinstance(metric, Mapping):
+                continue
+            name = str(metric.get("name", ""))
+            if not name:
+                continue
+            _set_dotted_metric(metrics, name, metric.get("value"))
+    return metrics
+
+
+def _set_dotted_metric(target: dict[str, Any], name: str, value: Any) -> None:
+    current = target
+    parts = [part for part in name.split(".") if part]
+    if not parts:
+        return
+    for part in parts[:-1]:
+        child = current.get(part)
+        if not isinstance(child, dict):
+            child = {}
+            current[part] = child
+        current = child
+    current[parts[-1]] = value
 
 
 def _benchmark_records(

@@ -22,6 +22,7 @@ DEFAULT_PARETO_METRICS = (
     "novel_view.psnr",
     "novel_view.ssim",
     "editability.editable_reconstruction_index",
+    "export.qa_score",
     "topology.score",
 )
 

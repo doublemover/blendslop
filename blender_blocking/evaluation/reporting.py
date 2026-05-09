@@ -19,6 +19,7 @@ def compact_console_summary(bundle: EvaluationBundle) -> str:
         f"  chamfer={_metric(metrics, 'geometry.chamfer_l2')} fscore={_metric(metrics, 'geometry.fscore_tau')} vol_iou={_metric(metrics, 'geometry.volumetric_iou')}",
         f"  psnr={_metric(metrics, 'novel_view.psnr')} ssim={_metric(metrics, 'novel_view.ssim')} lpips={_metric(metrics, 'novel_view.lpips')}",
         f"  editable={_metric(metrics, 'editability.editable_reconstruction_index')}",
+        f"  export={_metric(metrics, 'export.qa_score')}",
         f"  failures={len(bundle.failures)}",
     ]
     return "\n".join(parts)
@@ -29,7 +30,7 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
     for bundle in bundles:
         metrics = bundle.metric_index()
         rows.append(
-            "| {candidate} | {mode} | {status} | {rank} | {selected} | {score} | {min_iou} | {avg_iou} | {boundary} | {chamfer} | {fscore} | {vol_iou} | {psnr} | {ssim} | {lpips} | {editable} | {failures} |".format(
+            "| {candidate} | {mode} | {status} | {rank} | {selected} | {score} | {min_iou} | {avg_iou} | {boundary} | {chamfer} | {fscore} | {vol_iou} | {psnr} | {ssim} | {lpips} | {editable} | {export} | {failures} |".format(
                 candidate=bundle.candidate_id,
                 mode=bundle.mode,
                 status=bundle.status,
@@ -46,6 +47,7 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
                 ssim=_metric(metrics, "novel_view.ssim"),
                 lpips=_metric(metrics, "novel_view.lpips"),
                 editable=_metric(metrics, "editability.editable_reconstruction_index"),
+                export=_metric(metrics, "export.qa_score"),
                 failures=len(bundle.failures),
             )
         )
@@ -53,8 +55,8 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
         [
             f"# {title}",
             "",
-            "| Candidate | Mode | Status | Rank | Selected | Score | Min IoU | Avg IoU | Boundary | Chamfer | F-score | Vol IoU | PSNR | SSIM | LPIPS | Editable | Failures |",
-            "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+            "| Candidate | Mode | Status | Rank | Selected | Score | Min IoU | Avg IoU | Boundary | Chamfer | F-score | Vol IoU | PSNR | SSIM | LPIPS | Editable | Export | Failures |",
+            "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
             *rows,
             "",
         ]

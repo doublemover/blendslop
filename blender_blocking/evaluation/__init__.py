@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 from .bundle import bundle_from_candidate
+from .export_qa import (
+    ExportQAReport,
+    aggregate_score as export_qa_aggregate_score,
+    report_from_mapping as export_qa_report_from_mapping,
+)
 from .geometry import (
     GeometryMetricReport,
     chamfer_distance,
@@ -34,6 +39,7 @@ __all__ = [
     "MetricValue",
     "STATUS_VALUES",
     "EvaluationBudget",
+    "ExportQAReport",
     "GeometryMetricReport",
     "NovelViewMetricReport",
     "Threshold",
@@ -44,6 +50,8 @@ __all__ = [
     "bundle_from_candidate",
     "chamfer_distance",
     "evaluate_budget",
+    "export_qa_aggregate_score",
+    "export_qa_report_from_mapping",
     "fscore_at_tolerance",
     "image_pair_report",
     "image_set_report",

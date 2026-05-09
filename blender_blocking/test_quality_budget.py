@@ -72,6 +72,63 @@ class QualityBudgetTests(unittest.TestCase):
         self.assertEqual(report["checks"][0]["mode"], "min")
         self.assertEqual(report["checks"][0]["value"], 0.8)
 
+    def test_evaluation_bundle_records_are_budgetable_by_sota_metrics(self) -> None:
+        current = {
+            "schema_version": "evaluation-bundle-v1",
+            "suite": "smoke",
+            "candidate_id": "candidate-a",
+            "target_id": "cube",
+            "mode": "shape_program",
+            "metric_groups": [
+                {
+                    "name": "editability",
+                    "status": "pass",
+                    "metrics": [
+                        {
+                            "name": "editability.editable_reconstruction_index",
+                            "value": 0.82,
+                        }
+                    ],
+                },
+                {
+                    "name": "export_qa",
+                    "status": "pass",
+                    "metrics": [
+                        {"name": "export.qa_score", "value": 0.95},
+                    ],
+                },
+            ],
+        }
+        budget = {
+            "schema_version": "quality_perf_budget_v1",
+            "name": "evaluation",
+            "thresholds": [
+                {
+                    "id": "editability.floor",
+                    "artifact": "evaluation",
+                    "case": "smoke",
+                    "mode": "shape_program",
+                    "shape_id": "cube",
+                    "metric": "metrics.editability.editable_reconstruction_index",
+                    "threshold": 0.8,
+                    "required": True,
+                },
+                {
+                    "id": "export.floor",
+                    "artifact": "evaluation",
+                    "metric": "metrics.export.qa_score",
+                    "threshold": 0.9,
+                    "required": True,
+                },
+            ],
+        }
+
+        report = evaluate_budget_payloads(current, budget)
+
+        self.assertTrue(report["passed"])
+        self.assertEqual(len(report["checks"]), 2)
+        self.assertEqual(report["checks"][0]["value"], 0.82)
+
 
 if __name__ == "__main__":
     unittest.main()

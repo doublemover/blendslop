@@ -129,6 +129,23 @@ def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservati
                 recommended_actions=("inspect perceptual novel-view mismatch",),
             )
         )
+    export_score = _metric_value(metrics, "export.qa_score")
+    if export_score is not None and export_score < 0.6:
+        failures.append(
+            FailureObservation(
+                code="export_qa_low",
+                severity="fail",
+                subsystem="export",
+                evidence_metrics={"export.qa_score": export_score},
+                likely_causes=(
+                    "asset export failed, reimport failed, or exported asset has empty geometry/material counts",
+                ),
+                recommended_actions=(
+                    "inspect export QA report metadata",
+                    "rerun Blender export/reimport smoke with the same candidate artifact",
+                ),
+            )
+        )
     if bundle.status == "degraded":
         failures.append(
             FailureObservation(

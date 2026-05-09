@@ -26,6 +26,12 @@ Budget selectors match normalized artifact records:
 
 For e2e matrix artifacts, use `artifact: "e2e"` plus optional `case`, `mode`, or `shape_id` selectors. Supported comparison modes are `max_percent_increase`, `max_percent_decrease`, `max_absolute_increase`, and `max_absolute_decrease`.
 
+Evaluation bundles can be gated directly with `artifact: "evaluation"`.
+The budget reader expands bundle metric names into dotted paths, so
+`export.qa_score` is selected as `metrics.export.qa_score` and
+`editability.editable_reconstruction_index` is selected as
+`metrics.editability.editable_reconstruction_index`.
+
 ## Runner Phases
 
 From `blender_blocking/`:
@@ -59,6 +65,11 @@ The quality-smoke and nightly benchmark registries include dedicated rows for:
 
 - `geometry_metrics`: Chamfer/F-score/volumetric-IoU metric throughput.
 - `shape_program_build`: editable shape-program construction from profile bands.
+
+Evaluation bundles now expose a first-class `export_qa` metric group for
+editable Blender delivery checks. The group records export target count,
+round-trip status, object/vertex/face/material counts, per-target QA scores,
+and the aggregate `export.qa_score` used by reports and quality budgets.
 
 ## E2E Synthetic Matrix
 
