@@ -23,6 +23,7 @@ from geometry.silhouette_pipeline import (
 )
 
 from .artifacts import hash_json, write_json
+from .profile_bands import distributional_profile_bands, profile_distribution_summary
 from .types import (
     Bounds2D,
     Bounds3D,
@@ -141,7 +142,7 @@ def build_target_from_images(
 
     profile_bands = {
         view: tuple(
-            mask_to_profile_bands(
+            distributional_profile_bands(
                 mask,
                 sample_count=profile_samples,
                 view=view,
@@ -150,6 +151,10 @@ def build_target_from_images(
             )
         )
         for view, mask in raw_masks.items()
+    }
+    profile_distribution = {
+        view: profile_distribution_summary(bands)
+        for view, bands in profile_bands.items()
     }
     explicit_bounds = _bounds_from_minmax(bounds_minmax)
     inferred_bounds = _bounds_from_view_bboxes(bboxes, config)
@@ -180,6 +185,7 @@ def build_target_from_images(
             "uncertainty_views": sorted(uncertainties),
             "probability_views": sorted(probabilities),
             "profile_samples": int(profile_samples),
+            "profile_band_distribution": profile_distribution,
             "bounds_source": bounds_source,
         },
     )

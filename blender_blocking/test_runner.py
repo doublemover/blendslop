@@ -70,6 +70,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_config_validation", "test_config_validation"),
     ("pure_optional_deps", "test_optional_deps"),
     ("pure_profile_models", "test_profile_models"),
+    ("pure_profile_band_distribution", "test_profile_band_distribution"),
     ("pure_primitive_placement_math", "placement.test_primitive_placement_math"),
     ("pure_proxy_distillation", "test_proxy_distillation"),
     ("pure_image_processor_rgba", "test_image_processor_rgba"),
