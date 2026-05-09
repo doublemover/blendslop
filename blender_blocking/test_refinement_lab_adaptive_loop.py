@@ -7,6 +7,7 @@ import json
 import tempfile
 import unittest
 
+from refinement_lab.adaptive_planner import proposals_from_bundle
 from refinement_lab.adaptive_loop import AdaptiveLoopOptions, run_adaptive_loop
 from refinement_lab.contracts import ExperimentPlan, ExperimentResult
 from refinement_lab.runner import RunOptions
@@ -101,6 +102,48 @@ class _FakeHarness:
 
 
 class AdaptiveLoopTests(unittest.TestCase):
+    def test_adaptive_planner_proposes_appearance_asset_audit(self) -> None:
+        bundle = {
+            "status": "fail",
+            "metric_groups": [
+                {
+                    "name": "appearance",
+                    "status": "fail",
+                    "metrics": [
+                        {"name": "appearance.uv_valid", "value": False},
+                        {
+                            "name": "appearance.pbr_channel_coverage_ratio",
+                            "value": 0.25,
+                        },
+                        {
+                            "name": "appearance.attribution_texture_only_detail_score",
+                            "value": 0.9,
+                        },
+                        {
+                            "name": "appearance.attribution_geometry_detail_score",
+                            "value": 0.35,
+                        },
+                    ],
+                }
+            ],
+            "failures": [
+                {
+                    "code": "appearance_texture_hides_geometry",
+                    "severity": "warn",
+                    "subsystem": "appearance",
+                }
+            ],
+        }
+
+        proposals = proposals_from_bundle(bundle)
+        by_title = {proposal.title: proposal for proposal in proposals}
+
+        self.assertIn("Texture, UV, and material audit", by_title)
+        proposal = by_title["Texture, UV, and material audit"]
+        self.assertIn("--evaluate-texture-materials", proposal.cli_args)
+        self.assertIn("--uv-strict", proposal.cli_args)
+        self.assertIn("appearance", proposal.tags)
+
     def test_loop_runs_child_generation_from_ranked_adaptive_variants(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             harness = _FakeHarness()

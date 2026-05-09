@@ -28,6 +28,11 @@ _DIRECT_METRIC_ALIASES = {
     "geometry_volumetric_iou": "geometry.volumetric_iou",
     "geometry_chamfer_l2": "geometry.chamfer_l2",
     "geometry_surface_coverage": "geometry.surface_coverage",
+    "appearance_uv_valid": "appearance.uv_valid",
+    "appearance_pbr_channel_coverage_ratio": "appearance.pbr_channel_coverage_ratio",
+    "appearance_texture_only_detail_score": "appearance.attribution_texture_only_detail_score",
+    "appearance_geometry_detail_score": "appearance.attribution_geometry_detail_score",
+    "appearance_texture_memory_mb": "appearance.texture_memory_mb",
 }
 
 
@@ -106,6 +111,22 @@ def proposals_from_bundle(
     sdf_loss = _metric(metrics, "silhouette.mean_signed_distance_loss")
     fscore = _metric(metrics, "geometry.fscore_tau", default=1.0)
     coverage = _metric(metrics, "geometry.surface_coverage", default=1.0)
+    uv_valid = _metric(metrics, "appearance.uv_valid", default=1.0)
+    pbr_coverage = _metric(
+        metrics,
+        "appearance.pbr_channel_coverage_ratio",
+        default=1.0,
+    )
+    texture_only = _metric(
+        metrics,
+        "appearance.attribution_texture_only_detail_score",
+        default=0.0,
+    )
+    geometry_detail = _metric(
+        metrics,
+        "appearance.attribution_geometry_detail_score",
+        default=1.0,
+    )
 
     if boundary < max(0.35, min_iou - 0.15) or any("boundary" in f for f in failures):
         proposals.append(_boundary_first(metrics, failures))
@@ -124,6 +145,13 @@ def proposals_from_bundle(
         proposals.append(_topology_preserving_mesh(metrics, failures))
     if editable < 0.55 or any("editable" in f or "asset" in f for f in failures):
         proposals.append(_shape_program_editability(metrics, failures))
+    if (
+        uv_valid <= 0.0
+        or pbr_coverage < 0.75
+        or texture_only > geometry_detail + 0.25
+        or any("appearance" in f or "uv_" in f or "pbr" in f for f in failures)
+    ):
+        proposals.append(_appearance_asset_audit(metrics, failures))
     if any("metric_only" in f or "proxy" in f for f in failures):
         proposals.append(_proxy_grounding(metrics, failures))
     if _status(bundle) in {"research_only", "degraded"}:
@@ -399,6 +427,43 @@ def _shape_program_editability(
         tags=("shape-program", "editable", "research"),
         priority=50,
         risk="high",
+        source={"metrics": metrics, "failures": failures},
+    )
+
+
+def _appearance_asset_audit(
+    metrics: Mapping[str, float],
+    failures: Sequence[str],
+) -> RefinementProposal:
+    return _proposal(
+        "appearance-asset-audit",
+        "Texture, UV, and material audit",
+        "Image quality or editability is being limited by asset-delivery evidence; require explicit UV/PBR/material metrics and prevent texture-only detail from hiding missing geometry.",
+        mode="shape_program",
+        cli_args=(
+            "--validation-mode",
+            "backend-status",
+            "--shape-root-strategy",
+            "hybrid_profile_bounds",
+            "--shape-residual-policy",
+            "suggest_patches",
+            "--evaluate-texture-materials",
+            "--uv-strict",
+            "--material-target",
+            "pbr",
+            "--max-texture-memory-mb",
+            "128",
+            "--shape-run-export-qa",
+        ),
+        expected_win={
+            "appearance.uv_valid": "pass",
+            "appearance.pbr_channel_coverage_ratio": "increase",
+            "appearance.attribution_texture_only_detail_score": "decrease",
+            "editability.editable_reconstruction_index": "increase",
+        },
+        tags=("appearance", "uv", "material", "editable", "asset-delivery"),
+        priority=35,
+        risk="medium",
         source={"metrics": metrics, "failures": failures},
     )
 
