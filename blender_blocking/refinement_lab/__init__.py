@@ -8,6 +8,14 @@ from .adaptive_planner import (
     proposals_from_result_payload,
     variants_from_bundle,
 )
+from .content_adaptive_patches import (
+    AdaptivePatch,
+    PatchBox,
+    PatchFusionResult,
+    fuse_patch_predictions,
+    score_map_from_signals,
+    select_adaptive_patches,
+)
 from .contracts import (
     ExperimentCase,
     ExperimentPlan,
@@ -22,10 +30,16 @@ __all__ = [
     "ExperimentPlan",
     "ExperimentResult",
     "ExperimentVariant",
+    "AdaptivePatch",
     "ParameterSpec",
+    "PatchBox",
+    "PatchFusionResult",
     "RefinementProposal",
     "RefinementRunManifest",
+    "fuse_patch_predictions",
     "proposals_from_bundle",
     "proposals_from_result_payload",
+    "score_map_from_signals",
+    "select_adaptive_patches",
     "variants_from_bundle",
 ]

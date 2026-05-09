@@ -103,6 +103,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_refinement_lab_bounds_debug", "test_refinement_lab_bounds_debug"),
     ("pure_refinement_lab_report", "test_refinement_lab_report"),
     ("pure_refinement_lab_human_labels", "test_refinement_lab_human_labels"),
+    ("pure_refinement_lab_content_adaptive_patches", "test_refinement_lab_content_adaptive_patches"),
     ("pure_refinement_lab_runner", "test_refinement_lab_runner"),
     ("pure_refinement_lab_cli", "test_refinement_lab_cli"),
 ]
