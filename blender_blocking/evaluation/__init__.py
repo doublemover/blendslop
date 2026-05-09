@@ -57,7 +57,13 @@ from .silhouette_eval import (
     missing_silhouette_view,
     summarize_silhouette_views,
 )
-from .view_planning import ViewRequest, active_view_plan_payload, suggest_next_views
+from .view_planning import (
+    ViewDisagreementSignal,
+    ViewRequest,
+    active_view_plan_payload,
+    ensemble_disagreement_signal,
+    suggest_next_views,
+)
 
 __all__ = [
     "EvaluationBundle",
@@ -75,6 +81,7 @@ __all__ = [
     "RunLineage",
     "Threshold",
     "ViewRequest",
+    "ViewDisagreementSignal",
     "SilhouetteGateConfig",
     "SelectionEvidence",
     "active_view_plan_payload",
@@ -86,6 +93,7 @@ __all__ = [
     "dirty_worktree",
     "evaluate_budget",
     "evaluate_silhouette_pair",
+    "ensemble_disagreement_signal",
     "export_qa_aggregate_score",
     "export_qa_report_from_mapping",
     "fscore_at_tolerance",
