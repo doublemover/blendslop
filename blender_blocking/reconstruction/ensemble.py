@@ -9,6 +9,7 @@ import time
 from typing import Any, Mapping, Sequence
 
 from .candidate_scoring import rank_candidates, select_best
+from .pareto import pareto_report_from_candidates
 from .registry import get_backend
 from .types import (
     CandidateBudget,
@@ -35,6 +36,7 @@ class EnsembleRunResult:
     policy: str
     evaluation_bundles: tuple[Any, ...] = ()
     autopsy_packs: tuple[Mapping[str, Any], ...] = ()
+    pareto_report: Mapping[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -47,6 +49,7 @@ class EnsembleRunResult:
                 for bundle in self.evaluation_bundles
             ],
             "autopsy_packs": [dict(pack) for pack in self.autopsy_packs],
+            "pareto_report": dict(self.pareto_report),
         }
 
 
@@ -164,6 +167,11 @@ class EnsembleRunner:
             policy=self.selection_policy,
             evaluation_bundles=bundles,
             autopsy_packs=autopsy_packs,
+            pareto_report=pareto_report_from_candidates(
+                results,
+                selected_id="" if selected is None else selected.candidate_id,
+                policy=self.selection_policy,
+            ).to_dict(),
         )
 
     def run(
