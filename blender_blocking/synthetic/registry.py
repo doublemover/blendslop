@@ -10,8 +10,10 @@ from .random_params import (
     analytic_primitive_spec,
     capture_noise_spec,
     compound_blockout_spec,
+    material_fixture_spec,
     profile_lathe_spec,
 )
+from .materials import MATERIAL_FIXTURE_KINDS
 from .specs import ShapeFamily, SyntheticShapeSpec
 
 
@@ -109,6 +111,8 @@ CAPTURE_NOISE = (
     "posterize",
 )
 
+MATERIAL_APPEARANCE = tuple(f"material_{kind}" for kind in MATERIAL_FIXTURE_KINDS)
+
 DETERMINISTIC_MICRO = (
     "box",
     "sphere",
@@ -176,6 +180,15 @@ def _build_registry() -> dict[str, ShapeDefinition]:
             blender_supported=False,
             factory=lambda seed, shape_name=name: capture_noise_spec(shape_name, seed),
         )
+    for name in MATERIAL_APPEARANCE:
+        definitions[name] = ShapeDefinition(
+            name=name,
+            family=ShapeFamily.ANALYTIC_PRIMITIVE.value,
+            description=f"Material, UV, and appearance metric fixture: {name}.",
+            pure_python=True,
+            blender_supported=True,
+            factory=lambda seed, shape_name=name: material_fixture_spec(_material_kind(shape_name), seed),
+        )
     return definitions
 
 
@@ -210,7 +223,8 @@ SUITES: dict[str, tuple[str, ...]] = {
     "profile-band": ("vase", "bottle", "bowl", "cup", "chess_pawn", "asymmetric_vase", "multi_lobe_profile"),
     "visual-hull": ("table", "chair", "car", "truck", "gear", "pipe_elbow"),
     "primitive-fit": ("ellipsoid", "frustum", "capsule", "torus", "rounded_box", "superquadric"),
-    "nightly-heavy": ANALYTIC_PRIMITIVES + PROFILE_LATHE + FURNITURE + VEHICLE_MECHANICAL + ADVERSARIAL_SILHOUETTES + CAPTURE_NOISE,
+    "material-appearance": MATERIAL_APPEARANCE,
+    "nightly-heavy": ANALYTIC_PRIMITIVES + PROFILE_LATHE + FURNITURE + VEHICLE_MECHANICAL + ADVERSARIAL_SILHOUETTES + CAPTURE_NOISE + MATERIAL_APPEARANCE,
     "paper-regression": ("torus", "superquadric", "gear", "pipe_elbow", "table", "inconsistent_front_side"),
 }
 
@@ -252,3 +266,10 @@ def specs_for_suite(suite: str, seed: int = 0, count: int | None = None) -> tupl
     for index, name in enumerate(suite_names(suite, count)):
         specs.append(get_definition(name).create(seed + index))
     return tuple(specs)
+
+
+def _material_kind(name: str) -> str:
+    prefix = "material_"
+    if not name.startswith(prefix):
+        raise ValueError(f"Material fixture name must start with {prefix!r}: {name!r}")
+    return name[len(prefix) :]

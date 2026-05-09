@@ -191,7 +191,7 @@ def report_from_mapping(payload: Mapping[str, Any]) -> TextureMaterialReport:
         ),
         material_slot_count=_int_or_none(
             _first_present(
-                payload, materials, "material_slot_count", "slot_count", "materials"
+                materials, payload, "material_slot_count", "slot_count", "materials"
             )
         ),
         named_material_ratio=_float_or_none(

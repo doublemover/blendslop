@@ -10,6 +10,12 @@ from .artifact_writer import (
     validate_manifest_tree,
     write_artifact_set,
 )
+from .materials import (
+    MATERIAL_FIXTURE_KINDS,
+    appearance_expectations_from_materials,
+    appearance_payload_from_materials,
+    material_fixture_payload,
+)
 from .registry import get_definition, list_definitions, list_suites
 from .specs import (
     GENERATOR_VERSION,
@@ -20,6 +26,9 @@ from .specs import (
 
 __all__ = [
     "GENERATOR_VERSION",
+    "MATERIAL_FIXTURE_KINDS",
+    "appearance_expectations_from_materials",
+    "appearance_payload_from_materials",
     "build_manifest",
     "normalize_generation_policy",
     "should_keep_generated_artifacts",
@@ -32,4 +41,5 @@ __all__ = [
     "get_definition",
     "list_definitions",
     "list_suites",
+    "material_fixture_payload",
 ]

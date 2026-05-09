@@ -159,6 +159,8 @@ def _cmd_validate(path: Path) -> int:
 
 def _definition_name_from_spec(spec: object) -> str:
     parameters = getattr(spec, "parameters")
+    if "material_fixture" in parameters:
+        return f"material_{parameters['material_fixture']}"
     for key in ("primitive", "profile_kind", "blockout_kind", "mask_kind", "degradation"):
         if key in parameters:
             return str(parameters[key])

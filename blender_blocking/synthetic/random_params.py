@@ -7,6 +7,7 @@ import random
 from dataclasses import dataclass
 from typing import Any
 
+from .materials import material_fixture_payload
 from .specs import (
     ChallengeTag,
     FailureModeTag,
@@ -205,6 +206,49 @@ def capture_noise_spec(kind: str, seed: int) -> SyntheticShapeSpec:
         symmetry=(),
         known_dimensions={"canvas_width": 256.0, "canvas_height": 256.0},
         expected_failure_modes=failure_values(_capture_failures(kind)),
+    )
+
+
+def material_fixture_spec(kind: str, seed: int) -> SyntheticShapeSpec:
+    """Create an analytic primitive with deterministic material/UV challenges."""
+
+    base = analytic_primitive_spec("rounded_box", seed, variant=f"material_{kind}")
+    material_payload = material_fixture_payload(kind, seed)
+    material_challenges = tuple(str(value) for value in material_payload.get("challenge_tags", ()))
+    material_failures = tuple(str(value) for value in material_payload.get("expected_failure_modes", ()))
+    parameters = dict(base.parameters)
+    parameters.update(
+        {
+            "material_fixture": kind,
+            "appearance_validation": "texture_material_report_v1",
+            "fixture_base_primitive": parameters.get("primitive"),
+        }
+    )
+    return SyntheticShapeSpec(
+        shape_id=stable_shape_id("material", seed, kind),
+        family=ShapeFamily.ANALYTIC_PRIMITIVE.value,
+        seed=seed,
+        parameters=parameters,
+        transforms=base.transforms,
+        materials=material_payload,
+        intended_challenges=tuple(
+            dict.fromkeys(
+                (
+                    *base.intended_challenges,
+                    *material_challenges,
+                )
+            )
+        ),
+        symmetry=base.symmetry,
+        known_dimensions=base.known_dimensions,
+        expected_failure_modes=tuple(
+            dict.fromkeys(
+                (
+                    *base.expected_failure_modes,
+                    *material_failures,
+                )
+            )
+        ),
     )
 
 

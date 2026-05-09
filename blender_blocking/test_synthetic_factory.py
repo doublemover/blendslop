@@ -9,12 +9,18 @@ from pathlib import Path
 import numpy as np
 
 from config import BlockingConfig
+from evaluation.appearance import report_from_mapping
 from synthetic.artifact_writer import validate_manifest, validate_manifest_tree, write_artifact_set
 from synthetic.ground_truth import (
     build_pure_artifacts,
     geometry_payload_from_candidate,
     recoverable_envelope_from_views,
 )
+from synthetic.materials import (
+    MATERIAL_FIXTURE_KINDS,
+    appearance_payload_from_materials,
+)
+from synthetic.quality_targets import quality_targets_for
 from synthetic.registry import get_definition, list_suites, specs_for_suite
 from synthetic.specs import SyntheticShapeSpec
 
@@ -135,6 +141,7 @@ class SyntheticFactoryTests(unittest.TestCase):
         self.assertIn("capture-noise", list_suites())
         self.assertIn("degradation-stress", list_suites())
         self.assertIn("deterministic-micro", list_suites())
+        self.assertIn("material-appearance", list_suites())
         self.assertIn("silhouette-edge-cases", list_suites())
 
     def test_new_degradation_families_are_registered(self) -> None:
@@ -156,6 +163,41 @@ class SyntheticFactoryTests(unittest.TestCase):
         for filename, shape_id in fixture_files.items():
             self.assertTrue((fixture_root / filename).exists())
             self.assertIn(shape_id, expected_targets_text)
+
+    def test_material_appearance_suite_is_deterministic_and_metric_shaped(self) -> None:
+        specs = specs_for_suite("material-appearance", seed=6)
+        repeat = specs_for_suite("material-appearance", seed=6)
+
+        self.assertEqual(len(specs), len(MATERIAL_FIXTURE_KINDS))
+        self.assertEqual([spec.to_dict() for spec in specs], [spec.to_dict() for spec in repeat])
+        for spec in specs:
+            self.assertIn("material_fixture", spec.parameters)
+            self.assertIn("appearance_validation", spec.parameters)
+            report = report_from_mapping(appearance_payload_from_materials(spec.materials))
+            self.assertTrue(report.required)
+            self.assertIsNotNone(report.material_slot_count)
+
+    def test_material_texture_only_fixture_declares_hallucination_risk(self) -> None:
+        spec = get_definition("material_texture_only_high_frequency").create(12)
+        report = report_from_mapping(appearance_payload_from_materials(spec.materials))
+        targets = quality_targets_for(spec)["targets"]["appearance"]  # type: ignore[index]
+        artifacts = build_pure_artifacts(spec, volume_resolution=8)
+
+        self.assertTrue(report.image_space_hallucination_warning)
+        self.assertIn("texture_only_hallucination", spec.expected_failure_modes)
+        self.assertTrue(targets["image_space_hallucination_expected"])  # type: ignore[index]
+        self.assertIn("appearance_reference", artifacts["metadata"])
+        self.assertEqual(artifacts["metadata"]["material_fixture_kind"], "texture_only_high_frequency")
+
+    def test_material_uv_distortion_fixture_is_strictly_invalid(self) -> None:
+        spec = get_definition("material_uv_checker_distortion").create(14)
+        report = report_from_mapping(appearance_payload_from_materials(spec.materials))
+        targets = quality_targets_for(spec)["targets"]["appearance"]  # type: ignore[index]
+
+        self.assertFalse(report.uv_valid)
+        self.assertIn("uv_invalid", report.errors)
+        self.assertTrue(targets["strict_uv"])  # type: ignore[index]
+        self.assertFalse(targets["uv_valid_expected"])  # type: ignore[index]
 
 
 if __name__ == "__main__":

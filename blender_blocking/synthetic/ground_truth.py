@@ -7,6 +7,7 @@ from typing import Mapping
 
 from .analytic_sdf import analytic_metadata, require_numpy, sdf_sample_summary, sdf_occupancy, sdf_samples
 from .degradations import apply_degradation, generate_adversarial_mask, mask_to_uint8
+from .materials import appearance_payload_from_materials
 from .quality_targets import quality_targets_for
 from .specs import ShapeFamily, SyntheticShapeSpec
 
@@ -21,6 +22,10 @@ def build_pure_artifacts(
         metadata = analytic_metadata(spec, volume_resolution)
         metadata["sample_summary"] = sdf_sample_summary(samples["points"], samples["sdf"])
         metadata["geometry_reference"] = geometry_reference_metadata(samples)
+        appearance_reference = appearance_payload_from_materials(spec.materials)
+        if appearance_reference:
+            metadata["appearance_reference"] = appearance_reference
+            metadata["material_fixture_kind"] = spec.materials.get("fixture_kind")
         return {
             "volumes": {f"occupancy-r{volume_resolution}": occupancy},
             "sdf_samples": samples,

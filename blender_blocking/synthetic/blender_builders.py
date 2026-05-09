@@ -37,6 +37,7 @@ def build_mesh_object(spec: SyntheticShapeSpec, name: str | None = None) -> Any:
         raise BlenderUnavailableError(f"Spec family {spec.family!r} is a pure mask family and has no Blender mesh.")
     obj.name = object_name
     _apply_transform(obj, spec)
+    _apply_material_declaration(bpy, obj, spec)
     return obj
 
 
@@ -377,6 +378,178 @@ def _apply_transform(obj: Any, spec: SyntheticShapeSpec) -> None:
         obj.rotation_euler = tuple(_deg_to_rad(float(x)) for x in transform["rotation_deg"])
     if "scale" in transform:
         obj.scale = tuple(float(x) for x in transform["scale"])
+
+
+def _apply_material_declaration(bpy: Any, obj: Any, spec: SyntheticShapeSpec) -> None:
+    materials = spec.materials
+    if not materials:
+        return
+    data = getattr(obj, "data", None)
+    if data is None:
+        return
+
+    material_slots = materials.get("material_slots")
+    if isinstance(material_slots, list) and material_slots:
+        _clear_mesh_materials(data)
+        created = [_create_declared_material(bpy, dict(slot)) for slot in material_slots if isinstance(slot, dict)]
+        for material in created:
+            data.materials.append(material)
+        _assign_declared_material_indices(data, max(1, len(created)))
+    elif "base_color" in materials:
+        _clear_mesh_materials(data)
+        data.materials.append(
+            _create_declared_material(
+                bpy,
+                {
+                    "name": f"{spec.shape_id}_material",
+                    "base_color": materials.get("base_color"),
+                    "roughness": materials.get("roughness", 0.55),
+                    "metallic": materials.get("metallic", 0.0),
+                    "pbr_channels": ["base_color", "roughness", "metallic"],
+                },
+            )
+        )
+
+    uv_decl = materials.get("uv")
+    if isinstance(uv_decl, dict) and bool(uv_decl.get("has_uv_map", False)):
+        _ensure_declared_uvs(data, str(uv_decl.get("distortion", "none")))
+
+
+def _clear_mesh_materials(data: Any) -> None:
+    try:
+        data.materials.clear()
+        return
+    except Exception:
+        pass
+    try:
+        while len(data.materials):
+            data.materials.pop(index=0)
+    except Exception:
+        return
+
+
+def _create_declared_material(bpy: Any, declaration: dict[str, Any]) -> Any:
+    name = str(declaration.get("name") or "synthetic_material")
+    material = bpy.data.materials.new(name=name)
+    color = _rgba_tuple(declaration.get("base_color"), default=(0.35, 0.35, 0.35, 1.0))
+    material.diffuse_color = color
+    for attr in ("roughness", "metallic"):
+        try:
+            setattr(material, attr, float(declaration.get(attr, 0.0 if attr == "metallic" else 0.55)))
+        except Exception:
+            pass
+
+    try:
+        material.use_nodes = True
+        nodes = material.node_tree.nodes
+        principled = _find_principled_node(nodes)
+        if principled is not None:
+            _set_node_input(principled, "Base Color", color)
+            _set_node_input(principled, "Roughness", float(declaration.get("roughness", 0.55)))
+            _set_node_input(principled, "Metallic", float(declaration.get("metallic", 0.0)))
+        for texture in declaration.get("texture_maps", ()) or ():
+            if isinstance(texture, dict):
+                _add_texture_node(bpy, material, texture)
+    except Exception:
+        pass
+    return material
+
+
+def _find_principled_node(nodes: Any) -> Any | None:
+    try:
+        for node in nodes:
+            node_type = str(getattr(node, "type", "")).upper()
+            node_name = str(getattr(node, "name", "")).lower()
+            if node_type == "BSDF_PRINCIPLED" or "principled" in node_name:
+                return node
+    except Exception:
+        return None
+    return None
+
+
+def _set_node_input(node: Any, name: str, value: Any) -> None:
+    try:
+        socket = node.inputs.get(name)
+        if socket is not None:
+            socket.default_value = value
+    except Exception:
+        return
+
+
+def _add_texture_node(bpy: Any, material: Any, texture: dict[str, Any]) -> None:
+    nodes = material.node_tree.nodes
+    node = nodes.new(type="ShaderNodeTexImage")
+    semantic = str(texture.get("semantic", "base_color"))
+    node.name = f"synthetic_{semantic}_{texture.get('name', 'texture')}"
+    resolution = texture.get("resolution", [512, 512])
+    width = max(1, int(resolution[0]))  # type: ignore[index]
+    height = max(1, int(resolution[1]))  # type: ignore[index]
+    image = bpy.data.images.new(
+        name=str(texture.get("name", "synthetic_texture")),
+        width=width,
+        height=height,
+        alpha=True,
+    )
+    node.image = image
+    if semantic == "normal":
+        normal_node = nodes.new(type="ShaderNodeNormalMap")
+        normal_node.name = f"synthetic_normal_{texture.get('name', 'texture')}"
+
+
+def _assign_declared_material_indices(data: Any, material_count: int) -> None:
+    polygons = getattr(data, "polygons", None)
+    if polygons is None or material_count <= 1:
+        return
+    try:
+        for index, polygon in enumerate(polygons):
+            polygon.material_index = index % material_count
+    except Exception:
+        return
+
+
+def _ensure_declared_uvs(data: Any, distortion: str) -> None:
+    uv_layers = getattr(data, "uv_layers", None)
+    loops = getattr(data, "loops", None)
+    vertices = getattr(data, "vertices", None)
+    if uv_layers is None or loops is None or vertices is None:
+        return
+    try:
+        layer = uv_layers.active or uv_layers.new(name="synthetic_uv")
+    except Exception:
+        return
+    coords = [vertex.co for vertex in vertices]
+    if not coords:
+        return
+    min_x = min(float(co.x) for co in coords)
+    max_x = max(float(co.x) for co in coords)
+    min_y = min(float(co.y) for co in coords)
+    max_y = max(float(co.y) for co in coords)
+    span_x = max(max_x - min_x, 1e-6)
+    span_y = max(max_y - min_y, 1e-6)
+    try:
+        for loop_index, loop in enumerate(loops):
+            co = vertices[loop.vertex_index].co
+            u = (float(co.x) - min_x) / span_x
+            v = (float(co.y) - min_y) / span_y
+            if distortion == "overlap_and_out_of_bounds":
+                if loop_index % 5 == 0:
+                    u += 1.25
+                if loop_index % 7 == 0:
+                    v -= 0.35
+                if loop_index % 11 == 0:
+                    u, v = 0.5, 0.5
+            layer.data[loop_index].uv = (u, v)
+    except Exception:
+        return
+
+
+def _rgba_tuple(value: Any, *, default: tuple[float, float, float, float]) -> tuple[float, float, float, float]:
+    if not isinstance(value, (list, tuple)) or len(value) < 3:
+        return default
+    values = [float(item) for item in value[:4]]
+    if len(values) == 3:
+        values.append(1.0)
+    return tuple(values[:4])  # type: ignore[return-value]
 
 
 def _signed_pow(value: float, exponent: float) -> float:

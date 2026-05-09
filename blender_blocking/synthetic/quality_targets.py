@@ -2,30 +2,34 @@
 
 from __future__ import annotations
 
+from .materials import appearance_expectations_from_materials
 from .specs import ShapeFamily, SyntheticShapeSpec
 
 
 def quality_targets_for(spec: SyntheticShapeSpec) -> dict[str, object]:
     if spec.family == ShapeFamily.ANALYTIC_PRIMITIVE.value:
-        return {
-            "shape_id": spec.shape_id,
-            "ground_truth_level": "analytic_exact",
-            "targets": {
-                "profile_loft": {
-                    "front_area_iou_min": 0.88,
-                    "side_area_iou_min": 0.84,
-                },
-                "silhouette_intersection": {
-                    "front_area_iou_min": 0.94,
-                    "side_area_iou_min": 0.92,
-                    "non_manifold_edges_max": 0,
-                },
-                "visual_hull_voxel": {
-                    "volume_iou_min": 0.82,
-                    "known_limit": "view count controls exactness even with analytic ground truth",
+        return _with_appearance_targets(
+            spec,
+            {
+                "shape_id": spec.shape_id,
+                "ground_truth_level": "analytic_exact",
+                "targets": {
+                    "profile_loft": {
+                        "front_area_iou_min": 0.88,
+                        "side_area_iou_min": 0.84,
+                    },
+                    "silhouette_intersection": {
+                        "front_area_iou_min": 0.94,
+                        "side_area_iou_min": 0.92,
+                        "non_manifold_edges_max": 0,
+                    },
+                    "visual_hull_voxel": {
+                        "volume_iou_min": 0.82,
+                        "known_limit": "view count controls exactness even with analytic ground truth",
+                    },
                 },
             },
-        }
+        )
     if spec.family == ShapeFamily.PROFILE_LATHE.value:
         return {
             "shape_id": spec.shape_id,
@@ -93,4 +97,18 @@ def quality_targets_for(spec: SyntheticShapeSpec) -> dict[str, object]:
                 "uncertainty": {"should_record_degradation_parameters": True},
             },
         }
-    return {"shape_id": spec.shape_id, "targets": {}}
+    return _with_appearance_targets(spec, {"shape_id": spec.shape_id, "targets": {}})
+
+
+def _with_appearance_targets(
+    spec: SyntheticShapeSpec,
+    payload: dict[str, object],
+) -> dict[str, object]:
+    appearance = appearance_expectations_from_materials(spec.materials)
+    if not appearance:
+        return payload
+    targets = payload.setdefault("targets", {})
+    if not isinstance(targets, dict):
+        return payload
+    targets["appearance"] = appearance
+    return payload

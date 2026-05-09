@@ -33,6 +33,10 @@ class ChallengeTag(str, Enum):
     LOW_CONTRAST = "low_contrast"
     OCCLUSION = "occlusion"
     PROFILE_BANDS = "profile_bands"
+    MATERIAL_REGIONS = "material_regions"
+    UV_STRETCH = "uv_stretch"
+    TEXTURE_ONLY_DETAIL = "texture_only_detail"
+    PBR_CHANNELS = "pbr_channels"
 
 
 class FailureModeTag(str, Enum):
@@ -45,6 +49,9 @@ class FailureModeTag(str, Enum):
     OUTLIER_BBOX_EXPANSION = "outlier_bbox_expansion"
     COMPONENT_DROPOUT = "component_dropout"
     INSUFFICIENT_VIEWS = "insufficient_views"
+    UV_INVALID = "uv_invalid"
+    MATERIAL_CHANNEL_DROPOUT = "material_channel_dropout"
+    TEXTURE_ONLY_HALLUCINATION = "texture_only_hallucination"
 
 
 JsonScalar = str | int | float | bool | None
