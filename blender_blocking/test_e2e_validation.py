@@ -2065,13 +2065,7 @@ def _parse_view_reference_entries(entries: Iterable[str]) -> Dict[str, Path]:
                 "--novel-view-reference must use VIEW=PATH"
             )
         view, path = str(entry).split("=", 1)
-        view = view.strip()
-        if not view:
-            raise argparse.ArgumentTypeError("novel view name cannot be empty")
-        if view not in {"front", "side", "top"} and parse_orbit_view_degrees(view) is None:
-            raise argparse.ArgumentTypeError(
-                "novel view names must be front, side, top, or orbit/azimuth names"
-            )
+        view = _validate_novel_view_name(view.strip())
         references[view] = Path(path.strip())
     return references
 
@@ -2092,6 +2086,161 @@ def _novel_view_names_from_args(args: argparse.Namespace) -> Tuple[str, ...]:
         + tuple(angle_views)
         + tuple(references.keys())
     )
+
+
+def _resolve_novel_view_inputs(
+    args: argparse.Namespace,
+) -> tuple[
+    Dict[str, Path],
+    Tuple[str, ...],
+    bool,
+    bool,
+    Optional[float],
+    Optional[float],
+    Optional[float],
+]:
+    manifest = _load_novel_view_manifest(getattr(args, "novel_view_manifest", None))
+    manual_references = _parse_view_reference_entries(args.novel_view_reference)
+    references = {
+        **manifest["references"],
+        **manual_references,
+    }
+    view_names = _ordered_unique(
+        tuple(manifest["view_names"])
+        + tuple(_novel_view_names_from_args(args))
+        + tuple(references.keys())
+    )
+    options = manifest["options"]
+    compute_ssim = bool(
+        args.novel_compute_ssim
+        if args.novel_compute_ssim is not None
+        else options.get("compute_ssim", True)
+    )
+    compute_lpips = bool(
+        args.novel_compute_lpips
+        if args.novel_compute_lpips is not None
+        else options.get("compute_lpips", False)
+    )
+    psnr_threshold = _novel_threshold(
+        args.novel_psnr_threshold
+        if args.novel_psnr_threshold is not None
+        else options.get("psnr_threshold", 20.0)
+    )
+    ssim_threshold = _novel_threshold(
+        args.novel_ssim_threshold
+        if args.novel_ssim_threshold is not None
+        else options.get("ssim_threshold", 0.65)
+    )
+    lpips_threshold = _novel_threshold(
+        args.novel_lpips_threshold
+        if args.novel_lpips_threshold is not None
+        else options.get("lpips_threshold")
+    )
+    return (
+        references,
+        view_names,
+        compute_ssim,
+        compute_lpips,
+        psnr_threshold,
+        ssim_threshold,
+        lpips_threshold,
+    )
+
+
+def _load_novel_view_manifest(path: Optional[Path]) -> Dict[str, Any]:
+    if path is None:
+        return {"references": {}, "view_names": (), "options": {}}
+    manifest_path = Path(path)
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, Mapping):
+        raise argparse.ArgumentTypeError("--novel-view-manifest must be a JSON object")
+    base_dir = manifest_path.parent
+    references: Dict[str, Path] = {}
+    view_names: list[str] = []
+
+    references_payload = payload.get("references", {})
+    if isinstance(references_payload, Mapping):
+        for view, raw_path in references_payload.items():
+            view_name = _validate_novel_view_name(str(view))
+            references[view_name] = _manifest_relative_path(base_dir, raw_path)
+            view_names.append(view_name)
+
+    views_payload = payload.get("views", ())
+    if isinstance(views_payload, Sequence) and not isinstance(
+        views_payload, (str, bytes)
+    ):
+        for item in views_payload:
+            if isinstance(item, Mapping):
+                view_name = _validate_novel_view_name(str(item.get("view", "")))
+                view_names.append(view_name)
+                if item.get("reference") is not None:
+                    references[view_name] = _manifest_relative_path(
+                        base_dir,
+                        item.get("reference"),
+                    )
+            elif item:
+                view_names.append(_validate_novel_view_name(str(item)))
+
+    for angle in _manifest_angles(payload.get("angles", ())):
+        view_names.append(f"orbit_{int(round(angle % 360.0)):03d}")
+
+    metric_options = payload.get("metrics", {})
+    options: Dict[str, Any] = {}
+    if isinstance(metric_options, Mapping):
+        options.update(metric_options)
+    for source_key, target_key in (
+        ("compute_ssim", "compute_ssim"),
+        ("compute_lpips", "compute_lpips"),
+        ("psnr_threshold", "psnr_threshold"),
+        ("ssim_threshold", "ssim_threshold"),
+        ("lpips_threshold", "lpips_threshold"),
+    ):
+        if source_key in payload:
+            options[target_key] = payload[source_key]
+    return {
+        "references": references,
+        "view_names": _ordered_unique(view_names),
+        "options": options,
+    }
+
+
+def _validate_novel_view_name(value: str) -> str:
+    view = value.strip()
+    if not view:
+        raise argparse.ArgumentTypeError("novel view name cannot be empty")
+    if view not in {"front", "side", "top"} and parse_orbit_view_degrees(view) is None:
+        raise argparse.ArgumentTypeError(
+            "novel view names must be front, side, top, or orbit/azimuth names"
+        )
+    return view
+
+
+def _manifest_relative_path(base_dir: Path, value: object) -> Path:
+    path = Path(str(value))
+    return path if path.is_absolute() else base_dir / path
+
+
+def _manifest_angles(value: object) -> tuple[float, ...]:
+    if value is None:
+        return ()
+    if isinstance(value, str):
+        values: Iterable[object] = value.split(",")
+    elif isinstance(value, Sequence):
+        values = value
+    else:
+        values = (value,)
+    angles = []
+    for item in values:
+        text = str(item).strip()
+        if not text:
+            continue
+        try:
+            angles.append(float(text))
+        except ValueError as exc:
+            raise argparse.ArgumentTypeError(
+                f"invalid novel-view manifest angle: {text!r}"
+            ) from exc
+    return tuple(angles)
 
 
 def _novel_threshold(value: Optional[float]) -> Optional[float]:
@@ -2216,14 +2365,20 @@ Default ensemble:
     core.add_argument(
         "--novel-view-reference",
         action="append",
-        default=(),
+        default=[],
         metavar="VIEW=PATH",
         help="Reference image for image metrics. Repeat for views like orbit_045=path/to/ref.png.",
     )
     core.add_argument(
+        "--novel-view-manifest",
+        type=Path,
+        default=None,
+        help="JSON manifest containing held-out novel-view references, extra views, angles, and metric options.",
+    )
+    core.add_argument(
         "--novel-view",
         action="append",
-        default=(),
+        default=[],
         metavar="VIEW",
         help="Additional rendered view name for novel-view validation, e.g. orbit_045.",
     )
@@ -2236,25 +2391,25 @@ Default ensemble:
     core.add_argument(
         "--novel-compute-ssim",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=None,
         help="Compute SSIM for novel-view/image validation.",
     )
     core.add_argument(
         "--novel-compute-lpips",
         action=argparse.BooleanOptionalAction,
-        default=False,
+        default=None,
         help="Compute LPIPS for novel-view/image validation when torch/lpips are available.",
     )
     core.add_argument(
         "--novel-psnr-threshold",
         type=float,
-        default=20.0,
+        default=None,
         help="Minimum aggregate and per-view PSNR for novel-view validation; use 0 to disable.",
     )
     core.add_argument(
         "--novel-ssim-threshold",
         type=float,
-        default=0.65,
+        default=None,
         help="Minimum aggregate and per-view SSIM for novel-view validation; use 0 to disable.",
     )
     core.add_argument(
@@ -3618,16 +3773,18 @@ if __name__ == "__main__":
             "top": Path(args.top),
         }
     try:
-        novel_reference_paths = _parse_view_reference_entries(
-            args.novel_view_reference
-        )
-        novel_view_names = _novel_view_names_from_args(args)
-    except argparse.ArgumentTypeError as exc:
+        (
+            novel_reference_paths,
+            novel_view_names,
+            novel_compute_ssim,
+            novel_compute_lpips,
+            novel_psnr_threshold,
+            novel_ssim_threshold,
+            novel_lpips_threshold,
+        ) = _resolve_novel_view_inputs(args)
+    except (argparse.ArgumentTypeError, OSError, json.JSONDecodeError) as exc:
         print(f"ERROR: {exc}")
         sys.exit(2)
-    novel_psnr_threshold = _novel_threshold(args.novel_psnr_threshold)
-    novel_ssim_threshold = _novel_threshold(args.novel_ssim_threshold)
-    novel_lpips_threshold = _novel_threshold(args.novel_lpips_threshold)
 
     if args.dry_run:
         if refinement_requested:
@@ -3709,8 +3866,8 @@ if __name__ == "__main__":
             result_json=matrix_json,
             run_id=args.run_id,
             novel_view_names=novel_view_names,
-            novel_compute_ssim=args.novel_compute_ssim,
-            novel_compute_lpips=args.novel_compute_lpips,
+            novel_compute_ssim=novel_compute_ssim,
+            novel_compute_lpips=novel_compute_lpips,
             novel_psnr_threshold=novel_psnr_threshold,
             novel_ssim_threshold=novel_ssim_threshold,
             novel_lpips_threshold=novel_lpips_threshold,
@@ -3759,8 +3916,8 @@ if __name__ == "__main__":
             run_id=args.run_id,
             novel_view_reference_paths=novel_reference_paths,
             novel_view_names=novel_view_names,
-            novel_compute_ssim=args.novel_compute_ssim,
-            novel_compute_lpips=args.novel_compute_lpips,
+            novel_compute_ssim=novel_compute_ssim,
+            novel_compute_lpips=novel_compute_lpips,
             novel_psnr_threshold=novel_psnr_threshold,
             novel_ssim_threshold=novel_ssim_threshold,
             novel_lpips_threshold=novel_lpips_threshold,
@@ -3783,8 +3940,8 @@ if __name__ == "__main__":
             run_id=args.run_id,
             novel_view_reference_paths=novel_reference_paths,
             novel_view_names=novel_view_names,
-            novel_compute_ssim=args.novel_compute_ssim,
-            novel_compute_lpips=args.novel_compute_lpips,
+            novel_compute_ssim=novel_compute_ssim,
+            novel_compute_lpips=novel_compute_lpips,
             novel_psnr_threshold=novel_psnr_threshold,
             novel_ssim_threshold=novel_ssim_threshold,
             novel_lpips_threshold=novel_lpips_threshold,

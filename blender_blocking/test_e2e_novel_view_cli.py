@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
+import tempfile
 import unittest
 
 from integration.blender_ops.render_utils import parse_orbit_view_degrees
@@ -17,6 +19,7 @@ from test_e2e_validation import (
     _novel_view_names_from_args,
     _parse_args,
     _parse_view_reference_entries,
+    _resolve_novel_view_inputs,
 )
 
 
@@ -47,6 +50,65 @@ class E2ENovelViewCliTests(unittest.TestCase):
         names = _novel_view_names_from_args(args)
 
         self.assertEqual(names, ("orbit_090", "orbit_045", "orbit_135"))
+
+    def test_novel_view_manifest_supplies_references_views_and_options(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest = root / "novel.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "references": {"orbit_045": "refs/holdout_045.png"},
+                        "views": [
+                            {"view": "orbit_090", "reference": "refs/holdout_090.png"},
+                            "orbit_135",
+                        ],
+                        "angles": [225],
+                        "metrics": {
+                            "compute_ssim": False,
+                            "compute_lpips": True,
+                            "psnr_threshold": 24.0,
+                            "ssim_threshold": 0.7,
+                            "lpips_threshold": 0.35,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            args = _parse_args(
+                [
+                    "--reconstruction-mode",
+                    "legacy",
+                    "--validation-mode",
+                    "novel-view",
+                    "--novel-view-manifest",
+                    str(manifest),
+                    "--novel-view-reference",
+                    "orbit_315=manual.png",
+                ]
+            )
+
+            (
+                references,
+                names,
+                compute_ssim,
+                compute_lpips,
+                psnr_threshold,
+                ssim_threshold,
+                lpips_threshold,
+            ) = _resolve_novel_view_inputs(args)
+
+        self.assertEqual(
+            names,
+            ("orbit_045", "orbit_090", "orbit_135", "orbit_225", "orbit_315"),
+        )
+        self.assertEqual(references["orbit_045"], root / "refs" / "holdout_045.png")
+        self.assertEqual(references["orbit_315"], Path("manual.png"))
+        self.assertFalse(compute_ssim)
+        self.assertTrue(compute_lpips)
+        self.assertEqual(psnr_threshold, 24.0)
+        self.assertEqual(ssim_threshold, 0.7)
+        self.assertEqual(lpips_threshold, 0.35)
 
     def test_threshold_zero_disables_metric_gate(self) -> None:
         self.assertIsNone(_novel_threshold(0.0))
