@@ -120,6 +120,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_refinement_lab_editability_study", "test_refinement_lab_editability_study"),
     ("pure_refinement_lab_content_adaptive_patches", "test_refinement_lab_content_adaptive_patches"),
     ("pure_refinement_lab_adaptive_loop", "test_refinement_lab_adaptive_loop"),
+    ("pure_refinement_lab_surrogate", "test_refinement_lab_surrogate"),
     ("pure_refinement_lab_runner", "test_refinement_lab_runner"),
     ("pure_refinement_lab_cli", "test_refinement_lab_cli"),
     ("pure_e2e_novel_view_cli", "test_e2e_novel_view_cli"),

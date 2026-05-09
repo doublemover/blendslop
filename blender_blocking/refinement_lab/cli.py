@@ -34,6 +34,7 @@ from .parameter_search import promotion_decision
 from .presets import get_suite_preset, get_track_preset, list_suites, list_tracks
 from .result_index import load_index, write_leaderboard_json, write_leaderboard_md
 from .runner import RunOptions, runner_for_plan
+from .surrogate import surrogate_report
 
 try:
     from blender_blocking.config import BlockingConfig
@@ -79,6 +80,14 @@ def main(argv: list[str] | None = None) -> int:
     rank_parser.add_argument("--run-root", type=Path, required=True)
     rank_parser.add_argument("--objective", default="quality_win")
     rank_parser.add_argument("--top-k", type=int, default=10)
+
+    surrogate_parser = subparsers.add_parser("surrogate")
+    surrogate_parser.add_argument("--run-root", type=Path, required=True)
+    surrogate_parser.add_argument("--plan", type=Path, default=None)
+    surrogate_parser.add_argument("--objective", default="quality_win")
+    surrogate_parser.add_argument("--top-k", type=int, default=20)
+    surrogate_parser.add_argument("--ridge", type=float, default=1e-6)
+    surrogate_parser.add_argument("--out", type=Path, default=None)
 
     autopsy_parser = subparsers.add_parser("autopsy")
     autopsy_parser.add_argument("--run-root", type=Path, required=True)
@@ -186,6 +195,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_report(args)
     if args.command == "rank":
         return _cmd_rank(args)
+    if args.command == "surrogate":
+        return _cmd_surrogate(args)
     if args.command == "autopsy":
         return _cmd_autopsy(args)
     if args.command == "adapt":
@@ -428,6 +439,50 @@ def _cmd_rank(args: argparse.Namespace) -> int:
         results, args.run_root / "leaderboard.md", objective=args.objective
     )
     print((args.run_root / "leaderboard.md").as_posix())
+    return 0
+
+
+def _cmd_surrogate(args: argparse.Namespace) -> int:
+    results, malformed = load_index(
+        args.run_root / "index.jsonl", run_root=args.run_root
+    )
+    if malformed:
+        print(f"WARN: skipped {malformed} malformed index rows")
+    plan_path = args.plan or args.run_root / "plan.json"
+    variants = ()
+    if plan_path.exists():
+        from .contracts import ExperimentPlan
+
+        variants = ExperimentPlan.read(plan_path).variants
+    report = surrogate_report(
+        results,
+        variants,
+        objective=args.objective,
+        ridge=args.ridge,
+        top_k=args.top_k,
+    )
+    out = args.out or args.run_root / "surrogate-priorities.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        json.dumps(json_safe(report), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(
+        json.dumps(
+            {
+                "out": out.as_posix(),
+                "examples": report["model"]["example_count"],  # type: ignore[index]
+                "predictions": report["prediction_count"],
+                "top_variant": (
+                    report["predictions"][0]["variant_id"]  # type: ignore[index]
+                    if report["predictions"]
+                    else None
+                ),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
     return 0
 
 
