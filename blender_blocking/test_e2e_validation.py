@@ -54,9 +54,14 @@ from blender_blocking.integration.blender_ops.render_utils import (
     render_orthogonal_views,
 )
 from blender_blocking.integration.image_processing.image_loader import load_image
+from blender_blocking.evaluation.silhouette_eval import (
+    SilhouetteGateConfig,
+    evaluate_silhouette_pair,
+    missing_silhouette_view,
+    summarize_silhouette_views,
+)
 from blender_blocking.validation.silhouette_iou import (
     canonicalize_mask,
-    compute_mask_iou,
     mask_from_image_array,
 )
 
@@ -470,6 +475,8 @@ class E2EValidator:
         self,
         iou_threshold: float = 0.7,
         view_thresholds: Optional[Dict[str, float]] = None,
+        boundary_iou_threshold: Optional[float] = None,
+        signed_distance_loss_threshold: Optional[float] = None,
         render_config: Optional[RenderConfig] = None,
         workflow_config: Optional[BlockingConfig] = None,
         config_label: str = "default",
@@ -489,6 +496,8 @@ class E2EValidator:
         """
         self.iou_threshold = iou_threshold
         self.view_thresholds = view_thresholds or {}
+        self.boundary_iou_threshold = boundary_iou_threshold
+        self.signed_distance_loss_threshold = signed_distance_loss_threshold
         self.workflow_config = workflow_config or BlockingConfig()
         self.render_config = render_config or self.workflow_config.render_silhouette
         self.config_label = config_label
@@ -730,15 +739,39 @@ class E2EValidator:
         # Step 4: Compare with references
         _print_section("4/4 Compare Silhouettes")
         self.results = {}
-        ious = []
         table_rows = []
+        silhouette_gate = SilhouetteGateConfig(
+            min_area_iou=self.iou_threshold,
+            per_view_min_area_iou=self.view_thresholds,
+            min_boundary_iou=self.boundary_iou_threshold,
+            max_signed_distance_loss=self.signed_distance_loss_threshold,
+            required_views=tuple(views),
+        )
 
         compare_progress = progress_bar(
             len(views), desc="compare_views", enabled=self.progress
         )
         for view in views:
             if view not in reference_paths or view not in rendered_paths:
-                print(f"⚠ Skipping {view} (not available)")
+                reason = "missing_reference_or_render"
+                print(f"{_status_icon(False)} {view} {reason}")
+                payload = missing_silhouette_view(
+                    view,
+                    reason=reason,
+                    config=silhouette_gate,
+                    required=True,
+                )
+                self.results[view] = payload
+                table_rows.append(
+                    {
+                        "view": view,
+                        "iou": "0.000",
+                        "threshold": f"{silhouette_gate.threshold_for_view(view):.3f}",
+                        "status": "FAIL",
+                        "intersection": 0,
+                        "union": 0,
+                    }
+                )
                 compare_progress.update(1)
                 continue
 
@@ -768,10 +801,14 @@ class E2EValidator:
                 anchor=anchor,
             )
 
-            result = compute_mask_iou(ref_canon, render_canon)
-            iou = result.iou
-
             threshold = self.view_thresholds.get(view, self.iou_threshold)
+            payload = evaluate_silhouette_pair(
+                ref_canon,
+                render_canon,
+                view=view,
+                config=silhouette_gate,
+                required=True,
+            )
 
             if PIL_AVAILABLE:
                 debug_dir = (
@@ -794,25 +831,16 @@ class E2EValidator:
                 diff = np.logical_xor(ref_canon, render_canon).astype(np.uint8) * 255
                 Image.fromarray(diff).save(debug_dir / f"{view}_diff.png")
 
-            self.results[view] = {
-                "iou": iou,
-                "intersection": result.intersection,
-                "union": result.union,
-                "pixel_difference": float(
-                    np.abs(ref_canon.astype(float) - render_canon.astype(float)).mean()
-                ),
-                "warnings": "; ".join(result.warnings) if result.warnings else "",
-            }
+            self.results[view] = payload
 
-            ious.append(iou)
             table_rows.append(
                 {
                     "view": view,
-                    "iou": f"{iou:.3f}",
+                    "iou": f"{float(payload['area_iou']):.3f}",
                     "threshold": f"{threshold:.3f}",
-                    "status": "PASS" if iou >= threshold else "FAIL",
-                    "intersection": result.intersection,
-                    "union": result.union,
+                    "status": "PASS" if payload["passed"] else "FAIL",
+                    "intersection": payload["intersection"],
+                    "union": payload["union"],
                 }
             )
             compare_progress.update(1)
@@ -820,15 +848,35 @@ class E2EValidator:
         _print_result_table(table_rows)
 
         # Calculate overall result
-        if ious:
-            avg_iou = sum(ious) / len(ious)
-            passed = avg_iou >= self.iou_threshold
+        if self.results:
+            silhouette_summary = summarize_silhouette_views(
+                self.results,
+                config=silhouette_gate,
+            )
+            avg_iou = float(silhouette_summary["average_iou"])
+            min_iou = float(silhouette_summary["min_view_iou"])
+            passed = bool(silhouette_summary["passed"])
 
             _print_section("Summary")
             _print_kv_table(
                 (
                     ("average_iou", f"{avg_iou:.3f}"),
+                    ("min_view_iou", f"{min_iou:.3f}"),
                     ("threshold", f"{self.iou_threshold:.3f}"),
+                    (
+                        "required_views",
+                        "PASS"
+                        if silhouette_summary["required_views_passed"]
+                        else (
+                            "FAIL "
+                            + ",".join(
+                                str(view)
+                                for view in silhouette_summary[
+                                    "failed_required_views"
+                                ]
+                            )
+                        ),
+                    ),
                     (
                         "result",
                         f"{_status_icon(passed)} {'PASSED' if passed else 'FAILED'}",
@@ -845,6 +893,17 @@ class E2EValidator:
                     "validation_mode": validation_mode,
                     "passed": passed,
                     "average_iou": avg_iou,
+                    "min_view_iou": min_iou,
+                    "required_views_passed": silhouette_summary[
+                        "required_views_passed"
+                    ],
+                    "failed_required_view_count": silhouette_summary[
+                        "failed_required_view_count"
+                    ],
+                    "missing_required_metric_count": silhouette_summary[
+                        "missing_required_metric_count"
+                    ],
+                    "silhouette_summary": silhouette_summary,
                     "views": self.results,
                     "backend_result": backend_payload,
                     "rendered_paths": rendered_paths,
@@ -888,6 +947,8 @@ def test_with_sample_images(
     num_slices: int = 120,
     iou_threshold: float = 0.7,
     view_thresholds: Optional[Dict[str, float]] = None,
+    boundary_iou_threshold: Optional[float] = None,
+    signed_distance_loss_threshold: Optional[float] = None,
     render_config: Optional[RenderConfig] = None,
     workflow_config: Optional[BlockingConfig] = None,
     config_label: str = "default",
@@ -930,6 +991,8 @@ def test_with_sample_images(
     validator = E2EValidator(
         iou_threshold=iou_threshold,
         view_thresholds=view_thresholds,
+        boundary_iou_threshold=boundary_iou_threshold,
+        signed_distance_loss_threshold=signed_distance_loss_threshold,
         render_config=render_config,
         workflow_config=workflow_config,
         config_label=config_label,
@@ -960,6 +1023,8 @@ def test_with_custom_images(
     num_slices: int = 12,
     iou_threshold: float = 0.7,
     view_thresholds: Optional[Dict[str, float]] = None,
+    boundary_iou_threshold: Optional[float] = None,
+    signed_distance_loss_threshold: Optional[float] = None,
     render_config: Optional[RenderConfig] = None,
     workflow_config: Optional[BlockingConfig] = None,
     config_label: str = "default",
@@ -987,6 +1052,8 @@ def test_with_custom_images(
     validator = E2EValidator(
         iou_threshold=iou_threshold,
         view_thresholds=view_thresholds,
+        boundary_iou_threshold=boundary_iou_threshold,
+        signed_distance_loss_threshold=signed_distance_loss_threshold,
         render_config=render_config,
         workflow_config=workflow_config,
         config_label=config_label,
@@ -1018,6 +1085,8 @@ def run_synthetic_suite_matrix(
     base_config: Optional[BlockingConfig] = None,
     iou_threshold: float = 0.7,
     view_thresholds: Optional[Dict[str, float]] = None,
+    boundary_iou_threshold: Optional[float] = None,
+    signed_distance_loss_threshold: Optional[float] = None,
     validation_mode: str = "auto",
     config_label: str = "synthetic",
     result_json: Optional[Path] = None,
@@ -1122,6 +1191,8 @@ def run_synthetic_suite_matrix(
                     num_slices=cfg.reconstruction.num_slices,
                     iou_threshold=iou_threshold,
                     view_thresholds=view_thresholds,
+                    boundary_iou_threshold=boundary_iou_threshold,
+                    signed_distance_loss_threshold=signed_distance_loss_threshold,
                     render_config=cfg.render_silhouette,
                     workflow_config=cfg,
                     config_label=mode_label,
@@ -1233,10 +1304,27 @@ def _definition_name_from_spec(spec: object) -> str:
 
 def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float]:
     metrics: Dict[str, float] = {"passed": 1.0 if passed else 0.0}
-    for key in ("average_iou",):
+    for key in (
+        "average_iou",
+        "min_view_iou",
+        "failed_required_view_count",
+        "missing_required_metric_count",
+    ):
         value = payload.get(key)
         if isinstance(value, (int, float)):
             metrics[key] = float(value)
+    summary = payload.get("silhouette_summary")
+    if isinstance(summary, Mapping):
+        for key in (
+            "mean_boundary_iou",
+            "min_boundary_iou",
+            "mean_signed_distance_loss",
+            "required_view_count",
+            "missing_required_view_count",
+        ):
+            value = summary.get(key)
+            if isinstance(value, (int, float)):
+                metrics[f"silhouette_{key}"] = float(value)
     views = payload.get("views", {})
     if isinstance(views, Mapping):
         for view, view_payload in views.items():
@@ -1626,11 +1714,23 @@ Default ensemble:
         "--iou-threshold",
         type=float,
         default=0.7,
-        help="Average IoU threshold for render-iou validation.",
+        help="Per-required-view IoU threshold for render-iou validation.",
     )
     core.add_argument("--front-threshold", type=float, default=None)
     core.add_argument("--side-threshold", type=float, default=None)
     core.add_argument("--top-threshold", type=float, default=None)
+    core.add_argument(
+        "--boundary-iou-threshold",
+        type=float,
+        default=None,
+        help="Optional per-view Boundary IoU threshold for render-iou validation.",
+    )
+    core.add_argument(
+        "--signed-distance-loss-threshold",
+        type=float,
+        default=None,
+        help="Optional maximum per-view signed-distance silhouette loss.",
+    )
     core.add_argument(
         "--reconstruction-mode",
         choices=ALL_RECONSTRUCTION_MODES,
@@ -3005,6 +3105,8 @@ if __name__ == "__main__":
             base_config=workflow_config,
             iou_threshold=args.iou_threshold,
             view_thresholds=thresholds,
+            boundary_iou_threshold=args.boundary_iou_threshold,
+            signed_distance_loss_threshold=args.signed_distance_loss_threshold,
             validation_mode=args.validation_mode,
             config_label=config_label,
             result_json=matrix_json,
@@ -3042,6 +3144,8 @@ if __name__ == "__main__":
             num_slices=args.num_slices,
             iou_threshold=args.iou_threshold,
             view_thresholds=thresholds,
+            boundary_iou_threshold=args.boundary_iou_threshold,
+            signed_distance_loss_threshold=args.signed_distance_loss_threshold,
             render_config=render_config,
             workflow_config=workflow_config,
             config_label=config_label,
@@ -3057,6 +3161,8 @@ if __name__ == "__main__":
         validator = E2EValidator(
             iou_threshold=args.iou_threshold,
             view_thresholds=thresholds,
+            boundary_iou_threshold=args.boundary_iou_threshold,
+            signed_distance_loss_threshold=args.signed_distance_loss_threshold,
             render_config=render_config,
             workflow_config=workflow_config,
             config_label=config_label,

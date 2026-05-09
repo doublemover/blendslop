@@ -136,6 +136,15 @@ present. Visual-hull carving also honors boundary refinement by expanding the
 silhouette boundary band before voxel rejection, which reduces quantization
 loss around thin structures and hard view edges.
 
+Render-IoU validation treats front/side/top as required views by default.
+`average_iou` is still reported, but it cannot hide a required-view failure:
+the E2E payload includes `min_view_iou`, `required_views_passed`,
+`failed_required_view_count`, `missing_required_metric_count`, and a
+`silhouette_summary`. The same comparison path emits per-view Boundary IoU,
+signed-distance loss, precision, recall, area ratio, centroid delta, and
+optional gates from `--boundary-iou-threshold` and
+`--signed-distance-loss-threshold`.
+
 Visual-hull postprocess mode `topology_repair` is a pure-Python conservative
 repair pass. It drops invalid/degenerate faces, duplicate faces, loose vertices,
 and optional non-largest connected components without moving vertices or filling

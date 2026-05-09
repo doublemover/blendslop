@@ -90,6 +90,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_volume", "test_volume"),
     ("pure_synthetic_factory", "test_synthetic_factory"),
     ("pure_quality_budget", "test_quality_budget"),
+    ("pure_evaluation_silhouette", "test_evaluation_silhouette"),
     ("pure_metrics_foundation", "test_metrics_foundation"),
     ("pure_evaluation_bundle", "test_evaluation_bundle"),
     ("pure_reconstruction_contracts", "test_reconstruction_contracts"),

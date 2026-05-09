@@ -39,6 +39,13 @@ from .schemas import (
     STATUS_VALUES,
     json_safe,
 )
+from .silhouette_eval import (
+    DEFAULT_REQUIRED_VIEWS,
+    SilhouetteGateConfig,
+    evaluate_silhouette_pair,
+    missing_silhouette_view,
+    summarize_silhouette_views,
+)
 from .view_planning import ViewRequest, active_view_plan_payload, suggest_next_views
 
 __all__ = [
@@ -46,6 +53,7 @@ __all__ = [
     "MetricGroup",
     "MetricValue",
     "STATUS_VALUES",
+    "DEFAULT_REQUIRED_VIEWS",
     "EvaluationBudget",
     "ExportQAReport",
     "GeometryMetricReport",
@@ -54,6 +62,7 @@ __all__ = [
     "RegressionBudget",
     "Threshold",
     "ViewRequest",
+    "SilhouetteGateConfig",
     "SelectionEvidence",
     "active_view_plan_payload",
     "attach_selection",
@@ -61,15 +70,18 @@ __all__ = [
     "bundle_from_candidate",
     "chamfer_distance",
     "evaluate_budget",
+    "evaluate_silhouette_pair",
     "export_qa_aggregate_score",
     "export_qa_report_from_mapping",
     "fscore_at_tolerance",
     "image_pair_report",
     "image_set_report",
+    "missing_silhouette_view",
     "normal_consistency",
     "pareto_front",
     "psnr_from_mse",
     "sota_silhouette_budget",
+    "summarize_silhouette_views",
     "suggest_next_views",
     "surface_distance_report",
     "volumetric_iou",
