@@ -8,6 +8,7 @@ from typing import Any, Mapping
 from .capabilities import backend_dependency_state
 from .cost_model import cost_report_from_candidate
 from .failure_taxonomy import classify_bundle_failures
+from .geometry import report_from_mapping
 from .lineage import repo_revision
 from .schemas import EvaluationBundle, MetricGroup, MetricValue, utc_now_iso, worst_status
 
@@ -24,6 +25,7 @@ def bundle_from_candidate(
     metrics = getattr(result, "metric_result", None)
     metric_groups = (
         _silhouette_group(metrics),
+        _geometry_group(metrics),
         _topology_group(metrics),
         _editability_group(metrics),
         _cost_group(result),
@@ -131,6 +133,74 @@ def _topology_group(metrics: Any) -> MetricGroup:
         if "watertight" in topology:
             values.append(MetricValue("topology.watertight", bool(topology.get("watertight")), higher_is_better=True, status=_pass_fail(bool(topology.get("watertight")))))
     return MetricGroup("topology", "pass", tuple(values))
+
+
+def _geometry_group(metrics: Any) -> MetricGroup:
+    if metrics is None:
+        return MetricGroup("geometry", "not_applicable")
+    extras = getattr(metrics, "extras", {}) or {}
+    geometry = extras.get("geometry") if isinstance(extras, Mapping) else None
+    if not isinstance(geometry, Mapping):
+        geometry = extras.get("geometry_metrics") if isinstance(extras, Mapping) else None
+    if not isinstance(geometry, Mapping):
+        return MetricGroup("geometry", "not_applicable")
+    report = report_from_mapping(geometry)
+    values = []
+    for name, value, higher in (
+        ("geometry.chamfer_l2", report.chamfer_l2, False),
+        ("geometry.fscore_tau", report.fscore_tau, True),
+        ("geometry.volumetric_iou", report.volumetric_iou, True),
+        ("geometry.normal_consistency", report.normal_consistency, True),
+        ("geometry.surface_coverage", report.surface_coverage, True),
+        ("geometry.ambiguity_gap", report.ambiguity_gap, False),
+    ):
+        if value is not None:
+            values.append(
+                MetricValue(
+                    name,
+                    value,
+                    higher_is_better=higher,
+                    status="pass",
+                    source=str(geometry.get("source", "computed")),
+                )
+            )
+    if report.fscore_tolerance is not None:
+        values.append(
+            MetricValue(
+                "geometry.fscore_tolerance",
+                report.fscore_tolerance,
+                higher_is_better=None,
+                status="not_applicable",
+            )
+        )
+    if report.sample_count_ref:
+        values.append(
+            MetricValue(
+                "geometry.sample_count_ref",
+                report.sample_count_ref,
+                unit="points",
+                higher_is_better=None,
+                status="not_applicable",
+            )
+        )
+    if report.sample_count_candidate:
+        values.append(
+            MetricValue(
+                "geometry.sample_count_candidate",
+                report.sample_count_candidate,
+                unit="points",
+                higher_is_better=None,
+                status="not_applicable",
+            )
+        )
+    status = "pass" if values else "not_applicable"
+    return MetricGroup(
+        "geometry",
+        status,
+        tuple(values),
+        warnings=report.warnings,
+        metadata=report.to_dict(),
+    )
 
 
 def _editability_group(metrics: Any) -> MetricGroup:

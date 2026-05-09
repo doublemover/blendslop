@@ -53,6 +53,48 @@ def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservati
                 recommended_actions=("run safe topology repair", "try alternate mesh extraction"),
             )
         )
+    fscore = _metric_value(metrics, "geometry.fscore_tau")
+    volumetric_iou = _metric_value(metrics, "geometry.volumetric_iou")
+    chamfer = _metric_value(metrics, "geometry.chamfer_l2")
+    if fscore is not None and fscore < 0.5:
+        failures.append(
+            FailureObservation(
+                code="geometry_surface_fscore_low",
+                severity="fail",
+                subsystem="geometry",
+                evidence_metrics={"geometry.fscore_tau": fscore},
+                likely_causes=("surface samples miss ground truth within tolerance",),
+                recommended_actions=(
+                    "increase visual hull resolution",
+                    "inspect synthetic ground-truth alignment",
+                ),
+            )
+        )
+    if volumetric_iou is not None and volumetric_iou < 0.45:
+        failures.append(
+            FailureObservation(
+                code="geometry_volume_iou_low",
+                severity="fail",
+                subsystem="geometry",
+                evidence_metrics={"geometry.volumetric_iou": volumetric_iou},
+                likely_causes=("carved occupancy disagrees with synthetic ground truth",),
+                recommended_actions=(
+                    "run sparse visual hull resolution climb",
+                    "check camera bounds and occupancy threshold",
+                ),
+            )
+        )
+    if chamfer is not None and chamfer > 0.05:
+        failures.append(
+            FailureObservation(
+                code="geometry_chamfer_high",
+                severity="warn",
+                subsystem="geometry",
+                evidence_metrics={"geometry.chamfer_l2": chamfer},
+                likely_causes=("surface is shifted, over-smoothed, or missing thin structures",),
+                recommended_actions=("run boundary-first refinement", "inspect residual patches"),
+            )
+        )
     if bundle.status == "degraded":
         failures.append(
             FailureObservation(
@@ -86,4 +128,3 @@ def _metric_value(metrics: Mapping[str, object], name: str) -> float | None:
         return None if value is None else float(value)
     except (TypeError, ValueError):
         return None
-

@@ -16,6 +16,7 @@ def compact_console_summary(bundle: EvaluationBundle) -> str:
         f"  min_iou={_metric(metrics, 'silhouette.min_view_iou')}",
         f"  avg_iou={_metric(metrics, 'silhouette.average_iou')}",
         f"  boundary={_metric(metrics, 'silhouette.mean_boundary_iou')}",
+        f"  chamfer={_metric(metrics, 'geometry.chamfer_l2')} fscore={_metric(metrics, 'geometry.fscore_tau')} vol_iou={_metric(metrics, 'geometry.volumetric_iou')}",
         f"  editable={_metric(metrics, 'editability.editable_reconstruction_index')}",
         f"  failures={len(bundle.failures)}",
     ]
@@ -27,7 +28,7 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
     for bundle in bundles:
         metrics = bundle.metric_index()
         rows.append(
-            "| {candidate} | {mode} | {status} | {rank} | {selected} | {score} | {min_iou} | {avg_iou} | {boundary} | {editable} | {failures} |".format(
+            "| {candidate} | {mode} | {status} | {rank} | {selected} | {score} | {min_iou} | {avg_iou} | {boundary} | {chamfer} | {fscore} | {vol_iou} | {editable} | {failures} |".format(
                 candidate=bundle.candidate_id,
                 mode=bundle.mode,
                 status=bundle.status,
@@ -37,6 +38,9 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
                 min_iou=_metric(metrics, "silhouette.min_view_iou"),
                 avg_iou=_metric(metrics, "silhouette.average_iou"),
                 boundary=_metric(metrics, "silhouette.mean_boundary_iou"),
+                chamfer=_metric(metrics, "geometry.chamfer_l2"),
+                fscore=_metric(metrics, "geometry.fscore_tau"),
+                vol_iou=_metric(metrics, "geometry.volumetric_iou"),
                 editable=_metric(metrics, "editability.editable_reconstruction_index"),
                 failures=len(bundle.failures),
             )
@@ -45,8 +49,8 @@ def markdown_report(bundles: Iterable[EvaluationBundle], *, title: str = "Evalua
         [
             f"# {title}",
             "",
-            "| Candidate | Mode | Status | Rank | Selected | Score | Min IoU | Avg IoU | Boundary | Editable | Failures |",
-            "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            "| Candidate | Mode | Status | Rank | Selected | Score | Min IoU | Avg IoU | Boundary | Chamfer | F-score | Vol IoU | Editable | Failures |",
+            "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
             *rows,
             "",
         ]
