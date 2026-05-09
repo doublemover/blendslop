@@ -431,12 +431,17 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertIn("editable_proxy_shape_program", result.artifacts)
+        self.assertIn("proxy_distillation", result.artifacts)
+        self.assertIn("proxy_distillation_npz", result.artifacts)
         self.assertEqual(editable["node_count"], 2)
         self.assertEqual(editable["validation_errors"], [])
         self.assertEqual(node["primitive_type"], "ellipsoid")
         self.assertEqual(len(node["parameters"]["rotation_row_major"]), 9)
         self.assertGreater(result.metric_result.editability_score, 0.7)
         self.assertIn("editable_proxy_distillation", stages)
+        distillation = result.metric_result.extras["proxy_distillation"]
+        self.assertGreater(distillation["arbitration_score"], 0.0)
+        self.assertEqual(distillation["primitive_count"], 2)
 
     def test_duplicate_missing_and_alias_registration_errors(self) -> None:
         backend = _FakeBackend()

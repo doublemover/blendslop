@@ -25,8 +25,10 @@ from reconstruction.types import CandidateMetrics, CandidateResult
 
 try:
     from primitives.shape_program import ShapeNode, ShapeProgram, validate_shape_program
+    from primitives.proxy_distillation import distill_proxy_field, write_proxy_field_npz
 except ImportError:  # pragma: no cover - package import path
     from .shape_program import ShapeNode, ShapeProgram, validate_shape_program
+    from .proxy_distillation import distill_proxy_field, write_proxy_field_npz
 
 
 _ALLOWED_FAMILIES = {"gaussian", "gaussians", "ellipsoid", "ellipsoids"}
@@ -199,6 +201,27 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
         warnings.append("max_radius is smaller than min_radius")
 
     coverage = _coverage_score(points, primitives)
+    distillation_report, distillation_grid, distillation_sdf, distillation_occupancy = (
+        distill_proxy_field(
+            primitives,
+            target_points=points,
+            resolution=int(normalized["distillation_resolution"]),
+            padding=float(normalized["distillation_padding"]),
+        )
+    )
+    if root is not None:
+        distillation_path = write_proxy_field_npz(
+            root / "volume" / "gaussian-ellipsoid-distillation.npz",
+            report=distillation_report,
+            points=distillation_grid,
+            sdf=distillation_sdf,
+            occupancy=distillation_occupancy,
+        )
+        artifacts["proxy_distillation_npz"] = distillation_path
+        artifacts["proxy_distillation"] = write_json(
+            root / "artifacts" / "gaussian-ellipsoid-distillation.json",
+            distillation_report.to_dict(),
+        )
     complexity_penalty = min(
         1.0,
         len(primitives)
@@ -265,6 +288,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             "shape_program_node_count": editable_proxy.node_count(),
             "validation_errors": list(editable_proxy_errors),
             "source_family": family,
+            "field_distillation": distillation_report.to_dict(),
         },
     ]
     objective_improvement_record = {
@@ -343,6 +367,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             "topology_signal": dict(topology_signal),
             "mesh_topology": mesh_topology,
             "editable_proxy": editable_proxy_summary,
+            "proxy_distillation": distillation_report.to_dict(),
             "normalized_config": _compact_config_summary(normalized),
             "warnings": tuple(warnings),
             "surface_points": point_meta,
@@ -482,6 +507,22 @@ def _normalize_gaussian_ellipsoid_config(
     normalized["primitive_count"] = primitive_count
     normalized["target_point_count"] = target_point_count
     normalized["visual_hull_resolution"] = visual_hull_resolution
+    normalized["distillation_resolution"] = _coerce_int(
+        config.get("distillation_resolution", 24),
+        "distillation_resolution",
+        min_value=4,
+        max_value=128,
+        errors=errors,
+        default=24,
+    )
+    normalized["distillation_padding"] = _coerce_float(
+        config.get("distillation_padding", 0.08),
+        "distillation_padding",
+        min_value=0.0,
+        max_value=1.0,
+        errors=errors,
+        default=0.08,
+    )
     normalized["min_radius"] = min_radius
     normalized["max_radius"] = max_radius
     normalized["covariance_floor"] = covariance_floor
@@ -992,6 +1033,8 @@ def _compact_config_summary(config: Mapping[str, Any]) -> dict[str, Any]:
         "primitive_count": int(config.get("primitive_count", 0)),
         "target_point_count": int(config.get("target_point_count", 0)),
         "visual_hull_resolution": int(config.get("visual_hull_resolution", 0)),
+        "distillation_resolution": int(config.get("distillation_resolution", 0)),
+        "distillation_padding": float(config.get("distillation_padding", 0.0)),
         "initialization": str(config.get("initialization", "kmeans")),
         "renderer": str(config.get("renderer", "cpu_projected_ellipse")),
         "min_radius": float(config.get("min_radius", 0.0)),
