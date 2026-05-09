@@ -83,6 +83,9 @@ class ResFitPipelineResult:
     final_loss: ResFitObjectiveResult
     history: tuple[OptimizationRecord, ...]
     warnings: tuple[str, ...]
+    optimization_termination_reason: str = "not_run"
+    objective_evaluations: int = 0
+    optimizer_elapsed_s: float = 0.0
 
     def primitive_dicts(self) -> tuple[Mapping[str, object], ...]:
         return tuple(
@@ -159,6 +162,9 @@ def fit_residual_primitives(
             final_loss=initial_loss,
             history=optimization.history,
             warnings=tuple(warnings + list(initial_loss.warnings)),
+            optimization_termination_reason=optimization.termination_reason,
+            objective_evaluations=optimization.objective_evaluations,
+            optimizer_elapsed_s=optimization.elapsed_s,
         )
 
     return ResFitPipelineResult(
@@ -167,6 +173,9 @@ def fit_residual_primitives(
         final_loss=final_loss,
         history=optimization.history,
         warnings=tuple(warnings + list(final_loss.warnings)),
+        optimization_termination_reason=optimization.termination_reason,
+        objective_evaluations=optimization.objective_evaluations,
+        optimizer_elapsed_s=optimization.elapsed_s,
     )
 
 
@@ -233,73 +242,96 @@ def run_primitive_fit_pipeline(request: object) -> object:
         config.get("optimization_steps", 30),
         "optimization_steps",
         default=30,
-        min_value=1,
+        min_value=0,
         max_value=500,
         errors=errors,
     )
+    max_runtime_s = _coerce_optional_float(
+        config.get(
+            "max_runtime_s",
+            getattr(getattr(request, "budget", None), "timeout_s", None),
+        ),
+        "max_runtime_s",
+        min_value=1e-3,
+        max_value=24 * 60 * 60,
+        errors=errors,
+    )
+    max_objective_evaluations = _coerce_optional_int(
+        config.get("max_objective_evaluations"),
+        "max_objective_evaluations",
+        min_value=1,
+        max_value=1_000_000,
+        errors=errors,
+    )
+    loss_weights = config.get("loss_weights", {})
+    if loss_weights is None:
+        loss_weights = {}
+    if not isinstance(loss_weights, Mapping):
+        errors.append("loss_weights must be a mapping when provided")
+        loss_weights = {}
     weights = ResFitLossWeights(
-        surface_residual=_coerce_float(
-            config.get("surface_residual_weight", 1.0),
-            "surface_residual_weight",
+        surface_residual=_coerce_weight(
+            config,
+            loss_weights,
+            "surface_residual",
+            aliases=("surface",),
             default=1.0,
-            min_value=0.0,
-            max_value=1e6,
             errors=errors,
         ),
-        visual_hull_occupancy=_coerce_float(
-            config.get("visual_hull_occupancy_weight", 0.05),
-            "visual_hull_occupancy_weight",
+        visual_hull_occupancy=_coerce_weight(
+            config,
+            loss_weights,
+            "visual_hull_occupancy",
+            aliases=("occupancy", "volume", "visual_hull"),
             default=0.05,
-            min_value=0.0,
-            max_value=1e6,
             errors=errors,
         ),
-        primitive_count=_coerce_float(
-            config.get("primitive_count_weight", 0.01),
-            "primitive_count_weight",
+        primitive_count=_coerce_weight(
+            config,
+            loss_weights,
+            "primitive_count",
+            aliases=("complexity", "count"),
             default=0.01,
-            min_value=0.0,
-            max_value=1e6,
             errors=errors,
         ),
-        overlap_penalty=_coerce_float(
-            config.get("overlap_penalty_weight", 0.05),
-            "overlap_penalty_weight",
+        overlap_penalty=_coerce_weight(
+            config,
+            loss_weights,
+            "overlap_penalty",
+            aliases=("overlap",),
             default=0.05,
-            min_value=0.0,
-            max_value=1e6,
             errors=errors,
         ),
-        silhouette=_coerce_float(
-            config.get("silhouette_weight", 0.0),
-            "silhouette_weight",
+        silhouette=_coerce_weight(
+            config,
+            loss_weights,
+            "silhouette",
+            aliases=("profile",),
             default=0.0,
-            min_value=0.0,
-            max_value=1e6,
             errors=errors,
         ),
-        topology_penalty=_coerce_float(
-            config.get("topology_penalty_weight", 0.0),
-            "topology_penalty_weight",
+        topology_penalty=_coerce_weight(
+            config,
+            loss_weights,
+            "topology_penalty",
+            aliases=("topology",),
             default=0.0,
-            min_value=0.0,
-            max_value=1e6,
             errors=errors,
         ),
-        constraint_penalty=_coerce_float(
-            config.get("constraint_penalty_weight", 0.05),
-            "constraint_penalty_weight",
+        constraint_penalty=_coerce_weight(
+            config,
+            loss_weights,
+            "constraint_penalty",
+            aliases=("constraint",),
             default=0.05,
-            min_value=0.0,
-            max_value=1e6,
             errors=errors,
         ),
-        uncertainty_penalty=_coerce_float(
-            config.get("uncertainty_penalty_weight", 0.0),
-            "uncertainty_penalty_weight",
+        uncertainty_penalty=_coerce_weight(
+            config,
+            loss_weights,
+            "uncertainty_penalty",
+            aliases=("uncertainty",),
             default=0.0,
-            min_value=0.0,
-            max_value=1e6,
             errors=errors,
         ),
     )
@@ -357,6 +389,8 @@ def run_primitive_fit_pipeline(request: object) -> object:
             max_value=0.1,
             errors=errors,
         ),
+        max_objective_evaluations=max_objective_evaluations,
+        max_elapsed_s=max_runtime_s,
     )
 
     pipeline_config = ResFitPipelineConfig(
@@ -496,6 +530,13 @@ def run_primitive_fit_pipeline(request: object) -> object:
                 "initial_loss": result.initial_loss.terms,
                 "final_loss": result.final_loss.terms,
                 "improvement": result.initial_loss.total - result.final_loss.total,
+                "optimization": {
+                    "termination_reason": result.optimization_termination_reason,
+                    "objective_evaluations": result.objective_evaluations,
+                    "elapsed_s": result.optimizer_elapsed_s,
+                    "max_runtime_s": max_runtime_s,
+                    "max_objective_evaluations": max_objective_evaluations,
+                },
                 "history": [
                     {
                         "iteration": record.iteration,
@@ -539,8 +580,10 @@ def run_primitive_fit_pipeline(request: object) -> object:
     )
     surface_score = float(result.final_loss.terms.get("surface_residual", 0.0))
     silhouette_score = float(result.final_loss.terms.get("silhouette", 0.0))
-    area_iou = float(1.0 / (1.0 + surface_score))
-    boundary_iou = float(1.0 / (1.0 + silhouette_score))
+    surface_proxy_iou = float(1.0 / (1.0 + surface_score))
+    silhouette_proxy_iou = float(1.0 / (1.0 + silhouette_score))
+    area_iou = min(surface_proxy_iou, silhouette_proxy_iou)
+    boundary_iou = silhouette_proxy_iou
 
     warnings = list(result.warnings)
     if profile_init_warning:
@@ -549,6 +592,13 @@ def run_primitive_fit_pipeline(request: object) -> object:
         warnings.append("objective did not improve during refinement")
     if improved >= 0.0 and not profile_rows:
         warnings.append("using geometric seeding; no profile constraints were available")
+    if result.optimization_termination_reason in {
+        "elapsed_time_budget",
+        "objective_evaluation_budget",
+    }:
+        warnings.append(
+            f"optimization stopped by {result.optimization_termination_reason}"
+        )
 
     elapsed = time.perf_counter() - start
     metric = CandidateMetrics(
@@ -573,6 +623,13 @@ def run_primitive_fit_pipeline(request: object) -> object:
             "final_total": result.final_loss.total,
             "objective_improvement": improved,
             "objective_improvement_ratio": improvement_ratio,
+            "surface_proxy_iou": surface_proxy_iou,
+            "silhouette_proxy_iou": silhouette_proxy_iou,
+            "optimization_termination_reason": result.optimization_termination_reason,
+            "objective_evaluations": result.objective_evaluations,
+            "optimizer_elapsed_s": result.optimizer_elapsed_s,
+            "max_runtime_s": max_runtime_s,
+            "max_objective_evaluations": max_objective_evaluations,
             "history": history_records,
             "surface_points": surface_meta,
             "occupied_points": occupied_meta,
@@ -773,6 +830,8 @@ def _pipeline_config_summary(config: ResFitPipelineConfig) -> Mapping[str, Any]:
             "initial_step": config.optimizer.initial_step,
             "step_decay": config.optimizer.step_decay,
             "min_step": config.optimizer.min_step,
+            "max_objective_evaluations": config.optimizer.max_objective_evaluations,
+            "max_elapsed_s": config.optimizer.max_elapsed_s,
             "bounds": {
                 "min_radius": config.optimizer.bounds.min_radius,
                 "max_radius": config.optimizer.bounds.max_radius,
@@ -1150,6 +1209,83 @@ def _coerce_float(
     if parsed > max_value:
         errors.append(f"{name} must be <= {max_value}, got {parsed}")
     return parsed
+
+
+def _coerce_optional_int(
+    value: Any,
+    name: str,
+    *,
+    min_value: int,
+    max_value: int,
+    errors: list[str],
+) -> int | None:
+    if value is None:
+        return None
+    return _coerce_int(
+        value,
+        name,
+        default=min_value,
+        min_value=min_value,
+        max_value=max_value,
+        errors=errors,
+    )
+
+
+def _coerce_optional_float(
+    value: Any,
+    name: str,
+    *,
+    min_value: float,
+    max_value: float,
+    errors: list[str],
+) -> float | None:
+    if value is None:
+        return None
+    return _coerce_float(
+        value,
+        name,
+        default=min_value,
+        min_value=min_value,
+        max_value=max_value,
+        errors=errors,
+    )
+
+
+def _coerce_weight(
+    config: Mapping[str, Any],
+    loss_weights: Mapping[str, Any],
+    canonical: str,
+    *,
+    aliases: Sequence[str] = (),
+    default: float,
+    errors: list[str],
+) -> float:
+    flat_keys = (f"{canonical}_weight",) + tuple(
+        f"{alias}_weight" for alias in aliases
+    )
+    for key in flat_keys:
+        if key in config:
+            return _coerce_float(
+                config.get(key),
+                key,
+                default=default,
+                min_value=0.0,
+                max_value=1e6,
+                errors=errors,
+            )
+
+    for key in (canonical,) + tuple(aliases):
+        if key in loss_weights:
+            return _coerce_float(
+                loss_weights.get(key),
+                f"loss_weights.{key}",
+                default=default,
+                min_value=0.0,
+                max_value=1e6,
+                errors=errors,
+            )
+
+    return default
 
 
 def by_view_total(values: Sequence[float]) -> float:

@@ -5,6 +5,7 @@ Deterministic optimizers for duck-typed ResFit primitives.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import time
 from typing import Callable, List, Sequence, Tuple
 
 import numpy as np
@@ -43,6 +44,30 @@ def _validate_positive_int(value: object, name: str, errors: list[str]) -> int |
     if parsed <= 0:
         errors.append(f"{name} must be > 0, got {value!r}")
     return parsed
+
+
+def _validate_non_negative_int(value: object, name: str, errors: list[str]) -> int | None:
+    if isinstance(value, bool):
+        errors.append(f"{name} must be an integer, got {value!r}")
+        return None
+    try:
+        parsed = int(value)
+    except (OverflowError, TypeError, ValueError):
+        errors.append(f"{name} must be an integer, got {value!r}")
+        return None
+    if parsed < 0:
+        errors.append(f"{name} must be >= 0, got {value!r}")
+    return parsed
+
+
+def _validate_optional_positive_int(
+    value: object,
+    name: str,
+    errors: list[str],
+) -> int | None:
+    if value is None:
+        return None
+    return _validate_positive_int(value, name, errors)
 
 
 @dataclass(frozen=True)
@@ -122,18 +147,34 @@ class CoordinateDescentConfig:
     step_decay: float = 0.5
     min_step: float = 1e-4
     bounds: ParameterBounds = field(default_factory=ParameterBounds)
+    max_objective_evaluations: int | None = None
+    max_elapsed_s: float | None = None
 
     def validate(self) -> tuple[str, ...]:
         errors: list[str] = []
-        _validate_positive_int(self.iterations, "iterations", errors)
+        _validate_non_negative_int(self.iterations, "iterations", errors)
+        _validate_optional_positive_int(
+            self.max_objective_evaluations,
+            "max_objective_evaluations",
+            errors,
+        )
         initial_step = _validate_finite_float(self.initial_step, "initial_step", errors)
         step_decay = _validate_finite_float(self.step_decay, "step_decay", errors)
         min_step = _validate_finite_float(self.min_step, "min_step", errors)
+        max_elapsed_s = None
+        if self.max_elapsed_s is not None:
+            max_elapsed_s = _validate_finite_float(
+                self.max_elapsed_s,
+                "max_elapsed_s",
+                errors,
+            )
         if len(errors):
             return tuple(errors)
         assert initial_step is not None
         assert step_decay is not None
         assert min_step is not None
+        if max_elapsed_s is not None and max_elapsed_s <= 0.0:
+            errors.append(f"max_elapsed_s must be > 0.0, got {self.max_elapsed_s!r}")
         if initial_step <= 0.0:
             errors.append(f"initial_step must be > 0.0, got {self.initial_step!r}")
         if not (0.0 < step_decay < 1.0):
@@ -163,6 +204,9 @@ class OptimizationResult:
     primitives: tuple[object, ...]
     history: tuple[OptimizationRecord, ...]
     best_loss: float
+    termination_reason: str = "max_iterations"
+    objective_evaluations: int = 0
+    elapsed_s: float = 0.0
 
 
 def clone_primitive(primitive: object) -> object:
@@ -245,23 +289,63 @@ def coordinate_descent_optimize(
     if config_errors:
         raise ValueError("invalid optimizer config: " + ", ".join(config_errors))
     refs = discover_parameters(working)
-    current = objective_fn(working)
+    start = time.perf_counter()
+    objective_evaluations = 0
+
+    def budget_reason() -> str | None:
+        if (
+            config.max_objective_evaluations is not None
+            and objective_evaluations >= config.max_objective_evaluations
+        ):
+            return "objective_evaluation_budget"
+        if (
+            config.max_elapsed_s is not None
+            and (time.perf_counter() - start) >= config.max_elapsed_s
+        ):
+            return "elapsed_time_budget"
+        return None
+
+    def evaluate(primitives_to_score: Sequence[object]) -> ResFitObjectiveResult:
+        nonlocal objective_evaluations
+        objective_evaluations += 1
+        return objective_fn(primitives_to_score)
+
+    current = evaluate(working)
     best_loss = current.total
     history: List[OptimizationRecord] = []
     step = float(config.initial_step)
+    termination_reason = "zero_iterations" if config.iterations == 0 else "max_iterations"
+    stopped = False
 
     for iteration in range(max(0, config.iterations)):
+        reason = budget_reason()
+        if reason is not None:
+            termination_reason = reason
+            break
         accepted = 0
         for ref in refs:
+            reason = budget_reason()
+            if reason is not None:
+                termination_reason = reason
+                stopped = True
+                break
             original = _get_value(working, ref)
             best_value = original
             local_best = best_loss
             for direction in (1.0, -1.0):
+                reason = budget_reason()
+                if reason is not None:
+                    termination_reason = reason
+                    stopped = True
+                    break
                 _set_value(working, ref, original + direction * step, config.bounds)
-                trial = objective_fn(working)
+                trial = evaluate(working)
                 if trial.total < local_best:
                     local_best = trial.total
                     best_value = _get_value(working, ref)
+            if stopped:
+                _set_value(working, ref, original, config.bounds)
+                break
             _set_value(working, ref, best_value, config.bounds)
             if local_best < best_loss:
                 best_loss = local_best
@@ -269,7 +353,10 @@ def coordinate_descent_optimize(
             else:
                 _set_value(working, ref, original, config.bounds)
 
-        current = objective_fn(working)
+        if stopped:
+            break
+
+        current = evaluate(working)
         history.append(
             OptimizationRecord(
                 iteration=iteration,
@@ -282,12 +369,16 @@ def coordinate_descent_optimize(
         if accepted == 0:
             step *= config.step_decay
         if step < config.min_step:
+            termination_reason = "min_step"
             break
 
     return OptimizationResult(
         primitives=tuple(working),
         history=tuple(history),
         best_loss=float(best_loss),
+        termination_reason=termination_reason,
+        objective_evaluations=int(objective_evaluations),
+        elapsed_s=float(time.perf_counter() - start),
     )
 
 

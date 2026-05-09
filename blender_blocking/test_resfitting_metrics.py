@@ -6,6 +6,8 @@ import unittest
 
 import numpy as np
 
+from placement.resfit_objective import ResFitObjectiveResult
+from placement.resfit_optimizer import CoordinateDescentConfig, coordinate_descent_optimize
 from placement.resfitting import ResidualFitter
 from primitives.superfrustum import SuperFrustum
 
@@ -218,6 +220,46 @@ class TestResfittingMetrics(unittest.TestCase):
                 vec.radius_top, scalar.radius_top, rtol=1e-4, atol=1e-5
             )
             np.testing.assert_allclose(vec.height, scalar.height, rtol=1e-4, atol=1e-5)
+
+    def test_coordinate_descent_allows_initialization_only(self) -> None:
+        primitive = SuperFrustum(
+            position=(0.0, 0.0, 0.0),
+            orientation=(0.0, 0.0),
+            radius_bottom=1.0,
+            radius_top=1.0,
+            height=2.0,
+        )
+
+        result = coordinate_descent_optimize(
+            [primitive],
+            lambda _: ResFitObjectiveResult(total=1.0, terms={"constant": 1.0}),
+            CoordinateDescentConfig(iterations=0),
+        )
+
+        self.assertEqual(result.termination_reason, "zero_iterations")
+        self.assertEqual(result.history, ())
+        self.assertEqual(result.objective_evaluations, 1)
+
+    def test_coordinate_descent_respects_objective_evaluation_budget(self) -> None:
+        primitive = SuperFrustum(
+            position=(0.0, 0.0, 0.0),
+            orientation=(0.0, 0.0),
+            radius_bottom=1.0,
+            radius_top=1.0,
+            height=2.0,
+        )
+
+        result = coordinate_descent_optimize(
+            [primitive],
+            lambda _: ResFitObjectiveResult(total=1.0, terms={"constant": 1.0}),
+            CoordinateDescentConfig(
+                iterations=50,
+                max_objective_evaluations=3,
+            ),
+        )
+
+        self.assertEqual(result.termination_reason, "objective_evaluation_budget")
+        self.assertLessEqual(result.objective_evaluations, 3)
 
 
 if __name__ == "__main__":
