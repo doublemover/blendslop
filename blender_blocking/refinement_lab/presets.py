@@ -339,6 +339,10 @@ TRACKS: dict[str, TrackPreset] = {
             _p("shape_residual_policy", "--shape-residual-policy", ("ignore", "report", "suggest_patches"), group="shape_program"),
             _p("shape_max_nodes", "--shape-max-nodes", (24, 48, 64, 96, 128), value_type="int", group="shape_program"),
             _p("shape_editability_bias", "--shape-editability-bias", (0.7, 0.85, 1.0), value_type="float", group="shape_program"),
+            _p("shape_compile_blender", "--shape-compile-blender", (True, False), value_type="bool", group="shape_program"),
+            _p("shape_lathe_segments", "--shape-lathe-segments", (24, 48, 64, 96), value_type="int", group="shape_program"),
+            _p("shape_bevel_modifier", "--shape-bevel-modifier", (True, False), value_type="bool", group="shape_program"),
+            _p("shape_weighted_normals", "--shape-weighted-normals", (True, False), value_type="bool", group="shape_program"),
             _csv_p("ensemble_candidates", "--ensemble-candidates", (
                 ("shape_program",),
                 ("visual_hull_voxel", "shape_program"),

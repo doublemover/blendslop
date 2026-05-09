@@ -601,6 +601,10 @@ class ShapeProgramConfig:
     residual_policy: str = "suggest_patches"
     max_nodes: int = 64
     editability_bias: float = 1.0
+    compile_blender: bool = True
+    lathe_segments: int = 48
+    bevel_modifier: bool = True
+    weighted_normals: bool = True
 
     def validate(self) -> None:
         if self.root_strategy not in {
@@ -620,6 +624,8 @@ class ShapeProgramConfig:
             raise ValueError("shape_program.max_nodes must be >= 1")
         if not (0.0 <= self.editability_bias <= 1.0):
             raise ValueError("shape_program.editability_bias must be in [0, 1]")
+        if self.lathe_segments < 8:
+            raise ValueError("shape_program.lathe_segments must be >= 8")
 
     def to_dict(self) -> Dict[str, object]:
         return {
@@ -627,6 +633,10 @@ class ShapeProgramConfig:
             "residual_policy": self.residual_policy,
             "max_nodes": self.max_nodes,
             "editability_bias": self.editability_bias,
+            "compile_blender": self.compile_blender,
+            "lathe_segments": self.lathe_segments,
+            "bevel_modifier": self.bevel_modifier,
+            "weighted_normals": self.weighted_normals,
         }
 
 

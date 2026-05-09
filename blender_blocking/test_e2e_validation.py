@@ -1526,6 +1526,22 @@ Default ensemble:
     )
     shape_program.add_argument("--shape-max-nodes", type=int, default=None)
     shape_program.add_argument("--shape-editability-bias", type=float, default=None)
+    shape_program.add_argument(
+        "--shape-compile-blender",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    shape_program.add_argument("--shape-lathe-segments", type=int, default=None)
+    shape_program.add_argument(
+        "--shape-bevel-modifier",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    shape_program.add_argument(
+        "--shape-weighted-normals",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
 
     ensemble = parser.add_argument_group("ensemble")
     ensemble.add_argument("--ensemble-candidates", type=_parse_csv, default=None, help="Comma-separated backend list.")
@@ -1932,6 +1948,10 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     _set_if_not_none(
         cfg.shape_program, "editability_bias", args.shape_editability_bias
     )
+    _set_if_not_none(cfg.shape_program, "compile_blender", args.shape_compile_blender)
+    _set_if_not_none(cfg.shape_program, "lathe_segments", args.shape_lathe_segments)
+    _set_if_not_none(cfg.shape_program, "bevel_modifier", args.shape_bevel_modifier)
+    _set_if_not_none(cfg.shape_program, "weighted_normals", args.shape_weighted_normals)
 
     if args.ensemble_candidates:
         cfg.ensemble.candidates = _candidate_configs(args.ensemble_candidates)

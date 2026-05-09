@@ -78,6 +78,9 @@ class ShapeProgramBackend(BaseBackend):
         editability_bias = _float(config.get("editability_bias", 1.0), 1.0)
         if not (0.0 <= editability_bias <= 1.0):
             errors.append("shape_program.editability_bias must be in [0, 1]")
+        lathe_segments = config.get("lathe_segments", 48)
+        if not isinstance(lathe_segments, int) or lathe_segments < 8:
+            errors.append("shape_program.lathe_segments must be an integer >= 8")
         return errors
 
     def estimate_budget(
@@ -119,7 +122,6 @@ class ShapeProgramBackend(BaseBackend):
             program_id=request.candidate_id,
         )
         program_errors = validate_shape_program(program)
-        elapsed_s = time.perf_counter() - started
         if program_errors:
             return CandidateResult(
                 candidate_id=request.candidate_id,
@@ -131,6 +133,8 @@ class ShapeProgramBackend(BaseBackend):
 
         artifacts = {}
         primitive_path = None
+        diagnostics_path = None
+        compiled = None
         root = request.candidate_artifact_root()
         if root is not None:
             primitive_path = write_json(
@@ -138,26 +142,43 @@ class ShapeProgramBackend(BaseBackend):
                 program.to_dict(),
             )
             artifacts["shape_program"] = primitive_path
+            diagnostics_path = root / "shape-program" / "diagnostics.json"
+
+        if _should_compile_blender(request):
+            try:
+                compiled = _compile_program(program, request.config)
+                diagnostics["compiled_blender"] = compiled.to_dict()
+            except Exception as exc:
+                diagnostics["compile_error"] = str(exc)
+        elapsed_s = time.perf_counter() - started
+        if diagnostics_path is not None:
             artifacts["shape_program_diagnostics"] = write_json(
-                root / "shape-program" / "diagnostics.json",
+                diagnostics_path,
                 diagnostics,
             )
 
         warnings = (
             "shape_program is research_only: program emitted, but no Blender "
-            "compiler/render validation is implemented yet",
+            "render validation is implemented yet",
         )
+        if compiled is not None and compiled.warnings:
+            warnings = warnings + tuple(compiled.warnings)
         metrics = CandidateMetrics(
             per_view=_uncompiled_per_view_metrics(request.target),
-            editability_score=_editability_score(program, request.config),
+            editability_score=_editability_score(
+                program,
+                request.config,
+                compiled=compiled is not None,
+            ),
             complexity_penalty=_complexity_penalty(program, request.config),
             elapsed_s=elapsed_s,
             extras={
                 "shape_program": program.to_dict(),
                 "diagnostics": diagnostics,
+                "compiled_blender": None if compiled is None else compiled.to_dict(),
                 "topology": {
                     "status": "not_applicable",
-                    "reason": "no compiled mesh was produced",
+                    "reason": "compiled object render/topology QA was not executed",
                 },
                 "research_only": True,
                 "editable_output": True,
@@ -171,7 +192,7 @@ class ShapeProgramBackend(BaseBackend):
             metric_result=metrics,
             artifacts=artifacts,
             warnings=warnings,
-            payload=program,
+            payload=compiled.root_object if compiled is not None else program,
         )
 
 
@@ -382,12 +403,43 @@ def _uncompiled_per_view_metrics(
     return metrics
 
 
-def _editability_score(program: ShapeProgram, config: Mapping[str, Any]) -> float:
+def _should_compile_blender(request: CandidateRequest) -> bool:
+    if not bool(request.config.get("compile_blender", True)):
+        return False
+    context = request.context
+    if context is not None and not bool(getattr(context, "blender_available", False)):
+        return False
+    return True
+
+
+def _compile_program(program: ShapeProgram, config: Mapping[str, Any]) -> Any:
+    try:
+        from blender_blocking.primitives.shape_program_compiler import (
+            compile_shape_program,
+        )
+    except Exception:  # pragma: no cover - legacy script import path
+        from primitives.shape_program_compiler import compile_shape_program  # type: ignore
+
+    return compile_shape_program(
+        program,
+        lathe_segments=int(config.get("lathe_segments", 48)),
+        bevel_modifier=bool(config.get("bevel_modifier", True)),
+        weighted_normals=bool(config.get("weighted_normals", True)),
+    )
+
+
+def _editability_score(
+    program: ShapeProgram,
+    config: Mapping[str, Any],
+    *,
+    compiled: bool = False,
+) -> float:
     bias = _float(config.get("editability_bias", 1.0), 1.0)
     editable = sum(1 for node in program.root_nodes if node.editable)
     base = editable / float(max(1, program.node_count()))
     residual_penalty = min(0.2, program.residual_patch_count() * 0.01)
-    return max(0.0, min(1.0, (0.75 + 0.25 * base - residual_penalty) * bias))
+    compile_bonus = 0.08 if compiled else 0.0
+    return max(0.0, min(1.0, (0.75 + 0.25 * base + compile_bonus - residual_penalty) * bias))
 
 
 def _complexity_penalty(program: ShapeProgram, config: Mapping[str, Any]) -> float:
