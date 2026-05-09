@@ -120,6 +120,25 @@ def main(argv: list[str] | None = None) -> int:
     calibrate_parser.add_argument("--min-boundary-iou", type=float, default=None)
     calibrate_parser.add_argument("--max-sdf-loss", type=float, default=None)
 
+    patch_parser = subparsers.add_parser("patch-masks")
+    patch_parser.add_argument("--reference", type=Path, required=True)
+    patch_parser.add_argument("--candidate", type=Path, required=True)
+    patch_parser.add_argument("--image", type=Path, default=None)
+    patch_parser.add_argument("--out", type=Path, required=True)
+    patch_parser.add_argument("--refined-mask-out", type=Path, default=None)
+    patch_parser.add_argument("--patch-sizes", default="32,64,96")
+    patch_parser.add_argument("--max-patches", type=int, default=8)
+    patch_parser.add_argument("--threshold", type=float, default=0.5)
+    patch_parser.add_argument("--correction-strength", type=float, default=1.0)
+    patch_parser.add_argument("--min-area-iou-delta", type=float, default=0.01)
+    patch_parser.add_argument("--min-boundary-iou-delta", type=float, default=0.0)
+    patch_parser.add_argument(
+        "--alignment-mode",
+        choices=("none", "mean", "affine"),
+        default="none",
+    )
+    patch_parser.add_argument("--feather-fraction", type=float, default=0.12)
+
     label_parser = subparsers.add_parser("label")
     label_parser.add_argument("--run-root", type=Path, required=True)
     label_parser.add_argument("--run-id", default="")
@@ -173,6 +192,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_adapt(args)
     if args.command == "calibrate-masks":
         return _cmd_calibrate_masks(args)
+    if args.command == "patch-masks":
+        return _cmd_patch_masks(args)
     if args.command == "label":
         return _cmd_label(args)
     if args.command == "study-pack":
@@ -518,6 +539,60 @@ def _cmd_calibrate_masks(args: argparse.Namespace) -> int:
     return 0 if report.status in {"improved", "no_improvement"} else 1
 
 
+def _cmd_patch_masks(args: argparse.Namespace) -> int:
+    from .content_adaptive_patches import run_content_adaptive_patch_refinement
+
+    reference = _load_mask_image(args.reference)
+    candidate = _load_mask_image(args.candidate)
+    image = _load_rgb_image(args.image) if args.image is not None else None
+    result = run_content_adaptive_patch_refinement(
+        reference,
+        candidate_mask=candidate,
+        image=image,
+        patch_sizes=_parse_int_csv(args.patch_sizes),
+        max_patches=args.max_patches,
+        threshold=args.threshold,
+        correction_strength=args.correction_strength,
+        min_area_iou_delta=args.min_area_iou_delta,
+        min_boundary_iou_delta=args.min_boundary_iou_delta,
+        alignment_mode=args.alignment_mode,
+        feather_fraction=args.feather_fraction,
+    )
+    refined_mask_path = args.refined_mask_out
+    if refined_mask_path is not None:
+        _save_mask_image(refined_mask_path, result.refined_mask)
+    payload = {
+        "schema_version": "content_adaptive_patch_mask_result_v1",
+        "reference": args.reference.as_posix(),
+        "candidate": args.candidate.as_posix(),
+        "image": args.image.as_posix() if args.image is not None else None,
+        "refined_mask": refined_mask_path.as_posix() if refined_mask_path else None,
+        **result.to_dict(),
+    }
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(
+        json.dumps(json_safe(payload), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(
+        json.dumps(
+            {
+                "accepted": result.accepted,
+                "patches": len(result.patches),
+                "area_iou_delta": result.improvement.get("area_iou_delta"),
+                "boundary_iou_delta": result.improvement.get("boundary_iou_delta"),
+                "out": args.out.as_posix(),
+                "refined_mask": refined_mask_path.as_posix()
+                if refined_mask_path
+                else None,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    return 0 if result.accepted else 1
+
+
 def _adaptive_proposals_from_files(
     paths: list[Path],
     *,
@@ -587,6 +662,46 @@ def _load_mask_image(path: Path) -> object:
     alpha = array[..., 3]
     rgb = array[..., :3].mean(axis=2)
     return (alpha > 0) & (rgb > 8)
+
+
+def _load_rgb_image(path: Path) -> object:
+    try:
+        from PIL import Image
+        import numpy as np
+    except Exception as exc:  # pragma: no cover - dependency check covers this
+        raise SystemExit(f"Pillow/numpy are required to load images: {exc}") from exc
+    return np.asarray(Image.open(path).convert("RGB"))
+
+
+def _save_mask_image(path: Path, mask: object) -> None:
+    try:
+        from PIL import Image
+        import numpy as np
+    except Exception as exc:  # pragma: no cover - dependency check covers this
+        raise SystemExit(f"Pillow/numpy are required to save masks: {exc}") from exc
+    path.parent.mkdir(parents=True, exist_ok=True)
+    array = np.asarray(mask)
+    if array.ndim != 2:
+        raise SystemExit("refined mask must be a 2D array")
+    Image.fromarray(array.astype(bool).astype("uint8") * 255, mode="L").save(path)
+
+
+def _parse_int_csv(value: str) -> tuple[int, ...]:
+    parsed = []
+    for raw in str(value or "").split(","):
+        text = raw.strip()
+        if not text:
+            continue
+        try:
+            item = int(text)
+        except ValueError as exc:
+            raise SystemExit(f"invalid integer in --patch-sizes: {text!r}") from exc
+        if item <= 0:
+            raise SystemExit("--patch-sizes values must be positive")
+        parsed.append(item)
+    if not parsed:
+        raise SystemExit("--patch-sizes must contain at least one positive integer")
+    return tuple(parsed)
 
 
 def _cmd_label(args: argparse.Namespace) -> int:

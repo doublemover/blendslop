@@ -211,6 +211,46 @@ class RefinementLabCliTests(unittest.TestCase):
                 [-2, -1],
             )
 
+    def test_patch_masks_command_refines_local_residuals(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ref = root / "ref.png"
+            cand = root / "cand.png"
+            out = root / "patches.json"
+            refined = root / "refined.png"
+            _write_square_mask(ref, x0=10, y0=10, size=24)
+            _write_square_mask(cand, x0=10, y0=10, size=24, clear_box=(24, 18, 10, 12))
+
+            with redirect_stdout(io.StringIO()):
+                code = cli.main(
+                    [
+                        "patch-masks",
+                        "--reference",
+                        str(ref),
+                        "--candidate",
+                        str(cand),
+                        "--patch-sizes",
+                        "16,24",
+                        "--max-patches",
+                        "3",
+                        "--out",
+                        str(out),
+                        "--refined-mask-out",
+                        str(refined),
+                    ]
+                )
+
+            self.assertEqual(code, 0)
+            payload = json.loads(out.read_text(encoding="utf-8"))
+            self.assertEqual(
+                payload["schema_version"],
+                "content_adaptive_patch_mask_result_v1",
+            )
+            self.assertTrue(payload["accepted"])
+            self.assertGreater(payload["improvement"]["area_iou_delta"], 0.0)
+            self.assertGreaterEqual(len(payload["patches"]), 1)
+            self.assertTrue(refined.exists())
+
     def test_module_entrypoint_help_runs_from_repo_root(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]
         completed = subprocess.run(
@@ -312,7 +352,14 @@ class RefinementLabCliTests(unittest.TestCase):
             self.assertEqual(payload["promotion"]["tier"], "degraded")
 
 
-def _write_square_mask(path: Path, *, x0: int, y0: int, size: int) -> None:
+def _write_square_mask(
+    path: Path,
+    *,
+    x0: int,
+    y0: int,
+    size: int,
+    clear_box: tuple[int, int, int, int] | None = None,
+) -> None:
     from PIL import Image
 
     image = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
@@ -320,6 +367,11 @@ def _write_square_mask(path: Path, *, x0: int, y0: int, size: int) -> None:
     for y in range(y0, y0 + size):
         for x in range(x0, x0 + size):
             pixels[x, y] = (255, 255, 255, 255)
+    if clear_box is not None:
+        clear_x, clear_y, clear_w, clear_h = clear_box
+        for y in range(clear_y, clear_y + clear_h):
+            for x in range(clear_x, clear_x + clear_w):
+                pixels[x, y] = (0, 0, 0, 0)
     image.save(path)
 
 
