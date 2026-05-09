@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Iterable, Mapping
 
 from .contracts import ExperimentResult, json_safe
-from .parameter_search import rank_results, score_result
+from .parameter_search import promotion_decision, rank_results, score_result
 
 
 class ResultIndex:
@@ -134,13 +134,13 @@ def write_leaderboard_md(
         "",
         f"Objective: `{objective}`",
         "",
-        "| Rank | Case | Variant | Mode | Status | Score | Avg IoU | Min IoU | Front | Side | Top | Topology | Editability | Elapsed | Autopsy | Result |",
-        "|---:|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|",
+        "| Rank | Case | Variant | Mode | Status | Promotion | Score | Avg IoU | Min IoU | Front | Side | Top | Topology | Editability | Elapsed | Autopsy | Result |",
+        "|---:|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|",
     ]
     for index, (result, score) in enumerate(scored, start=1):
         row = _leaderboard_row(index, result, score)
         lines.append(
-            "| {rank} | {case_id} | {variant_id} | {mode} | {status} | {score:.3f} | "
+            "| {rank} | {case_id} | {variant_id} | {mode} | {status} | {promotion_tier} | {score:.3f} | "
             "{average_iou:.3f} | {min_iou:.3f} | {front_iou:.3f} | {side_iou:.3f} | "
             "{top_iou:.3f} | {topology_score:.3f} | {editability_score:.3f} | "
             "{elapsed_s:.3f} | {autopsy_category} | {result_json} |".format(
@@ -159,12 +159,17 @@ def _leaderboard_row(
 ) -> dict[str, object]:
     score = score or score_result(result)
     autopsy = result.autopsy if isinstance(result.autopsy, Mapping) else {}
+    promotion = promotion_decision(result)
     return {
         "rank": rank,
         "case_id": result.case_id,
         "variant_id": result.variant_id,
         "mode": result.mode,
         "status": result.status,
+        "promotion_tier": promotion.tier,
+        "promotable": promotion.promotable,
+        "promotion_blockers": list(promotion.blockers),
+        "backend_status": promotion.backend_status,
         "score": float(score.get("total", 0.0)),
         "average_iou": result.avg_iou,
         "min_iou": result.min_iou,
@@ -185,6 +190,7 @@ def _fastest_acceptable(rows: list[Mapping[str, object]]) -> Mapping[str, object
         row
         for row in rows
         if row.get("status") == "pass"
+        and bool(row.get("promotable"))
         and (float(row.get("min_iou") or 0.0) >= 0.7 or float(row.get("average_iou") or 0.0) >= 0.85)
     ]
     return min(acceptable, key=lambda row: float(row.get("elapsed_s") or 0.0), default=None)

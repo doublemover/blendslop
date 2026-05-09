@@ -180,10 +180,16 @@ python -m blender_blocking.refinement_lab.cli promote `
   --out temp\refinement-runs\promoted\vh-best.json
 ```
 
+Promotion is blocked by default for candidates whose backend status is
+`degraded`, `research_only`, `skipped`, `failed`, `error`, `unreported`, or whose
+metrics are proxy-only without required per-view render evidence. Use
+`--allow-review-required` only when intentionally preserving one of those risky
+artifacts; the exported preset records the promotion tier and blockers.
+
 ## Quality Rules
 
 - A high average score is not enough if a required view fails; check per-view IoU in `result.json` and the report table.
-- Metric-only research candidates are visibly marked through warnings/autopsies; do not promote them without render evidence.
+- Leaderboards include a promotion tier. `promotable` means a passing backend result with required-view evidence; `degraded`, `research_only`, `metric_only`, `unverified`, and `blocked` are intentionally ranked below full validated results.
 - Optional dependencies must be explicit: skipped/fail behavior is recorded in result metadata instead of silently degrading.
 - Bounds diagnostics are the first stop for visual-hull failures: inspect `bounds-debug.json` and projection overlays before changing reconstruction math.
 - Commit only source, tiny deterministic fixtures/specs, and docs. Do not commit generated `temp/`, `test_output/`, meshes, renders, volumes, reports, or suite result JSON.

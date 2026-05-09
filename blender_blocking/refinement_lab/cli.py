@@ -23,6 +23,7 @@ from .candidate_autopsy import write_autopsy
 from .contracts import json_safe
 from .human_labels import HumanLabel, append_label
 from .matrix import build_experiment_plan, load_variants_from_files, write_plan
+from .parameter_search import promotion_decision
 from .presets import get_suite_preset, get_track_preset, list_suites, list_tracks
 from .result_index import load_index, write_leaderboard_json, write_leaderboard_md
 from .runner import RunOptions, runner_for_plan
@@ -88,6 +89,11 @@ def main(argv: list[str] | None = None) -> int:
     promote_parser.add_argument("--run-root", type=Path, required=True)
     promote_parser.add_argument("--variant", required=True)
     promote_parser.add_argument("--out", type=Path, required=True)
+    promote_parser.add_argument(
+        "--allow-review-required",
+        action="store_true",
+        help="allow degraded, research-only, metric-only, or otherwise unverified results",
+    )
 
     args = parser.parse_args(argv)
     if args.command == "list-suites":
@@ -425,6 +431,17 @@ def _cmd_promote(args: argparse.Namespace) -> int:
     )
     for result in results:
         if result.variant_id == args.variant:
+            promotion = promotion_decision(result)
+            if not promotion.promotable and not args.allow_review_required:
+                blockers = ", ".join(promotion.blockers) or promotion.tier
+                print(
+                    (
+                        f"variant {args.variant!r} is {promotion.tier} and cannot be "
+                        f"promoted without --allow-review-required: {blockers}"
+                    ),
+                    file=sys.stderr,
+                )
+                return 2
             payload = {
                 "schema_version": "refinement_preset_v1",
                 "source_run_id": result.run_id,
@@ -434,6 +451,7 @@ def _cmd_promote(args: argparse.Namespace) -> int:
                 "metrics": result.metrics,
                 "command": list(result.command),
                 "score": result.score,
+                "promotion": promotion.to_dict(),
             }
             args.out.parent.mkdir(parents=True, exist_ok=True)
             args.out.write_text(

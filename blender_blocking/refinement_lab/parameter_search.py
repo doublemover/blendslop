@@ -18,6 +18,16 @@ OBJECTIVES = {
     "human_adjusted",
 }
 
+_BACKEND_FAILURE_STATUSES = {"failed", "error", "skipped"}
+_PROMOTION_TIER_RANK = {
+    "blocked": 0,
+    "metric_only": 1,
+    "research_only": 2,
+    "unverified": 3,
+    "degraded": 4,
+    "promotable": 5,
+}
+
 
 @dataclass(frozen=True)
 class ScoreTerm:
@@ -37,6 +47,31 @@ class ScoreTerm:
             "weight": self.weight,
             "weighted": self.weighted,
             "description": self.description,
+        }
+
+
+@dataclass(frozen=True)
+class PromotionDecision:
+    tier: str
+    promotable: bool
+    requires_review: bool
+    backend_status: str
+    backend_degraded: bool
+    blockers: tuple[str, ...] = ()
+
+    @property
+    def rank(self) -> int:
+        return _PROMOTION_TIER_RANK.get(self.tier, 0)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "tier": self.tier,
+            "promotable": self.promotable,
+            "requires_review": self.requires_review,
+            "backend_status": self.backend_status,
+            "backend_degraded": self.backend_degraded,
+            "blockers": list(self.blockers),
+            "rank": self.rank,
         }
 
 
@@ -62,10 +97,12 @@ def score_result(
         terms = _quality_terms(result) + _human_label_terms(labels or ())
     else:
         terms = _quality_terms(result)
+    terms = terms + _promotion_terms(result)
     total = sum(term.weighted for term in terms)
     return {
         "objective": objective,
         "total": total,
+        "promotion": promotion_decision(result).to_dict(),
         "terms": [term.to_dict() for term in terms],
     }
 
@@ -91,6 +128,7 @@ def rank_results(
         scored,
         key=lambda pair: (
             float(pair[1]["total"]),
+            promotion_decision(pair[0]).rank,
             pair[0].min_iou,
             pair[0].avg_iou,
             -pair[0].elapsed_s,
@@ -106,6 +144,58 @@ def top_k(
     objective: str = "quality_win",
 ) -> list[tuple[ExperimentResult, dict[str, object]]]:
     return rank_results(results, objective=objective)[: max(1, int(k))]
+
+
+def promotion_decision(result: ExperimentResult) -> PromotionDecision:
+    backend_status = _backend_status(result)
+    backend_degraded = _backend_degraded(result)
+    metric_only = metric_only_candidate(result) > 0.0
+    blockers: list[str] = []
+
+    if result.status != "pass":
+        blockers.append(f"result_status:{result.status}")
+    if backend_status in _BACKEND_FAILURE_STATUSES:
+        blockers.append(f"backend_status:{backend_status}")
+    if backend_status == "research_only":
+        blockers.append("research_only_backend")
+    if backend_degraded or backend_status == "degraded":
+        blockers.append("degraded_backend")
+    if metric_only:
+        blockers.append("metric_only_candidate")
+    if missing_required_metrics(result) > 0.0:
+        blockers.append("missing_required_metrics")
+    if catastrophic_view_failure(result) > 0.0:
+        blockers.append("catastrophic_view_failure")
+    if backend_status == "unreported":
+        blockers.append("unreported_backend_status")
+
+    hard_blocked = any(
+        item.startswith("result_status:")
+        or item.startswith("backend_status:")
+        or item in {"missing_required_metrics", "catastrophic_view_failure"}
+        for item in blockers
+    )
+    if hard_blocked:
+        tier = "blocked"
+    elif metric_only:
+        tier = "metric_only"
+    elif backend_status == "research_only":
+        tier = "research_only"
+    elif backend_degraded or backend_status == "degraded":
+        tier = "degraded"
+    elif backend_status == "unreported":
+        tier = "unverified"
+    else:
+        tier = "promotable"
+
+    return PromotionDecision(
+        tier=tier,
+        promotable=tier == "promotable",
+        requires_review=tier != "promotable",
+        backend_status=backend_status,
+        backend_degraded=backend_degraded,
+        blockers=tuple(blockers),
+    )
 
 
 def metric_value(result: ExperimentResult, key: str, default: float = 0.0) -> float:
@@ -181,7 +271,6 @@ def _quality_terms(result: ExperimentResult) -> list[ScoreTerm]:
         ScoreTerm("catastrophic_view_failure", catastrophic_view_failure(result), -250.0),
         ScoreTerm("missing_required_metrics", missing_required_metrics(result), -100.0),
         ScoreTerm("artifact_escape", artifact_escape(result), -100.0),
-        ScoreTerm("metric_only_candidate", metric_only_candidate(result), -75.0),
     ]
 
 
@@ -243,6 +332,54 @@ def _fast_preview_terms(result: ExperimentResult) -> list[ScoreTerm]:
     ]
 
 
+def _promotion_terms(result: ExperimentResult) -> list[ScoreTerm]:
+    decision = promotion_decision(result)
+    return [
+        ScoreTerm(
+            "promotion_ready",
+            1.0 if decision.promotable else 0.0,
+            500.0,
+            "candidate can be promoted without capability review",
+        ),
+        ScoreTerm(
+            "result_not_pass",
+            1.0 if result.status != "pass" else 0.0,
+            -5000.0,
+            "experiment runner did not produce a passing result",
+        ),
+        ScoreTerm(
+            "backend_failed_or_skipped",
+            1.0 if decision.backend_status in _BACKEND_FAILURE_STATUSES else 0.0,
+            -5000.0,
+            "backend result is failed, error, or skipped",
+        ),
+        ScoreTerm(
+            "metric_only_candidate",
+            metric_only_candidate(result),
+            -1800.0,
+            "candidate has aggregate proxy metrics but no required per-view render evidence",
+        ),
+        ScoreTerm(
+            "research_only_candidate",
+            1.0 if decision.backend_status == "research_only" else 0.0,
+            -1600.0,
+            "candidate produced a research artifact without validated editable reconstruction",
+        ),
+        ScoreTerm(
+            "degraded_candidate",
+            1.0 if decision.backend_degraded or decision.backend_status == "degraded" else 0.0,
+            -900.0,
+            "candidate explicitly reported degraded reconstruction quality or capability",
+        ),
+        ScoreTerm(
+            "unverified_backend_status",
+            1.0 if decision.backend_status == "unreported" else 0.0,
+            -300.0,
+            "candidate did not expose backend CandidateResult status",
+        ),
+    ]
+
+
 def _human_label_terms(labels: Sequence[Mapping[str, Any]]) -> list[ScoreTerm]:
     weights = {
         "sculptable": 120.0,
@@ -278,6 +415,48 @@ def _selected_metric_result(result: ExperimentResult) -> Mapping[str, Any]:
         return metric if isinstance(metric, Mapping) else {}
     metric = backend.get("metric_result") if isinstance(backend, Mapping) else None
     return metric if isinstance(metric, Mapping) else {}
+
+
+def _backend_source(result: ExperimentResult) -> Mapping[str, Any]:
+    backend = result.backend_result or {}
+    if not isinstance(backend, Mapping):
+        return {}
+    selected = backend.get("selected")
+    if isinstance(selected, Mapping):
+        return selected
+    return backend
+
+
+def _backend_status(result: ExperimentResult) -> str:
+    source = _backend_source(result)
+    status = source.get("status") if isinstance(source, Mapping) else None
+    if status is None and isinstance(result.backend_result, Mapping):
+        status = result.backend_result.get("status")
+    if status is None:
+        return "unreported"
+    return str(status).strip().lower() or "unreported"
+
+
+def _backend_degraded(result: ExperimentResult) -> bool:
+    sources: list[Mapping[str, Any]] = []
+    source = _backend_source(result)
+    if source:
+        sources.append(source)
+    if isinstance(result.backend_result, Mapping):
+        sources.append(result.backend_result)
+    for item in sources:
+        if _truthy(item.get("degraded")):
+            return True
+        degradation = item.get("degradation")
+        if isinstance(degradation, Mapping) and _truthy(degradation.get("degraded")):
+            return True
+    return False
+
+
+def _truthy(value: Any) -> bool:
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "pass", "passed", "degraded"}
+    return bool(value)
 
 
 def _nested(data: Mapping[str, Any], keys: Sequence[str]) -> Any:

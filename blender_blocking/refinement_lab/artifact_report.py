@@ -11,7 +11,7 @@ from typing import Iterable, Mapping, Sequence
 import numpy as np
 
 from .contracts import ExperimentResult, RefinementRunManifest
-from .parameter_search import rank_results
+from .parameter_search import promotion_decision, rank_results
 
 try:
     from PIL import Image, ImageDraw
@@ -127,6 +127,7 @@ def _leaderboard_table(rows: Sequence[Mapping[str, object]]) -> str:
         "variant",
         "mode",
         "status",
+        "promotion",
         "score",
         "avg",
         "min",
@@ -149,6 +150,7 @@ def _leaderboard_table(rows: Sequence[Mapping[str, object]]) -> str:
             row["variant_id"],
             row["mode"],
             row["status"],
+            row["promotion_tier"],
             f"{float(row['score']):.3f}",
             f"{float(row['average_iou']):.3f}",
             f"{float(row['min_iou']):.3f}",
@@ -286,12 +288,15 @@ def _thumbnail(source: Path, target: Path) -> None:
 
 def _row(rank: int, result: ExperimentResult, score: Mapping[str, object]) -> dict[str, object]:
     autopsy = result.autopsy if isinstance(result.autopsy, Mapping) else {}
+    promotion = promotion_decision(result)
     return {
         "rank": rank,
         "case_id": result.case_id,
         "variant_id": result.variant_id,
         "mode": result.mode,
         "status": result.status,
+        "promotion_tier": promotion.tier,
+        "promotion_blockers": list(promotion.blockers),
         "score": float(score.get("total", 0.0)),
         "average_iou": result.avg_iou,
         "min_iou": result.min_iou,

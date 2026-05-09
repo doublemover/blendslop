@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import tempfile
 import unittest
 
@@ -25,6 +26,7 @@ class RefinementLabIndexTests(unittest.TestCase):
                 started_utc="s",
                 finished_utc="f",
                 elapsed_s=1.0,
+                backend_result={"status": "success"},
                 metrics={"average_iou": 0.9, "front_iou": 0.9, "side_iou": 0.8, "top_iou": 0.7},
             )
             index.append(result)
@@ -33,6 +35,9 @@ class RefinementLabIndexTests(unittest.TestCase):
             index.write_leaderboards(loaded)
             self.assertTrue((root / "leaderboard.json").exists())
             self.assertTrue((root / "leaderboard.md").exists())
+            leaderboard = json.loads((root / "leaderboard.json").read_text(encoding="utf-8"))
+            self.assertEqual(leaderboard["rows"][0]["promotion_tier"], "promotable")
+            self.assertTrue(leaderboard["fastest_acceptable"]["promotable"])
 
     def test_malformed_trailing_line_is_skipped(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

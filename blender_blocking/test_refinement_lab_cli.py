@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 import io
 import json
 from pathlib import Path
@@ -13,8 +13,12 @@ import unittest
 
 try:
     from refinement_lab import cli
+    from refinement_lab.contracts import ExperimentResult
+    from refinement_lab.result_index import ResultIndex
 except ModuleNotFoundError:  # pragma: no cover - package unittest path
     from blender_blocking.refinement_lab import cli
+    from blender_blocking.refinement_lab.contracts import ExperimentResult
+    from blender_blocking.refinement_lab.result_index import ResultIndex
 
 
 class RefinementLabCliTests(unittest.TestCase):
@@ -189,6 +193,89 @@ class RefinementLabCliTests(unittest.TestCase):
         )
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("list-tracks", completed.stdout)
+
+    def test_promote_blocks_review_required_candidate_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            index = ResultIndex(root)
+            index.append(
+                ExperimentResult(
+                    run_id="r",
+                    case_id="c",
+                    variant_id="shape-program",
+                    mode="shape_program",
+                    status="pass",
+                    exit_code=0,
+                    started_utc="s",
+                    finished_utc="f",
+                    elapsed_s=1.0,
+                    backend_result={"status": "research_only"},
+                    metrics={
+                        "average_iou": 0.95,
+                        "front_iou": 0.95,
+                        "side_iou": 0.95,
+                        "top_iou": 0.95,
+                    },
+                )
+            )
+            stderr = io.StringIO()
+            with redirect_stdout(io.StringIO()), redirect_stderr(stderr):
+                code = cli.main(
+                    [
+                        "promote",
+                        "--run-root",
+                        str(root),
+                        "--variant",
+                        "shape-program",
+                        "--out",
+                        str(root / "promoted.json"),
+                    ]
+                )
+            self.assertEqual(code, 2)
+            self.assertIn("research_only", stderr.getvalue())
+            self.assertFalse((root / "promoted.json").exists())
+
+    def test_promote_can_record_review_required_candidate_explicitly(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            out = root / "promoted.json"
+            index = ResultIndex(root)
+            index.append(
+                ExperimentResult(
+                    run_id="r",
+                    case_id="c",
+                    variant_id="degraded",
+                    mode="visual_hull_voxel",
+                    status="pass",
+                    exit_code=0,
+                    started_utc="s",
+                    finished_utc="f",
+                    elapsed_s=1.0,
+                    backend_result={"status": "degraded", "degraded": True},
+                    metrics={
+                        "average_iou": 0.92,
+                        "front_iou": 0.92,
+                        "side_iou": 0.92,
+                        "top_iou": 0.92,
+                    },
+                )
+            )
+            with redirect_stdout(io.StringIO()):
+                code = cli.main(
+                    [
+                        "promote",
+                        "--run-root",
+                        str(root),
+                        "--variant",
+                        "degraded",
+                        "--out",
+                        str(out),
+                        "--allow-review-required",
+                    ]
+                )
+            self.assertEqual(code, 0)
+            payload = json.loads(out.read_text(encoding="utf-8"))
+            self.assertEqual(payload["promotion"]["tier"], "degraded")
 
 
 if __name__ == "__main__":
