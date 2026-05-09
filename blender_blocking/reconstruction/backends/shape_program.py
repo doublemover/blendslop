@@ -12,6 +12,8 @@ import time
 from collections.abc import Mapping, Sequence
 from typing import Any
 
+import numpy as np
+
 from ..artifacts import write_json
 from ..backend import BackendBudget, BackendCapabilities, BaseBackend
 from ..types import (
@@ -158,6 +160,7 @@ class ShapeProgramBackend(BaseBackend):
             )
 
         compiled_scene_summary = _compiled_scene_summary(compiled)
+        compiled_topology = _compiled_topology_summary(compiled)
         if compiled is None:
             status = "research_only"
             warnings = (
@@ -167,7 +170,7 @@ class ShapeProgramBackend(BaseBackend):
         else:
             status = "degraded"
             warnings = (
-                "shape_program compiled editable Blender objects, but render/topology/export QA has not run yet",
+                "shape_program compiled editable Blender objects, but render/export round-trip QA has not run yet",
             )
             degraded = True
         if compiled is not None and compiled.warnings:
@@ -193,11 +196,9 @@ class ShapeProgramBackend(BaseBackend):
                     program,
                     request.config,
                     compiled=compiled is not None,
+                    topology_score=float(compiled_topology.get("topology_score", 0.0)),
                 ),
-                "topology": {
-                    "status": "not_applicable",
-                    "reason": "compiled object render/topology QA was not executed",
-                },
+                "topology": compiled_topology,
                 "research_only": compiled is None,
                 "editable_output": True,
             },
@@ -550,6 +551,71 @@ def _compiled_scene_summary(compiled: Any) -> dict[str, Any]:
     }
 
 
+def _compiled_topology_summary(compiled: Any) -> dict[str, Any]:
+    if compiled is None:
+        return {
+            "status": "not_applicable",
+            "reason": "shape program has not been compiled",
+            "topology_score": 0.0,
+            "penalty": 1.0,
+            "source": "shape_program_compiler",
+        }
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+    for obj in tuple(getattr(compiled, "objects", ()) or ()):
+        data = getattr(obj, "data", None)
+        obj_vertices = getattr(data, "vertices", None)
+        obj_polygons = getattr(data, "polygons", None)
+        if obj_vertices is None or obj_polygons is None:
+            continue
+        offset = len(vertices)
+        matrix = getattr(obj, "matrix_world", None)
+        for vertex in obj_vertices:
+            co = getattr(vertex, "co", None)
+            if co is None:
+                continue
+            if matrix is not None:
+                try:
+                    co = matrix @ co
+                except Exception:
+                    pass
+            vertices.append((float(co[0]), float(co[1]), float(co[2])))
+        for polygon in obj_polygons:
+            indices = tuple(int(index) + offset for index in getattr(polygon, "vertices", ()) or ())
+            if len(indices) >= 3:
+                faces.append(indices)
+    if not vertices or not faces:
+        return {
+            "status": "skipped",
+            "reason": "compiled shape program produced no mesh faces",
+            "vertex_count": len(vertices),
+            "face_count": len(faces),
+            "topology_score": 0.0,
+            "penalty": 1.0,
+            "source": "shape_program_compiler",
+        }
+    try:
+        from metrics.topology import mesh_topology_report
+
+        report = mesh_topology_report(
+            np.asarray(vertices, dtype=float),
+            tuple(faces),
+        ).to_dict()
+        report["status"] = "measured"
+        report["source"] = "shape_program_compiler"
+        return report
+    except Exception as exc:
+        return {
+            "status": "failed",
+            "reason": f"compiled shape program topology report failed: {exc}",
+            "vertex_count": len(vertices),
+            "face_count": len(faces),
+            "topology_score": 0.0,
+            "penalty": 1.0,
+            "source": "shape_program_compiler",
+        }
+
+
 def _editability_score(
     program: ShapeProgram,
     config: Mapping[str, Any],
@@ -569,6 +635,7 @@ def _editability_report(
     config: Mapping[str, Any],
     *,
     compiled: bool = False,
+    topology_score: float = 0.0,
 ) -> dict[str, Any]:
     node_count = max(1, program.node_count())
     residual_count = program.residual_patch_count()
@@ -578,10 +645,10 @@ def _editability_report(
         "modifier_score": 0.8 if compiled else 0.0,
         "mesh_density_score": 1.0,
         "semantic_part_score": 1.0 if all(node.name for node in program.root_nodes) else 0.65,
-        "topology_score": 0.0,
+        "topology_score": topology_score,
         "export_roundtrip_score": 0.0,
         "warnings": (
-            "render/topology/export QA has not been run for compiled shape program",
+            "render/export round-trip QA has not been run for compiled shape program",
         ),
         "metadata": {
             "node_count": node_count,
