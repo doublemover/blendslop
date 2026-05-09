@@ -95,6 +95,40 @@ def classify_bundle_failures(bundle: EvaluationBundle) -> tuple[FailureObservati
                 recommended_actions=("run boundary-first refinement", "inspect residual patches"),
             )
         )
+    psnr = _metric_value(metrics, "novel_view.psnr")
+    ssim = _metric_value(metrics, "novel_view.ssim")
+    lpips = _metric_value(metrics, "novel_view.lpips")
+    if psnr is not None and psnr < 20.0:
+        failures.append(
+            FailureObservation(
+                code="novel_view_psnr_low",
+                severity="warn",
+                subsystem="novel_view",
+                evidence_metrics={"novel_view.psnr": psnr},
+                likely_causes=("rendered appearance diverges from held-out view",),
+                recommended_actions=("inspect novel-view render overlays",),
+            )
+        )
+    if ssim is not None and ssim < 0.65:
+        failures.append(
+            FailureObservation(
+                code="novel_view_ssim_low",
+                severity="warn",
+                subsystem="novel_view",
+                evidence_metrics={"novel_view.ssim": ssim},
+                recommended_actions=("inspect lighting/material/framing consistency",),
+            )
+        )
+    if lpips is not None and lpips > 0.35:
+        failures.append(
+            FailureObservation(
+                code="novel_view_lpips_high",
+                severity="warn",
+                subsystem="novel_view",
+                evidence_metrics={"novel_view.lpips": lpips},
+                recommended_actions=("inspect perceptual novel-view mismatch",),
+            )
+        )
     if bundle.status == "degraded":
         failures.append(
             FailureObservation(

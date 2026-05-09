@@ -10,6 +10,7 @@ from .cost_model import cost_report_from_candidate
 from .failure_taxonomy import classify_bundle_failures
 from .geometry import report_from_mapping
 from .lineage import repo_revision
+from .novel_view import report_from_mapping as novel_view_report_from_mapping
 from .schemas import EvaluationBundle, MetricGroup, MetricValue, utc_now_iso, worst_status
 
 
@@ -26,6 +27,7 @@ def bundle_from_candidate(
     metric_groups = (
         _silhouette_group(metrics),
         _geometry_group(metrics),
+        _novel_view_group(metrics),
         _topology_group(metrics),
         _editability_group(metrics),
         _cost_group(result),
@@ -133,6 +135,53 @@ def _topology_group(metrics: Any) -> MetricGroup:
         if "watertight" in topology:
             values.append(MetricValue("topology.watertight", bool(topology.get("watertight")), higher_is_better=True, status=_pass_fail(bool(topology.get("watertight")))))
     return MetricGroup("topology", "pass", tuple(values))
+
+
+def _novel_view_group(metrics: Any) -> MetricGroup:
+    if metrics is None:
+        return MetricGroup("novel_view", "not_applicable")
+    extras = getattr(metrics, "extras", {}) or {}
+    payload = extras.get("novel_view") if isinstance(extras, Mapping) else None
+    if not isinstance(payload, Mapping):
+        payload = extras.get("image_metrics") if isinstance(extras, Mapping) else None
+    if not isinstance(payload, Mapping):
+        return MetricGroup("novel_view", "not_applicable")
+    report = novel_view_report_from_mapping(payload)
+    values = []
+    for name, value, higher, unit in (
+        ("novel_view.psnr", report.psnr, True, "dB"),
+        ("novel_view.ssim", report.ssim, True, None),
+        ("novel_view.lpips", report.lpips, False, None),
+        ("novel_view.mse", report.mse, False, None),
+    ):
+        if value is not None:
+            values.append(
+                MetricValue(
+                    name,
+                    value,
+                    unit=unit,
+                    higher_is_better=higher,
+                    status="pass",
+                    source=str(payload.get("source", "computed")),
+                )
+            )
+    if report.image_count:
+        values.append(
+            MetricValue(
+                "novel_view.image_count",
+                report.image_count,
+                unit="image",
+                higher_is_better=None,
+                status="not_applicable",
+            )
+        )
+    return MetricGroup(
+        "novel_view",
+        "pass" if values else "not_applicable",
+        tuple(values),
+        warnings=report.warnings,
+        metadata=report.to_dict(),
+    )
 
 
 def _geometry_group(metrics: Any) -> MetricGroup:

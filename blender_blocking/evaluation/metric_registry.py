@@ -43,6 +43,8 @@ _DEFINITIONS = (
     MetricDefinition("novel_view.psnr", "dB", True, "Novel-view peak signal-to-noise ratio."),
     MetricDefinition("novel_view.ssim", None, True, "Novel-view structural similarity."),
     MetricDefinition("novel_view.lpips", None, False, "Novel-view learned perceptual patch distance."),
+    MetricDefinition("novel_view.mse", None, False, "Novel-view mean squared pixel error."),
+    MetricDefinition("novel_view.image_count", "image", None, "Novel-view image pair count."),
     MetricDefinition("topology.connected_components", "count", False, "Mesh connected component count."),
     MetricDefinition("topology.boundary_edges", "count", False, "Mesh boundary edge count."),
     MetricDefinition("topology.non_manifold_edges", "count", False, "Mesh non-manifold edge count."),

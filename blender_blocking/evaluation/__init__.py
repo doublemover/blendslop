@@ -12,6 +12,12 @@ from .geometry import (
     volumetric_iou,
 )
 from .gates import EvaluationBudget, Threshold, evaluate_budget
+from .novel_view import (
+    NovelViewMetricReport,
+    image_pair_report,
+    image_set_report,
+    psnr_from_mse,
+)
 from .selection import SelectionEvidence, attach_selection, pareto_front
 from .schemas import (
     EvaluationBundle,
@@ -29,6 +35,7 @@ __all__ = [
     "STATUS_VALUES",
     "EvaluationBudget",
     "GeometryMetricReport",
+    "NovelViewMetricReport",
     "Threshold",
     "ViewRequest",
     "SelectionEvidence",
@@ -38,8 +45,11 @@ __all__ = [
     "chamfer_distance",
     "evaluate_budget",
     "fscore_at_tolerance",
+    "image_pair_report",
+    "image_set_report",
     "normal_consistency",
     "pareto_front",
+    "psnr_from_mse",
     "suggest_next_views",
     "surface_distance_report",
     "volumetric_iou",

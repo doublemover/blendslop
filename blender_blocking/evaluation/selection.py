@@ -19,6 +19,8 @@ DEFAULT_PARETO_METRICS = (
     "silhouette.mean_boundary_iou",
     "geometry.fscore_tau",
     "geometry.volumetric_iou",
+    "novel_view.psnr",
+    "novel_view.ssim",
     "editability.editable_reconstruction_index",
     "topology.score",
 )
