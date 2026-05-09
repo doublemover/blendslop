@@ -21,14 +21,38 @@ from __future__ import annotations
 
 import sys
 import unittest
+import site
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 # Add blender_blocking directory to path for test module imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-# Add ~/blender_python_packages for user-installed dependencies (numpy, opencv-python, Pillow, scipy)
-sys.path.insert(0, str(Path.home() / "blender_python_packages"))
+def _add_dependency_path(path: Path) -> None:
+    """Expose optional dependency installs without shadowing bundled packages."""
+    path_str = str(path)
+    if path.exists() and path_str not in sys.path:
+        sys.path.append(path_str)
+
+
+# Add user-installed dependency locations for Blender's bundled Python.
+#
+# Blender can launch with Python user-site disabled even when the same bundled
+# python.exe sees it directly. Appending these paths keeps Blender's bundled
+# packages first, but makes user installs of cv2/Pillow/scipy visible.
+_add_dependency_path(Path.home() / "blender_python_packages")
+try:
+    _add_dependency_path(Path(site.getusersitepackages()))
+except Exception:
+    pass
+_add_dependency_path(
+    Path.home()
+    / "AppData"
+    / "Roaming"
+    / "Python"
+    / f"Python{sys.version_info.major}{sys.version_info.minor}"
+    / "site-packages"
+)
 
 from utils.progress import iter_progress, progress_print
 

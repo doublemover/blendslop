@@ -13,10 +13,38 @@ Usage in Blender:
 from __future__ import annotations
 
 import sys
+import site
+from pathlib import Path
+
+
+def _add_dependency_path(path: Path) -> None:
+    """Expose user-installed packages to Blender without shadowing bundled libs."""
+    path_str = str(path)
+    if path.exists() and path_str not in sys.path:
+        sys.path.append(path_str)
+
+
+def configure_dependency_paths() -> None:
+    """Add supported external dependency install locations to sys.path."""
+    _add_dependency_path(Path.home() / "blender_python_packages")
+    try:
+        _add_dependency_path(Path(site.getusersitepackages()))
+    except Exception:
+        pass
+    _add_dependency_path(
+        Path.home()
+        / "AppData"
+        / "Roaming"
+        / "Python"
+        / f"Python{sys.version_info.major}{sys.version_info.minor}"
+        / "site-packages"
+    )
 
 
 def verify_setup() -> bool:
     """Verify that all dependencies are properly installed and compatible."""
+    configure_dependency_paths()
+
     print("\n" + "=" * 70)
     print("Blender Blocking Tool - Setup Verification")
     print("=" * 70 + "\n")

@@ -88,8 +88,10 @@ class SilhouetteRenderSession:
             except Exception:
                 pass
 
-        if self.original_camera is not None:
-            self.scene.camera = self.original_camera
+        # Always clear or restore the scene camera before deleting a temporary
+        # camera. Blender can otherwise leave scene.camera pointing at a removed
+        # object, causing the next headless render to produce an empty frame.
+        self.scene.camera = self.original_camera
 
         if self.created_light and self.light is not None:
             bpy.data.objects.remove(self.light, do_unlink=True)
