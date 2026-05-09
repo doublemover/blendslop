@@ -1134,7 +1134,12 @@ def run_synthetic_suite_matrix(
                 )
                 result_payload = _load_optional_json(case_json)
                 metrics = _matrix_metrics(result_payload, passed)
-                ground_truth = _synthetic_ground_truth_row(spec, result_payload)
+                ground_truth = _synthetic_ground_truth_row(
+                    spec,
+                    result_payload,
+                    reference_paths=reference_paths,
+                    config=cfg,
+                )
                 metrics.update(ground_truth.get("metrics", {}))
                 status = "pass" if passed else "fail"
                 message = ""
@@ -1142,7 +1147,12 @@ def run_synthetic_suite_matrix(
                 passed = False
                 result_payload = {}
                 metrics = {"passed": 0.0}
-                ground_truth = _synthetic_ground_truth_row(spec, result_payload)
+                ground_truth = _synthetic_ground_truth_row(
+                    spec,
+                    result_payload,
+                    reference_paths=reference_paths,
+                    config=cfg,
+                )
                 status = "error"
                 message = str(exc)
                 if progress:
@@ -1288,11 +1298,15 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
 def _synthetic_ground_truth_row(
     spec: object,
     result_payload: Mapping[str, Any],
+    *,
+    reference_paths: Optional[Mapping[str, str]] = None,
+    config: Optional[BlockingConfig] = None,
 ) -> Dict[str, Any]:
     try:
         from blender_blocking.synthetic.ground_truth import (
             build_pure_artifacts,
             geometry_payload_from_candidate,
+            recoverable_envelope_from_views,
         )
     except Exception:
         return {"available": False, "reason": "synthetic ground truth module unavailable"}
@@ -1324,11 +1338,38 @@ def _synthetic_ground_truth_row(
     if candidate_points is None or len(candidate_points) == 0:
         row["reason"] = f"candidate mesh had no readable vertices: {mesh_path}"
         return row
+    recoverable_surface_points = None
+    recoverable_occupancy = None
+    if reference_paths:
+        try:
+            reference_views = {
+                view: load_image(path)
+                for view, path in reference_paths.items()
+                if path and Path(path).exists()
+            }
+            if reference_views:
+                recoverable = recoverable_envelope_from_views(
+                    reference_views,
+                    config=config,
+                    resolution=32,
+                    max_surface_points=8192,
+                    profile_samples=64,
+                )
+                recoverable_surface_points = recoverable.get("surface_points")
+                recoverable_occupancy = recoverable.get("occupancy")
+                row["recoverable_envelope"] = recoverable.get("metadata", {})
+        except Exception as exc:
+            row["recoverable_envelope"] = {
+                "available": False,
+                "reason": str(exc),
+            }
 
     try:
         payload = geometry_payload_from_candidate(
             reference,
             candidate_surface_points=candidate_points,
+            recoverable_surface_points=recoverable_surface_points,
+            recoverable_occupancy=recoverable_occupancy,
             tolerance=0.03,
         )
     except Exception as exc:

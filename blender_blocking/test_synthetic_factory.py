@@ -6,10 +6,23 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import numpy as np
+
+from config import BlockingConfig
 from synthetic.artifact_writer import validate_manifest, validate_manifest_tree, write_artifact_set
-from synthetic.ground_truth import build_pure_artifacts, geometry_payload_from_candidate
+from synthetic.ground_truth import (
+    build_pure_artifacts,
+    geometry_payload_from_candidate,
+    recoverable_envelope_from_views,
+)
 from synthetic.registry import get_definition, list_suites, specs_for_suite
 from synthetic.specs import SyntheticShapeSpec
+
+
+def _rgb_rect() -> np.ndarray:
+    image = np.full((32, 32, 3), 255, dtype=np.uint8)
+    image[8:25, 10:23, :] = 0
+    return image
 
 
 class SyntheticFactoryTests(unittest.TestCase):
@@ -55,7 +68,41 @@ class SyntheticFactoryTests(unittest.TestCase):
         self.assertIn("geometry_recoverable", payload)
         self.assertIn("recoverability", payload)
         self.assertAlmostEqual(payload["geometry_true"]["volumetric_iou"], 1.0)
+        self.assertAlmostEqual(
+            payload["recoverability"]["ambiguity_gap_chamfer_l2"],
+            0.0,
+        )
+        self.assertAlmostEqual(
+            payload["recoverability"]["ambiguity_gap_volume_iou"],
+            0.0,
+        )
         self.assertGreaterEqual(payload["geometry_true"]["fscore_tau"], 0.99)
+
+    def test_recoverable_envelope_builds_from_reference_views(self) -> None:
+        envelope = recoverable_envelope_from_views(
+            {
+                "front": _rgb_rect(),
+                "side": _rgb_rect(),
+                "top": _rgb_rect(),
+            },
+            config=BlockingConfig(),
+            resolution=8,
+            max_surface_points=256,
+            profile_samples=4,
+        )
+
+        self.assertIn("surface_points", envelope)
+        self.assertIn("occupancy", envelope)
+        self.assertGreater(len(envelope["surface_points"]), 0)
+        self.assertEqual(envelope["occupancy"].shape, (8, 8, 8))
+        self.assertEqual(
+            envelope["metadata"]["source"],
+            "reference_silhouette_visual_hull",
+        )
+        self.assertEqual(
+            sorted(envelope["metadata"]["target_views"]),
+            ["front", "side", "top"],
+        )
 
     def test_generated_artifact_policy_records_skips(self) -> None:
         spec = get_definition("single_outlier_pixel").create(4)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import Mapping
 
 from .analytic_sdf import analytic_metadata, require_numpy, sdf_sample_summary, sdf_occupancy, sdf_samples
 from .degradations import apply_degradation, generate_adversarial_mask, mask_to_uint8
@@ -223,11 +224,26 @@ def geometry_payload_from_candidate(
             candidate_occupancy,
         )
     if len(recoverable_payload) > 1:
+        gap_chamfer_l1 = _positive_difference(
+            true_payload.get("chamfer_l1"),
+            recoverable_payload.get("chamfer_l1"),
+        )
+        gap_chamfer_l2 = _positive_difference(
+            true_payload.get("chamfer_l2"),
+            recoverable_payload.get("chamfer_l2"),
+        )
+        gap_volume_iou = _positive_difference(
+            recoverable_payload.get("volumetric_iou"),
+            true_payload.get("volumetric_iou"),
+        )
         payload["geometry_recoverable"] = recoverable_payload
         payload["recoverability"] = {
             "source": "synthetic_shape_factory",
             "true_geometry": payload.get("geometry_true", {}),
             "recoverable_geometry": recoverable_payload,
+            "ambiguity_gap_chamfer_l1": gap_chamfer_l1,
+            "ambiguity_gap_chamfer_l2": gap_chamfer_l2,
+            "ambiguity_gap_volume_iou": gap_volume_iou,
             "metadata": {
                 "tolerance": tolerance,
                 "reference_surface_sample_count": int(len(reference_surface)),
@@ -236,11 +252,92 @@ def geometry_payload_from_candidate(
     return payload
 
 
+def recoverable_envelope_from_views(
+    views: Mapping[str, Any],
+    *,
+    config: Any = None,
+    resolution: int = 32,
+    max_surface_points: int = 8192,
+    profile_samples: int = 64,
+    bounds_minmax: tuple[Any, Any] | None = None,
+) -> dict[str, Any]:
+    """Compute a silhouette-recoverable visual-hull envelope for synthetic rows.
+
+    This is intentionally pure-Python and deterministic.  It turns the same
+    reference silhouettes used by the e2e matrix into a typed target, carves a
+    bounded visual hull, and returns the occupancy plus surface samples needed
+    by ``geometry_payload_from_candidate``.
+    """
+
+    if not views:
+        raise ValueError("views are required to build a recoverable envelope")
+    if resolution < 2:
+        raise ValueError("resolution must be >= 2")
+
+    try:
+        from blender_blocking.reconstruction.target_builder import build_target_from_images
+        from blender_blocking.reconstruction.point_cloud import visual_hull_grid_from_target
+        from blender_blocking.volume import surface_points
+    except ImportError:  # pragma: no cover - direct script execution fallback
+        from reconstruction.target_builder import build_target_from_images  # type: ignore
+        from reconstruction.point_cloud import visual_hull_grid_from_target  # type: ignore
+        from volume import surface_points  # type: ignore
+
+    target_build = build_target_from_images(
+        views,
+        config=config,
+        bounds_minmax=bounds_minmax,
+        profile_samples=profile_samples,
+    )
+    grid = visual_hull_grid_from_target(
+        target_build.target,
+        resolution=resolution,
+        chunk_size=None,
+        use_vectorized=True,
+        backend="dense",
+        boundary_refine=True,
+    )
+    max_voxels = max(1, int(resolution) ** 3)
+    occupancy = grid.to_dense(max_voxels=max_voxels).astype(bool, copy=False)
+    recoverable_surface = surface_points(grid, max_voxels=max_voxels)
+    if len(recoverable_surface) > max_surface_points:
+        np = require_numpy()
+        indices = (
+            np.linspace(0, len(recoverable_surface) - 1, int(max_surface_points))
+            .round()
+            .astype(int)
+        )
+        recoverable_surface = recoverable_surface[indices]
+    return {
+        "surface_points": recoverable_surface,
+        "occupancy": occupancy,
+        "metadata": {
+            "source": "reference_silhouette_visual_hull",
+            "resolution": int(resolution),
+            "surface_sample_count": int(len(recoverable_surface)),
+            "occupancy_shape": [int(v) for v in occupancy.shape],
+            "occupancy_count": int(occupancy.sum()),
+            "target_views": list(target_build.target.views()),
+            "target_warnings": list(target_build.warnings),
+            "grid_stats": grid.stats().to_dict(),
+        },
+    }
+
+
 def _first_volume(volumes: dict[str, Any]) -> Any | None:
     if not volumes:
         return None
     first_key = sorted(volumes)[0]
     return volumes[first_key]
+
+
+def _positive_difference(left: Any, right: Any) -> float | None:
+    try:
+        if left is None or right is None:
+            return None
+        return max(0.0, float(left) - float(right))
+    except (TypeError, ValueError):
+        return None
 
 
 def _grid_spacing(points: Any) -> float:
