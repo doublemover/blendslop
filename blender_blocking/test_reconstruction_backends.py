@@ -18,7 +18,15 @@ from reconstruction.registry import (
     register_backend,
     register_builtin_backends,
 )
-from reconstruction.types import CandidateMetrics, CandidateRequest, CandidateResult
+from reconstruction.backends.shape_program import build_shape_program_from_target
+from reconstruction.types import (
+    Bounds3D,
+    CandidateMetrics,
+    CandidateRequest,
+    CandidateResult,
+    ProfileBand,
+    ProfileIntervalPx,
+)
 from reconstruction.types import ReconstructionTarget
 
 
@@ -267,6 +275,47 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
                 self.assertEqual(payload, expected)
                 self.assertEqual(infos[name].to_dict()["capabilities"], expected)
                 self.assertTrue(infos[name].version)
+
+    def test_shape_program_preserves_profile_curve_rows(self) -> None:
+        bands = (
+            ProfileBand(
+                t=0.0,
+                intervals=(ProfileIntervalPx(10.0, 20.0),),
+                center_x=15.0,
+                width_px=10.0,
+                source_view="front",
+            ),
+            ProfileBand(
+                t=0.5,
+                intervals=(ProfileIntervalPx(6.0, 24.0),),
+                center_x=15.0,
+                width_px=18.0,
+                source_view="front",
+            ),
+            ProfileBand(
+                t=1.0,
+                intervals=(ProfileIntervalPx(11.0, 19.0),),
+                center_x=15.0,
+                width_px=8.0,
+                source_view="front",
+            ),
+        )
+        target = ReconstructionTarget(
+            profile_bands={"front": bands},
+            bounds=Bounds3D.from_min_max((-1.0, -0.5, 0.0), (1.0, 0.5, 2.0)),
+        )
+
+        program, diagnostics = build_shape_program_from_target(
+            target,
+            config={"root_strategy": "profile_lathe", "residual_policy": "report"},
+            program_id="shape-curve-test",
+        )
+
+        curve = program.root_nodes[0].parameters["profile_curve"]
+        self.assertEqual(len(curve), 3)
+        self.assertEqual(diagnostics["profile_curve_rows"], 3)
+        self.assertGreater(curve[1]["radius_x_world"], curve[0]["radius_x_world"])
+        self.assertGreater(curve[1]["radius_y_world"], curve[2]["radius_y_world"])
 
     def test_duplicate_missing_and_alias_registration_errors(self) -> None:
         backend = _FakeBackend()

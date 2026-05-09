@@ -8,8 +8,10 @@ opaque mesh blobs.
 
 from __future__ import annotations
 
+import math
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from .shape_program import ResidualPatch, ShapeNode, ShapeProgram
 
@@ -116,7 +118,10 @@ def _compile_node(
         obj = _sphere(name=name, params=params, segments=lathe_segments)
     elif primitive in {"lathe_profile", "loft_profile"}:
         obj = _lathe_profile_proxy(name=name, params=params, vertices=lathe_segments)
-        warnings.append(f"{primitive} compiled from profile summary, not full row curve")
+        if _profile_curve_rows(params):
+            warnings.append(f"{primitive} compiled from preserved profile-band curve")
+        else:
+            warnings.append(f"{primitive} compiled from profile summary, not full row curve")
     elif primitive == "torus":
         obj = _torus(name=name, params=params, segments=lathe_segments)
     elif primitive in {"plane_patch", "residual_mesh_patch"}:
@@ -195,6 +200,14 @@ def _lathe_profile_proxy(
     params: Mapping[str, Any],
     vertices: int,
 ) -> Any:
+    profile_curve = _profile_curve_rows(params)
+    if profile_curve:
+        return _lathe_profile_mesh(
+            name=name,
+            rows=profile_curve,
+            vertices=vertices,
+            params=params,
+        )
     width = _float(params, "width_world", _float(params, "mean_width_px", 1.0))
     depth = _float(params, "depth_world", width)
     height = _float(params, "height_world", 1.0)
@@ -215,6 +228,91 @@ def _lathe_profile_proxy(
         params.get("preserves_multiple_intervals")
     ):
         _add_wire_overlay_modifier(obj)
+    return obj
+
+
+def _profile_curve_rows(params: Mapping[str, Any]) -> tuple[Mapping[str, Any], ...]:
+    curve = params.get("profile_curve")
+    if not isinstance(curve, Sequence) or isinstance(curve, (str, bytes, bytearray)):
+        return ()
+    rows = tuple(item for item in curve if isinstance(item, Mapping))
+    return tuple(sorted(rows, key=lambda item: _float(item, "z_world", 0.0)))
+
+
+def _lathe_profile_mesh(
+    *,
+    name: str,
+    rows: Sequence[Mapping[str, Any]],
+    vertices: int,
+    params: Mapping[str, Any],
+) -> Any:
+    segments = max(12, int(vertices))
+    mesh_vertices: list[tuple[float, float, float]] = []
+    mesh_faces: list[tuple[int, ...]] = []
+    for row in rows:
+        z = _float(row, "z_world", 0.0)
+        radius_x = max(_float(row, "radius_x_world", 0.0), 1e-6)
+        radius_y = max(_float(row, "radius_y_world", radius_x), 1e-6)
+        center_offset = _float(row, "center_offset_world", 0.0)
+        for index in range(segments):
+            theta = (float(index) / float(segments)) * math.tau
+            mesh_vertices.append(
+                (
+                    center_offset + math.cos(theta) * radius_x,
+                    math.sin(theta) * radius_y,
+                    z,
+                )
+            )
+
+    ring_count = len(rows)
+    for ring in range(max(0, ring_count - 1)):
+        ring_start = ring * segments
+        next_start = (ring + 1) * segments
+        for index in range(segments):
+            mesh_faces.append(
+                (
+                    ring_start + index,
+                    ring_start + ((index + 1) % segments),
+                    next_start + ((index + 1) % segments),
+                    next_start + index,
+                )
+            )
+    if ring_count:
+        bottom_center = len(mesh_vertices)
+        bottom_z = _float(rows[0], "z_world", 0.0)
+        bottom_offset = _float(rows[0], "center_offset_world", 0.0)
+        mesh_vertices.append((bottom_offset, 0.0, bottom_z))
+        top_center = len(mesh_vertices)
+        top_z = _float(rows[-1], "z_world", 0.0)
+        top_offset = _float(rows[-1], "center_offset_world", 0.0)
+        mesh_vertices.append((top_offset, 0.0, top_z))
+        last_ring = (ring_count - 1) * segments
+        for index in range(segments):
+            mesh_faces.append(
+                (
+                    bottom_center,
+                    (index + 1) % segments,
+                    index,
+                )
+            )
+            mesh_faces.append(
+                (
+                    top_center,
+                    last_ring + index,
+                    last_ring + ((index + 1) % segments),
+                )
+            )
+
+    mesh = bpy.data.meshes.new(f"{name}Mesh")
+    mesh.from_pydata(mesh_vertices, [], mesh_faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = _location(params)
+    obj["blendslop_profile_curve_rows"] = len(rows)
+    obj["blendslop_profile_curve_segments"] = segments
+    obj["blendslop_profile_curve_confidence_mean"] = _mean(
+        _float(row, "confidence", 0.0) for row in rows
+    )
     return obj
 
 
@@ -356,3 +454,8 @@ def _float(params: Mapping[str, Any], key: str, default: float) -> float:
         return float(params.get(key, default))
     except (TypeError, ValueError):
         return default
+
+
+def _mean(values: Iterable[float]) -> float:
+    collected = tuple(float(value) for value in values)
+    return sum(collected) / float(len(collected)) if collected else 0.0

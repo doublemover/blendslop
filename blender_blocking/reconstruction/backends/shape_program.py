@@ -1,9 +1,9 @@
 """Editable shape-program reconstruction backend.
 
 This backend turns silhouette/profile evidence into a structured, editable
-program artifact.  It is intentionally marked ``research_only`` until there is
-a compiler that turns the program into Blender geometry and renders it back for
-real silhouette metrics.
+program artifact.  In pure Python it reports a research-only program; inside
+Blender it can compile editable scene objects, but still reports degraded
+status until render/topology/export round-trip QA is executed.
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ class ShapeProgramBackend(BaseBackend):
             estimated_seconds=0.01 + band_count * 0.0002,
             estimated_memory_mb=1.0,
             notes=(
-                "shape_program emits editable JSON only; no mesh compiler cost included",
+                "pure mode emits editable JSON; Blender mode may compile editable scene objects",
             ),
         )
 
@@ -157,10 +157,19 @@ class ShapeProgramBackend(BaseBackend):
                 diagnostics,
             )
 
-        warnings = (
-            "shape_program is research_only: program emitted, but no Blender "
-            "render validation is implemented yet",
-        )
+        compiled_scene_summary = _compiled_scene_summary(compiled)
+        if compiled is None:
+            status = "research_only"
+            warnings = (
+                "shape_program is research_only: editable program emitted, but Blender compilation did not run",
+            )
+            degraded = False
+        else:
+            status = "degraded"
+            warnings = (
+                "shape_program compiled editable Blender objects, but render/topology/export QA has not run yet",
+            )
+            degraded = True
         if compiled is not None and compiled.warnings:
             warnings = warnings + tuple(compiled.warnings)
         metrics = CandidateMetrics(
@@ -176,6 +185,7 @@ class ShapeProgramBackend(BaseBackend):
                 "shape_program": program.to_dict(),
                 "diagnostics": diagnostics,
                 "compiled_blender": None if compiled is None else compiled.to_dict(),
+                "compiled_scene_summary": compiled_scene_summary,
                 "primitive_editability": 1.0,
                 "modifier_editability": 0.8 if compiled is not None else 0.0,
                 "object_hierarchy_score": 1.0 if compiled is not None else 0.6,
@@ -188,18 +198,19 @@ class ShapeProgramBackend(BaseBackend):
                     "status": "not_applicable",
                     "reason": "compiled object render/topology QA was not executed",
                 },
-                "research_only": True,
+                "research_only": compiled is None,
                 "editable_output": True,
             },
         )
         return CandidateResult(
             candidate_id=request.candidate_id,
             backend_name=self.name,
-            status="research_only",
+            status=status,
             primitive_path=primitive_path,
             metric_result=metrics,
             artifacts=artifacts,
             warnings=warnings,
+            degraded=degraded,
             payload=compiled.root_object if compiled is not None else program,
         )
 
@@ -222,6 +233,7 @@ def build_shape_program_from_target(
 
     if dominant_bands and root_strategy in {"profile_lathe", "hybrid_profile_bounds"}:
         stats = _profile_stats(dominant_bands)
+        profile_curve = _profile_curve_payload(dominant_bands, size, stats)
         nodes.append(
             ShapeNode(
                 node_id="root_profile_00",
@@ -234,6 +246,7 @@ def build_shape_program_from_target(
                     "mean_width_px": stats["mean_width_px"],
                     "max_width_px": stats["max_width_px"],
                     "mean_center_px": stats["mean_center_px"],
+                    "profile_curve": profile_curve,
                     "height_world": size[2],
                     "width_world": size[0],
                     "depth_world": size[1],
@@ -307,6 +320,7 @@ def build_shape_program_from_target(
     diagnostics = {
         "dominant_profile_view": dominant_view,
         "dominant_profile_band_count": len(dominant_bands),
+        "profile_curve_rows": _dominant_profile_curve_row_count(program),
         "node_count": program.node_count(),
         "residual_patch_count": program.residual_patch_count(),
         "has_uncertainty": _has_uncertainty(target),
@@ -357,6 +371,61 @@ def _profile_stats(bands: Sequence[ProfileBand]) -> dict[str, Any]:
         ),
         "hole_rows": sum(1 for band in bands if getattr(band, "holes", ()) or ()),
     }
+
+
+def _dominant_profile_curve_row_count(program: ShapeProgram) -> int:
+    for node in program.root_nodes:
+        curve = node.parameters.get("profile_curve")
+        if isinstance(curve, Sequence) and not isinstance(curve, (str, bytes, bytearray)):
+            return len(curve)
+    return 0
+
+
+def _profile_curve_payload(
+    bands: Sequence[ProfileBand],
+    size: tuple[float, float, float],
+    stats: Mapping[str, Any],
+) -> tuple[dict[str, Any], ...]:
+    if not bands:
+        return ()
+    max_width_px = max(float(stats.get("max_width_px", 0.0) or 0.0), 1e-6)
+    mean_center_px = float(stats.get("mean_center_px", 0.0) or 0.0)
+    width_world, depth_world, height_world = size
+    rows = []
+    for band in sorted(bands, key=lambda item: float(getattr(item, "t", 0.0))):
+        width_px = max(0.0, float(getattr(band, "width_px", 0.0) or 0.0))
+        if width_px <= 0.0:
+            continue
+        t = max(0.0, min(1.0, float(getattr(band, "t", 0.0) or 0.0)))
+        width_ratio = width_px / max_width_px
+        center_x = getattr(band, "center_x", None)
+        center_offset_world = 0.0
+        if center_x is not None:
+            center_offset_world = ((float(center_x) - mean_center_px) / max_width_px) * width_world
+        intervals = getattr(band, "intervals", ()) or ()
+        holes = getattr(band, "holes", ()) or ()
+        rows.append(
+            {
+                "t": t,
+                "z_world": (t - 0.5) * height_world,
+                "width_px": width_px,
+                "radius_x_world": max(width_world * 0.5 * width_ratio, 1e-6),
+                "radius_y_world": max(depth_world * 0.5 * width_ratio, 1e-6),
+                "center_offset_world": center_offset_world,
+                "confidence": max(0.0, min(1.0, float(getattr(band, "confidence", 1.0) or 0.0))),
+                "interval_count": len(intervals),
+                "hole_count": len(holes),
+            }
+        )
+    if len(rows) == 1:
+        row = dict(rows[0])
+        duplicate = dict(row)
+        row["z_world"] = -height_world * 0.5
+        row["t"] = 0.0
+        duplicate["z_world"] = height_world * 0.5
+        duplicate["t"] = 1.0
+        rows = [row, duplicate]
+    return tuple(rows)
 
 
 def _profile_residual_hints(
@@ -434,6 +503,51 @@ def _compile_program(program: ShapeProgram, config: Mapping[str, Any]) -> Any:
         bevel_modifier=bool(config.get("bevel_modifier", True)),
         weighted_normals=bool(config.get("weighted_normals", True)),
     )
+
+
+def _compiled_scene_summary(compiled: Any) -> dict[str, Any]:
+    if compiled is None:
+        return {
+            "compiled": False,
+            "object_count": 0,
+            "mesh_object_count": 0,
+            "vertex_count": 0,
+            "face_count": 0,
+            "modifier_count": 0,
+            "material_count": 0,
+        }
+    objects = tuple(getattr(compiled, "objects", ()) or ())
+    mesh_objects = [
+        obj
+        for obj in objects
+        if getattr(getattr(obj, "data", None), "vertices", None) is not None
+    ]
+    vertex_count = 0
+    face_count = 0
+    modifier_count = 0
+    material_count = 0
+    for obj in objects:
+        data = getattr(obj, "data", None)
+        vertices = getattr(data, "vertices", ()) or ()
+        polygons = getattr(data, "polygons", ()) or ()
+        materials = getattr(data, "materials", ()) or ()
+        modifiers = getattr(obj, "modifiers", ()) or ()
+        vertex_count += len(vertices)
+        face_count += len(polygons)
+        material_count += len(materials)
+        modifier_count += len(modifiers)
+    return {
+        "compiled": True,
+        "object_count": len(objects),
+        "mesh_object_count": len(mesh_objects),
+        "residual_marker_count": len(getattr(compiled, "residual_markers", ()) or ()),
+        "vertex_count": vertex_count,
+        "face_count": face_count,
+        "modifier_count": modifier_count,
+        "material_count": material_count,
+        "object_names": list(compiled.object_names()) if hasattr(compiled, "object_names") else [],
+        "marker_names": list(compiled.marker_names()) if hasattr(compiled, "marker_names") else [],
+    }
 
 
 def _editability_score(
