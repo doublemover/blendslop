@@ -1,0 +1,36 @@
+{
+  "analytic_box": {
+    "ground_truth_level": "analytic_exact",
+    "shape_id": "box_fixture_seed_0000",
+    "targets": {
+      "profile_loft": {
+        "front_area_iou_min": 0.88,
+        "side_area_iou_min": 0.84
+      },
+      "silhouette_intersection": {
+        "front_area_iou_min": 0.94,
+        "non_manifold_edges_max": 0,
+        "side_area_iou_min": 0.92
+      },
+      "visual_hull_voxel": {
+        "known_limit": "view count controls exactness even with analytic ground truth",
+        "volume_iou_min": 0.82
+      }
+    }
+  },
+  "adversarial_outlier": {
+    "ground_truth_level": "rendered_silhouette",
+    "shape_id": "single_outlier_pixel_fixture_seed_0000",
+    "targets": {
+      "profile_loft": {
+        "expected_status": "ambiguous"
+      },
+      "segmentation": {
+        "known_failure_modes": [
+          "outlier_bbox_expansion"
+        ],
+        "mask_iou_min": 0.98
+      }
+    }
+  }
+}

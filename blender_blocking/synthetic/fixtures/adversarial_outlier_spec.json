@@ -1,0 +1,27 @@
+{
+  "expected_failure_modes": [
+    "outlier_bbox_expansion"
+  ],
+  "family": "adversarial_silhouette",
+  "generator_version": "synthetic-shape-factory-v1",
+  "intended_challenges": [
+    "outlier_pixels"
+  ],
+  "known_dimensions": {
+    "canvas_height": 256.0,
+    "canvas_width": 256.0
+  },
+  "materials": {},
+  "parameters": {
+    "mask_kind": "single_outlier_pixel",
+    "polarity": "dark_on_light",
+    "resolution": [
+      256,
+      256
+    ]
+  },
+  "seed": 0,
+  "shape_id": "single_outlier_pixel_fixture_seed_0000",
+  "symmetry": [],
+  "transforms": {}
+}
