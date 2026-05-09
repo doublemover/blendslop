@@ -18,6 +18,14 @@ from .baselines import (
     thresholds_for_query,
     thresholds_from_baseline,
 )
+from .cost_model import (
+    CacheCost,
+    CostRecorder,
+    CostReport,
+    StageCost,
+    StageTimer,
+    cost_report_from_mapping,
+)
 from .export_qa import (
     ExportQAReport,
     aggregate_score as export_qa_aggregate_score,
@@ -97,6 +105,9 @@ __all__ = [
     "BaselineMatch",
     "BaselineQuery",
     "BaselineSlice",
+    "CacheCost",
+    "CostRecorder",
+    "CostReport",
     "MetricDistribution",
     "MetricSensitivityReport",
     "NovelViewMetricReport",
@@ -111,6 +122,8 @@ __all__ = [
     "SilhouetteGateConfig",
     "SelectionEvidence",
     "SensitivityProbe",
+    "StageCost",
+    "StageTimer",
     "active_view_plan_payload",
     "attach_selection",
     "boundary_refinement_plan_payload",
@@ -120,6 +133,7 @@ __all__ = [
     "bundle_from_candidate",
     "capture_environment",
     "chamfer_distance",
+    "cost_report_from_mapping",
     "dirty_worktree",
     "evaluate_budget",
     "evaluate_silhouette_pair",
