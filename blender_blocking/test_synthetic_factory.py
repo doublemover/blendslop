@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from synthetic.artifact_writer import validate_manifest_tree, write_artifact_set
+from synthetic.artifact_writer import validate_manifest, validate_manifest_tree, write_artifact_set
 from synthetic.ground_truth import build_pure_artifacts
 from synthetic.registry import get_definition, list_suites, specs_for_suite
 from synthetic.specs import SyntheticShapeSpec
@@ -27,20 +27,65 @@ class SyntheticFactoryTests(unittest.TestCase):
         spec = get_definition("sphere").create(3)
         artifacts = build_pure_artifacts(spec, volume_resolution=12)
         self.assertIn("occupancy-r12", artifacts["volumes"])
+        self.assertIn("deterministic_signature", artifacts["metadata"])
+        self.assertIn("sample_summary", artifacts["metadata"])
         with tempfile.TemporaryDirectory() as tmp:
             artifact_set = write_artifact_set(spec, artifacts, Path(tmp))
             result = validate_manifest_tree(artifact_set.manifest_path)
         self.assertTrue(result["ok"])
+
+    def test_generated_artifact_policy_records_skips(self) -> None:
+        spec = get_definition("single_outlier_pixel").create(4)
+        artifacts = build_pure_artifacts(spec)
+        with tempfile.TemporaryDirectory() as tmp:
+            artifact_set = write_artifact_set(
+                spec,
+                artifacts,
+                Path(tmp),
+                generation_policy={
+                    "commit_small_fixtures_only": True,
+                    "keep_heavy_artifacts": False,
+                },
+            )
+            result = validate_manifest(artifact_set.manifest_path)
+        self.assertTrue(result["ok"])
+        self.assertEqual(artifact_set.mask_paths, {})
+        self.assertIn("mask/clean/front", result["ignored"])
 
     def test_adversarial_mask_records_effect(self) -> None:
         spec = get_definition("single_outlier_pixel").create(4)
         artifacts = build_pure_artifacts(spec)
         self.assertIn("clean/front", artifacts["masks"])
         self.assertIn("expected_effect", artifacts["metadata"])
+        self.assertEqual(artifacts["metadata"]["shape_id"], spec.shape_id)
 
     def test_suite_registry_contains_required_entries(self) -> None:
         self.assertIn("adversarial-silhouettes", list_suites())
         self.assertIn("blender-smoke", list_suites())
+        self.assertIn("capture-noise", list_suites())
+        self.assertIn("degradation-stress", list_suites())
+        self.assertIn("deterministic-micro", list_suites())
+        self.assertIn("silhouette-edge-cases", list_suites())
+
+    def test_new_degradation_families_are_registered(self) -> None:
+        mask_spec = get_definition("checkerboard_breakup").create(5)
+        noise_spec = get_definition("salt_and_pepper").create(5)
+        self.assertEqual(mask_spec.parameters["mask_kind"], "checkerboard_breakup")
+        self.assertEqual(noise_spec.parameters["degradation"], "salt_and_pepper")
+        self.assertIn("silhouette_ambiguity", mask_spec.expected_failure_modes)
+        self.assertIn("outlier_bbox_expansion", noise_spec.expected_failure_modes)
+
+    def test_deterministic_fixture_specs_have_target_entries(self) -> None:
+        fixture_root = Path(__file__).parent / "synthetic" / "fixtures"
+        fixture_files = {
+            "adversarial_checkerboard_breakup_spec.json": "checkerboard_breakup_fixture_seed_0000",
+            "capture_salt_and_pepper_spec.json": "salt_and_pepper_fixture_seed_0000",
+            "analytic_sphere_spec.json": "sphere_fixture_seed_0000",
+        }
+        expected_targets_text = (fixture_root / "expected_targets.json").read_text(encoding="utf-8")
+        for filename, shape_id in fixture_files.items():
+            self.assertTrue((fixture_root / filename).exists())
+            self.assertIn(shape_id, expected_targets_text)
 
 
 if __name__ == "__main__":

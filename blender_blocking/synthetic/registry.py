@@ -86,6 +86,10 @@ ADVERSARIAL_SILHOUETTES = (
     "full_canvas_near_threshold",
     "ambiguous_polarity_pair",
     "inconsistent_front_side",
+    "checkerboard_breakup",
+    "frame_with_corner_gap",
+    "off_canvas_ellipse",
+    "single_pixel_noise",
 )
 
 CAPTURE_NOISE = (
@@ -99,6 +103,20 @@ CAPTURE_NOISE = (
     "transparent_rgb_noise",
     "missing_top_view",
     "tilted_input",
+    "salt_and_pepper",
+    "scanline_jitter",
+    "radial_vignette",
+    "posterize",
+)
+
+DETERMINISTIC_MICRO = (
+    "box",
+    "sphere",
+    "asymmetric_vase",
+    "chair",
+    "car",
+    "single_outlier_pixel",
+    "low_contrast",
 )
 
 
@@ -165,10 +183,30 @@ REGISTRY = _build_registry()
 
 
 SUITES: dict[str, tuple[str, ...]] = {
+    "capture-noise": CAPTURE_NOISE,
+    "deterministic-micro": DETERMINISTIC_MICRO,
     "smoke": ("box", "sphere", "vase", "table", "single_outlier_pixel"),
     "quick-blender": ("box", "vase", "table", "asymmetric_vase", "gear"),
     "blender-smoke": ("box", "vase", "table", "asymmetric_vase", "gear"),
     "adversarial-silhouettes": ADVERSARIAL_SILHOUETTES,
+    "silhouette-edge-cases": (
+        "border_touching",
+        "single_outlier_pixel",
+        "dust_clusters",
+        "checkerboard_breakup",
+        "frame_with_corner_gap",
+        "off_canvas_ellipse",
+        "single_pixel_noise",
+    ),
+    "degradation-stress": (
+        "low_contrast",
+        "partial_occlusion",
+        "salt_and_pepper",
+        "scanline_jitter",
+        "radial_vignette",
+        "posterize",
+        "missing_top_view",
+    ),
     "profile-band": ("vase", "bottle", "bowl", "cup", "chess_pawn", "asymmetric_vase", "multi_lobe_profile"),
     "visual-hull": ("table", "chair", "car", "truck", "gear", "pipe_elbow"),
     "primitive-fit": ("ellipsoid", "frustum", "capsule", "torus", "rounded_box", "superquadric"),

@@ -201,10 +201,10 @@ def capture_noise_spec(kind: str, seed: int) -> SyntheticShapeSpec:
         parameters={"degradation": kind, "resolution": [256, 256], "base_mask": "center_disc"},
         transforms={},
         materials={},
-        intended_challenges=challenge_values([ChallengeTag.LOW_CONTRAST] if kind in ("low_contrast", "uneven_lighting") else [ChallengeTag.OCCLUSION] if kind == "partial_occlusion" else []),
+        intended_challenges=challenge_values(_capture_challenges(kind)),
         symmetry=(),
         known_dimensions={"canvas_width": 256.0, "canvas_height": 256.0},
-        expected_failure_modes=failure_values([FailureModeTag.COMPONENT_DROPOUT] if kind == "missing_top_view" else []),
+        expected_failure_modes=failure_values(_capture_failures(kind)),
     )
 
 
@@ -305,6 +305,10 @@ def _adversarial_challenges(kind: str) -> list[ChallengeTag]:
         "disconnected_components": [ChallengeTag.MULTI_PART],
         "ambiguous_polarity_pair": [ChallengeTag.AMBIGUOUS_POLARITY],
         "inconsistent_front_side": [ChallengeTag.PROFILE_BANDS],
+        "checkerboard_breakup": [ChallengeTag.PROFILE_BANDS],
+        "frame_with_corner_gap": [ChallengeTag.BORDER_TOUCHING, ChallengeTag.HOLES],
+        "off_canvas_ellipse": [ChallengeTag.BORDER_TOUCHING],
+        "single_pixel_noise": [ChallengeTag.OUTLIER_PIXELS],
     }
     return mapping.get(kind, [])
 
@@ -318,5 +322,36 @@ def _adversarial_failures(kind: str) -> list[FailureModeTag]:
         "inconsistent_front_side": [FailureModeTag.INSUFFICIENT_VIEWS],
         "holed_silhouette": [FailureModeTag.VISUAL_HULL_CONCAVITY_FILL],
         "thin_diagonal_struts": [FailureModeTag.THIN_LEG_LOSS],
+        "checkerboard_breakup": [FailureModeTag.SILHOUETTE_AMBIGUITY],
+        "frame_with_corner_gap": [FailureModeTag.VISUAL_HULL_CONCAVITY_FILL],
+        "off_canvas_ellipse": [FailureModeTag.OUTLIER_BBOX_EXPANSION],
+        "single_pixel_noise": [FailureModeTag.COMPONENT_DROPOUT],
     }
     return mapping.get(kind, [FailureModeTag.SILHOUETTE_AMBIGUITY])
+
+
+def _capture_challenges(kind: str) -> list[ChallengeTag]:
+    mapping = {
+        "uneven_lighting": [ChallengeTag.LOW_CONTRAST],
+        "low_contrast": [ChallengeTag.LOW_CONTRAST],
+        "partial_occlusion": [ChallengeTag.OCCLUSION],
+        "alpha_premultiplication": [ChallengeTag.LOW_CONTRAST],
+        "transparent_rgb_noise": [ChallengeTag.LOW_CONTRAST, ChallengeTag.DUST_CLUSTERS],
+        "missing_top_view": [ChallengeTag.OCCLUSION],
+        "salt_and_pepper": [ChallengeTag.OUTLIER_PIXELS],
+        "scanline_jitter": [ChallengeTag.LOW_CONTRAST],
+        "radial_vignette": [ChallengeTag.LOW_CONTRAST],
+        "posterize": [ChallengeTag.PROFILE_BANDS],
+    }
+    return mapping.get(kind, [])
+
+
+def _capture_failures(kind: str) -> list[FailureModeTag]:
+    mapping = {
+        "missing_top_view": [FailureModeTag.COMPONENT_DROPOUT],
+        "salt_and_pepper": [FailureModeTag.OUTLIER_BBOX_EXPANSION],
+        "scanline_jitter": [FailureModeTag.POLARITY_MISCLASSIFICATION],
+        "radial_vignette": [FailureModeTag.POLARITY_MISCLASSIFICATION],
+        "posterize": [FailureModeTag.SILHOUETTE_AMBIGUITY],
+    }
+    return mapping.get(kind, [])

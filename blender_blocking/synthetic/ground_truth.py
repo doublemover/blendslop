@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .analytic_sdf import analytic_metadata, occupancy_grid, sdf_samples
+from .analytic_sdf import analytic_metadata, sdf_sample_summary, sdf_occupancy, sdf_samples
 from .degradations import apply_degradation, generate_adversarial_mask, mask_to_uint8
 from .quality_targets import quality_targets_for
 from .specs import ShapeFamily, SyntheticShapeSpec
@@ -15,13 +15,15 @@ def build_pure_artifacts(
     volume_resolution: int = 64,
 ) -> dict[str, Any]:
     if spec.family == ShapeFamily.ANALYTIC_PRIMITIVE.value:
-        occupancy = occupancy_grid(spec, resolution=volume_resolution)
         samples = sdf_samples(spec, resolution=volume_resolution)
+        occupancy = sdf_occupancy(samples["sdf"])
+        metadata = analytic_metadata(spec, volume_resolution)
+        metadata["sample_summary"] = sdf_sample_summary(samples["points"], samples["sdf"])
         return {
             "volumes": {f"occupancy-r{volume_resolution}": occupancy},
             "sdf_samples": samples,
             "masks": {},
-            "metadata": analytic_metadata(spec, volume_resolution),
+            "metadata": metadata,
             "quality_targets": quality_targets_for(spec),
         }
 
@@ -33,7 +35,7 @@ def build_pure_artifacts(
             "sdf_samples": {},
             "masks": {"clean/front": mask_to_uint8(mask)},
             "mask_arrays": {"clean/front": mask},
-            "metadata": {"ground_truth_level": "rendered_silhouette", **metadata},
+            "metadata": {**_metadata_base(spec, "rendered_silhouette"), **metadata},
             "quality_targets": quality_targets_for(spec),
         }
 
@@ -51,7 +53,7 @@ def build_pure_artifacts(
             "masks": masks,
             "mask_arrays": {"clean/front": mask},
             "metadata": {
-                "ground_truth_level": "rendered_silhouette",
+                **_metadata_base(spec, "rendered_silhouette"),
                 **metadata,
                 "degradation_parameters": degradation_params,
             },
@@ -70,7 +72,7 @@ def build_pure_artifacts(
                 "segments": spec.parameters.get("segments"),
             },
             "metadata": {
-                "ground_truth_level": "profile_json",
+                **_metadata_base(spec, "profile_json"),
                 "profile": spec.parameters.get("profile"),
                 "segments": spec.parameters.get("segments"),
             },
@@ -82,7 +84,7 @@ def build_pure_artifacts(
         "sdf_samples": {},
         "masks": {},
         "metadata": {
-            "ground_truth_level": "compound_blockout",
+            **_metadata_base(spec, "compound_blockout"),
             "parts": spec.parameters.get("parts", []),
             "known_limits": list(spec.expected_failure_modes),
         },
@@ -93,3 +95,15 @@ def build_pure_artifacts(
 def _resolution_from_spec(spec: SyntheticShapeSpec) -> tuple[int, int]:
     value = spec.parameters.get("resolution", [256, 256])
     return int(value[0]), int(value[1])  # type: ignore[index]
+
+
+def _metadata_base(spec: SyntheticShapeSpec, ground_truth_level: str) -> dict[str, object]:
+    return {
+        "shape_id": spec.shape_id,
+        "shape_family": spec.family,
+        "seed": spec.seed,
+        "generator_version": spec.generator_version,
+        "ground_truth_level": ground_truth_level,
+        "intended_challenges": list(spec.intended_challenges),
+        "expected_failure_modes": list(spec.expected_failure_modes),
+    }

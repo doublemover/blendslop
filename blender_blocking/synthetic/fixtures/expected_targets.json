@@ -18,6 +18,70 @@
       }
     }
   },
+  "analytic_sphere": {
+    "ground_truth_level": "analytic_exact",
+    "shape_id": "sphere_fixture_seed_0000",
+    "targets": {
+      "profile_loft": {
+        "front_area_iou_min": 0.88,
+        "side_area_iou_min": 0.84
+      },
+      "silhouette_intersection": {
+        "front_area_iou_min": 0.94,
+        "non_manifold_edges_max": 0,
+        "side_area_iou_min": 0.92
+      },
+      "visual_hull_voxel": {
+        "known_limit": "view count controls exactness even with analytic ground truth",
+        "volume_iou_min": 0.82
+      }
+    }
+  },
+  "adversarial_border_touching": {
+    "ground_truth_level": "rendered_silhouette",
+    "shape_id": "border_touching_fixture_seed_0000",
+    "targets": {
+      "profile_loft": {
+        "expected_status": "ambiguous"
+      },
+      "segmentation": {
+        "known_failure_modes": [
+          "silhouette_ambiguity"
+        ],
+        "mask_iou_min": 0.98
+      }
+    }
+  },
+  "adversarial_checkerboard_breakup": {
+    "ground_truth_level": "rendered_silhouette",
+    "shape_id": "checkerboard_breakup_fixture_seed_0000",
+    "targets": {
+      "profile_loft": {
+        "expected_status": "ambiguous"
+      },
+      "segmentation": {
+        "known_failure_modes": [
+          "silhouette_ambiguity"
+        ],
+        "mask_iou_min": 0.98
+      }
+    }
+  },
+  "adversarial_dust_clusters": {
+    "ground_truth_level": "rendered_silhouette",
+    "shape_id": "dust_clusters_fixture_seed_0000",
+    "targets": {
+      "profile_loft": {
+        "expected_status": "ambiguous"
+      },
+      "segmentation": {
+        "known_failure_modes": [
+          "outlier_bbox_expansion"
+        ],
+        "mask_iou_min": 0.98
+      }
+    }
+  },
   "adversarial_outlier": {
     "ground_truth_level": "rendered_silhouette",
     "shape_id": "single_outlier_pixel_fixture_seed_0000",
@@ -30,6 +94,105 @@
           "outlier_bbox_expansion"
         ],
         "mask_iou_min": 0.98
+      }
+    }
+  },
+  "capture_low_contrast": {
+    "ground_truth_level": "rendered_silhouette",
+    "shape_id": "low_contrast_fixture_seed_0000",
+    "targets": {
+      "segmentation": {
+        "expected_status": "robustness_candidate",
+        "known_failure_modes": [],
+        "mask_iou_min": 0.82
+      },
+      "uncertainty": {
+        "should_record_degradation_parameters": true
+      }
+    }
+  },
+  "capture_missing_top_view": {
+    "ground_truth_level": "rendered_silhouette",
+    "shape_id": "missing_top_view_fixture_seed_0000",
+    "targets": {
+      "segmentation": {
+        "expected_status": "robustness_candidate",
+        "known_failure_modes": [
+          "component_dropout"
+        ],
+        "mask_iou_min": 0.82
+      },
+      "uncertainty": {
+        "should_record_degradation_parameters": true
+      }
+    }
+  },
+  "capture_salt_and_pepper": {
+    "ground_truth_level": "rendered_silhouette",
+    "shape_id": "salt_and_pepper_fixture_seed_0000",
+    "targets": {
+      "segmentation": {
+        "expected_status": "robustness_candidate",
+        "known_failure_modes": [
+          "outlier_bbox_expansion"
+        ],
+        "mask_iou_min": 0.82
+      },
+      "uncertainty": {
+        "should_record_degradation_parameters": true
+      }
+    }
+  },
+  "furniture_chair": {
+    "ground_truth_level": "compound_blockout",
+    "shape_id": "chair_fixture_seed_0000",
+    "targets": {
+      "profile_loft": {
+        "front_area_iou_min": 0.72,
+        "known_limit": "topology will not preserve leg gaps",
+        "side_area_iou_min": 0.68
+      },
+      "silhouette_intersection": {
+        "front_area_iou_min": 0.86,
+        "side_area_iou_min": 0.82
+      },
+      "visual_hull_voxel": {
+        "known_limit": "hidden support gaps may be filled",
+        "volume_iou_min": 0.62
+      }
+    }
+  },
+  "profile_asymmetric_vase": {
+    "ground_truth_level": "profile_json",
+    "shape_id": "asymmetric_vase_fixture_seed_0000",
+    "targets": {
+      "primitive_fit": {
+        "known_limit": "multi-band profiles may not reduce to one radius"
+      },
+      "profile_loft": {
+        "front_area_iou_min": 0.9,
+        "side_area_iou_min": 0.9
+      },
+      "visual_hull_voxel": {
+        "volume_iou_min": 0.76
+      }
+    }
+  },
+  "vehicle_car": {
+    "ground_truth_level": "compound_blockout",
+    "shape_id": "car_fixture_seed_0000",
+    "targets": {
+      "profile_loft": {
+        "front_area_iou_min": 0.65,
+        "known_limit": "holes and wheel gaps are expected losses"
+      },
+      "silhouette_intersection": {
+        "front_area_iou_min": 0.84,
+        "side_area_iou_min": 0.8
+      },
+      "visual_hull_voxel": {
+        "known_limit": "concavity fill is expected",
+        "volume_iou_min": 0.66
       }
     }
   }

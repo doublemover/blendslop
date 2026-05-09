@@ -1,0 +1,27 @@
+{
+  "expected_failure_modes": [
+    "outlier_bbox_expansion"
+  ],
+  "family": "capture_noise",
+  "generator_version": "synthetic-shape-factory-v1",
+  "intended_challenges": [
+    "outlier_pixels"
+  ],
+  "known_dimensions": {
+    "canvas_height": 256.0,
+    "canvas_width": 256.0
+  },
+  "materials": {},
+  "parameters": {
+    "base_mask": "center_disc",
+    "degradation": "salt_and_pepper",
+    "resolution": [
+      256,
+      256
+    ]
+  },
+  "seed": 0,
+  "shape_id": "salt_and_pepper_fixture_seed_0000",
+  "symmetry": [],
+  "transforms": {}
+}

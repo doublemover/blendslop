@@ -85,7 +85,11 @@ def quality_targets_for(spec: SyntheticShapeSpec) -> dict[str, object]:
             "shape_id": spec.shape_id,
             "ground_truth_level": "rendered_silhouette",
             "targets": {
-                "segmentation": {"mask_iou_min": 0.82, "expected_status": "robustness_candidate"},
+                "segmentation": {
+                    "mask_iou_min": 0.82,
+                    "expected_status": "robustness_candidate",
+                    "known_failure_modes": list(spec.expected_failure_modes),
+                },
                 "uncertainty": {"should_record_degradation_parameters": True},
             },
         }

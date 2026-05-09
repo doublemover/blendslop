@@ -28,6 +28,7 @@ def generate_adversarial_mask(
     rng = np.random.default_rng(seed)
     mask = np.zeros((height, width), dtype=np.bool_)
     yy, xx = np.ogrid[:height, :width]
+    mask_family_metadata: dict[str, object] = {}
 
     if kind == "off_center_dark":
         cx, cy, rx, ry = int(width * 0.68), int(height * 0.38), int(width * 0.18), int(height * 0.26)
@@ -72,6 +73,40 @@ def generate_adversarial_mask(
     elif kind == "inconsistent_front_side":
         mask[int(height * 0.23) : int(height * 0.78), int(width * 0.3) : int(width * 0.7)] = True
         mask[int(height * 0.42) : int(height * 0.58), int(width * 0.48) : int(width * 0.93)] = True
+    elif kind == "checkerboard_breakup":
+        cell = max(4, min(width, height) // 16)
+        phase_x = int(rng.integers(0, cell))
+        phase_y = int(rng.integers(0, cell))
+        checker = ((xx + phase_x) // cell + (yy + phase_y) // cell) % 2 == 0
+        mask[checker] = True
+        mask_family_metadata["checker_cell"] = cell
+        mask_family_metadata["checker_phase"] = [phase_x, phase_y]
+    elif kind == "frame_with_corner_gap":
+        thickness = max(1, min(width, height) // 24)
+        gap_w = max(1, width // 6)
+        gap_h = max(1, height // 6)
+        cx = width // 2 - gap_w // 2
+        cy = height // 2 - gap_h // 2
+        mask[:thickness, :] = True
+        mask[-thickness:, :] = True
+        mask[:, :thickness] = True
+        mask[:, -thickness:] = True
+        mask[cy : cy + gap_h, cx : cx + gap_w] = False
+        mask_family_metadata["frame_thickness"] = thickness
+        mask_family_metadata["frame_gap"] = [cx, cy, gap_w, gap_h]
+    elif kind == "off_canvas_ellipse":
+        cx = -int(width * 0.18)
+        cy = int(height * 1.15)
+        rx = max(1, int(width * 0.55))
+        ry = max(1, int(height * 0.38))
+        mask[((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2 <= 1.0] = True
+        mask_family_metadata["ellipse_center"] = [cx, cy]
+        mask_family_metadata["ellipse_radii"] = [rx, ry]
+    elif kind == "single_pixel_noise":
+        cx = int(rng.integers(0, max(1, width)))
+        cy = int(rng.integers(0, max(1, height)))
+        mask[cy, cx] = True
+        mask_family_metadata["single_pixel"] = [cx, cy]
     else:
         raise ValueError(f"Unknown adversarial mask kind: {kind}")
 
@@ -81,6 +116,7 @@ def generate_adversarial_mask(
         "seed": seed,
         "foreground_true": True,
         "expected_effect": _mask_effect(kind),
+        "mask_family_metadata": mask_family_metadata,
     }
     return mask, metadata
 
@@ -101,9 +137,20 @@ def apply_degradation(image: Any, kind: str, seed: int = 0) -> tuple[Any, dict[s
         params["quality"] = quality
         arr = _jpeg_roundtrip(arr.astype(np.uint8), quality).astype(np.float32)
     elif kind == "blur":
-        radius = 1.6
+        radius = 2
         params["radius"] = radius
-        arr = _box_blur(arr, radius=2)
+        arr = _box_blur(arr, radius=radius)
+    elif kind == "salt_and_pepper":
+        ratio = 0.005
+        count = max(8, int(arr.size * ratio))
+        count = min(arr.size, count)
+        indices = rng.choice(arr.size, size=count, replace=False)
+        flips = rng.random(count) < 0.5
+        flat = arr.reshape(-1)
+        flat[indices[flips]] = 0.0
+        flat[indices[~flips]] = 255.0
+        params["impulse_ratio"] = ratio
+        params["impulse_count"] = count
     elif kind == "paper_sketch_lines":
         line_count = 22
         params["line_count"] = line_count
@@ -138,6 +185,34 @@ def apply_degradation(image: Any, kind: str, seed: int = 0) -> tuple[Any, dict[s
     elif kind == "tilted_input":
         params["tilt_degrees"] = 7.5
         arr = _shift_rows(arr, max_shift=10)
+    elif kind == "scanline_jitter":
+        period = int(rng.integers(7, 18))
+        thickness = int(rng.integers(1, 3))
+        phase = int(rng.integers(0, period))
+        gain = float(rng.uniform(0.55, 0.9))
+        for y in range(phase, arr.shape[0], period):
+            arr[y : y + thickness] = np.clip(arr[y : y + thickness] * gain, 0, 255)
+        params["scanline_period"] = period
+        params["scanline_thickness"] = thickness
+        params["scanline_gain"] = gain
+        params["scanline_phase"] = phase
+    elif kind == "radial_vignette":
+        yy_v, xx_v = np.ogrid[:arr.shape[0], :arr.shape[1]]
+        cx = float(rng.uniform(0.35, 0.65) * arr.shape[1])
+        cy = float(rng.uniform(0.35, 0.65) * arr.shape[0])
+        dx = (xx_v - cx) / float(max(1, arr.shape[1]))
+        dy = (yy_v - cy) / float(max(1, arr.shape[0]))
+        radius = np.sqrt(dx * dx + dy * dy)
+        falloff = 1.0 - np.clip((radius - 0.25) / 0.75, 0.0, 1.0) ** 1.5
+        arr = np.clip(arr * falloff, 0, 255)
+        params["vignette_center"] = [float(cx), float(cy)]
+        params["vignette_falloff"] = 0.75
+    elif kind == "posterize":
+        levels = int(rng.integers(4, 18))
+        levels = max(2, levels)
+        step = 256.0 / float(levels - 1)
+        arr = np.clip(np.round(arr / step) * step, 0, 255)
+        params["posterize_levels"] = levels
     else:
         raise ValueError(f"Unknown degradation kind: {kind}")
 
@@ -219,6 +294,10 @@ def _mask_effect(kind: str) -> str:
         "full_canvas_near_threshold": "checks full-canvas foreground rejection",
         "ambiguous_polarity_pair": "checks dark/light polarity ambiguity",
         "inconsistent_front_side": "checks deliberate view disagreement",
+        "checkerboard_breakup": "checks high-frequency boundary consistency",
+        "frame_with_corner_gap": "checks border contact plus intentional hole handling",
+        "off_canvas_ellipse": "checks silhouette clipping for out-of-frame geometry",
+        "single_pixel_noise": "checks degenerate tiny-object fallback behavior",
     }.get(kind, "adversarial mask")
 
 
@@ -228,10 +307,14 @@ def _degradation_effect(kind: str) -> str:
         "blur": "softens foreground boundary",
         "paper_sketch_lines": "adds non-object sketch strokes",
         "partial_occlusion": "hides a known foreground section",
+        "salt_and_pepper": "adds impulse noise at deterministic sparse locations",
         "uneven_lighting": "moves threshold by image position",
         "low_contrast": "compresses foreground/background separation",
         "alpha_premultiplication": "fades object through alpha blending",
         "transparent_rgb_noise": "adds faint RGB noise in transparent-like regions",
         "missing_top_view": "marks top view as unavailable",
         "tilted_input": "marks non-axis-aligned capture input",
+        "scanline_jitter": "injects deterministic horizontal line corruption",
+        "radial_vignette": "adds radial intensity roll-off",
+        "posterize": "quantizes tone levels for aliasing pressure",
     }.get(kind, "capture degradation")
