@@ -599,6 +599,28 @@ def run_primitive_fit_pipeline(request: object) -> object:
         warnings.append(
             f"optimization stopped by {result.optimization_termination_reason}"
         )
+    status = "success" if result.primitives else "skipped"
+    degraded = False
+    errors_out: tuple[str, ...] = ()
+    if result.primitives and improved <= 0.0:
+        no_improvement_message = "primitive fit objective did not improve"
+        if bool(
+            config.get("require_objective_improvement")
+            or config.get("fail_on_no_improvement")
+        ):
+            status = "failed"
+            errors_out = (no_improvement_message,)
+        else:
+            status = "degraded"
+            degraded = True
+    if (
+        result.primitives
+        and result.optimization_termination_reason
+        in {"elapsed_time_budget", "objective_evaluation_budget"}
+        and status == "success"
+    ):
+        status = "degraded"
+        degraded = True
 
     elapsed = time.perf_counter() - start
     metric = CandidateMetrics(
@@ -643,12 +665,14 @@ def run_primitive_fit_pipeline(request: object) -> object:
     return CandidateResult(
         candidate_id=candidate_id,
         backend_name=backend_name,
-        status="success" if result.primitives else "skipped",
+        status=status,
         primitive_path=primitive_path,
         mesh_path=mesh_path,
         metric_result=metric,
         artifacts=artifacts,
         warnings=tuple(warnings),
+        errors=errors_out,
+        degraded=degraded,
         payload=result,
     )
 
