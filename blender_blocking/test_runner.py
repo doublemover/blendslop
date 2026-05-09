@@ -68,6 +68,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_manifest_schema", "utils.test_manifest_schema"),
     ("pure_config_defaults", "test_config_defaults"),
     ("pure_config_validation", "test_config_validation"),
+    ("pure_optional_deps", "test_optional_deps"),
     ("pure_profile_models", "test_profile_models"),
     ("pure_primitive_placement_math", "placement.test_primitive_placement_math"),
     ("pure_image_processor_rgba", "test_image_processor_rgba"),
@@ -92,6 +93,17 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_metrics_foundation", "test_metrics_foundation"),
     ("pure_reconstruction_contracts", "test_reconstruction_contracts"),
     ("pure_reconstruction_backends", "test_reconstruction_backends"),
+    ("pure_refinement_lab_contracts", "test_refinement_lab_contracts"),
+    ("pure_refinement_lab_presets", "test_refinement_lab_presets"),
+    ("pure_refinement_lab_matrix", "test_refinement_lab_matrix"),
+    ("pure_refinement_lab_parameter_search", "test_refinement_lab_parameter_search"),
+    ("pure_refinement_lab_index", "test_refinement_lab_index"),
+    ("pure_refinement_lab_autopsy", "test_refinement_lab_autopsy"),
+    ("pure_refinement_lab_bounds_debug", "test_refinement_lab_bounds_debug"),
+    ("pure_refinement_lab_report", "test_refinement_lab_report"),
+    ("pure_refinement_lab_human_labels", "test_refinement_lab_human_labels"),
+    ("pure_refinement_lab_runner", "test_refinement_lab_runner"),
+    ("pure_refinement_lab_cli", "test_refinement_lab_cli"),
 ]
 
 

@@ -16,9 +16,11 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import sys
 from pathlib import Path
 import json
+import re
 from dataclasses import fields, is_dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, Mapping, Optional, Sequence, Tuple
@@ -178,6 +180,32 @@ def _json_dump(path: Path, payload: Mapping[str, Any]) -> None:
     )
 
 
+def _bounded_slug(value: object, *, max_len: int = 32) -> str:
+    text = str(value or "default").strip()
+    slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", text).strip("-._")
+    if not slug:
+        slug = "default"
+    if len(slug) <= max_len:
+        return slug
+    digest = hashlib.sha1(slug.encode("utf-8")).hexdigest()[:8]
+    head_len = max(1, max_len - len(digest) - 1)
+    return f"{slug[:head_len]}-{digest}"
+
+
+def _render_filename_prefix(
+    base_name: Optional[str],
+    technique: str,
+    config_label: str,
+) -> str:
+    """Build a readable but path-safe prefix for refinement render outputs."""
+    parts = []
+    if base_name:
+        parts.append(_bounded_slug(base_name, max_len=10))
+    parts.append(_bounded_slug(technique or "legacy", max_len=14))
+    parts.append(_bounded_slug(config_label or "default", max_len=18))
+    return "_".join(parts) + "_"
+
+
 def _is_renderable_mesh(value: object) -> bool:
     return getattr(value, "type", None) == "MESH"
 
@@ -227,9 +255,21 @@ def _import_obj_for_render(path: Path) -> Optional[object]:
     before = {obj.name for obj in bpy.context.scene.objects}
     try:
         if hasattr(bpy.ops.wm, "obj_import"):
-            bpy.ops.wm.obj_import(filepath=str(path))
+            # Backend OBJ writers emit Blender Z-up coordinates directly.  The
+            # Blender 5 importer defaults to Y-up OBJ conversion, which rotates
+            # visual-hull meshes into a top-like front render and collapses
+            # side/top IoU.  Preserve the file coordinates during validation.
+            bpy.ops.wm.obj_import(
+                filepath=str(path),
+                forward_axis="Y",
+                up_axis="Z",
+            )
         else:
-            bpy.ops.import_scene.obj(filepath=str(path))
+            bpy.ops.import_scene.obj(
+                filepath=str(path),
+                axis_forward="Y",
+                axis_up="Z",
+            )
     except Exception as exc:
         print(f"Warning: failed to import OBJ for render validation: {exc}")
         return None
@@ -335,6 +375,8 @@ class E2EValidator:
         config_label: str = "default",
         validation_mode: str = "auto",
         render_output_dir: Optional[Path] = None,
+        debug_output_dir: Optional[Path] = None,
+        artifact_root: Optional[Path] = None,
         result_json: Optional[Path] = None,
         run_id: Optional[str] = None,
         progress: bool = False,
@@ -351,11 +393,25 @@ class E2EValidator:
         self.render_config = render_config or self.workflow_config.render_silhouette
         self.config_label = config_label
         self.validation_mode = validation_mode
-        self.render_output_dir = (
-            render_output_dir
-            or Path(__file__).parent / "test_output" / "e2e_renders"
+        default_render_dir = Path(__file__).parent / "test_output" / "e2e_renders"
+        self.render_output_dir = Path(
+            render_output_dir or default_render_dir
+        ).resolve(strict=False)
+        self.debug_output_dir = (
+            Path(debug_output_dir).resolve(strict=False)
+            if debug_output_dir is not None
+            else None
         )
-        self.result_json = result_json
+        self.artifact_root = (
+            Path(artifact_root).resolve(strict=False)
+            if artifact_root is not None
+            else None
+        )
+        self.result_json = (
+            Path(result_json).resolve(strict=False)
+            if result_json is not None
+            else None
+        )
         self.run_id = run_id
         self.progress = progress
         self.results = {}
@@ -432,7 +488,13 @@ class E2EValidator:
         print("Generating reconstruction from reference images...")
         from blender_blocking.main_integration import BlockingWorkflow
 
-        context = GenerationContext(run_id=self.run_id) if self.run_id else None
+        context = (
+            GenerationContext(run_id=self.run_id)
+            if self.run_id
+            else GenerationContext()
+        )
+        if self.artifact_root is not None:
+            context.artifact_root = str(self.artifact_root)
         workflow = BlockingWorkflow(
             front_path=reference_paths.get("front"),
             side_path=reference_paths.get("side"),
@@ -528,10 +590,7 @@ class E2EValidator:
             else "legacy"
         )
         config_label = self.config_label or "default"
-        if base_name:
-            filename_prefix = f"{base_name}_{technique}_{config_label}_"
-        else:
-            filename_prefix = f"{technique}_{config_label}_"
+        filename_prefix = _render_filename_prefix(base_name, technique, config_label)
         render_progress = progress_bar(
             len(views), desc="render_views", enabled=self.progress
         )
@@ -608,7 +667,10 @@ class E2EValidator:
             threshold = self.view_thresholds.get(view, self.iou_threshold)
 
             if PIL_AVAILABLE:
-                debug_dir = Path(__file__).parent / "test_output" / "debug_silhouettes"
+                debug_dir = (
+                    self.debug_output_dir
+                    or Path(__file__).parent / "test_output" / "debug_silhouettes"
+                )
                 debug_dir.mkdir(parents=True, exist_ok=True)
                 Image.fromarray(ref_mask.astype(np.uint8) * 255).save(
                     debug_dir / f"{view}_ref_silhouette.png"
@@ -720,6 +782,8 @@ def test_with_sample_images(
     config_label: str = "default",
     validation_mode: str = "auto",
     render_output_dir: Optional[Path] = None,
+    debug_output_dir: Optional[Path] = None,
+    artifact_root: Optional[Path] = None,
     result_json: Optional[Path] = None,
     run_id: Optional[str] = None,
     progress: bool = False,
@@ -760,6 +824,8 @@ def test_with_sample_images(
         config_label=config_label,
         validation_mode=validation_mode,
         render_output_dir=render_output_dir,
+        debug_output_dir=debug_output_dir,
+        artifact_root=artifact_root,
         result_json=result_json,
         run_id=run_id,
         progress=progress,
@@ -788,6 +854,8 @@ def test_with_custom_images(
     config_label: str = "default",
     validation_mode: str = "auto",
     render_output_dir: Optional[Path] = None,
+    debug_output_dir: Optional[Path] = None,
+    artifact_root: Optional[Path] = None,
     result_json: Optional[Path] = None,
     run_id: Optional[str] = None,
     progress: bool = False,
@@ -813,6 +881,8 @@ def test_with_custom_images(
         config_label=config_label,
         validation_mode=validation_mode,
         render_output_dir=render_output_dir,
+        debug_output_dir=debug_output_dir,
+        artifact_root=artifact_root,
         result_json=result_json,
         run_id=run_id,
         progress=progress,
@@ -946,6 +1016,7 @@ def run_synthetic_suite_matrix(
                     config_label=mode_label,
                     validation_mode=validation_mode,
                     render_output_dir=case_dir / "renders",
+                    artifact_root=case_dir / "artifacts",
                     result_json=case_json,
                     run_id=case_run_id,
                     progress=progress,
@@ -1419,6 +1490,8 @@ Default ensemble:
     primitive.add_argument("--primitive-steps", type=int, default=None)
     primitive.add_argument("--primitive-checkpoint-cadence", type=int, default=None)
     primitive.add_argument("--primitive-fail-on-regression", action=argparse.BooleanOptionalAction, default=None)
+    primitive.add_argument("--primitive-max-runtime-s", type=float, default=None)
+    primitive.add_argument("--primitive-max-objective-evaluations", type=int, default=None)
 
     gaussian = parser.add_argument_group("gaussian and ellipsoid proxy")
     gaussian.add_argument("--gaussian-count", type=int, default=None)
@@ -1487,6 +1560,47 @@ Default ensemble:
     )
     misc.add_argument("--synthetic-commit-small-fixtures-only", action=argparse.BooleanOptionalAction, default=None)
     misc.add_argument("--synthetic-keep-heavy-artifacts", action=argparse.BooleanOptionalAction, default=None)
+    misc.add_argument(
+        "--artifact-output-root",
+        type=Path,
+        default=None,
+        help="Write reconstruction backend artifacts under this root.",
+    )
+
+    refinement = parser.add_argument_group("refinement lab")
+    refinement.add_argument("--refinement-suite", type=str, default=None)
+    refinement.add_argument("--refinement-track", type=str, default=None)
+    refinement.add_argument("--refinement-search", choices=("grid", "random", "coordinate", "successive_halving"), default=None)
+    refinement.add_argument(
+        "--refinement-objective",
+        choices=(
+            "quality_win",
+            "min_view_iou",
+            "mean_iou",
+            "profile_editable",
+            "visual_hull_alignment",
+            "fast_preview",
+            "human_adjusted",
+        ),
+        default=None,
+    )
+    refinement.add_argument("--refinement-result-root", type=Path, default=None)
+    refinement.add_argument("--refinement-preset-json", type=Path, default=None)
+    refinement.add_argument("--refinement-max-runs", type=int, default=None)
+    refinement.add_argument("--refinement-top-k", type=int, default=None)
+    refinement.add_argument("--refinement-seed", type=int, default=None)
+    refinement.add_argument("--refinement-html-report", action=argparse.BooleanOptionalAction, default=None)
+    refinement.add_argument("--refinement-write-overlays", action=argparse.BooleanOptionalAction, default=None)
+    refinement.add_argument("--refinement-bounds-debug", action=argparse.BooleanOptionalAction, default=None)
+    refinement.add_argument("--refinement-autopsy", action=argparse.BooleanOptionalAction, default=None)
+    refinement.add_argument("--refinement-copy-references", action=argparse.BooleanOptionalAction, default=None)
+    refinement.add_argument("--refinement-stop-on-first-error", action="store_true")
+    refinement.add_argument("--refinement-fail-on-all-failed", action=argparse.BooleanOptionalAction, default=None)
+    refinement.add_argument("--refinement-append-global-index", action=argparse.BooleanOptionalAction, default=None)
+    refinement.add_argument("--refinement-report-failures", choices=("top", "all", "none"), default=None)
+    refinement.add_argument("--refinement-subprocess", action="store_true")
+    refinement.add_argument("--refinement-blender-exe", type=str, default=None)
+
     misc.add_argument(
         "--no-progress",
         action="store_false",
@@ -1745,6 +1859,12 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
     _set_if_not_none(
         cfg.primitive_fit, "fail_on_regression", args.primitive_fail_on_regression
     )
+    _set_if_not_none(cfg.primitive_fit, "max_runtime_s", args.primitive_max_runtime_s)
+    _set_if_not_none(
+        cfg.primitive_fit,
+        "max_objective_evaluations",
+        args.primitive_max_objective_evaluations,
+    )
 
     _set_if_not_none(cfg.gaussian_ellipsoid, "primitive_count", args.gaussian_count)
     _set_if_not_none(
@@ -1828,6 +1948,42 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
         args.synthetic_keep_heavy_artifacts,
     )
 
+    _set_if_not_none(cfg.refinement_lab, "default_suite", args.refinement_suite)
+    _set_if_not_none(cfg.refinement_lab, "default_track", args.refinement_track)
+    _set_if_not_none(cfg.refinement_lab, "default_search", args.refinement_search)
+    _set_if_not_none(cfg.refinement_lab, "default_objective", args.refinement_objective)
+    _set_if_not_none(
+        cfg.refinement_lab,
+        "default_output_root",
+        str(args.refinement_result_root) if args.refinement_result_root else None,
+    )
+    _set_if_not_none(cfg.refinement_lab, "max_runs", args.refinement_max_runs)
+    _set_if_not_none(cfg.refinement_lab, "top_k", args.refinement_top_k)
+    _set_if_not_none(cfg.refinement_lab, "html_report", args.refinement_html_report)
+    _set_if_not_none(cfg.refinement_lab, "write_overlays", args.refinement_write_overlays)
+    _set_if_not_none(
+        cfg.refinement_lab, "write_bounds_debug", args.refinement_bounds_debug
+    )
+    _set_if_not_none(cfg.refinement_lab, "write_autopsy", args.refinement_autopsy)
+    _set_if_not_none(cfg.refinement_lab, "copy_references", args.refinement_copy_references)
+    _set_if_not_none(
+        cfg.refinement_lab, "fail_on_all_failed", args.refinement_fail_on_all_failed
+    )
+    _set_if_not_none(
+        cfg.refinement_lab, "append_leaderboard", args.refinement_append_global_index
+    )
+    _set_if_not_none(
+        cfg.refinement_lab, "report_failures", args.refinement_report_failures
+    )
+    _set_if_not_none(
+        cfg.refinement_lab, "allow_subprocess_blender", args.refinement_subprocess
+    )
+    _set_if_not_none(
+        cfg.refinement_lab, "blender_executable", args.refinement_blender_exe
+    )
+    if args.refinement_stop_on_first_error:
+        cfg.refinement_lab.stop_on_first_error = True
+
 
 def _derive_config_label(args: argparse.Namespace) -> str:
     if args.config_path:
@@ -1841,6 +1997,150 @@ def _derive_config_label(args: argparse.Namespace) -> str:
     if args.config_json:
         return "inline"
     return "default"
+
+
+def _refinement_requested(args: argparse.Namespace) -> bool:
+    return any(
+        (
+            args.refinement_suite,
+            args.refinement_track,
+            args.refinement_search,
+            args.refinement_objective,
+            args.refinement_result_root,
+            args.refinement_preset_json,
+        )
+    )
+
+
+def _build_refinement_plan_from_args(
+    args: argparse.Namespace,
+    workflow_config: BlockingConfig,
+    *,
+    custom_reference_paths: Optional[Mapping[str, Path]] = None,
+):
+    from blender_blocking.refinement_lab.matrix import build_experiment_plan
+    from blender_blocking.refinement_lab.presets import get_track_preset
+
+    refinement_cfg = workflow_config.refinement_lab
+    preset_overrides: Dict[str, Any] = {}
+    if args.refinement_preset_json:
+        with open(args.refinement_preset_json, "r", encoding="utf-8") as handle:
+            preset_overrides = json.load(handle)
+    suite = (
+        args.refinement_suite
+        or preset_overrides.get("suite")
+        or refinement_cfg.default_suite
+    )
+    track_name = (
+        args.refinement_track
+        or preset_overrides.get("track")
+        or refinement_cfg.default_track
+    )
+    track = get_track_preset(track_name)
+    search = (
+        args.refinement_search
+        or preset_overrides.get("search")
+        or track.default_search
+        or refinement_cfg.default_search
+    )
+    objective = (
+        args.refinement_objective
+        or preset_overrides.get("objective")
+        or track.default_objective
+        or refinement_cfg.default_objective
+    )
+    result_root = Path(
+        args.refinement_result_root
+        or preset_overrides.get("result_root", "")
+        or refinement_cfg.default_output_root
+    )
+    seed = (
+        args.refinement_seed
+        if args.refinement_seed is not None
+        else int(preset_overrides.get("seed", workflow_config.synthetic_factory.seed))
+    )
+    max_runs = (
+        args.refinement_max_runs
+        if args.refinement_max_runs is not None
+        else preset_overrides.get("max_runs", refinement_cfg.max_runs)
+    )
+    top_k = (
+        args.refinement_top_k
+        if args.refinement_top_k is not None
+        else int(preset_overrides.get("top_k", refinement_cfg.top_k))
+    )
+    plan = build_experiment_plan(
+        suite=suite,
+        track=track_name,
+        search=search,
+        objective=objective,
+        output_root=result_root,
+        seed=seed,
+        max_runs=max_runs,
+        top_k=top_k,
+        custom_reference_paths=custom_reference_paths,
+    )
+    summary = {
+        "suite": suite,
+        "track": track_name,
+        "search": search,
+        "objective": objective,
+        "seed": seed,
+        "max_runs": max_runs,
+        "top_k": top_k,
+    }
+    return plan, track, summary
+
+
+def _run_refinement_from_args(
+    args: argparse.Namespace,
+    workflow_config: BlockingConfig,
+    *,
+    custom_reference_paths: Optional[Mapping[str, Path]] = None,
+) -> bool:
+    from blender_blocking.refinement_lab.runner import RunOptions, runner_for_plan
+
+    refinement_cfg = workflow_config.refinement_lab
+    plan, track, summary = _build_refinement_plan_from_args(
+        args,
+        workflow_config,
+        custom_reference_paths=custom_reference_paths,
+    )
+    options = RunOptions(
+        html_report=refinement_cfg.html_report,
+        write_overlays=refinement_cfg.write_overlays or track.force_overlays,
+        write_bounds_debug=refinement_cfg.write_bounds_debug or track.force_bounds_debug,
+        write_autopsy=refinement_cfg.write_autopsy or track.force_autopsy,
+        copy_references=refinement_cfg.copy_references,
+        stop_on_first_error=refinement_cfg.stop_on_first_error,
+        fail_on_all_failed=refinement_cfg.fail_on_all_failed,
+        append_global_index=refinement_cfg.append_leaderboard,
+        report_failures=refinement_cfg.report_failures,
+        subprocess_blender=bool(
+            args.refinement_subprocess or refinement_cfg.allow_subprocess_blender
+        ),
+        blender_executable=args.refinement_blender_exe or refinement_cfg.blender_executable,
+        progress=args.progress,
+    )
+    _print_rule("BLENDSLOP REFINEMENT LAB", width=72)
+    _print_kv_table(
+        (
+            ("suite", summary["suite"]),
+            ("track", summary["track"]),
+            ("search", summary["search"]),
+            ("objective", summary["objective"]),
+            ("run_root", plan.output_root),
+            ("cases", len(plan.cases)),
+            ("variants", len(plan.variants)),
+        )
+    )
+    ok, _results = runner_for_plan(
+        plan,
+        options=options,
+        base_config=workflow_config,
+    ).run()
+    print(f"\nRefinement report: {plan.output_root / 'report.html'}")
+    return ok
 
 
 if __name__ == "__main__":
@@ -1882,19 +2182,56 @@ if __name__ == "__main__":
         _print_rule("RESOLVED CONFIG", width=72)
         print(json.dumps(workflow_config.to_dict(), indent=2, sort_keys=True))
 
-    if args.dry_run:
-        print("\nDry run complete: config resolved and validated.")
-        sys.exit(0)
-
-    if not BLENDER_AVAILABLE:
-        print("ERROR: This validation CLI must be run inside Blender.")
-        print("Run: blender --background --python blender_blocking/test_e2e_validation.py -- [options]")
-        sys.exit(1)
+    refinement_requested = _refinement_requested(args)
 
     custom_paths = [args.front, args.side, args.top]
     if any(custom_paths) and not all(custom_paths):
         print("ERROR: --front, --side, and --top must be provided together.")
         sys.exit(2)
+    custom_reference_paths = None
+    if all(custom_paths):
+        custom_reference_paths = {
+            "front": Path(args.front),
+            "side": Path(args.side),
+            "top": Path(args.top),
+        }
+
+    if args.dry_run:
+        if refinement_requested:
+            plan, _track, summary = _build_refinement_plan_from_args(
+                args,
+                workflow_config,
+                custom_reference_paths=custom_reference_paths,
+            )
+            _print_rule("REFINEMENT PLAN", width=72)
+            _print_kv_table(
+                (
+                    ("suite", summary["suite"]),
+                    ("track", summary["track"]),
+                    ("search", summary["search"]),
+                    ("objective", summary["objective"]),
+                    ("run_root", plan.output_root),
+                    ("cases", len(plan.cases)),
+                    ("variants", len(plan.variants)),
+                    ("plan_id", plan.plan_id),
+                )
+            )
+        print("\nDry run complete: config resolved and validated.")
+        sys.exit(0)
+
+    if not BLENDER_AVAILABLE:
+        can_delegate_refinement = refinement_requested and (
+            args.refinement_subprocess
+            or workflow_config.refinement_lab.allow_subprocess_blender
+        )
+        if not can_delegate_refinement:
+            print("ERROR: This validation CLI must be run inside Blender.")
+            print("Run: blender --background --python blender_blocking/test_e2e_validation.py -- [options]")
+            print(
+                "For refinement labs from system Python, add "
+                "--refinement-subprocess --refinement-blender-exe <blender>."
+            )
+            sys.exit(1)
 
     thresholds = {
         key: value
@@ -1906,7 +2243,13 @@ if __name__ == "__main__":
         if value is not None
     }
 
-    if args.synthetic_matrix:
+    if refinement_requested:
+        success = _run_refinement_from_args(
+            args,
+            workflow_config,
+            custom_reference_paths=custom_reference_paths,
+        )
+    elif args.synthetic_matrix:
         matrix_root = Path(
             args.synthetic_output_root or workflow_config.synthetic_factory.output_root
         )
@@ -1966,6 +2309,7 @@ if __name__ == "__main__":
             config_label=config_label,
             validation_mode=args.validation_mode,
             render_output_dir=args.render_output_dir,
+            artifact_root=args.artifact_output_root,
             result_json=args.result_json,
             run_id=args.run_id,
             progress=args.progress,
@@ -1980,6 +2324,7 @@ if __name__ == "__main__":
             config_label=config_label,
             validation_mode=args.validation_mode,
             render_output_dir=args.render_output_dir,
+            artifact_root=args.artifact_output_root,
             result_json=args.result_json,
             run_id=args.run_id,
             progress=args.progress,

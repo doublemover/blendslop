@@ -10,6 +10,7 @@ from config import (
     MeshJoinConfig,
     GaussianEllipsoidConfig,
     ProfileSamplingConfig,
+    RefinementLabConfig,
     ReconstructionConfig,
     RenderConfig,
     SilhouetteExtractConfig,
@@ -70,6 +71,31 @@ class TestConfigValidation(unittest.TestCase):
 
     def test_invalid_optional_dependency_policy(self) -> None:
         cfg = DifferentiableRenderConfig(optional_dependency_policy="maybe")
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_refinement_search(self) -> None:
+        cfg = RefinementLabConfig(default_search="bad_search")
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_refinement_objective(self) -> None:
+        cfg = RefinementLabConfig(default_objective="bad_objective")
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_refinement_max_runs(self) -> None:
+        cfg = RefinementLabConfig(max_runs=0)
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_refinement_top_k(self) -> None:
+        cfg = RefinementLabConfig(top_k=0)
+        with self.assertRaises(ValueError):
+            cfg.validate()
+
+    def test_invalid_refinement_report_failures(self) -> None:
+        cfg = RefinementLabConfig(report_failures="everything")
         with self.assertRaises(ValueError):
             cfg.validate()
 
