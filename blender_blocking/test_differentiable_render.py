@@ -117,6 +117,30 @@ class TestDifferentiableRender(unittest.TestCase):
             self.assertEqual(result.artifacts["primitive_json"], result.primitive_path)
             self.assertEqual(result.artifacts["mesh_obj"], result.mesh_path)
 
+    def test_objective_regression_can_fail_strict_candidate(self) -> None:
+        request = CandidateRequest(
+            candidate_id="cpu-soft-regression",
+            backend_name="differentiable_refine",
+            target=self.make_target(),
+            config={
+                "backend": "cpu_soft_silhouette",
+                "primitive_count": 2,
+                "target_point_count": 4,
+                "require_objective_improvement": True,
+            },
+        )
+        losses = [
+            diff_render.LossResult(total=1.0, terms={"area_iou": 0.0}, per_view={}),
+            diff_render.LossResult(total=2.0, terms={"area_iou": 1.0}, per_view={}),
+        ]
+
+        with patch.object(diff_render, "evaluate_render_loss", side_effect=losses):
+            result = diff_render.run_refinement_candidate(request)
+
+        self.assertEqual(result.status, "failed")
+        self.assertFalse(result.succeeded)
+        self.assertIn("objective worsened", "\n".join(result.errors))
+
 
 class _MissingNvdiffrastBackend:
     available = False

@@ -1401,17 +1401,32 @@ def run_refinement_candidate(request: object) -> object:
         },
     )
     warnings = tuple(loss.warnings) + tuple(baseline_loss.warnings) + tuple(config_warnings) + tuple(target_signal_warnings)
+    errors: tuple[str, ...] = ()
+    status = "success" if primitives else "skipped"
+    degraded = False
     if objective_improvement < 0.0:
-        warnings = warnings + ("objective worsened relative to baseline zero silhouette",)
+        regression_message = "objective worsened relative to baseline zero silhouette"
+        warnings = warnings + (regression_message,)
+        if bool(
+            config.get("fail_on_objective_regression")
+            or config.get("require_objective_improvement")
+        ):
+            status = "failed"
+            errors = (regression_message,)
+        elif primitives:
+            status = "degraded"
+            degraded = True
     return CandidateResult(
         candidate_id=candidate_id,
         backend_name=backend_name,
-        status="success" if primitives else "skipped",
+        status=status,
         primitive_path=primitive_path,
         mesh_path=mesh_path,
         metric_result=metrics,
         artifacts=artifacts,
         warnings=warnings,
+        errors=errors,
+        degraded=degraded,
         payload={
             "primitives": primitives,
             "loss": loss,
