@@ -85,6 +85,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_profile_combination", "test_profile_combination"),
     ("pure_slice_shape_metrics", "test_slice_shape_metrics"),
     ("pure_topology_guard", "test_topology_guard"),
+    ("pure_retopology_policy", "test_retopology_policy"),
     ("pure_resfitting_metrics", "test_resfitting_metrics"),
     ("pure_visual_hull", "integration.multi_view.test_visual_hull"),
     ("pure_silhouette_pipeline", "test_silhouette_pipeline"),
