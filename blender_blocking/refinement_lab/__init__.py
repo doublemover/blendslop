@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .adaptive_planner import (
+from .adaptive import (
     RefinementProposal,
     proposals_from_bundle,
     proposals_from_result_payload,

@@ -12,7 +12,7 @@ import sys
 import time
 from typing import Any, Mapping, Sequence
 
-from .adaptive_planner import merge_proposals, proposals_from_result_payload
+from .adaptive import merge_proposals, proposals_from_result_payload
 from .artifact_report import ReportOptions, generate_report
 from .bounds_debug import build_bounds_debug_report
 from .candidate_autopsy import autopsy_candidate

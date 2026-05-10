@@ -7,7 +7,7 @@ import json
 import tempfile
 import unittest
 
-from refinement_lab.adaptive_planner import proposals_from_bundle
+from refinement_lab.adaptive import proposals_from_bundle
 from refinement_lab.adaptive_loop import AdaptiveLoopOptions, run_adaptive_loop
 from refinement_lab.contracts import ExperimentPlan, ExperimentResult
 from refinement_lab.runner import RunOptions

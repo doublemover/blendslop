@@ -12,7 +12,7 @@ from refinement_lab.parameters import (
     parameter_path,
     validate_parameter_catalog,
 )
-from refinement_lab.presets import get_track_preset, list_tracks
+from refinement_lab.preset_catalog import get_track_preset, list_tracks
 from refinement_lab.runner import _apply_variant_to_config
 
 

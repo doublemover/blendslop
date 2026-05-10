@@ -17,7 +17,7 @@ from .contracts import (
     safe_slug,
     stable_hash,
 )
-from .presets import SuitePreset, TrackPreset, get_suite_preset, get_track_preset
+from .preset_catalog import SuitePreset, TrackPreset, get_suite_preset, get_track_preset
 
 try:
     from blender_blocking.synthetic.quality_targets import quality_targets_for

@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
-from .contracts import ExperimentVariant, safe_slug, stable_hash
+from ..contracts import ExperimentVariant, safe_slug, stable_hash
 
 
 _DIRECT_METRIC_ALIASES = {

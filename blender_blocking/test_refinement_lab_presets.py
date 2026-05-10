@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from refinement_lab.presets import (
+from refinement_lab.preset_catalog import (
     get_suite_preset,
     get_track_preset,
     list_suites,

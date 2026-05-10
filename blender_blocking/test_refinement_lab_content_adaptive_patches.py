@@ -12,7 +12,7 @@ from refinement_lab.content_adaptive_patches import (
     score_map_from_signals,
     select_adaptive_patches,
 )
-from refinement_lab.adaptive_planner import (
+from refinement_lab.adaptive import (
     proposals_from_bundle,
     proposals_from_result_payload,
 )

@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Mapping, Protocol, Sequence
 
-from .adaptive_planner import RefinementProposal, merge_proposals, proposals_from_result_payload
+from .adaptive import RefinementProposal, merge_proposals, proposals_from_result_payload
 from .contracts import ExperimentPlan, ExperimentResult, ExperimentVariant, json_safe, safe_slug, stable_hash
 from .matrix import build_experiment_plan
 from .parameter_search import rank_results
