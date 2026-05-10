@@ -256,7 +256,7 @@ def test_reconstruction_accuracy():
 
     # Render orthogonal views
     print("Rendering orthogonal views...")
-    rendered_paths = render_orthogonal_views('test_output/renders/')
+    rendered_paths = render_orthogonal_views('../temp/renders/')
 
     # Compare each view
     print("Comparing rendered views to references...")

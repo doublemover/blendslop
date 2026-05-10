@@ -104,7 +104,7 @@ class E2EValidator:
         self.render_config = render_config or self.workflow_config.render_silhouette
         self.config_label = config_label
         self.validation_mode = validation_mode
-        default_render_dir = BLENDER_BLOCKING_ROOT / "test_output" / "e2e_renders"
+        default_render_dir = TEMP_OUTPUT_ROOT / "e2e" / "renders"
         self.render_output_dir = Path(render_output_dir or default_render_dir).resolve(
             strict=False
         )
@@ -472,7 +472,7 @@ class E2EValidator:
             if PIL_AVAILABLE:
                 debug_dir = (
                     self.debug_output_dir
-                    or BLENDER_BLOCKING_ROOT / "test_output" / "debug_silhouettes"
+                    or TEMP_OUTPUT_ROOT / "e2e" / "debug_silhouettes"
                 )
                 debug_dir.mkdir(parents=True, exist_ok=True)
                 Image.fromarray(ref_mask.astype(np.uint8) * 255).save(

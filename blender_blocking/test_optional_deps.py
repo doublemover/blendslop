@@ -105,6 +105,22 @@ class OptionalDependencyTests(unittest.TestCase):
         self.assertEqual(fail["policy"], "fail")
         self.assertIn("unit", fail["message"])
 
+    def test_torch_dll_load_failure_reports_binary_runtime_diagnostic(self) -> None:
+        with patch.object(
+            optional_deps.importlib,
+            "import_module",
+            side_effect=OSError(
+                "[WinError 1114] A dynamic link library initialization routine failed"
+            ),
+        ):
+            dep = probe_dependency("torch", cache=False)
+
+        payload = dep.to_dict()
+        diagnostic = payload["details"]["diagnostic"]
+        self.assertFalse(dep.available)
+        self.assertEqual(diagnostic["category"], "binary_runtime_load_failure")
+        self.assertIn("CPU", diagnostic["remediation"])
+
 
 if __name__ == "__main__":
     unittest.main()

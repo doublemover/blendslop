@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import unittest
+from types import SimpleNamespace
 
 import numpy as np
 
 from placement.resfit_objective import ResFitObjectiveResult
 from placement.resfit_optimizer import CoordinateDescentConfig, coordinate_descent_optimize
+from placement.resfit.status import resfit_candidate_status
 from placement.resfitting import ResidualFitter
 from primitives.superfrustum import SuperFrustum
 
@@ -260,6 +262,46 @@ class TestResfittingMetrics(unittest.TestCase):
 
         self.assertEqual(result.termination_reason, "objective_evaluation_budget")
         self.assertLessEqual(result.objective_evaluations, 3)
+
+    def test_resfit_budget_limited_improvement_can_still_succeed(self) -> None:
+        result = SimpleNamespace(
+            primitives=(object(),),
+            warnings=(),
+            optimization_termination_reason="elapsed_time_budget",
+            final_loss=SimpleNamespace(total=0.25),
+        )
+
+        status, degraded, errors, warnings = resfit_candidate_status(
+            config={},
+            result=result,
+            improved=0.1,
+            profile_rows_present=True,
+            profile_init_warning="",
+        )
+
+        self.assertEqual(status, "success")
+        self.assertFalse(degraded)
+        self.assertEqual(errors, ())
+        self.assertIn("budget-limited primitive fit accepted", "\n".join(warnings))
+
+    def test_resfit_budget_limited_can_remain_degraded_when_strict(self) -> None:
+        result = SimpleNamespace(
+            primitives=(object(),),
+            warnings=(),
+            optimization_termination_reason="elapsed_time_budget",
+            final_loss=SimpleNamespace(total=0.25),
+        )
+
+        status, degraded, _errors, _warnings = resfit_candidate_status(
+            config={"require_optimizer_completion": True},
+            result=result,
+            improved=0.1,
+            profile_rows_present=True,
+            profile_init_warning="",
+        )
+
+        self.assertEqual(status, "degraded")
+        self.assertTrue(degraded)
 
 
 if __name__ == "__main__":

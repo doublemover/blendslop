@@ -57,6 +57,17 @@ def build_resfit_candidate_metrics(
     area_iou = min(surface_proxy_iou, silhouette_proxy_iou)
     boundary_iou = silhouette_proxy_iou
     per_view = _build_per_view_profile_summary(profile_rows)
+    budget_limited = result.optimization_termination_reason in {
+        "elapsed_time_budget",
+        "objective_evaluation_budget",
+    }
+    budget_outcome = (
+        "accepted_after_improvement"
+        if budget_limited and improved > 0.0 and result.primitives
+        else "incomplete"
+        if budget_limited
+        else "not_budget_limited"
+    )
 
     metric = CandidateMetrics(
         area_iou_min=area_iou,
@@ -111,6 +122,17 @@ def build_resfit_candidate_metrics(
                 "history_length": len(history_records),
                 "selected_attempt": result.selected_attempt,
                 "attempts": list(result.attempts),
+            },
+            "budget": {
+                "limited": budget_limited,
+                "outcome": budget_outcome,
+                "termination_reason": result.optimization_termination_reason,
+                "improved": improved > 0.0,
+                "objective_improvement": improved,
+                "max_runtime_s": max_runtime_s,
+                "max_objective_evaluations": max_objective_evaluations,
+                "objective_evaluations": result.objective_evaluations,
+                "optimizer_elapsed_s": result.optimizer_elapsed_s,
             },
             "initial_primitive_count": (
                 len(initial_primitives) if initial_primitives is not None else None

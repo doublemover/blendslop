@@ -224,6 +224,13 @@ class VolumeGridTests(unittest.TestCase):
             postprocess_status = result.metric_result.extras["mesh_postprocess"]
             self.assertEqual(postprocess_status["method"], postprocess)
             self.assertEqual(postprocess_status["status"], "skipped")
+            editable_proxy = result.metric_result.extras["editable_proxy"]
+            self.assertEqual(editable_proxy["status"], "ok")
+            self.assertIn("editable_proxy_shape_program", result.artifacts)
+            self.assertGreaterEqual(
+                result.metric_result.editability_score,
+                editable_proxy["editability_score"],
+            )
             has_postprocess_warning = any(
                 "postprocess" in warning for warning in result.warnings
             )

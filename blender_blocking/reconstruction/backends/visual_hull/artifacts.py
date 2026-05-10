@@ -115,3 +115,25 @@ def write_visual_hull_mesh_artifact(
     )
     artifacts["mesh_obj"] = mesh_path
     return mesh_path
+
+
+def write_visual_hull_editable_proxy_artifacts(
+    *,
+    root: Path,
+    program_payload: Mapping[str, Any],
+    diagnostics: Mapping[str, Any],
+    artifacts: dict[str, Path],
+) -> tuple[Path, Path]:
+    from reconstruction.artifacts import write_json
+
+    program_path = write_json(
+        root / "editable-proxy" / "shape-program.json",
+        program_payload,
+    )
+    diagnostics_path = write_json(
+        root / "editable-proxy" / "diagnostics.json",
+        diagnostics,
+    )
+    artifacts["editable_proxy_shape_program"] = program_path
+    artifacts["editable_proxy_diagnostics"] = diagnostics_path
+    return program_path, diagnostics_path

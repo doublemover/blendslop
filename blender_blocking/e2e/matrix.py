@@ -64,7 +64,7 @@ def run_synthetic_suite_matrix(
     modes: Sequence[str] = DEFAULT_SYNTHETIC_MATRIX_MODES,
     seed: int = 1234,
     count: Optional[int] = None,
-    output_root: Path = Path("test_output/e2e_synthetic"),
+    output_root: Path = TEMP_OUTPUT_ROOT / "e2e_synthetic",
     base_config: Optional[BlockingConfig] = None,
     iou_threshold: float = 0.7,
     view_thresholds: Optional[Dict[str, float]] = None,

@@ -215,7 +215,21 @@ def _candidate_per_view_metrics(
             and boundary_iou > 0.0
             and math.isfinite(signed_distance)
         )
-        reason = "" if passed else "soft silhouette did not satisfy required view gate"
+        reason = ""
+        if not passed:
+            reasons: list[str] = []
+            if area_iou < 0.5:
+                if soft_iou > 0.0:
+                    reasons.append(
+                        "soft silhouette hard-IoU gate failed despite nonzero soft overlap"
+                    )
+                else:
+                    reasons.append("silhouette has no measurable overlap")
+            if boundary_iou <= 0.0:
+                reasons.append("boundary IoU is zero")
+            if not math.isfinite(signed_distance):
+                reasons.append("signed-distance loss is non-finite")
+            reason = "; ".join(reasons) or "soft silhouette did not satisfy required view gate"
         converted[str(view)] = {
             **dict(values),
             "area_iou": area_iou,

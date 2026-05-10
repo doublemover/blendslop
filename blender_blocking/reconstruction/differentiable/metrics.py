@@ -60,6 +60,20 @@ def build_differentiable_candidate_metrics(
         for payload in candidate_per_view.values()
         if bool(payload.get("required", True)) and not bool(payload.get("passed", False))
     )
+    gate_summary = {
+        "required_view_count": sum(
+            1 for payload in candidate_per_view.values() if bool(payload.get("required", True))
+        ),
+        "failed_required_views": failed_required_views,
+        "min_area_iou": max(0.0, area_iou_min),
+        "mean_area_iou": max(0.0, area_iou_mean),
+        "mean_boundary_iou": max(0.0, boundary_iou_mean),
+        "mean_soft_iou": _mean_candidate_metric(
+            candidate_per_view,
+            "soft_iou",
+            fallback=max(0.0, soft_iou_mean),
+        ),
+    }
     metrics = CandidateMetrics(
         area_iou_min=max(0.0, area_iou_min),
         area_iou_mean=max(0.0, area_iou_mean),
@@ -78,6 +92,7 @@ def build_differentiable_candidate_metrics(
             "primitive_count": len(optimized_primitives),
             "surface_points": point_meta,
             "render_metadata": dict(getattr(render_batch, "metadata", {})),
+            "gate_summary": gate_summary,
             "topology": dict(topology_payload),
             "baseline_loss": dict(baseline_loss.terms),
             "baseline_total": float(baseline_loss.total),

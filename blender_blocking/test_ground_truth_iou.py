@@ -297,7 +297,7 @@ def main() -> int:
     ground_truth_grid = voxelize_mesh(vase, resolution=resolution)
 
     # Save ground truth for later use
-    cache_path = Path("test_output/ground_truth_voxels.pkl")
+    cache_path = Path(__file__).resolve().parents[1] / "temp" / "ground_truth_voxels.pkl"
     cache_path.parent.mkdir(exist_ok=True)
     with open(cache_path, "wb") as f:
         pickle.dump(ground_truth_grid, f)

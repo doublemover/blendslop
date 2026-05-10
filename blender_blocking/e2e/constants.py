@@ -10,6 +10,8 @@ except ImportError:
     BLENDER_AVAILABLE = False
 
 BLENDER_BLOCKING_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = BLENDER_BLOCKING_ROOT.parent
+TEMP_OUTPUT_ROOT = REPO_ROOT / "temp"
 ALL_RECONSTRUCTION_MODES = (
     "legacy",
     "loft_profile",

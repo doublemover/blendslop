@@ -321,12 +321,14 @@ def probe_dependency(import_name: str, *, cache: bool = True) -> OptionalDepende
             )
             break
         except Exception as exc:
+            diagnostic = _import_failure_diagnostic(exc, candidate)
             attempts.append(
                 {
                     "module_name": candidate,
                     "status": "import_error",
                     "error_type": type(exc).__name__,
                     "error": str(exc),
+                    "diagnostic": diagnostic,
                 }
             )
             continue
@@ -342,6 +344,10 @@ def probe_dependency(import_name: str, *, cache: bool = True) -> OptionalDepende
             error_type=str(last.get("error_type", "ImportError")),
             attempts=tuple(attempts),
             spec=spec,
+            details={
+                "diagnostic": last.get("diagnostic", {}),
+                "attempted_imports": attempted_names,
+            },
         )
     if cache:
         _CACHE[import_name] = result
@@ -397,3 +403,39 @@ def optional_policy_decision(
 def clear_dependency_cache() -> None:
     """Reset cached probes for tests."""
     _CACHE.clear()
+
+
+def _import_failure_diagnostic(exc: Exception, candidate: str) -> Dict[str, object]:
+    text = str(exc)
+    lowered = text.lower()
+    error_type = type(exc).__name__
+    category = "import_error"
+    likely_cause = "The module import failed."
+    remediation = "Install a build compatible with the active Python runtime."
+    if isinstance(exc, ModuleNotFoundError):
+        category = "missing_module"
+        likely_cause = "The package is not installed in the active Python runtime."
+        remediation = "Install the package into Blender's bundled Python or the configured user site."
+    elif (
+        "dll" in lowered
+        or "winerror 1114" in lowered
+        or "initialization routine failed" in lowered
+        or "dynamic module" in lowered
+    ):
+        category = "binary_runtime_load_failure"
+        likely_cause = (
+            "The package was found but a native extension or dependent runtime "
+            "library could not be loaded."
+        )
+        remediation = (
+            "Reinstall a wheel matching Blender's Python ABI and the machine's "
+            "CPU/GPU runtime; for torch/lpips this often means choosing a CPU, "
+            "CUDA, or ROCm build intentionally."
+        )
+    return {
+        "category": category,
+        "module_name": candidate,
+        "error_type": error_type,
+        "likely_cause": likely_cause,
+        "remediation": remediation,
+    }

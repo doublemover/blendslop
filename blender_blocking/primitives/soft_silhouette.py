@@ -202,8 +202,8 @@ def soft_mask_metrics(predicted: np.ndarray, target: np.ndarray) -> Mapping[str,
             "target_area_ratio": 0.0,
             "area_abs_diff_ratio": 0.0,
         }
-    hard_pred = pred >= 0.5
     hard_tgt = tgt >= 0.5
+    hard_pred, hard_threshold = _adaptive_hard_prediction(pred, hard_tgt)
     hard_union = float(np.logical_or(hard_pred, hard_tgt).sum())
     hard_iou = (
         float(np.logical_and(hard_pred, hard_tgt).sum()) / hard_union
@@ -226,6 +226,65 @@ def soft_mask_metrics(predicted: np.ndarray, target: np.ndarray) -> Mapping[str,
         "area_abs_diff_ratio": abs(float(pred.sum() - tgt.sum())) / pixel_count,
         "pred_boundary_area_ratio": float(_boundary_band(hard_pred).mean()),
         "target_boundary_area_ratio": float(_boundary_band(hard_tgt).mean()),
+        "pred_hard_threshold": float(hard_threshold),
+        "pred_hard_area_ratio": float(hard_pred.mean()),
+        "target_hard_area_ratio": float(hard_tgt.mean()),
+        "hard_intersection_ratio": float(np.logical_and(hard_pred, hard_tgt).sum())
+        / pixel_count,
+        "hard_union_ratio": hard_union / pixel_count,
+        **_mask_geometry_metrics("pred", hard_pred),
+        **_mask_geometry_metrics("target", hard_tgt),
+    }
+
+
+def _adaptive_hard_prediction(
+    predicted: np.ndarray,
+    target_hard: np.ndarray,
+) -> tuple[np.ndarray, float]:
+    """Harden a soft mask for diagnostics without erasing low-opacity overlap."""
+    pred = np.asarray(predicted, dtype=np.float64)
+    default_threshold = 0.5
+    hard = pred >= default_threshold
+    if hard.any() or not np.asarray(target_hard, dtype=bool).any():
+        return hard, default_threshold
+    positive = pred[pred > 0.0]
+    if positive.size == 0:
+        return hard, default_threshold
+    target_count = int(np.count_nonzero(target_hard))
+    if target_count <= 0:
+        return hard, default_threshold
+    flat = pred.ravel()
+    count = max(1, min(int(target_count), flat.size))
+    kth = flat.size - count
+    threshold = float(np.partition(flat, kth)[kth])
+    if threshold <= 0.0 or not np.isfinite(threshold):
+        threshold = float(np.min(positive))
+    threshold = min(default_threshold, max(threshold, float(np.min(positive))))
+    adaptive = pred >= threshold
+    if adaptive.any():
+        return adaptive, threshold
+    return hard, default_threshold
+
+
+def _mask_geometry_metrics(prefix: str, mask: np.ndarray) -> Mapping[str, float]:
+    hard = np.asarray(mask, dtype=bool)
+    if hard.size == 0 or not hard.any():
+        return {
+            f"{prefix}_bbox_x0": -1.0,
+            f"{prefix}_bbox_y0": -1.0,
+            f"{prefix}_bbox_x1": -1.0,
+            f"{prefix}_bbox_y1": -1.0,
+            f"{prefix}_centroid_x": -1.0,
+            f"{prefix}_centroid_y": -1.0,
+        }
+    ys, xs = np.nonzero(hard)
+    return {
+        f"{prefix}_bbox_x0": float(np.min(xs)),
+        f"{prefix}_bbox_y0": float(np.min(ys)),
+        f"{prefix}_bbox_x1": float(np.max(xs)),
+        f"{prefix}_bbox_y1": float(np.max(ys)),
+        f"{prefix}_centroid_x": float(np.mean(xs)),
+        f"{prefix}_centroid_y": float(np.mean(ys)),
     }
 
 

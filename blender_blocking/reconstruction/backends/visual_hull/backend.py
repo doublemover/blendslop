@@ -15,6 +15,7 @@ from .artifacts import (
     export_openvdb_artifact,
     save_sdf_volume_artifacts,
     save_volume_artifacts,
+    write_visual_hull_editable_proxy_artifacts,
     write_visual_hull_mesh_artifact,
 )
 from .config import direct_sparse_builder_requested, visual_hull_run_config
@@ -340,6 +341,26 @@ class VisualHullBackend(BaseBackend):
             config=request.config,
             warnings=warnings,
         )
+        effective_editability_score = 0.15
+        editable_proxy = _maybe_emit_editable_proxy(
+            target=request.target,
+            candidate_id=request.candidate_id,
+            root=root,
+            artifacts=artifacts,
+            retopology_decision=retopology_decision,
+            mesh_metrics=mesh_metrics,
+            config=request.config,
+            warnings=warnings,
+        )
+        if editable_proxy is not None:
+            mesh_metrics["editable_proxy"] = editable_proxy
+            try:
+                effective_editability_score = max(
+                    effective_editability_score,
+                    float(editable_proxy.get("editability_score", 0.0)),
+                )
+            except (TypeError, ValueError):
+                pass
 
         status, degraded = visual_hull_result_status(
             config=request.config,
@@ -353,7 +374,7 @@ class VisualHullBackend(BaseBackend):
 
         metrics = CandidateMetrics(
             per_view=per_view_metrics,
-            editability_score=0.15,
+            editability_score=effective_editability_score,
             topology_score=topology_score,
             uncertainty_consistency=float(
                 mesh_metrics.get("uncertainty_report", {}).get(
@@ -383,3 +404,115 @@ class VisualHullBackend(BaseBackend):
             degraded=degraded,
             payload=grid,
         )
+
+
+def _maybe_emit_editable_proxy(
+    *,
+    target: Any,
+    candidate_id: str,
+    root: Path | None,
+    artifacts: dict[str, Path],
+    retopology_decision: Any,
+    mesh_metrics: Mapping[str, Any],
+    config: Mapping[str, Any],
+    warnings: list[str],
+) -> dict[str, Any] | None:
+    should_emit = bool(config.get("emit_editable_proxy", True))
+    if retopology_decision is not None and getattr(
+        retopology_decision,
+        "accepted_for_editing",
+        False,
+    ):
+        should_emit = bool(config.get("always_emit_editable_proxy", False))
+    if not should_emit:
+        return None
+
+    proxy_config = {
+        "root_strategy": str(
+            config.get("editable_proxy_root_strategy", "hybrid_profile_bounds")
+        ),
+        "residual_policy": str(
+            config.get("editable_proxy_residual_policy", "suggest_patches")
+        ),
+        "max_nodes": int(config.get("editable_proxy_max_nodes", 64)),
+        "program_search_candidates": int(
+            config.get("editable_proxy_program_search_candidates", 4)
+        ),
+        "program_search_objective": str(
+            config.get("editable_proxy_program_search_objective", "editable_balanced")
+        ),
+    }
+    try:
+        from ..shape_program.builder import build_shape_program_from_target
+        from ..shape_program.editability import _complexity_penalty, _editability_score
+
+        try:
+            from blender_blocking.primitives.shape_program import validate_shape_program
+        except Exception:  # pragma: no cover - legacy script import path
+            from primitives.shape_program import validate_shape_program
+
+        program, diagnostics = build_shape_program_from_target(
+            target,
+            config=proxy_config,
+            program_id=str(
+                config.get(
+                    "editable_proxy_program_id",
+                    f"{candidate_id}_editable_proxy",
+                )
+            ),
+        )
+        validation_errors = list(validate_shape_program(program))
+        diagnostics = {
+            **dict(diagnostics),
+            "validation_errors": validation_errors,
+            "source": "visual_hull_retopology_policy",
+            "dense_mesh": dict(mesh_metrics.get("mesh", {})),
+            "retopology_policy": (
+                retopology_decision.to_dict()
+                if hasattr(retopology_decision, "to_dict")
+                else None
+            ),
+            "proxy_config": proxy_config,
+        }
+        editability_score = float(
+            _editability_score(program, proxy_config, compiled=False)
+        )
+        payload = {
+            "available": not validation_errors,
+            "status": "ok" if not validation_errors else "failed",
+            "kind": "shape_program",
+            "editability_score": editability_score,
+            "complexity_penalty": float(_complexity_penalty(program, proxy_config)),
+            "program": program.to_dict(),
+            "diagnostics": diagnostics,
+            "accepted_for_editing": not validation_errors,
+            "dense_mesh_retained": True,
+            "message": (
+                "editable shape-program proxy emitted for dense visual hull"
+                if not validation_errors
+                else "editable proxy validation failed"
+            ),
+        }
+        if root is not None:
+            write_visual_hull_editable_proxy_artifacts(
+                root=root,
+                program_payload=payload["program"],
+                diagnostics=diagnostics,
+                artifacts=artifacts,
+            )
+        if validation_errors:
+            warnings.append(
+                "editable proxy emitted with validation errors: "
+                + "; ".join(str(error) for error in validation_errors)
+            )
+        return payload
+    except Exception as exc:
+        warnings.append(f"editable proxy generation failed: {exc}")
+        return {
+            "available": False,
+            "status": "failed",
+            "kind": "shape_program",
+            "message": str(exc),
+            "error_type": type(exc).__name__,
+            "dense_mesh_retained": True,
+        }

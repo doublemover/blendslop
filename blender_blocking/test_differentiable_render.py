@@ -18,6 +18,7 @@ from reconstruction.types import (
     ReconstructionTarget,
     ViewConstraint,
 )
+from primitives.soft_silhouette import soft_mask_metrics
 
 
 class TestDifferentiableRender(unittest.TestCase):
@@ -258,6 +259,20 @@ class TestDifferentiableRender(unittest.TestCase):
             loss.total,
             loss.terms["boundary_iou"] + 2.0 * loss.terms["signed_distance"],
         )
+
+    def test_soft_mask_metrics_hardens_low_opacity_overlap_for_diagnostics(self) -> None:
+        target = np.zeros((20, 20), dtype=np.float64)
+        target[5:15, 5:15] = 1.0
+        predicted = np.zeros_like(target)
+        predicted[5:15, 5:15] = 0.25
+
+        metrics = soft_mask_metrics(predicted, target)
+
+        self.assertEqual(metrics["area_iou_loss"], 0.0)
+        self.assertLess(metrics["area_iou_loss"], 1.0)
+        self.assertLess(metrics["pred_hard_threshold"], 0.5)
+        self.assertGreater(metrics["boundary_iou"], 0.0)
+        self.assertGreaterEqual(metrics["pred_bbox_x0"], 0.0)
 
     def test_objective_regression_can_fail_strict_candidate(self) -> None:
         request = CandidateRequest(

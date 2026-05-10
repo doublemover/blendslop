@@ -1103,7 +1103,7 @@ class BlockingWorkflow:
         artifact_root = getattr(self.context, "artifact_root", None)
         if artifact_root:
             return Path(str(artifact_root))
-        return Path("test_output") / "reconstruction" / self.context.run_id
+        return Path(__file__).resolve().parents[1] / "temp" / "reconstruction" / self.context.run_id
 
     def _backend_name_for_mode(self, mode: str) -> str:
         """Return the canonical backend name for a reconstruction mode."""

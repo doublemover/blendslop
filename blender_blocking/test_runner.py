@@ -508,7 +508,7 @@ Examples:
   python test_runner.py --phase pure
   blender --background --python test_runner.py -- --phase quick
   blender --background --python test_runner.py -- --phase quality-smoke --budget-json ../configs/quality_perf_budget-smoke.json
-  python test_runner.py --phase bench --bench-case quality-smoke --bench-json test_output/benchmarks/quality-smoke.json
+  python test_runner.py --phase bench --bench-case quality-smoke --bench-json ../temp/benchmarks/quality-smoke.json
 """,
     )
     parser.add_argument("--verbose", "-v", action="store_true")
@@ -528,7 +528,7 @@ Examples:
     parser.add_argument(
         "--artifact-root",
         type=Path,
-        default=BLENDER_BLOCKING_ROOT / "test_output" / "runner",
+        default=REPO_ROOT / "temp" / "runner",
         help="Root for JSON artifacts emitted by bench/quality phases.",
     )
     parser.add_argument("--bench-case", action="append", default=None)

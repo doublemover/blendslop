@@ -29,7 +29,7 @@ def main(argv: list[str] | None = None) -> int:
 
     generate_parser = subparsers.add_parser("generate", help="Generate a synthetic suite.")
     generate_parser.add_argument("--suite", default="smoke", help="Suite name.")
-    generate_parser.add_argument("--out", default="test_output/synthetic", help="Output root.")
+    generate_parser.add_argument("--out", default="temp/synthetic", help="Output root.")
     generate_parser.add_argument("--count", type=int, default=None, help="Optional number of generated specs.")
     generate_parser.add_argument("--seed", type=int, default=0, help="Base deterministic seed.")
     generate_parser.add_argument("--volume-resolution", type=int, default=64, help="Analytic volume resolution.")

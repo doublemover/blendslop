@@ -212,7 +212,7 @@ artifacts; the exported preset records the promotion tier and blockers.
 - Leaderboards include a promotion tier. `promotable` means a passing backend result with required-view evidence; `degraded`, `research_only`, `metric_only`, `unverified`, and `blocked` are intentionally ranked below full validated results.
 - Optional dependencies must be explicit: skipped/fail behavior is recorded in result metadata instead of silently degrading.
 - Bounds diagnostics are the first stop for visual-hull failures: inspect `bounds-debug.json` and projection overlays before changing reconstruction math.
-- Commit only source, tiny deterministic fixtures/specs, and docs. Do not commit generated `temp/`, `test_output/`, meshes, renders, volumes, reports, or suite result JSON.
+- Commit only source, tiny deterministic fixtures/specs, and docs. Do not commit generated repo-root `temp/`, meshes, renders, volumes, reports, or suite result JSON.
 
 ## Pure Validation
 

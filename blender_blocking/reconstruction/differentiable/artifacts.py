@@ -18,6 +18,8 @@ def differentiable_config_payload(
         "finite_difference_epsilon": float(parsed_config["finite_difference_epsilon"]),
         "softness": float(parsed_config["softness"]),
         "min_variance": float(parsed_config["min_variance"]),
+        "primitive_opacity_floor": float(parsed_config["primitive_opacity_floor"]),
+        "silhouette_bounds_padding": float(parsed_config["silhouette_bounds_padding"]),
         "visual_hull_resolution": int(parsed_config["visual_hull_resolution"]),
         "primitive_count": int(parsed_config["primitive_count"]),
         "target_point_count": int(parsed_config["target_point_count"]),

@@ -128,6 +128,7 @@ def run_refinement_candidate(request: object) -> object:
             )
 
     try:
+        cameras, silhouettes = _target_cameras_and_masks(target)
         points, point_meta = target_surface_points(
             target,
             resolution=int(parsed_config["visual_hull_resolution"]),
@@ -146,9 +147,18 @@ def run_refinement_candidate(request: object) -> object:
                 ),
             )
         )
+        primitives = _apply_soft_silhouette_opacity_floor(
+            primitives,
+            floor=float(parsed_config["primitive_opacity_floor"]),
+        )
+        primitives = _calibrate_primitives_to_silhouette_bounds(
+            primitives,
+            cameras=cameras,
+            silhouettes=silhouettes,
+            padding=float(parsed_config["silhouette_bounds_padding"]),
+        )
         renderables = tuple(renderable_from_primitive(primitive) for primitive in primitives)
         scene = RenderableScene(primitives=renderables)
-        cameras, silhouettes = _target_cameras_and_masks(target)
         if backend_choice == "nvdiffrast":
             renderer = nvd_renderer or NvdiffrastBackend()
         else:
@@ -366,3 +376,269 @@ def run_refinement_candidate(request: object) -> object:
             "view_signal_weights": dict(target_view_weights),
         },
     )
+
+
+def _apply_soft_silhouette_opacity_floor(
+    primitives: Sequence[object],
+    *,
+    floor: float,
+) -> tuple[object, ...]:
+    """Raise render opacity for silhouette fitting without changing geometry."""
+    opacity_floor = float(np.clip(floor, 0.0, 1.0))
+    adjusted: list[object] = []
+    for primitive in primitives:
+        if isinstance(primitive, EllipsoidPrimitive):
+            adjusted.append(
+                EllipsoidPrimitive(
+                    center=primitive.center,
+                    radii=primitive.radii,
+                    rotation=primitive.rotation,
+                    density=max(float(primitive.density), opacity_floor),
+                    confidence=primitive.confidence,
+                )
+            )
+        elif isinstance(primitive, AnisotropicGaussianPrimitive):
+            adjusted.append(
+                AnisotropicGaussianPrimitive(
+                    center=primitive.center,
+                    covariance=primitive.covariance,
+                    opacity=max(float(primitive.opacity), opacity_floor),
+                    color=primitive.color,
+                    semantic_role=primitive.semantic_role,
+                    confidence=primitive.confidence,
+                )
+            )
+        elif isinstance(primitive, SuperquadricPrimitive):
+            adjusted.append(
+                SuperquadricPrimitive(
+                    center=primitive.center,
+                    radii=primitive.radii,
+                    rotation=primitive.rotation,
+                    epsilon1=primitive.epsilon1,
+                    epsilon2=primitive.epsilon2,
+                    density=max(float(primitive.density), opacity_floor),
+                    confidence=primitive.confidence,
+                )
+            )
+        else:
+            adjusted.append(primitive)
+    return tuple(adjusted)
+
+
+def _calibrate_primitives_to_silhouette_bounds(
+    primitives: Sequence[object],
+    *,
+    cameras: Sequence[object],
+    silhouettes: Mapping[str, np.ndarray],
+    padding: float = 1.0,
+) -> tuple[object, ...]:
+    """Align primitive world extents to the target silhouette boxes.
+
+    Visual-hull surface samples are useful seeds, but clustered ellipsoids can
+    over-cover the orthographic frame when several broad covariance ellipses are
+    alpha-composited.  This deterministic affine calibration keeps the editable
+    primitive family while matching the per-axis image evidence before any
+    objective refinement runs.
+    """
+    source = tuple(primitives)
+    if not source or not cameras or not silhouettes:
+        return source
+    target_intervals = _target_axis_intervals_from_silhouettes(cameras, silhouettes)
+    primitive_intervals = _primitive_axis_intervals(source)
+    if not target_intervals or not primitive_intervals:
+        return source
+
+    scale = np.ones(3, dtype=np.float64)
+    current_center = np.zeros(3, dtype=np.float64)
+    target_center = np.zeros(3, dtype=np.float64)
+    for axis in range(3):
+        current = primitive_intervals.get(axis)
+        desired = target_intervals.get(axis)
+        if current is None or desired is None:
+            continue
+        current_min, current_max = current
+        desired_min, desired_max = desired
+        current_extent = max(float(current_max - current_min), 1.0e-9)
+        desired_extent = max(float(desired_max - desired_min) * float(padding), 1.0e-9)
+        current_center[axis] = 0.5 * (float(current_min) + float(current_max))
+        target_center[axis] = 0.5 * (float(desired_min) + float(desired_max))
+        scale[axis] = float(np.clip(desired_extent / current_extent, 0.02, 50.0))
+
+    transformed = [
+        _affine_transform_primitive(
+            primitive,
+            source_center=current_center,
+            target_center=target_center,
+            scale=scale,
+        )
+        for primitive in source
+    ]
+    return tuple(transformed)
+
+
+def _target_axis_intervals_from_silhouettes(
+    cameras: Sequence[object],
+    silhouettes: Mapping[str, np.ndarray],
+) -> dict[int, tuple[float, float]]:
+    intervals: dict[int, list[tuple[float, float]]] = {0: [], 1: [], 2: []}
+    for camera in cameras:
+        name = str(getattr(camera, "name", ""))
+        raw_mask = silhouettes.get(name)
+        if raw_mask is None:
+            continue
+        mask = np.asarray(raw_mask, dtype=np.float64)
+        if mask.ndim != 2:
+            continue
+        hard = mask > 0.5
+        if not hard.any():
+            continue
+        ys, xs = np.nonzero(hard)
+        width, height = getattr(camera, "image_size", (mask.shape[1], mask.shape[0]))
+        axes = tuple(int(axis) for axis in getattr(camera, "axes", (0, 2)))
+        bounds = tuple(float(value) for value in getattr(camera, "world_bounds", (-1.0, 1.0, -1.0, 1.0)))
+        x_interval = _pixel_interval_to_world(
+            int(xs.min()),
+            int(xs.max()),
+            int(width),
+            bounds[0],
+            bounds[1],
+            descending=False,
+        )
+        y_interval = _pixel_interval_to_world(
+            int(ys.min()),
+            int(ys.max()),
+            int(height),
+            bounds[2],
+            bounds[3],
+            descending=True,
+        )
+        intervals[axes[0]].append(x_interval)
+        intervals[axes[1]].append(y_interval)
+
+    merged: dict[int, tuple[float, float]] = {}
+    for axis, axis_intervals in intervals.items():
+        if not axis_intervals:
+            continue
+        lows = [pair[0] for pair in axis_intervals]
+        highs = [pair[1] for pair in axis_intervals]
+        low = float(np.mean(lows))
+        high = float(np.mean(highs))
+        if high > low:
+            merged[axis] = (low, high)
+    return merged
+
+
+def _pixel_interval_to_world(
+    pixel_min: int,
+    pixel_max: int,
+    length: int,
+    world_min: float,
+    world_max: float,
+    *,
+    descending: bool,
+) -> tuple[float, float]:
+    denom = max(1, int(length) - 1)
+    start = float(pixel_min) / float(denom)
+    end = float(pixel_max) / float(denom)
+    if descending:
+        w0 = float(world_max) - start * (float(world_max) - float(world_min))
+        w1 = float(world_max) - end * (float(world_max) - float(world_min))
+    else:
+        w0 = float(world_min) + start * (float(world_max) - float(world_min))
+        w1 = float(world_min) + end * (float(world_max) - float(world_min))
+    return (min(w0, w1), max(w0, w1))
+
+
+def _primitive_axis_intervals(
+    primitives: Sequence[object],
+) -> dict[int, tuple[float, float]]:
+    lows = np.full(3, np.inf, dtype=np.float64)
+    highs = np.full(3, -np.inf, dtype=np.float64)
+    for primitive in primitives:
+        center, cov = _primitive_center_covariance(primitive)
+        if center is None or cov is None:
+            continue
+        radius = np.sqrt(np.maximum(np.diag(cov), 1.0e-12))
+        lows = np.minimum(lows, center - radius)
+        highs = np.maximum(highs, center + radius)
+    intervals: dict[int, tuple[float, float]] = {}
+    for axis in range(3):
+        if np.isfinite(lows[axis]) and np.isfinite(highs[axis]) and highs[axis] > lows[axis]:
+            intervals[axis] = (float(lows[axis]), float(highs[axis]))
+    return intervals
+
+
+def _primitive_center_covariance(
+    primitive: object,
+) -> tuple[np.ndarray | None, np.ndarray | None]:
+    if isinstance(primitive, EllipsoidPrimitive):
+        return primitive.center, primitive.covariance()
+    if isinstance(primitive, AnisotropicGaussianPrimitive):
+        return primitive.center, np.asarray(primitive.covariance, dtype=np.float64)
+    if isinstance(primitive, SuperquadricPrimitive):
+        cov = primitive.rotation @ np.diag(primitive.radii * primitive.radii) @ primitive.rotation.T
+        return primitive.center, cov
+    if hasattr(primitive, "center") and hasattr(primitive, "radii"):
+        center = np.asarray(getattr(primitive, "center"), dtype=np.float64)
+        radii = np.asarray(getattr(primitive, "radii"), dtype=np.float64)
+        if center.shape == (3,) and radii.shape == (3,):
+            rotation = np.asarray(getattr(primitive, "rotation", np.eye(3)), dtype=np.float64)
+            cov = rotation @ np.diag(radii * radii) @ rotation.T
+            return center, cov
+    return None, None
+
+
+def _affine_transform_primitive(
+    primitive: object,
+    *,
+    source_center: np.ndarray,
+    target_center: np.ndarray,
+    scale: np.ndarray,
+) -> object:
+    center, cov = _primitive_center_covariance(primitive)
+    if center is None or cov is None:
+        return primitive
+    new_center = target_center + (center - source_center) * scale
+    transform = np.diag(scale)
+    new_cov = transform @ cov @ transform
+    new_radii, new_rotation = _decompose_covariance_to_radii_rotation(new_cov)
+    if isinstance(primitive, EllipsoidPrimitive):
+        return EllipsoidPrimitive(
+            center=new_center,
+            radii=new_radii,
+            rotation=new_rotation,
+            density=primitive.density,
+            confidence=primitive.confidence,
+        )
+    if isinstance(primitive, AnisotropicGaussianPrimitive):
+        return AnisotropicGaussianPrimitive(
+            center=new_center,
+            covariance=new_cov,
+            opacity=primitive.opacity,
+            color=primitive.color,
+            semantic_role=primitive.semantic_role,
+            confidence=primitive.confidence,
+        )
+    if isinstance(primitive, SuperquadricPrimitive):
+        return SuperquadricPrimitive(
+            center=new_center,
+            radii=new_radii,
+            rotation=new_rotation,
+            epsilon1=primitive.epsilon1,
+            epsilon2=primitive.epsilon2,
+            density=primitive.density,
+            confidence=primitive.confidence,
+        )
+    return primitive
+
+
+def _decompose_covariance_to_radii_rotation(
+    covariance: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    matrix = np.asarray(covariance, dtype=np.float64)
+    sym = 0.5 * (matrix + matrix.T)
+    eigvals, eigvecs = np.linalg.eigh(sym)
+    order = np.argsort(eigvals)[::-1]
+    eigvals = np.maximum(eigvals[order], 1.0e-12)
+    eigvecs = eigvecs[:, order]
+    return np.sqrt(eigvals), eigvecs

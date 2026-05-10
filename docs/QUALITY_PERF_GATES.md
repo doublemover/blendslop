@@ -73,7 +73,7 @@ python test_runner.py --phase bench --bench-case quality-smoke --budget-json ../
 blender --background --python test_runner.py -- --phase quality-smoke --budget-json ../configs/quality_perf_budget-smoke.json
 ```
 
-`quality-smoke` writes under `blender_blocking/test_output/runner/quality-smoke/` by default:
+`quality-smoke` writes under repo-root `temp/runner/quality-smoke/` by default:
 
 - `e2e-matrix.json`
 - `e2e-budget-report.json`
@@ -205,9 +205,9 @@ blender --background --python blender_blocking/test_e2e_validation.py -- \
   --synthetic-matrix \
   --synthetic-suite smoke \
   --synthetic-modes legacy,loft_profile,silhouette_intersection,visual_hull_voxel \
-  --result-json blender_blocking/test_output/e2e_synthetic_matrix.json \
+  --result-json temp/e2e_synthetic_matrix.json \
   --quality-budget-json configs/quality_perf_budget-smoke.json \
-  --quality-report-json blender_blocking/test_output/e2e_budget_report.json \
+  --quality-report-json temp/e2e_budget_report.json \
   --no-progress
 ```
 
@@ -236,7 +236,7 @@ blender --background --python blender_blocking/test_e2e_validation.py -- \
   --validation-mode backend-status \
   --shape-run-export-qa \
   --shape-export-qa-targets obj,glb \
-  --result-json blender_blocking/test_output/shape_program_export_qa.json \
+  --result-json temp/shape_program_export_qa.json \
   --no-progress
 ```
 
@@ -254,7 +254,7 @@ separated from known silhouette-only ambiguity.
 
 ## Artifact Policy
 
-Do not commit routine outputs from `blender_blocking/test_output/`, `benchmarks/results/`, or ad hoc runner artifact roots. Keep generated JSON, rendered PNGs, synthetic references, and imported/exported meshes as CI artifacts or local diagnostics.
+Do not commit routine outputs from repo-root `temp/`, `benchmarks/results/`, or ad hoc runner artifact roots. Keep generated JSON, rendered PNGs, synthetic references, and imported/exported meshes as CI artifacts or local diagnostics.
 
 Commit only small, intentional fixtures and config examples:
 

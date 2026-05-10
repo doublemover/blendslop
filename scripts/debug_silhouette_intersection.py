@@ -64,7 +64,7 @@ def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser.add_argument(
         "--render-dir",
         type=str,
-        default="blender_blocking/test_output/debug_intersection",
+        default="temp/debug_intersection",
         help="Output directory for renders",
     )
     parser.add_argument(

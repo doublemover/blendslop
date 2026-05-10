@@ -12,7 +12,7 @@ class SyntheticFactoryConfig:
 
     suite: str = "smoke"
     seed: int = 1234
-    output_root: str = "test_output/synthetic"
+    output_root: str = "temp/synthetic"
     commit_small_fixtures_only: bool = True
     keep_heavy_artifacts: bool = False
 

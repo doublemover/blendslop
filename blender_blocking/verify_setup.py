@@ -163,6 +163,17 @@ def verify_setup() -> bool:
                 print(f"  OK: {dep_name} available as {resolved} ({version})")
                 continue
             print(f"  WARN: {dep_name} unavailable")
+            diagnostic = payload.get("details", {}).get("diagnostic", {})
+            if isinstance(diagnostic, dict) and diagnostic:
+                category = diagnostic.get("category")
+                likely_cause = diagnostic.get("likely_cause")
+                remediation = diagnostic.get("remediation")
+                if category:
+                    print(f"    Diagnostic: {category}")
+                if likely_cause:
+                    print(f"    Likely cause: {likely_cause}")
+                if remediation:
+                    print(f"    Remediation: {remediation}")
             install_hint = payload.get("install_hint")
             if install_hint:
                 print(f"    Install hint: {install_hint}")

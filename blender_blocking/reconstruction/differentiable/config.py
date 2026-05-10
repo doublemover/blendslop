@@ -263,6 +263,31 @@ def _normalize_differentiable_config(config: Mapping[str, object]) -> tuple[
         min_variance = 1.0e-6
     normalized["min_variance"] = float(min_variance)
 
+    primitive_opacity_floor = _coerce_float(
+        config.get(
+            "primitive_opacity_floor",
+            config.get("render_opacity_floor", config.get("initial_opacity_floor", 0.0)),
+        ),
+        "primitive_opacity_floor",
+        errors,
+        min_value=0.0,
+        max_value=1.0,
+    )
+    if primitive_opacity_floor is None:
+        primitive_opacity_floor = 0.0
+    normalized["primitive_opacity_floor"] = float(primitive_opacity_floor)
+
+    silhouette_bounds_padding = _coerce_float(
+        config.get("silhouette_bounds_padding", 1.0),
+        "silhouette_bounds_padding",
+        errors,
+        min_value=0.05,
+        max_value=10.0,
+    )
+    if silhouette_bounds_padding is None:
+        silhouette_bounds_padding = 1.0
+    normalized["silhouette_bounds_padding"] = float(silhouette_bounds_padding)
+
     visual_hull_resolution = _coerce_int(
         config.get("visual_hull_resolution", config.get("resolution", 40)),
         "visual_hull_resolution",
