@@ -26,7 +26,7 @@ from ..resfit_optimizer import (
     coordinate_descent_optimize,
 )
 
-from .profiles import _collect_profile_rows
+from .profiles import _collect_profile_rows, _dominant_interval
 
 
 def _collect_target_signals(target: object) -> dict[str, Mapping[str, Any]]:
