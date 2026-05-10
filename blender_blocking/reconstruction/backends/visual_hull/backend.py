@@ -11,10 +11,19 @@ except Exception:  # pragma: no cover - script-style imports
     from utils.optional_deps import dependency_report, probe_dependency
 from ...backend import BackendCapabilities, BaseBackend, BackendBudget
 from ...types import CandidateMetrics, CandidateRequest, CandidateResult
+from .artifacts import (
+    export_openvdb_artifact,
+    save_sdf_volume_artifacts,
+    save_volume_artifacts,
+    write_visual_hull_mesh_artifact,
+)
+from .config import direct_sparse_builder_requested, visual_hull_run_config
 from .dependency_policy import _visual_hull_dependency_report
-from .metrics import _mesh_metadata, _openvdb_required, _record_retopology_policy, _retopology_required
-from .postprocess import _evaluate_postprocess, _mesh_required, _postprocess_mesh, _postprocess_required
-from .volume_flow import _mesh_uses_sdf, _sdf_projection_enabled, _sdf_required, _visual_hull_cache_directory
+from .metrics import _mesh_metadata, _record_retopology_policy
+from .postprocess import _evaluate_postprocess, _postprocess_mesh
+from .projection import collect_visual_hull_projection_metrics
+from .status import visual_hull_result_status
+from .volume_flow import _mesh_uses_sdf, _sdf_projection_enabled, _sdf_required
 
 
 class VisualHullBackend(BaseBackend):
@@ -47,8 +56,9 @@ class VisualHullBackend(BaseBackend):
         )
 
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
-        resolution = int(request.config.get("resolution", 64))
-        requested_backend = str(request.config.get("backend", "dense")).strip().lower()
+        run_config = visual_hull_run_config(request.config)
+        resolution = run_config.resolution
+        requested_backend = run_config.requested_backend
         if not request.target.constraints:
             return CandidateResult(
                 candidate_id=request.candidate_id,
@@ -58,35 +68,19 @@ class VisualHullBackend(BaseBackend):
             )
         try:
             from reconstruction.point_cloud import visual_hull_grid_from_target
-            from volume import extract_mesh, save_volume
+            from volume import extract_mesh
 
-            boundary_refine = bool(request.config.get("boundary_refine", True))
-            boundary_dilate_px = request.config.get("boundary_dilate_px")
             grid = visual_hull_grid_from_target(
                 request.target,
                 resolution=resolution,
                 chunk_size=request.config.get("chunk_size"),
                 backend=requested_backend,
-                boundary_refine=boundary_refine,
-                boundary_dilate_px=(
-                    None if boundary_dilate_px is None else int(boundary_dilate_px)
-                ),
-                cache_directory=_visual_hull_cache_directory(request.config),
-                cache_namespace=str(
-                    request.config.get("cache_namespace", "visual_hull")
-                ),
-                cache_read=bool(
-                    request.config.get(
-                        "cache_read",
-                        not bool(request.config.get("cache_write_only", False)),
-                    )
-                ),
-                cache_write=bool(
-                    request.config.get(
-                        "cache_write",
-                        not bool(request.config.get("cache_read_only", False)),
-                    )
-                ),
+                boundary_refine=run_config.boundary_refine,
+                boundary_dilate_px=run_config.boundary_dilate_px,
+                cache_directory=run_config.cache_directory,
+                cache_namespace=run_config.cache_namespace,
+                cache_read=run_config.cache_read,
+                cache_write=run_config.cache_write,
             )
 
             openvdb_status = getattr(grid, "openvdb_status", None)
@@ -124,8 +118,8 @@ class VisualHullBackend(BaseBackend):
         mesh_metrics: dict[str, Any] = {
             "optional_dependencies": _visual_hull_dependency_report(),
             "boundary_refinement": {
-                "enabled": bool(request.config.get("boundary_refine", True)),
-                "boundary_dilate_px": request.config.get("boundary_dilate_px"),
+                "enabled": run_config.boundary_refine,
+                "boundary_dilate_px": run_config.boundary_dilate_px,
             },
         }
         if requested_backend == "openvdb" and openvdb_status is not None:
@@ -135,11 +129,7 @@ class VisualHullBackend(BaseBackend):
                 else dict(openvdb_status)
             )
 
-        direct_sparse_builder = requested_backend in {
-            "chunked",
-            "sparse_hash",
-            "openvdb",
-        }
+        direct_sparse_builder = direct_sparse_builder_requested(requested_backend)
         volume_backend_metadata = {
             "requested": requested_backend,
             "storage": getattr(grid, "backend", type(grid).__name__),
@@ -230,75 +220,42 @@ class VisualHullBackend(BaseBackend):
         else:
             mesh_metrics["mesh_source"] = {"kind": "occupancy"}
 
+        source_views = tuple(
+            str(constraint.view) for constraint in request.target.constraints
+        )
         if root is not None:
-            try:
-                metadata = save_volume(
-                    grid,
-                    root / "volume",
-                    source_candidate_id=request.candidate_id,
-                    source_views=tuple(
-                        constraint.view for constraint in request.target.constraints
-                    ),
-                    extra=volume_metadata_extra,
-                )
-                volume_path = root / "volume"
-                artifacts["volume_metadata"] = root / "volume" / "volume.json"
-                artifacts["volume_npz"] = root / "volume" / "volume.npz"
-                mesh_metrics["volume_metadata"] = metadata.to_dict()
-            except Exception as exc:
-                warnings.append(f"failed to save volume artifact: {exc}")
-
+            volume_path = save_volume_artifacts(
+                grid=grid,
+                root=root,
+                candidate_id=request.candidate_id,
+                source_views=source_views,
+                extra=volume_metadata_extra,
+                artifacts=artifacts,
+                metrics=mesh_metrics,
+                warnings=warnings,
+            )
             if sdf_result is not None:
-                try:
-                    sdf_metadata = save_volume(
-                        sdf_result.grid,
-                        root / "sdf_volume",
-                        source_candidate_id=request.candidate_id,
-                        source_views=tuple(
-                            constraint.view
-                            for constraint in request.target.constraints
-                        ),
-                        extra={
-                            "backend": self.name,
-                            "source": "visual_hull_occupancy",
-                            "sdf_projection": sdf_result.report.to_dict(),
-                        },
-                    )
-                    artifacts["sdf_volume_metadata"] = (
-                        root / "sdf_volume" / "volume.json"
-                    )
-                    artifacts["sdf_volume_npz"] = root / "sdf_volume" / "volume.npz"
-                    mesh_metrics["sdf_volume_metadata"] = sdf_metadata.to_dict()
-                except Exception as exc:
-                    warnings.append(f"failed to save SDF volume artifact: {exc}")
+                save_sdf_volume_artifacts(
+                    sdf_grid=sdf_result.grid,
+                    root=root,
+                    candidate_id=request.candidate_id,
+                    source_views=source_views,
+                    sdf_report=sdf_result.report.to_dict(),
+                    artifacts=artifacts,
+                    metrics=mesh_metrics,
+                    warnings=warnings,
+                )
 
             if requested_backend == "openvdb" or bool(
                 request.config.get("export_openvdb")
             ):
-                try:
-                    from volume import export_to_openvdb
-
-                    openvdb_export_path = root / "volume" / "volume.vdb"
-                    openvdb_export_status = export_to_openvdb(
-                        grid,
-                        openvdb_export_path,
-                    )
-                    mesh_metrics["openvdb_export"] = openvdb_export_status.to_dict()
-                    if openvdb_export_status.status == "exported":
-                        artifacts["volume_openvdb"] = openvdb_export_path
-                    else:
-                        warnings.append(
-                            "OpenVDB artifact export did not complete: "
-                            f"{openvdb_export_status.message}"
-                        )
-                except Exception as exc:
-                    warnings.append(f"failed to export OpenVDB artifact: {exc}")
-                    mesh_metrics["openvdb_export"] = {
-                        "available": False,
-                        "status": "failed",
-                        "message": str(exc),
-                        "error_type": type(exc).__name__,
-                    }
+                export_openvdb_artifact(
+                    grid=grid,
+                    root=root,
+                    artifacts=artifacts,
+                    metrics=mesh_metrics,
+                    warnings=warnings,
+                )
 
         mesh_result = None
         postprocess_status: dict[str, Any] = _evaluate_postprocess(
@@ -344,17 +301,14 @@ class VisualHullBackend(BaseBackend):
                 )
                 mesh_metrics["topology"] = topology.to_dict()
                 if root is not None:
-                    from reconstruction.mesh_io import write_obj
-
-                    mesh_path = write_obj(
-                        root / "mesh" / "visual_hull.obj",
-                        {
-                            "vertices": final_mesh_result.vertices,
-                            "faces": final_mesh_result.faces,
-                        },
-                        header=(f"candidate {request.candidate_id}", self.name),
+                    mesh_path = write_visual_hull_mesh_artifact(
+                        root=root,
+                        candidate_id=request.candidate_id,
+                        backend_name=self.name,
+                        vertices=final_mesh_result.vertices,
+                        faces=final_mesh_result.faces,
+                        artifacts=artifacts,
                     )
-                    artifacts["mesh_obj"] = mesh_path
             elif getattr(mesh_result, "topology", None):
                 mesh_metrics["topology"] = dict(mesh_result.topology)
                 if str(getattr(mesh_result, "method", "")) != "points":
@@ -369,43 +323,15 @@ class VisualHullBackend(BaseBackend):
         topology_score = float(
             mesh_metrics.get("topology", {}).get("topology_score", 0.0)
         )
-        per_view_metrics: dict[str, Any] = {}
-        try:
-            from reconstruction.point_cloud import (
-                visual_hull_view_diagnostics_from_target,
-                visual_hull_projection_metrics_from_target,
-            )
-
-            per_view_metrics = visual_hull_projection_metrics_from_target(
-                request.target,
-                grid,
-                max_metric_voxels=int(
-                    request.config.get("projection_metric_max_voxels", 4_000_000)
-                ),
-            )
-            skipped_metric = per_view_metrics.pop("_skipped", None)
-            if skipped_metric:
-                mesh_metrics["projection_metrics_skipped"] = skipped_metric
-                warnings.append(str(skipped_metric.get("reason", "projection metrics skipped")))
-            else:
-                diagnostics = visual_hull_view_diagnostics_from_target(
-                    request.target,
-                    grid,
-                    per_view_metrics=per_view_metrics,
-                    boundary_refine=bool(request.config.get("boundary_refine", True)),
-                    boundary_dilate_px=(
-                        None
-                        if request.config.get("boundary_dilate_px") is None
-                        else int(request.config.get("boundary_dilate_px"))
-                    ),
-                )
-                mesh_metrics["visual_hull_view_diagnostics"] = diagnostics
-                if diagnostics.get("axis_or_transform_suspect"):
-                    warnings.append("visual hull view diagnostics flagged axis_or_transform_suspect")
-                if diagnostics.get("catastrophic_view_failure"):
-                    warnings.append("visual hull view diagnostics flagged catastrophic_view_failure")
-        except Exception as exc:
-            warnings.append(f"projection metrics failed: {exc}")
+        per_view_metrics = collect_visual_hull_projection_metrics(
+            target=request.target,
+            grid=grid,
+            max_metric_voxels=run_config.projection_metric_max_voxels,
+            boundary_refine=run_config.boundary_refine,
+            boundary_dilate_px=run_config.boundary_dilate_px,
+            metrics=mesh_metrics,
+            warnings=warnings,
+        )
 
         retopology_decision = _record_retopology_policy(
             mesh_metrics=mesh_metrics,
@@ -415,65 +341,15 @@ class VisualHullBackend(BaseBackend):
             warnings=warnings,
         )
 
-        status = "failed" if errors else "success"
-        if _openvdb_required(request.config):
-            openvdb_payload = mesh_metrics.get("openvdb")
-            openvdb_export_payload = mesh_metrics.get("openvdb_export")
-            if requested_backend == "openvdb" and isinstance(openvdb_payload, Mapping):
-                if not bool(openvdb_payload.get("available")):
-                    status = "failed"
-                    errors.append(
-                        str(
-                            openvdb_payload.get(
-                                "message",
-                                "OpenVDB backend was required but bindings were unavailable",
-                            )
-                        )
-                    )
-            if bool(request.config.get("export_openvdb")):
-                if (
-                    not isinstance(openvdb_export_payload, Mapping)
-                    or openvdb_export_payload.get("status") != "exported"
-                ):
-                    status = "failed"
-                    if isinstance(openvdb_export_payload, Mapping):
-                        errors.append(
-                            str(
-                                openvdb_export_payload.get(
-                                    "message",
-                                    "OpenVDB export was required but did not complete",
-                                )
-                            )
-                        )
-                    else:
-                        errors.append(
-                            "OpenVDB export was required but no export status was produced"
-                        )
-        if postprocess_status.get("status") == "failed" and _postprocess_required(
-            request.config
-        ):
-            status = "failed"
-            errors.append(str(postprocess_status.get("message", "mesh postprocess failed")))
-        if (
-            mesh_result is not None
-            and not mesh_result.available
-            and str(getattr(mesh_result, "method", "")) != "points"
-        ):
-            message = str(
-                getattr(mesh_result, "message", "mesh extraction did not produce a mesh")
-            )
-            if _mesh_required(request.config):
-                status = "failed"
-                errors.append(message)
-            elif status == "success":
-                status = "degraded"
-        if (
-            retopology_decision is not None
-            and not retopology_decision.accepted_for_editing
-            and _retopology_required(request.config)
-        ):
-            status = "failed"
-            errors.append(str(retopology_decision.reason))
+        status, degraded = visual_hull_result_status(
+            config=request.config,
+            requested_backend=requested_backend,
+            mesh_metrics=mesh_metrics,
+            mesh_result=mesh_result,
+            postprocess_status=postprocess_status,
+            retopology_decision=retopology_decision,
+            errors=errors,
+        )
 
         metrics = CandidateMetrics(
             per_view=per_view_metrics,
@@ -504,6 +380,6 @@ class VisualHullBackend(BaseBackend):
             artifacts=artifacts,
             warnings=tuple(warnings),
             errors=tuple(errors),
-            degraded=status == "degraded",
+            degraded=degraded,
             payload=grid,
         )
