@@ -81,6 +81,11 @@
               "type": "boolean",
               "default": true
             },
+            "allow_missing": {
+              "type": "boolean",
+              "default": false,
+              "description": "When true, a selector with no matching records passes, but matching records must still satisfy the threshold."
+            },
             "description": {
               "type": "string"
             }

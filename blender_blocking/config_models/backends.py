@@ -160,16 +160,27 @@ class EnsembleConfig:
 class PrimitiveFitConfig:
     """Configuration for primitive fitting/refinement."""
 
-    primitive_families: Tuple[str, ...] = ("superfrustum", "ellipsoid")
-    target_point_count: int = 4096
+    primitive_families: Tuple[str, ...] = ("superquadric", "superfrustum", "ellipsoid")
+    target_point_count: int = 2048
     min_primitives: int = 1
-    max_primitives: int = 16
-    optimization_steps: int = 50
+    max_primitives: int = 6
+    optimization_steps: int = 12
     checkpoint_cadence: int = 10
     fail_on_regression: bool = True
-    max_runtime_s: Optional[float] = 20.0
-    max_objective_evaluations: Optional[int] = 768
-    loss_weights: Dict[str, float] = field(default_factory=dict)
+    max_runtime_s: Optional[float] = 8.0
+    max_objective_evaluations: Optional[int] = 256
+    loss_weights: Dict[str, float] = field(
+        default_factory=lambda: {
+            "surface_residual": 1.0,
+            "visual_hull_occupancy": 0.08,
+            "primitive_count": 0.01,
+            "overlap_penalty": 0.04,
+            "silhouette": 0.08,
+            "topology_penalty": 0.03,
+            "constraint_penalty": 0.05,
+            "uncertainty_penalty": 0.02,
+        }
+    )
 
     def validate(self) -> None:
         if not self.primitive_families:
@@ -251,7 +262,10 @@ class DifferentiableRenderConfig:
     optional_dependency_policy: str = "skip"
     gradient_mode: str = "finite_difference"
     finite_difference_epsilon: float = 1e-4
-    primitive_count: Optional[int] = None
+    softness: float = 72.0
+    primitive_opacity_floor: float = 0.95
+    silhouette_bounds_padding: float = 0.92
+    primitive_count: Optional[int] = 12
     target_point_count: int = 2048
     visual_hull_resolution: Optional[int] = None
     optimization_steps: int = 6
@@ -260,7 +274,16 @@ class DifferentiableRenderConfig:
     optimization_min_step: float = 1.0e-4
     max_objective_evaluations: Optional[int] = 256
     max_runtime_s: Optional[float] = 20.0
-    loss_weights: Dict[str, float] = field(default_factory=dict)
+    loss_weights: Dict[str, float] = field(
+        default_factory=lambda: {
+            "silhouette_l2": 0.6,
+            "soft_iou": 1.0,
+            "area_iou": 0.45,
+            "boundary_iou": 1.25,
+            "signed_distance": 0.65,
+            "depth_l2": 0.0,
+        }
+    )
 
     def validate(self) -> None:
         if self.backend not in {"cpu_soft_silhouette", "blender_finite_difference", "nvdiffrast"}:
@@ -271,6 +294,12 @@ class DifferentiableRenderConfig:
             raise ValueError("gradient_mode must be finite_difference/backend")
         if self.finite_difference_epsilon <= 0:
             raise ValueError("finite_difference_epsilon must be > 0")
+        if self.softness <= 0:
+            raise ValueError("differentiable_render.softness must be > 0")
+        if not (0.0 <= self.primitive_opacity_floor <= 1.0):
+            raise ValueError("differentiable_render.primitive_opacity_floor must be in [0, 1]")
+        if self.silhouette_bounds_padding <= 0:
+            raise ValueError("differentiable_render.silhouette_bounds_padding must be > 0")
         if self.primitive_count is not None and self.primitive_count < 1:
             raise ValueError("differentiable_render.primitive_count must be >= 1 when provided")
         if self.target_point_count < 1:
@@ -302,6 +331,9 @@ class DifferentiableRenderConfig:
             "optional_dependency_policy": self.optional_dependency_policy,
             "gradient_mode": self.gradient_mode,
             "finite_difference_epsilon": self.finite_difference_epsilon,
+            "softness": self.softness,
+            "primitive_opacity_floor": self.primitive_opacity_floor,
+            "silhouette_bounds_padding": self.silhouette_bounds_padding,
             "target_point_count": self.target_point_count,
             "optimization_steps": self.optimization_steps,
             "optimization_initial_step": self.optimization_initial_step,

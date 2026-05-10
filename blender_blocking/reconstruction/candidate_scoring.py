@@ -40,6 +40,7 @@ class CandidateScoreWeights:
     warning_penalty: float = -10.0
     failure_warn_penalty: float = -100.0
     failure_fail_penalty: float = -2000.0
+    quality_floor_penalty: float = -850.0
     failure_penalty: float = -10000.0
 
 
@@ -161,6 +162,7 @@ def score_candidate(
             )
         )
     metrics = result.metric_result
+    quality_floor_failures = _quality_floor_failures(metrics)
     failed_required_views = _metric_value(
         bundle_metrics,
         "silhouette.failed_required_view_count",
@@ -189,6 +191,12 @@ def score_candidate(
                 missing_required_metrics,
                 weights.missing_required_metric_penalty,
                 "success requires Boundary IoU and signed-distance loss for required views",
+            ),
+            CandidateScoreTerm(
+                "quality_floor_failures",
+                quality_floor_failures,
+                weights.quality_floor_penalty,
+                "candidate fell below hard quality floor for IoU, boundary, or topology",
             ),
             CandidateScoreTerm("min_area_iou", metrics.area_iou_min, weights.min_area_iou),
             CandidateScoreTerm(
@@ -312,6 +320,17 @@ def score_candidate(
         terms=tuple(terms),
         policy=policy,
     )
+
+
+def _quality_floor_failures(metrics: Any) -> float:
+    failures = 0
+    if float(getattr(metrics, "area_iou_min", 0.0) or 0.0) < 0.55:
+        failures += 1
+    if float(getattr(metrics, "boundary_iou_mean", 0.0) or 0.0) < 0.25:
+        failures += 1
+    if float(getattr(metrics, "topology_score", 0.0) or 0.0) < 0.45:
+        failures += 1
+    return float(failures)
 
 
 def rank_candidates(

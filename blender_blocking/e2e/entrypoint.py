@@ -167,7 +167,20 @@ def main(argv: Optional[list[str]] = None) -> int:
                 args.refinement_subprocess
                 or workflow_config.refinement_lab.allow_subprocess_blender
             )
-            if not can_delegate_refinement:
+            can_run_pure_synthetic_matrix = bool(
+                args.synthetic_matrix
+                and _synthetic_suite_is_pure_mask(
+                    args.synthetic_suite or workflow_config.synthetic_factory.suite,
+                    seed=(
+                        args.synthetic_seed
+                        if args.synthetic_seed is not None
+                        else workflow_config.synthetic_factory.seed
+                    ),
+                    count=args.synthetic_count,
+                )
+                and args.validation_mode in {"auto", "backend-status"}
+            )
+            if not can_delegate_refinement and not can_run_pure_synthetic_matrix:
                 print("ERROR: This validation CLI must be run inside Blender.")
                 print(
                     "Run: blender --background --python blender_blocking/test_e2e_validation.py -- [options]"
@@ -341,6 +354,27 @@ def main(argv: Optional[list[str]] = None) -> int:
 
         # Exit with appropriate code
         return 0 if success else 1
+
+
+def _synthetic_suite_is_pure_mask(
+    suite: str,
+    *,
+    seed: int,
+    count: int | None,
+) -> bool:
+    try:
+        from blender_blocking.synthetic.registry import get_definition, specs_for_suite
+        from blender_blocking.e2e.matrix import _definition_name_from_spec
+    except Exception:
+        return False
+    try:
+        specs = specs_for_suite(suite, seed=seed, count=count)
+        return bool(specs) and all(
+            not get_definition(_definition_name_from_spec(spec)).blender_supported
+            for spec in specs
+        )
+    except Exception:
+        return False
 
 
 if __name__ == "__main__":

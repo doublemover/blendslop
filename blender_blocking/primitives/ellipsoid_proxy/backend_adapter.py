@@ -225,8 +225,15 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
 
     uncertainty_consistency = float(uncertainty_signal.get("consistency", 0.75))
     constraint_score = float(constraint_signal.get("score", 1.0))
-    topology_score = float(np.clip(mesh_topology_score, 0.0, 1.0))
+    editable_component_score = float(
+        editable_proxy_summary.get("component_sanity_score", 0.0) or 0.0
+    )
+    topology_score = float(
+        np.clip(max(mesh_topology_score, editable_component_score), 0.0, 1.0)
+    )
     topology_source = _topology_source(topology_signal, mesh_topology)
+    if editable_component_score > mesh_topology_score:
+        topology_source = "editable_proxy_program"
 
     objective_terms = _objective_terms(
         coverage=coverage,

@@ -25,6 +25,7 @@ Budget selectors match normalized artifact records:
 ```
 
 For e2e matrix artifacts, use `artifact: "e2e"` plus optional `case`, `mode`, or `shape_id` selectors. Supported comparison modes are `max_percent_increase`, `max_percent_decrease`, `max_absolute_increase`, and `max_absolute_decrease`.
+Mode-specific quality floors can set `allow_missing: true`: absent modes do not fail a smaller matrix, but any matching row must satisfy the threshold. This is how the smoke budget keeps hard floors for optional research modes without forcing every command to run every backend.
 
 Evaluation bundles can be gated directly with `artifact: "evaluation"`.
 The budget reader expands bundle metric names into dotted paths, so
@@ -245,6 +246,7 @@ evaluation metrics such as `export.qa_score`, `export.status_ok`, and
 `export.reimport_ok`.
 
 The matrix renders Blender-backed synthetic fixtures through the public synthetic builder, then calls the existing e2e custom-image path. Pure 2D synthetic definitions are marked as allowed skips unless `--synthetic-strict-skips` is set.
+Pure 2D adversarial and capture-noise definitions now run through a backend-status mask path. The runner writes deterministic reference masks under the selected `temp/` output root, builds a `ReconstructionTarget` directly from those masks, and records backend metrics for each selected mode instead of skipping the row solely because no Blender mesh builder exists.
 
 Synthetic matrix rows also carry a `ground_truth` object. For analytic fixtures
 with readable mesh artifacts, the row metrics include flattened true-geometry

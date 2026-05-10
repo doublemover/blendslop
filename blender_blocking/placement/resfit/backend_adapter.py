@@ -75,12 +75,20 @@ def run_primitive_fit_pipeline(request: object) -> object:
 
     primitive_family = _first_family(config)
     errors: list[str] = []
-    primitive_count = _coerce_int(
-        config.get("primitive_count", config.get("max_primitives", 6)),
-        "primitive_count",
+    configured_max_primitives = _coerce_int(
+        config.get("max_primitives", 6),
+        "max_primitives",
         default=6,
         min_value=1,
         max_value=4096,
+        errors=errors,
+    )
+    primitive_count = _coerce_int(
+        config.get("primitive_count", min(configured_max_primitives, 6)),
+        "primitive_count",
+        default=min(configured_max_primitives, 6),
+        min_value=1,
+        max_value=configured_max_primitives,
         errors=errors,
     )
     target_point_count = _coerce_int(
@@ -262,9 +270,9 @@ def run_primitive_fit_pipeline(request: object) -> object:
         max_elapsed_s=max_runtime_s,
     )
     max_multistart_attempts = _coerce_int(
-        config.get("max_multistart_attempts", 4),
+        config.get("max_multistart_attempts", 2),
         "max_multistart_attempts",
-        default=4,
+        default=2,
         min_value=1,
         max_value=16,
         errors=errors,

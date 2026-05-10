@@ -89,6 +89,15 @@ class EllipsoidPrimitive:
         """Return the ellipsoid axis covariance used by projected renderers."""
         return self.rotation @ np.diag(self.radii * self.radii) @ self.rotation.T
 
+    def profile_width_at_world_z(self, z_world: float) -> float:
+        """Approximate horizontal profile width at a world-space height."""
+        local_z = float((np.asarray((0.0, 0.0, z_world)) - self.center) @ self.rotation[:, 2])
+        rz = max(float(self.radii[2]), 1e-9)
+        normalized = abs(local_z) / rz
+        if normalized >= 1.0:
+            return 0.0
+        return float(2.0 * self.radii[0] * np.sqrt(max(0.0, 1.0 - normalized * normalized)))
+
     def sdf_batch(self, points: np.ndarray) -> np.ndarray:
         """Approximate signed distance for an ellipsoid."""
         local = self._to_local(points)
@@ -198,6 +207,18 @@ class SuperquadricPrimitive:
             np.power(xy, e2 / e1) + np.power(q[:, 2], 2.0 / e1),
             e1 / 2.0,
         )
+
+    def profile_width_at_world_z(self, z_world: float) -> float:
+        """Approximate horizontal profile width at a world-space height."""
+        local_z = float((np.asarray((0.0, 0.0, z_world)) - self.center) @ self.rotation[:, 2])
+        rz = max(float(self.radii[2]), 1e-9)
+        normalized = abs(local_z) / rz
+        if normalized >= 1.0:
+            return 0.0
+        e1 = max(float(self.epsilon1), 1e-6)
+        exponent = 2.0 / e1
+        remaining = max(0.0, 1.0 - normalized**exponent)
+        return float(2.0 * self.radii[0] * remaining ** (1.0 / exponent))
 
     def sdf_batch(self, points: np.ndarray) -> np.ndarray:
         if np.asarray(points).size == 0:

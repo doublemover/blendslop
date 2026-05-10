@@ -13,12 +13,14 @@ try:
     from primitives.analytic_primitives import (
         AnisotropicGaussianPrimitive,
         EllipsoidPrimitive,
+        SuperquadricPrimitive,
     )
     from primitives.superfrustum import SuperFrustum
 except ImportError:  # pragma: no cover - package import path.
     from ..primitives.analytic_primitives import (
         AnisotropicGaussianPrimitive,
         EllipsoidPrimitive,
+        SuperquadricPrimitive,
     )
     from ..primitives.superfrustum import SuperFrustum
 
@@ -200,6 +202,54 @@ def initialize_ellipsoids_from_points(
     return ellipsoids
 
 
+def initialize_superquadrics_from_points(
+    points: np.ndarray,
+    config: PrimitiveInitializationConfig = PrimitiveInitializationConfig(),
+) -> List[SuperquadricPrimitive]:
+    """Seed editable superquadrics from deterministic clusters.
+
+    The default exponent is intentionally box-biased because silhouette
+    fixtures often contain rectangular/mechanical blockouts where ellipsoids
+    and circular frusta leave large corner residuals.
+    """
+    points = bounded_point_sample(points, config.target_point_count)
+    centers, labels = deterministic_kmeans(
+        points, config.primitive_count, config.kmeans_iterations
+    )
+    superquadrics: List[SuperquadricPrimitive] = []
+    for idx, center in enumerate(centers):
+        cluster = points[labels == idx]
+        if len(cluster) == 0:
+            continue
+        mins = cluster.min(axis=0)
+        maxs = cluster.max(axis=0)
+        radii = np.maximum((maxs - mins) * 0.5, config.min_radius)
+        if np.any(radii <= config.min_radius * 1.01):
+            cov = _cluster_covariance(cluster, center, config.covariance_floor)
+            eigvals, eigvecs = np.linalg.eigh(cov)
+            order = np.argsort(eigvals)[::-1]
+            eigvals = eigvals[order]
+            eigvecs = eigvecs[:, order]
+            radii = np.maximum(2.0 * np.sqrt(np.maximum(eigvals, 0.0)), config.min_radius)
+            rotation = eigvecs
+        else:
+            rotation = np.eye(3, dtype=np.float64)
+        rectangularity = _cluster_rectangularity(cluster, center, radii)
+        exponent = float(np.interp(rectangularity, (0.0, 1.0), (1.0, 0.28)))
+        superquadrics.append(
+            SuperquadricPrimitive(
+                center=center,
+                radii=radii,
+                rotation=rotation,
+                epsilon1=exponent,
+                epsilon2=exponent,
+                density=min(1.0, len(cluster) / max(1, len(points))),
+                confidence=1.0,
+            )
+        )
+    return superquadrics
+
+
 def initialize_gaussians_from_points(
     points: np.ndarray,
     config: PrimitiveInitializationConfig = PrimitiveInitializationConfig(),
@@ -224,6 +274,19 @@ def initialize_gaussians_from_points(
             )
         )
     return gaussians
+
+
+def _cluster_rectangularity(
+    cluster: np.ndarray,
+    center: np.ndarray,
+    radii: np.ndarray,
+) -> float:
+    if len(cluster) == 0:
+        return 0.0
+    normalized = np.abs((cluster - center[None, :]) / np.maximum(radii[None, :], 1e-9))
+    near_faces = np.count_nonzero(np.max(normalized, axis=1) > 0.82)
+    fill = len(cluster) / max(1, np.prod(np.maximum(radii, 1e-9)) * 8.0)
+    return float(np.clip(0.6 * near_faces / max(1, len(cluster)) + 0.4 * min(1.0, fill), 0.0, 1.0))
 
 
 def initialize_from_profile_bands(

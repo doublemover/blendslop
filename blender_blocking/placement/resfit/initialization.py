@@ -12,6 +12,7 @@ from ..resfit_initialization import (
     initialize_from_profile_bands,
     initialize_gaussians_from_points,
     initialize_superfrusta_from_points,
+    initialize_superquadrics_from_points,
 )
 from ..resfit_objective import (
     PenaltyHook,
@@ -38,6 +39,8 @@ def get_initializer(family: str) -> InitializerFn:
         return initialize_superfrusta_from_points
     if normalized in ("ellipsoid", "ellipsoids"):
         return initialize_ellipsoids_from_points
+    if normalized in ("superquadric", "superquadrics", "boxy_superquadric"):
+        return initialize_superquadrics_from_points
     if normalized in ("gaussian", "gaussians", "anisotropic_gaussian"):
         return initialize_gaussians_from_points
     raise ValueError(f"unknown primitive family: {family}")

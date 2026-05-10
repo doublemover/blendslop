@@ -23,6 +23,7 @@ def collect_visual_hull_projection_metrics(
             target,
             grid,
             max_metric_voxels=max_metric_voxels,
+            boundary_refine=boundary_refine,
         )
         skipped_metric = per_view_metrics.pop("_skipped", None)
         if skipped_metric:

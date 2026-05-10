@@ -23,6 +23,87 @@
       "description": "Renderable mesh rows with IoU output should stay above the smoke floor."
     },
     {
+      "id": "e2e.visual_hull.min_iou.floor",
+      "artifact": "e2e",
+      "mode": "visual_hull_voxel",
+      "metric": "metrics.area_iou_min",
+      "threshold": 0.94,
+      "required": true,
+      "allow_missing": true,
+      "description": "Visual hull is the geometric baseline and should retain strong required-view overlap when present."
+    },
+    {
+      "id": "e2e.visual_hull.boundary.floor",
+      "artifact": "e2e",
+      "mode": "visual_hull_voxel",
+      "metric": "metrics.boundary_iou_mean",
+      "threshold": 0.7,
+      "required": true,
+      "allow_missing": true,
+      "description": "Visual hull boundary refinement should preserve thin/detail contours instead of only area overlap."
+    },
+    {
+      "id": "e2e.gaussian.min_iou.floor",
+      "artifact": "e2e",
+      "mode": "gaussian_ellipsoid_proxy",
+      "metric": "metrics.area_iou_min",
+      "threshold": 0.94,
+      "required": true,
+      "allow_missing": true,
+      "description": "Gaussian/ellipsoid proxy should keep its strong IoU/throughput baseline when present."
+    },
+    {
+      "id": "e2e.gaussian.topology.floor",
+      "artifact": "e2e",
+      "mode": "gaussian_ellipsoid_proxy",
+      "metric": "metrics.topology_score",
+      "threshold": 0.75,
+      "required": true,
+      "allow_missing": true,
+      "description": "Gaussian/ellipsoid proxy must expose usable editable topology or an equivalent editable primitive-set topology score."
+    },
+    {
+      "id": "e2e.primitive.min_iou.floor",
+      "artifact": "e2e",
+      "mode": "primitive_fit_refine",
+      "metric": "metrics.area_iou_min",
+      "threshold": 0.65,
+      "required": true,
+      "allow_missing": true,
+      "description": "Primitive fitting cannot pass by status alone; it must clear a real silhouette floor."
+    },
+    {
+      "id": "e2e.primitive.elapsed.max",
+      "artifact": "e2e",
+      "mode": "primitive_fit_refine",
+      "metric": "metrics.elapsed_s",
+      "threshold_mode": "max",
+      "threshold": 25.0,
+      "required": true,
+      "allow_missing": true,
+      "description": "Primitive fitting should be bounded enough for iterative quality work."
+    },
+    {
+      "id": "e2e.differentiable.min_iou.floor",
+      "artifact": "e2e",
+      "mode": "differentiable_refine",
+      "metric": "metrics.area_iou_min",
+      "threshold": 0.65,
+      "required": true,
+      "allow_missing": true,
+      "description": "Differentiable refinement should improve beyond broad-overlap weak candidates."
+    },
+    {
+      "id": "e2e.differentiable.boundary.floor",
+      "artifact": "e2e",
+      "mode": "differentiable_refine",
+      "metric": "metrics.boundary_iou_mean",
+      "threshold": 0.25,
+      "required": true,
+      "allow_missing": true,
+      "description": "Differentiable refinement is specifically expected to improve boundary fit."
+    },
+    {
       "id": "bench.canonicalize.max_ms",
       "artifact": "benchmark",
       "case": "quality-smoke",

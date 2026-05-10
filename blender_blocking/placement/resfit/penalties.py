@@ -62,7 +62,8 @@ def _build_profile_silhouette_hook(
                     predicted_width,
                     float(primitive.profile_width_at_world_z(z_world)),
                 )
-                position = np.asarray(getattr(primitive, "position", (0.0, 0.0, 0.0)))
+                center_attr = "position" if hasattr(primitive, "position") else "center"
+                position = np.asarray(getattr(primitive, center_attr, (0.0, 0.0, 0.0)))
                 if position.size == 3:
                     predicted_centers.append(float(position[0]))
             if not predicted_centers:
@@ -126,10 +127,11 @@ def _build_constraint_penalty_hook(
     def hook(primitives: Sequence[object]) -> float:
         base = 0.0
         for primitive in primitives:
-            if not hasattr(primitive, "position"):
+            center_attr = "position" if hasattr(primitive, "position") else "center"
+            if not hasattr(primitive, center_attr):
                 continue
             if has_bounds:
-                position = np.asarray(primitive.position, dtype=float)
+                position = np.asarray(getattr(primitive, center_attr), dtype=float)
                 if position.size == 3:
                     below = np.maximum(bounds_min - position, 0.0)
                     above = np.maximum(position - bounds_max, 0.0)

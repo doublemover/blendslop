@@ -53,8 +53,16 @@ from blender_blocking.validation.silhouette_iou import canonicalize_mask, mask_f
 from blender_blocking.e2e.constants import *
 
 
+def _stream_supports_unicode() -> bool:
+    encoding = getattr(sys.stdout, "encoding", None) or ""
+    return encoding.lower().replace("-", "") in {"utf8", "utf8sig", "utf16"}
+
+
 def _status_icon(ok: bool) -> str:
-    return "✓" if ok else "✗"
+    if _stream_supports_unicode():
+        return "✓" if ok else "✗"
+    return "OK" if ok else "FAIL"
+
 
 def _print_rule(title: str = "", width: int = 72) -> None:
     if title:

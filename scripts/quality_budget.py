@@ -133,6 +133,8 @@ def _evaluate_threshold(
     required = bool(threshold.get("required", True))
     matches = [record for record in records if _selector_matches(threshold, record)]
     if not matches:
+        if bool(threshold.get("allow_missing", False)):
+            return [_base_check(threshold, None, required, True, "no matching record")]
         if _selector_artifact_absent(threshold, records):
             return [
                 _base_check(threshold, None, required, True, "artifact not present")

@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import tempfile
+import sys
 import unittest
 from pathlib import Path
 
 import numpy as np
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from config import BlockingConfig
 from evaluation.appearance import report_from_mapping
@@ -28,6 +33,7 @@ from synthetic.materials import (
 from synthetic.quality_targets import quality_targets_for
 from synthetic.registry import get_definition, list_suites, specs_for_suite
 from synthetic.specs import SyntheticShapeSpec
+from blender_blocking.e2e.matrix import _build_pure_mask_case
 
 
 def _rgb_rect() -> np.ndarray:
@@ -139,6 +145,17 @@ class SyntheticFactoryTests(unittest.TestCase):
         self.assertIn("clean/front", artifacts["masks"])
         self.assertIn("expected_effect", artifacts["metadata"])
         self.assertEqual(artifacts["metadata"]["shape_id"], spec.shape_id)
+
+    def test_pure_mask_matrix_case_expands_backend_views_under_temp_root(self) -> None:
+        spec = get_definition("single_outlier_pixel").create(4)
+        with tempfile.TemporaryDirectory() as tmp:
+            case = _build_pure_mask_case(spec=spec, output_root=Path(tmp))
+
+        self.assertEqual(sorted(case["views"]), ["front", "side", "top"])
+        self.assertEqual(sorted(case["reference_paths"]), ["front", "side", "top"])
+        for path in case["reference_paths"].values():
+            self.assertTrue(Path(path).is_relative_to(Path(tmp)))
+        self.assertIn("expected_effect", case["metadata"])
 
     def test_suite_registry_contains_required_entries(self) -> None:
         self.assertIn("adversarial-level-1", list_suites())

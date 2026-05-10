@@ -30,7 +30,7 @@
   "synthetic_factory": {
     "suite": "smoke",
     "seed": 1234,
-    "output_root": "blender_blocking/test_output/quality-smoke/synthetic",
+    "output_root": "temp/quality-smoke/synthetic",
     "commit_small_fixtures_only": true,
     "keep_heavy_artifacts": false
   },

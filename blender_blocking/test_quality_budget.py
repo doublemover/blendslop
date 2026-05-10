@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
+import sys
 import unittest
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.quality_budget import evaluate_budget_payloads
 
@@ -71,6 +77,29 @@ class QualityBudgetTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["checks"][0]["mode"], "min")
         self.assertEqual(report["checks"][0]["value"], 0.8)
+
+    def test_allow_missing_passes_absent_optional_mode_but_fails_present_rows(self) -> None:
+        budget = {
+            "schema_version": "quality_perf_budget_v1",
+            "name": "mode-floor",
+            "thresholds": [
+                {
+                    "id": "primitive.floor",
+                    "artifact": "e2e",
+                    "mode": "primitive_fit_refine",
+                    "metric": "metrics.area_iou_min",
+                    "threshold": 0.65,
+                    "required": True,
+                    "allow_missing": True,
+                }
+            ],
+        }
+
+        absent = {"matrix": [{"mode": "visual_hull_voxel", "metrics": {"area_iou_min": 0.9}}]}
+        present_bad = {"matrix": [{"mode": "primitive_fit_refine", "metrics": {"area_iou_min": 0.2}}]}
+
+        self.assertTrue(evaluate_budget_payloads(absent, budget)["passed"])
+        self.assertFalse(evaluate_budget_payloads(present_bad, budget)["passed"])
 
     def test_evaluation_bundle_records_are_budgetable_by_sota_metrics(self) -> None:
         current = {

@@ -124,7 +124,14 @@ class ReconstructionContractsTests(unittest.TestCase):
         self.assertGreater(result.metric_result.extras["occupied_voxels"], 0)
         self.assertGreater(result.metric_result.area_iou_mean, 0.0)
         self.assertIn("front", result.metric_result.per_view)
-        self.assertIn("candidate_projection_source", result.metric_result.per_view["front"])
+        front_metrics = result.metric_result.per_view["front"]
+        self.assertIn("candidate_projection_source", front_metrics)
+        self.assertEqual(
+            front_metrics["candidate_projection_source"],
+            "occupied_volume_voxel_centers_constraint_clipped",
+        )
+        self.assertIn("raw_area_iou", front_metrics)
+        self.assertIn("raw_boundary_iou", front_metrics)
 
 
 if __name__ == "__main__":

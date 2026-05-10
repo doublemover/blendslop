@@ -114,6 +114,13 @@ def visual_hull_view_diagnostics_from_target(
             "area_iou": area_iou,
             "boundary_iou": boundary_iou,
             "signed_distance_loss": signed_distance_loss,
+            "raw_area_iou": _optional_float(payload.get("raw_area_iou")),
+            "raw_boundary_iou": _optional_float(payload.get("raw_boundary_iou")),
+            "raw_signed_distance_loss": _optional_float(
+                payload.get("raw_signed_distance_loss")
+            ),
+            "raw_render_area": _optional_float(payload.get("raw_render_area")),
+            "projection_source": str(payload.get("candidate_projection_source", "")),
             "centroid_delta_px": centroid_delta,
             "passed": bool(payload.get("passed", payload.get("pass", False))),
             "reason": str(payload.get("reason", "")),

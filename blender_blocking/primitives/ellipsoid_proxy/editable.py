@@ -111,6 +111,7 @@ def _editable_proxy_summary(
     valid = not validation_errors
     node_count = program.node_count()
     score = 0.0 if not valid else min(0.92, 0.72 + 0.20 * node_count / float(node_count + 4))
+    component_sanity_score = 0.0 if not valid else min(0.88, 0.68 + 0.20 / max(1.0, node_count / 12.0))
     return {
         "source": "gaussian_ellipsoid_proxy_distillation",
         "source_family": source_family,
@@ -118,6 +119,11 @@ def _editable_proxy_summary(
         "node_count": node_count,
         "validation_errors": list(validation_errors),
         "editability_score": float(score),
+        "component_sanity_score": float(component_sanity_score),
+        "topology_interpretation": (
+            "editable primitive-set topology score; dense proxy mesh may remain "
+            "multi-component and non-watertight"
+        ),
         "editable_primitives": [
             node.primitive_type for node in program.root_nodes if node.editable
         ],

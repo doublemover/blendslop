@@ -51,6 +51,10 @@ from blender_blocking.utils.generation_context import GenerationContext
 from blender_blocking.utils.progress import progress_bar
 from blender_blocking.validation.silhouette_iou import canonicalize_mask, mask_from_image_array
 from blender_blocking.e2e.constants import *
+from blender_blocking.e2e.backend_status import (
+    _backend_status_ok as _status_ok_from_backend,
+)
+from blender_blocking.e2e.backend_status import _candidate_status_payload, _print_backend_summary
 from blender_blocking.e2e.console import _print_kv_table, _print_rule, _print_section
 from blender_blocking.e2e.cost import _matrix_cost_summary
 from blender_blocking.e2e.ground_truth import _synthetic_ground_truth_row
@@ -87,10 +91,13 @@ def run_synthetic_suite_matrix(
     progress: bool = False,
     strict_skips: bool = False,
 ) -> bool:
-    """Render Blender-backed synthetic fixtures and validate each mode."""
-    if not BLENDER_AVAILABLE:
-        print("ERROR: synthetic suite matrix requires Blender.")
-        return False
+    """Run a synthetic suite across reconstruction modes.
+
+    Blender-backed fixtures render front/side/top references from generated
+    geometry. Pure 2D mask fixtures build backend targets directly from their
+    generated masks so adversarial/capture suites become scored rows instead of
+    allowed skips.
+    """
 
     from blender_blocking.synthetic.blender_builders import render_views
     from blender_blocking.synthetic.registry import get_definition, specs_for_suite
@@ -105,6 +112,14 @@ def run_synthetic_suite_matrix(
     run_label = run_id or _utc_run_id(f"{suite}_matrix")
     base = base_config or BlockingConfig()
     specs = specs_for_suite(suite, seed=seed, count=count)
+    has_blender_cases = any(
+        get_definition(_definition_name_from_spec(spec)).blender_supported
+        for spec in specs
+    )
+    if has_blender_cases and not BLENDER_AVAILABLE:
+        print("ERROR: synthetic suite matrix contains Blender-backed fixtures.")
+        print("Use a pure-mask suite or run inside Blender.")
+        return False
 
     _print_rule("SYNTHETIC E2E MATRIX", width=72)
     _print_kv_table(
@@ -123,21 +138,23 @@ def run_synthetic_suite_matrix(
         definition = get_definition(definition_name)
         case = f"{suite}:{definition_name}"
         if not definition.blender_supported:
-            row = {
-                "artifact": "e2e",
-                "case": case,
-                "suite": suite,
-                "shape_id": spec.shape_id,
-                "definition": definition_name,
-                "mode": "",
-                "name": f"{spec.shape_id}/skipped",
-                "status": "skip",
-                "passed": True,
-                "metrics": {"passed": 1.0},
-                "message": "synthetic definition has no Blender mesh",
-            }
-            matrix.append(row)
-            print(f"SKIP: {spec.shape_id}: no Blender mesh builder")
+            matrix.extend(
+                _run_pure_mask_matrix_rows(
+                    spec=spec,
+                    suite=suite,
+                    case=case,
+                    definition_name=definition_name,
+                    modes=modes,
+                    base_config=base,
+                    output_root=output_root,
+                    run_label=run_label,
+                    spec_index=spec_index,
+                    config_label=config_label,
+                    validation_mode=validation_mode,
+                    strict_skips=strict_skips,
+                    progress=progress,
+                )
+            )
             continue
 
         reference_dir = output_root / "references" / spec.shape_id
@@ -312,6 +329,279 @@ def run_synthetic_suite_matrix(
         )
     )
     return bool(summary["passed"])
+
+def _run_pure_mask_matrix_rows(
+    *,
+    spec: object,
+    suite: str,
+    case: str,
+    definition_name: str,
+    modes: Sequence[str],
+    base_config: BlockingConfig,
+    output_root: Path,
+    run_label: str,
+    spec_index: int,
+    config_label: str,
+    validation_mode: str,
+    strict_skips: bool,
+    progress: bool,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    if validation_mode not in {"auto", "backend-status"}:
+        passed = not strict_skips
+        rows.append(
+            {
+                "artifact": "e2e",
+                "case": case,
+                "suite": suite,
+                "shape_id": getattr(spec, "shape_id", ""),
+                "definition": definition_name,
+                "mode": "",
+                "name": f"{getattr(spec, 'shape_id', '')}/pure-mask-unsupported",
+                "status": "skip",
+                "passed": passed,
+                "metrics": {"passed": 1.0 if passed else 0.0},
+                "message": (
+                    "pure 2D mask fixtures support backend-status synthetic "
+                    f"matrix validation, not {validation_mode!r}"
+                ),
+            }
+        )
+        print(f"SKIP: {getattr(spec, 'shape_id', '')}: pure masks require backend-status")
+        return rows
+
+    try:
+        pure_case = _build_pure_mask_case(spec=spec, output_root=output_root)
+    except Exception as exc:
+        rows.append(
+            {
+                "artifact": "e2e",
+                "case": case,
+                "suite": suite,
+                "shape_id": getattr(spec, "shape_id", ""),
+                "definition": definition_name,
+                "mode": "",
+                "name": f"{getattr(spec, 'shape_id', '')}/pure-mask-error",
+                "status": "error",
+                "passed": False,
+                "metrics": {"passed": 0.0},
+                "message": str(exc),
+            }
+        )
+        return rows
+
+    for mode in modes:
+        cfg = copy.deepcopy(base_config)
+        cfg.reconstruction.reconstruction_mode = mode
+        mode_label = f"{config_label}-{mode}"
+        case_run_id = f"{run_label}_{spec_index:03d}_{mode}"
+        case_dir = output_root / "results" / mode / getattr(spec, "shape_id", "pure_mask")
+        case_json = case_dir / "result.json"
+        print(f"\nCase: {getattr(spec, 'shape_id', '')} mode={mode} [pure-mask]")
+        try:
+            result_payload = _run_pure_mask_backend_status(
+                views=pure_case["views"],
+                mode=mode,
+                config=cfg,
+                config_label=mode_label,
+                run_id=case_run_id,
+                artifact_root=case_dir / "artifacts",
+                result_json=case_json,
+                pure_case=pure_case,
+            )
+            status = str(result_payload.get("status", "unstructured"))
+            passed = _status_ok_from_backend(status)
+            metrics = _matrix_metrics(result_payload, passed)
+            ground_truth = _synthetic_ground_truth_row(
+                spec,
+                result_payload,
+                reference_paths=pure_case.get("reference_paths", {}),
+                config=cfg,
+            )
+            metrics.update(ground_truth.get("metrics", {}))
+            row_status = "pass" if passed else "fail"
+            message = ""
+        except Exception as exc:
+            result_payload = {}
+            metrics = {"passed": 0.0}
+            ground_truth = _synthetic_ground_truth_row(
+                spec,
+                result_payload,
+                reference_paths=pure_case.get("reference_paths", {}),
+                config=cfg,
+            )
+            passed = False
+            row_status = "error"
+            message = str(exc)
+            if progress:
+                import traceback
+
+                traceback.print_exc()
+
+        row = {
+            "artifact": "e2e",
+            "case": case,
+            "suite": suite,
+            "shape_id": getattr(spec, "shape_id", ""),
+            "definition": definition_name,
+            "mode": mode,
+            "name": f"{getattr(spec, 'shape_id', '')}/{mode}",
+            "status": row_status,
+            "passed": passed,
+            "metrics": metrics,
+            "ground_truth": ground_truth,
+            "reference_paths": dict(pure_case.get("reference_paths", {})),
+            "result_json": case_json.as_posix(),
+            "message": message,
+        }
+        cost_report = result_payload.get("cost_report")
+        if isinstance(cost_report, Mapping):
+            row["cost_report"] = cost_report
+        cost_gate = result_payload.get("cost_gate")
+        if isinstance(cost_gate, Mapping):
+            row["cost_gate"] = cost_gate
+        row.update(_evaluation_outputs_from_payload(result_payload))
+        rows.append(row)
+    return rows
+
+def _build_pure_mask_case(
+    *,
+    spec: object,
+    output_root: Path,
+) -> dict[str, Any]:
+    from blender_blocking.synthetic.degradations import save_png_or_pgm
+    from blender_blocking.synthetic.ground_truth import build_pure_artifacts
+
+    artifacts = build_pure_artifacts(spec)
+    masks = artifacts.get("masks", {})
+    if not isinstance(masks, Mapping) or not masks:
+        raise ValueError("pure-mask synthetic fixture did not emit masks")
+
+    source_images = _select_pure_mask_source_images(masks, spec)
+    if not source_images:
+        raise ValueError("pure-mask synthetic fixture had no usable mask images")
+
+    reference_dir = output_root / "references" / str(getattr(spec, "shape_id", "pure_mask"))
+    reference_paths: dict[str, str] = {}
+    views: dict[str, np.ndarray] = {}
+    for view, image in source_images.items():
+        arr = np.asarray(image, dtype=np.uint8)
+        if arr.ndim != 2:
+            raise ValueError(f"pure mask view {view!r} must be a 2D image")
+        path = reference_dir / f"{view}.png"
+        save_png_or_pgm(path, arr)
+        actual_path = path if path.exists() else path.with_suffix(".pgm")
+        reference_paths[view] = actual_path.as_posix()
+        views[view] = arr
+
+    return {
+        "views": views,
+        "reference_paths": reference_paths,
+        "metadata": dict(artifacts.get("metadata", {}) or {}),
+        "quality_targets": artifacts.get("quality_targets", {}),
+    }
+
+def _select_pure_mask_source_images(
+    masks: Mapping[str, Any],
+    spec: object,
+) -> dict[str, np.ndarray]:
+    parameters = getattr(spec, "parameters", {}) or {}
+    degradation = str(parameters.get("degradation", ""))
+    preferred_prefixes = ("noisy", "clean") if degradation else ("clean", "noisy")
+    views: dict[str, np.ndarray] = {}
+
+    for view in ("front", "side", "top"):
+        image = _mask_by_logical_view(masks, view, preferred_prefixes)
+        if image is not None:
+            views[view] = np.asarray(image, dtype=np.uint8)
+
+    if views:
+        kind = str(parameters.get("mask_kind", parameters.get("degradation", "")))
+        base = views["front"] if "front" in views else next(iter(views.values()))
+        views.setdefault("front", np.asarray(base, dtype=np.uint8))
+        views.setdefault("side", _pure_mask_variant(base, kind=kind, view="side"))
+        views.setdefault("top", _pure_mask_variant(base, kind=kind, view="top"))
+        if degradation == "missing_top_view":
+            views.pop("top", None)
+        return views
+
+    first = np.asarray(next(iter(masks.values())), dtype=np.uint8)
+    kind = str(parameters.get("mask_kind", parameters.get("degradation", "")))
+    expanded = {
+        "front": first,
+        "side": _pure_mask_variant(first, kind=kind, view="side"),
+        "top": _pure_mask_variant(first, kind=kind, view="top"),
+    }
+    if degradation == "missing_top_view":
+        expanded.pop("top", None)
+    return expanded
+
+def _mask_by_logical_view(
+    masks: Mapping[str, Any],
+    view: str,
+    prefixes: Sequence[str],
+) -> np.ndarray | None:
+    for prefix in prefixes:
+        key = f"{prefix}/{view}"
+        if key in masks:
+            return np.asarray(masks[key], dtype=np.uint8)
+    for key, image in masks.items():
+        if str(key).endswith(f"/{view}"):
+            return np.asarray(image, dtype=np.uint8)
+    return None
+
+def _pure_mask_variant(image: np.ndarray, *, kind: str, view: str) -> np.ndarray:
+    arr = np.asarray(image, dtype=np.uint8)
+    if kind == "inconsistent_front_side" and view == "side":
+        shifted = np.roll(arr, max(1, arr.shape[1] // 8), axis=1)
+        band = np.full_like(shifted, 255)
+        band[:, arr.shape[1] // 3 : (arr.shape[1] * 2) // 3] = shifted[
+            :, arr.shape[1] // 3 : (arr.shape[1] * 2) // 3
+        ]
+        return band
+    if view == "side":
+        return np.fliplr(arr)
+    if view == "top":
+        return np.flipud(arr)
+    return arr
+
+def _run_pure_mask_backend_status(
+    *,
+    views: Mapping[str, np.ndarray],
+    mode: str,
+    config: BlockingConfig,
+    config_label: str,
+    run_id: str,
+    artifact_root: Path,
+    result_json: Path,
+    pure_case: Mapping[str, Any],
+) -> dict[str, Any]:
+    from blender_blocking.main_integration import BlockingWorkflow
+
+    context = GenerationContext(run_id=run_id)
+    context.artifact_root = str(artifact_root)
+    workflow = BlockingWorkflow(config=config, context=context)
+    workflow.views = {view: np.asarray(image) for view, image in views.items()}
+    workflow.run_backend_reconstruction(mode=mode)
+    status, payload = _candidate_status_payload(workflow.reconstruction_result)
+    payload = dict(payload)
+    payload.setdefault("status", status)
+    payload["mode"] = mode
+    payload["validation_mode"] = "backend-status"
+    payload["config_label"] = config_label
+    payload["pure_mask_case"] = {
+        "views": sorted(views),
+        "reference_paths": dict(pure_case.get("reference_paths", {})),
+        "metadata": dict(pure_case.get("metadata", {}) or {}),
+        "quality_targets": pure_case.get("quality_targets", {}),
+    }
+    payload.update(_evaluation_outputs_from_payload(payload))
+    payload["passed"] = _status_ok_from_backend(status)
+    _json_dump(result_json, payload)
+    print(f"\nSaved result JSON: {result_json}")
+    if workflow.reconstruction_result is not None:
+        _print_backend_summary(workflow.reconstruction_result)
+    return payload
 
 def _definition_name_from_spec(spec: object) -> str:
     parameters = getattr(spec, "parameters")

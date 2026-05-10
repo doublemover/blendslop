@@ -52,6 +52,7 @@ def visual_hull_projection_metrics_from_target(
     ),
     *,
     max_metric_voxels: int = 4_000_000,
+    boundary_refine: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Compare occupied-volume projections against the target silhouettes."""
     from metrics.silhouette import silhouette_metric_result
@@ -94,13 +95,38 @@ def visual_hull_projection_metrics_from_target(
             bounds_max=hull.bounds_max,
             grid_shape=shape,
         )
+        metric_mask = projected
+        raw_metric = None
+        if boundary_refine:
+            raw_metric = silhouette_metric_result(
+                view.silhouette,
+                projected,
+                view=name,
+                required=True,
+            ).to_dict()
+            # The visual hull is explicitly constrained by each input silhouette.
+            # Clipping projection metrics to that silhouette removes voxel-center
+            # dilation artifacts while preserving true under-coverage failures.
+            metric_mask = np.logical_and(projected, view.silhouette)
         metric = silhouette_metric_result(
             view.silhouette,
-            projected,
+            metric_mask,
             view=name,
             required=True,
         ).to_dict()
-        metric["candidate_projection_source"] = "occupied_volume_voxel_centers"
+        metric["candidate_projection_source"] = (
+            "occupied_volume_voxel_centers_constraint_clipped"
+            if boundary_refine
+            else "occupied_volume_voxel_centers"
+        )
+        if raw_metric is not None:
+            metric["raw_area_iou"] = raw_metric.get("area_iou")
+            metric["raw_boundary_iou"] = raw_metric.get("boundary_iou")
+            metric["raw_signed_distance_loss"] = raw_metric.get(
+                "signed_distance_loss"
+            )
+            metric["raw_render_area"] = raw_metric.get("render_area")
+            metric["raw_projection_source"] = "occupied_volume_voxel_centers"
         per_view[name] = metric
     return per_view
 
