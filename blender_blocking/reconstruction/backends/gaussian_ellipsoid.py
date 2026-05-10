@@ -26,13 +26,13 @@ class GaussianEllipsoidBackend(BaseBackend):
         )
 
     def validate_config(self, config: Mapping[str, object]) -> list[str]:
-        from primitives.gaussian_ellipsoid import validate_gaussian_ellipsoid_config
+        from primitives.ellipsoid_proxy import validate_gaussian_ellipsoid_config
 
         return list(validate_gaussian_ellipsoid_config(config))
 
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
         try:
-            from primitives.gaussian_ellipsoid import run_gaussian_ellipsoid_proxy
+            from primitives.ellipsoid_proxy import run_gaussian_ellipsoid_proxy
         except Exception as exc:
             return CandidateResult(
                 candidate_id=request.candidate_id,

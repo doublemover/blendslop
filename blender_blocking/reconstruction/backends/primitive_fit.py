@@ -24,7 +24,7 @@ class PrimitiveFitBackend(BaseBackend):
 
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
         try:
-            from placement.resfit_pipeline import run_primitive_fit_pipeline
+            from placement.resfit import run_primitive_fit_pipeline
         except Exception as exc:
             return CandidateResult(
                 candidate_id=request.candidate_id,

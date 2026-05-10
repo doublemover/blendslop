@@ -11,41 +11,41 @@ from typing import Any, Callable, Mapping, Sequence
 import numpy as np
 
 try:
-    from .resfit_initialization import (
+    from ..resfit_initialization import (
         PrimitiveInitializationConfig,
         initialize_ellipsoids_from_points,
         initialize_from_profile_bands,
         initialize_gaussians_from_points,
         initialize_superfrusta_from_points,
     )
-    from .resfit_objective import (
+    from ..resfit_objective import (
         PenaltyHook,
         ResFitLossWeights,
         ResFitObjectiveResult,
         SilhouetteHook,
         evaluate_resfit_objective,
     )
-    from .resfit_optimizer import (
+    from ..resfit_optimizer import (
         CoordinateDescentConfig,
         OptimizationRecord,
         coordinate_descent_optimize,
     )
 except ImportError:  # pragma: no cover - supports direct script execution.
-    from resfit_initialization import (
+    from placement.resfit_initialization import (
         PrimitiveInitializationConfig,
         initialize_ellipsoids_from_points,
         initialize_from_profile_bands,
         initialize_gaussians_from_points,
         initialize_superfrusta_from_points,
     )
-    from resfit_objective import (
+    from placement.resfit_objective import (
         PenaltyHook,
         ResFitLossWeights,
         ResFitObjectiveResult,
         SilhouetteHook,
         evaluate_resfit_objective,
     )
-    from resfit_optimizer import (
+    from placement.resfit_optimizer import (
         CoordinateDescentConfig,
         OptimizationRecord,
         coordinate_descent_optimize,

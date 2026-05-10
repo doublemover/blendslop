@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from reconstruction import differentiable_render as diff_render
+from reconstruction import differentiable as diff_render
 from reconstruction.types import (
     Bounds3D,
     CandidateBudget,
@@ -60,7 +60,11 @@ class TestDifferentiableRender(unittest.TestCase):
             config={"backend": "nvdiffrast", "optional_dependency_policy": "skip"},
         )
 
-        with patch.object(diff_render, "NvdiffrastBackend", _MissingNvdiffrastBackend):
+        with patch.object(
+            diff_render.candidate_adapter,
+            "NvdiffrastBackend",
+            _MissingNvdiffrastBackend,
+        ):
             result = diff_render.run_refinement_candidate(request)
         self.assertEqual(result.status, "skipped")
         self.assertEqual(len(result.warnings), 1)
@@ -77,7 +81,11 @@ class TestDifferentiableRender(unittest.TestCase):
             config={"backend": "nvdiffrast", "optional_dependency_policy": "fail"},
         )
 
-        with patch.object(diff_render, "NvdiffrastBackend", _MissingNvdiffrastBackend):
+        with patch.object(
+            diff_render.candidate_adapter,
+            "NvdiffrastBackend",
+            _MissingNvdiffrastBackend,
+        ):
             result = diff_render.run_refinement_candidate(request)
         self.assertEqual(result.status, "failed")
         self.assertEqual(len(result.warnings), 1)
@@ -102,7 +110,11 @@ class TestDifferentiableRender(unittest.TestCase):
             },
         )
 
-        with patch.object(diff_render, "NvdiffrastBackend", _FakeNvdiffrastBackend):
+        with patch.object(
+            diff_render.candidate_adapter,
+            "NvdiffrastBackend",
+            _FakeNvdiffrastBackend,
+        ):
             result = diff_render.run_refinement_candidate(request)
         self.assertEqual(result.status, "success")
         self.assertEqual(
@@ -264,7 +276,11 @@ class TestDifferentiableRender(unittest.TestCase):
             diff_render.LossResult(total=2.0, terms={"area_iou": 1.0}, per_view={}),
         ]
 
-        with patch.object(diff_render, "evaluate_render_loss", side_effect=losses):
+        with patch.object(
+            diff_render.candidate_adapter,
+            "evaluate_render_loss",
+            side_effect=losses,
+        ):
             result = diff_render.run_refinement_candidate(request)
 
         self.assertEqual(result.status, "failed")

@@ -9,21 +9,36 @@ from typing import Any, Mapping, Optional
 
 import numpy as np
 
-from volume import (
-    Bounds3D as VolumeBounds3D,
-    ChunkKey,
-    ChunkedVolumeGrid,
-    DenseVolumeGrid,
-    OpenVDBVolumeGrid,
-    SparseHashVolumeGrid,
-    VolumeChunkCache,
-    chunk_cache_key,
-    detect_openvdb,
-    extract_surface_voxels,
-    surface_points,
-)
+try:
+    from volume import (
+        Bounds3D as VolumeBounds3D,
+        ChunkKey,
+        ChunkedVolumeGrid,
+        DenseVolumeGrid,
+        OpenVDBVolumeGrid,
+        SparseHashVolumeGrid,
+        VolumeChunkCache,
+        chunk_cache_key,
+        detect_openvdb,
+        extract_surface_voxels,
+        surface_points,
+    )
+except ImportError:  # pragma: no cover - package import path
+    from ...volume import (
+        Bounds3D as VolumeBounds3D,
+        ChunkKey,
+        ChunkedVolumeGrid,
+        DenseVolumeGrid,
+        OpenVDBVolumeGrid,
+        SparseHashVolumeGrid,
+        VolumeChunkCache,
+        chunk_cache_key,
+        detect_openvdb,
+        extract_surface_voxels,
+        surface_points,
+    )
 
-from .types import Bounds3D, ReconstructionTarget
+from ..types import Bounds3D, ReconstructionTarget
 
 
 _SUPPORTED_VISUAL_HULL_BACKENDS = {

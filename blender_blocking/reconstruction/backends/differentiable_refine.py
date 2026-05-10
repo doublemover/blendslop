@@ -27,7 +27,7 @@ class DifferentiableRefinementBackend(BaseBackend):
 
     def validate_config(self, config: Mapping[str, object]) -> list[str]:
         try:
-            from reconstruction.differentiable_render import _normalize_differentiable_config
+            from reconstruction.differentiable import _normalize_differentiable_config
         except Exception:
             return ["differentiable render module is unavailable"]
 
@@ -44,7 +44,7 @@ class DifferentiableRefinementBackend(BaseBackend):
                 errors=tuple(config_errors),
             )
         try:
-            from reconstruction.differentiable_render import run_refinement_candidate
+            from reconstruction.differentiable import run_refinement_candidate
         except Exception as exc:
             return CandidateResult(
                 candidate_id=request.candidate_id,

@@ -27,8 +27,8 @@ try:
     from primitives.shape_program import ShapeNode, ShapeProgram, validate_shape_program
     from primitives.proxy_distillation import distill_proxy_field, write_proxy_field_npz
 except ImportError:  # pragma: no cover - package import path
-    from .shape_program import ShapeNode, ShapeProgram, validate_shape_program
-    from .proxy_distillation import distill_proxy_field, write_proxy_field_npz
+    from ..shape_program import ShapeNode, ShapeProgram, validate_shape_program
+    from ..proxy_distillation import distill_proxy_field, write_proxy_field_npz
 
 
 _ALLOWED_FAMILIES = {"gaussian", "gaussians", "ellipsoid", "ellipsoids"}
