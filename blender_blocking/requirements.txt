@@ -17,8 +17,9 @@ open3d>=0.19.0
 # - nvdiffrast is NVIDIA/CUDA-only and must be source-built from NVlabs.
 # - OpenVDB Python bindings usually come from Blender/conda/source builds, not
 #   normal Windows pip wheels; absent bindings use structured sparse-NPZ fallback.
-# - torch/torchvision/lpips/trimesh can be installed into a project-local helper
-#   venv for evaluation experiments without becoming Blender runtime requirements.
+# - torch/torchvision/lpips are optional Blender research dependencies. Install
+#   or repair the supported CPU stack with:
+#   python blender_blocking/verify_setup.py --install-research-deps
 
 # Blender Python API (bpy)
 # Note: bpy comes bundled with Blender and cannot be installed via pip in standard Python

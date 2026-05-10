@@ -8,6 +8,14 @@ import unittest
 from unittest.mock import patch
 
 import utils.optional_deps as optional_deps
+from utils.dependency_installer import (
+    LPIPS_VERSION,
+    PYTORCH_CPU_INDEX,
+    SYMPY_VERSION,
+    TORCH_CPU_VERSION,
+    TORCHVISION_CPU_VERSION,
+    blender_research_cpu_plan,
+)
 from utils.optional_deps import (
     clear_dependency_cache,
     dependency_report,
@@ -120,6 +128,47 @@ class OptionalDependencyTests(unittest.TestCase):
         self.assertFalse(dep.available)
         self.assertEqual(diagnostic["category"], "binary_runtime_load_failure")
         self.assertIn("CPU", diagnostic["remediation"])
+
+    def test_research_cpu_install_plan_pins_known_good_blender_stack(self) -> None:
+        plan = blender_research_cpu_plan(python_executable="python-blender")
+        commands = [" ".join(step.args) for step in plan.steps]
+
+        self.assertEqual(plan.name, "blender-research-cpu")
+        self.assertEqual(len(plan.steps), 3)
+        self.assertIn(PYTORCH_CPU_INDEX, commands[0])
+        self.assertIn(f"torch=={TORCH_CPU_VERSION}+cpu", commands[0])
+        self.assertIn(
+            f"torchvision=={TORCHVISION_CPU_VERSION}+cpu",
+            commands[0],
+        )
+        self.assertIn(f"sympy=={SYMPY_VERSION}", commands[1])
+        self.assertIn(f"lpips=={LPIPS_VERSION}", commands[2])
+        self.assertIn("--no-deps", commands[2])
+
+    def test_windows_blender_native_conflict_blocks_crash_prone_coimport(self) -> None:
+        previous_bpy = sys.modules.get("bpy")
+        previous_open3d = sys.modules.get("open3d")
+        sys.modules["bpy"] = types.ModuleType("bpy")
+        sys.modules["open3d"] = types.ModuleType("open3d")
+        try:
+            with patch.object(optional_deps.os, "name", "nt"):
+                dep = probe_dependency("torch", cache=False)
+        finally:
+            if previous_bpy is None:
+                sys.modules.pop("bpy", None)
+            else:
+                sys.modules["bpy"] = previous_bpy
+            if previous_open3d is None:
+                sys.modules.pop("open3d", None)
+            else:
+                sys.modules["open3d"] = previous_open3d
+
+        payload = dep.to_dict()
+        diagnostic = payload["details"]["diagnostic"]
+        self.assertFalse(dep.available)
+        self.assertEqual(payload["error_type"], "NativeRuntimeConflict")
+        self.assertEqual(diagnostic["category"], "native_runtime_conflict")
+        self.assertEqual(diagnostic["loaded_module"], "open3d")
 
 
 if __name__ == "__main__":

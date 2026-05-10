@@ -12,9 +12,18 @@ Usage in Blender:
 
 from __future__ import annotations
 
+import argparse
 import sys
 import site
 from pathlib import Path
+
+
+_THIS_FILE = Path(__file__).resolve()
+_PACKAGE_ROOT = _THIS_FILE.parent
+_REPO_ROOT = _PACKAGE_ROOT.parent
+for _path in (str(_REPO_ROOT), str(_PACKAGE_ROOT)):
+    if _path not in sys.path:
+        sys.path.insert(0, _path)
 
 
 def _add_dependency_path(path: Path) -> None:
@@ -39,6 +48,43 @@ def configure_dependency_paths() -> None:
         / f"Python{sys.version_info.major}{sys.version_info.minor}"
         / "site-packages"
     )
+
+
+def install_research_dependencies(
+    *,
+    dry_run: bool = False,
+    user: bool = True,
+    force_reinstall: bool = True,
+) -> int:
+    """Install/repair optional CPU research dependencies for this Python."""
+
+    configure_dependency_paths()
+    try:
+        from utils.dependency_installer import (
+            blender_research_cpu_plan,
+            execute_install_plan,
+            print_install_plan,
+        )
+        from utils.optional_deps import clear_dependency_cache
+    except Exception:
+        from blender_blocking.utils.dependency_installer import (
+            blender_research_cpu_plan,
+            execute_install_plan,
+            print_install_plan,
+        )
+        from blender_blocking.utils.optional_deps import clear_dependency_cache
+
+    plan = blender_research_cpu_plan(
+        python_executable=sys.executable,
+        user=user,
+        force_reinstall=force_reinstall,
+    )
+    if dry_run:
+        print_install_plan(plan)
+        return 0
+    exit_code = execute_install_plan(plan)
+    clear_dependency_cache()
+    return exit_code
 
 
 def verify_setup() -> bool:
@@ -155,12 +201,17 @@ def verify_setup() -> bool:
 
     if probe_dependency is not None:
         for dep_name in ("trimesh", "torch", "torchvision", "lpips", "openvdb", "nvdiffrast"):
-            dep = probe_dependency(dep_name, cache=False)
+            dep = probe_dependency(
+                dep_name,
+                cache=False,
+                isolated=dep_name in {"torch", "torchvision", "lpips"},
+            )
             payload = dep.to_dict()
             if dep.available:
                 version = payload.get("module_version") or "unknown version"
                 resolved = payload.get("resolved_module_name") or payload.get("import_name") or dep_name
-                print(f"  OK: {dep_name} available as {resolved} ({version})")
+                suffix = " [isolated probe]" if payload.get("details", {}).get("isolated") else ""
+                print(f"  OK: {dep_name} available as {resolved} ({version}){suffix}")
                 continue
             print(f"  WARN: {dep_name} unavailable")
             diagnostic = payload.get("details", {}).get("diagnostic", {})
@@ -238,6 +289,62 @@ def verify_setup() -> bool:
     return len(errors) == 0
 
 
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Verify and optionally repair Blender Blocking dependencies."
+    )
+    parser.add_argument(
+        "--install-research-deps",
+        "--repair-torch",
+        action="store_true",
+        help=(
+            "Install or repair the CPU torch/torchvision/lpips stack for the "
+            "active Python, then run verification."
+        ),
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print dependency install commands without running pip.",
+    )
+    parser.add_argument(
+        "--no-user",
+        action="store_true",
+        help="Install into the active Python environment instead of --user site.",
+    )
+    parser.add_argument(
+        "--no-force-reinstall",
+        action="store_true",
+        help="Do not force reinstall pinned torch/torchvision/MKL packages.",
+    )
+    return parser.parse_args(_script_args(argv))
+
+
+def _script_args(argv: list[str] | None = None) -> list[str]:
+    if argv is not None:
+        return list(argv)
+    if "--" in sys.argv:
+        return sys.argv[sys.argv.index("--") + 1 :]
+    script_name = Path(__file__).name.lower()
+    for index, value in enumerate(sys.argv):
+        if Path(str(value)).name.lower() == script_name:
+            return sys.argv[index + 1 :]
+    return sys.argv[1:]
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
+    if args.install_research_deps:
+        exit_code = install_research_dependencies(
+            dry_run=bool(args.dry_run),
+            user=not bool(args.no_user),
+            force_reinstall=not bool(args.no_force_reinstall),
+        )
+        if exit_code != 0 or args.dry_run:
+            return exit_code
+    return 0 if verify_setup() else 1
+
+
 if __name__ == "__main__":
     # When run directly (or exec'd in Blender console)
-    verify_setup()
+    raise SystemExit(main())

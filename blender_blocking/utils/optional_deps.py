@@ -9,6 +9,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import importlib
+import json
+import os
+import subprocess
+import sys
 from types import ModuleType
 from typing import Dict, Iterable, Mapping, Optional, Sequence, Tuple
 
@@ -114,20 +118,30 @@ KNOWN_DEPENDENCIES: Dict[str, DependencySpec] = {
         package_name="PyTorch",
         pypi_name="torch",
         purpose="LPIPS, differentiable research paths, and optional GPU tensor execution",
-        install_hint="pip install torch torchvision",
+        install_hint=(
+            "python blender_blocking/verify_setup.py --install-research-deps "
+            "(or run the same script with Blender's Python) installs the supported "
+            "CPU torch/torchvision stack"
+        ),
         optional_for=("lpips", "gpu_research"),
     ),
     "torchvision": DependencySpec(
         name="torchvision",
         package_name="torchvision",
         purpose="LPIPS model support",
-        install_hint="pip install torchvision",
+        install_hint=(
+            "python blender_blocking/verify_setup.py --install-research-deps "
+            "installs the supported CPU torch/torchvision pair"
+        ),
         optional_for=("lpips",),
     ),
     "lpips": DependencySpec(
         name="lpips",
         purpose="learned perceptual image metric for novel-view evaluation",
-        install_hint="pip install lpips",
+        install_hint=(
+            "python blender_blocking/verify_setup.py --install-research-deps "
+            "installs lpips against the pinned CPU torch stack"
+        ),
         optional_for=("novel_view_lpips",),
     ),
     "nvdiffrast": DependencySpec(
@@ -242,19 +256,27 @@ class OptionalDependency:
     def to_dict(self) -> Dict[str, object]:
         """Return a JSON-safe availability record."""
         spec_payload: Dict[str, object] = self.spec.to_dict() if self.spec else {}
+        available_attempt = next(
+            (
+                dict(attempt)
+                for attempt in self.attempts
+                if attempt.get("status") == "available"
+            ),
+            {},
+        )
         return {
             "module_name": self.name,
             "import_name": self.import_name,
             "resolved_module_name": getattr(self.module, "__name__", None)
             if self.module is not None
-            else None,
+            else self.import_name,
             "available": self.available,
             "module_version": getattr(self.module, "__version__", None)
             if self.module is not None
-            else None,
+            else available_attempt.get("module_version"),
             "module_file": getattr(self.module, "__file__", None)
             if self.module is not None
-            else None,
+            else available_attempt.get("module_file"),
             "error_type": self.error_type,
             "error": self.error,
             "attempts": [dict(attempt) for attempt in self.attempts],
@@ -292,12 +314,42 @@ def dependency_spec(name: str) -> Optional[DependencySpec]:
     return None
 
 
-def probe_dependency(import_name: str, *, cache: bool = True) -> OptionalDependency:
+def probe_dependency(
+    import_name: str,
+    *,
+    cache: bool = True,
+    isolated: bool = False,
+) -> OptionalDependency:
     """Probe one import path without making it a hard runtime dependency."""
+    if isolated:
+        return _probe_dependency_isolated(import_name)
     if cache and import_name in _CACHE:
         return _CACHE[import_name]
     spec = dependency_spec(import_name)
     candidates: Sequence[str] = spec.candidates if spec else (import_name,)
+    conflict = _native_runtime_conflict(import_name)
+    if conflict is not None:
+        result = OptionalDependency(
+            import_name,
+            False,
+            import_name=None,
+            error=str(conflict["message"]),
+            error_type="NativeRuntimeConflict",
+            attempts=(
+                {
+                    "module_name": import_name,
+                    "status": "blocked",
+                    "error_type": "NativeRuntimeConflict",
+                    "error": str(conflict["message"]),
+                    "diagnostic": conflict,
+                },
+            ),
+            spec=spec,
+            details={"diagnostic": conflict},
+        )
+        if cache:
+            _CACHE[import_name] = result
+        return result
     attempts: list[Mapping[str, object]] = []
     result: OptionalDependency | None = None
     for candidate in candidates:
@@ -352,6 +404,192 @@ def probe_dependency(import_name: str, *, cache: bool = True) -> OptionalDepende
     if cache:
         _CACHE[import_name] = result
     return result
+
+
+def _probe_dependency_isolated(import_name: str) -> OptionalDependency:
+    spec = dependency_spec(import_name)
+    candidates: Sequence[str] = spec.candidates if spec else (import_name,)
+    command = _isolated_probe_command(candidates)
+    try:
+        completed = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=45,
+        )
+    except Exception as exc:
+        return OptionalDependency(
+            import_name,
+            False,
+            error=str(exc),
+            error_type=type(exc).__name__,
+            attempts=(),
+            spec=spec,
+            details={
+                "diagnostic": {
+                    "category": "isolated_probe_failed",
+                    "module_name": import_name,
+                    "error_type": type(exc).__name__,
+                    "likely_cause": "The isolated dependency probe could not be executed.",
+                    "remediation": "Run verify_setup.py directly in Blender Python for details.",
+                }
+            },
+        )
+    payload = _isolated_probe_payload(completed.stdout)
+    attempts = tuple(payload.get("attempts", ()) if isinstance(payload, dict) else ())
+    if completed.returncode != 0 and not attempts:
+        stderr = (completed.stderr or "").strip()
+        return OptionalDependency(
+            import_name,
+            False,
+            error=stderr or f"isolated probe exited {completed.returncode}",
+            error_type="IsolatedProbeProcessError",
+            attempts=(),
+            spec=spec,
+            details={
+                "returncode": completed.returncode,
+                "stderr": stderr,
+                "stdout": completed.stdout,
+            },
+        )
+    for attempt in attempts:
+        if attempt.get("status") == "available":
+            return OptionalDependency(
+                import_name,
+                True,
+                module=None,
+                import_name=str(attempt.get("module_name", "")),
+                attempts=attempts,
+                spec=spec,
+                details={
+                    "isolated": True,
+                    "probe_command": command,
+                    "note": "module was available in an isolated process",
+                },
+            )
+    last = attempts[-1] if attempts else {}
+    return OptionalDependency(
+        import_name,
+        False,
+        import_name=None,
+        error=str(last.get("error", "")),
+        error_type=str(last.get("error_type", "ImportError")),
+        attempts=attempts,
+        spec=spec,
+        details={
+            "diagnostic": last.get("diagnostic", {}),
+            "isolated": True,
+            "probe_command": command,
+        },
+    )
+
+
+def _isolated_probe_command(candidates: Sequence[str]) -> list[str]:
+    code = (
+        "import importlib,json,site,sys\n"
+        "from pathlib import Path\n"
+        "for p in (Path.home()/'blender_python_packages', "
+        "Path(site.getusersitepackages()), "
+        "Path.home()/'AppData'/'Roaming'/'Python'/"
+        "f'Python{sys.version_info.major}{sys.version_info.minor}'/'site-packages'):\n"
+        "    s=str(p)\n"
+        "    if p.exists() and s not in sys.path:\n"
+        "        sys.path.append(s)\n"
+        f"candidates={list(candidates)!r}\n"
+        "attempts=[]\n"
+        "for name in candidates:\n"
+        "    try:\n"
+        "        module=importlib.import_module(name)\n"
+        "        attempts.append({"
+        "'module_name':name,'status':'available',"
+        "'module_version':getattr(module,'__version__',None),"
+        "'module_file':getattr(module,'__file__',None)})\n"
+        "        break\n"
+        "    except Exception as exc:\n"
+        "        attempts.append({"
+        "'module_name':name,'status':'import_error',"
+        "'error_type':type(exc).__name__,'error':str(exc)})\n"
+        "print('BLENDSLOP_DEP_PROBE='+json.dumps({'attempts':attempts}, sort_keys=True))\n"
+    )
+    blender_binary = _active_blender_binary()
+    if blender_binary:
+        return [blender_binary, "--background", "--python-expr", code]
+    return [sys.executable, "-c", code]
+
+
+def _isolated_probe_payload(stdout: str) -> Mapping[str, object]:
+    marker = "BLENDSLOP_DEP_PROBE="
+    for line in reversed((stdout or "").splitlines()):
+        if line.startswith(marker):
+            try:
+                payload = json.loads(line[len(marker) :])
+            except json.JSONDecodeError:
+                return {}
+            return payload if isinstance(payload, Mapping) else {}
+    return {}
+
+
+def _active_blender_binary() -> str | None:
+    try:
+        import bpy  # type: ignore
+
+        binary = str(getattr(getattr(bpy, "app", None), "binary_path", "") or "")
+        return binary or None
+    except Exception:
+        return None
+
+
+def _native_runtime_conflict(import_name: str) -> Mapping[str, object] | None:
+    if os.name != "nt" or "bpy" not in sys.modules:
+        return None
+    spec = dependency_spec(import_name)
+    names = {str(import_name)}
+    if spec is not None:
+        names.update(spec.candidates)
+        names.update(spec.aliases)
+    lowered = {name.lower() for name in names}
+    torch_like = bool(lowered & {"torch", "torchvision", "lpips"})
+    open3d_like = "open3d" in lowered
+    if torch_like and "open3d" in sys.modules:
+        return {
+            "category": "native_runtime_conflict",
+            "module_name": import_name,
+            "loaded_module": "open3d",
+            "likely_cause": (
+                "Open3D and CPU PyTorch load incompatible native runtimes inside "
+                "the same Windows Blender process."
+            ),
+            "remediation": (
+                "Use isolated setup probes for availability reporting, and avoid "
+                "running LPIPS/Torch and Open3D postprocess in the same Blender process."
+            ),
+            "message": (
+                f"blocked import of {import_name!r} because open3d is already loaded "
+                "in this Windows Blender process"
+            ),
+        }
+    if open3d_like and any(name in sys.modules for name in ("torch", "torchvision", "lpips")):
+        loaded = next(
+            name for name in ("torch", "torchvision", "lpips") if name in sys.modules
+        )
+        return {
+            "category": "native_runtime_conflict",
+            "module_name": import_name,
+            "loaded_module": loaded,
+            "likely_cause": (
+                "CPU PyTorch and Open3D load incompatible native runtimes inside "
+                "the same Windows Blender process."
+            ),
+            "remediation": (
+                "Run Open3D postprocess and LPIPS/Torch metrics in separate Blender "
+                "processes when both are needed."
+            ),
+            "message": (
+                f"blocked import of {import_name!r} because {loaded} is already loaded "
+                "in this Windows Blender process"
+            ),
+        }
+    return None
 
 
 def dependency_report(import_names: Iterable[str]) -> Dict[str, Dict[str, object]]:

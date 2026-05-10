@@ -143,6 +143,25 @@ Install or repair `open3d` in Blender's Python. Poisson and screened-Poisson pos
 $BLENDER_PYTHON -m pip install open3d
 ```
 
+### LPIPS / torch / torchvision are unavailable
+
+`torch`, `torchvision`, and `lpips` are optional research dependencies used by LPIPS novel-view scoring and some experimental differentiable paths. On Windows/Blender 5, use the repository repair command instead of a loose `pip install torch`, because newer CPU wheels can import in Blender's standalone `python.exe` but fail once loaded inside the Blender process.
+
+```powershell
+$BLENDER_PYTHON = "C:\Program Files\Blender Foundation\Blender 5.0\5.0\python\bin\python.exe"
+& $BLENDER_PYTHON blender_blocking\verify_setup.py --install-research-deps
+```
+
+Dry-run the exact commands first:
+
+```powershell
+& $BLENDER_PYTHON blender_blocking\verify_setup.py --install-research-deps --dry-run
+```
+
+The supported plan installs the CPU-only `torch==2.5.1+cpu` / `torchvision==0.20.1+cpu` pair, `sympy==1.13.1`, and `lpips==0.1.4` into the active Blender Python user site. This is appropriate for AMD/non-CUDA machines. It does not install `nvdiffrast`.
+
+On Windows, Open3D and CPU PyTorch can load incompatible native runtimes inside the same Blender process. The setup verifier probes the LPIPS/PyTorch stack in isolated Blender subprocesses so availability reporting cannot crash the main process. If you need both Open3D postprocessing and LPIPS metrics for one asset, run those phases in separate Blender invocations.
+
 ### OpenVDB export is skipped
 
 OpenVDB is optional. The tool probes both `pyopenvdb` and `openvdb` bindings and falls back to sparse NPZ interchange when neither binding is available. A plain `pip install openvdb` often has no Windows wheel, so direct `.vdb` export usually requires a compatible Blender-bundled binding, conda package, or source-built OpenVDB Python binding for the exact Python runtime.
