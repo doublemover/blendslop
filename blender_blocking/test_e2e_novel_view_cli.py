@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import redirect_stdout
+import io
 import json
 from pathlib import Path
 import tempfile
@@ -11,7 +13,7 @@ import unittest
 
 from integration.blender_ops.render_utils import parse_orbit_view_degrees
 from config import BlockingConfig
-from e2e.validator import E2EValidator
+from e2e.validator import E2EValidator, _novel_failure_code
 from test_e2e_validation import (
     _aggregate_novel_reports,
     _apply_cli_args,
@@ -175,6 +177,45 @@ class E2ENovelViewCliTests(unittest.TestCase):
             refs = validator._novel_reference_map({"front": str(front)})
 
         self.assertEqual(refs, {"orbit_045": str(orbit)})
+
+    def test_missing_novel_render_gets_explicit_failure_payload(self) -> None:
+        validator = E2EValidator(
+            novel_view_reference_paths={"orbit_045": "refs/orbit_045.png"},
+            novel_view_names=("orbit_045",),
+        )
+
+        output = io.StringIO()
+        with redirect_stdout(output):
+            passed, payload = validator._validate_novel_views(
+                mode="profile_loft",
+                rendered_paths={},
+                reference_paths={},
+                backend_payload={},
+                render_output_dir=Path("temp/rendered"),
+            )
+
+        report = payload["views"]["orbit_045"]
+        self.assertFalse(passed)
+        self.assertEqual(report["failure_code"], "render_failed")
+        self.assertEqual(report["reference_path"], "refs/orbit_045.png")
+        self.assertIsNone(report["rendered_path"])
+
+    def test_lpips_missing_dependency_failure_code_is_specific(self) -> None:
+        code = _novel_failure_code(
+            {
+                "dependency_state": {
+                    "lpips": {
+                        "lpips": {
+                            "available": False,
+                            "skip_reason": "missing lpips",
+                        }
+                    }
+                }
+            },
+            {"failures": ["LPIPS missing"]},
+        )
+
+        self.assertEqual(code, "lpips_dependency_missing")
 
     def test_texture_material_cli_flags_apply_to_shape_program_config(self) -> None:
         args = _parse_args(

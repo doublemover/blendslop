@@ -637,6 +637,34 @@ class E2EValidator:
             rendered_path = rendered_paths.get(view)
             if not rendered_path:
                 missing_views.append(view)
+                report = {
+                    "psnr": None,
+                    "ssim": None,
+                    "lpips": None,
+                    "mse": None,
+                    "image_count": 0,
+                    "warnings": (),
+                    "failure_code": "render_failed",
+                    "error": f"candidate render missing for novel view {view!r}",
+                    "reference_path": str(reference_path),
+                    "rendered_path": None,
+                }
+                report["gate"] = _novel_view_gate(
+                    report,
+                    psnr_threshold=self.novel_psnr_threshold,
+                    ssim_threshold=self.novel_ssim_threshold,
+                    lpips_threshold=self.novel_lpips_threshold,
+                )
+                pair_reports[view] = report
+                table_rows.append(
+                    {
+                        "view": view,
+                        "psnr": "n/a",
+                        "ssim": "n/a",
+                        "lpips": "n/a",
+                        "status": "FAIL",
+                    }
+                )
                 continue
             try:
                 ref_image, render_image, warnings = _load_novel_pair(
