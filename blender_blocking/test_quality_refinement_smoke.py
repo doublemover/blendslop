@@ -77,6 +77,30 @@ class QualityRefinementSmokeTests(unittest.TestCase):
             "synthetic-blender-smoke",
         )
 
+    def test_full_nightly_estimates_resolved_refinement_case_counts(self) -> None:
+        args = parse_args(
+            [
+                "--profile",
+                "full-nightly",
+                "--dry-run",
+                "--run-root",
+                f"temp/quality-refinement-runs/{uuid.uuid4().hex}",
+            ]
+        )
+
+        _run_root, phases = build_phase_plan(args)
+        primitive = next(
+            phase for phase in phases if phase.name == "refinement-primitive-fit"
+        )
+        ensemble = next(
+            phase for phase in phases if phase.name == "refinement-ensemble-selection"
+        )
+
+        self.assertEqual(primitive.expected_case_count, 6)
+        self.assertEqual(primitive.expected_candidate_count, 96)
+        self.assertEqual(ensemble.expected_case_count, 5)
+        self.assertEqual(ensemble.expected_candidate_count, 80)
+
     def test_preflight_rejects_pure_mask_refinement_suite(self) -> None:
         target = RefinementTarget(
             name="bad-ensemble",
@@ -125,6 +149,27 @@ class QualityRefinementSmokeTests(unittest.TestCase):
         report = preflight_phases(phases)
 
         self.assertTrue(report["passed"], report)
+
+    def test_preflight_only_fails_fast_on_missing_blender_executable(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        phase = PhaseCommand(
+            name="needs-blender",
+            description="missing blender probe",
+            command=("definitely_missing_blender_executable_for_test",),
+            artifacts=(run_root / "artifact.json",),
+            requires_blender=True,
+        )
+
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = run_phases(run_root, (phase,), preflight_only=True)
+
+        self.assertEqual(exit_code, 1)
+        self.assertFalse(run_root.exists())
+        payload = json.loads(output.getvalue())
+        self.assertFalse(payload["passed"])
+        self.assertEqual(payload["checked_executable_phases"], 1)
+        self.assertEqual(payload["issues"][0]["code"], "missing_blender_executable")
 
     def test_run_root_must_stay_under_temp(self) -> None:
         with self.assertRaises(ValueError):

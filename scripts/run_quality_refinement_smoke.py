@@ -13,6 +13,7 @@ import argparse
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from functools import lru_cache
 import hashlib
 import json
 import os
@@ -279,6 +280,7 @@ class PhaseCommand:
     refinement_preflight: RefinementPhasePreflight | None = None
     depends_on: tuple[str, ...] = ()
     inline_quality_budget: tuple[Path, Path, Path] | None = None
+    expected_case_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -556,6 +558,11 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                 max_length=24,
                 fallback="target",
             )
+            expected_case_count = _estimate_refinement_case_count(
+                target=target,
+                case_count=refinement_case_count,
+                seed=args.seed,
+            )
             phases.append(
                 PhaseCommand(
                     name=f"refinement-{target.name}",
@@ -590,7 +597,7 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                     expected_candidate_count=(
                         refinement_max_runs
                         * refinement_generations
-                        * max(1, refinement_case_count or 1)
+                        * max(1, expected_case_count)
                     ),
                     expected_blender_invocations=1,
                     refinement_preflight=RefinementPhasePreflight(
@@ -601,6 +608,7 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                         top_k=refinement_top_k,
                         seed=args.seed,
                     ),
+                    expected_case_count=expected_case_count,
                 )
             )
 
@@ -746,6 +754,37 @@ def _selected_refinement_targets(raw: str | None) -> tuple[RefinementTarget, ...
     return tuple(by_name[name] for name in names)
 
 
+def _estimate_refinement_case_count(
+    *,
+    target: RefinementTarget,
+    case_count: int | None,
+    seed: int,
+) -> int:
+    return _estimate_refinement_suite_case_count(target.suite, case_count, seed)
+
+
+@lru_cache(maxsize=64)
+def _estimate_refinement_suite_case_count(
+    suite_name: str,
+    case_count: int | None,
+    seed: int,
+) -> int:
+    try:
+        from blender_blocking.refinement_lab.matrix import resolve_suite_cases
+        from blender_blocking.refinement_lab.preset_catalog import get_suite_preset
+    except ImportError:  # pragma: no cover - direct blender_blocking/ execution
+        from refinement_lab.matrix import resolve_suite_cases
+        from refinement_lab.preset_catalog import get_suite_preset
+
+    suite = get_suite_preset(suite_name)
+    cases = resolve_suite_cases(
+        suite,
+        seed=seed or suite.default_seed,
+        count=case_count if case_count is not None else suite.default_count,
+    )
+    return len(cases)
+
+
 def format_command(command: Sequence[str]) -> str:
     parts = [_quote_arg(part) for part in command]
     if parts and parts[0].startswith('"'):
@@ -813,7 +852,7 @@ def run_phases(
         _print_plan(run_root, phases)
         return 0
 
-    preflight = preflight_phases(phases)
+    preflight = preflight_phases(phases, verify_executables=True)
     if preflight_only:
         print(json.dumps(preflight, indent=2, sort_keys=True))
         return 0 if preflight["passed"] else 1
@@ -1066,10 +1105,18 @@ def _execute_phase(
     return result
 
 
-def preflight_phases(phases: Sequence[PhaseCommand]) -> dict[str, object]:
+def preflight_phases(
+    phases: Sequence[PhaseCommand],
+    *,
+    verify_executables: bool = False,
+) -> dict[str, object]:
     issues: list[dict[str, object]] = []
     checked_refinement = 0
+    checked_executables = 0
     for phase in phases:
+        if verify_executables and phase.requires_blender:
+            checked_executables += 1
+            issues.extend(_preflight_phase_executable(phase))
         preflight = phase.refinement_preflight
         if preflight is None:
             continue
@@ -1079,9 +1126,48 @@ def preflight_phases(phases: Sequence[PhaseCommand]) -> dict[str, object]:
         "schema_version": "quality_refinement_preflight_v1",
         "passed": not issues,
         "checked_refinement_phases": checked_refinement,
+        "checked_executable_phases": checked_executables,
         "issue_count": len(issues),
         "issues": issues,
     }
+
+
+def _preflight_phase_executable(phase: PhaseCommand) -> list[dict[str, object]]:
+    if not phase.command:
+        return [
+            {
+                "phase": phase.name,
+                "code": "missing_phase_command",
+                "message": "Phase has no command to execute.",
+            }
+        ]
+    executable = str(phase.command[0])
+    if _executable_available(executable):
+        return []
+    return [
+        {
+            "phase": phase.name,
+            "code": "missing_blender_executable",
+            "executable": executable,
+            "message": (
+                "This phase requires Blender, but the configured executable "
+                "does not exist and was not found on PATH."
+            ),
+        }
+    ]
+
+
+def _executable_available(executable: str) -> bool:
+    path = Path(executable)
+    separators = [os.sep]
+    if os.altsep:
+        separators.append(os.altsep)
+    looks_like_path = path.is_absolute() or bool(path.drive) or any(
+        separator in executable for separator in separators
+    )
+    if looks_like_path:
+        return path.exists()
+    return shutil.which(executable) is not None
 
 
 def _preflight_refinement_phase(
@@ -1371,12 +1457,13 @@ def _print_plan(run_root: Path, phases: Sequence[PhaseCommand]) -> None:
         f"{artifact_count} expected artifact roots/files"
     )
     print()
-    print("| # | Phase | Candidates | Blender starts | Artifacts |")
-    print("| ---: | --- | ---: | ---: | ---: |")
+    print("| # | Phase | Cases | Candidates | Blender starts | Artifacts |")
+    print("| ---: | --- | ---: | ---: | ---: | ---: |")
     for index, phase in enumerate(phases, start=1):
         print(
             "| "
             f"{index} | `{phase.name}` | "
+            f"{phase.expected_case_count} | "
             f"{phase.expected_candidate_count} | "
             f"{phase.expected_blender_invocations} | "
             f"{len(phase.artifacts)} |"
@@ -1492,6 +1579,7 @@ def _write_machine_summary(
                 "artifacts": [_repo_path(path) for path in result.phase.artifacts],
                 "expected_candidate_count": result.phase.expected_candidate_count,
                 "expected_blender_invocations": result.phase.expected_blender_invocations,
+                "expected_case_count": result.phase.expected_case_count,
                 "stdout_path": _repo_path(result.stdout_path) if result.stdout_path else None,
                 "stderr_path": _repo_path(result.stderr_path) if result.stderr_path else None,
             }
