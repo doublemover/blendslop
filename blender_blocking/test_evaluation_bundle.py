@@ -411,11 +411,13 @@ class EvaluationBundleTests(unittest.TestCase):
                     "recoverability": {
                         "source": "synthetic-test",
                         "true_geometry": {
+                            "chamfer_l1": 0.12,
                             "chamfer_l2": 0.08,
                             "fscore_tau": 0.42,
                             "volumetric_iou": 0.5,
                         },
                         "recoverable_geometry": {
+                            "chamfer_l1": 0.04,
                             "chamfer_l2": 0.02,
                             "fscore_tau": 0.82,
                             "volumetric_iou": 0.76,
@@ -431,6 +433,11 @@ class EvaluationBundleTests(unittest.TestCase):
 
         self.assertEqual(metrics["geometry.true.fscore_tau"].value, 0.42)
         self.assertEqual(metrics["geometry.recoverable.fscore_tau"].value, 0.82)
+        self.assertEqual(metrics["geometry.true.chamfer_l1_normalized"].value, 0.12)
+        self.assertEqual(
+            metrics["geometry.recoverable.chamfer_l2_normalized"].value,
+            0.02,
+        )
         self.assertAlmostEqual(metrics["geometry.ambiguity_gap_chamfer_l2"].value, 0.06)
         self.assertIn("geometry_true_recoverable_gap_large", codes)
         autopsy = autopsy_pack_from_bundle(bundle).to_dict()

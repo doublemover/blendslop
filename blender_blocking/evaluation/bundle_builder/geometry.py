@@ -175,7 +175,9 @@ def _geometry_metric_values(
     values: list[MetricValue] = []
     for name, value, higher in (
         (f"{prefix}.chamfer_l1", report.chamfer_l1, False),
+        (f"{prefix}.chamfer_l1_normalized", report.chamfer_l1, False),
         (f"{prefix}.chamfer_l2", report.chamfer_l2, False),
+        (f"{prefix}.chamfer_l2_normalized", report.chamfer_l2, False),
         (f"{prefix}.fscore_tau", report.fscore_tau, True),
         (f"{prefix}.volumetric_iou", report.volumetric_iou, True),
         (f"{prefix}.normal_consistency", report.normal_consistency, True),

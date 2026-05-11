@@ -1085,6 +1085,8 @@ def _bundle_metric_alias(name: str) -> str:
         "geometry.fscore_tau": "geometry_fscore_tau",
         "geometry.volumetric_iou": "geometry_volumetric_iou",
         "geometry.chamfer_l2": "geometry_chamfer_l2",
+        "geometry.chamfer_l1_normalized": "geometry_chamfer_l1_normalized",
+        "geometry.chamfer_l2_normalized": "geometry_chamfer_l2_normalized",
         "geometry.surface_coverage": "geometry_surface_coverage",
     }
     return aliases.get(name, "")

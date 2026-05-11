@@ -202,8 +202,15 @@ def nearest_indices(points: Any, reference: Any, *, chunk_size: int = 4096) -> A
 
 def report_from_mapping(payload: Mapping[str, Any]) -> GeometryMetricReport:
     return GeometryMetricReport(
-        chamfer_l1=_optional_float(payload.get("chamfer_l1")),
-        chamfer_l2=_optional_float(payload.get("chamfer_l2", payload.get("chamfer"))),
+        chamfer_l1=_optional_float(
+            payload.get("chamfer_l1", payload.get("chamfer_l1_normalized"))
+        ),
+        chamfer_l2=_optional_float(
+            payload.get(
+                "chamfer_l2",
+                payload.get("chamfer_l2_normalized", payload.get("chamfer")),
+            )
+        ),
         fscore_tau=_optional_float(payload.get("fscore_tau", payload.get("f_score"))),
         fscore_tolerance=_optional_float(payload.get("fscore_tolerance", payload.get("tau"))),
         volumetric_iou=_optional_float(payload.get("volumetric_iou")),
