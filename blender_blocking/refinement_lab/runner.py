@@ -361,7 +361,12 @@ class BaseRunner:
                 "track": self.plan.track,
                 "objective": self.plan.objective,
                 "case": case.to_dict(),
-                "variant": variant.to_dict(),
+                "variant": {
+                    "schema": "refinement_candidate_effective_variant_v1",
+                    "mode": variant.mode,
+                    "validation_mode": variant.validation_mode,
+                    "variant_hash": variant.variant_hash(),
+                },
                 "base_config": self.base_config.to_dict(),
                 "references": _reference_hashes(reference_paths),
             },
@@ -399,7 +404,7 @@ class BaseRunner:
         for path in candidates:
             result = self._load_candidate_state(path, key)
             if result is not None:
-                return result
+                return self._adapt_reused_candidate_result(result, case, variant)
         return None
 
     def _load_candidate_state(
@@ -429,6 +434,31 @@ class BaseRunner:
         if not _result_artifacts_ready(result):
             return None
         return result
+
+    def _adapt_reused_candidate_result(
+        self,
+        result: ExperimentResult,
+        case: ExperimentCase,
+        variant: ExperimentVariant,
+    ) -> ExperimentResult:
+        metrics = copy.deepcopy(dict(result.metrics))
+        set_metric_path(metrics, "variant.diagnostic_only", bool(variant.diagnostic_only))
+        warnings = tuple(result.warnings)
+        if result.case_id != case.case_id or result.variant_id != variant.variant_id:
+            warnings = warnings + (
+                f"reused_candidate_result:{result.case_id}:{result.variant_id}",
+            )
+        return ExperimentResult.from_dict(
+            {
+                **result.to_dict(),
+                "run_id": self.plan.run_id,
+                "case_id": case.case_id,
+                "variant_id": variant.variant_id,
+                "mode": variant.mode,
+                "metrics": metrics,
+                "warnings": warnings,
+            }
+        )
 
     def _write_candidate_state(
         self,
@@ -909,6 +939,7 @@ def _result_from_payload(
         payload.get("backend_result", {}) if isinstance(payload, Mapping) else {}
     )
     metrics = _metrics_from_payload(payload)
+    set_metric_path(metrics, "variant.diagnostic_only", bool(variant.diagnostic_only))
     artifacts = _artifacts_from_payload(payload)
     render_paths = {
         key: Path(value)

@@ -215,6 +215,25 @@ class RefinementLabScoringTests(unittest.TestCase):
             self.assertIn("research_only_candidate", terms)
             self.assertLess(terms["research_only_candidate"]["weighted"], 0.0)
 
+    def test_diagnostic_only_candidate_cannot_promote(self) -> None:
+        result = _result(
+            "diagnostic",
+            0.96,
+            0.96,
+            0.96,
+            0.96,
+            metrics={"variant": {"diagnostic_only": True}},
+        )
+
+        decision = promotion_decision(result)
+        score = score_result(result, objective="reliability_first")
+
+        self.assertFalse(decision.promotable)
+        self.assertEqual(decision.tier, "blocked")
+        self.assertEqual(decision.state, "diagnostic_only")
+        self.assertIn("diagnostic_only_candidate", decision.blockers)
+        self.assertEqual(score["total"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

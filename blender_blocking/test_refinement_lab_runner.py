@@ -25,6 +25,7 @@ try:
         RunOptions,
         _apply_variant_to_config,
         _metrics_from_payload,
+        _result_from_payload,
         _variant_command,
     )
     from test_e2e_validation import (
@@ -47,6 +48,7 @@ except ModuleNotFoundError:  # pragma: no cover - package unittest path
         RunOptions,
         _apply_variant_to_config,
         _metrics_from_payload,
+        _result_from_payload,
         _variant_command,
     )
     from blender_blocking.test_e2e_validation import (
@@ -271,6 +273,121 @@ class RefinementLabRunnerTests(unittest.TestCase):
             assert reused is not None
             self.assertEqual(reused.status, "pass")
             self.assertEqual(reused.variant_id, "baseline")
+
+    def test_candidate_cache_reuses_effective_duplicate_variant(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            refs = root / "refs"
+            refs.mkdir()
+            reference_paths = {}
+            for view in ("front", "side", "top"):
+                path = refs / f"{view}.png"
+                path.write_bytes(f"{view}-mask".encode("utf-8"))
+                reference_paths[view] = path
+            case = ExperimentCase(
+                "case",
+                "default-vase",
+                "builtin_sample",
+                reference_paths=reference_paths,
+            )
+            first = ExperimentVariant(
+                "baseline",
+                "baseline",
+                "profile_loft",
+                parameters={"profile_samples": 64},
+            )
+            duplicate = ExperimentVariant(
+                "renamed-duplicate",
+                "renamed duplicate",
+                "profile_loft",
+                parameters={"profile_samples": 64},
+                diagnostic_only=True,
+            )
+            plan = ExperimentPlan(
+                plan_id="p",
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="grid",
+                objective="quality_win",
+                output_root=root / "run",
+                run_id="run",
+                cases=(case,),
+                variants=(first, duplicate),
+            )
+            runner = InProcessBlenderRunner(
+                plan=plan,
+                options=RunOptions(
+                    cache_root=root / "cache",
+                    candidate_cache=True,
+                    html_report=False,
+                    write_lineage=False,
+                ),
+            )
+            result_json = runner._case_variant_dir(case, first) / "result.json"
+            result_json.parent.mkdir(parents=True, exist_ok=True)
+            result_json.write_text('{"passed": true}\n', encoding="utf-8")
+            result = ExperimentResult(
+                run_id="run",
+                case_id="case",
+                variant_id="baseline",
+                mode="profile_loft",
+                status="pass",
+                exit_code=0,
+                started_utc="2026-01-01T00:00:00Z",
+                finished_utc="2026-01-01T00:00:01Z",
+                elapsed_s=1.0,
+                result_json=result_json,
+                reference_paths=reference_paths,
+                metrics={"render": {"min_view_iou": 0.9}},
+            )
+
+            runner._write_candidate_state(case, first, reference_paths, result)
+            reused = runner._load_reusable_candidate(case, duplicate, reference_paths)
+
+            self.assertIsNotNone(reused)
+            assert reused is not None
+            self.assertEqual(reused.variant_id, "renamed-duplicate")
+            self.assertIn("reused_candidate_result:case:baseline", reused.warnings)
+            self.assertEqual(reused.metrics["variant"]["diagnostic_only"], True)
+
+    def test_diagnostic_only_variant_is_recorded_in_result_metrics(self) -> None:
+        reference_paths = {
+            "front": Path("front.png"),
+            "side": Path("side.png"),
+            "top": Path("top.png"),
+        }
+        case = ExperimentCase(
+            "case",
+            "default-vase",
+            "builtin_sample",
+            reference_paths=reference_paths,
+        )
+        variant = ExperimentVariant(
+            "diag",
+            "diagnostic",
+            "profile_loft",
+            diagnostic_only=True,
+        )
+
+        result = _result_from_payload(
+            plan_id="run",
+            case=case,
+            variant=variant,
+            status="pass",
+            exit_code=0,
+            started_utc="2026-01-01T00:00:00Z",
+            finished_utc="2026-01-01T00:00:01Z",
+            elapsed_s=1.0,
+            command=("python", "noop.py"),
+            result_json=Path("temp/result.json"),
+            payload={"validation_mode": "render-iou"},
+            reference_paths=reference_paths,
+        )
+
+        self.assertEqual(
+            result.metrics["variant"]["diagnostic_only"],
+            True,
+        )
 
     def test_run_option_cache_enables_visual_hull_volume_cache(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

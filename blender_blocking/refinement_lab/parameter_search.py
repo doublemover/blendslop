@@ -179,6 +179,7 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
     backend_status = _backend_status(result)
     backend_degraded = _backend_degraded(result)
     metric_only = metric_only_candidate(result) > 0.0
+    diagnostic_only = diagnostic_only_candidate(result) > 0.0
     blockers: list[str] = []
 
     if result.status != "pass":
@@ -191,6 +192,8 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
         blockers.append("degraded_backend")
     if metric_only:
         blockers.append("metric_only_candidate")
+    if diagnostic_only:
+        blockers.append("diagnostic_only_candidate")
     if missing_required_metrics(result) > 0.0:
         blockers.append("missing_required_metrics")
     if catastrophic_view_failure(result) > 0.0:
@@ -222,6 +225,7 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
             "editability_roundtrip_missing",
             "proxy_render_namespace_violation",
             "proxy_render_disagreement",
+            "diagnostic_only_candidate",
         }
         for item in blockers
     )
@@ -331,6 +335,13 @@ def metric_only_candidate(result: ExperimentResult) -> float:
     if optional_float(backend_mean) and float(backend_mean) > 0.9:
         return 1.0
     return 0.0
+
+
+def diagnostic_only_candidate(result: ExperimentResult) -> float:
+    value = get_metric_path(result.metrics, "variant.diagnostic_only")
+    if value is None:
+        value = result.metrics.get("diagnostic_only")
+    return 1.0 if _truthy(value) else 0.0
 
 
 def proxy_render_namespace_violation(result: ExperimentResult) -> float:
@@ -513,6 +524,12 @@ def _promotion_terms(result: ExperimentResult) -> list[ScoreTerm]:
             "candidate produced a research artifact without validated editable reconstruction",
         ),
         ScoreTerm(
+            "diagnostic_only_candidate",
+            diagnostic_only_candidate(result),
+            -1600.0,
+            "candidate is marked diagnostic-only and cannot become a quality parent",
+        ),
+        ScoreTerm(
             "degraded_candidate",
             1.0 if decision.backend_degraded or decision.backend_status == "degraded" else 0.0,
             -900.0,
@@ -670,6 +687,8 @@ def _promotion_state(
         return "research_only"
     if "metric_only_candidate" in blocker_set:
         return "metric_only_candidate"
+    if "diagnostic_only_candidate" in blocker_set:
+        return "diagnostic_only"
     if backend_status in _BACKEND_FAILURE_STATUSES:
         return "diagnostic_only"
     return tier
