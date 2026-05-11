@@ -40,15 +40,27 @@ def differentiable_candidate_status(
         and not boundary_or_sdf_improved
         and status == "success"
     ):
-        status = "degraded"
-        degraded = True
-        warnings = warnings + (
-            "differentiable refinement did not improve boundary or signed-distance losses",
-        )
+        message = "differentiable refinement did not improve boundary or signed-distance losses"
+        warnings = warnings + (message,)
+        if bool(
+            config.get("require_boundary_sdf_improvement")
+            or config.get("fail_on_no_boundary_sdf_improvement")
+        ):
+            status = "failed"
+            errors = errors + (message,)
+        else:
+            status = "degraded"
+            degraded = True
     if optimized_primitives_present and failed_required_views and status == "success":
-        status = "degraded"
-        degraded = True
-        warnings = warnings + (
-            f"{failed_required_views} required soft-silhouette view(s) failed metric gates",
-        )
+        message = f"{failed_required_views} required soft-silhouette view(s) failed metric gates"
+        warnings = warnings + (message,)
+        if bool(
+            config.get("require_required_views_pass")
+            or config.get("fail_on_required_view_failure")
+        ):
+            status = "failed"
+            errors = errors + (message,)
+        else:
+            status = "degraded"
+            degraded = True
     return status, degraded, errors, warnings

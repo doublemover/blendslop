@@ -370,6 +370,34 @@ class TestResfittingMetrics(unittest.TestCase):
         self.assertEqual(errors, ())
         self.assertIn("topology score", "\n".join(warnings))
 
+    def test_primitive_quality_floors_fail_strict_noop_optimization(self) -> None:
+        metric = SimpleNamespace(
+            area_iou_min=0.8,
+            topology_score=0.95,
+            extras={
+                "topology": {"watertight": True, "boundary_edges": 0},
+                "objective": {
+                    "improved": False,
+                    "all_attempts_noop": True,
+                    "accepted_move_count": 0,
+                },
+            },
+        )
+
+        status, degraded, errors, warnings = apply_resfit_quality_floors(
+            config={"fail_on_noop_optimization": True},
+            status="success",
+            degraded=False,
+            errors=(),
+            warnings=(),
+            metric=metric,
+        )
+
+        self.assertEqual(status, "failed")
+        self.assertFalse(degraded)
+        self.assertIn("primitive optimizer made no accepted", "\n".join(errors))
+        self.assertIn("primitive objective did not improve", "\n".join(warnings))
+
     def test_analytic_ellipsoid_mesh_is_watertight(self) -> None:
         mesh = EllipsoidPrimitive().to_mesh_data(resolution=24)
         report = mesh_topology_report(mesh.vertices, mesh.faces)

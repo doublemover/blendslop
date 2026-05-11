@@ -63,11 +63,18 @@ def build_resfit_candidate_metrics(
     }
     accepted_moves = sum(int(record.get("accepted_moves", 0) or 0) for record in history_records)
     rejected_moves = sum(int(record.get("rejected_moves", 0) or 0) for record in history_records)
+    attempt_count = len(result.attempts)
+    noop_attempt_count = sum(1 for attempt in result.attempts if _attempt_is_noop(attempt))
+    all_attempts_noop = attempt_count > 0 and noop_attempt_count == attempt_count
     fail_reason = ""
     if not result.primitives:
         fail_reason = "no_primitives_emitted"
+    elif improved <= 0.0 and accepted_moves <= 0:
+        fail_reason = "optimizer_noop_objective_did_not_improve"
     elif improved <= 0.0:
         fail_reason = "objective_did_not_improve"
+    elif accepted_moves <= 0:
+        fail_reason = "optimizer_noop"
     budget_outcome = (
         "accepted_after_improvement"
         if budget_limited and improved > 0.0 and result.primitives
@@ -128,6 +135,9 @@ def build_resfit_candidate_metrics(
                 "improved": improved > 0.0,
                 "accepted_move_count": accepted_moves,
                 "rejected_move_count": rejected_moves,
+                "attempt_count": attempt_count,
+                "noop_attempt_count": noop_attempt_count,
+                "all_attempts_noop": all_attempts_noop,
                 "termination_reason": result.optimization_termination_reason,
                 "objective_evaluations": result.objective_evaluations,
                 "history_length": len(history_records),
@@ -160,6 +170,9 @@ def build_resfit_candidate_metrics(
             "objective_improvement_ratio": improvement_ratio,
             "accepted_move_count": accepted_moves,
             "rejected_move_count": rejected_moves,
+            "attempt_count": attempt_count,
+            "noop_attempt_count": noop_attempt_count,
+            "all_attempts_noop": all_attempts_noop,
             "termination_reason": result.optimization_termination_reason,
             "fail_reason": fail_reason,
             "surface_proxy_iou": surface_proxy_iou,
@@ -187,3 +200,14 @@ def build_resfit_candidate_metrics(
         "constraint_score": constraint_score,
         "uncertainty_consistency": uncertainty_consistency,
     }
+
+
+def _attempt_is_noop(attempt: Mapping[str, Any]) -> bool:
+    if str(attempt.get("status", "")) != "ok":
+        return False
+    try:
+        accepted = int(attempt.get("accepted_moves", 0) or 0)
+        improvement = float(attempt.get("improvement", 0.0) or 0.0)
+    except (TypeError, ValueError):
+        return False
+    return accepted <= 0 and improvement <= 1.0e-12

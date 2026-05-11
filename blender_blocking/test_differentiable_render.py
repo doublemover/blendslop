@@ -331,6 +331,36 @@ class TestDifferentiableRender(unittest.TestCase):
         self.assertEqual(errors, ())
         self.assertIn("boundary or signed-distance", "\n".join(warnings))
 
+    def test_boundary_sdf_gate_can_fail_strict_average_only_improvement(self) -> None:
+        status, degraded, errors, warnings = differentiable_candidate_status(
+            config={"require_boundary_sdf_improvement": True},
+            optimized_primitives_present=True,
+            objective_improvement=0.1,
+            boundary_or_sdf_improved=False,
+            failed_required_views=0,
+            warnings=(),
+        )
+
+        self.assertEqual(status, "failed")
+        self.assertFalse(degraded)
+        self.assertIn("boundary or signed-distance", "\n".join(errors))
+        self.assertIn("boundary or signed-distance", "\n".join(warnings))
+
+    def test_required_view_failure_can_fail_strict_candidate(self) -> None:
+        status, degraded, errors, warnings = differentiable_candidate_status(
+            config={"fail_on_required_view_failure": True},
+            optimized_primitives_present=True,
+            objective_improvement=0.1,
+            boundary_or_sdf_improved=True,
+            failed_required_views=1,
+            warnings=(),
+        )
+
+        self.assertEqual(status, "failed")
+        self.assertFalse(degraded)
+        self.assertIn("required soft-silhouette", "\n".join(errors))
+        self.assertIn("required soft-silhouette", "\n".join(warnings))
+
     def test_cpu_optimizer_honors_request_runtime_budget(self) -> None:
         request = CandidateRequest(
             candidate_id="cpu-soft-budgeted",

@@ -110,6 +110,15 @@ def apply_resfit_quality_floors(
             fail_reasons.append(message)
         else:
             degrade_reasons.append(message)
+    if isinstance(objective, Mapping) and objective.get("all_attempts_noop") is True:
+        message = "primitive optimizer made no accepted objective-improving moves"
+        if bool(
+            config.get("fail_on_noop_optimization")
+            or config.get("fail_on_no_improvement")
+        ):
+            fail_reasons.append(message)
+        else:
+            degrade_reasons.append(message)
 
     if fail_reasons:
         status = "failed"

@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Iterable, Mapping
 
-from .contracts import ExperimentResult, json_safe
+from .contracts import ExperimentResult, json_safe, stable_hash
 from .parameter_search import promotion_decision, rank_results, score_result
 try:
     from blender_blocking.metrics.namespaces import get_metric_path
@@ -124,7 +124,11 @@ def write_leaderboard_json(
     objective: str,
 ) -> Path:
     scored = rank_results(results, objective=objective)
-    rows = [_leaderboard_row(index + 1, result, score) for index, (result, score) in enumerate(scored)]
+    rows = [
+        _leaderboard_row(index + 1, result, score)
+        for index, (result, score) in enumerate(scored)
+    ]
+    duplicate_groups = _annotate_duplicate_quality_groups(rows)
     counts: dict[str, int] = {}
     for row in rows:
         counts[str(row["status"])] = counts.get(str(row["status"]), 0) + 1
@@ -132,13 +136,25 @@ def write_leaderboard_json(
         "schema_version": "refinement_leaderboard_v1",
         "objective": objective,
         "counts": counts,
+        "duplicate_quality_group_count": len(duplicate_groups),
+        "duplicate_quality_duplicate_row_count": sum(
+            int(group["count"]) for group in duplicate_groups
+        ),
+        "duplicate_quality_groups": duplicate_groups,
         "top_by_objective": rows[0] if rows else None,
-        "top_by_min_iou": max(rows, key=lambda row: float(row.get("min_iou") or 0.0), default=None),
+        "top_by_min_iou": max(
+            rows,
+            key=lambda row: float(row.get("min_iou") or 0.0),
+            default=None,
+        ),
         "fastest_acceptable": _fastest_acceptable(rows),
         "rows": rows,
     }
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n",
+        encoding="utf-8",
+    )
     return path
 
 
@@ -157,8 +173,12 @@ def write_leaderboard_md(
         "| Rank | Case | Variant | Mode | Status | Promotion | Score | Avg IoU | Min IoU | Front | Side | Top | Topology | Editability | Elapsed | Autopsy | Result |",
         "|---:|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|",
     ]
+    rows: list[dict[str, object]] = []
     for index, (result, score) in enumerate(scored, start=1):
         row = _leaderboard_row(index, result, score)
+        rows.append(row)
+    duplicate_groups = _annotate_duplicate_quality_groups(rows)
+    for row in rows:
         lines.append(
             "| {rank} | {case_id} | {variant_id} | {mode} | {status} | {promotion_tier} | {score:.3f} | "
             "{average_iou:.3f} | {min_iou:.3f} | {front_iou:.3f} | {side_iou:.3f} | "
@@ -167,6 +187,24 @@ def write_leaderboard_md(
                 **row
             )
         )
+    if duplicate_groups:
+        lines.extend(
+            [
+                "",
+                "## Duplicate Quality Groups",
+                "",
+                "| Fingerprint | Count | Examples |",
+                "|---|---:|---|",
+            ]
+        )
+        for group in duplicate_groups[:20]:
+            lines.append(
+                "| {fingerprint} | {count} | {examples} |".format(
+                    fingerprint=group["fingerprint"],
+                    count=group["count"],
+                    examples=", ".join(str(item) for item in group["examples"]),
+                )
+            )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
@@ -190,6 +228,7 @@ def _leaderboard_row(
         "promotable": promotion.promotable,
         "promotion_blockers": list(promotion.blockers),
         "backend_status": promotion.backend_status,
+        "quality_fingerprint": _quality_fingerprint(result, promotion),
         "score": float(score.get("total", 0.0)),
         "average_iou": result.avg_iou,
         "min_iou": result.min_iou,
@@ -203,6 +242,129 @@ def _leaderboard_row(
         "result_json": result.result_json.as_posix() if result.result_json else "",
         "score_terms": json_safe(score.get("terms", ())),
     }
+
+
+def _annotate_duplicate_quality_groups(
+    rows: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    groups: dict[str, list[dict[str, object]]] = {}
+    for row in rows:
+        fingerprint = str(row.get("quality_fingerprint", ""))
+        if fingerprint:
+            groups.setdefault(fingerprint, []).append(row)
+    duplicate_groups = [
+        {
+            "fingerprint": fingerprint,
+            "count": len(items),
+            "examples": [
+                f"{item.get('case_id')}:{item.get('variant_id')}"
+                for item in items[:8]
+            ],
+            "modes": sorted({str(item.get("mode", "")) for item in items}),
+            "statuses": sorted({str(item.get("status", "")) for item in items}),
+        }
+        for fingerprint, items in groups.items()
+        if len(items) > 1
+    ]
+    duplicate_groups.sort(
+        key=lambda item: (int(item["count"]), str(item["fingerprint"])),
+        reverse=True,
+    )
+    counts = {
+        str(group["fingerprint"]): int(group["count"])
+        for group in duplicate_groups
+    }
+    group_ids = {
+        str(group["fingerprint"]): index + 1
+        for index, group in enumerate(duplicate_groups)
+    }
+    for row in rows:
+        fingerprint = str(row.get("quality_fingerprint", ""))
+        count = counts.get(fingerprint, 1)
+        row["duplicate_quality_count"] = count
+        row["duplicate_quality_group_id"] = group_ids.get(fingerprint)
+        row["duplicate_quality"] = count > 1
+    return duplicate_groups
+
+
+def _quality_fingerprint(result: ExperimentResult, promotion: object) -> str:
+    payload = {
+        "schema": "refinement_quality_fingerprint_v1",
+        "mode": result.mode,
+        "result_status": result.status,
+        "backend_status": getattr(promotion, "backend_status", ""),
+        "promotion_tier": getattr(promotion, "tier", ""),
+        "render": {
+            view: {
+                "area_iou": _rounded(
+                    get_metric_path(
+                        result.metrics,
+                        f"render.per_view.{view}.area_iou",
+                    )
+                ),
+                "boundary_iou": _rounded(
+                    get_metric_path(
+                        result.metrics,
+                        f"render.per_view.{view}.boundary_iou",
+                    )
+                ),
+                "signed_distance_loss": _rounded(
+                    get_metric_path(
+                        result.metrics,
+                        f"render.per_view.{view}.signed_distance_loss",
+                    )
+                ),
+            }
+            for view in ("front", "side", "top")
+        },
+        "aggregates": {
+            "average_iou": _rounded(result.avg_iou),
+            "min_view_iou": _rounded(result.min_iou),
+            "boundary_iou_mean": _rounded(
+                get_metric_path(result.metrics, "render.boundary_iou_mean")
+            ),
+            "signed_distance_loss_mean": _rounded(
+                get_metric_path(result.metrics, "render.signed_distance_loss_mean")
+            ),
+            "topology_score": _rounded(_metric(result, "topology_score")),
+            "editability_score": _rounded(_metric(result, "editability_score")),
+        },
+        "backend": {
+            "selected": _selected_backend_name(result),
+            "area_iou_min": _rounded(
+                get_metric_path(result.metrics, "backend.area_iou_min")
+            ),
+            "area_iou_mean": _rounded(
+                get_metric_path(result.metrics, "backend.area_iou_mean")
+            ),
+            "boundary_iou_mean": _rounded(
+                get_metric_path(result.metrics, "backend.boundary_iou_mean")
+            ),
+        },
+        "blockers": tuple(sorted(getattr(promotion, "blockers", ()))),
+    }
+    return stable_hash(payload, length=16)
+
+
+def _rounded(value: object) -> float | None:
+    try:
+        parsed = float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+    return round(parsed, 6)
+
+
+def _selected_backend_name(result: ExperimentResult) -> str:
+    backend = result.backend_result if isinstance(result.backend_result, Mapping) else {}
+    selected = backend.get("selected") if isinstance(backend, Mapping) else None
+    source = selected if isinstance(selected, Mapping) else backend
+    if not isinstance(source, Mapping):
+        return ""
+    for key in ("backend_name", "name", "mode", "selected_backend"):
+        value = source.get(key)
+        if value:
+            return str(value)
+    return ""
 
 
 def _fastest_acceptable(rows: list[Mapping[str, object]]) -> Mapping[str, object] | None:
