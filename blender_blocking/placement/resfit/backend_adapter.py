@@ -35,7 +35,10 @@ from .config import (
     _coerce_weight,
     _pipeline_config_summary,
 )
-from .initialization import _family_supports_profile_init, _first_family
+from .initialization import (
+    _candidate_families,
+    _family_supports_profile_init,
+)
 from .artifacts import (
     build_resfit_mesh_proxy,
     resfit_history_records,
@@ -73,7 +76,7 @@ def run_primitive_fit_pipeline(request: object) -> object:
             errors=("missing target in request",),
         )
 
-    primitive_family = _first_family(config)
+    primitive_families = _candidate_families(config)
     errors: list[str] = []
     configured_max_primitives = _coerce_int(
         config.get("max_primitives", 6),
@@ -277,9 +280,19 @@ def run_primitive_fit_pipeline(request: object) -> object:
         max_value=16,
         errors=errors,
     )
+    default_max_family_candidates = len(primitive_families)
+    max_family_candidates = _coerce_int(
+        config.get("max_family_candidates", default_max_family_candidates),
+        "max_family_candidates",
+        default=default_max_family_candidates,
+        min_value=1,
+        max_value=max(1, len(primitive_families)),
+        errors=errors,
+    )
+    primitive_families = primitive_families[:max_family_candidates]
 
     pipeline_config = ResFitPipelineConfig(
-        primitive_family=primitive_family,
+        primitive_family=primitive_families[0],
         initialization=init_config,
         optimizer=optimizer_config,
         weights=weights,
@@ -319,24 +332,6 @@ def run_primitive_fit_pipeline(request: object) -> object:
     signal_summary = _collect_target_signals(target)
     profile_rows = _collect_profile_rows(signal_summary["profile"], getattr(target, "bounds", None))
 
-    initial_primitives: Sequence[object] | None = None
-    if _family_supports_profile_init(primitive_family) and profile_rows:
-        try:
-            slice_data = _profile_rows_to_slices(profile_rows, init_config)
-            if slice_data:
-                initial_primitives = initialize_from_profile_bands(
-                    slice_data,
-                    init_config,
-                )
-        except Exception as exc:
-            # Keep behavior stable: degrade to canonical seeding if profile init fails.
-            initial_primitives = None
-            profile_init_warning = f"profile initialization failed: {exc}"
-        else:
-            profile_init_warning = ""
-    else:
-        profile_init_warning = ""
-
     uncertainty_signal = signal_summary["uncertainty"]
     constraint_signal = signal_summary["constraints"]
     topology_signal = signal_summary["topology"]
@@ -356,16 +351,27 @@ def run_primitive_fit_pipeline(request: object) -> object:
     uncertainty_penalty_hook = _build_uncertainty_penalty_hook(uncertainty_signal)
 
     try:
-        result = fit_residual_primitives_multistart(
-            surface,
+        (
+            result,
+            primitive_family,
             pipeline_config,
-            profile_primitives=initial_primitives,
+            initial_primitives,
+            profile_init_warning,
+        ) = _fit_best_primitive_family(
+            surface=surface,
+            base_config=pipeline_config,
+            primitive_families=primitive_families,
+            profile_rows=profile_rows,
+            init_config=init_config,
             occupied_points=occupied,
             silhouette_hook=silhouette_hook,
             topology_penalty_hook=topology_penalty_hook,
             constraint_penalty_hook=constraint_penalty_hook,
             uncertainty_penalty_hook=uncertainty_penalty_hook,
             max_attempts=max_multistart_attempts,
+            share_budget_across_families=bool(
+                config.get("share_budget_across_families", True)
+            ),
         )
     except Exception as exc:
         return CandidateResult(
@@ -445,3 +451,147 @@ def run_primitive_fit_pipeline(request: object) -> object:
         degraded=degraded,
         payload=result,
     )
+
+
+def _fit_best_primitive_family(
+    *,
+    surface: np.ndarray,
+    base_config: ResFitPipelineConfig,
+    primitive_families: Sequence[str],
+    profile_rows: Sequence[Mapping[str, Any]],
+    init_config: PrimitiveInitializationConfig,
+    occupied_points: np.ndarray,
+    silhouette_hook: SilhouetteHook | None,
+    topology_penalty_hook: PenaltyHook | None,
+    constraint_penalty_hook: PenaltyHook | None,
+    uncertainty_penalty_hook: PenaltyHook | None,
+    max_attempts: int,
+    share_budget_across_families: bool,
+) -> tuple[ResFitPipelineResult, str, ResFitPipelineConfig, Sequence[object] | None, str]:
+    family_count = max(1, len(primitive_families))
+    summaries: list[Mapping[str, Any]] = []
+    best: tuple[ResFitPipelineResult, str, ResFitPipelineConfig, Sequence[object] | None, str] | None = None
+    for family in primitive_families:
+        family_config = _family_pipeline_config(
+            base_config,
+            family=family,
+            family_count=family_count,
+            share_budget=share_budget_across_families,
+        )
+        initial_primitives, profile_init_warning = _profile_initial_primitives(
+            family,
+            profile_rows=profile_rows,
+            init_config=init_config,
+        )
+        family_start = time.perf_counter()
+        try:
+            candidate = fit_residual_primitives_multistart(
+                surface,
+                family_config,
+                profile_primitives=initial_primitives,
+                occupied_points=occupied_points,
+                silhouette_hook=silhouette_hook,
+                topology_penalty_hook=topology_penalty_hook,
+                constraint_penalty_hook=constraint_penalty_hook,
+                uncertainty_penalty_hook=uncertainty_penalty_hook,
+                max_attempts=max_attempts,
+            )
+        except Exception as exc:
+            summaries.append(
+                {
+                    "family": family,
+                    "status": "failed",
+                    "error": str(exc),
+                    "elapsed_s": time.perf_counter() - family_start,
+                    "profile_init_warning": profile_init_warning,
+                }
+            )
+            continue
+        improvement = candidate.initial_loss.total - candidate.final_loss.total
+        summaries.append(
+            {
+                "family": family,
+                "status": "ok",
+                "selected_attempt": candidate.selected_attempt,
+                "initial_total": candidate.initial_loss.total,
+                "final_total": candidate.final_loss.total,
+                "improvement": improvement,
+                "primitive_count": len(candidate.primitives),
+                "objective_evaluations": candidate.objective_evaluations,
+                "optimizer_elapsed_s": candidate.optimizer_elapsed_s,
+                "elapsed_s": time.perf_counter() - family_start,
+                "profile_initialized": bool(initial_primitives),
+                "profile_init_warning": profile_init_warning,
+            }
+        )
+        if best is None or _family_result_is_better(candidate, best[0]):
+            best = (candidate, family, family_config, initial_primitives, profile_init_warning)
+    if best is None:
+        errors = [
+            str(summary.get("error", "unknown family fitting error"))
+            for summary in summaries
+            if summary.get("status") == "failed"
+        ]
+        raise RuntimeError("all primitive family attempts failed: " + "; ".join(errors))
+    selected, family, family_config, initial_primitives, profile_init_warning = best
+    selected = replace(selected, family_attempts=tuple(summaries))
+    return selected, family, family_config, initial_primitives, profile_init_warning
+
+
+def _family_pipeline_config(
+    base_config: ResFitPipelineConfig,
+    *,
+    family: str,
+    family_count: int,
+    share_budget: bool,
+) -> ResFitPipelineConfig:
+    optimizer = base_config.optimizer
+    if share_budget and family_count > 1:
+        max_elapsed_s = (
+            None
+            if optimizer.max_elapsed_s is None
+            else max(1.0e-3, float(optimizer.max_elapsed_s) / float(family_count))
+        )
+        max_objective_evaluations = (
+            None
+            if optimizer.max_objective_evaluations is None
+            else max(1, int(optimizer.max_objective_evaluations) // int(family_count))
+        )
+        optimizer = replace(
+            optimizer,
+            max_elapsed_s=max_elapsed_s,
+            max_objective_evaluations=max_objective_evaluations,
+        )
+    return replace(base_config, primitive_family=str(family), optimizer=optimizer)
+
+
+def _profile_initial_primitives(
+    primitive_family: str,
+    *,
+    profile_rows: Sequence[Mapping[str, Any]],
+    init_config: PrimitiveInitializationConfig,
+) -> tuple[Sequence[object] | None, str]:
+    if not (_family_supports_profile_init(primitive_family) and profile_rows):
+        return None, ""
+    try:
+        slice_data = _profile_rows_to_slices(profile_rows, init_config)
+        if slice_data:
+            return initialize_from_profile_bands(slice_data, init_config), ""
+    except Exception as exc:
+        return None, f"profile initialization failed: {exc}"
+    return None, ""
+
+
+def _family_result_is_better(
+    candidate: ResFitPipelineResult,
+    incumbent: ResFitPipelineResult,
+) -> bool:
+    if candidate.final_loss.total < incumbent.final_loss.total:
+        return True
+    if candidate.final_loss.total > incumbent.final_loss.total:
+        return False
+    candidate_improvement = candidate.initial_loss.total - candidate.final_loss.total
+    incumbent_improvement = incumbent.initial_loss.total - incumbent.final_loss.total
+    if candidate_improvement != incumbent_improvement:
+        return candidate_improvement > incumbent_improvement
+    return len(candidate.primitives) < len(incumbent.primitives)

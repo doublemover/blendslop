@@ -63,6 +63,7 @@ class ResFitPipelineResult:
     optimizer_elapsed_s: float = 0.0
     selected_attempt: str = "default"
     attempts: tuple[Mapping[str, Any], ...] = ()
+    family_attempts: tuple[Mapping[str, Any], ...] = ()
 
     def primitive_dicts(self) -> tuple[Mapping[str, object], ...]:
         return tuple(

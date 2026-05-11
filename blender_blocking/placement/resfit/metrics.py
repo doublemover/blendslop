@@ -66,6 +66,7 @@ def build_resfit_candidate_metrics(
     attempt_count = len(result.attempts)
     noop_attempt_count = sum(1 for attempt in result.attempts if _attempt_is_noop(attempt))
     all_attempts_noop = attempt_count > 0 and noop_attempt_count == attempt_count
+    family_attempts = tuple(getattr(result, "family_attempts", ()) or ())
     fail_reason = ""
     if not result.primitives:
         fail_reason = "no_primitives_emitted"
@@ -143,6 +144,7 @@ def build_resfit_candidate_metrics(
                 "history_length": len(history_records),
                 "selected_attempt": result.selected_attempt,
                 "attempts": list(result.attempts),
+                "family_attempts": list(family_attempts),
                 "per_view": per_view,
                 "fail_reason": fail_reason,
             },
@@ -180,6 +182,7 @@ def build_resfit_candidate_metrics(
             "optimization_termination_reason": result.optimization_termination_reason,
             "selected_attempt": result.selected_attempt,
             "optimization_attempts": list(result.attempts),
+            "family_attempts": list(family_attempts),
             "objective_evaluations": result.objective_evaluations,
             "optimizer_elapsed_s": result.optimizer_elapsed_s,
             "max_runtime_s": max_runtime_s,

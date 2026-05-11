@@ -9,6 +9,9 @@ import numpy as np
 
 from placement.resfit_objective import ResFitObjectiveResult
 from placement.resfit_optimizer import CoordinateDescentConfig, coordinate_descent_optimize
+from placement.resfit.backend_adapter import _family_pipeline_config
+from placement.resfit.config import ResFitPipelineConfig
+from placement.resfit.initialization import _candidate_families
 from placement.resfit.status import apply_resfit_quality_floors, resfit_candidate_status
 from placement.resfitting import ResidualFitter
 from metrics.topology import mesh_topology_report
@@ -264,6 +267,58 @@ class TestResfittingMetrics(unittest.TestCase):
 
         self.assertEqual(result.termination_reason, "objective_evaluation_budget")
         self.assertLessEqual(result.objective_evaluations, 3)
+
+    def test_candidate_families_deduplicates_configured_families(self) -> None:
+        self.assertEqual(
+            _candidate_families(
+                {
+                    "primitive_families": (
+                        "superquadric",
+                        "superquadric",
+                        "superfrustum",
+                        "ellipsoid",
+                    )
+                }
+            ),
+            ("superquadric", "superfrustum", "ellipsoid"),
+        )
+        self.assertEqual(
+            _candidate_families({"primitive_families": "ellipsoid, superfrustum"}),
+            ("ellipsoid", "superfrustum"),
+        )
+
+    def test_candidate_family_override_stays_single_family(self) -> None:
+        self.assertEqual(
+            _candidate_families(
+                {
+                    "primitive_family": "ellipsoid",
+                    "primitive_families": ("superquadric", "superfrustum"),
+                }
+            ),
+            ("ellipsoid",),
+        )
+
+    def test_family_pipeline_config_shares_runtime_and_eval_budget(self) -> None:
+        base = ResFitPipelineConfig(
+            primitive_family="superquadric",
+            optimizer=CoordinateDescentConfig(
+                iterations=4,
+                max_elapsed_s=9.0,
+                max_objective_evaluations=90,
+            ),
+        )
+
+        family_config = _family_pipeline_config(
+            base,
+            family="superfrustum",
+            family_count=3,
+            share_budget=True,
+        )
+
+        self.assertEqual(family_config.primitive_family, "superfrustum")
+        self.assertEqual(family_config.optimizer.max_elapsed_s, 3.0)
+        self.assertEqual(family_config.optimizer.max_objective_evaluations, 30)
+        self.assertEqual(base.primitive_family, "superquadric")
 
     def test_resfit_budget_limited_improvement_can_still_succeed(self) -> None:
         result = SimpleNamespace(
