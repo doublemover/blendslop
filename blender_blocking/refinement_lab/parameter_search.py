@@ -197,6 +197,8 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
         blockers.append("catastrophic_view_failure")
     if proxy_render_namespace_violation(result) > 0.0:
         blockers.append("proxy_render_namespace_violation")
+    if proxy_render_disagreement(result) > 0.0:
+        blockers.append("proxy_render_disagreement")
     topology_blocker = _topology_blocker(result)
     if topology_blocker:
         blockers.append(topology_blocker)
@@ -219,6 +221,7 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
             "topology_non_manifold_edges",
             "editability_roundtrip_missing",
             "proxy_render_namespace_violation",
+            "proxy_render_disagreement",
         }
         for item in blockers
     )
@@ -342,6 +345,28 @@ def proxy_render_namespace_violation(result: ExperimentResult) -> float:
     return 0.0
 
 
+def proxy_render_disagreement(result: ExperimentResult) -> float:
+    backend_min = optional_float(get_metric_path(result.metrics, "backend.area_iou_min"))
+    if backend_min is None or backend_min < 0.95:
+        return 0.0
+    render_min = optional_float(get_metric_path(result.metrics, "render.min_view_iou"))
+    if render_min is None:
+        render_min = result.min_iou if result.min_iou > 0.0 else None
+    boundary_min = optional_float(get_metric_path(result.metrics, "render.boundary_iou_min"))
+    if boundary_min is None:
+        boundary_values = [
+            optional_float(get_metric_path(result.metrics, f"render.per_view.{view}.boundary_iou"))
+            for view in ("front", "side", "top")
+        ]
+        present = [value for value in boundary_values if value is not None]
+        boundary_min = min(present) if present else None
+    if render_min is not None and 0.2 < render_min < 0.85:
+        return 1.0
+    if boundary_min is not None and boundary_min < 0.25:
+        return 1.0
+    return 0.0
+
+
 def _reliability_first_terms(result: ExperimentResult) -> list[ScoreTerm]:
     decision = promotion_decision(result)
     if not decision.promotable:
@@ -387,6 +412,11 @@ def _quality_terms(result: ExperimentResult) -> list[ScoreTerm]:
             "proxy_render_namespace_violation",
             proxy_render_namespace_violation(result),
             -2000.0,
+        ),
+        ScoreTerm(
+            "proxy_render_disagreement",
+            proxy_render_disagreement(result),
+            -1600.0,
         ),
     ]
 
@@ -634,6 +664,8 @@ def _promotion_state(
         return "blocked_editability"
     if "proxy_render_namespace_violation" in blocker_set:
         return "diagnostic_only"
+    if "proxy_render_disagreement" in blocker_set:
+        return "blocked_proxy_render_disagreement"
     if backend_status == "research_only":
         return "research_only"
     if "metric_only_candidate" in blocker_set:

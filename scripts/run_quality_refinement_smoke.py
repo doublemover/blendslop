@@ -1412,10 +1412,15 @@ def write_summary(
     path = run_root / "summary.md"
     matrix_rows = _collect_matrix_rows(run_root)
     budget_reports = _collect_budget_reports(run_root)
+    quality = _quality_summary(results, matrix_rows, budget_reports)
     lines = [
         "# Quality Refinement Smoke Summary",
         "",
         f"Run root: `{_repo_path(run_root)}`",
+        "",
+        f"Overall quality status: **{quality['overall_quality_status']}**",
+        f"Quality status reason: `{quality['quality_status_reason']}`",
+        f"Required budget failures: {quality['required_budget_failure_count']}",
         "",
         "## Phase Status",
         "",
@@ -1455,7 +1460,7 @@ def write_summary(
         ]
     )
     path.write_text("\n".join(lines), encoding="utf-8")
-    _write_machine_summary(run_root, results, matrix_rows, budget_reports)
+    _write_machine_summary(run_root, results, matrix_rows, budget_reports, quality)
     return path
 
 
@@ -1464,16 +1469,23 @@ def _write_machine_summary(
     results: Sequence[PhaseResult],
     matrix_rows: Sequence[dict],
     budget_reports: Sequence[dict],
+    quality: Mapping[str, object],
 ) -> None:
     payload = {
         "schema_version": "quality_refinement_smoke_summary_v1",
         "run_root": _repo_path(run_root),
+        "overall_quality_status": quality["overall_quality_status"],
+        "quality_status_reason": quality["quality_status_reason"],
+        "required_budget_failures": quality["required_budget_failures"],
+        "required_budget_failure_count": quality["required_budget_failure_count"],
         "phase_results": [
             {
                 "name": result.phase.name,
                 "returncode": result.returncode,
                 "passed": result.passed,
                 "status": result.status,
+                "process_status": _phase_process_status(result),
+                "quality_status": _phase_quality_status(result),
                 "reused": result.reused,
                 "original_elapsed_s": result.original_elapsed_s,
                 "elapsed_s": result.elapsed_s,
@@ -1503,6 +1515,73 @@ def _write_machine_summary(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _quality_summary(
+    results: Sequence[PhaseResult],
+    matrix_rows: Sequence[dict],
+    budget_reports: Sequence[dict],
+) -> dict[str, object]:
+    required_budget_failures = _required_budget_failures(budget_reports)
+    process_failures = [result.phase.name for result in results if not result.passed]
+    matrix_failed = sum(1 for row in matrix_rows if not row.get("passed"))
+    if process_failures:
+        status = "fail"
+        reason = "phase_process_failure"
+    elif required_budget_failures:
+        status = "fail"
+        reason = "required_budget_failures"
+    elif matrix_failed and not budget_reports:
+        status = "fail"
+        reason = "matrix_row_failures_without_budget"
+    elif not results and not matrix_rows and not budget_reports:
+        status = "not_run"
+        reason = "no_evidence"
+    else:
+        status = "pass"
+        reason = "all_required_quality_gates_passed"
+    return {
+        "overall_quality_status": status,
+        "quality_status_reason": reason,
+        "required_budget_failures": required_budget_failures,
+        "required_budget_failure_count": len(required_budget_failures),
+        "process_failures": process_failures,
+        "matrix_failed": matrix_failed,
+    }
+
+
+def _required_budget_failures(reports: Sequence[dict]) -> list[dict[str, object]]:
+    failures: list[dict[str, object]] = []
+    for report in reports:
+        failed_required_checks = _failed_required_check_count(report)
+        if failed_required_checks <= 0:
+            continue
+        failures.append(
+            {
+                "path": report.get("_quality_report_json", ""),
+                "failed_required_checks": failed_required_checks,
+                "passed": report.get("passed"),
+                "threshold_passed": report.get("threshold_passed"),
+                "comparison_passed": report.get("comparison_passed"),
+            }
+        )
+    return failures
+
+
+def _phase_process_status(result: PhaseResult) -> str:
+    if result.reused:
+        return "reused"
+    if result.passed:
+        return "pass"
+    if result.status.startswith("blocked"):
+        return result.status
+    return "fail"
+
+
+def _phase_quality_status(result: PhaseResult) -> str:
+    if result.phase.inline_quality_budget is not None:
+        return "warn" if result.passed else "fail"
+    return "pass" if result.passed else "fail"
 
 
 def _phase_status_text(result: PhaseResult) -> str:

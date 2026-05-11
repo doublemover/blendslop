@@ -209,7 +209,10 @@ artifacts; the exported preset records the promotion tier and blockers.
 ## Quality Rules
 
 - A high average score is not enough if a required view fails; check per-view IoU in `result.json` and the report table.
-- Leaderboards include a promotion tier. `promotable` means a passing backend result with required-view evidence; `degraded`, `research_only`, `metric_only`, `unverified`, and `blocked` are intentionally ranked below full validated results.
+- Leaderboards include a promotion tier. `promotable` means a passing backend result with required-view evidence, topology/editability gates satisfied, and no proxy/render disagreement. `degraded`, `research_only`, `metric_only`, `unverified`, and `blocked` are intentionally ranked below full validated results.
+- Promotion states explain the blocker: `blocked_missing_render_metrics`, `blocked_required_view_failure`, `blocked_topology`, `blocked_editability`, `blocked_proxy_render_disagreement`, `metric_only_candidate`, `diagnostic_only`, and `research_only`.
+- `reliability_first` is the default quality-track objective. It hard-zeroes non-promotable candidates, then ranks by min-view IoU, render Boundary IoU, render signed-distance loss, topology, editability, and elapsed time.
+- Adaptive loops select only promotable parents for normal child variants. When no promotable parent exists, the loop stops with `no_promotable_parents` unless diagnostics are explicitly enabled; diagnostic children remain `diagnostic_only`.
 - Optional dependencies must be explicit: skipped/fail behavior is recorded in result metadata instead of silently degrading.
 - Bounds diagnostics are the first stop for visual-hull failures: inspect `bounds-debug.json` and projection overlays before changing reconstruction math.
 - Commit only source, tiny deterministic fixtures/specs, and docs. Do not commit generated repo-root `temp/`, meshes, renders, volumes, reports, or suite result JSON.

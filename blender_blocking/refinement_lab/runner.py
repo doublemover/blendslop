@@ -38,11 +38,16 @@ try:
     from blender_blocking.metrics.namespaces import (
         namespace_metric_key,
         set_metric_path,
+        set_render_aggregate_metrics,
     )
     from blender_blocking.utils.optional_deps import dependency_report
 except ImportError:  # pragma: no cover
     from config import BlockingConfig
-    from metrics.namespaces import namespace_metric_key, set_metric_path
+    from metrics.namespaces import (
+        namespace_metric_key,
+        set_metric_path,
+        set_render_aggregate_metrics,
+    )
     from utils.optional_deps import dependency_report
 
 
@@ -980,6 +985,7 @@ def _metrics_from_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             set_metric_path(metrics, "render.min_view_iou", min_required)
             if validation_mode == "render-iou":
                 metrics["min_view_iou"] = min_required
+        set_render_aggregate_metrics(metrics)
     backend = payload.get("backend_result", {})
     selected = backend.get("selected") if isinstance(backend, Mapping) else None
     source = selected if isinstance(selected, Mapping) else backend

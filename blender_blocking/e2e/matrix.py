@@ -42,7 +42,11 @@ from blender_blocking.evaluation.silhouette_eval import (
     missing_silhouette_view,
     summarize_silhouette_views,
 )
-from blender_blocking.metrics.namespaces import namespace_metric_key, set_metric_path
+from blender_blocking.metrics.namespaces import (
+    namespace_metric_key,
+    set_metric_path,
+    set_render_aggregate_metrics,
+)
 from blender_blocking.integration.blender_ops.render_utils import (
     parse_orbit_view_degrees,
     render_orthogonal_views,
@@ -699,6 +703,12 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, Any]:
                 numeric = float(value)
                 set_metric_path(metrics, f"render.{key}", numeric)
                 set_metric_path(metrics, f"silhouette.{key}", numeric)
+                if key == "mean_boundary_iou":
+                    set_metric_path(metrics, "render.boundary_iou_mean", numeric)
+                elif key == "min_boundary_iou":
+                    set_metric_path(metrics, "render.boundary_iou_min", numeric)
+                elif key == "mean_signed_distance_loss":
+                    set_metric_path(metrics, "render.signed_distance_loss_mean", numeric)
     novel = payload.get("novel_view")
     if isinstance(novel, Mapping):
         for key in ("psnr", "ssim", "lpips", "mse", "image_count"):
@@ -765,6 +775,7 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, Any]:
             set_metric_path(metrics, "render.min_view_iou", min_required)
             if validation_mode == "render-iou":
                 metrics["min_view_iou"] = min_required
+        set_render_aggregate_metrics(metrics)
     backend = payload.get("backend_result")
     backend_payload = backend if isinstance(backend, Mapping) else payload
     status = backend_payload.get("status")

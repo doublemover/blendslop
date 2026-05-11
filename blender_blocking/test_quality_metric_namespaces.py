@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import unittest
 
-from e2e.matrix import _matrix_metrics
-from refinement_lab.runner import _metrics_from_payload
+from blender_blocking.e2e.matrix import _matrix_metrics
+from blender_blocking.refinement_lab.runner import _metrics_from_payload
 
 
 class QualityMetricNamespaceTests(unittest.TestCase):
@@ -96,11 +96,43 @@ class QualityMetricNamespaceTests(unittest.TestCase):
 
         self.assertEqual(metrics["render"]["average_iou"], 0.6)
         self.assertEqual(metrics["render"]["min_view_iou"], 0.5)
+        self.assertAlmostEqual(metrics["render"]["boundary_iou_mean"], 0.4)
         self.assertEqual(metrics["backend"]["area_iou_mean"], 0.99)
         self.assertNotEqual(
             metrics["backend"]["area_iou_min"],
             metrics["render"]["min_view_iou"],
         )
+
+    def test_render_per_view_boundary_and_sdf_emit_aggregates(self) -> None:
+        payload = {
+            "validation_mode": "render-iou",
+            "views": {
+                "front": {
+                    "iou": 0.9,
+                    "boundary_iou": 0.8,
+                    "signed_distance_loss": 0.1,
+                },
+                "side": {
+                    "iou": 0.7,
+                    "boundary_iou": 0.4,
+                    "signed_distance_loss": 0.3,
+                },
+                "top": {
+                    "iou": 0.95,
+                    "boundary_iou": 0.6,
+                    "signed_distance_loss": 0.2,
+                },
+            },
+        }
+
+        matrix_metrics = _matrix_metrics(payload, passed=True)
+        refinement_metrics = _metrics_from_payload(payload)
+
+        for metrics in (matrix_metrics, refinement_metrics):
+            self.assertAlmostEqual(metrics["render"]["boundary_iou_mean"], 0.6)
+            self.assertAlmostEqual(metrics["render"]["boundary_iou_min"], 0.4)
+            self.assertAlmostEqual(metrics["render"]["signed_distance_loss_mean"], 0.2)
+            self.assertAlmostEqual(metrics["render"]["signed_distance_loss_max"], 0.3)
 
     def test_refinement_missing_renderable_mesh_does_not_use_backend_bundle_as_render_iou(self) -> None:
         payload = {

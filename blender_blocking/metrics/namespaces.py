@@ -110,6 +110,48 @@ def render_average_iou(metrics: Mapping[str, Any]) -> float | None:
     return optional_float(value)
 
 
+def set_render_aggregate_metrics(
+    metrics: MutableMapping[str, Any],
+    *,
+    required_views: Sequence[str] = REQUIRED_RENDER_VIEWS,
+) -> None:
+    """Derive canonical render aggregates from required per-view metrics."""
+    boundary_values = _required_view_metric_values(
+        metrics,
+        "boundary_iou",
+        required_views=required_views,
+    )
+    if boundary_values:
+        boundary_mean = sum(boundary_values) / len(boundary_values)
+        set_metric_path(metrics, "render.boundary_iou_mean", boundary_mean)
+        set_metric_path(metrics, "render.boundary_iou_min", min(boundary_values))
+        metrics["boundary_iou_mean"] = boundary_mean
+    sdf_values = _required_view_metric_values(
+        metrics,
+        "signed_distance_loss",
+        required_views=required_views,
+    )
+    if sdf_values:
+        sdf_mean = sum(sdf_values) / len(sdf_values)
+        set_metric_path(metrics, "render.signed_distance_loss_mean", sdf_mean)
+        set_metric_path(metrics, "render.signed_distance_loss_max", max(sdf_values))
+        metrics["signed_distance_loss_mean"] = sdf_mean
+
+
+def _required_view_metric_values(
+    metrics: Mapping[str, Any],
+    metric: str,
+    *,
+    required_views: Sequence[str],
+) -> list[float]:
+    values: list[float] = []
+    for view in required_views:
+        value = optional_float(get_metric_path(metrics, f"render.per_view.{view}.{metric}"))
+        if value is not None:
+            values.append(value)
+    return values
+
+
 def required_render_metrics_missing(
     metrics: Mapping[str, Any],
     *,

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import unittest
 
-from refinement_lab.contracts import ExperimentResult
-from refinement_lab.parameter_search import (
+from blender_blocking.refinement_lab.contracts import ExperimentResult
+from blender_blocking.refinement_lab.parameter_search import (
     OBJECTIVES,
     promotion_decision,
     rank_results,
@@ -169,6 +169,33 @@ class RefinementLabScoringTests(unittest.TestCase):
         decision = promotion_decision(result)
 
         self.assertIn("proxy_render_namespace_violation", decision.blockers)
+
+    def test_proxy_render_disagreement_blocks_promotion(self) -> None:
+        result = _result(
+            "gaussian-disagreement",
+            0.75,
+            0.92,
+            0.74,
+            0.61,
+            metrics={
+                "backend": {"area_iou_min": 0.98, "area_iou_mean": 0.99},
+                "render": {
+                    "min_view_iou": 0.61,
+                    "boundary_iou_min": 0.04,
+                    "per_view": {
+                        "front": {"area_iou": 0.92, "boundary_iou": 0.4},
+                        "side": {"area_iou": 0.74, "boundary_iou": 0.2},
+                        "top": {"area_iou": 0.61, "boundary_iou": 0.04},
+                    },
+                },
+            },
+        )
+
+        decision = promotion_decision(result)
+
+        self.assertFalse(decision.promotable)
+        self.assertEqual(decision.state, "blocked_proxy_render_disagreement")
+        self.assertIn("proxy_render_disagreement", decision.blockers)
 
     def test_research_only_requires_review_across_objectives(self) -> None:
         result = _result(

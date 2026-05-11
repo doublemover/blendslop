@@ -15,6 +15,7 @@ import uuid
 from scripts.run_quality_refinement_smoke import (
     DEFAULT_AMBITIOUS_MODES,
     PhaseCommand,
+    PhaseResult,
     RefinementPhasePreflight,
     RefinementTarget,
     build_phase_plan,
@@ -384,6 +385,51 @@ class QualityRefinementSmokeTests(unittest.TestCase):
             path = write_summary(run_root, (), ())
             summary = path.read_text(encoding="utf-8")
             self.assertIn("| `visual_hull_voxel` | 1 | 1 | n/a | n/a | n/a |", summary)
+        finally:
+            shutil.rmtree(run_root, ignore_errors=True)
+
+    def test_summary_quality_status_fails_on_warn_only_budget_failure(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        quality_dir = run_root / "m" / "smoke"
+        quality_dir.mkdir(parents=True)
+        (quality_dir / "quality.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "quality_perf_budget_v1",
+                    "passed": False,
+                    "threshold_passed": False,
+                    "comparison_passed": True,
+                    "checks": [
+                        {
+                            "id": "min",
+                            "required": True,
+                            "passed": False,
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        report = quality_dir / "quality.json"
+        phase = PhaseCommand(
+            name="quality-budget-smoke",
+            description="warn-only budget",
+            command=(sys.executable, "scripts/quality_budget.py", "--warn-only"),
+            artifacts=(report,),
+            inline_quality_budget=(quality_dir / "matrix.json", quality_dir / "budget.json", report),
+        )
+        result = PhaseResult(phase=phase, returncode=0, elapsed_s=0.01)
+        try:
+            path = write_summary(run_root, (phase,), (result,))
+            summary = path.read_text(encoding="utf-8")
+            payload = json.loads((run_root / "summary.json").read_text(encoding="utf-8"))
+
+            self.assertIn("Overall quality status: **fail**", summary)
+            self.assertEqual(payload["overall_quality_status"], "fail")
+            self.assertEqual(payload["quality_status_reason"], "required_budget_failures")
+            self.assertEqual(payload["required_budget_failure_count"], 1)
+            self.assertEqual(payload["phase_results"][0]["process_status"], "pass")
+            self.assertEqual(payload["phase_results"][0]["quality_status"], "warn")
         finally:
             shutil.rmtree(run_root, ignore_errors=True)
 

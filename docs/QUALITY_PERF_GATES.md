@@ -74,6 +74,36 @@ python test_runner.py --phase bench --bench-case quality-smoke --budget-json ../
 blender --background --python test_runner.py -- --phase quality-smoke --budget-json ../configs/quality_perf_budget-smoke.json
 ```
 
+## Quality Refinement Smoke Status
+
+`scripts/run_quality_refinement_smoke.py` separates process completion from
+quality acceptance:
+
+- `phase_results[].process_status` reports whether a command ran, was reused,
+  was blocked by dependencies, or failed as a process.
+- `phase_results[].quality_status` reports the quality meaning of that phase.
+  Warn-only quality-budget phases can have `process_status: pass` and
+  `quality_status: warn`.
+- `overall_quality_status` is the authoritative run verdict. It becomes `fail`
+  when a required budget check fails, even when every subprocess exits with
+  code 0.
+- `required_budget_failures` lists the budget reports and failed required check
+  counts that made the run quality-red.
+
+This means a full-nightly run that finishes cleanly can still be correctly
+reported as a failed quality run. Use the light profiles first when iterating:
+
+```bash
+python scripts/run_quality_refinement_smoke.py --profile contract --dry-run
+python scripts/run_quality_refinement_smoke.py --profile primitive-fit-fast --dry-run
+python scripts/run_quality_refinement_smoke.py --profile gaussian-diagnostic --dry-run
+python scripts/run_quality_refinement_smoke.py --profile differentiable-smoke --dry-run
+python scripts/run_quality_refinement_smoke.py --profile visual-hull-fast --dry-run
+python scripts/run_quality_refinement_smoke.py --profile lpips-only --dry-run
+```
+
+Only run `--profile full-nightly --yes` after the light profiles are green.
+
 `quality-smoke` writes under repo-root `temp/runner/quality-smoke/` by default:
 
 - `e2e-matrix.json`
