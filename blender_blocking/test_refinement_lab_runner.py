@@ -273,6 +273,9 @@ class RefinementLabRunnerTests(unittest.TestCase):
             assert reused is not None
             self.assertEqual(reused.status, "pass")
             self.assertEqual(reused.variant_id, "baseline")
+            self.assertEqual(reused.metrics["cache"]["hit"], True)
+            self.assertEqual(reused.metrics["cache"]["source"], "local_resume")
+            self.assertEqual(runner.cache_stats["candidate_cache_hits"], 1)
 
     def test_candidate_cache_reuses_effective_duplicate_variant(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -349,6 +352,17 @@ class RefinementLabRunnerTests(unittest.TestCase):
             self.assertEqual(reused.variant_id, "renamed-duplicate")
             self.assertIn("reused_candidate_result:case:baseline", reused.warnings)
             self.assertEqual(reused.metrics["variant"]["diagnostic_only"], True)
+            self.assertEqual(reused.metrics["cache"]["hit"], True)
+            self.assertEqual(reused.metrics["cache"]["source"], "shared_cache")
+            self.assertEqual(runner.cache_stats["candidate_cache_hits"], 1)
+            self.assertEqual(runner.cache_stats["candidate_cache_writes"], 1)
+
+            stats_path = runner._write_cache_stats()
+            assert stats_path is not None
+            stats = json.loads(stats_path.read_text(encoding="utf-8"))
+            self.assertEqual(stats["candidate_cache_hits"], 1)
+            self.assertEqual(stats["candidate_cache_writes"], 1)
+            self.assertEqual(stats["candidate_cache_sources"]["shared_cache"], 1)
 
     def test_diagnostic_only_variant_is_recorded_in_result_metrics(self) -> None:
         reference_paths = {

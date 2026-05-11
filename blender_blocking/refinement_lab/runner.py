@@ -89,6 +89,12 @@ class BaseRunner:
         self.base_config = base_config or BlockingConfig()
         self.run_root = Path(plan.output_root).resolve(strict=False)
         self.index = ResultIndex(self.run_root, objective=plan.objective)
+        self.cache_stats: dict[str, Any] = {
+            "candidate_cache_hits": 0,
+            "candidate_cache_misses": 0,
+            "candidate_cache_writes": 0,
+            "candidate_cache_sources": {},
+        }
 
     def run(self) -> tuple[bool, list[ExperimentResult]]:
         self._prepare_run_root()
@@ -164,6 +170,7 @@ class BaseRunner:
             self._write_adaptive_outputs(results)
         if self.options.write_lineage:
             self._write_lineage_outputs(results)
+        self._write_cache_stats()
         passed_any = any(result.status == "pass" for result in results)
         return (passed_any or not self.options.fail_on_all_failed), results
 
@@ -396,15 +403,22 @@ class BaseRunner:
         if not (self.options.resume_candidates or self.options.candidate_cache):
             return None
         key = self._candidate_state_key(case, variant, reference_paths)
-        candidates: list[Path] = []
+        candidates: list[tuple[Path, str]] = []
         if self.options.resume_candidates:
-            candidates.append(self._local_candidate_state_path(case, variant))
+            candidates.append((self._local_candidate_state_path(case, variant), "local_resume"))
         if self.options.candidate_cache:
-            candidates.append(self._shared_candidate_state_path(key))
-        for path in candidates:
+            candidates.append((self._shared_candidate_state_path(key), "shared_cache"))
+        for path, source in candidates:
             result = self._load_candidate_state(path, key)
             if result is not None:
-                return self._adapt_reused_candidate_result(result, case, variant)
+                self._record_candidate_cache_hit(source)
+                return self._adapt_reused_candidate_result(
+                    result,
+                    case,
+                    variant,
+                    source=source,
+                )
+        self.cache_stats["candidate_cache_misses"] += 1
         return None
 
     def _load_candidate_state(
@@ -440,9 +454,13 @@ class BaseRunner:
         result: ExperimentResult,
         case: ExperimentCase,
         variant: ExperimentVariant,
+        *,
+        source: str,
     ) -> ExperimentResult:
         metrics = copy.deepcopy(dict(result.metrics))
         set_metric_path(metrics, "variant.diagnostic_only", bool(variant.diagnostic_only))
+        set_metric_path(metrics, "cache.hit", True)
+        set_metric_path(metrics, "cache.source", source)
         warnings = tuple(result.warnings)
         if result.case_id != case.case_id or result.variant_id != variant.variant_id:
             warnings = warnings + (
@@ -486,6 +504,32 @@ class BaseRunner:
             paths.append(self._shared_candidate_state_path(key))
         for path in paths:
             _write_json(path, payload)
+            self.cache_stats["candidate_cache_writes"] += 1
+
+    def _record_candidate_cache_hit(self, source: str) -> None:
+        self.cache_stats["candidate_cache_hits"] += 1
+        sources = self.cache_stats["candidate_cache_sources"]
+        if isinstance(sources, dict):
+            sources[source] = int(sources.get(source, 0)) + 1
+
+    def _write_cache_stats(self) -> Path | None:
+        if not (
+            self.options.resume_candidates
+            or self.options.candidate_cache
+            or self.options.reference_cache
+        ):
+            return None
+        payload = {
+            "schema_version": "refinement_cache_stats_v1",
+            "run_id": self.plan.run_id,
+            "reference_cache_enabled": bool(self.options.reference_cache),
+            "candidate_cache_enabled": bool(self.options.candidate_cache),
+            "resume_candidates_enabled": bool(self.options.resume_candidates),
+            **self.cache_stats,
+        }
+        path = self.run_root / "cache-stats.json"
+        _write_json(path, payload)
+        return path
 
     def _case_dir(self, case: ExperimentCase) -> Path:
         return self.run_root / "c" / compact_path_segment(
