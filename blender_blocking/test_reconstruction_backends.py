@@ -943,6 +943,102 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         bad_terms = {term.name: term.weighted for term in scores["pretty-bad"].terms}
         self.assertLess(bad_terms["failed_required_views"], 0.0)
 
+    def test_quality_first_selection_cannot_select_metric_only_candidate(self) -> None:
+        metric_only = CandidateResult(
+            candidate_id="metric-only",
+            backend_name="gaussian_ellipsoid_proxy",
+            status="success",
+            metric_result=CandidateMetrics(
+                area_iou_min=0.99,
+                area_iou_mean=0.99,
+                boundary_iou_mean=0.95,
+                topology_score=0.9,
+            ),
+        )
+
+        selected, ranked = select_best((metric_only,), policy="quality_first")
+
+        self.assertIsNone(selected)
+        terms = {term.name: term.weighted for term in ranked[0][1].terms}
+        self.assertLess(terms["metric_only_candidate"], 0.0)
+
+    def test_quality_first_selection_cannot_select_metricless_candidate(self) -> None:
+        metricless = CandidateResult(
+            candidate_id="metricless",
+            backend_name="status_only",
+            status="success",
+            metric_result=CandidateMetrics(),
+        )
+
+        selected, ranked = select_best((metricless,), policy="quality_first")
+
+        self.assertIsNone(selected)
+        terms = {term.name: term.weighted for term in ranked[0][1].terms}
+        self.assertLess(terms["metric_only_candidate"], 0.0)
+
+    def test_quality_first_selection_skips_metric_only_for_render_evidence(self) -> None:
+        metric_only = CandidateResult(
+            candidate_id="metric-only",
+            backend_name="gaussian_ellipsoid_proxy",
+            status="success",
+            metric_result=CandidateMetrics(
+                area_iou_min=0.99,
+                area_iou_mean=0.99,
+                boundary_iou_mean=0.95,
+            ),
+        )
+        render_evidence = CandidateResult(
+            candidate_id="render-evidence",
+            backend_name="visual_hull_voxel",
+            status="success",
+            metric_result=CandidateMetrics(
+                per_view={
+                    "front": {
+                        "area_iou": 0.72,
+                        "boundary_iou": 0.52,
+                        "signed_distance_loss": 0.12,
+                        "required": True,
+                        "passed": True,
+                    },
+                    "top": {
+                        "area_iou": 0.70,
+                        "boundary_iou": 0.50,
+                        "signed_distance_loss": 0.13,
+                        "required": True,
+                        "passed": True,
+                    },
+                },
+                topology_score=0.7,
+            ),
+        )
+
+        selected, _ranked = select_best(
+            (metric_only, render_evidence),
+            policy="quality_first",
+        )
+
+        self.assertIsNotNone(selected)
+        self.assertEqual(selected.candidate_id, "render-evidence")
+
+    def test_best_score_can_still_rank_metric_only_diagnostics(self) -> None:
+        metric_only = CandidateResult(
+            candidate_id="metric-only",
+            backend_name="gaussian_ellipsoid_proxy",
+            status="success",
+            metric_result=CandidateMetrics(
+                area_iou_min=0.99,
+                area_iou_mean=0.99,
+                boundary_iou_mean=0.95,
+            ),
+        )
+
+        selected, ranked = select_best((metric_only,), policy="best_score")
+
+        self.assertIsNotNone(selected)
+        self.assertEqual(selected.candidate_id, "metric-only")
+        terms = {term.name: term.weighted for term in ranked[0][1].terms}
+        self.assertEqual(terms["metric_only_candidate"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

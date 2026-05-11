@@ -41,6 +41,7 @@ class CandidateScoreWeights:
     failure_warn_penalty: float = -100.0
     failure_fail_penalty: float = -2000.0
     quality_floor_penalty: float = -850.0
+    metric_only_penalty: float = 0.0
     failure_penalty: float = -10000.0
 
 
@@ -58,6 +59,7 @@ POLICY_WEIGHT_PRESETS: Mapping[str, CandidateScoreWeights] = {
         recoverable_volumetric_iou=220.0,
         editability=70.0,
         time_penalty=-8.0,
+        metric_only_penalty=-5000.0,
     ),
     "editability_first": CandidateScoreWeights(
         editability=320.0,
@@ -68,6 +70,7 @@ POLICY_WEIGHT_PRESETS: Mapping[str, CandidateScoreWeights] = {
         complexity_penalty=-80.0,
         min_area_iou=160.0,
         min_boundary_iou=160.0,
+        metric_only_penalty=-5000.0,
     ),
     "fast_preview": CandidateScoreWeights(
         time_penalty=-90.0,
@@ -173,6 +176,7 @@ def score_candidate(
         "silhouette.missing_required_metric_count",
         0.0,
     )
+    metric_only = _metric_only_candidate(result)
     terms.extend(
         [
             CandidateScoreTerm(
@@ -197,6 +201,13 @@ def score_candidate(
                 quality_floor_failures,
                 weights.quality_floor_penalty,
                 "candidate fell below hard quality floor for IoU, boundary, or topology",
+            ),
+            CandidateScoreTerm(
+                "metric_only_candidate",
+                1.0 if metric_only else 0.0,
+                weights.metric_only_penalty,
+                "aggregate or status-only metrics without per-view render evidence "
+                "cannot win quality selection",
             ),
             CandidateScoreTerm("min_area_iou", metrics.area_iou_min, weights.min_area_iou),
             CandidateScoreTerm(
@@ -333,6 +344,21 @@ def _quality_floor_failures(metrics: Any) -> float:
     return float(failures)
 
 
+def _metric_only_candidate(result: CandidateResult) -> bool:
+    metrics = result.metric_result
+    if metrics.per_view:
+        return False
+    has_proxy_metric = any(
+        float(getattr(metrics, name, 0.0) or 0.0) > 0.0
+        for name in ("area_iou_min", "area_iou_mean", "boundary_iou_mean")
+    )
+    return bool(has_proxy_metric or result.status == "success")
+
+
+def _quality_selection_policy(policy: str) -> bool:
+    return policy in {"quality_first", "fidelity", "editability_first", "printable"}
+
+
 def rank_candidates(
     results: Iterable[CandidateResult],
     *,
@@ -415,6 +441,15 @@ def select_best(
         return None, []
     policy = _normalize_policy(policy)
     ranked = rank_candidates(results, policy=policy, weights=weights)
+    if _quality_selection_policy(policy):
+        eligible = [
+            (result, score)
+            for result, score in ranked
+            if not _metric_only_candidate(result)
+        ]
+        if eligible:
+            return eligible[0][0], ranked
+        return None, ranked
     return ranked[0][0], ranked
 
 
