@@ -60,6 +60,7 @@ from blender_blocking.e2e.cost import _matrix_cost_summary
 from blender_blocking.e2e.ground_truth import _synthetic_ground_truth_row
 from blender_blocking.e2e.payloads import _evaluation_outputs_from_payload, _json_dump
 from blender_blocking.e2e.validator import test_with_custom_images
+from blender_blocking.utils.path_safety import compact_path_segment
 
 
 def run_synthetic_suite_matrix(
@@ -157,7 +158,11 @@ def run_synthetic_suite_matrix(
             )
             continue
 
-        reference_dir = output_root / "references" / spec.shape_id
+        reference_dir = (
+            output_root
+            / "ref"
+            / compact_path_segment(spec.shape_id, max_length=36, fallback="shape")
+        )
         include_orbit = bool(
             validation_mode == "novel-view"
             and any(parse_orbit_view_degrees(view) is not None for view in novel_view_names)
@@ -201,7 +206,12 @@ def run_synthetic_suite_matrix(
             cfg.reconstruction.num_slices = base.reconstruction.num_slices
             mode_label = f"{config_label}-{mode}"
             case_run_id = f"{run_label}_{spec_index:03d}_{mode}"
-            case_dir = output_root / "results" / mode / spec.shape_id
+            case_dir = (
+                output_root
+                / "r"
+                / compact_path_segment(mode, max_length=28, fallback="mode")
+                / compact_path_segment(spec.shape_id, max_length=36, fallback="shape")
+            )
             case_json = case_dir / "result.json"
             print(f"\nCase: {spec.shape_id} mode={mode}")
             try:
@@ -218,8 +228,8 @@ def run_synthetic_suite_matrix(
                     workflow_config=cfg,
                     config_label=mode_label,
                     validation_mode=validation_mode,
-                    render_output_dir=case_dir / "renders",
-                    artifact_root=case_dir / "artifacts",
+                    render_output_dir=case_dir / "r",
+                    artifact_root=case_dir / "a",
                     result_json=case_json,
                     run_id=case_run_id,
                     novel_view_reference_paths=novel_reference_paths,
@@ -395,7 +405,16 @@ def _run_pure_mask_matrix_rows(
         cfg.reconstruction.reconstruction_mode = mode
         mode_label = f"{config_label}-{mode}"
         case_run_id = f"{run_label}_{spec_index:03d}_{mode}"
-        case_dir = output_root / "results" / mode / getattr(spec, "shape_id", "pure_mask")
+        case_dir = (
+            output_root
+            / "r"
+            / compact_path_segment(mode, max_length=28, fallback="mode")
+            / compact_path_segment(
+                getattr(spec, "shape_id", "pure_mask"),
+                max_length=36,
+                fallback="shape",
+            )
+        )
         case_json = case_dir / "result.json"
         print(f"\nCase: {getattr(spec, 'shape_id', '')} mode={mode} [pure-mask]")
         try:
@@ -405,7 +424,7 @@ def _run_pure_mask_matrix_rows(
                 config=cfg,
                 config_label=mode_label,
                 run_id=case_run_id,
-                artifact_root=case_dir / "artifacts",
+                artifact_root=case_dir / "a",
                 result_json=case_json,
                 pure_case=pure_case,
             )
@@ -481,7 +500,15 @@ def _build_pure_mask_case(
     if not source_images:
         raise ValueError("pure-mask synthetic fixture had no usable mask images")
 
-    reference_dir = output_root / "references" / str(getattr(spec, "shape_id", "pure_mask"))
+    reference_dir = (
+        output_root
+        / "ref"
+        / compact_path_segment(
+            getattr(spec, "shape_id", "pure_mask"),
+            max_length=36,
+            fallback="shape",
+        )
+    )
     reference_paths: dict[str, str] = {}
     views: dict[str, np.ndarray] = {}
     for view, image in source_images.items():

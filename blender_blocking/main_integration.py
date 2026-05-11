@@ -90,6 +90,7 @@ from geometry.slicing import sample_elliptical_slices
 from config import BlockingConfig
 from utils.generation_context import GenerationContext
 from utils.manifest import apply_object_tags, build_manifest, write_manifest
+from utils.path_safety import compact_path_segment
 from reconstruction.ensemble import CandidateConfig as BackendCandidateConfig
 from reconstruction.ensemble import EnsembleRunner
 from reconstruction.registry import get_backend, register_builtin_backends
@@ -1103,7 +1104,12 @@ class BlockingWorkflow:
         artifact_root = getattr(self.context, "artifact_root", None)
         if artifact_root:
             return Path(str(artifact_root))
-        return Path(__file__).resolve().parents[1] / "temp" / "reconstruction" / self.context.run_id
+        run_segment = compact_path_segment(
+            self.context.run_id,
+            max_length=40,
+            fallback="run",
+        )
+        return Path(__file__).resolve().parents[1] / "temp" / "recon" / run_segment
 
     def _backend_name_for_mode(self, mode: str) -> str:
         """Return the canonical backend name for a reconstruction mode."""
@@ -1281,7 +1287,7 @@ class BlockingWorkflow:
                 result = runner.run(
                     target=target_build.target,
                     candidates=candidates,
-                    artifact_root=artifact_root / "candidates",
+                    artifact_root=artifact_root / "cand",
                     context=context,
                     budget=CandidateBudget(
                         timeout_s=self.config.ensemble.per_candidate_timeout_s,
@@ -1324,7 +1330,7 @@ class BlockingWorkflow:
                     ),
                     memory_budget_mb=self.config.visual_hull.memory_budget_mb
                 ),
-                artifact_root=artifact_root / "candidates",
+                artifact_root=artifact_root / "cand",
                 context=context,
             )
             with cost_recorder.stage("validate_config"):

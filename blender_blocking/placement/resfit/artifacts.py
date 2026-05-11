@@ -74,7 +74,7 @@ def write_resfit_artifacts(
 
     artifacts: dict[str, Any] = {}
     primitive_path = write_primitive_set(
-        root / "primitives" / "primitive-fit.json",
+        root / "p" / "primitive-fit.json",
         result.primitives,
         metadata={
             "family": primitive_family,
@@ -86,14 +86,14 @@ def write_resfit_artifacts(
         },
     )
     mesh_path = write_obj(
-        root / "mesh" / "primitive-fit.obj",
+        root / "m" / "primitive-fit.obj",
         mesh_proxy,
         header=(f"candidate {candidate_id}", backend_name),
     )
     artifacts["primitive_json"] = primitive_path
     artifacts["mesh_obj"] = mesh_path
     objective_path = write_json(
-        root / "artifacts" / "primitive-fit-objective.json",
+        root / "h" / "objective.json",
         {
             "weights": {
                 "surface_residual": pipeline_config.weights.surface_residual,

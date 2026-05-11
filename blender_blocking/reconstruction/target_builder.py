@@ -563,12 +563,12 @@ def _write_target_artifacts(
 ) -> Mapping[str, Path]:
     if root is None:
         return {}
-    target_dir = root / "target"
+    target_dir = root / "t"
     target_dir.mkdir(parents=True, exist_ok=True)
     paths: dict[str, Path] = {}
     paths["target"] = write_json(target_dir / "target.json", target.to_dict())
     paths["constraints"] = write_json(target_dir / "constraints.json", constraints_payload)
-    paths["diagnostics"] = write_json(target_dir / "view-diagnostics.json", diagnostics)
+    paths["diagnostics"] = write_json(target_dir / "diag.json", diagnostics)
     for view, mask in masks.items():
         mask_path = target_dir / f"{view}-mask.npy"
         np.save(mask_path, np.asarray(mask).astype(bool, copy=False))

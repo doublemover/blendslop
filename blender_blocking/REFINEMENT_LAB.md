@@ -9,7 +9,7 @@ Each run root contains:
 - `plan.json` and `manifest.json` for reproducibility.
 - `index.jsonl`, `leaderboard.json`, and `leaderboard.md` for ranking.
 - `report.html` with per-variant metrics, warnings, artifacts, overlays, and failure summaries.
-- `cases/<case>/variants/<variant>/command.txt`, `config.json`, `result.json`, and optional `autopsy.json` / `bounds-debug.json`.
+- `c/<case>/v/<variant>/command.txt`, `config.json`, `result.json`, and optional `autopsy.json` / `bounds-debug.json`.
 - `human-labels.jsonl` when reviewers label candidates.
 
 ## Built-In Suites
@@ -149,7 +149,7 @@ Turn a result/autopsy payload into the next adaptive batch:
 
 ```bash
 python -m blender_blocking.refinement_lab.cli adapt `
-  --result-json temp\refinement-runs\default-vase-vh-transform\cases\case\variants\variant\result.json `
+  --result-json temp\refinement-runs\default-vase-vh-transform\c\case\v\variant\result.json `
   --out temp\refinement-runs\adaptive-proposals.json `
   --variants-out temp\refinement-runs\adaptive-variants.json `
   --max-proposals 8
@@ -173,7 +173,7 @@ python -m blender_blocking.refinement_lab.cli loop `
   --blender-exe "C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
 ```
 
-The loop writes one `generation-XX/` run root per iteration plus
+The loop writes one compact `gXX/` run root per iteration plus
 `adaptive-loop-summary.json` at the loop root. Each generation records the
 selected parent variants, emitted proposals, and child variants. Child variants
 carry `parent_variant_id`, `adaptive-loop` tags, and generation metadata so

@@ -75,7 +75,7 @@ def write_differentiable_candidate_artifacts(
 
     artifacts: dict[str, Path] = {}
     primitive_path = write_primitive_set(
-        root / "primitives" / "differentiable-refine.json",
+        root / "p" / "diff.json",
         optimized_primitives,
         metadata={
             "backend": backend_choice,
@@ -88,7 +88,7 @@ def write_differentiable_candidate_artifacts(
     )
     artifacts["primitive_json"] = primitive_path
     mesh_path = write_obj(
-        root / "mesh" / "differentiable-refine.obj",
+        root / "m" / "diff.obj",
         mesh_proxy,
         header=(f"candidate {candidate_id}", backend_name),
     )
@@ -99,7 +99,7 @@ def write_differentiable_candidate_artifacts(
         parsed_config=parsed_config,
         config_warnings=config_warnings,
     )
-    objective_path = root / "artifacts" / "differentiable-refine-objective-history.json"
+    objective_path = root / "h" / "objective.json"
     write_json(
         objective_path,
         {
@@ -124,7 +124,7 @@ def write_differentiable_candidate_artifacts(
         },
     )
     artifacts["objective_history"] = objective_path
-    history_path = root / "artifacts" / "differentiable-refine-history.json"
+    history_path = root / "h" / "history.json"
     write_json(
         history_path,
         {

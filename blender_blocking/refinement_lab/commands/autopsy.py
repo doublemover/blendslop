@@ -9,7 +9,7 @@ from ..adaptive import RefinementProposal, merge_proposals, proposals_from_resul
 from ..adaptive_loop import AdaptiveLoopOptions, run_adaptive_loop
 from ..artifact_report import ReportOptions, generate_report
 from ..candidate_autopsy import write_autopsy
-from ..contracts import json_safe
+from ..contracts import compact_path_segment, json_safe
 from ..editability_study import build_editability_study_pack, load_review_rows, summarize_review_rows, write_editability_study_pack
 from ..human_labels import HumanLabel, append_label
 from ..matrix import build_experiment_plan, load_variants_from_files, write_plan
@@ -37,10 +37,10 @@ def _cmd_autopsy(args: argparse.Namespace) -> int:
     for result in selected:
         path = (
             args.run_root
-            / "cases"
-            / result.case_id
-            / "variants"
-            / result.variant_id
+            / "c"
+            / compact_path_segment(result.case_id, max_length=32, fallback="case")
+            / "v"
+            / compact_path_segment(result.variant_id, max_length=40, fallback="variant")
             / "autopsy.json"
         )
         write_autopsy(

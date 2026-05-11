@@ -10,6 +10,13 @@ from pathlib import Path
 import re
 from typing import Any, Mapping, Optional, Sequence
 
+try:
+    from blender_blocking.utils.path_safety import (
+        compact_path_segment as _compact_path_segment,
+    )
+except ImportError:  # pragma: no cover - script-style imports
+    from utils.path_safety import compact_path_segment as _compact_path_segment
+
 
 JsonMap = dict[str, Any]
 
@@ -65,6 +72,22 @@ def safe_slug(value: str, *, fallback: str = "unnamed") -> str:
     slug = re.sub(r"[^A-Za-z0-9_-]+", "_", str(value).strip())
     slug = re.sub(r"_+", "_", slug).strip("_-")
     return slug or fallback
+
+
+def compact_path_segment(
+    value: str,
+    *,
+    max_length: int = 64,
+    hash_length: int = 10,
+    fallback: str = "item",
+) -> str:
+    """Return a readable, deterministic filesystem segment bounded by length."""
+    return _compact_path_segment(
+        value,
+        max_length=max_length,
+        hash_length=hash_length,
+        fallback=fallback,
+    )
 
 
 def _tuple(value: Sequence[Any] | None) -> tuple[Any, ...]:

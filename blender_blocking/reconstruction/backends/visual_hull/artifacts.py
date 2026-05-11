@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Mapping
 
+from .artifact_io import artifact_paths
+
 
 def save_volume_artifacts(
     *,
@@ -18,17 +20,19 @@ def save_volume_artifacts(
     try:
         from volume import save_volume
 
+        paths = artifact_paths(root)
+        volume_dir = paths["volume_dir"]
         metadata = save_volume(
             grid,
-            root / "volume",
+            volume_dir,
             source_candidate_id=candidate_id,
             source_views=source_views,
             extra=extra,
         )
-        artifacts["volume_metadata"] = root / "volume" / "volume.json"
-        artifacts["volume_npz"] = root / "volume" / "volume.npz"
+        artifacts["volume_metadata"] = volume_dir / "volume.json"
+        artifacts["volume_npz"] = volume_dir / "volume.npz"
         metrics["volume_metadata"] = metadata.to_dict()
-        return root / "volume"
+        return volume_dir
     except Exception as exc:
         warnings.append(f"failed to save volume artifact: {exc}")
         return None
@@ -48,9 +52,11 @@ def save_sdf_volume_artifacts(
     try:
         from volume import save_volume
 
+        paths = artifact_paths(root)
+        sdf_dir = paths["sdf_volume_dir"]
         sdf_metadata = save_volume(
             sdf_grid,
-            root / "sdf_volume",
+            sdf_dir,
             source_candidate_id=candidate_id,
             source_views=source_views,
             extra={
@@ -59,8 +65,8 @@ def save_sdf_volume_artifacts(
                 "sdf_projection": dict(sdf_report),
             },
         )
-        artifacts["sdf_volume_metadata"] = root / "sdf_volume" / "volume.json"
-        artifacts["sdf_volume_npz"] = root / "sdf_volume" / "volume.npz"
+        artifacts["sdf_volume_metadata"] = sdf_dir / "volume.json"
+        artifacts["sdf_volume_npz"] = sdf_dir / "volume.npz"
         metrics["sdf_volume_metadata"] = sdf_metadata.to_dict()
     except Exception as exc:
         warnings.append(f"failed to save SDF volume artifact: {exc}")
@@ -77,7 +83,7 @@ def export_openvdb_artifact(
     try:
         from volume import export_to_openvdb
 
-        openvdb_export_path = root / "volume" / "volume.vdb"
+        openvdb_export_path = artifact_paths(root)["openvdb"]
         openvdb_export_status = export_to_openvdb(grid, openvdb_export_path)
         metrics["openvdb_export"] = openvdb_export_status.to_dict()
         if openvdb_export_status.status == "exported":
@@ -109,7 +115,7 @@ def write_visual_hull_mesh_artifact(
     from reconstruction.mesh_io import write_obj
 
     mesh_path = write_obj(
-        root / "mesh" / "visual_hull.obj",
+        artifact_paths(root)["mesh_obj"],
         {"vertices": vertices, "faces": faces},
         header=(f"candidate {candidate_id}", backend_name),
     )
@@ -127,11 +133,11 @@ def write_visual_hull_editable_proxy_artifacts(
     from reconstruction.artifacts import write_json
 
     program_path = write_json(
-        root / "editable-proxy" / "shape-program.json",
+        root / "ep" / "shape-program.json",
         program_payload,
     )
     diagnostics_path = write_json(
-        root / "editable-proxy" / "diagnostics.json",
+        root / "ep" / "diagnostics.json",
         diagnostics,
     )
     artifacts["editable_proxy_shape_program"] = program_path

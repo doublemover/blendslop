@@ -165,11 +165,11 @@ class ShapeProgramBackend(BaseBackend):
         root = request.candidate_artifact_root()
         if root is not None:
             primitive_path = write_json(
-                root / "shape-program" / "program.json",
+                root / "sp" / "program.json",
                 program.to_dict(),
             )
             artifacts["shape_program"] = primitive_path
-            diagnostics_path = root / "shape-program" / "diagnostics.json"
+            diagnostics_path = root / "sp" / "diag.json"
 
         if _should_compile_blender(request):
             try:
@@ -185,7 +185,7 @@ class ShapeProgramBackend(BaseBackend):
                 try:
                     export_qa_reports = _run_shape_program_export_qa(
                         compiled,
-                        root / "shape-program" / "export-qa",
+                        root / "sp" / "qa",
                         targets=_export_qa_targets(request.config),
                     )
                     diagnostics["export_qa"] = [

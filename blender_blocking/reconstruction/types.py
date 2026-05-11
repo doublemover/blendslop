@@ -11,6 +11,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Sequence, Tuple
 
+try:
+    from blender_blocking.utils.path_safety import compact_path_segment
+except ImportError:  # pragma: no cover - script-style imports
+    from utils.path_safety import compact_path_segment
+
 
 JsonMap = Dict[str, Any]
 
@@ -519,7 +524,14 @@ class CandidateRequest:
         if self.artifact_root is None:
             return None
         artifact_root = self.artifact_root.resolve(strict=False)
-        candidate_root = (artifact_root / self.candidate_id).resolve(strict=False)
+        candidate_root = (
+            artifact_root
+            / compact_path_segment(
+                self.candidate_id,
+                max_length=36,
+                fallback="candidate",
+            )
+        ).resolve(strict=False)
         try:
             candidate_root.relative_to(artifact_root)
         except ValueError as exc:

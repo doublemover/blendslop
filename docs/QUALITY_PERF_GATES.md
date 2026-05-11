@@ -80,7 +80,7 @@ blender --background --python test_runner.py -- --phase quality-smoke --budget-j
 - `e2e-budget-report.json`
 - `benchmarks.json`
 - `bench-budget-report.json`
-- synthetic references and per-case e2e results under `synthetic/`
+- synthetic references and per-case e2e results under compact generated subdirectories
 
 The quality-smoke and nightly benchmark registries include dedicated rows for:
 
@@ -169,8 +169,7 @@ with center, radii, rotation metadata, density/opacity, and confidence, so the
 research proxy can be inspected or rebuilt as Blender primitives instead of
 remaining only a dense visual mesh/proxy. The evaluation extras expose
 `editable_proxy` with node counts, validation errors, and the embedded
-shape-program payload; artifact runs write
-`shape-program/gaussian-ellipsoid-editable-proxy.json`.
+shape-program payload; artifact runs write `sp/gauss-proxy.json`.
 
 Ensemble runtime budgets are part of the contract, not just CLI decoration.
 `--ensemble-timeout` is passed to each candidate as `CandidateBudget.timeout_s`,
@@ -253,6 +252,39 @@ with readable mesh artifacts, the row metrics include flattened true-geometry
 measurements such as `synthetic_geometry_true_chamfer_l1`; non-analytic rows
 still report quality targets and the ground-truth level so failures can be
 separated from known silhouette-only ambiguity.
+
+## Ambitious Quality/Refinement Smoke
+
+For a single repeatable local pass over the current ambitious quality surfaces,
+use the repo-level smoke orchestrator:
+
+```powershell
+python scripts\run_quality_refinement_smoke.py --dry-run
+python scripts\run_quality_refinement_smoke.py --clean-first
+```
+
+The script builds public commands instead of bypassing the existing CLIs. It
+runs:
+
+- synthetic backend-status matrices for `visual_hull_voxel`,
+  `primitive_fit_refine`, `gaussian_ellipsoid_proxy`, and
+  `differentiable_refine`;
+- one isolated Blender novel-view run with PSNR, SSIM, and LPIPS enabled;
+- closed adaptive refinement loops for visual hull, primitive fitting,
+  Gaussian proxy, differentiable refine, and ensemble selection tracks.
+
+Every run writes under `temp/quality-refinement-runs/<timestamp>/`. The run root
+contains `commands.md` for exact reproduction, `summary.md`/`summary.json` for
+phase status and matrix aggregates, and child directories for matrix, LPIPS, and
+refinement artifacts. Generated subdirectories intentionally use compact names
+such as `m/`, `r/`, `c/`, `v/`, `a/`, and `gXX/` so Blender and Windows path
+limits do not hide reconstruction failures behind filesystem failures. Closed
+adaptive loops run through
+`scripts/run_refinement_lab_blender.py` so the refinement planner itself is
+inside Blender before synthetic reference generation calls `bpy`. LPIPS is
+intentionally isolated from Open3D-capable visual-hull refinement commands
+because Windows Blender can import each stack successfully while still being
+crash-prone when both stacks are co-imported in one process.
 
 ## Artifact Policy
 

@@ -125,6 +125,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_refinement_lab_surrogate", "test_refinement_lab_surrogate"),
     ("pure_refinement_lab_runner", "test_refinement_lab_runner"),
     ("pure_refinement_lab_cli", "test_refinement_lab_cli"),
+    ("pure_quality_refinement_smoke", "test_quality_refinement_smoke"),
     ("pure_e2e_novel_view_cli", "test_e2e_novel_view_cli"),
     ("pure_modularization_contracts", "test_modularization_contracts"),
 ]

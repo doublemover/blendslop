@@ -160,6 +160,30 @@ blender --background --python blender_blocking/test_e2e_validation.py -- --refin
 
 Generated lab artifacts belong under ignored `temp/refinement-runs/`; see [REFINEMENT_LAB.md](REFINEMENT_LAB.md).
 
+### Ambitious Quality/Refinement Smoke
+
+Use the repo-level orchestration script when you want one repeatable pass that
+compares the ambitious backends on synthetic fixtures, exercises LPIPS
+novel-view scoring, and runs closed-loop refinement sweeps:
+
+```powershell
+python scripts\run_quality_refinement_smoke.py --dry-run
+python scripts\run_quality_refinement_smoke.py --clean-first
+```
+
+The default matrix covers `visual_hull_voxel`, `primitive_fit_refine`,
+`gaussian_ellipsoid_proxy`, and `differentiable_refine` across adversarial,
+primitive-fit, visual-hull, and smoke synthetic suites. LPIPS runs in its own
+Blender process so Torch/LPIPS never shares a process with Open3D-heavy
+visual-hull postprocess work. Closed-loop refinement runs launch the planner
+itself inside Blender so synthetic references are generated where `bpy` exists.
+Outputs go under
+`temp/quality-refinement-runs/<timestamp>/` and include `commands.md`,
+`summary.md`, `summary.json`, matrix JSON, quality reports, cost reports, and
+refinement-loop artifacts. Generated internals use compact directory names to
+stay inside Blender and Windows path limits. These are diagnostics only and must
+not be committed.
+
 ### Supported Blender Versions
 
 Tested and supported versions:

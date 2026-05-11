@@ -10,7 +10,7 @@ from typing import Iterable, Mapping, Sequence
 
 import numpy as np
 
-from .contracts import ExperimentResult, RefinementRunManifest
+from .contracts import ExperimentResult, RefinementRunManifest, compact_path_segment
 from .parameter_search import promotion_decision, rank_results
 
 try:
@@ -47,9 +47,9 @@ def generate_report(
 ) -> Path:
     run_root = Path(run_root)
     assets = run_root / "assets"
-    overlays = assets / "overlays"
-    diffs = assets / "diffs"
-    thumbs = assets / "thumbnails"
+    overlays = assets / "o"
+    diffs = assets / "d"
+    thumbs = assets / "t"
     for directory in (assets, overlays, diffs, thumbs):
         directory.mkdir(parents=True, exist_ok=True)
     css_path = assets / "report.css"
@@ -188,8 +188,8 @@ def _visual_grid(
             for kind, mapping in (
                 ("ref", result.reference_paths),
                 ("render", result.render_paths),
-                ("overlay", {"overlay": run_root / "assets" / "overlays" / f"{result.case_id}-{result.variant_id}-{view}.png"}),
-                ("diff", {"diff": run_root / "assets" / "diffs" / f"{result.case_id}-{result.variant_id}-{view}.png"}),
+                ("overlay", {"overlay": _visual_asset_path(run_root, "overlay", result, view)}),
+                ("diff", {"diff": _visual_asset_path(run_root, "diff", result, view)}),
             ):
                 path = mapping.get(view) if kind in {"ref", "render"} else next(iter(mapping.values()))
                 if path and Path(path).exists():
@@ -245,12 +245,32 @@ def _write_visual_assets(
                 render_mask = _resize_mask(render_mask, ref_mask.shape)
             overlay = _overlay(ref_mask, render_mask)
             diff = _diff(ref_mask, render_mask)
-            overlay.save(overlays / f"{result.case_id}-{result.variant_id}-{view}.png")
-            diff.save(diffs / f"{result.case_id}-{result.variant_id}-{view}.png")
-            _thumbnail(Path(ref), thumbs / f"{result.case_id}-{result.variant_id}-{view}-ref.png")
-            _thumbnail(Path(render), thumbs / f"{result.case_id}-{result.variant_id}-{view}-render.png")
+            overlay.save(_visual_asset_path(run_root, "overlay", result, view))
+            diff.save(_visual_asset_path(run_root, "diff", result, view))
+            _thumbnail(Path(ref), _visual_asset_path(run_root, "ref_thumb", result, view))
+            _thumbnail(Path(render), _visual_asset_path(run_root, "render_thumb", result, view))
         except Exception:
             continue
+
+
+def _visual_asset_path(
+    run_root: Path,
+    kind: str,
+    result: ExperimentResult,
+    view: str,
+) -> Path:
+    case = compact_path_segment(result.case_id, max_length=36, fallback="case")
+    variant = compact_path_segment(result.variant_id, max_length=56, fallback="variant")
+    stem = f"{case}-{variant}-{view}"
+    if kind == "overlay":
+        return run_root / "assets" / "o" / f"{stem}.png"
+    if kind == "diff":
+        return run_root / "assets" / "d" / f"{stem}.png"
+    if kind == "ref_thumb":
+        return run_root / "assets" / "t" / f"{stem}-ref.png"
+    if kind == "render_thumb":
+        return run_root / "assets" / "t" / f"{stem}-render.png"
+    raise ValueError(f"unknown visual asset kind: {kind}")
 
 
 def _overlay(ref_mask: np.ndarray, render_mask: np.ndarray) -> "Image.Image":

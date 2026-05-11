@@ -8,8 +8,8 @@ def artifact_paths(root: Path | None) -> dict[str, Path]:
     if root is None:
         return {}
     return {
-        "volume_dir": root / "volume",
-        "sdf_volume_dir": root / "sdf_volume",
-        "mesh_obj": root / "mesh" / "visual_hull.obj",
-        "openvdb": root / "volume" / "volume.vdb",
+        "volume_dir": root / "vol",
+        "sdf_volume_dir": root / "sdf",
+        "mesh_obj": root / "m" / "vh.obj",
+        "openvdb": root / "vol" / "v.vdb",
     }

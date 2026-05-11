@@ -146,7 +146,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
     mesh_path = None
     if root is not None:
         primitive_path = write_primitive_set(
-            root / "primitives" / "gaussian-ellipsoid.json",
+            root / "p" / "gauss.json",
             primitives,
             metadata={
                 "family": family,
@@ -161,13 +161,13 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
         )
         artifacts["primitive_json"] = primitive_path
         editable_proxy_path = write_json(
-            root / "shape-program" / "gaussian-ellipsoid-editable-proxy.json",
+            root / "sp" / "gauss-proxy.json",
             editable_proxy.to_dict(),
         )
         artifacts["editable_proxy_shape_program"] = editable_proxy_path
         if bool(config.get("export_mesh_proxy", True)):
             mesh_path = write_obj(
-                root / "mesh" / "gaussian-ellipsoid-proxy.obj",
+                root / "m" / "gauss.obj",
                 mesh_proxy,
                 header=(f"candidate {candidate_id}", backend_name),
             )
@@ -182,7 +182,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
                 mesh_topology_score = float(report.topology_score)
                 if root is not None:
                     topology_path = write_json(
-                        root / "artifacts" / "gaussian-ellipsoid-topology.json",
+                        root / "h" / "topology.json",
                         mesh_topology,
                     )
                     artifacts["topology"] = topology_path
@@ -205,7 +205,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
     )
     if root is not None:
         distillation_path = write_proxy_field_npz(
-            root / "volume" / "gaussian-ellipsoid-distillation.npz",
+            root / "vol" / "distill.npz",
             report=distillation_report,
             points=distillation_grid,
             sdf=distillation_sdf,
@@ -213,7 +213,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
         )
         artifacts["proxy_distillation_npz"] = distillation_path
         artifacts["proxy_distillation"] = write_json(
-            root / "artifacts" / "gaussian-ellipsoid-distillation.json",
+            root / "h" / "distill.json",
             distillation_report.to_dict(),
         )
     complexity_penalty = min(
@@ -302,13 +302,13 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
 
     if root is not None:
         objective_path = write_json(
-            root / "artifacts" / "gaussian-ellipsoid-objectives.json",
+            root / "h" / "objectives.json",
             objective_improvement_record,
         )
         artifacts["objective_history"] = objective_path
 
     signal_path = write_json(
-        root / "artifacts" / "gaussian-ellipsoid-signals.json",
+        root / "h" / "signals.json",
         {
             "target_signals": signals,
             "normalized_config": _compact_config_summary(normalized),

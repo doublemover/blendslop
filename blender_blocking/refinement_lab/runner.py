@@ -22,6 +22,7 @@ from .contracts import (
     ExperimentResult,
     ExperimentVariant,
     RefinementRunManifest,
+    compact_path_segment,
     json_safe,
     utc_now,
 )
@@ -132,11 +133,11 @@ class BaseRunner:
     def _prepare_run_root(self) -> None:
         for directory in (
             self.run_root,
-            self.run_root / "cases",
+            self.run_root / "c",
             self.run_root / "assets",
-            self.run_root / "assets" / "overlays",
-            self.run_root / "assets" / "diffs",
-            self.run_root / "assets" / "thumbnails",
+            self.run_root / "assets" / "o",
+            self.run_root / "assets" / "d",
+            self.run_root / "assets" / "t",
         ):
             directory.mkdir(parents=True, exist_ok=True)
         self.plan.write(self.run_root / "plan.json")
@@ -204,7 +205,7 @@ class BaseRunner:
             case.metadata.get("spec", {}) if isinstance(case.metadata, Mapping) else {}
         )
         spec = SyntheticShapeSpec.from_dict(spec_payload)
-        output = self.run_root / "cases" / case.case_id / "references"
+        output = self._case_dir(case) / "ref"
         rendered = render_views(
             spec,
             output,
@@ -217,10 +218,21 @@ class BaseRunner:
             if view in rendered
         }
 
+    def _case_dir(self, case: ExperimentCase) -> Path:
+        return self.run_root / "c" / compact_path_segment(
+            case.case_id,
+            max_length=32,
+            fallback="case",
+        )
+
     def _case_variant_dir(
         self, case: ExperimentCase, variant: ExperimentVariant
     ) -> Path:
-        return self.run_root / "cases" / case.case_id / "variants" / variant.variant_id
+        return self._case_dir(case) / "v" / compact_path_segment(
+            variant.variant_id,
+            max_length=40,
+            fallback="variant",
+        )
 
     def _postprocess_result(
         self,
@@ -457,8 +469,8 @@ class InProcessBlenderRunner(BaseRunner):
         started_monotonic = time.perf_counter()
         variant_dir = self._case_variant_dir(case, variant)
         variant_dir.mkdir(parents=True, exist_ok=True)
-        render_dir = variant_dir / "renders"
-        artifact_root = variant_dir / "artifacts"
+        render_dir = variant_dir / "r"
+        artifact_root = variant_dir / "a"
         result_json = variant_dir / "result.json"
         command = _variant_command(
             variant,
@@ -489,7 +501,7 @@ class InProcessBlenderRunner(BaseRunner):
                 result_json=result_json,
                 run_id=f"{self.plan.run_id}-{case.case_id}-{variant.variant_id}",
                 progress=self.options.progress,
-                debug_output_dir=variant_dir / "debug_silhouettes",
+                debug_output_dir=variant_dir / "dbg",
             )
             status = "pass" if passed else "fail"
             exit_code = 0 if passed else 1
@@ -557,8 +569,8 @@ class SubprocessRunner(BaseRunner):
         started_monotonic = time.perf_counter()
         variant_dir = self._case_variant_dir(case, variant)
         variant_dir.mkdir(parents=True, exist_ok=True)
-        render_dir = (variant_dir / "renders").resolve(strict=False)
-        artifact_root = (variant_dir / "artifacts").resolve(strict=False)
+        render_dir = (variant_dir / "r").resolve(strict=False)
+        artifact_root = (variant_dir / "a").resolve(strict=False)
         result_json = (variant_dir / "result.json").resolve(strict=False)
         command = _variant_command(
             variant,

@@ -262,6 +262,19 @@ class E2EValidator:
                 print("ERROR: Reconstruction did not produce a renderable Blender mesh")
                 if workflow.reconstruction_result is not None:
                     _print_backend_summary(workflow.reconstruction_result)
+                result_payload, _cost_passed = self._attach_cost_outputs(
+                    {
+                        "mode": mode,
+                        "validation_mode": validation_mode,
+                        "status": "failed",
+                        "error": "missing_renderable_mesh",
+                        "backend_result": backend_payload,
+                    },
+                    backend_payload,
+                )
+                if self.result_json:
+                    _json_dump(self.result_json, result_payload)
+                    print(f"\nSaved result JSON: {self.result_json}")
                 return False, {}
             if workflow.reconstruction_result is None:
                 print("ERROR: Reconstruction returned no mesh and no backend result")
@@ -472,7 +485,7 @@ class E2EValidator:
             if PIL_AVAILABLE:
                 debug_dir = (
                     self.debug_output_dir
-                    or TEMP_OUTPUT_ROOT / "e2e" / "debug_silhouettes"
+                    or TEMP_OUTPUT_ROOT / "e2e" / "dbg"
                 )
                 debug_dir.mkdir(parents=True, exist_ok=True)
                 Image.fromarray(ref_mask.astype(np.uint8) * 255).save(

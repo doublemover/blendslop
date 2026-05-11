@@ -183,7 +183,7 @@ class AdaptiveLoopTests(unittest.TestCase):
             self.assertEqual(payload["schema_version"], "refinement_adaptive_loop_v1")
             self.assertEqual(payload["generation_count"], 2)
             self.assertTrue(
-                (Path(tmp) / "loop" / "generation-00" / "adaptive-loop-variants.json").exists()
+                (Path(tmp) / "loop" / "g00" / "adaptive-loop-variants.json").exists()
             )
 
 

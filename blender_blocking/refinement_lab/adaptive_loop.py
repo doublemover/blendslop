@@ -123,7 +123,7 @@ def run_adaptive_loop(
     stopped_reason = "max_generations"
 
     for generation in range(options.generations):
-        generation_root = root / f"generation-{generation:02d}"
+        generation_root = root / f"g{generation:02d}"
         plan = build_experiment_plan(
             suite=suite,
             track=track,
@@ -305,12 +305,16 @@ def _variant_for_child(
             "config_overrides": base.config_overrides,
         }
     )[:8]
+    parent_token = _adaptive_id_token(parent.variant_id, max_length=36)
+    proposal_token = _adaptive_id_token(proposal.proposal_id, max_length=44)
     variant_id = safe_slug(
-        f"g{generation + 1:02d}_{parent.variant_id}_{proposal.proposal_id}_{unique_hash}"
+        f"g{generation + 1:02d}_{parent_token}_{proposal_token}_{unique_hash}"
     )
     while variant_id in seen_ids:
         unique_hash = stable_hash({"variant_id": variant_id, "count": len(seen_ids)})[:8]
-        variant_id = safe_slug(f"{variant_id}_{unique_hash}")
+        variant_id = safe_slug(
+            f"g{generation + 1:02d}_{parent_token}_{proposal_token}_{unique_hash}"
+        )
     seen_ids.add(variant_id)
     parameters = {
         **dict(base.parameters),
@@ -333,6 +337,15 @@ def _variant_for_child(
         stage=f"adaptive_loop_generation_{generation + 1}",
         diagnostic_only=base.diagnostic_only,
     )
+
+
+def _adaptive_id_token(value: str, *, max_length: int) -> str:
+    slug = safe_slug(value, fallback="variant")
+    if len(slug) <= max_length:
+        return slug
+    digest = stable_hash({"adaptive_id": value}, length=8)
+    stem = slug[: max(1, max_length - 9)].rstrip("_-") or "variant"
+    return f"{stem}_{digest}"
 
 
 def _write_generation_adaptive_outputs(

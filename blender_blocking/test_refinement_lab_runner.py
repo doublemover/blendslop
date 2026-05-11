@@ -208,6 +208,46 @@ class RefinementLabRunnerTests(unittest.TestCase):
 
         self.assertTrue(runner.run_root.is_absolute())
 
+    def test_runner_compacts_long_case_variant_artifact_paths(self) -> None:
+        case_id = "visual-hull-pipe_elbow_seed_1240-with-a-long-adversarial-capture-label"
+        variant_id = (
+            "g01_hybrid_loft_hull-baseline_topology-preserving-mesh_3a703432"
+            "_with-an-extra-long-adaptive-parent-and-proposal-label"
+        )
+        case = ExperimentCase(
+            case_id,
+            "default-vase",
+            "builtin_sample",
+            reference_paths={
+                "front": Path("front.png"),
+                "side": Path("side.png"),
+                "top": Path("top.png"),
+            },
+        )
+        variant = ExperimentVariant(variant_id, "variant", "hybrid_loft_hull")
+        plan = ExperimentPlan(
+            plan_id="p",
+            suite="default-vase",
+            track="visual-hull-quality",
+            search="grid",
+            objective="quality_win",
+            output_root=Path("temp/refinement-runs/compact-path-test"),
+            run_id="run",
+            cases=(case,),
+            variants=(variant,),
+        )
+
+        runner = InProcessBlenderRunner(plan=plan, options=RunOptions())
+        variant_dir = runner._case_variant_dir(case, variant)
+
+        self.assertLessEqual(len(variant_dir.name), 40)
+        self.assertLessEqual(len(variant_dir.parent.parent.name), 32)
+        self.assertNotEqual(variant_dir.name, variant_id)
+        digest = variant_dir.name.rsplit("-", 1)[-1]
+        self.assertEqual(len(digest), 10)
+        self.assertTrue(all(char in "0123456789abcdef" for char in digest))
+        self.assertEqual(variant.variant_id, variant_id)
+
     def test_runner_writes_adaptive_outputs_from_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             case = ExperimentCase(
@@ -304,7 +344,7 @@ class RefinementLabRunnerTests(unittest.TestCase):
             )
             runner = InProcessBlenderRunner(plan=plan, options=RunOptions())
             runner._prepare_run_root()
-            result_json = runner.run_root / "cases" / "case" / "variants" / "baseline" / "result.json"
+            result_json = runner._case_variant_dir(case, variant) / "result.json"
             result_json.parent.mkdir(parents=True, exist_ok=True)
             result_json.write_text('{"passed": true}\n', encoding="utf-8")
             result = ExperimentResult(
