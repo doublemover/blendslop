@@ -13,6 +13,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Optional, Sequence
 
+from blender_blocking.metrics.namespaces import get_metric_path
+
 
 SCHEMA_VERSION = "quality_perf_budget_v1"
 THRESHOLD_MODES = {"min", "max", "equal"}
@@ -146,7 +148,7 @@ def _evaluate_threshold(
     checks = []
     for record in matches:
         metric = str(threshold["metric"])
-        value = _coerce_number(_lookup_metric(record.data, metric))
+        value = _coerce_number(get_metric_path(record.data, metric))
         operator_mode = _threshold_operator_mode(threshold)
         passed, message = _compare_value(
             value,
@@ -210,8 +212,8 @@ def _evaluate_comparison(
                 }
             )
             continue
-        before = _coerce_number(_lookup_metric(baseline.data, metric))
-        after = _coerce_number(_lookup_metric(current.data, metric))
+        before = _coerce_number(get_metric_path(baseline.data, metric))
+        after = _coerce_number(get_metric_path(current.data, metric))
         operator_mode = _comparison_operator_mode(comparison)
         passed, delta, message = _compare_delta(
             before,
@@ -450,16 +452,6 @@ def _record_selector(record: BudgetRecord) -> dict[str, str]:
         "mode": record.mode,
         "shape_id": record.shape_id,
     }
-
-
-def _lookup_metric(data: Mapping[str, Any], dotted_key: str) -> Any:
-    current: Any = data
-    for part in dotted_key.split("."):
-        if isinstance(current, Mapping) and part in current:
-            current = current[part]
-        else:
-            return None
-    return current
 
 
 def _compare_value(

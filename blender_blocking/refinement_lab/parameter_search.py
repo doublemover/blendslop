@@ -13,6 +13,7 @@ try:
         render_view_iou,
         required_render_metrics_missing,
     )
+    from blender_blocking.metrics.values import float_or as _float
 except ImportError:  # pragma: no cover - script-style imports
     from metrics.namespaces import (
         get_metric_path,
@@ -21,6 +22,7 @@ except ImportError:  # pragma: no cover - script-style imports
         render_view_iou,
         required_render_metrics_missing,
     )
+    from metrics.values import float_or as _float
 
 from .contracts import ExperimentResult, json_safe
 
@@ -77,11 +79,14 @@ class ScoreTerm:
 class PromotionDecision:
     tier: str
     promotable: bool
+    parent_selectable: bool
     requires_review: bool
     backend_status: str
     backend_degraded: bool
     state: str
     blockers: tuple[str, ...] = ()
+    blocking_for_quality: tuple[str, ...] = ()
+    blocking_for_parent_selection: tuple[str, ...] = ()
 
     @property
     def rank(self) -> int:
@@ -91,11 +96,14 @@ class PromotionDecision:
         return {
             "tier": self.tier,
             "promotable": self.promotable,
+            "parent_selectable": self.parent_selectable,
             "requires_review": self.requires_review,
             "backend_status": self.backend_status,
             "backend_degraded": self.backend_degraded,
             "state": self.state,
             "blockers": list(self.blockers),
+            "blocking_for_quality": list(self.blocking_for_quality),
+            "blocking_for_parent_selection": list(self.blocking_for_parent_selection),
             "rank": self.rank,
         }
 
@@ -178,7 +186,13 @@ def top_k(
 def promotion_decision(result: ExperimentResult) -> PromotionDecision:
     backend_status = _backend_status(result)
     backend_degraded = _backend_degraded(result)
+    degradation_reasons = _backend_degradation_reasons(result)
     metric_only = metric_only_candidate(result) > 0.0
+    metric_only_parent = _metric_only_parent_candidate(result)
+    proxy_disagreement_parent = _proxy_disagreement_parent_candidate(result)
+    shape_program_missing_qa_parent = (
+        _shape_program_missing_render_qa_parent_candidate(result)
+    )
     diagnostic_only = diagnostic_only_candidate(result) > 0.0
     blockers: list[str] = []
 
@@ -189,7 +203,11 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
     if backend_status == "research_only":
         blockers.append("research_only_backend")
     if backend_degraded or backend_status == "degraded":
-        blockers.append("degraded_backend")
+        blockers.append(
+            "degraded_backend"
+            if degradation_reasons
+            else "degraded_backend_unexplained"
+        )
     if metric_only:
         blockers.append("metric_only_candidate")
     if diagnostic_only:
@@ -211,6 +229,7 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
     if backend_status == "unreported":
         blockers.append("unreported_backend_status")
 
+    quality_blockers = tuple(blockers)
     hard_blocked = any(
         item.startswith("result_status:")
         or item.startswith("backend_status:")
@@ -247,15 +266,65 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
         blockers=blockers,
         result=result,
     )
+    parent_blockers = tuple(
+        item
+        for item in blockers
+        if (
+            item.startswith("result_status:")
+            or item.startswith("backend_status:")
+            or item
+            in {
+                "missing_required_metrics",
+                "catastrophic_view_failure",
+                "proxy_render_namespace_violation",
+                "proxy_render_disagreement",
+                "diagnostic_only_candidate",
+                "metric_only_candidate",
+                "research_only_backend",
+            }
+        )
+        and not (
+            metric_only_parent
+            and item
+            in {
+                "missing_required_metrics",
+                "catastrophic_view_failure",
+                "metric_only_candidate",
+                "proxy_render_namespace_violation",
+            }
+        )
+        and not (
+            proxy_disagreement_parent
+            and item == "proxy_render_disagreement"
+        )
+        and not (
+            shape_program_missing_qa_parent
+            and item
+            in {
+                "missing_required_metrics",
+                "research_only_backend",
+            }
+        )
+    )
+    parent_selectable = (
+        tier == "promotable"
+        or (
+            not parent_blockers
+            and _has_repairable_parent_quality(result)
+        )
+    )
 
     return PromotionDecision(
         tier=tier,
         promotable=tier == "promotable",
+        parent_selectable=parent_selectable,
         requires_review=tier != "promotable",
         backend_status=backend_status,
         backend_degraded=backend_degraded,
         state=state,
         blockers=tuple(blockers),
+        blocking_for_quality=quality_blockers,
+        blocking_for_parent_selection=parent_blockers,
     )
 
 
@@ -300,11 +369,10 @@ def required_views_all_pass(result: ExperimentResult) -> float:
 
 
 def catastrophic_view_failure(result: ExperimentResult) -> float:
-    for view in ("front", "side", "top"):
-        value = render_view_iou(result.metrics, view)
-        if value is None or value < 0.2:
-            return 1.0
-    return 0.0
+    values = [render_view_iou(result.metrics, view) for view in ("front", "side", "top")]
+    if any(value is None for value in values):
+        return 0.0
+    return 1.0 if any(value < 0.2 for value in values) else 0.0
 
 
 def missing_required_metrics(result: ExperimentResult) -> float:
@@ -617,6 +685,138 @@ def _backend_degraded(result: ExperimentResult) -> bool:
     return False
 
 
+def _backend_degradation_reasons(result: ExperimentResult) -> tuple[str, ...]:
+    reasons: list[str] = []
+    sources: list[Mapping[str, Any]] = []
+    source = _backend_source(result)
+    if source:
+        sources.append(source)
+    if isinstance(result.backend_result, Mapping):
+        sources.append(result.backend_result)
+    for item in sources:
+        for key in ("degradation_reasons", "degraded_reasons", "warnings", "errors"):
+            value = item.get(key)
+            if isinstance(value, str) and value.strip():
+                reasons.append(value.strip())
+            elif isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+                reasons.extend(str(entry) for entry in value if entry)
+        degradation = item.get("degradation")
+        if isinstance(degradation, Mapping):
+            for key in ("reason", "reasons", "warnings"):
+                value = degradation.get(key)
+                if isinstance(value, str) and value.strip():
+                    reasons.append(value.strip())
+                elif isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+                    reasons.extend(str(entry) for entry in value if entry)
+    return tuple(dict.fromkeys(reasons))
+
+
+def _has_repairable_parent_quality(result: ExperimentResult) -> bool:
+    if result.status != "pass":
+        return False
+    if metric_only_candidate(result) > 0.0:
+        return _metric_only_parent_candidate(result)
+    if _shape_program_missing_render_qa_parent_candidate(result):
+        return True
+    if not has_complete_required_render_views(result.metrics):
+        return False
+    if catastrophic_view_failure(result) > 0.0:
+        return False
+    return result.min_iou >= 0.7 or result.avg_iou >= 0.85
+
+
+def _metric_only_parent_candidate(result: ExperimentResult) -> bool:
+    if metric_only_candidate(result) <= 0.0:
+        return False
+    if result.mode != "ensemble":
+        return False
+    if str(get_metric_path(result.metrics, "validation_mode") or "") != "backend-status":
+        return False
+    if _backend_status(result) not in {"success", "degraded"}:
+        return False
+    backend_min = optional_float(get_metric_path(result.metrics, "backend.area_iou_min"))
+    if backend_min is None:
+        backend_min = optional_float(result.metrics.get("area_iou_min"))
+    backend_mean = optional_float(get_metric_path(result.metrics, "backend.area_iou_mean"))
+    if backend_mean is None:
+        backend_mean = optional_float(result.metrics.get("area_iou_mean"))
+    return (backend_min is not None and backend_min >= 0.7) or (
+        backend_mean is not None and backend_mean >= 0.85
+    )
+
+
+def _proxy_disagreement_parent_candidate(result: ExperimentResult) -> bool:
+    if proxy_render_disagreement(result) <= 0.0:
+        return False
+    if result.status != "pass":
+        return False
+    if _backend_status(result) not in {"success", "degraded"}:
+        return False
+    if not has_complete_required_render_views(result.metrics):
+        return False
+    if catastrophic_view_failure(result) > 0.0:
+        return False
+    return result.min_iou >= 0.85 and result.avg_iou >= 0.9
+
+
+def _shape_program_missing_render_qa_parent_candidate(result: ExperimentResult) -> bool:
+    if result.status != "pass":
+        return False
+    if result.mode != "shape_program" and _backend_name(result) != "shape_program":
+        return False
+    if _backend_status(result) not in {"degraded", "research_only"}:
+        return False
+    if not _shape_program_render_qa_missing(result):
+        return False
+    if not _has_shape_program_artifact(result):
+        return False
+    source = _backend_source(result)
+    source_errors = source.get("errors") if isinstance(source, Mapping) else ()
+    if result.errors:
+        return False
+    if isinstance(source_errors, str):
+        return not source_errors.strip()
+    if isinstance(source_errors, Sequence) and not isinstance(source_errors, (str, bytes)):
+        return not any(str(error).strip() for error in source_errors)
+    return True
+
+
+def _backend_name(result: ExperimentResult) -> str:
+    source = _backend_source(result)
+    for key in ("backend_name", "name", "mode", "candidate_id"):
+        value = source.get(key) if isinstance(source, Mapping) else None
+        if value:
+            return str(value).strip().lower()
+    return ""
+
+
+def _shape_program_render_qa_missing(result: ExperimentResult) -> bool:
+    metric = _selected_metric_result(result)
+    extras = metric.get("extras") if isinstance(metric, Mapping) else None
+    render_qa = extras.get("render_qa") if isinstance(extras, Mapping) else None
+    if isinstance(render_qa, Mapping):
+        if render_qa.get("missing_required_metrics") is True:
+            return True
+        status = str(render_qa.get("status", "")).strip().lower()
+        if status in {"missing", "not_applicable", "incomplete"}:
+            return True
+    qa_missing = get_metric_path(result.metrics, "render.qa.missing_required_metrics")
+    if qa_missing is True:
+        return True
+    status = str(get_metric_path(result.metrics, "render.qa.status") or "").strip().lower()
+    return status in {"missing", "not_applicable", "incomplete"}
+
+
+def _has_shape_program_artifact(result: ExperimentResult) -> bool:
+    if any(key in result.artifacts for key in ("shape_program", "primitive")):
+        return True
+    source = _backend_source(result)
+    artifacts = source.get("artifacts") if isinstance(source, Mapping) else None
+    if isinstance(artifacts, Mapping):
+        return any(key in artifacts for key in ("shape_program", "primitive"))
+    return False
+
+
 def _topology_blocker(result: ExperimentResult) -> str:
     topology_score = optional_float(get_metric_path(result.metrics, "topology.score"))
     if topology_score is None:
@@ -670,6 +870,8 @@ def _promotion_state(
     if tier == "promotable":
         return "promotable"
     if "missing_required_metrics" in blocker_set:
+        if _shape_program_missing_render_qa_parent_candidate(result):
+            return "shape_program_missing_render_qa"
         if metric_only_candidate(result) > 0.0:
             return "metric_only_candidate"
         return "blocked_missing_render_metrics"
@@ -707,10 +909,3 @@ def _nested(data: Mapping[str, Any], keys: Sequence[str]) -> Any:
             return None
         current = current.get(key)
     return current
-
-
-def _float(value: Any, default: float = 0.0) -> float:
-    try:
-        return float(default if value is None else value)
-    except (TypeError, ValueError):
-        return default

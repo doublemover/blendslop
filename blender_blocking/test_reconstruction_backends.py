@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 from typing import Any, Mapping, Sequence
 
 import numpy as np
@@ -666,6 +667,95 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
             "shape_program.material_target must be pbr/simple/none",
             backend.validate_config({"material_target": "radiance"}),
         )
+
+    def test_shape_program_backend_compile_gate_is_imported(self) -> None:
+        from reconstruction.backends.shape_program import ShapeProgramBackend
+
+        backend = ShapeProgramBackend()
+        with tempfile.TemporaryDirectory() as tmp:
+            result = backend.reconstruct(
+                CandidateRequest(
+                    candidate_id="shape-program-no-compile",
+                    backend_name="shape_program",
+                    target=ReconstructionTarget(),
+                    config={"compile_blender": False},
+                    artifact_root=Path(tmp),
+                )
+            )
+
+        self.assertEqual(result.status, "research_only")
+        self.assertFalse(result.metric_result.extras["compiled_blender"])
+        self.assertEqual(result.metric_result.per_view, {})
+        self.assertEqual(result.metric_result.extras["render_qa"]["status"], "not_applicable")
+        self.assertEqual(result.errors, ())
+
+    def test_shape_program_compiled_render_qa_populates_real_per_view_metrics(self) -> None:
+        import reconstruction.backends.shape_program.backend as shape_backend_module
+        from reconstruction.backends.shape_program import ShapeProgramBackend
+
+        class FakeCompiled:
+            warnings = ()
+            objects = ()
+            residual_markers = ()
+            root_object = object()
+
+            def to_dict(self) -> dict[str, object]:
+                return {"compiled": True}
+
+            def object_names(self) -> list[str]:
+                return []
+
+            def marker_names(self) -> list[str]:
+                return []
+
+        target = ReconstructionTarget(
+            constraints=(
+                ViewConstraint("front", None, OrthographicCameraSpec("front", "y")),
+                ViewConstraint("side", None, OrthographicCameraSpec("side", "x")),
+                ViewConstraint("top", None, OrthographicCameraSpec("top", "z")),
+            ),
+            bounds=Bounds3D.from_min_max((-1.0, -1.0, -1.0), (1.0, 1.0, 1.0)),
+        )
+        backend = ShapeProgramBackend()
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(shape_backend_module, "_compile_program", return_value=FakeCompiled()):
+                result = backend.reconstruct(
+                    CandidateRequest(
+                        candidate_id="shape-program-render-qa",
+                        backend_name="shape_program",
+                        target=target,
+                        config={
+                            "compile_blender": True,
+                            "render_qa_metrics": {
+                                "per_view": {
+                                    "front": {
+                                        "area_iou": 0.91,
+                                        "boundary_iou": 0.62,
+                                        "signed_distance_loss": 0.03,
+                                    },
+                                    "side": {
+                                        "area_iou": 0.93,
+                                        "boundary_iou": 0.64,
+                                        "signed_distance_loss": 0.02,
+                                    },
+                                    "top": {
+                                        "area_iou": 0.90,
+                                        "boundary_iou": 0.60,
+                                        "signed_distance_loss": 0.04,
+                                    },
+                                }
+                            },
+                        },
+                        artifact_root=Path(tmp),
+                    )
+                )
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(result.degraded)
+        self.assertEqual(result.metric_result.extras["render_qa"]["status"], "complete")
+        self.assertAlmostEqual(result.metric_result.per_view["front"]["area_iou"], 0.91)
+        self.assertAlmostEqual(result.metric_result.area_iou_min, 0.90)
+        self.assertNotIn("degraded_no_render_qa", "\n".join(result.warnings))
 
     def test_duplicate_missing_and_alias_registration_errors(self) -> None:
         backend = _FakeBackend()

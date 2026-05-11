@@ -50,13 +50,25 @@ def build_resfit_candidate_metrics(
     uncertainty_consistency = float(
         np.clip(uncertainty_signal.get("consistency", 0.75), 0.0, 1.0)
     )
+    per_view = _build_per_view_profile_summary(profile_rows)
     surface_score = float(result.final_loss.terms.get("surface_residual", 0.0))
     silhouette_score = float(result.final_loss.terms.get("silhouette", 0.0))
     surface_proxy_iou = float(1.0 / (1.0 + surface_score))
     silhouette_proxy_iou = float(1.0 / (1.0 + silhouette_score))
-    area_iou = min(surface_proxy_iou, silhouette_proxy_iou)
-    boundary_iou = silhouette_proxy_iou
-    per_view = _build_per_view_profile_summary(profile_rows)
+    objective_proxy_iou = min(surface_proxy_iou, silhouette_proxy_iou)
+    view_area_values = _per_view_metric_values(per_view, "area_iou")
+    view_boundary_values = _per_view_metric_values(per_view, "boundary_iou")
+    if view_area_values:
+        area_iou_min = float(min(view_area_values))
+        area_iou_mean = float(sum(view_area_values) / len(view_area_values))
+    else:
+        area_iou_min = objective_proxy_iou
+        area_iou_mean = objective_proxy_iou
+    boundary_iou = (
+        float(sum(view_boundary_values) / len(view_boundary_values))
+        if view_boundary_values
+        else silhouette_proxy_iou
+    )
     budget_limited = result.optimization_termination_reason in {
         "elapsed_time_budget",
         "objective_evaluation_budget",
@@ -85,8 +97,8 @@ def build_resfit_candidate_metrics(
     )
 
     metric = CandidateMetrics(
-        area_iou_min=area_iou,
-        area_iou_mean=area_iou,
+        area_iou_min=area_iou_min,
+        area_iou_mean=area_iou_mean,
         boundary_iou_mean=boundary_iou,
         topology_score=topology_score,
         uncertainty_consistency=uncertainty_consistency,
@@ -179,6 +191,8 @@ def build_resfit_candidate_metrics(
             "fail_reason": fail_reason,
             "surface_proxy_iou": surface_proxy_iou,
             "silhouette_proxy_iou": silhouette_proxy_iou,
+            "objective_proxy_iou": objective_proxy_iou,
+            "backend_quality_source": "profile_per_view" if view_area_values else "objective_proxy",
             "optimization_termination_reason": result.optimization_termination_reason,
             "selected_attempt": result.selected_attempt,
             "optimization_attempts": list(result.attempts),
@@ -214,3 +228,25 @@ def _attempt_is_noop(attempt: Mapping[str, Any]) -> bool:
     except (TypeError, ValueError):
         return False
     return accepted <= 0 and improvement <= 1.0e-12
+
+
+def _per_view_metric_values(
+    per_view: Mapping[str, Any],
+    metric: str,
+) -> list[float]:
+    values: list[float] = []
+    for payload in per_view.values():
+        if not isinstance(payload, Mapping):
+            continue
+        if not bool(payload.get("required", True)):
+            continue
+        value = payload.get(metric)
+        if isinstance(value, bool):
+            continue
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError):
+            continue
+        if np.isfinite(parsed):
+            values.append(parsed)
+    return values

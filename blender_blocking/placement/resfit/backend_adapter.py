@@ -25,6 +25,7 @@ from ..resfit_optimizer import (
     OptimizationRecord,
     coordinate_descent_optimize,
 )
+from reconstruction.target_signals import collect_target_signals
 
 from .config import (
     ResFitPipelineConfig,
@@ -53,7 +54,6 @@ from .penalties import (
     _build_uncertainty_penalty_hook,
 )
 from .profiles import _build_per_view_profile_summary, _collect_profile_rows, _profile_rows_to_slices
-from .signals import _collect_target_signals
 from .status import apply_resfit_quality_floors, resfit_candidate_status
 
 
@@ -329,7 +329,13 @@ def run_primitive_fit_pipeline(request: object) -> object:
             errors=(str(exc),),
         )
 
-    signal_summary = _collect_target_signals(target)
+    signal_summary = collect_target_signals(
+        target,
+        include_profile_rows=True,
+        include_surface_density=False,
+        include_constraint_kinds=False,
+        include_topology_details=False,
+    )
     profile_rows = _collect_profile_rows(signal_summary["profile"], getattr(target, "bounds", None))
 
     uncertainty_signal = signal_summary["uncertainty"]

@@ -35,7 +35,7 @@ InitializerFn = Callable[[np.ndarray, PrimitiveInitializationConfig], Sequence[o
 def get_initializer(family: str) -> InitializerFn:
     """Return the initializer for a primitive family."""
     normalized = family.lower().strip()
-    if normalized in ("superfrustum", "superfrusta", "frustum"):
+    if normalized in ("superfrustum", "superfrusta", "frustum", "capsule", "capsules"):
         return initialize_superfrusta_from_points
     if normalized in ("ellipsoid", "ellipsoids"):
         return initialize_ellipsoids_from_points
@@ -47,7 +47,13 @@ def get_initializer(family: str) -> InitializerFn:
 
 
 def _family_supports_profile_init(primitive_family: str) -> bool:
-    return str(primitive_family).lower().strip() in {"superfrustum", "superfrusta", "frustum"}
+    return str(primitive_family).lower().strip() in {
+        "superfrustum",
+        "superfrusta",
+        "frustum",
+        "capsule",
+        "capsules",
+    }
 
 
 def _first_family(config: Mapping[str, object]) -> str:

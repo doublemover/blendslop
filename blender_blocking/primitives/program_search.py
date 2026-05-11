@@ -143,8 +143,10 @@ def _replace_root_primitive(
     name: str,
 ) -> ShapeProgram:
     size = _size_from_program(program)
+    old_root_id = program.root_nodes[0].node_id if program.root_nodes else ""
+    new_root_id = f"{rule.rule_id}_00"
     node = ShapeNode(
-        node_id=f"{rule.rule_id}_00",
+        node_id=new_root_id,
         operation=rule.operation,
         primitive_type=rule.output_primitive,
         name=name,
@@ -156,9 +158,20 @@ def _replace_root_primitive(
             "source_rule": rule.rule_id,
         },
     )
+    constraints = tuple(
+        replace(
+            constraint,
+            target_nodes=tuple(
+                new_root_id if target == old_root_id else target
+                for target in constraint.target_nodes
+            ),
+        )
+        for constraint in program.constraints
+    )
     return replace(
         program,
         root_nodes=(node,) + tuple(program.root_nodes[1:]),
+        constraints=constraints,
         metadata={**dict(program.metadata), "selected_rule": rule.rule_id},
     )
 

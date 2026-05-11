@@ -8,6 +8,10 @@ from typing import Any, Mapping
 import tracemalloc
 
 from .schemas import json_safe
+try:
+    from blender_blocking.metrics.values import optional_float as _optional_float
+except ImportError:  # pragma: no cover - script-style imports
+    from metrics.values import optional_float as _optional_float
 
 
 @dataclass(frozen=True)
@@ -398,12 +402,3 @@ def _flatten_cache(cache_items: tuple[CacheCost, ...]) -> dict[str, float]:
         payload["misses"] = float(total_misses)
         payload["hit_rate"] = float(total_hits / total) if total else 0.0
     return payload
-
-
-def _optional_float(value: Any) -> float | None:
-    if value is None:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None

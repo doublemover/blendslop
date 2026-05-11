@@ -31,6 +31,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from blender_blocking.utils.path_safety import compact_path_segment
+from blender_blocking.metrics.namespaces import get_metric_path
 
 TEMP_ROOT = REPO_ROOT / "temp"
 RUN_ROOT = TEMP_ROOT / "quality-refinement-runs"
@@ -52,6 +53,17 @@ DEFAULT_MATRIX_SUITES = (
     "smoke",
 )
 DEFAULT_LPIPS_MODES = ("legacy", "profile_loft")
+
+
+def _configure_stdio_encoding() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if not callable(reconfigure):
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
 
 
 @dataclass(frozen=True)
@@ -96,6 +108,13 @@ DEFAULT_REFINEMENT_TARGETS = (
         objective="reliability_first",
     ),
     RefinementTarget(
+        name="moonshot-sidecars",
+        suite="synthetic-primitive-fit",
+        track="shape-program-editability",
+        search="coordinate",
+        objective="profile_editable",
+    ),
+    RefinementTarget(
         name="ensemble-selection",
         suite="synthetic-blender-smoke",
         track="ensemble-selection",
@@ -126,6 +145,8 @@ class SmokeProfile:
     matrix_budget_mode: str = "gating"
     matrix_allow_failed_rows: bool = False
     stop_on_failure: bool = False
+    moonshot_sidecars: bool = False
+    moonshot_experiments: tuple[str, ...] = ()
     expected_artifacts: tuple[str, ...] = ("commands.md", "summary.md", "summary.json")
 
 
@@ -237,6 +258,31 @@ SMOKE_PROFILES: dict[str, SmokeProfile] = {
         refinement_max_runs=1,
         refinement_generations=1,
         refinement_top_k=1,
+        stop_on_failure=True,
+    ),
+    "moonshot-smoke": SmokeProfile(
+        name="moonshot-smoke",
+        description="Cheap sidecar evidence generation for moonshot diagnostics.",
+        refinement_targets=(
+            "moonshot-sidecars",
+            "primitive-fit",
+            "gaussian-proxy",
+            "differentiable-refine",
+            "ensemble-selection",
+        ),
+        refinement_max_runs=1,
+        refinement_generations=1,
+        refinement_top_k=1,
+        moonshot_sidecars=True,
+        moonshot_experiments=(
+            "shape_grammar_search",
+            "active_view_planning",
+            "implicit_sdf_proxy",
+            "editable_retopology",
+            "human_constraint_learning",
+            "differentiable_primitives",
+            "moonshot_portfolio_optimizer",
+        ),
         stop_on_failure=True,
     ),
     "lpips-only": SmokeProfile(
@@ -354,6 +400,104 @@ def _blender_cmd(blender_exe: str) -> str:
     return blender_exe or os.environ.get("BLENDER_EXE") or DEFAULT_BLENDER_EXE
 
 
+_ANSI_COLORS = {
+    "blue": "34",
+    "cyan": "36",
+    "green": "32",
+    "magenta": "35",
+    "red": "31",
+    "yellow": "33",
+    "dim": "2",
+}
+
+_BADGE_SYMBOLS = {
+    "blocked": "⛔",
+    "error": "✗",
+    "fail": "✗",
+    "pass": "✓",
+    "reuse": "↻",
+    "warn": "!",
+    "wrote": "✎",
+}
+
+
+def _color_enabled(stream: object | None = None) -> bool:
+    if os.environ.get("NO_COLOR"):
+        return False
+    if os.environ.get("FORCE_COLOR"):
+        return True
+    stream = stream or sys.stdout
+    return bool(getattr(stream, "isatty", lambda: False)())
+
+
+def _style(
+    text: str,
+    color: str | None = None,
+    *,
+    bold: bool = False,
+    stream: object | None = None,
+) -> str:
+    if not _color_enabled(stream):
+        return text
+    codes: list[str] = []
+    if bold:
+        codes.append("1")
+    if color:
+        code = _ANSI_COLORS.get(color)
+        if code:
+            codes.append(code)
+    if not codes:
+        return text
+    return f"\033[{';'.join(codes)}m{text}\033[0m"
+
+
+def _badge(label: str, color: str, *, stream: object | None = None) -> str:
+    text = f"{_BADGE_SYMBOLS.get(label.lower(), '•')} {label.upper():<7}"
+    return _style(text, color, bold=True, stream=stream)
+
+
+def _muted(text: str) -> str:
+    return _style(text, "dim")
+
+
+def _print_console_table(
+    rows: Sequence[Mapping[str, object]],
+    columns: Sequence[tuple[str, str, str]],
+) -> None:
+    if not rows:
+        return
+    widths = {
+        key: max(len(label), *(len(str(row.get(key, ""))) for row in rows))
+        for key, label, _align in columns
+    }
+    header_parts = []
+    rule_parts = []
+    for key, label, align in columns:
+        width = widths[key]
+        header_parts.append(f"{label:>{width}}" if align == "right" else f"{label:<{width}}")
+        rule_parts.append("-" * width)
+    print(_style("  " + "  ".join(header_parts), "dim", bold=True))
+    print(_style("  " + "  ".join(rule_parts), "dim"))
+    for row in rows:
+        parts = []
+        for key, _label, align in columns:
+            value = str(row.get(key, ""))
+            width = widths[key]
+            parts.append(f"{value:>{width}}" if align == "right" else f"{value:<{width}}")
+        print("  " + "  ".join(parts))
+
+
+def _format_count(value: int) -> str:
+    return "-" if int(value) == 0 else str(int(value))
+
+
+def _subprocess_env() -> dict[str, str]:
+    env = dict(os.environ)
+    env.setdefault("PYTHONUTF8", "1")
+    env.setdefault("PYTHONIOENCODING", "utf-8")
+    return env
+
+
 def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand, ...]]:
     run_root = resolve_run_root(args.run_root)
     profile = _profile(args.profile)
@@ -361,6 +505,11 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
     reference_cache = _bool_default(args.reference_cache, full_nightly)
     candidate_cache = _bool_default(args.candidate_cache, full_nightly)
     resume_candidates = _bool_default(args.resume_candidates, full_nightly)
+    moonshot_sidecars = _bool_default(args.moonshot_sidecars, profile.moonshot_sidecars)
+    moonshot_experiments = (
+        _parse_csv(args.moonshot_experiments)
+        or profile.moonshot_experiments
+    )
     debug_artifact_policy = args.debug_artifact_policy or (
         "failures" if full_nightly else "all"
     )
@@ -585,6 +734,8 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                         reference_cache=reference_cache,
                         candidate_cache=candidate_cache,
                         resume_candidates=resume_candidates,
+                        moonshot_sidecars=moonshot_sidecars,
+                        moonshot_experiments=moonshot_experiments,
                         debug_artifact_policy=debug_artifact_policy,
                     ),
                     artifacts=(
@@ -663,6 +814,8 @@ def _refinement_loop_command(
     reference_cache: bool,
     candidate_cache: bool,
     resume_candidates: bool,
+    moonshot_sidecars: bool,
+    moonshot_experiments: Sequence[str],
     debug_artifact_policy: str,
 ) -> tuple[str, ...]:
     command = [
@@ -693,13 +846,13 @@ def _refinement_loop_command(
         "--children-per-parent",
         str(children_per_parent),
         "--result-root",
-        _repo_path(result_root),
+        str(result_root.resolve(strict=False)),
         "--seed",
         str(seed),
         "--report-failures",
         "all",
         "--cache-root",
-        _repo_path(cache_root),
+        str(cache_root.resolve(strict=False)),
         "--debug-artifact-policy",
         debug_artifact_policy,
     ]
@@ -715,6 +868,12 @@ def _refinement_loop_command(
         command.append("--resume-candidates")
     else:
         command.append("--no-resume-candidates")
+    if moonshot_sidecars:
+        command.append("--moonshot-sidecars")
+    else:
+        command.append("--no-moonshot-sidecars")
+    if moonshot_experiments:
+        command.extend(("--moonshot-experiments", ",".join(moonshot_experiments)))
     if case_count is not None:
         command.extend(("--case-count", str(case_count)))
     return tuple(command)
@@ -792,6 +951,29 @@ def format_command(command: Sequence[str]) -> str:
     return " ".join(parts)
 
 
+def format_console_command(command: Sequence[str]) -> str:
+    parts = [_quote_arg(_console_command_arg(part)) for part in command]
+    if parts and parts[0].startswith('"'):
+        return "& " + " ".join(parts)
+    return " ".join(parts)
+
+
+def _console_command_arg(value: object) -> str:
+    text = str(value)
+    if not text:
+        return text
+    try:
+        path = Path(text)
+    except (TypeError, ValueError):
+        return text
+    if not path.is_absolute():
+        return text
+    try:
+        return str(path.resolve(strict=False).relative_to(REPO_ROOT))
+    except (OSError, ValueError):
+        return path.name if path.suffix else text
+
+
 def _quote_arg(value: object) -> str:
     text = str(value)
     if text == "":
@@ -848,6 +1030,7 @@ def run_phases(
     max_open3d_workers: int = 1,
     max_lpips_workers: int = 1,
 ) -> int:
+    _configure_stdio_encoding()
     if dry_run:
         _print_plan(run_root, phases)
         return 0
@@ -862,17 +1045,17 @@ def run_phases(
         shutil.rmtree(run_root)
     run_root.mkdir(parents=True, exist_ok=True)
     recipe = write_command_recipe(run_root, phases)
-    print(f"Saved command recipe: {_repo_path(recipe)}")
+    print(f"{_badge('wrote', 'cyan')} command recipe   {_repo_path(recipe)}")
     preflight_path = run_root / "preflight.json"
     preflight_path.write_text(
         json.dumps(preflight, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    print(f"Saved preflight report: {_repo_path(preflight_path)}")
+    print(f"{_badge('wrote', 'cyan')} preflight report {_repo_path(preflight_path)}")
     if not preflight["passed"]:
         for issue in preflight["issues"]:
             print(
-                "PREFLIGHT FAIL: "
+                f"{_badge('blocked', 'yellow')} "
                 f"{issue.get('phase')} {issue.get('code')} "
                 f"{issue.get('case_id', '')} {issue.get('family', '')}"
             )
@@ -901,7 +1084,7 @@ def run_phases(
         )
 
     summary = write_summary(run_root, phases, results)
-    print(f"Saved summary: {_repo_path(summary)}")
+    print(f"{_badge('wrote', 'cyan')} summary          {_repo_path(summary)}")
     return 0 if results and all(result.passed for result in results) else 1
 
 
@@ -1044,7 +1227,10 @@ def _run_phases_parallel(
                             exc,
                         ),
                     )
-                    print(f"ERROR: {phase.name}: {exc}", file=sys.stderr)
+                    print(
+                        f"{_badge('error', 'red', stream=sys.stderr)} {phase.name}: {exc}",
+                        file=sys.stderr,
+                    )
                 completed[phase.name] = result
                 ordered_results.append(result)
     by_name = {result.phase.name: result for result in ordered_results}
@@ -1075,7 +1261,10 @@ def _execute_phase(
     if resume and not force:
         reused = _resume_phase_result(phase, run_root=run_root)
         if reused is not None:
-            print(f"REUSE: {phase.name} ({reused.original_elapsed_s or 0.0:.1f}s original)")
+            print(
+                f"{_badge('reuse', 'cyan')} {phase.name} "
+                f"({reused.original_elapsed_s or 0.0:.1f}s original)"
+            )
             return reused
 
     started = time.perf_counter()
@@ -1100,8 +1289,9 @@ def _execute_phase(
     )
     if result.passed:
         _write_phase_state(run_root, result)
-    status = "PASS" if result.passed else "FAIL"
-    print(f"{status}: {phase.name} ({elapsed_s:.1f}s)")
+    label = "pass" if result.passed else "fail"
+    color = "green" if result.passed else "red"
+    print(f"{_badge(label, color)} {phase.name} ({elapsed_s:.1f}s)")
     return result
 
 
@@ -1252,7 +1442,10 @@ def _run_phase_command(
         process = subprocess.Popen(
             phase.command,
             cwd=REPO_ROOT,
+            env=_subprocess_env(),
             text=True,
+            encoding="utf-8",
+            errors="replace",
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             bufsize=1,
@@ -1270,7 +1463,7 @@ def _run_phase_command(
             threads.append(
                 threading.Thread(
                     target=_tee_stream,
-                    args=(process.stderr, stderr_file, sys.stderr),
+                    args=(process.stderr, stderr_file, sys.stderr, True),
                     daemon=True,
                 )
             )
@@ -1307,12 +1500,22 @@ def _run_inline_quality_budget_phase(
         text = json.dumps(report, indent=2, sort_keys=True) + "\n"
         stdout_path.write_text(text, encoding="utf-8")
         stderr_path.write_text("", encoding="utf-8")
-        print(text, end="")
+        failed_required = _failed_required_check_count(report)
+        passed = bool(report.get("passed"))
+        status = "pass" if passed else ("warn" if warn_only else "fail")
+        color = "green" if passed else ("yellow" if warn_only else "red")
+        print(
+            f"{_badge(status, color)} quality budget "
+            f"required_failures={failed_required} report={_repo_path(report_json)}"
+        )
         returncode = 0 if warn_only or bool(report.get("passed")) else 1
     except Exception as exc:
         stdout_path.write_text("", encoding="utf-8")
         stderr_path.write_text(f"{type(exc).__name__}: {exc}\n", encoding="utf-8")
-        print(f"INLINE QUALITY BUDGET ERROR: {exc}", file=sys.stderr)
+        print(
+            f"{_badge('error', 'red', stream=sys.stderr)} inline quality budget: {exc}",
+            file=sys.stderr,
+        )
         returncode = 2
     return returncode, stdout_path, stderr_path
 
@@ -1428,12 +1631,39 @@ def _artifact_ready(path: Path) -> bool:
     return path.exists()
 
 
-def _tee_stream(source: object, log_file: object, console: object) -> None:
+def _tee_stream(
+    source: object,
+    log_file: object,
+    console: object,
+    suppress_known_noise: bool = False,
+) -> None:
     for line in source:  # type: ignore[operator]
         log_file.write(line)
         log_file.flush()
+        if suppress_known_noise and _is_known_warning_noise(line):
+            continue
         console.write(line)
+        if line and not line.endswith(("\n", "\r")):
+            console.write("\n")
         console.flush()
+
+
+def _is_known_warning_noise(line: str) -> bool:
+    text = line.strip()
+    if not text:
+        return False
+    known_fragments = (
+        "The parameter 'pretrained' is deprecated",
+        "Arguments other than a weight enum or `None` for 'weights' are deprecated",
+        "You are using `torch.load` with `weights_only=False`",
+        "torchvision\\models\\_utils.py",
+        "torchvision/models/_utils.py",
+        "lpips\\lpips.py",
+        "lpips/lpips.py",
+        "warnings.warn",
+        "self.load_state_dict(torch.load",
+    )
+    return any(fragment in text for fragment in known_fragments)
 
 
 def _assert_temp_child(path: Path) -> None:
@@ -1447,48 +1677,59 @@ def _print_plan(run_root: Path, phases: Sequence[PhaseCommand]) -> None:
     candidates = sum(phase.expected_candidate_count for phase in phases)
     blender_starts = sum(phase.expected_blender_invocations for phase in phases)
     artifact_count = sum(len(phase.artifacts) for phase in phases) + 3
-    print("QUALITY / REFINEMENT SMOKE PLAN")
-    print(f"Run root: {_repo_path(run_root)}")
+    print(_style("Quality / Refinement Smoke Plan", "cyan", bold=True))
+    print(f"  Run root   {_repo_path(run_root)}")
     print(
-        "Workload: "
+        "  Workload   "
         f"{len(phases)} phases, "
-        f"{candidates} expected candidates, "
-        f"{blender_starts} expected Blender starts, "
-        f"{artifact_count} expected artifact roots/files"
+        f"{candidates} candidates, "
+        f"{blender_starts} Blender starts, "
+        f"{artifact_count} artifacts"
     )
     print()
-    print("| # | Phase | Cases | Candidates | Blender starts | Artifacts |")
-    print("| ---: | --- | ---: | ---: | ---: | ---: |")
+    rows: list[dict[str, object]] = []
     for index, phase in enumerate(phases, start=1):
-        print(
-            "| "
-            f"{index} | `{phase.name}` | "
-            f"{phase.expected_case_count} | "
-            f"{phase.expected_candidate_count} | "
-            f"{phase.expected_blender_invocations} | "
-            f"{len(phase.artifacts)} |"
+        rows.append(
+            {
+                "#": index,
+                "phase": phase.name,
+                "cases": _format_count(phase.expected_case_count),
+                "candidates": _format_count(phase.expected_candidate_count),
+                "blender": _format_count(phase.expected_blender_invocations),
+                "artifacts": _format_count(len(phase.artifacts)),
+            }
         )
+    _print_console_table(
+        rows,
+        (
+            ("#", "#", "right"),
+            ("phase", "Phase", "left"),
+            ("cases", "Cases", "right"),
+            ("candidates", "Candidates", "right"),
+            ("blender", "Blender", "right"),
+            ("artifacts", "Artifacts", "right"),
+        ),
+    )
+    print()
+    print(_style("Commands", "cyan", bold=True))
     for index, phase in enumerate(phases, start=1):
         print()
-        print(f"{index}. {phase.name}")
+        print(_style(f"{index}. {phase.name}", "magenta", bold=True))
         print(f"   {phase.description}")
-        print(f"   {format_command(phase.command)}")
+        print(f"   {_muted(format_console_command(phase.command))}")
         for artifact in phase.artifacts:
-            print(f"   artifact: {_repo_path(artifact)}")
+            print(f"   {_style('artifact', 'dim')}: {_repo_path(artifact)}")
 
 
 def _print_phase_header(phase: PhaseCommand) -> None:
     print()
-    print("=" * 78)
-    print(phase.name)
-    print("-" * 78)
-    print(phase.description)
+    print(_style(f"▶ {phase.name}", "magenta", bold=True))
+    print(f"  {phase.description}")
     if phase.uses_torch_lpips_path:
-        print("Dependency lane: Torch/LPIPS isolated process")
+        print(f"  {_style('lane', 'dim')}: Torch/LPIPS isolated process")
     elif phase.uses_open3d_path:
-        print("Dependency lane: Open3D/OpenVDB-capable process")
-    print(format_command(phase.command))
-    print("=" * 78)
+        print(f"  {_style('lane', 'dim')}: Open3D/OpenVDB-capable process")
+    print(f"  {_style('command', 'dim')}: {format_console_command(phase.command)}")
 
 
 def write_summary(
@@ -1500,7 +1741,8 @@ def write_summary(
     matrix_rows = _collect_matrix_rows(run_root)
     budget_reports = _collect_budget_reports(run_root)
     cache_stats = _collect_cache_stats(run_root)
-    quality = _quality_summary(results, matrix_rows, budget_reports)
+    refinement_summaries = _collect_refinement_summaries(run_root)
+    quality = _quality_summary(results, matrix_rows, budget_reports, refinement_summaries)
     lines = [
         "# Quality Refinement Smoke Summary",
         "",
@@ -1509,6 +1751,7 @@ def write_summary(
         f"Overall quality status: **{quality['overall_quality_status']}**",
         f"Quality status reason: `{quality['quality_status_reason']}`",
         f"Required budget failures: {quality['required_budget_failure_count']}",
+        f"Required refinement failures: {quality['refinement_required_failure_count']}",
         "",
         "## Phase Status",
         "",
@@ -1529,16 +1772,36 @@ def write_summary(
         lines.extend(_matrix_summary_lines(matrix_rows))
     else:
         lines.append("No synthetic matrix JSON rows were found.")
+    failed_matrix_rows = _failed_matrix_rows(matrix_rows)
+    if failed_matrix_rows:
+        lines.extend(["", "## Failed Matrix Rows", ""])
+        lines.extend(_failed_matrix_row_lines(failed_matrix_rows))
     lines.extend(["", "## Quality Budget Reports", ""])
     if budget_reports:
         lines.extend(_budget_summary_lines(budget_reports))
     else:
         lines.append("No quality budget report JSON files were found.")
+    lines.extend(["", "## Refinement Results", ""])
+    if refinement_summaries:
+        lines.extend(_refinement_summary_lines(refinement_summaries))
+    else:
+        lines.append("No refinement adaptive summaries were found.")
+    lines.extend(["", "## Moonshot Sidecars", ""])
+    moonshot_lines = _moonshot_summary_lines(refinement_summaries)
+    if moonshot_lines:
+        lines.extend(moonshot_lines)
+    else:
+        lines.append("No moonshot sidecar evidence was found.")
     lines.extend(["", "## Cache Stats", ""])
     if cache_stats:
         lines.extend(_cache_summary_lines(cache_stats))
     else:
         lines.append("No refinement cache stats were found.")
+    cache_warnings = _cache_health_warnings(cache_stats, refinement_summaries)
+    if cache_warnings:
+        lines.extend(["", "## Cache Health Warnings", ""])
+        for warning in cache_warnings:
+            lines.append(f"- `{warning['code']}`: {warning['message']}")
     lines.extend(
         [
             "",
@@ -1559,7 +1822,9 @@ def write_summary(
         matrix_rows,
         budget_reports,
         cache_stats,
+        refinement_summaries,
         quality,
+        cache_warnings,
     )
     return path
 
@@ -1570,8 +1835,13 @@ def _write_machine_summary(
     matrix_rows: Sequence[dict],
     budget_reports: Sequence[dict],
     cache_stats: Sequence[dict],
+    refinement_summaries: Sequence[dict],
     quality: Mapping[str, object],
+    cache_warnings: Sequence[Mapping[str, object]],
 ) -> None:
+    cache_totals = _cache_totals(cache_stats)
+    failed_matrix_rows = _failed_matrix_rows(matrix_rows)
+    refinement_required_failures = quality["refinement_required_failures"]
     payload = {
         "schema_version": "quality_refinement_smoke_summary_v1",
         "run_root": _repo_path(run_root),
@@ -1579,6 +1849,8 @@ def _write_machine_summary(
         "quality_status_reason": quality["quality_status_reason"],
         "required_budget_failures": quality["required_budget_failures"],
         "required_budget_failure_count": quality["required_budget_failure_count"],
+        "required_refinement_failures": refinement_required_failures,
+        "required_refinement_failure_count": quality["refinement_required_failure_count"],
         "phase_results": [
             {
                 "name": result.phase.name,
@@ -1602,6 +1874,7 @@ def _write_machine_summary(
         "matrix_row_count": len(matrix_rows),
         "matrix_passed": sum(1 for row in matrix_rows if row.get("passed")),
         "matrix_failed": sum(1 for row in matrix_rows if not row.get("passed")),
+        "matrix_failed_rows": failed_matrix_rows,
         "quality_budget_reports": [
             {
                 "path": report["_quality_report_json"],
@@ -1613,7 +1886,30 @@ def _write_machine_summary(
             for report in budget_reports
         ],
         "cache_stats": cache_stats,
-        "cache_totals": _cache_totals(cache_stats),
+        "cache_totals": cache_totals,
+        "cache_health_warnings": list(cache_warnings),
+        "reference_cache_totals": {
+            "hits": cache_totals["reference_cache_hits"],
+            "misses": cache_totals["reference_cache_misses"],
+            "writes": cache_totals["reference_cache_writes"],
+        },
+        "candidate_cache_totals": {
+            "hits": cache_totals["candidate_cache_hits"],
+            "misses": cache_totals["candidate_cache_misses"],
+            "writes": cache_totals["candidate_cache_writes"],
+            "local_resume_writes": cache_totals["candidate_cache_local_resume_writes"],
+            "shared_writes": cache_totals["candidate_cache_shared_writes"],
+            "sources": cache_totals["candidate_cache_sources"],
+        },
+        "refinement_summaries": refinement_summaries,
+        "refinement_error_rows": sum(int(row.get("error_rows", 0) or 0) for row in refinement_summaries),
+        "refinement_promotable_rows": sum(int(row.get("promotable_rows", 0) or 0) for row in refinement_summaries),
+        "refinement_parent_selectable_rows": sum(
+            int(row.get("parent_selectable_rows", 0) or 0)
+            for row in refinement_summaries
+        ),
+        "moonshot_summary": _moonshot_totals(refinement_summaries),
+        "refinement_required_failures": refinement_required_failures,
     }
     (run_root / "summary.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
@@ -1625,8 +1921,10 @@ def _quality_summary(
     results: Sequence[PhaseResult],
     matrix_rows: Sequence[dict],
     budget_reports: Sequence[dict],
+    refinement_summaries: Sequence[dict],
 ) -> dict[str, object]:
     required_budget_failures = _required_budget_failures(budget_reports)
+    refinement_required_failures = _refinement_required_failures(refinement_summaries)
     process_failures = [result.phase.name for result in results if not result.passed]
     matrix_failed = sum(1 for row in matrix_rows if not row.get("passed"))
     if process_failures:
@@ -1635,6 +1933,9 @@ def _quality_summary(
     elif required_budget_failures:
         status = "fail"
         reason = "required_budget_failures"
+    elif refinement_required_failures:
+        status = "fail"
+        reason = "refinement_required_failures"
     elif matrix_failed and not budget_reports:
         status = "fail"
         reason = "matrix_row_failures_without_budget"
@@ -1649,6 +1950,8 @@ def _quality_summary(
         "quality_status_reason": reason,
         "required_budget_failures": required_budget_failures,
         "required_budget_failure_count": len(required_budget_failures),
+        "refinement_required_failures": refinement_required_failures,
+        "refinement_required_failure_count": len(refinement_required_failures),
         "process_failures": process_failures,
         "matrix_failed": matrix_failed,
     }
@@ -1746,10 +2049,530 @@ def _collect_cache_stats(run_root: Path) -> list[dict]:
     return stats
 
 
+def _collect_refinement_summaries(run_root: Path) -> list[dict]:
+    summaries: list[dict] = []
+    for summary_path in sorted((run_root / "r").glob("*/adaptive-loop-summary.json")):
+        try:
+            adaptive_payload = json.loads(summary_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(adaptive_payload, dict):
+            continue
+        loop_root = summary_path.parent
+        leaderboard_paths = sorted(loop_root.glob("g*/leaderboard.json"))
+        row_count = 0
+        error_rows = 0
+        blocked_rows = 0
+        promotable_rows = 0
+        parent_selectable_rows = 0
+        duplicate_quality_group_count = 0
+        duplicate_quality_duplicate_row_count = 0
+        moonshot_status_counts: dict[str, int] = {}
+        moonshot_top_deltas: list[dict[str, object]] = []
+        moonshot_active_views: list[dict[str, object]] = []
+        moonshot_active_sequences: list[dict[str, object]] = []
+        moonshot_portfolio_available_actions: list[dict[str, object]] = []
+        moonshot_portfolio_actions: list[dict[str, object]] = []
+        moonshot_portfolio_rejected_actions: list[dict[str, object]] = []
+        moonshot_portfolio_dependencies: list[dict[str, object]] = []
+        moonshot_portfolio_execution: list[dict[str, object]] = []
+        moonshot_portfolio_risks: list[dict[str, object]] = []
+        leaderboard_summaries: list[dict[str, object]] = []
+        for leaderboard_path in leaderboard_paths:
+            try:
+                leaderboard = json.loads(leaderboard_path.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            if not isinstance(leaderboard, dict):
+                continue
+            rows = leaderboard.get("rows")
+            if not isinstance(rows, list):
+                rows = []
+            row_count += len(rows)
+            current_error_rows = sum(1 for row in rows if isinstance(row, dict) and row.get("status") == "error")
+            current_promotable_rows = sum(1 for row in rows if isinstance(row, dict) and bool(row.get("promotable")))
+            current_parent_selectable_rows = sum(
+                1
+                for row in rows
+                if isinstance(row, dict)
+                and bool(row.get("parent_selectable", row.get("promotable")))
+            )
+            current_blocked_rows = sum(
+                1
+                for row in rows
+                if isinstance(row, dict) and str(row.get("promotion_tier", "")).startswith("blocked")
+            )
+            error_rows += current_error_rows
+            promotable_rows += current_promotable_rows
+            parent_selectable_rows += current_parent_selectable_rows
+            blocked_rows += current_blocked_rows
+            duplicate_quality_group_count += int(leaderboard.get("duplicate_quality_group_count", 0) or 0)
+            duplicate_quality_duplicate_row_count += int(
+                leaderboard.get("duplicate_quality_duplicate_row_count", 0) or 0
+            )
+            moonshot_summary = leaderboard.get("moonshot_summary")
+            if isinstance(moonshot_summary, Mapping):
+                for status, count in dict(moonshot_summary.get("status_counts", {}) or {}).items():
+                    moonshot_status_counts[str(status)] = (
+                        moonshot_status_counts.get(str(status), 0) + int(count or 0)
+                    )
+                for item in moonshot_summary.get("top_candidate_deltas", ()) or ():
+                    if isinstance(item, Mapping):
+                        moonshot_top_deltas.append(dict(item))
+                for item in moonshot_summary.get("active_view_suggestions", ()) or ():
+                    if isinstance(item, Mapping):
+                        moonshot_active_views.append(dict(item))
+                for item in moonshot_summary.get("active_view_sequence", ()) or ():
+                    if isinstance(item, Mapping):
+                        moonshot_active_sequences.append(dict(item))
+                for item in moonshot_summary.get("portfolio_available_actions", ()) or ():
+                    if isinstance(item, Mapping):
+                        moonshot_portfolio_available_actions.append(dict(item))
+                for item in moonshot_summary.get("portfolio_actions", ()) or ():
+                    if isinstance(item, Mapping):
+                        moonshot_portfolio_actions.append(dict(item))
+                for item in moonshot_summary.get("portfolio_rejected_actions", ()) or ():
+                    if isinstance(item, Mapping):
+                        moonshot_portfolio_rejected_actions.append(dict(item))
+                for item in moonshot_summary.get("portfolio_dependency_edges", ()) or ():
+                    if isinstance(item, Mapping):
+                        moonshot_portfolio_dependencies.append(dict(item))
+                for item in moonshot_summary.get("portfolio_execution_plan", ()) or ():
+                    if isinstance(item, Mapping):
+                        moonshot_portfolio_execution.append(dict(item))
+                for item in moonshot_summary.get("portfolio_risks", ()) or ():
+                    if isinstance(item, Mapping):
+                        moonshot_portfolio_risks.append(dict(item))
+            leaderboard_summaries.append(
+                {
+                    "path": _repo_path(leaderboard_path),
+                    "rows": len(rows),
+                    "error_rows": current_error_rows,
+                    "promotable_rows": current_promotable_rows,
+                    "parent_selectable_rows": current_parent_selectable_rows,
+                    "blocked_rows": current_blocked_rows,
+                    "duplicate_quality_group_count": int(
+                        leaderboard.get("duplicate_quality_group_count", 0) or 0
+                    ),
+                    "duplicate_quality_duplicate_row_count": int(
+                        leaderboard.get("duplicate_quality_duplicate_row_count", 0) or 0
+                    ),
+                    "moonshot_summary": moonshot_summary if isinstance(moonshot_summary, Mapping) else {},
+                }
+            )
+        generation_promotable_rows = _adaptive_promotable_count(adaptive_payload)
+        if generation_promotable_rows > promotable_rows:
+            promotable_rows = generation_promotable_rows
+        generation_parent_selectable_rows = _adaptive_parent_selectable_count(adaptive_payload)
+        if generation_parent_selectable_rows > parent_selectable_rows:
+            parent_selectable_rows = generation_parent_selectable_rows
+        stopped_reason = str(adaptive_payload.get("stopped_reason") or "")
+        failure_reasons: list[str] = []
+        if row_count > 0 and error_rows == row_count:
+            failure_reasons.append("all_error_rows")
+        if row_count > 0 and promotable_rows <= 0 and parent_selectable_rows <= 0:
+            failure_reasons.append("zero_promotable_candidates")
+        if stopped_reason == "no_promotable_parents" and parent_selectable_rows <= 0:
+            failure_reasons.append("no_promotable_parents")
+        summaries.append(
+            {
+                "path": _repo_path(summary_path),
+                "target": loop_root.name,
+                "stopped_reason": stopped_reason,
+                "generation_count": int(adaptive_payload.get("generation_count", 0) or 0),
+                "result_rows": row_count,
+                "error_rows": error_rows,
+                "blocked_rows": blocked_rows,
+                "promotable_rows": promotable_rows,
+                "parent_selectable_rows": parent_selectable_rows,
+                "duplicate_quality_group_count": duplicate_quality_group_count,
+                "duplicate_quality_duplicate_row_count": duplicate_quality_duplicate_row_count,
+                "moonshot_status_counts": dict(sorted(moonshot_status_counts.items())),
+                "moonshot_ran_count": int(moonshot_status_counts.get("ran", 0)),
+                "moonshot_error_count": int(moonshot_status_counts.get("error", 0)),
+                "moonshot_top_deltas": _top_moonshot_deltas(moonshot_top_deltas),
+                "moonshot_active_views": _top_moonshot_active_views(moonshot_active_views),
+                "moonshot_active_sequence": _top_moonshot_active_sequence(
+                    moonshot_active_sequences
+                ),
+                "moonshot_portfolio_available_actions": _top_moonshot_portfolio_actions(
+                    moonshot_portfolio_available_actions
+                ),
+                "moonshot_portfolio_actions": _top_moonshot_portfolio_actions(
+                    moonshot_portfolio_actions
+                ),
+                "moonshot_portfolio_rejected_actions": _top_moonshot_portfolio_actions(
+                    moonshot_portfolio_rejected_actions
+                ),
+                "moonshot_portfolio_dependencies": _top_moonshot_portfolio_dependencies(
+                    moonshot_portfolio_dependencies
+                ),
+                "moonshot_portfolio_execution": _top_moonshot_portfolio_execution(
+                    moonshot_portfolio_execution
+                ),
+                "moonshot_portfolio_risks": _top_moonshot_portfolio_risks(
+                    moonshot_portfolio_risks
+                ),
+                "required": True,
+                "failure_reasons": failure_reasons,
+                "leaderboards": leaderboard_summaries,
+            }
+        )
+    return summaries
+
+
+def _adaptive_promotable_count(adaptive_payload: Mapping[str, object]) -> int:
+    total = 0
+    generations = adaptive_payload.get("generations")
+    if not isinstance(generations, list):
+        return total
+    for generation in generations:
+        if not isinstance(generation, Mapping):
+            continue
+        health = generation.get("parent_health")
+        if not isinstance(health, Mapping):
+            continue
+        total += int(health.get("promotable_count", 0) or 0)
+    return total
+
+
+def _adaptive_parent_selectable_count(adaptive_payload: Mapping[str, object]) -> int:
+    total = 0
+    generations = adaptive_payload.get("generations")
+    if not isinstance(generations, list):
+        return total
+    for generation in generations:
+        if not isinstance(generation, Mapping):
+            continue
+        health = generation.get("parent_health")
+        if not isinstance(health, Mapping):
+            continue
+        total += int(
+            health.get(
+                "parent_selectable_count",
+                health.get("promotable_count", 0),
+            )
+            or 0
+        )
+    return total
+
+
+def _top_moonshot_deltas(items: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+    rows = [dict(item) for item in items]
+    rows.sort(
+        key=lambda item: abs(float(item.get("delta", item.get("expected_metric_delta", 0.0)) or 0.0)),
+        reverse=True,
+    )
+    return rows[:8]
+
+
+def _top_moonshot_active_views(items: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+    rows = [dict(item) for item in items]
+    rows.sort(
+        key=lambda item: float(item.get("expected_metric_delta", item.get("score", 0.0)) or 0.0),
+        reverse=True,
+    )
+    return rows[:8]
+
+
+def _top_moonshot_active_sequence(items: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+    rows = [dict(item) for item in items]
+    rows.sort(
+        key=lambda item: (
+            str(item.get("case_id", "")),
+            str(item.get("variant_id", "")),
+            int(item.get("order", 999) or 999),
+        )
+    )
+    return rows[:8]
+
+
+def _top_moonshot_portfolio_actions(items: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+    rows = [dict(item) for item in items]
+    rows.sort(
+        key=lambda item: float(item.get("score", 0.0) or 0.0),
+        reverse=True,
+    )
+    return rows[:8]
+
+
+def _top_moonshot_portfolio_dependencies(
+    items: Sequence[Mapping[str, object]]
+) -> list[dict[str, object]]:
+    rows = [dict(item) for item in items]
+    rows.sort(
+        key=lambda item: (
+            str(item.get("case_id", "")),
+            str(item.get("variant_id", "")),
+            str(item.get("before_kind", "")),
+            str(item.get("after_kind", "")),
+        )
+    )
+    return rows[:12]
+
+
+def _top_moonshot_portfolio_execution(
+    items: Sequence[Mapping[str, object]]
+) -> list[dict[str, object]]:
+    rows = [dict(item) for item in items]
+    rows.sort(
+        key=lambda item: (
+            str(item.get("case_id", "")),
+            str(item.get("variant_id", "")),
+            int(item.get("order", 999) or 999),
+            str(item.get("stage", "")),
+        )
+    )
+    return rows[:8]
+
+
+def _top_moonshot_portfolio_risks(items: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+    rows = [dict(item) for item in items]
+    rows.sort(
+        key=lambda item: float(item.get("risk", 0.0) or 0.0),
+        reverse=True,
+    )
+    return rows[:8]
+
+
+def _refinement_summary_lines(summaries: Sequence[dict]) -> list[str]:
+    lines = [
+        "| Target | Stopped | Rows | Errors | Promotable | Parent-selectable | Duplicate rows | Moonshots | Failure reasons |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
+    ]
+    for row in summaries:
+        reasons = ", ".join(str(reason) for reason in row.get("failure_reasons", ()))
+        lines.append(
+            "| "
+            f"`{row.get('target', '')}` | "
+            f"`{row.get('stopped_reason', '') or 'n/a'}` | "
+            f"{int(row.get('result_rows', 0) or 0)} | "
+            f"{int(row.get('error_rows', 0) or 0)} | "
+            f"{int(row.get('promotable_rows', 0) or 0)} | "
+            f"{int(row.get('parent_selectable_rows', 0) or 0)} | "
+            f"{int(row.get('duplicate_quality_duplicate_row_count', 0) or 0)} | "
+            f"{int(row.get('moonshot_ran_count', 0) or 0)} | "
+            f"{reasons or 'n/a'} |"
+        )
+    return lines
+
+
+def _moonshot_totals(summaries: Sequence[dict]) -> dict[str, object]:
+    counts: dict[str, int] = {}
+    deltas: list[Mapping[str, object]] = []
+    active_views: list[Mapping[str, object]] = []
+    active_sequence: list[Mapping[str, object]] = []
+    portfolio_available_actions: list[Mapping[str, object]] = []
+    portfolio_actions: list[Mapping[str, object]] = []
+    portfolio_rejected_actions: list[Mapping[str, object]] = []
+    portfolio_dependencies: list[Mapping[str, object]] = []
+    portfolio_execution: list[Mapping[str, object]] = []
+    portfolio_risks: list[Mapping[str, object]] = []
+    for row in summaries:
+        row_counts = row.get("moonshot_status_counts")
+        if isinstance(row_counts, Mapping):
+            for status, count in row_counts.items():
+                counts[str(status)] = counts.get(str(status), 0) + int(count or 0)
+        for item in row.get("moonshot_top_deltas", ()) or ():
+            if isinstance(item, Mapping):
+                deltas.append(item)
+        for item in row.get("moonshot_active_views", ()) or ():
+            if isinstance(item, Mapping):
+                active_views.append(item)
+        for item in row.get("moonshot_active_sequence", ()) or ():
+            if isinstance(item, Mapping):
+                active_sequence.append(item)
+        for item in row.get("moonshot_portfolio_available_actions", ()) or ():
+            if isinstance(item, Mapping):
+                portfolio_available_actions.append(item)
+        for item in row.get("moonshot_portfolio_actions", ()) or ():
+            if isinstance(item, Mapping):
+                portfolio_actions.append(item)
+        for item in row.get("moonshot_portfolio_rejected_actions", ()) or ():
+            if isinstance(item, Mapping):
+                portfolio_rejected_actions.append(item)
+        for item in row.get("moonshot_portfolio_dependencies", ()) or ():
+            if isinstance(item, Mapping):
+                portfolio_dependencies.append(item)
+        for item in row.get("moonshot_portfolio_execution", ()) or ():
+            if isinstance(item, Mapping):
+                portfolio_execution.append(item)
+        for item in row.get("moonshot_portfolio_risks", ()) or ():
+            if isinstance(item, Mapping):
+                portfolio_risks.append(item)
+    return {
+        "status_counts": dict(sorted(counts.items())),
+        "ran_count": int(counts.get("ran", 0)),
+        "error_count": int(counts.get("error", 0)),
+        "top_candidate_deltas": _top_moonshot_deltas(deltas),
+        "active_view_suggestions": _top_moonshot_active_views(active_views),
+        "active_view_sequence": _top_moonshot_active_sequence(active_sequence),
+        "portfolio_available_actions": _top_moonshot_portfolio_actions(
+            portfolio_available_actions
+        ),
+        "portfolio_actions": _top_moonshot_portfolio_actions(portfolio_actions),
+        "portfolio_rejected_actions": _top_moonshot_portfolio_actions(
+            portfolio_rejected_actions
+        ),
+        "portfolio_dependency_edges": _top_moonshot_portfolio_dependencies(
+            portfolio_dependencies
+        ),
+        "portfolio_execution_plan": _top_moonshot_portfolio_execution(
+            portfolio_execution
+        ),
+        "portfolio_risks": _top_moonshot_portfolio_risks(portfolio_risks),
+    }
+
+
+def _moonshot_summary_lines(summaries: Sequence[dict]) -> list[str]:
+    totals = _moonshot_totals(summaries)
+    counts = totals["status_counts"]
+    if not isinstance(counts, Mapping) or not counts:
+        return []
+    lines = [
+        "| Status | Count |",
+        "| --- | ---: |",
+    ]
+    for status, count in counts.items():
+        lines.append(f"| `{status}` | {int(count or 0)} |")
+    deltas = totals.get("top_candidate_deltas")
+    if isinstance(deltas, Sequence) and deltas:
+        lines.extend(["", "Top deltas:"])
+        for item in deltas[:5]:
+            if not isinstance(item, Mapping):
+                continue
+            lines.append(
+                "- "
+                f"`{item.get('experiment_id', '')}` "
+                f"{item.get('metric', 'delta')}={_fmt_metric(item.get('delta'))} "
+                f"for `{item.get('case_id', '')}:{item.get('variant_id', '')}`"
+            )
+    active_views = totals.get("active_view_suggestions")
+    if isinstance(active_views, Sequence) and active_views:
+        lines.extend(["", "Active-view suggestions:"])
+        for item in active_views[:5]:
+            if not isinstance(item, Mapping):
+                continue
+            lines.append(
+                "- "
+                f"`{item.get('view_id', '')}` "
+                f"delta={_fmt_metric(item.get('expected_metric_delta'))} "
+                f"for `{item.get('case_id', '')}:{item.get('variant_id', '')}`"
+            )
+    active_sequence = totals.get("active_view_sequence")
+    if isinstance(active_sequence, Sequence) and active_sequence:
+        lines.extend(["", "Active-view sequence:"])
+        for item in active_sequence[:5]:
+            if not isinstance(item, Mapping):
+                continue
+            lines.append(
+                "- "
+                f"{int(item.get('order', 0) or 0)}. `{item.get('view_id', '')}` "
+                f"marginal={_fmt_metric(item.get('marginal_expected_metric_delta'))} "
+                f"for `{item.get('case_id', '')}:{item.get('variant_id', '')}`"
+            )
+    portfolio_actions = totals.get("portfolio_actions")
+    available_actions = totals.get("portfolio_available_actions")
+    if isinstance(available_actions, Sequence) and available_actions:
+        lines.extend(["", "Available moonshot evidence:"])
+        for item in available_actions[:5]:
+            if not isinstance(item, Mapping):
+                continue
+            lines.append(
+                "- "
+                f"`{item.get('source', '')}:{item.get('kind', '')}` "
+                f"score={_fmt_metric(item.get('score'))} "
+                f"for `{item.get('case_id', '')}:{item.get('variant_id', '')}`"
+            )
+    if isinstance(portfolio_actions, Sequence) and portfolio_actions:
+        lines.extend(["", "Portfolio actions:"])
+        for item in portfolio_actions[:5]:
+            if not isinstance(item, Mapping):
+                continue
+            lines.append(
+                "- "
+                f"`{item.get('kind', '')}` "
+                f"score={_fmt_metric(item.get('score'))} "
+                f"risk={_fmt_metric(item.get('risk'))} "
+                f"for `{item.get('case_id', '')}:{item.get('variant_id', '')}`"
+            )
+    rejected_actions = totals.get("portfolio_rejected_actions")
+    if isinstance(rejected_actions, Sequence) and rejected_actions:
+        lines.extend(["", "Rejected portfolio actions:"])
+        for item in rejected_actions[:5]:
+            if not isinstance(item, Mapping):
+                continue
+            lines.append(
+                "- "
+                f"`{item.get('source', '')}:{item.get('kind', '')}` "
+                f"reason={item.get('rejection', 'lower_rank')} "
+                f"for `{item.get('case_id', '')}:{item.get('variant_id', '')}`"
+            )
+    dependencies = totals.get("portfolio_dependency_edges")
+    if isinstance(dependencies, Sequence) and dependencies:
+        lines.extend(["", "Portfolio dependencies:"])
+        for item in dependencies[:5]:
+            if not isinstance(item, Mapping):
+                continue
+            lines.append(
+                "- "
+                f"`{item.get('before_kind', '')}` -> `{item.get('after_kind', '')}` "
+                f"({item.get('type', 'dependency')}) "
+                f"for `{item.get('case_id', '')}:{item.get('variant_id', '')}`"
+            )
+    execution = totals.get("portfolio_execution_plan")
+    if isinstance(execution, Sequence) and execution:
+        lines.extend(["", "Portfolio execution stages:"])
+        for item in execution[:5]:
+            if not isinstance(item, Mapping):
+                continue
+            actions = item.get("actions")
+            action_count = len(actions) if isinstance(actions, Sequence) and not isinstance(actions, (str, bytes)) else 0
+            lines.append(
+                "- "
+                f"`{item.get('stage', '')}` actions={action_count} "
+                f"for `{item.get('case_id', '')}:{item.get('variant_id', '')}`"
+            )
+    risks = totals.get("portfolio_risks")
+    if isinstance(risks, Sequence) and risks:
+        lines.extend(["", "Portfolio risks:"])
+        for item in risks[:5]:
+            if not isinstance(item, Mapping):
+                continue
+            lines.append(
+                "- "
+                f"`{item.get('kind', '')}` level={item.get('level', 'n/a')} "
+                f"risk={_fmt_metric(item.get('risk'))} "
+                f"for `{item.get('case_id', '')}:{item.get('variant_id', '')}`"
+            )
+    return lines
+
+
+def _refinement_required_failures(summaries: Sequence[dict]) -> list[dict[str, object]]:
+    failures: list[dict[str, object]] = []
+    for row in summaries:
+        reasons = tuple(str(reason) for reason in row.get("failure_reasons", ()) if reason)
+        if not reasons or not bool(row.get("required", True)):
+            continue
+        failures.append(
+            {
+                "path": row.get("path", ""),
+                "target": row.get("target", ""),
+                "stopped_reason": row.get("stopped_reason", ""),
+                "result_rows": int(row.get("result_rows", 0) or 0),
+                "error_rows": int(row.get("error_rows", 0) or 0),
+                "promotable_rows": int(row.get("promotable_rows", 0) or 0),
+                "parent_selectable_rows": int(row.get("parent_selectable_rows", 0) or 0),
+                "failure_reasons": list(reasons),
+            }
+        )
+    return failures
+
+
 def _cache_summary_lines(stats: Sequence[dict]) -> list[str]:
     lines = [
-        "| Report | Hits | Misses | Writes | Sources |",
-        "| --- | ---: | ---: | ---: | --- |",
+        "| Report | Ref hits | Ref misses | Ref writes | Candidate hits | Candidate misses | Candidate writes | Local writes | Shared writes | Sources |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
     ]
     for row in stats:
         sources = row.get("candidate_cache_sources")
@@ -1759,20 +2582,35 @@ def _cache_summary_lines(stats: Sequence[dict]) -> list[str]:
             )
         else:
             source_text = ""
+        no_hit_reasons = row.get("candidate_cache_no_hit_reasons")
+        if isinstance(no_hit_reasons, dict) and no_hit_reasons:
+            source_text = (source_text + "; " if source_text else "") + "no-hit " + ", ".join(
+                f"{key}:{value}" for key, value in sorted(no_hit_reasons.items())
+            )
         lines.append(
             "| "
             f"`{row.get('_cache_stats_json', '')}` | "
+            f"{int(row.get('reference_cache_hits', 0) or 0)} | "
+            f"{int(row.get('reference_cache_misses', 0) or 0)} | "
+            f"{int(row.get('reference_cache_writes', 0) or 0)} | "
             f"{int(row.get('candidate_cache_hits', 0) or 0)} | "
             f"{int(row.get('candidate_cache_misses', 0) or 0)} | "
             f"{int(row.get('candidate_cache_writes', 0) or 0)} | "
+            f"{int(row.get('candidate_cache_local_resume_writes', 0) or 0)} | "
+            f"{int(row.get('candidate_cache_shared_writes', 0) or 0)} | "
             f"{source_text or 'n/a'} |"
         )
     totals = _cache_totals(stats)
     lines.append(
         "| **total** | "
+        f"{totals['reference_cache_hits']} | "
+        f"{totals['reference_cache_misses']} | "
+        f"{totals['reference_cache_writes']} | "
         f"{totals['candidate_cache_hits']} | "
         f"{totals['candidate_cache_misses']} | "
         f"{totals['candidate_cache_writes']} | "
+        f"{totals['candidate_cache_local_resume_writes']} | "
+        f"{totals['candidate_cache_shared_writes']} | "
         f"{totals['candidate_cache_sources'] or 'n/a'} |"
     )
     return lines
@@ -1780,11 +2618,17 @@ def _cache_summary_lines(stats: Sequence[dict]) -> list[str]:
 
 def _cache_totals(stats: Sequence[dict]) -> dict[str, object]:
     totals = {
+        "reference_cache_hits": 0,
+        "reference_cache_misses": 0,
+        "reference_cache_writes": 0,
         "candidate_cache_hits": 0,
         "candidate_cache_misses": 0,
         "candidate_cache_writes": 0,
+        "candidate_cache_local_resume_writes": 0,
+        "candidate_cache_shared_writes": 0,
     }
     sources: dict[str, int] = {}
+    no_hit_reasons: dict[str, int] = {}
     for row in stats:
         for key in totals:
             totals[key] += int(row.get(key, 0) or 0)
@@ -1792,10 +2636,50 @@ def _cache_totals(stats: Sequence[dict]) -> dict[str, object]:
         if isinstance(row_sources, dict):
             for source, count in row_sources.items():
                 sources[str(source)] = sources.get(str(source), 0) + int(count or 0)
+        row_no_hits = row.get("candidate_cache_no_hit_reasons")
+        if isinstance(row_no_hits, dict):
+            for reason, count in row_no_hits.items():
+                no_hit_reasons[str(reason)] = no_hit_reasons.get(str(reason), 0) + int(count or 0)
     return {
         **totals,
         "candidate_cache_sources": dict(sorted(sources.items())),
+        "candidate_cache_no_hit_reasons": dict(sorted(no_hit_reasons.items())),
     }
+
+
+def _cache_health_warnings(
+    stats: Sequence[dict],
+    refinement_summaries: Sequence[dict],
+) -> list[dict[str, object]]:
+    if not any(bool(row.get("candidate_cache_enabled")) for row in stats):
+        return []
+    duplicate_rows = sum(
+        int(row.get("duplicate_quality_duplicate_row_count", 0) or 0)
+        for row in refinement_summaries
+    )
+    if duplicate_rows <= 0:
+        return []
+    totals = _cache_totals(stats)
+    sources = totals.get("candidate_cache_sources")
+    shared_hits = (
+        int(sources.get("shared_cache", 0) or 0)
+        if isinstance(sources, Mapping)
+        else 0
+    )
+    if shared_hits > 0:
+        return []
+    return [
+        {
+            "code": "candidate_cache_no_shared_hits_for_duplicates",
+            "duplicate_rows": duplicate_rows,
+            "candidate_cache_hits": totals["candidate_cache_hits"],
+            "candidate_cache_misses": totals["candidate_cache_misses"],
+            "message": (
+                "candidate cache is enabled and duplicate-quality rows exist, "
+                "but no shared-cache hits were recorded"
+            ),
+        }
+    ]
 
 
 def _budget_summary_lines(reports: Sequence[dict]) -> list[str]:
@@ -1833,8 +2717,113 @@ def _failed_required_check_count(report: dict) -> int:
     return failed
 
 
+def _failed_matrix_rows(rows: Sequence[dict]) -> list[dict[str, object]]:
+    failed: list[dict[str, object]] = []
+    for row in rows:
+        if row.get("passed"):
+            continue
+        metrics = row.get("metrics") if isinstance(row.get("metrics"), Mapping) else {}
+        render_min, render_source = _first_numeric_metric(
+            metrics,
+            (
+                ("render.min_view_iou", "render"),
+                ("silhouette.min_view_iou", "silhouette"),
+            ),
+        )
+        backend_min, _backend_source = _first_numeric_metric(
+            metrics,
+            (("backend.area_iou_min", "backend"),),
+        )
+        failed.append(
+            {
+                "suite": row.get("suite", ""),
+                "case": row.get("case", row.get("case_id", row.get("shape_id", ""))),
+                "shape_id": row.get("shape_id", ""),
+                "mode": row.get("mode", ""),
+                "status": row.get("status", ""),
+                "backend_min_iou": backend_min,
+                "render_min_iou": render_min,
+                "render_metric_source": render_source or "n/a",
+                "front_iou": _matrix_view_iou(metrics, "front"),
+                "side_iou": _matrix_view_iou(metrics, "side"),
+                "top_iou": _matrix_view_iou(metrics, "top"),
+                "failure_reason": _matrix_failure_reason(row),
+                "result_json": row.get("result_json", ""),
+                "matrix_json": row.get("_matrix_json", ""),
+            }
+        )
+    return failed
+
+
+def _failed_matrix_row_lines(rows: Sequence[Mapping[str, object]]) -> list[str]:
+    lines = [
+        "| Suite | Case | Mode | Status | Backend min IoU | Render min IoU | Front | Side | Top | Reason | Result |",
+        "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |",
+    ]
+    for row in rows:
+        result = str(row.get("result_json") or "")
+        lines.append(
+            "| "
+            f"`{row.get('suite', '')}` | "
+            f"`{row.get('case') or row.get('shape_id') or ''}` | "
+            f"`{row.get('mode', '')}` | "
+            f"`{row.get('status', '') or 'fail'}` | "
+            f"{_fmt_metric(row.get('backend_min_iou'))} | "
+            f"{_fmt_metric(row.get('render_min_iou'))} "
+            f"({row.get('render_metric_source', 'n/a')}) | "
+            f"{_fmt_metric(row.get('front_iou'))} | "
+            f"{_fmt_metric(row.get('side_iou'))} | "
+            f"{_fmt_metric(row.get('top_iou'))} | "
+            f"{_escape_table_text(str(row.get('failure_reason') or 'n/a'))} | "
+            f"{f'`{result}`' if result else 'n/a'} |"
+        )
+    return lines
+
+
+def _matrix_view_iou(metrics: Mapping[str, object], view: str) -> float | None:
+    value, _source = _first_numeric_metric(
+        metrics,
+        (
+            (f"render.per_view.{view}.area_iou", "render"),
+            (f"silhouette.per_view.{view}.area_iou", "silhouette"),
+            (f"{view}_iou", "legacy"),
+        ),
+    )
+    return value
+
+
+def _matrix_failure_reason(row: Mapping[str, object]) -> str:
+    for key in ("message", "details", "error"):
+        value = row.get(key)
+        if value:
+            return str(value)
+    bundle = row.get("evaluation_bundle")
+    if isinstance(bundle, Mapping):
+        errors = bundle.get("errors")
+        if isinstance(errors, Sequence) and not isinstance(errors, (str, bytes)):
+            return "; ".join(str(item) for item in errors if item)
+        failures = bundle.get("failures")
+        if isinstance(failures, Sequence) and not isinstance(failures, (str, bytes)):
+            reasons: list[str] = []
+            for failure in failures:
+                if not isinstance(failure, Mapping):
+                    continue
+                causes = failure.get("likely_causes")
+                if isinstance(causes, Sequence) and not isinstance(causes, (str, bytes)):
+                    reasons.extend(str(cause) for cause in causes if cause)
+                elif failure.get("code"):
+                    reasons.append(str(failure["code"]))
+            if reasons:
+                return "; ".join(reasons)
+    return "matrix row failed"
+
+
+def _escape_table_text(text: str) -> str:
+    return text.replace("|", "\\|").replace("\n", " ")
+
+
 def _matrix_summary_lines(rows: Sequence[dict]) -> list[str]:
-    by_mode: dict[str, dict[str, float]] = {}
+    by_mode: dict[str, dict[str, object]] = {}
     for row in rows:
         mode = str(row.get("mode") or "unknown")
         metrics = row.get("metrics") if isinstance(row.get("metrics"), dict) else {}
@@ -1849,23 +2838,50 @@ def _matrix_summary_lines(rows: Sequence[dict]) -> list[str]:
                 "boundary_count": 0.0,
                 "sdf_sum": 0.0,
                 "sdf_count": 0.0,
+                "sources": {},
             },
         )
-        bucket["total"] += 1.0
+        bucket["total"] = float(bucket["total"]) + 1.0
         if row.get("passed"):
-            bucket["passed"] += 1.0
-        _accumulate_metric(bucket, metrics, "render.min_view_iou", "min_iou")
-        _accumulate_metric(bucket, metrics, "render.boundary_iou_mean", "boundary")
-        _accumulate_metric(bucket, metrics, "render.signed_distance_loss_mean", "sdf")
+            bucket["passed"] = float(bucket["passed"]) + 1.0
+        _accumulate_metric(
+            bucket,
+            metrics,
+            (
+                ("render.min_view_iou", "render"),
+                ("silhouette.min_view_iou", "silhouette"),
+                ("backend.area_iou_min", "backend"),
+            ),
+            "min_iou",
+        )
+        _accumulate_metric(
+            bucket,
+            metrics,
+            (
+                ("render.boundary_iou_mean", "render"),
+                ("silhouette.mean_boundary_iou", "silhouette"),
+                ("backend.boundary_iou_mean", "backend"),
+            ),
+            "boundary",
+        )
+        _accumulate_metric(
+            bucket,
+            metrics,
+            (
+                ("render.signed_distance_loss_mean", "render"),
+                ("silhouette.mean_signed_distance_loss", "silhouette"),
+            ),
+            "sdf",
+        )
 
     lines = [
-        "| Mode | Passed | Total | Avg min IoU | Avg Boundary IoU | Avg SDF Loss |",
-        "| --- | ---: | ---: | ---: | ---: | ---: |",
+        "| Mode | Passed | Total | Avg min IoU | Avg Boundary IoU | Avg SDF Loss | Metric sources |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | --- |",
     ]
     ranked = sorted(
         by_mode.items(),
         key=lambda item: (
-            item[1]["passed"] / max(item[1]["total"], 1.0),
+            float(item[1]["passed"]) / max(float(item[1]["total"]), 1.0),
             _sort_metric(_average(item[1], "min_iou")),
             _sort_metric(_average(item[1], "boundary")),
             -_sort_metric(_average(item[1], "sdf"), missing=1e9),
@@ -1880,55 +2896,74 @@ def _matrix_summary_lines(rows: Sequence[dict]) -> list[str]:
             f"{int(bucket['total'])} | "
             f"{_fmt_metric(_average(bucket, 'min_iou'))} | "
             f"{_fmt_metric(_average(bucket, 'boundary'))} | "
-            f"{_fmt_metric(_average(bucket, 'sdf'))} |"
+            f"{_fmt_metric(_average(bucket, 'sdf'))} | "
+            f"{_metric_sources_text(bucket)} |"
         )
     return lines
 
 
 def _accumulate_metric(
-    bucket: dict[str, float],
+    bucket: dict[str, object],
     metrics: dict,
-    metric_name: str,
+    metric_paths: Sequence[tuple[str, str]],
     prefix: str,
 ) -> None:
-    value = _lookup_metric(metrics, metric_name)
-    if isinstance(value, (int, float)):
-        bucket[f"{prefix}_sum"] += float(value)
-        bucket[f"{prefix}_count"] += 1.0
-
-
-def _lookup_metric(metrics: dict, metric_name: str) -> object:
-    if metric_name in metrics:
-        return metrics[metric_name]
-    current: object = metrics
-    for part in metric_name.split("."):
-        if isinstance(current, dict) and part in current:
-            current = current[part]
-        else:
-            return None
-    return current
+    value, source = _first_numeric_metric(metrics, metric_paths)
+    if value is None:
+        return
+    bucket[f"{prefix}_sum"] = float(bucket.get(f"{prefix}_sum", 0.0)) + value
+    bucket[f"{prefix}_count"] = float(bucket.get(f"{prefix}_count", 0.0)) + 1.0
+    sources = bucket.setdefault("sources", {})
+    if isinstance(sources, dict):
+        key = f"{prefix}:{source}"
+        sources[key] = int(sources.get(key, 0)) + 1
 
 
 def _average(
-    bucket: dict[str, float],
+    bucket: Mapping[str, object],
     prefix: str,
     *,
     missing: float | None = None,
 ) -> float | None:
-    count = bucket.get(f"{prefix}_count", 0.0)
+    count = float(bucket.get(f"{prefix}_count", 0.0) or 0.0)
     if count <= 0:
         return missing
-    return bucket.get(f"{prefix}_sum", 0.0) / count
+    return float(bucket.get(f"{prefix}_sum", 0.0) or 0.0) / count
+
+
+def _first_numeric_metric(
+    metrics: Mapping[str, object],
+    metric_paths: Sequence[tuple[str, str]],
+) -> tuple[float | None, str]:
+    for path, source in metric_paths:
+        value = get_metric_path(metrics, path)
+        if isinstance(value, bool):
+            continue
+        if isinstance(value, (int, float)):
+            return float(value), source
+    return None, ""
+
+
+def _metric_sources_text(bucket: Mapping[str, object]) -> str:
+    sources = bucket.get("sources")
+    if not isinstance(sources, Mapping) or not sources:
+        return "n/a"
+    return ", ".join(f"{key}:{value}" for key, value in sorted(sources.items()))
 
 
 def _sort_metric(value: float | None, *, missing: float = 0.0) -> float:
     return missing if value is None else value
 
 
-def _fmt_metric(value: float | None) -> str:
+def _fmt_metric(value: object) -> str:
     if value is None or value == 1e9:
         return "n/a"
-    return f"{value:.4f}"
+    if isinstance(value, bool):
+        return "n/a"
+    try:
+        return f"{float(value):.4f}"
+    except (TypeError, ValueError):
+        return "n/a"
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -1948,14 +2983,6 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--blender-exe", default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--preflight-only", action="store_true")
-    parser.add_argument(
-        "--yes",
-        action="store_true",
-        help=(
-            "Acknowledge and run the opt-in full-nightly workload. "
-            "Short profiles do not require this flag."
-        ),
-    )
     parser.add_argument("--clean-first", action="store_true")
     parser.add_argument("--stop-on-failure", action="store_true")
     parser.add_argument("--serial", action="store_true")
@@ -2009,6 +3036,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--refinement-generations", type=int, default=None)
     parser.add_argument("--refinement-parent-top-k", type=int, default=None)
     parser.add_argument("--refinement-children-per-parent", type=int, default=None)
+    parser.add_argument(
+        "--moonshot-sidecars",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    parser.add_argument("--moonshot-experiments", default=None)
     parser.add_argument("--no-synthetic-matrix", action="store_true")
     parser.add_argument("--no-lpips-novel", action="store_true")
     parser.add_argument("--no-refinement-loop", action="store_true")
@@ -2016,6 +3049,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    _configure_stdio_encoding()
     args = parse_args(argv)
     profile = _profile(args.profile)
     try:
@@ -2027,15 +3061,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("ERROR: no phases selected", file=sys.stderr)
         return 2
     full_nightly = profile.name == "full-nightly"
-    if full_nightly and not args.dry_run and not args.preflight_only and not args.yes:
-        _print_plan(run_root, phases)
-        print(
-            "\nERROR: full-nightly is the broad opt-in workload. "
-            "Run with --dry-run or --preflight-only first, then add --yes "
-            "when you are ready to spend the full runtime.",
-            file=sys.stderr,
-        )
-        return 2
     resume = _bool_default(args.resume, full_nightly)
     max_workers = args.max_workers if args.max_workers is not None else (4 if full_nightly else 1)
     max_blender_workers = (

@@ -19,6 +19,7 @@ from reconstruction.mesh_io import (
     write_primitive_set,
 )
 from reconstruction.point_cloud import target_surface_points
+from reconstruction.target_signals import collect_target_signals, compact_signal_summary
 from reconstruction.types import CandidateMetrics, CandidateResult
 
 try:
@@ -42,7 +43,6 @@ from .scoring import (
     _per_view_scores,
     _topology_source,
 )
-from .signals import _collect_target_signals, _compact_signal_summary
 
 
 def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
@@ -66,7 +66,13 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
     requested_primitive_count = int(normalized["primitive_count"])
     requested_point_count = int(normalized["target_point_count"])
 
-    signals = _collect_target_signals(target)
+    signals = collect_target_signals(
+        target,
+        include_profile_rows=False,
+        include_surface_density=True,
+        include_constraint_kinds=True,
+        include_topology_details=True,
+    )
     surface_signal = signals["surface"]
     profile_signal = signals["profile"]
     constraint_signal = signals["constraints"]
@@ -166,7 +172,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             primitives,
             metadata={
                 "family": family,
-                "signal_summary": _compact_signal_summary(signals),
+                "signal_summary": compact_signal_summary(signals),
                 "point_meta": point_meta,
                 "requested_primitive_count": requested_primitive_count,
                 "requested_point_count": requested_point_count,

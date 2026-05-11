@@ -7,7 +7,12 @@ import unittest
 from primitives.grammar import default_shape_program_grammar, validate_grammar
 from primitives.program_search import search_shape_program_candidates
 from primitives.shape_dsl import program_from_dsl, program_to_dsl
-from primitives.shape_program import ShapeNode, ShapeProgram, validate_shape_program
+from primitives.shape_program import (
+    ShapeConstraint,
+    ShapeNode,
+    ShapeProgram,
+    validate_shape_program,
+)
 from reconstruction.backends.shape_program import build_shape_program_from_target
 from reconstruction.types import (
     Bounds3D,
@@ -35,6 +40,12 @@ def _seed_program() -> ShapeProgram:
                     "band_count": 3,
                     "preserves_multiple_intervals": True,
                 },
+            ),
+        ),
+        constraints=(
+            ShapeConstraint(
+                kind="profile_anchor",
+                target_nodes=("root_profile_00",),
             ),
         ),
         metadata={"bounds": {"min_x": -0.5, "max_x": 0.5}},
@@ -67,6 +78,8 @@ class ShapeProgramGrammarTests(unittest.TestCase):
         self.assertEqual(result.selected, result.candidates[0])
         self.assertEqual(validate_shape_program(result.selected.program), ())
         self.assertIn("dsl", result.selected.to_dict())
+        for candidate in result.candidates:
+            self.assertEqual(validate_shape_program(candidate.program), ())
 
     def test_backend_records_grammar_search_and_dsl(self) -> None:
         bands = (

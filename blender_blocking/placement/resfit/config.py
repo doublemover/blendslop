@@ -6,6 +6,21 @@ from typing import Any, Callable, Mapping, Sequence
 
 import numpy as np
 
+try:
+    from blender_blocking.config_models.coercion import (
+        coerce_float as _coerce_float,
+        coerce_int as _coerce_int,
+        coerce_optional_float as _shared_coerce_optional_float,
+        coerce_optional_int as _shared_coerce_optional_int,
+    )
+except ImportError:  # pragma: no cover - script-style imports
+    from config_models.coercion import (
+        coerce_float as _coerce_float,
+        coerce_int as _coerce_int,
+        coerce_optional_float as _shared_coerce_optional_float,
+        coerce_optional_int as _shared_coerce_optional_int,
+    )
+
 from ..resfit_initialization import (
     PrimitiveInitializationConfig,
     initialize_ellipsoids_from_points,
@@ -115,51 +130,6 @@ def _pipeline_config_summary(config: ResFitPipelineConfig) -> Mapping[str, Any]:
     }
 
 
-def _coerce_int(
-    value: Any,
-    name: str,
-    *,
-    default: int,
-    min_value: int,
-    max_value: int,
-    errors: list[str],
-) -> int:
-    try:
-        parsed = int(value)
-    except (OverflowError, TypeError, ValueError):
-        errors.append(f"{name} must be an integer, got {type(value)!r}")
-        return default
-    if parsed < min_value:
-        errors.append(f"{name} must be >= {min_value}, got {parsed}")
-    if parsed > max_value:
-        errors.append(f"{name} must be <= {max_value}, got {parsed}")
-    return parsed
-
-
-def _coerce_float(
-    value: Any,
-    name: str,
-    *,
-    default: float,
-    min_value: float,
-    max_value: float,
-    errors: list[str],
-) -> float:
-    try:
-        parsed = float(value)
-    except (TypeError, ValueError):
-        errors.append(f"{name} must be a float, got {type(value)!r}")
-        return default
-    if not np.isfinite(parsed):
-        errors.append(f"{name} must be finite, got {parsed}")
-        return default
-    if parsed < min_value:
-        errors.append(f"{name} must be >= {min_value}, got {parsed}")
-    if parsed > max_value:
-        errors.append(f"{name} must be <= {max_value}, got {parsed}")
-    return parsed
-
-
 def _coerce_optional_int(
     value: Any,
     name: str,
@@ -168,15 +138,13 @@ def _coerce_optional_int(
     max_value: int,
     errors: list[str],
 ) -> int | None:
-    if value is None:
-        return None
-    return _coerce_int(
+    return _shared_coerce_optional_int(
         value,
         name,
+        errors,
         default=min_value,
         min_value=min_value,
         max_value=max_value,
-        errors=errors,
     )
 
 
@@ -188,15 +156,13 @@ def _coerce_optional_float(
     max_value: float,
     errors: list[str],
 ) -> float | None:
-    if value is None:
-        return None
-    return _coerce_float(
+    return _shared_coerce_optional_float(
         value,
         name,
+        errors,
         default=min_value,
         min_value=min_value,
         max_value=max_value,
-        errors=errors,
     )
 
 

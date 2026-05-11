@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field, is_dataclass
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Iterable, Literal, Mapping
+
+try:
+    from blender_blocking.utils.json_io import json_safe
+except ImportError:  # pragma: no cover - script-style imports
+    from utils.json_io import json_safe
 
 
 GENERATOR_VERSION = "synthetic-shape-factory-v1"
@@ -178,22 +183,6 @@ DEFAULT_VIEWS: tuple[SyntheticViewSpec, ...] = (
     SyntheticViewSpec("side", "orthographic", azimuth_deg=90.0, elevation_deg=0.0),
     SyntheticViewSpec("top", "orthographic", azimuth_deg=0.0, elevation_deg=90.0),
 )
-
-
-def json_safe(value: Any) -> Any:
-    if is_dataclass(value):
-        return json_safe(asdict(value))
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, Path):
-        return value.as_posix()
-    if isinstance(value, Mapping):
-        return {str(key): json_safe(val) for key, val in sorted(value.items(), key=lambda item: str(item[0]))}
-    if isinstance(value, tuple):
-        return [json_safe(item) for item in value]
-    if isinstance(value, list):
-        return [json_safe(item) for item in value]
-    return value
 
 
 def stable_shape_id(kind: str, seed: int, variant: str | None = None) -> str:

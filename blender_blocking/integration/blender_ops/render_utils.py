@@ -27,6 +27,7 @@ from integration.blender_ops.silhouette_render import (
     render_silhouette_frame,
     set_camera_orbit,
     silhouette_session,
+    _suppress_blender_render_stdout,
 )
 
 
@@ -574,4 +575,5 @@ def save_render(output_path: str) -> None:
         return
 
     bpy.context.scene.render.filepath = output_path
-    bpy.ops.render.render(write_still=True)
+    with _suppress_blender_render_stdout():
+        bpy.ops.render.render(write_still=True)

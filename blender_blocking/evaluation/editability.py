@@ -6,6 +6,10 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping
 
 from .schemas import json_safe
+try:
+    from blender_blocking.metrics.values import float_or as _float
+except ImportError:  # pragma: no cover - script-style imports
+    from metrics.values import float_or as _float
 
 
 @dataclass(frozen=True)
@@ -137,13 +141,6 @@ def report_from_mapping(payload: Mapping[str, Any]) -> EditabilityReport:
         if isinstance(payload.get("metadata", {}), Mapping)
         else {},
     )
-
-
-def _float(value: Any, default: float = 0.0) -> float:
-    try:
-        return float(default if value is None else value)
-    except (TypeError, ValueError):
-        return default
 
 
 def _clamped(value: Any, default: float = 0.0) -> float:

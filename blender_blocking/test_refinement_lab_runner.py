@@ -24,7 +24,9 @@ try:
         InProcessBlenderRunner,
         RunOptions,
         _apply_variant_to_config,
+        _copy_reference_views,
         _metrics_from_payload,
+        _require_reference_mapping,
         _result_from_payload,
         _variant_command,
     )
@@ -47,7 +49,9 @@ except ModuleNotFoundError:  # pragma: no cover - package unittest path
         InProcessBlenderRunner,
         RunOptions,
         _apply_variant_to_config,
+        _copy_reference_views,
         _metrics_from_payload,
+        _require_reference_mapping,
         _result_from_payload,
         _variant_command,
     )
@@ -185,6 +189,79 @@ class RefinementLabRunnerTests(unittest.TestCase):
         self.assertEqual(metrics["editability_score"], 0.81)
         self.assertEqual(metrics["silhouette_min_view_iou"], 0.74)
 
+    def test_metrics_from_payload_reads_top_level_ensemble_selection(self) -> None:
+        payload = {
+            "validation_mode": "backend-status",
+            "selected": {
+                "status": "success",
+                "backend_name": "visual_hull_voxel",
+                "metric_result": {
+                    "area_iou_mean": 0.99,
+                    "area_iou_min": 0.97,
+                    "boundary_iou_mean": 0.88,
+                    "topology_score": 1.0,
+                    "editability_score": 0.62,
+                    "per_view": {
+                        "front": {"area_iou": 0.98, "boundary_iou": 0.9},
+                        "side": {"area_iou": 0.97, "boundary_iou": 0.88},
+                        "top": {"area_iou": 0.99, "boundary_iou": 0.91},
+                    },
+                },
+            },
+            "candidates": [],
+        }
+
+        metrics = _metrics_from_payload(payload)
+
+        self.assertEqual(metrics["backend"]["area_iou_min"], 0.97)
+        self.assertEqual(metrics["backend"]["per_view"]["front"]["area_iou"], 0.98)
+        self.assertEqual(metrics["topology"]["score"], 1.0)
+        self.assertEqual(metrics["editability"]["qa_score"], 0.62)
+        self.assertNotIn("render", metrics)
+
+    def test_metrics_from_payload_maps_shape_program_render_qa_to_render_namespace(self) -> None:
+        payload = {
+            "validation_mode": "backend-status",
+            "backend_result": {
+                "status": "success",
+                "backend_name": "shape_program",
+                "metric_result": {
+                    "extras": {
+                        "render_qa": {
+                            "status": "complete",
+                            "missing_required_metrics": False,
+                            "per_view": {
+                                "front": {
+                                    "area_iou": 0.91,
+                                    "boundary_iou": 0.62,
+                                    "signed_distance_loss": 0.03,
+                                },
+                                "side": {
+                                    "area_iou": 0.93,
+                                    "boundary_iou": 0.64,
+                                    "signed_distance_loss": 0.02,
+                                },
+                                "top": {
+                                    "area_iou": 0.90,
+                                    "boundary_iou": 0.60,
+                                    "signed_distance_loss": 0.04,
+                                },
+                            },
+                        }
+                    }
+                },
+            },
+        }
+
+        metrics = _metrics_from_payload(payload)
+
+        self.assertEqual(metrics["render"]["qa"]["status"], "complete")
+        self.assertFalse(metrics["render"]["qa"]["missing_required_metrics"])
+        self.assertAlmostEqual(metrics["render"]["per_view"]["front"]["area_iou"], 0.91)
+        self.assertAlmostEqual(metrics["render"]["min_view_iou"], 0.90)
+        self.assertAlmostEqual(metrics["render"]["boundary_iou_mean"], 0.62)
+        self.assertAlmostEqual(metrics["render"]["signed_distance_loss_mean"], 0.03)
+
     def test_runner_resolves_relative_run_root(self) -> None:
         case = ExperimentCase(
             "case",
@@ -212,6 +289,35 @@ class RefinementLabRunnerTests(unittest.TestCase):
         runner = InProcessBlenderRunner(plan=plan, options=RunOptions())
 
         self.assertTrue(runner.run_root.is_absolute())
+
+    def test_copy_reference_views_reports_missing_required_views(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "cache"
+            output = root / "run" / "ref"
+            source.mkdir()
+            (source / "side.png").write_bytes(b"side")
+            (source / "top.png").write_bytes(b"top")
+
+            rendered, error = _copy_reference_views(source, output)
+
+            self.assertEqual(set(rendered), {"side", "top"})
+            self.assertEqual(error, "reference_generation_missing_views:front")
+            self.assertFalse((output / "front.png").exists())
+
+    def test_require_reference_mapping_rejects_missing_or_empty_view_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            front = root / "front.png"
+            side = root / "side.png"
+            front.write_bytes(b"front")
+            side.write_bytes(b"side")
+
+            with self.assertRaisesRegex(RuntimeError, "top"):
+                _require_reference_mapping(
+                    {"front": front, "side": side, "top": root / "missing.png"},
+                    context="test",
+                )
 
     def test_candidate_state_resume_reuses_completed_result(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -362,7 +468,107 @@ class RefinementLabRunnerTests(unittest.TestCase):
             stats = json.loads(stats_path.read_text(encoding="utf-8"))
             self.assertEqual(stats["candidate_cache_hits"], 1)
             self.assertEqual(stats["candidate_cache_writes"], 1)
+            self.assertEqual(stats["reference_cache_hits"], 0)
+            self.assertEqual(stats["reference_cache_misses"], 0)
+            self.assertEqual(stats["reference_cache_writes"], 0)
+            self.assertEqual(stats["cache_root"], (root / "cache").resolve(strict=False).as_posix())
             self.assertEqual(stats["candidate_cache_sources"]["shared_cache"], 1)
+            self.assertEqual(stats["candidate_cache_shared_writes"], 1)
+
+    def test_candidate_cache_key_ignores_run_local_paths_and_adaptive_parent_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            refs_a = root / "run-a" / "refs"
+            refs_b = root / "run-b" / "refs"
+            refs_a.mkdir(parents=True)
+            refs_b.mkdir(parents=True)
+            reference_paths_a = {}
+            reference_paths_b = {}
+            for view in ("front", "side", "top"):
+                for refs, target in ((refs_a, reference_paths_a), (refs_b, reference_paths_b)):
+                    path = refs / f"{view}.png"
+                    path.write_bytes(f"{view}-same-mask".encode("utf-8"))
+                    target[view] = path
+            case_a = ExperimentCase(
+                "case",
+                "default-vase",
+                "builtin_sample",
+                reference_paths=reference_paths_a,
+            )
+            case_b = ExperimentCase(
+                "case",
+                "default-vase",
+                "builtin_sample",
+                reference_paths=reference_paths_b,
+            )
+            variant_a = ExperimentVariant(
+                "g01_parent_a_boundary",
+                "child",
+                "profile_loft",
+                parameters={
+                    "profile_samples": 64,
+                    "adaptive_loop_generation": 1,
+                    "adaptive_loop_parent_result": "parent-a",
+                    "adaptive_loop_parent_mode": "profile_loft",
+                },
+            )
+            variant_b = ExperimentVariant(
+                "g01_parent_b_boundary",
+                "child",
+                "profile_loft",
+                parameters={
+                    "profile_samples": 64,
+                    "adaptive_loop_generation": 1,
+                    "adaptive_loop_parent_result": "parent-b",
+                    "adaptive_loop_parent_mode": "profile_loft",
+                },
+            )
+            plan = ExperimentPlan(
+                plan_id="p",
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="grid",
+                objective="quality_win",
+                output_root=root / "run-a",
+                run_id="run",
+                cases=(case_a,),
+                variants=(variant_a,),
+            )
+            runner = InProcessBlenderRunner(
+                plan=plan,
+                options=RunOptions(
+                    cache_root=root / "cache",
+                    candidate_cache=True,
+                    html_report=False,
+                    write_lineage=False,
+                ),
+            )
+            result_json = runner._case_variant_dir(case_a, variant_a) / "result.json"
+            result_json.parent.mkdir(parents=True, exist_ok=True)
+            result_json.write_text('{"passed": true}\n', encoding="utf-8")
+            result = ExperimentResult(
+                run_id="run",
+                case_id="case",
+                variant_id=variant_a.variant_id,
+                mode="profile_loft",
+                status="pass",
+                exit_code=0,
+                started_utc="2026-01-01T00:00:00Z",
+                finished_utc="2026-01-01T00:00:01Z",
+                elapsed_s=1.0,
+                result_json=result_json,
+                reference_paths=reference_paths_a,
+                metrics={"render": {"min_view_iou": 0.9}},
+            )
+
+            runner._write_candidate_state(case_a, variant_a, reference_paths_a, result)
+            reused = runner._load_reusable_candidate(case_b, variant_b, reference_paths_b)
+
+            self.assertIsNotNone(reused)
+            assert reused is not None
+            self.assertEqual(reused.variant_id, variant_b.variant_id)
+            self.assertEqual(reused.metrics["cache"]["source"], "shared_cache")
+            self.assertEqual(runner.cache_stats["candidate_cache_hits"], 1)
 
     def test_diagnostic_only_variant_is_recorded_in_result_metrics(self) -> None:
         reference_paths = {

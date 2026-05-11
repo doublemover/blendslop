@@ -8,8 +8,20 @@ import numpy as np
 
 try:
     from utils.optional_deps import optional_policy_decision, probe_dependency
+    from config_models.coercion import (
+        coerce_float,
+        coerce_int,
+        coerce_optional_float,
+        coerce_optional_int,
+    )
 except Exception:  # pragma: no cover
     from ...utils.optional_deps import optional_policy_decision, probe_dependency
+    from ...config_models.coercion import (
+        coerce_float,
+        coerce_int,
+        coerce_optional_float,
+        coerce_optional_int,
+    )
 
 try:
     from primitives.analytic_primitives import (
@@ -87,21 +99,15 @@ def _coerce_float(
     min_value: float | None = None,
     max_value: float | None = None,
 ) -> float | None:
-    try:
-        casted = float(value)
-    except (TypeError, ValueError):
-        errors.append(f"{name} must be a real number, got {value!r}")
-        return None
-    if not math.isfinite(casted):
-        errors.append(f"{name} must be finite, got {casted}")
-        return None
-    if min_value is not None and casted < min_value:
-        errors.append(f"{name} must be >= {min_value}, got {casted}")
-        return None
-    if max_value is not None and casted > max_value:
-        errors.append(f"{name} must be <= {max_value}, got {casted}")
-        return None
-    return casted
+    return coerce_float(
+        value,
+        name,
+        errors,
+        min_value=min_value,
+        max_value=max_value,
+        default_on_bounds=True,
+        real_number_message=True,
+    )
 
 def _coerce_int(
     value: object,
@@ -110,18 +116,13 @@ def _coerce_int(
     *,
     min_value: int = 0,
 ) -> int | None:
-    if isinstance(value, bool):
-        errors.append(f"{name} must be an integer, got {value!r}")
-        return None
-    try:
-        casted = int(value)
-    except (OverflowError, TypeError, ValueError):
-        errors.append(f"{name} must be an integer, got {value!r}")
-        return None
-    if casted < min_value:
-        errors.append(f"{name} must be >= {min_value}, got {casted}")
-        return None
-    return casted
+    return coerce_int(
+        value,
+        name,
+        errors,
+        min_value=min_value,
+        default_on_bounds=True,
+    )
 
 def _coerce_optional_int(
     value: object,
@@ -130,9 +131,13 @@ def _coerce_optional_int(
     *,
     min_value: int = 1,
 ) -> int | None:
-    if value is None:
-        return None
-    return _coerce_int(value, name, errors, min_value=min_value)
+    return coerce_optional_int(
+        value,
+        name,
+        errors,
+        min_value=min_value,
+        default_on_bounds=True,
+    )
 
 def _coerce_optional_float(
     value: object,
@@ -142,14 +147,14 @@ def _coerce_optional_float(
     min_value: float | None = None,
     max_value: float | None = None,
 ) -> float | None:
-    if value is None:
-        return None
-    return _coerce_float(
+    return coerce_optional_float(
         value,
         name,
         errors,
         min_value=min_value,
         max_value=max_value,
+        default_on_bounds=True,
+        real_number_message=True,
     )
 
 def _minimum_positive_float(*values: object) -> float | None:

@@ -12,6 +12,10 @@ from typing import Any, Mapping
 from .analytic_sdf import require_numpy
 from .degradations import save_png_or_pgm
 from .specs import GENERATOR_VERSION, SyntheticArtifactSet, SyntheticShapeSpec, json_safe
+try:
+    from blender_blocking.utils.json_io import write_json as _write_json
+except ImportError:  # pragma: no cover - script-style imports
+    from utils.json_io import write_json as _write_json
 
 _ARTIFACT_POLICY_VERSION = 1
 GENERATED_ARTIFACT_CATEGORIES = frozenset({"mesh", "volume", "mask"})
@@ -317,12 +321,6 @@ def _retained_named_paths(
         for name, path in paths.items()
         if _artifact_should_retain(_artifact_key(category, name), generation_policy)
     }
-
-
-def _write_json(path: Path, data: object) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    text = json.dumps(json_safe(data), indent=2, sort_keys=True)
-    path.write_text(text + "\n", encoding="utf-8")
 
 
 def _write_npz(path: Path, arrays: Mapping[str, Any]) -> None:

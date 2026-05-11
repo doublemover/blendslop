@@ -59,7 +59,7 @@ from blender_blocking.e2e.cli_args import (
     _parse_args,
     _resolve_novel_view_inputs,
 )
-from blender_blocking.e2e.console import _print_kv_table, _print_rule
+from blender_blocking.e2e.console import _artifact_line, _console_print, _print_kv_table, _print_rule
 from blender_blocking.e2e.matrix import run_synthetic_suite_matrix
 from blender_blocking.e2e.refinement_bridge import _build_refinement_plan_from_args, _refinement_requested, _run_refinement_from_args
 from blender_blocking.e2e.validator import E2EValidator, test_with_custom_images
@@ -255,14 +255,15 @@ def main(argv: Optional[list[str]] = None) -> int:
                 )
                 if args.quality_report_json:
                     write_report(args.quality_report_json, report)
-                    print(f"Saved quality budget report: {args.quality_report_json}")
+                    _artifact_line("quality budget report", args.quality_report_json)
                 threshold_passed = bool(report.get("threshold_passed", False))
                 comparison_passed = bool(report.get("comparison_passed", True))
-                print(
+                _console_print(
                     "Quality budget: "
                     f"{'PASS' if report.get('passed') else 'FAIL'} "
                     f"(thresholds={'PASS' if threshold_passed else 'FAIL'}, "
-                    f"comparisons={'PASS' if comparison_passed else 'FAIL'})"
+                    f"comparisons={'PASS' if comparison_passed else 'FAIL'})",
+                    color="green" if report.get("passed") else "red",
                 )
                 success = success and threshold_passed
                 if workflow_config.quality_budget.fail_on_regression:

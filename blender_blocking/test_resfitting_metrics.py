@@ -12,6 +12,7 @@ from placement.resfit_optimizer import CoordinateDescentConfig, coordinate_desce
 from placement.resfit.backend_adapter import _family_pipeline_config
 from placement.resfit.config import ResFitPipelineConfig
 from placement.resfit.initialization import _candidate_families
+from placement.resfit.metrics import build_resfit_candidate_metrics
 from placement.resfit.status import apply_resfit_quality_floors, resfit_candidate_status
 from placement.resfitting import ResidualFitter
 from metrics.topology import mesh_topology_report
@@ -360,11 +361,15 @@ class TestResfittingMetrics(unittest.TestCase):
         self.assertEqual(status, "degraded")
         self.assertTrue(degraded)
 
-    def test_primitive_quality_floors_fail_low_backend_iou(self) -> None:
+    def test_primitive_quality_floors_degrade_low_backend_iou_by_default(self) -> None:
         metric = SimpleNamespace(
-            area_iou_min=0.12,
+            area_iou_min=0.31,
             topology_score=0.95,
-            extras={"topology": {"watertight": True, "boundary_edges": 0}},
+            extras={
+                "topology": {"watertight": True, "boundary_edges": 0},
+                "backend_quality_source": "objective_proxy",
+                "primitive_count": 4,
+            },
         )
 
         status, degraded, errors, warnings = apply_resfit_quality_floors(
@@ -376,10 +381,76 @@ class TestResfittingMetrics(unittest.TestCase):
             metric=metric,
         )
 
+        self.assertEqual(status, "degraded")
+        self.assertTrue(degraded)
+        self.assertEqual(errors, ())
+        self.assertIn("renderable artifacts", "\n".join(warnings))
+        self.assertIn("objective proxy min IoU 0.310", "\n".join(warnings))
+
+    def test_primitive_quality_floors_fail_low_backend_iou_when_strict(self) -> None:
+        metric = SimpleNamespace(
+            area_iou_min=0.12,
+            topology_score=0.95,
+            extras={"topology": {"watertight": True, "boundary_edges": 0}},
+        )
+
+        status, degraded, errors, warnings = apply_resfit_quality_floors(
+            config={"fail_on_backend_iou_floor": True},
+            status="success",
+            degraded=False,
+            errors=(),
+            warnings=(),
+            metric=metric,
+        )
+
         self.assertEqual(status, "failed")
         self.assertFalse(degraded)
-        self.assertIn("backend min IoU", "\n".join(errors))
+        self.assertIn("min IoU 0.120 is below 0.350", "\n".join(errors))
         self.assertEqual(warnings, ())
+
+    def test_resfit_metrics_use_required_view_support_for_backend_floor(self) -> None:
+        result = SimpleNamespace(
+            initial_loss=SimpleNamespace(total=2.0, terms={}),
+            final_loss=SimpleNamespace(
+                total=1.0,
+                terms={"surface_residual": 4.0, "silhouette": 4.0},
+            ),
+            optimization_termination_reason="",
+            primitives=(object(),),
+            attempts=(),
+            family_attempts=(),
+            selected_attempt="",
+            objective_evaluations=1,
+            optimizer_elapsed_s=0.1,
+        )
+
+        metric, _summary = build_resfit_candidate_metrics(
+            elapsed_s=0.1,
+            result=result,
+            primitive_family="ellipsoid",
+            mesh_metadata={},
+            topology_payload={"topology_score": 0.95, "watertight": True},
+            uncertainty_signal={},
+            profile_rows=(
+                {"view": "front", "width_world": 1.0, "z_world": 0.0, "confidence": 0.40},
+                {"view": "side", "width_world": 1.0, "z_world": 0.0, "confidence": 0.38},
+                {"view": "top", "width_world": 1.0, "z_world": 0.0, "confidence": 0.39},
+            ),
+            pipeline_config=ResFitPipelineConfig(),
+            history_records=({"accepted_moves": 1, "rejected_moves": 0},),
+            surface_meta={},
+            occupied_meta={},
+            signal_summary={},
+            initial_primitives=(),
+            max_runtime_s=None,
+            max_objective_evaluations=None,
+        )
+
+        self.assertAlmostEqual(metric.area_iou_min, 0.38)
+        self.assertAlmostEqual(metric.area_iou_mean, 0.39)
+        self.assertAlmostEqual(metric.boundary_iou_mean, 0.39)
+        self.assertEqual(metric.extras["backend_quality_source"], "profile_per_view")
+        self.assertAlmostEqual(metric.extras["objective_proxy_iou"], 0.2)
 
     def test_primitive_quality_floors_remove_accepted_warning_on_failure(self) -> None:
         metric = SimpleNamespace(
@@ -389,7 +460,7 @@ class TestResfittingMetrics(unittest.TestCase):
         )
 
         status, _degraded, errors, warnings = apply_resfit_quality_floors(
-            config={},
+            config={"fail_on_backend_iou_floor": True},
             status="success",
             degraded=False,
             errors=(),
@@ -401,7 +472,7 @@ class TestResfittingMetrics(unittest.TestCase):
         )
 
         self.assertEqual(status, "failed")
-        self.assertIn("backend min IoU 0.004 below 0.350", errors)
+        self.assertIn("min IoU 0.004 is below 0.350", "\n".join(errors))
         self.assertNotIn("budget-limited primitive fit accepted", "\n".join(warnings))
 
     def test_primitive_quality_floors_degrade_bad_topology(self) -> None:

@@ -7,10 +7,14 @@ safe so every backend can report the same shape of evidence.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, is_dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any, Mapping, Sequence
+
+try:
+    from blender_blocking.utils.json_io import json_safe
+except ImportError:  # pragma: no cover - script-style imports
+    from utils.json_io import json_safe
 
 
 STATUS_VALUES = {
@@ -33,32 +37,6 @@ def utc_now_iso() -> str:
 def normalize_status(value: object, *, default: str = "not_applicable") -> str:
     status = str(value or default).strip().lower()
     return status if status in STATUS_VALUES else default
-
-
-def json_safe(value: Any) -> Any:
-    """Convert common Python values into JSON-compatible structures."""
-    if hasattr(value, "to_dict") and callable(value.to_dict):
-        return json_safe(value.to_dict())
-    if is_dataclass(value):
-        return json_safe({name: getattr(value, name) for name in value.__dataclass_fields__})
-    if isinstance(value, Path):
-        return str(value)
-    if isinstance(value, Mapping):
-        return {str(key): json_safe(item) for key, item in value.items()}
-    if isinstance(value, tuple):
-        return [json_safe(item) for item in value]
-    if isinstance(value, list):
-        return [json_safe(item) for item in value]
-    if isinstance(value, set):
-        return sorted(json_safe(item) for item in value)
-    if isinstance(value, float):
-        if value != value:
-            return None
-        if value == float("inf"):
-            return None
-        if value == float("-inf"):
-            return None
-    return value
 
 
 @dataclass(frozen=True)

@@ -39,9 +39,17 @@ _RESIDUAL_POLICIES = {"ignore", "report", "suggest_patches"}
 from .appearance import _compiled_appearance_summary
 from .builder import build_shape_program_from_target
 from .compiled_scene import _compiled_scene_summary, _compiled_topology_summary
-from .compiler_bridge import _compile_program, _export_qa_score, _export_qa_targets, _run_shape_program_export_qa
+from .compiler_bridge import (
+    _compile_program,
+    _export_qa_score,
+    _export_qa_targets,
+    _run_shape_program_export_qa,
+    _should_compile_blender,
+)
 from .editability import _complexity_penalty, _editability_report, _editability_score, _float
-from .residuals import _uncompiled_per_view_metrics
+
+
+_DEFAULT_REQUIRED_RENDER_VIEWS = ("front", "side", "top")
 
 
 class ShapeProgramBackend(BaseBackend):
@@ -203,16 +211,34 @@ class ShapeProgramBackend(BaseBackend):
         compiled_scene_summary = _compiled_scene_summary(compiled)
         compiled_topology = _compiled_topology_summary(compiled)
         appearance_summary = _compiled_appearance_summary(compiled, request.config)
+        render_per_view, render_qa = _shape_program_render_qa(
+            request,
+            compiled=compiled,
+        )
         if compiled is None:
             status = "research_only"
             warnings = (
                 "shape_program is research_only: editable program emitted, but Blender compilation did not run",
             )
             degraded = False
+        elif render_per_view and not render_qa.get("missing_required_metrics"):
+            failed_views = tuple(render_qa.get("failed_required_views", ()) or ())
+            if failed_views:
+                status = "degraded"
+                warnings = (
+                    "shape_program render QA ran, but at least one required view failed",
+                )
+                degraded = True
+            else:
+                status = "success"
+                warnings = (
+                    "shape_program compiled editable Blender objects and render QA metrics are available",
+                )
+                degraded = False
         else:
             status = "degraded"
             warnings = (
-                "shape_program compiled editable Blender objects, but render/export round-trip QA has not run yet",
+                "degraded_no_render_qa: shape_program compiled editable Blender objects, but required render QA has not run yet",
             )
             degraded = True
         if compiled is not None and compiled.warnings:
@@ -234,6 +260,7 @@ class ShapeProgramBackend(BaseBackend):
             ),
             "topology": compiled_topology,
             "research_only": compiled is None,
+            "render_qa": render_qa,
             "editable_output": True,
         }
         if appearance_summary is not None:
@@ -243,7 +270,7 @@ class ShapeProgramBackend(BaseBackend):
                 "reports": [report.to_dict() for report in export_qa_reports],
             }
         metrics = CandidateMetrics(
-            per_view=_uncompiled_per_view_metrics(request.target),
+            per_view=render_per_view,
             editability_score=_editability_score(
                 program,
                 request.config,
@@ -264,3 +291,135 @@ class ShapeProgramBackend(BaseBackend):
             degraded=degraded,
             payload=compiled.root_object if compiled is not None else program,
         )
+
+
+def _shape_program_render_qa(
+    request: CandidateRequest,
+    *,
+    compiled: Any,
+) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
+    required_views = _required_render_views(request.target)
+    if compiled is None:
+        return {}, {
+            "status": "not_applicable",
+            "reason": "shape program has not been compiled",
+            "required_views": list(required_views),
+            "missing_required_metrics": bool(required_views),
+        }
+    raw = _render_qa_payload(request.config)
+    per_view = _coerce_render_qa_per_view(
+        raw,
+        required_views=required_views,
+        min_area_iou=_float(request.config.get("render_qa_min_area_iou", 0.7), 0.7),
+    )
+    if not per_view:
+        return {}, {
+            "status": "missing",
+            "reason": "render QA has not been run for compiled shape program",
+            "required_views": list(required_views),
+            "missing_required_views": list(required_views),
+            "missing_required_metrics": bool(required_views),
+            "next_step": "render compiled shape-program objects against required views",
+        }
+
+    missing_views = [view for view in required_views if view not in per_view]
+    missing_metrics: list[str] = []
+    failed_views: list[str] = []
+    for view in required_views:
+        metrics = per_view.get(view)
+        if not isinstance(metrics, Mapping):
+            continue
+        if metrics.get("area_iou") is None:
+            missing_metrics.append(f"{view}.area_iou")
+        if metrics.get("boundary_iou") is None:
+            missing_metrics.append(f"{view}.boundary_iou")
+        if metrics.get("signed_distance_loss") is None:
+            missing_metrics.append(f"{view}.signed_distance_loss")
+        if bool(metrics.get("required", True)) and not bool(metrics.get("passed", False)):
+            failed_views.append(view)
+    status = "complete"
+    if missing_views or missing_metrics:
+        status = "incomplete"
+    elif failed_views:
+        status = "failed"
+    return per_view, {
+        "status": status,
+        "source": "shape_program_render_qa",
+        "required_views": list(required_views),
+        "missing_required_views": missing_views,
+        "missing_required_metric_names": missing_metrics,
+        "missing_required_metrics": bool(missing_views or missing_metrics),
+        "failed_required_views": failed_views,
+        "per_view": per_view,
+    }
+
+
+def _required_render_views(target: ReconstructionTarget) -> tuple[str, ...]:
+    try:
+        views = tuple(str(view) for view in target.views() if str(view))
+    except Exception:
+        views = ()
+    return views or _DEFAULT_REQUIRED_RENDER_VIEWS
+
+
+def _render_qa_payload(config: Mapping[str, Any]) -> Mapping[str, Any]:
+    for key in ("render_qa_metrics", "shape_program_render_qa", "render_qa"):
+        value = config.get(key)
+        if isinstance(value, Mapping):
+            return value
+    return {}
+
+
+def _coerce_render_qa_per_view(
+    payload: Mapping[str, Any],
+    *,
+    required_views: Sequence[str],
+    min_area_iou: float,
+) -> dict[str, dict[str, Any]]:
+    source = payload.get("per_view") if isinstance(payload.get("per_view"), Mapping) else payload
+    if not isinstance(source, Mapping):
+        return {}
+    output: dict[str, dict[str, Any]] = {}
+    for view, value in source.items():
+        if not isinstance(value, Mapping):
+            continue
+        view_name = str(view)
+        area = _optional_metric_float(value.get("area_iou", value.get("iou")))
+        boundary = _optional_metric_float(value.get("boundary_iou"))
+        signed_distance = _optional_metric_float(value.get("signed_distance_loss"))
+        required = _truthy(value.get("required", view_name in required_views))
+        passed_raw = value.get("passed", value.get("pass"))
+        passed = (
+            _truthy(passed_raw)
+            if passed_raw is not None
+            else bool(area is not None and area >= min_area_iou)
+        )
+        output[view_name] = {
+            "required": required,
+            "passed": passed,
+            "pass": passed,
+            "area_iou": area,
+            "boundary_iou": boundary,
+            "signed_distance_loss": signed_distance,
+            "soft_iou": _optional_metric_float(value.get("soft_iou")),
+            "reason": str(value.get("reason", "")),
+        }
+    return output
+
+
+def _optional_metric_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return None
+    if np.isfinite(parsed):
+        return parsed
+    return None
+
+
+def _truthy(value: Any) -> bool:
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "pass", "passed"}
+    return bool(value)

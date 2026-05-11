@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import unittest
 
 from blender_blocking.refinement_lab.contracts import ExperimentResult
@@ -104,6 +105,51 @@ class RefinementLabScoringTests(unittest.TestCase):
         self.assertEqual(ranked[0][0].variant_id, "full")
         self.assertEqual(ranked[1][1]["promotion"]["tier"], "degraded")
 
+    def test_high_render_quality_degraded_primitive_fit_can_seed_exploration(self) -> None:
+        result = ExperimentResult(
+            run_id="r",
+            case_id="c",
+            variant_id="primitive-degraded",
+            mode="primitive_fit_refine",
+            status="pass",
+            exit_code=0,
+            started_utc="s",
+            finished_utc="f",
+            elapsed_s=1.0,
+            backend_result={
+                "status": "degraded",
+                "degraded": True,
+                "warnings": (
+                    "primitive backend emitted renderable artifacts, but internal/proxy min IoU 0.310 is below 0.350",
+                ),
+            },
+            metrics={
+                "average_iou": 0.91,
+                "front_iou": 0.90,
+                "side_iou": 0.92,
+                "top_iou": 0.91,
+                "topology_score": 0.9,
+                "editability_score": 0.7,
+                "backend": {"area_iou_min": 0.31, "area_iou_mean": 0.36},
+                "render": {
+                    "min_view_iou": 0.90,
+                    "per_view": {
+                        "front": {"area_iou": 0.90},
+                        "side": {"area_iou": 0.92},
+                        "top": {"area_iou": 0.91},
+                    },
+                },
+            },
+        )
+
+        decision = promotion_decision(result)
+
+        self.assertFalse(decision.promotable)
+        self.assertTrue(decision.parent_selectable)
+        self.assertEqual(decision.tier, "degraded")
+        self.assertIn("degraded_backend", decision.blockers)
+        self.assertEqual(decision.blocking_for_parent_selection, ())
+
     def test_metric_only_candidate_cannot_hide_behind_area_iou(self) -> None:
         full = _result("full", 0.76, 0.76, 0.76, 0.76)
         metric_only = ExperimentResult(
@@ -131,6 +177,75 @@ class RefinementLabScoringTests(unittest.TestCase):
             promotion_decision(metric_only).blockers,
         )
 
+    def test_backend_status_metric_only_candidate_can_seed_exploration(self) -> None:
+        metric_only = ExperimentResult(
+            run_id="r",
+            case_id="c",
+            variant_id="metric-only",
+            mode="ensemble",
+            status="pass",
+            exit_code=0,
+            started_utc="s",
+            finished_utc="f",
+            elapsed_s=1.0,
+            backend_result={"status": "success"},
+            metrics={
+                "validation_mode": "backend-status",
+                "backend": {"area_iou_mean": 0.99, "area_iou_min": 0.97},
+            },
+        )
+
+        decision = promotion_decision(metric_only)
+
+        self.assertFalse(decision.promotable)
+        self.assertTrue(decision.parent_selectable)
+        self.assertEqual(decision.state, "metric_only_candidate")
+        self.assertEqual(decision.blocking_for_parent_selection, ())
+
+    def test_shape_program_missing_render_qa_can_seed_exploration(self) -> None:
+        shape_program = ExperimentResult(
+            run_id="r",
+            case_id="c",
+            variant_id="shape-program",
+            mode="shape_program",
+            status="pass",
+            exit_code=0,
+            started_utc="s",
+            finished_utc="f",
+            elapsed_s=1.0,
+            backend_result={
+                "status": "degraded",
+                "backend_name": "shape_program",
+                "metric_result": {
+                    "extras": {
+                        "render_qa": {
+                            "status": "missing",
+                            "missing_required_metrics": True,
+                        }
+                    }
+                },
+                "artifacts": {"shape_program": "program.json"},
+            },
+            metrics={
+                "render": {
+                    "qa": {
+                        "status": "missing",
+                        "missing_required_metrics": True,
+                    }
+                }
+            },
+            artifacts={"shape_program": Path("program.json")},
+        )
+
+        decision = promotion_decision(shape_program)
+
+        self.assertFalse(decision.promotable)
+        self.assertTrue(decision.parent_selectable)
+        self.assertEqual(decision.state, "shape_program_missing_render_qa")
+        self.assertIn("missing_required_metrics", decision.blockers)
+        self.assertNotIn("catastrophic_view_failure", decision.blockers)
+        self.assertEqual(decision.blocking_for_parent_selection, ())
+
     def test_topology_failure_blocks_promotion(self) -> None:
         bad_topology = _result(
             "bad-topology",
@@ -144,7 +259,9 @@ class RefinementLabScoringTests(unittest.TestCase):
         decision = promotion_decision(bad_topology)
 
         self.assertFalse(decision.promotable)
+        self.assertTrue(decision.parent_selectable)
         self.assertEqual(decision.state, "blocked_topology")
+        self.assertEqual(decision.blocking_for_parent_selection, ())
 
     def test_proxy_render_namespace_violation_is_flagged(self) -> None:
         result = _result(
@@ -196,6 +313,36 @@ class RefinementLabScoringTests(unittest.TestCase):
         self.assertFalse(decision.promotable)
         self.assertEqual(decision.state, "blocked_proxy_render_disagreement")
         self.assertIn("proxy_render_disagreement", decision.blockers)
+        self.assertFalse(decision.parent_selectable)
+
+    def test_high_quality_proxy_render_disagreement_can_seed_exploration(self) -> None:
+        result = _result(
+            "boundary-repair-parent",
+            0.955,
+            0.977,
+            0.983,
+            0.905,
+            metrics={
+                "backend": {"area_iou_min": 0.999, "area_iou_mean": 0.999},
+                "render": {
+                    "min_view_iou": 0.905,
+                    "boundary_iou_min": 0.201,
+                    "per_view": {
+                        "front": {"area_iou": 0.977, "boundary_iou": 0.783},
+                        "side": {"area_iou": 0.983, "boundary_iou": 0.792},
+                        "top": {"area_iou": 0.905, "boundary_iou": 0.201},
+                    },
+                },
+            },
+        )
+
+        decision = promotion_decision(result)
+
+        self.assertFalse(decision.promotable)
+        self.assertTrue(decision.parent_selectable)
+        self.assertEqual(decision.state, "blocked_proxy_render_disagreement")
+        self.assertIn("proxy_render_disagreement", decision.blockers)
+        self.assertEqual(decision.blocking_for_parent_selection, ())
 
     def test_research_only_requires_review_across_objectives(self) -> None:
         result = _result(

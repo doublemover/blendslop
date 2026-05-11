@@ -7,8 +7,10 @@ from typing import Any, Mapping
 
 try:
     from blender_blocking.utils.optional_deps import probe_dependency
+    from blender_blocking.metrics.values import optional_float as _optional_float
 except Exception:  # pragma: no cover - script-style imports
     from utils.optional_deps import probe_dependency
+    from metrics.values import optional_float as _optional_float
 
 
 @dataclass(frozen=True)
@@ -212,15 +214,6 @@ def _mean_optional(values: Any) -> float | None:
     if not filtered:
         return None
     return sum(filtered) / float(len(filtered))
-
-
-def _optional_float(value: Any) -> float | None:
-    if value is None:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 
 def _np() -> Any:

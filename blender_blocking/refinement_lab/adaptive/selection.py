@@ -14,7 +14,9 @@ from .mutations import (
     _compile_or_crosscheck,
     _content_adaptive_patches,
     _proxy_grounding,
+    _primitive_fit_proxy_retry,
     _shape_program_editability,
+    _shape_program_render_qa_retry,
     _topology_preserving_mesh,
     _uncertainty_sweep,
     _visual_hull_resolution,
@@ -153,6 +155,37 @@ def _fallback_proposals_from_backend(
     max_proposals: int,
 ) -> tuple[RefinementProposal, ...]:
     autopsy_proposals = list(_autopsy_plan_proposals(backend))
+    status = str(backend.get("status", ""))
+    metrics = backend.get("metric_result", {})
+    metric_map = metrics if isinstance(metrics, Mapping) else {}
+    backend_name = _backend_name(backend)
+    backend_text = _backend_message_text(backend)
+    if (
+        backend_name == "primitive_fit_refine"
+        and status == "degraded"
+        and (
+            _metric(metric_map, "area_iou_min", default=1.0) < 0.55
+            or "proxy" in backend_text
+            or "min iou" in backend_text
+        )
+    ):
+        autopsy_proposals.append(
+            _primitive_fit_proxy_retry(
+                metric_map,
+                ("primitive_fit_proxy_floor_degraded",),
+            )
+        )
+    if (
+        backend_name == "shape_program"
+        and status in {"research_only", "degraded"}
+        and _shape_program_render_qa_missing(backend)
+    ):
+        autopsy_proposals.append(
+            _shape_program_render_qa_retry(
+                metric_map,
+                ("shape_program_missing_render_qa",),
+            )
+        )
     nested_bundles = backend.get("evaluation_bundles")
     if isinstance(nested_bundles, Sequence) and not isinstance(
         nested_bundles, (str, bytes)
@@ -179,13 +212,11 @@ def _fallback_proposals_from_backend(
             ]
         )
 
-    status = str(backend.get("status", ""))
-    metrics = backend.get("metric_result", {})
     fake_bundle = {
         "status": status,
         "metric_groups": (),
         "failures": (),
-        "metrics": metrics if isinstance(metrics, Mapping) else {},
+        "metrics": metric_map,
     }
     autopsy_proposals.extend(
         proposals_from_bundle(fake_bundle, max_proposals=max_proposals)
@@ -195,6 +226,43 @@ def _fallback_proposals_from_backend(
             :max_proposals
         ]
     )
+
+
+def _backend_name(backend: Mapping[str, Any]) -> str:
+    selected = backend.get("selected")
+    source = selected if isinstance(selected, Mapping) else backend
+    for key in ("backend_name", "name", "mode"):
+        value = source.get(key)
+        if value:
+            return str(value)
+    return ""
+
+
+def _backend_message_text(backend: Mapping[str, Any]) -> str:
+    parts: list[str] = []
+    for key in ("warnings", "errors", "degradation_reasons", "degraded_reasons"):
+        value = backend.get(key)
+        if isinstance(value, str):
+            parts.append(value)
+        elif isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+            parts.extend(str(item) for item in value if item)
+    return " ".join(parts).lower()
+
+
+def _shape_program_render_qa_missing(backend: Mapping[str, Any]) -> bool:
+    metrics = backend.get("metric_result")
+    extras = metrics.get("extras") if isinstance(metrics, Mapping) else None
+    render_qa = extras.get("render_qa") if isinstance(extras, Mapping) else None
+    if not isinstance(render_qa, Mapping):
+        return True
+    if render_qa.get("missing_required_metrics") is True:
+        return True
+    return str(render_qa.get("status", "")).lower() in {
+        "",
+        "missing",
+        "not_applicable",
+        "incomplete",
+    }
 
 
 def _dedupe(proposals: Sequence[RefinementProposal]) -> tuple[RefinementProposal, ...]:

@@ -23,7 +23,7 @@ try:
     from blender_blocking.config import BlockingConfig
 except ImportError:  # pragma: no cover
     from config import BlockingConfig
-from .common import _run_options_from_args, _runtime_can_execute
+from .common import _resolve_repo_path, _run_options_from_args, _runtime_can_execute
 
 
 def _cmd_loop(args: argparse.Namespace) -> int:
@@ -36,7 +36,7 @@ def _cmd_loop(args: argparse.Namespace) -> int:
         track=args.track,
         search=args.search or track.default_search,
         objective=args.objective or track.default_objective,
-        output_root=args.result_root,
+        output_root=_resolve_repo_path(args.result_root),
         seed=args.seed,
         case_count=args.case_count,
         max_runs=args.max_runs,

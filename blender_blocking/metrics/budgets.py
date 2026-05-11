@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from typing import Any, Mapping, Optional
 
+from .namespaces import get_metric_path
+
 
 @dataclass(frozen=True)
 class BudgetThreshold:
@@ -108,7 +110,7 @@ def evaluate_budgets(
     normalized = _normalize_thresholds(thresholds)
     checks = []
     for threshold in normalized:
-        value = _lookup_metric(metrics, threshold.metric)
+        value = get_metric_path(metrics, threshold.metric)
         numeric_value = None if value is None else float(value)
         checks.append(threshold.evaluate(numeric_value))
     return BudgetReport(tuple(checks), dict(metadata or {}))
@@ -129,8 +131,8 @@ def compare_metric_delta(
     """Fail metrics that regress by more than configured absolute tolerance."""
     checks = []
     for metric, allowed_regression in tolerance.items():
-        before = _lookup_metric(baseline, metric)
-        after = _lookup_metric(current, metric)
+        before = get_metric_path(baseline, metric)
+        after = get_metric_path(current, metric)
         if before is None or after is None:
             checks.append(
                 BudgetCheck(
@@ -185,13 +187,3 @@ def _normalize_thresholds(
         )
         for item in items
     )
-
-
-def _lookup_metric(metrics: Mapping[str, Any], dotted_key: str) -> Any:
-    current: Any = metrics
-    for part in dotted_key.split("."):
-        if isinstance(current, Mapping) and part in current:
-            current = current[part]
-        else:
-            return None
-    return current

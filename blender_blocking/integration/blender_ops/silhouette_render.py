@@ -5,7 +5,9 @@ from __future__ import annotations
 from contextlib import contextmanager
 from dataclasses import dataclass
 import math
+import os
 from pathlib import Path
+import sys
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 try:
@@ -381,7 +383,41 @@ def render_silhouette_frame(
 ) -> None:
     """Render a single frame using the active scene camera."""
     session.scene.render.filepath = str(output_path)
-    bpy.ops.render.render(write_still=True)
+    with _suppress_blender_render_stdout():
+        bpy.ops.render.render(write_still=True)
+
+
+@contextmanager
+def _suppress_blender_render_stdout() -> Any:
+    """Keep Blender's per-file render log lines out of smoke-run output."""
+    stdout = getattr(sys, "stdout", None)
+    fileno = getattr(stdout, "fileno", None)
+    if not callable(fileno):
+        yield
+        return
+    try:
+        fd = fileno()
+    except (OSError, ValueError):
+        yield
+        return
+
+    try:
+        stdout.flush()
+    except Exception:
+        pass
+    saved_fd = os.dup(fd)
+    try:
+        with open(os.devnull, "w", encoding="utf-8") as devnull:
+            os.dup2(devnull.fileno(), fd)
+            yield
+    finally:
+        try:
+            if stdout is not None:
+                stdout.flush()
+        except Exception:
+            pass
+        os.dup2(saved_fd, fd)
+        os.close(saved_fd)
 
 
 @contextmanager

@@ -24,6 +24,15 @@ try:
 except ImportError:  # pragma: no cover
     from config import BlockingConfig
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _resolve_repo_path(path: Path | str) -> Path:
+    raw = Path(path)
+    if raw.is_absolute():
+        return raw.resolve(strict=False)
+    return (REPO_ROOT / raw).resolve(strict=False)
+
 
 def _add_plan_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--suite", default="default-vase")
@@ -114,6 +123,17 @@ def _add_run_args(parser: argparse.ArgumentParser) -> None:
         default=True,
         help="Append refinement indexes in batches after a generation run.",
     )
+    parser.add_argument(
+        "--moonshot-sidecars",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Attach deterministic moonshot sidecar evidence to refinement rows.",
+    )
+    parser.add_argument(
+        "--moonshot-experiments",
+        default="",
+        help="Comma-separated moonshot experiment ids. Empty runs all registered sidecars.",
+    )
     parser.add_argument("--blender-exe", default=None)
 
 def _runtime_can_execute(args: argparse.Namespace) -> bool:
@@ -130,6 +150,7 @@ def _runtime_can_execute(args: argparse.Namespace) -> bool:
     return True
 
 def _run_options_from_args(args: argparse.Namespace) -> RunOptions:
+    cache_root = _resolve_repo_path(args.cache_root)
     return RunOptions(
         html_report=args.html_report,
         write_overlays=args.write_overlays,
@@ -143,10 +164,16 @@ def _run_options_from_args(args: argparse.Namespace) -> RunOptions:
         adaptive_max_proposals=args.adaptive_max_proposals,
         subprocess_blender=args.blender_exe is not None,
         blender_executable=args.blender_exe,
-        cache_root=args.cache_root,
+        cache_root=cache_root,
         reference_cache=args.reference_cache,
         candidate_cache=args.candidate_cache,
         resume_candidates=args.resume_candidates,
         debug_artifact_policy=args.debug_artifact_policy,
         batch_index_writes=args.batch_index_writes,
+        moonshot_sidecars=bool(getattr(args, "moonshot_sidecars", False)),
+        moonshot_experiments=tuple(
+            item.strip()
+            for item in str(getattr(args, "moonshot_experiments", "") or "").split(",")
+            if item.strip()
+        ),
     )

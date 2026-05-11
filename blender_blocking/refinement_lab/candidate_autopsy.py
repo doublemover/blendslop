@@ -7,6 +7,10 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .contracts import ExperimentResult, json_safe
+try:
+    from blender_blocking.metrics.values import float_or as _float
+except ImportError:  # pragma: no cover - script-style imports
+    from metrics.values import float_or as _float
 
 
 SUSPECTED_TRANSFORM_FILES = (
@@ -97,6 +101,43 @@ def _backend_findings(result: ExperimentResult) -> list[dict[str, object]]:
                 "medium",
                 "Backend skipped reconstruction.",
                 evidence={"backend_status": status},
+            )
+        )
+    backend_warnings = _string_items(backend.get("warnings", ()))
+    backend_errors = _string_items(backend.get("errors", ()))
+    degradation_text = " ".join(
+        backend_warnings
+        + backend_errors
+        + [str(item) for item in result.warnings]
+        + [str(item) for item in result.errors]
+    )
+    if (
+        result.mode == "primitive_fit_refine"
+        and status == "degraded"
+        and (
+            "min IoU" in degradation_text
+            or "proxy" in degradation_text
+            or "internal fit" in degradation_text
+        )
+    ):
+        findings.append(
+            _finding(
+                "primitive_fit_proxy_floor_degraded",
+                "medium",
+                (
+                    "Primitive-fit emitted renderable artifacts, but its internal "
+                    "fit/proxy quality floor was weak."
+                ),
+                evidence={
+                    "backend_status": status,
+                    "warnings": backend_warnings,
+                    "errors": backend_errors,
+                },
+                recommended_next_actions=(
+                    "rerun primitive-fit with a larger objective budget",
+                    "try silhouette/profile-weighted primitive family variants",
+                    "probe target axis and bounds assumptions before promotion",
+                ),
             )
         )
     if "ModuleNotFoundError" in errors or "No module named" in errors:
@@ -487,6 +528,14 @@ def _finding(
     }
 
 
+def _string_items(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return [str(item) for item in value if item]
+    return []
+
+
 def _backend_status(backend: Mapping[str, Any]) -> str:
     selected = backend.get("selected")
     if isinstance(selected, Mapping):
@@ -572,10 +621,3 @@ def _backend_area_iou(result: ExperimentResult) -> float:
     source = selected if isinstance(selected, Mapping) else backend
     metrics = source.get("metric_result", {}) if isinstance(source, Mapping) else {}
     return _float(metrics.get("area_iou_mean") if isinstance(metrics, Mapping) else None)
-
-
-def _float(value: Any, default: float = 0.0) -> float:
-    try:
-        return float(default if value is None else value)
-    except (TypeError, ValueError):
-        return default

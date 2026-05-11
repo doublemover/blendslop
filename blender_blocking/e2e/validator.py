@@ -52,7 +52,18 @@ from blender_blocking.utils.progress import progress_bar
 from blender_blocking.validation.silhouette_iou import canonicalize_mask, mask_from_image_array
 from blender_blocking.e2e.constants import *
 from blender_blocking.e2e.backend_status import _candidate_status_payload, _print_backend_summary
-from blender_blocking.e2e.console import _format_metric, _print_kv_table, _print_result_table, _print_rule, _print_section, _print_table, _status_icon
+from blender_blocking.e2e.console import (
+    _artifact_line,
+    _console_print,
+    _format_metric,
+    _print_kv_table,
+    _print_result_table,
+    _print_rule,
+    _print_section,
+    _print_table,
+    _render_summary,
+    _status_icon,
+)
 from blender_blocking.e2e.cost import _cost_gate_report, _cost_payload
 from blender_blocking.e2e.novel_view import _aggregate_novel_reports, _load_novel_pair, _novel_view_gate
 from blender_blocking.e2e.payloads import _evaluation_outputs_from_payload, _find_renderable_mesh, _json_dump, _mesh_path_from_backend_result, _ordered_unique, _render_filename_prefix
@@ -219,7 +230,7 @@ class E2EValidator:
 
         # Step 1: Generate 3D model
         _print_section("1/4 Reconstruct")
-        print("Generating reconstruction from reference images...")
+        _console_print("Generating reconstruction from reference images...")
         from blender_blocking.main_integration import BlockingWorkflow
 
         context = (
@@ -261,7 +272,10 @@ class E2EValidator:
 
         if render_mesh is None:
             if validation_mode in {"render-iou", "novel-view"}:
-                print("ERROR: Reconstruction did not produce a renderable Blender mesh")
+                _console_print(
+                    "ERROR: Reconstruction did not produce a renderable Blender mesh",
+                    color="red",
+                )
                 if workflow.reconstruction_result is not None:
                     _print_backend_summary(workflow.reconstruction_result)
                 failure_code = (
@@ -283,10 +297,14 @@ class E2EValidator:
                 )
                 if self.result_json:
                     _json_dump(self.result_json, result_payload)
-                    print(f"\nSaved result JSON: {self.result_json}")
+                    _console_print()
+                    _artifact_line("result json", self.result_json)
                 return False, {}
             if workflow.reconstruction_result is None:
-                print("ERROR: Reconstruction returned no mesh and no backend result")
+                _console_print(
+                    "ERROR: Reconstruction returned no mesh and no backend result",
+                    color="red",
+                )
                 return False, {}
             passed = _print_backend_summary(workflow.reconstruction_result)
             result_payload, cost_passed = self._attach_cost_outputs(
@@ -296,10 +314,14 @@ class E2EValidator:
             passed = passed and cost_passed
             if self.result_json:
                 _json_dump(self.result_json, result_payload)
-                print(f"\nSaved result JSON: {self.result_json}")
+                _console_print()
+                _artifact_line("result json", self.result_json)
             return passed, {}
 
-        print(f"{_status_icon(True)} Renderable mesh: {render_mesh.name}")
+        _console_print(
+            f"{_status_icon(True)} renderable mesh: {render_mesh.name}",
+            color="green",
+        )
         if validation_mode == "backend-status":
             if workflow.reconstruction_result is not None:
                 passed = _print_backend_summary(workflow.reconstruction_result)
@@ -336,14 +358,18 @@ class E2EValidator:
             passed = passed and cost_passed
             if self.result_json:
                 _json_dump(self.result_json, result_payload)
-                print(f"\nSaved result JSON: {self.result_json}")
+                _console_print()
+                _artifact_line("result json", self.result_json)
             return passed, {}
 
         # Step 2: Setup rendering
         _print_section("2/4 Render Setup")
         with self.cost_recorder.stage("render_setup"):
             self.setup_render_settings()
-        print(f"{_status_icon(True)} Render settings configured")
+        _console_print(
+            f"{_status_icon(True)} render settings configured",
+            color="green",
+        )
 
         # Step 3: Render orthogonal views
         _print_section("3/4 Render Views")
@@ -401,11 +427,10 @@ class E2EValidator:
         render_progress.close()
 
         if not rendered_paths:
-            print("ERROR: Failed to render views")
+            _console_print("ERROR: Failed to render views", color="red")
             return False, {}
 
-        for view, path in rendered_paths.items():
-            print(f"{_status_icon(True)} Rendered {view:<5} {path}")
+        _render_summary("rendered views", rendered_paths)
 
         if validation_mode == "novel-view":
             passed, novel_payload = self._validate_novel_views(
@@ -435,7 +460,10 @@ class E2EValidator:
         for view in silhouette_views:
             if view not in reference_paths or view not in rendered_paths:
                 reason = "missing_reference_or_render"
-                print(f"{_status_icon(False)} {view} {reason}")
+                _console_print(
+                    f"{_status_icon(False)} {view} {reason}",
+                    color="red",
+                )
                 payload = missing_silhouette_view(
                     view,
                     reason=reason,
@@ -566,7 +594,7 @@ class E2EValidator:
                 )
             )
             if workflow.reconstruction_result is not None:
-                print()
+                _console_print()
                 _print_backend_summary(workflow.reconstruction_result)
             payload_out = {
                 "mode": mode,
@@ -597,11 +625,12 @@ class E2EValidator:
             payload_out["passed"] = passed
             if self.result_json:
                 _json_dump(self.result_json, payload_out)
-                print(f"\nSaved result JSON: {self.result_json}")
+                _console_print()
+                _artifact_line("result json", self.result_json)
 
             return passed, self.results
         else:
-            print("ERROR: No views to compare")
+            _console_print("ERROR: No views to compare", color="red")
             return False, {}
 
     def _should_write_debug_artifacts(self, payload: Mapping[str, Any]) -> bool:
@@ -782,7 +811,8 @@ class E2EValidator:
         payload_out["passed"] = passed
         if self.result_json:
             _json_dump(self.result_json, payload_out)
-            print(f"\nSaved result JSON: {self.result_json}")
+            _console_print()
+            _artifact_line("result json", self.result_json)
         self.results = pair_reports
         return passed, payload_out
 
@@ -829,24 +859,28 @@ class E2EValidator:
         merged["cost_gate"] = gate
         if self.cost_report_json is not None:
             _json_dump(self.cost_report_json, cost_report)
-            print(f"\nSaved cost report JSON: {self.cost_report_json}")
+            _console_print()
+            _artifact_line("cost json", self.cost_report_json)
         if not gate["passed"]:
-            print("\nCost gate: FAIL")
+            _console_print()
+            _console_print("Cost gate: FAIL", color="red")
             for failure in gate["failures"]:
-                print(f"  - {failure}")
+                _console_print(f"  - {failure}", color="red")
         elif self.cost_fail_max_wall_ms is not None or self.cost_fail_max_backend_wall_ms is not None:
-            print("\nCost gate: PASS")
+            _console_print()
+            _console_print("Cost gate: PASS", color="green")
         return merged, bool(gate["passed"])
 
     def print_detailed_results(self) -> None:
         """Print detailed comparison results."""
         if not self.results:
-            print("No results to display")
+            _console_print("No results to display")
             return
 
         first = next(iter(self.results.values()))
         if isinstance(first, Mapping) and "psnr" in first:
-            print("\nDetailed Novel/Image Metrics:")
+            _console_print()
+            _console_print("Detailed Novel/Image Metrics:")
             _print_table(
                 [
                     {
@@ -862,15 +896,16 @@ class E2EValidator:
             )
             return
 
-        print("\nDetailed Results:")
-        print("-" * 60)
-        print(
+        _console_print()
+        _console_print("Detailed Results:")
+        _console_print("-" * 60, color="dim")
+        _console_print(
             f"{'View':<10} {'IoU':>8} {'Intersection':>12} {'Union':>10} {'PixDiff':>10}"
         )
-        print("-" * 60)
+        _console_print("-" * 60, color="dim")
 
         for view, metrics in self.results.items():
-            print(
+            _console_print(
                 f"{view:<10} "
                 f"{metrics['iou']:>8.3f} "
                 f"{metrics['intersection']:>12d} "
@@ -878,7 +913,7 @@ class E2EValidator:
                 f"{metrics['pixel_difference']:>10.2f}"
             )
 
-        print("-" * 60)
+        _console_print("-" * 60, color="dim")
 
 
 def _novel_failure_code(
@@ -991,7 +1026,7 @@ def test_with_sample_images(
     )
 
     # Print detailed results
-    if validator.results:
+    if progress and validator.results:
         validator.print_detailed_results()
 
     return passed
@@ -1074,7 +1109,7 @@ def test_with_custom_images(
         reference_paths, num_slices=num_slices
     )
 
-    if validator.results:
+    if progress and validator.results:
         validator.print_detailed_results()
 
     return passed

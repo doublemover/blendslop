@@ -15,6 +15,7 @@ from .contracts import (
     VoxelTransform,
 )
 from .dense import _active_mask, _normalize_default
+from .grid import all_chunk_keys, chunk_slices
 
 
 class ChunkedVolumeGrid:
@@ -173,22 +174,9 @@ class ChunkedVolumeGrid:
         return self._chunks
 
     def _all_chunk_keys(self) -> Iterator[ChunkKey]:
-        sx, sy, sz = self.shape
-        for ix in range((sx + self.chunk_size - 1) // self.chunk_size):
-            for iy in range((sy + self.chunk_size - 1) // self.chunk_size):
-                for iz in range((sz + self.chunk_size - 1) // self.chunk_size):
-                    yield ChunkKey(ix, iy, iz)
+        yield from all_chunk_keys(self.shape, self.chunk_size)
 
     def _chunk_slices(
         self, key: ChunkKey
     ) -> Tuple[Tuple[slice, slice, slice], Tuple[int, int, int], Tuple[int, int, int]]:
-        origin = (
-            key.ix * self.chunk_size,
-            key.iy * self.chunk_size,
-            key.iz * self.chunk_size,
-        )
-        end = tuple(origin[axis] + self.chunk_size for axis in range(3))
-        valid_end = tuple(min(end[axis], self.shape[axis]) for axis in range(3))
-        valid_shape = tuple(max(0, valid_end[axis] - origin[axis]) for axis in range(3))
-        slices = tuple(slice(origin[axis], valid_end[axis]) for axis in range(3))
-        return slices, origin, valid_shape
+        return chunk_slices(key, self.shape, self.chunk_size)

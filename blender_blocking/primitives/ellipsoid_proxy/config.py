@@ -5,6 +5,21 @@ from typing import Any, Mapping, Sequence
 
 import numpy as np
 
+try:
+    from blender_blocking.config_models.coercion import (
+        coerce_float as _coerce_float,
+        coerce_int as _coerce_int,
+        coerce_optional_float as _shared_coerce_optional_float,
+        coerce_optional_int as _shared_coerce_optional_int,
+    )
+except ImportError:  # pragma: no cover - script-style imports
+    from config_models.coercion import (
+        coerce_float as _coerce_float,
+        coerce_int as _coerce_int,
+        coerce_optional_float as _shared_coerce_optional_float,
+        coerce_optional_int as _shared_coerce_optional_int,
+    )
+
 from metrics.topology import mesh_topology_report
 from placement.resfit_initialization import (
     PrimitiveInitializationConfig,
@@ -204,27 +219,6 @@ def _normalize_gaussian_ellipsoid_config(
     return normalized, errors, warnings
 
 
-def _coerce_int(
-    value: Any,
-    name: str,
-    *,
-    min_value: int,
-    max_value: int,
-    errors: list[str],
-    default: int,
-) -> int:
-    try:
-        parsed = int(value)
-    except (OverflowError, TypeError, ValueError):
-        errors.append(f"{name} must be an integer, got {type(value)!r}")
-        return default
-    if parsed < min_value:
-        errors.append(f"{name} must be >= {min_value}, got {parsed}")
-    if parsed > max_value:
-        errors.append(f"{name} must be <= {max_value}, got {parsed}")
-    return parsed
-
-
 def _coerce_optional_int(
     value: Any,
     name: str,
@@ -232,41 +226,14 @@ def _coerce_optional_int(
     errors: list[str],
     default: int | None = None,
 ) -> int | None:
-    if value is None:
-        return default
-    try:
-        parsed = int(value)
-    except (OverflowError, TypeError, ValueError):
-        errors.append(f"{name} must be an integer, got {type(value)!r}")
-        return default
-    if parsed < 1:
-        errors.append(f"{name} must be >= 1, got {parsed}")
-        return default
-    return parsed
-
-
-def _coerce_float(
-    value: Any,
-    name: str,
-    *,
-    min_value: float,
-    max_value: float | None = None,
-    errors: list[str],
-    default: float,
-) -> float:
-    try:
-        parsed = float(value)
-    except (TypeError, ValueError):
-        errors.append(f"{name} must be a float, got {type(value)!r}")
-        return default
-    if not np.isfinite(parsed):
-        errors.append(f"{name} must be finite, got {parsed!r}")
-        return default
-    if parsed < min_value:
-        errors.append(f"{name} must be >= {min_value}, got {parsed}")
-    if max_value is not None and parsed > max_value:
-        errors.append(f"{name} must be <= {max_value}, got {parsed}")
-    return parsed
+    return _shared_coerce_optional_int(
+        value,
+        name,
+        errors,
+        default=default,
+        min_value=1,
+        default_on_bounds=True,
+    )
 
 
 def _coerce_float_or_none(
@@ -274,17 +241,7 @@ def _coerce_float_or_none(
     name: str,
     errors: list[str],
 ) -> float | None:
-    if value is None:
-        return None
-    try:
-        parsed = float(value)
-    except (TypeError, ValueError):
-        errors.append(f"{name} must be a float or null, got {type(value)!r}")
-        return None
-    if not np.isfinite(parsed):
-        errors.append(f"{name} must be finite or null, got {parsed!r}")
-        return None
-    return parsed
+    return _shared_coerce_optional_float(value, name, errors, default=None)
 
 
 def _coerce_objective_weights(

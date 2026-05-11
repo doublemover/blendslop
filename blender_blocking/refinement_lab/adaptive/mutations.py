@@ -272,6 +272,77 @@ def _proxy_grounding(
     )
 
 
+def _primitive_fit_proxy_retry(
+    metrics: Mapping[str, float],
+    failures: Sequence[str],
+) -> RefinementProposal:
+    return _proposal(
+        "primitive-fit-proxy-retry",
+        "Primitive-fit proxy mismatch retry",
+        "Primitive-fit produced artifacts but failed its internal/proxy fit floor; retry with a larger objective budget, silhouette/profile weighting, and broader primitive families before promotion.",
+        mode="primitive_fit_refine",
+        cli_args=(
+            "--validation-mode",
+            "backend-status",
+            "--primitive-families",
+            "superquadric,superfrustum,ellipsoid,capsule",
+            "--primitive-steps",
+            "50",
+            "--primitive-max",
+            "12",
+            "--primitive-max-objective-evaluations",
+            "1536",
+            "--primitive-loss-weights-json",
+            '{"silhouette":1.25,"profile":1.0,"surface":0.65,"topology":0.15}',
+        ),
+        expected_win={
+            "backend.area_iou_min": "increase",
+            "backend.objective_proxy_iou": "increase",
+            "diagnostics.bounds_axis_probe": "clear",
+        },
+        tags=("primitive-fit", "proxy-mismatch", "objective-budget", "bounds-probe"),
+        priority=5,
+        risk="medium",
+        validation_mode="backend-status",
+        diagnostic_only=True,
+        source={"metrics": metrics, "failures": failures},
+    )
+
+
+def _shape_program_render_qa_retry(
+    metrics: Mapping[str, float],
+    failures: Sequence[str],
+) -> RefinementProposal:
+    return _proposal(
+        "shape-program-render-qa",
+        "Shape-program render-QA compile check",
+        "Compiled shape-program artifacts need required-view render QA before grammar expansion or promotion.",
+        mode="shape_program",
+        cli_args=(
+            "--validation-mode",
+            "render-iou",
+            "--shape-compile-blender",
+            "--shape-root-strategy",
+            "hybrid_profile_bounds",
+            "--shape-residual-policy",
+            "suggest_patches",
+            "--shape-run-export-qa",
+        ),
+        expected_win={
+            "render.per_view.front.area_iou": "present",
+            "render.per_view.side.area_iou": "present",
+            "render.per_view.top.area_iou": "present",
+            "render.qa.missing_required_metrics": "false",
+        },
+        tags=("shape-program", "render-qa", "compile-validation"),
+        priority=4,
+        risk="low",
+        validation_mode="render-iou",
+        diagnostic_only=True,
+        source={"metrics": metrics, "failures": failures},
+    )
+
+
 def _compile_or_crosscheck(
     metrics: Mapping[str, float],
     failures: Sequence[str],

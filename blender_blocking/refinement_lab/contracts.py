@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, is_dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-import hashlib
 import json
 from pathlib import Path
 import re
@@ -20,6 +19,7 @@ try:
     from blender_blocking.utils.path_safety import (
         compact_path_segment as _compact_path_segment,
     )
+    from blender_blocking.utils.json_io import json_safe, stable_hash
 except ImportError:  # pragma: no cover - script-style imports
     from metrics.namespaces import (
         get_metric_path,
@@ -28,6 +28,7 @@ except ImportError:  # pragma: no cover - script-style imports
         render_view_iou,
     )
     from utils.path_safety import compact_path_segment as _compact_path_segment
+    from utils.json_io import json_safe, stable_hash
 
 
 JsonMap = dict[str, Any]
@@ -41,43 +42,6 @@ _RESULT_STATUSES = {"pass", "fail", "error", "skip"}
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-
-
-def json_safe(value: Any) -> Any:
-    """Convert common values into JSON-safe structures."""
-    if hasattr(value, "to_dict"):
-        return value.to_dict()
-    if isinstance(value, Path):
-        return value.as_posix()
-    if is_dataclass(value):
-        return {
-            key: json_safe(getattr(value, key))
-            for key in getattr(value, "__dataclass_fields__", {})
-        }
-    if isinstance(value, Mapping):
-        return {str(key): json_safe(item) for key, item in value.items()}
-    if isinstance(value, tuple):
-        return [json_safe(item) for item in value]
-    if isinstance(value, list):
-        return [json_safe(item) for item in value]
-    if isinstance(value, set):
-        return [json_safe(item) for item in sorted(value, key=str)]
-    if hasattr(value, "item"):
-        try:
-            return value.item()
-        except Exception:
-            pass
-    return value
-
-
-def stable_hash(payload: Any, *, length: int = 12) -> str:
-    encoded = json.dumps(
-        json_safe(payload),
-        sort_keys=True,
-        separators=(",", ":"),
-        default=str,
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()[: int(length)]
 
 
 def safe_slug(value: str, *, fallback: str = "unnamed") -> str:

@@ -226,6 +226,11 @@ TRACKS: dict[str, TrackPreset] = {
                     ("ellipsoid",),
                     ("superfrustum", "ellipsoid"),
                     ("superquadric",),
+                    ("boxy_superquadric",),
+                    ("capsule",),
+                    ("superquadric", "superfrustum"),
+                    ("boxy_superquadric", "ellipsoid"),
+                    ("superfrustum", "superquadric", "ellipsoid"),
                 ),
             ),
             _p(

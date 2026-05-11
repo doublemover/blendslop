@@ -60,7 +60,14 @@ from blender_blocking.e2e.backend_status import (
     _backend_status_ok as _status_ok_from_backend,
 )
 from blender_blocking.e2e.backend_status import _candidate_status_payload, _print_backend_summary
-from blender_blocking.e2e.console import _print_kv_table, _print_rule, _print_section
+from blender_blocking.e2e.console import (
+    _artifact_line,
+    _console_print,
+    _print_kv_table,
+    _print_rule,
+    _print_section,
+    _render_summary,
+)
 from blender_blocking.e2e.cost import _matrix_cost_summary
 from blender_blocking.e2e.ground_truth import _synthetic_ground_truth_row
 from blender_blocking.e2e.payloads import _evaluation_outputs_from_payload, _json_dump
@@ -124,8 +131,11 @@ def run_synthetic_suite_matrix(
         for spec in specs
     )
     if has_blender_cases and not BLENDER_AVAILABLE:
-        print("ERROR: synthetic suite matrix contains Blender-backed fixtures.")
-        print("Use a pure-mask suite or run inside Blender.")
+        _console_print(
+            "ERROR: synthetic suite matrix contains Blender-backed fixtures.",
+            color="red",
+        )
+        _console_print("Use a pure-mask suite or run inside Blender.", color="red")
         return False
 
     _print_rule("SYNTHETIC E2E MATRIX", width=72)
@@ -184,6 +194,7 @@ def run_synthetic_suite_matrix(
             include_orbit=include_orbit,
             orbit_angles=orbit_angles if orbit_angles else None,
         )
+        _render_summary(f"render refs {spec.shape_id}", rendered)
         reference_paths = {
             key: str(rendered[key])
             for key in ("front", "side", "top")
@@ -224,7 +235,8 @@ def run_synthetic_suite_matrix(
                 / compact_path_segment(spec.shape_id, max_length=36, fallback="shape")
             )
             case_json = case_dir / "result.json"
-            print(f"\nCase: {spec.shape_id} mode={mode}")
+            _console_print()
+            _console_print(f"case {spec.shape_id} | mode={mode}", color="cyan", bold=True)
             try:
                 passed = test_with_custom_images(
                     reference_paths["front"],
@@ -338,13 +350,16 @@ def run_synthetic_suite_matrix(
     }
     if cost_report_json:
         if result_json is not None and cost_report_json == result_json:
-            print("\nCost report included in synthetic matrix JSON")
+            _console_print()
+            _console_print("cost report included in synthetic matrix JSON", color="cyan")
         else:
             _json_dump(cost_report_json, cost_summary)
-            print(f"\nSaved synthetic matrix cost report JSON: {cost_report_json}")
+            _console_print()
+            _artifact_line("matrix cost", cost_report_json)
     if result_json:
         _json_dump(result_json, summary)
-        print(f"\nSaved synthetic matrix JSON: {result_json}")
+        _console_print()
+        _artifact_line("matrix json", result_json)
     _print_section("Synthetic Matrix Summary")
     _print_kv_table(
         (
@@ -395,7 +410,10 @@ def _run_pure_mask_matrix_rows(
                 ),
             }
         )
-        print(f"SKIP: {getattr(spec, 'shape_id', '')}: pure masks require backend-status")
+        _console_print(
+            f"skip {getattr(spec, 'shape_id', '')}: pure masks require backend-status",
+            color="yellow",
+        )
         return rows
 
     try:
@@ -434,7 +452,12 @@ def _run_pure_mask_matrix_rows(
             )
         )
         case_json = case_dir / "result.json"
-        print(f"\nCase: {getattr(spec, 'shape_id', '')} mode={mode} [pure-mask]")
+        _console_print()
+        _console_print(
+            f"case {getattr(spec, 'shape_id', '')} | mode={mode} | pure-mask",
+            color="cyan",
+            bold=True,
+        )
         try:
             result_payload = _run_pure_mask_backend_status(
                 views=pure_case["views"],
@@ -643,7 +666,8 @@ def _run_pure_mask_backend_status(
     payload.update(_evaluation_outputs_from_payload(payload))
     payload["passed"] = _status_ok_from_backend(status)
     _json_dump(result_json, payload)
-    print(f"\nSaved result JSON: {result_json}")
+    _console_print()
+    _artifact_line("result json", result_json)
     if workflow.reconstruction_result is not None:
         _print_backend_summary(workflow.reconstruction_result)
     return payload
@@ -830,6 +854,33 @@ def _add_backend_metric_result(
         value = metric_result.get(key)
         if isinstance(value, (int, float)):
             set_metric_path(metrics, namespace_metric_key(key), float(value))
+    extras = metric_result.get("extras")
+    render_qa = extras.get("render_qa") if isinstance(extras, Mapping) else None
+    per_view = render_qa.get("per_view") if isinstance(render_qa, Mapping) else None
+    if isinstance(render_qa, Mapping):
+        status = render_qa.get("status")
+        if status is not None:
+            set_metric_path(metrics, "render.qa.status", str(status))
+        missing = render_qa.get("missing_required_metrics")
+        if isinstance(missing, bool):
+            set_metric_path(metrics, "render.qa.missing_required_metrics", missing)
+    if isinstance(per_view, Mapping):
+        for view, item in per_view.items():
+            if not isinstance(item, Mapping):
+                continue
+            value = item.get("area_iou", item.get("iou"))
+            if isinstance(value, (int, float)):
+                numeric = float(value)
+                set_metric_path(metrics, f"render.per_view.{view}.area_iou", numeric)
+                metrics[f"{view}_iou"] = numeric
+            for source_key, target_key in (
+                ("boundary_iou", f"render.per_view.{view}.boundary_iou"),
+                ("signed_distance_loss", f"render.per_view.{view}.signed_distance_loss"),
+            ):
+                raw = item.get(source_key)
+                if isinstance(raw, (int, float)):
+                    set_metric_path(metrics, target_key, float(raw))
+        set_render_aggregate_metrics(metrics)
 
 def _evaluation_bundle_sequence(
     payload: Mapping[str, Any],

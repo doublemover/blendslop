@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Mapping, MutableMapping, Sequence
 
+from .values import get_metric_path, optional_float
+
 
 REQUIRED_RENDER_VIEWS = ("front", "side", "top")
 
@@ -31,28 +33,6 @@ def set_metric_path(
             current[part] = child
         current = child
     current[parts[-1]] = value
-
-
-def get_metric_path(metrics: Mapping[str, Any], path: str, default: Any = None) -> Any:
-    """Read a metric from a dotted key or nested JSON path."""
-    if path in metrics:
-        return metrics[path]
-    current: Any = metrics
-    for part in str(path).split("."):
-        if isinstance(current, Mapping) and part in current:
-            current = current[part]
-        else:
-            return default
-    return current
-
-
-def optional_float(value: Any) -> float | None:
-    if value is None:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 
 def validation_mode(metrics: Mapping[str, Any]) -> str:

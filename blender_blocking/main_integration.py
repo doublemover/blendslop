@@ -83,6 +83,12 @@ from integration.image_processing.image_loader import load_orthogonal_views
 from integration.image_processing.image_processor import process_image
 from integration.shape_matching.contour_analyzer import find_contours, analyze_shape
 from integration.blender_ops.profile_loft_mesh import create_loft_mesh_from_slices
+from integration.blender_ops.silhouette_boolean import (
+    apply_boolean,
+    apply_transforms,
+    mesh_counts,
+    split_contours,
+)
 from geometry.profile_models import PixelScale
 from geometry.dual_profile import build_elliptical_profile_from_views
 from geometry.silhouette import extract_binary_silhouette
@@ -858,61 +864,6 @@ class BlockingWorkflow:
             print("Warning: Missing contours for silhouette intersection.")
             return self.create_3d_blockout(num_slices=num_slices)
 
-        def _split_contours(
-            contours: List[np.ndarray], hierarchy: Optional[np.ndarray]
-        ) -> Tuple[List[int], Dict[int, List[int]]]:
-            if not contours:
-                return [], {}
-            if hierarchy is None or len(hierarchy) == 0:
-                outer = list(range(len(contours)))
-                return outer, {}
-            outer = [i for i, h in enumerate(hierarchy[0]) if h[3] == -1]
-            holes: Dict[int, List[int]] = {idx: [] for idx in outer}
-            for idx, h in enumerate(hierarchy[0]):
-                parent = h[3]
-                if parent != -1 and parent in holes:
-                    holes[parent].append(idx)
-            if not outer:
-                outer = list(range(len(contours)))
-            return outer, holes
-
-        def _apply_transforms(obj: object) -> None:
-            bpy.ops.object.select_all(action="DESELECT")
-            obj.select_set(True)
-            bpy.context.view_layer.objects.active = obj
-            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-            bpy.ops.object.mode_set(mode="EDIT")
-            bpy.ops.mesh.normals_make_consistent(inside=False)
-            bpy.ops.object.mode_set(mode="OBJECT")
-            triangulate_object(obj)
-            clean_mesh_for_boolean(obj)
-            obj.select_set(False)
-
-        def _mesh_counts(obj: object) -> Tuple[int, int]:
-            if obj is None or getattr(obj, "type", None) != "MESH":
-                return 0, 0
-            return len(obj.data.vertices), len(obj.data.polygons)
-
-        def _apply_boolean(
-            base: object, other: object, operation: str, solver: str
-        ) -> bool:
-            if base is None or other is None:
-                return False
-            modifier = base.modifiers.new(name=f"{operation}_Op", type="BOOLEAN")
-            modifier.operation = operation
-            modifier.object = other
-            modifier.solver = solver
-            bpy.context.view_layer.objects.active = base
-            bpy.ops.object.modifier_apply(modifier=modifier.name)
-            bpy.data.objects.remove(other, do_unlink=True)
-            verts, faces = _mesh_counts(base)
-            if verts == 0 or faces == 0:
-                print(
-                    f"Warning: Boolean {operation} with solver {solver} produced empty mesh"
-                )
-                return False
-            return True
-
         largest_only = self.config.silhouette_intersection.largest_component_only
         if largest_only is None:
             largest_only = bool(extract_cfg.get("largest_component_only", False))
@@ -929,7 +880,7 @@ class BlockingWorkflow:
             source_size: Tuple[int, int],
             normalize_bounds: Optional[Tuple[float, float, float, float]],
         ) -> Optional[object]:
-            outer, holes = _split_contours(contours, hierarchy)
+            outer, holes = split_contours(contours, hierarchy)
             if not outer:
                 return None
             if largest_only:
@@ -952,8 +903,13 @@ class BlockingWorkflow:
                 center_extrusion(obj, extrude_distance=extrude_distance)
                 obj.scale = scale
                 obj.rotation_euler = rotation
-                _apply_transforms(obj)
-                verts, faces = _mesh_counts(obj)
+                apply_transforms(
+                    obj,
+                    bpy_module=bpy,
+                    triangulate_object=triangulate_object,
+                    clean_mesh_for_boolean=clean_mesh_for_boolean,
+                )
+                verts, faces = mesh_counts(obj)
                 print(
                     f"DEBUG silhouette_intersection {obj.name}: verts={verts} faces={faces}"
                 )
@@ -975,8 +931,19 @@ class BlockingWorkflow:
                     center_extrusion(hole_obj, extrude_distance=extrude_distance)
                     hole_obj.scale = scale
                     hole_obj.rotation_euler = rotation
-                    _apply_transforms(hole_obj)
-                    hole_ok = _apply_boolean(obj, hole_obj, "DIFFERENCE", solver)
+                    apply_transforms(
+                        hole_obj,
+                        bpy_module=bpy,
+                        triangulate_object=triangulate_object,
+                        clean_mesh_for_boolean=clean_mesh_for_boolean,
+                    )
+                    hole_ok = apply_boolean(
+                        obj,
+                        hole_obj,
+                        "DIFFERENCE",
+                        solver,
+                        bpy_module=bpy,
+                    )
                     if not hole_ok:
                         print(
                             f"Warning: Hole subtraction failed for {obj.name} using solver {solver}"
@@ -990,7 +957,7 @@ class BlockingWorkflow:
                 return parts[0]
             base = parts[0]
             for extra in parts[1:]:
-                ok = _apply_boolean(base, extra, "UNION", solver)
+                ok = apply_boolean(base, extra, "UNION", solver, bpy_module=bpy)
                 if not ok:
                     print(
                         f"Warning: UNION failed while combining {base.name}; solver={solver}"
@@ -1032,8 +999,8 @@ class BlockingWorkflow:
             print("Warning: Failed to create silhouette meshes.")
             return self.create_3d_blockout(num_slices=num_slices)
 
-        front_verts, front_faces = _mesh_counts(front_obj)
-        side_verts, side_faces = _mesh_counts(side_obj)
+        front_verts, front_faces = mesh_counts(front_obj)
+        side_verts, side_faces = mesh_counts(side_obj)
         print(
             f"DEBUG silhouette_intersection front_obj={front_obj.name} verts={front_verts} faces={front_faces}"
         )
@@ -1058,7 +1025,7 @@ class BlockingWorkflow:
         bpy.ops.object.modifier_apply(modifier=modifier.name)
         bpy.data.objects.remove(side_obj, do_unlink=True)
 
-        final_verts, final_faces = _mesh_counts(base_obj)
+        final_verts, final_faces = mesh_counts(base_obj)
         print(
             f"DEBUG silhouette_intersection intersect result verts={final_verts} faces={final_faces} solver={solver}"
         )

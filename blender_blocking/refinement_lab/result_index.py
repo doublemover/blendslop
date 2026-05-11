@@ -4,14 +4,16 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Iterable, Mapping
+from typing import Iterable, Mapping, Sequence
 
 from .contracts import ExperimentResult, json_safe, stable_hash
 from .parameter_search import promotion_decision, rank_results, score_result
 try:
     from blender_blocking.metrics.namespaces import get_metric_path
+    from blender_blocking.utils.json_io import write_json, write_jsonl
 except ImportError:  # pragma: no cover
     from metrics.namespaces import get_metric_path
+    from utils.json_io import write_json, write_jsonl
 
 
 class ResultIndex:
@@ -22,27 +24,15 @@ class ResultIndex:
         self.malformed_lines = 0
 
     def append(self, result: ExperimentResult) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = _relativize_result(result.to_dict(), self.run_root)
-        with self.path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(payload, sort_keys=True, default=str) + "\n")
-            handle.flush()
+        write_jsonl(self.path, (payload,), append=True)
 
     def append_many(self, results: Iterable[ExperimentResult]) -> None:
         rows = [
-            json.dumps(
-                _relativize_result(result.to_dict(), self.run_root),
-                sort_keys=True,
-                default=str,
-            )
+            _relativize_result(result.to_dict(), self.run_root)
             for result in results
         ]
-        if not rows:
-            return
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        with self.path.open("a", encoding="utf-8") as handle:
-            handle.write("\n".join(rows) + "\n")
-            handle.flush()
+        write_jsonl(self.path, rows, append=True)
 
     def load(self) -> list[ExperimentResult]:
         results, malformed = load_index(self.path, run_root=self.run_root)
@@ -93,18 +83,10 @@ def append_global_index_many(
     run_root: Path,
 ) -> None:
     rows = [
-        json.dumps(
-            _global_index_payload(result, run_root=run_root),
-            sort_keys=True,
-            default=str,
-        )
+        _global_index_payload(result, run_root=run_root)
         for result in results
     ]
-    if not rows:
-        return
-    global_path.parent.mkdir(parents=True, exist_ok=True)
-    with global_path.open("a", encoding="utf-8") as handle:
-        handle.write("\n".join(rows) + "\n")
+    write_jsonl(global_path, rows, append=True)
 
 
 def _global_index_payload(result: ExperimentResult, *, run_root: Path) -> dict[str, object]:
@@ -152,6 +134,7 @@ def write_leaderboard_json(
         for index, (result, score) in enumerate(scored)
     ]
     duplicate_groups = _annotate_duplicate_quality_groups(rows)
+    moonshot_summary = _moonshot_leaderboard_summary(rows)
     counts: dict[str, int] = {}
     for row in rows:
         counts[str(row["status"])] = counts.get(str(row["status"]), 0) + 1
@@ -164,6 +147,7 @@ def write_leaderboard_json(
             int(group["count"]) for group in duplicate_groups
         ),
         "duplicate_quality_groups": duplicate_groups,
+        "moonshot_summary": moonshot_summary,
         "top_by_objective": rows[0] if rows else None,
         "top_by_min_iou": max(
             rows,
@@ -173,11 +157,7 @@ def write_leaderboard_json(
         "fastest_acceptable": _fastest_acceptable(rows),
         "rows": rows,
     }
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n",
-        encoding="utf-8",
-    )
+    write_json(path, payload)
     return path
 
 
@@ -193,8 +173,8 @@ def write_leaderboard_md(
         "",
         f"Objective: `{objective}`",
         "",
-        "| Rank | Case | Variant | Mode | Status | Promotion | Score | Avg IoU | Min IoU | Front | Side | Top | Topology | Editability | Elapsed | Autopsy | Result |",
-        "|---:|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|",
+        "| Rank | Case | Variant | Mode | Status | Promotion | Score | Avg IoU | Min IoU | Front | Side | Top | Topology | Editability | Moonshots | Portfolio | Elapsed | Autopsy | Result |",
+        "|---:|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---|---|",
     ]
     rows: list[dict[str, object]] = []
     for index, (result, score) in enumerate(scored, start=1):
@@ -206,7 +186,7 @@ def write_leaderboard_md(
             "| {rank} | {case_id} | {variant_id} | {mode} | {status} | {promotion_tier} | {score:.3f} | "
             "{average_iou:.3f} | {min_iou:.3f} | {front_iou:.3f} | {side_iou:.3f} | "
             "{top_iou:.3f} | {topology_score:.3f} | {editability_score:.3f} | "
-            "{elapsed_s:.3f} | {autopsy_category} | {result_json} |".format(
+            "{moonshot_ran_count:.0f} | {moonshot_portfolio_kind} | {elapsed_s:.3f} | {autopsy_category} | {result_json} |".format(
                 **row
             )
         )
@@ -249,9 +229,26 @@ def _leaderboard_row(
         "status": result.status,
         "promotion_tier": promotion.tier,
         "promotable": promotion.promotable,
+        "parent_selectable": promotion.parent_selectable,
         "promotion_blockers": list(promotion.blockers),
+        "parent_selection_blockers": list(promotion.blocking_for_parent_selection),
         "backend_status": promotion.backend_status,
+        "cache_hit": bool(get_metric_path(result.metrics, "cache.hit")),
+        "cache_source": str(get_metric_path(result.metrics, "cache.source") or ""),
         "quality_fingerprint": _quality_fingerprint(result, promotion),
+        "moonshot_status_counts": _moonshot_status_counts(result),
+        "moonshot_ran_count": float(_moonshot_status_counts(result).get("ran", 0)),
+        "moonshot_error_count": float(_moonshot_status_counts(result).get("error", 0)),
+        "moonshot_top_delta": _moonshot_top_delta(result),
+        "moonshot_active_view": _moonshot_active_view(result),
+        "moonshot_active_sequence": _moonshot_active_sequence(result),
+        "moonshot_portfolio_action": _moonshot_portfolio_action(result),
+        "moonshot_portfolio_available_actions": _moonshot_portfolio_available_actions(result),
+        "moonshot_portfolio_rejected_actions": _moonshot_portfolio_rejected_actions(result),
+        "moonshot_portfolio_dependency_edges": _moonshot_portfolio_dependency_edges(result),
+        "moonshot_portfolio_execution_plan": _moonshot_portfolio_execution_plan(result),
+        "moonshot_portfolio_risks": _moonshot_portfolio_risks(result),
+        "moonshot_portfolio_kind": _moonshot_portfolio_kind(result),
         "score": float(score.get("total", 0.0)),
         "average_iou": result.avg_iou,
         "min_iou": result.min_iou,
@@ -308,6 +305,134 @@ def _annotate_duplicate_quality_groups(
         row["duplicate_quality_group_id"] = group_ids.get(fingerprint)
         row["duplicate_quality"] = count > 1
     return duplicate_groups
+
+
+def _moonshot_leaderboard_summary(rows: list[dict[str, object]]) -> dict[str, object]:
+    counts: dict[str, int] = {}
+    top_deltas: list[Mapping[str, object]] = []
+    active_views: list[Mapping[str, object]] = []
+    active_sequences: list[Mapping[str, object]] = []
+    portfolio_available_actions: list[Mapping[str, object]] = []
+    portfolio_actions: list[Mapping[str, object]] = []
+    portfolio_rejected_actions: list[Mapping[str, object]] = []
+    portfolio_dependency_edges: list[Mapping[str, object]] = []
+    portfolio_execution_plan: list[Mapping[str, object]] = []
+    portfolio_risks: list[Mapping[str, object]] = []
+    for row in rows:
+        status_counts = row.get("moonshot_status_counts")
+        if isinstance(status_counts, Mapping):
+            for status, count in status_counts.items():
+                counts[str(status)] = counts.get(str(status), 0) + int(count or 0)
+        top_delta = row.get("moonshot_top_delta")
+        if isinstance(top_delta, Mapping) and top_delta:
+            top_deltas.append(
+                {
+                    **dict(top_delta),
+                    "case_id": row.get("case_id", ""),
+                    "variant_id": row.get("variant_id", ""),
+                }
+            )
+        active_view = row.get("moonshot_active_view")
+        if isinstance(active_view, Mapping) and active_view:
+            active_views.append(
+                {
+                    **dict(active_view),
+                    "case_id": row.get("case_id", ""),
+                    "variant_id": row.get("variant_id", ""),
+                }
+            )
+        active_sequence = row.get("moonshot_active_sequence")
+        if isinstance(active_sequence, Sequence) and not isinstance(active_sequence, (str, bytes)):
+            for item in active_sequence:
+                if isinstance(item, Mapping):
+                    active_sequences.append(
+                        {
+                            **dict(item),
+                            "case_id": row.get("case_id", ""),
+                            "variant_id": row.get("variant_id", ""),
+                        }
+                    )
+        portfolio_action = row.get("moonshot_portfolio_action")
+        if isinstance(portfolio_action, Mapping) and portfolio_action:
+            portfolio_actions.append(
+                {
+                    **dict(portfolio_action),
+                    "case_id": row.get("case_id", ""),
+                    "variant_id": row.get("variant_id", ""),
+                }
+            )
+        for key, target in (
+            ("moonshot_portfolio_available_actions", portfolio_available_actions),
+            ("moonshot_portfolio_rejected_actions", portfolio_rejected_actions),
+        ):
+            items = row.get(key)
+            if isinstance(items, Sequence) and not isinstance(items, (str, bytes)):
+                for item in items:
+                    if isinstance(item, Mapping):
+                        target.append(
+                            {
+                                **dict(item),
+                                "case_id": row.get("case_id", ""),
+                                "variant_id": row.get("variant_id", ""),
+                            }
+                        )
+        for key, target in (
+            ("moonshot_portfolio_dependency_edges", portfolio_dependency_edges),
+            ("moonshot_portfolio_execution_plan", portfolio_execution_plan),
+            ("moonshot_portfolio_risks", portfolio_risks),
+        ):
+            items = row.get(key)
+            if isinstance(items, Sequence) and not isinstance(items, (str, bytes)):
+                for item in items:
+                    if isinstance(item, Mapping):
+                        target.append(
+                            {
+                                **dict(item),
+                                "case_id": row.get("case_id", ""),
+                                "variant_id": row.get("variant_id", ""),
+                            }
+                        )
+    top_deltas.sort(
+        key=lambda item: abs(float(item.get("delta", item.get("expected_metric_delta", 0.0)) or 0.0)),
+        reverse=True,
+    )
+    active_views.sort(
+        key=lambda item: float(item.get("expected_metric_delta", item.get("score", 0.0)) or 0.0),
+        reverse=True,
+    )
+    portfolio_actions.sort(
+        key=lambda item: float(item.get("score", 0.0) or 0.0),
+        reverse=True,
+    )
+    portfolio_available_actions.sort(
+        key=lambda item: float(item.get("score", 0.0) or 0.0),
+        reverse=True,
+    )
+    portfolio_rejected_actions.sort(
+        key=lambda item: (
+            str(item.get("rejection", "")),
+            -float(item.get("score", 0.0) or 0.0),
+        )
+    )
+    active_sequences.sort(key=lambda item: int(item.get("order", 999) or 999))
+    portfolio_risks.sort(
+        key=lambda item: float(item.get("risk", 0.0) or 0.0),
+        reverse=True,
+    )
+    return {
+        "status_counts": dict(sorted(counts.items())),
+        "ran_count": int(counts.get("ran", 0)),
+        "error_count": int(counts.get("error", 0)),
+        "top_candidate_deltas": top_deltas[:8],
+        "active_view_suggestions": active_views[:8],
+        "active_view_sequence": active_sequences[:8],
+        "portfolio_available_actions": portfolio_available_actions[:12],
+        "portfolio_actions": portfolio_actions[:8],
+        "portfolio_rejected_actions": portfolio_rejected_actions[:12],
+        "portfolio_dependency_edges": portfolio_dependency_edges[:12],
+        "portfolio_execution_plan": portfolio_execution_plan[:8],
+        "portfolio_risks": portfolio_risks[:8],
+    }
 
 
 def _quality_fingerprint(result: ExperimentResult, promotion: object) -> str:
@@ -399,6 +524,113 @@ def _fastest_acceptable(rows: list[Mapping[str, object]]) -> Mapping[str, object
         and (float(row.get("min_iou") or 0.0) >= 0.7 or float(row.get("average_iou") or 0.0) >= 0.85)
     ]
     return min(acceptable, key=lambda row: float(row.get("elapsed_s") or 0.0), default=None)
+
+
+def _moonshot_payload(result: ExperimentResult) -> Mapping[str, object]:
+    payload = get_metric_path(result.metrics, "moonshots")
+    if not isinstance(payload, Mapping):
+        payload = result.metrics.get("moonshots")
+    if isinstance(payload, Mapping):
+        return payload
+    backend = result.backend_result if isinstance(result.backend_result, Mapping) else {}
+    payload = backend.get("moonshot_evidence")
+    return payload if isinstance(payload, Mapping) else {}
+
+
+def _moonshot_status_counts(result: ExperimentResult) -> dict[str, int]:
+    payload = _moonshot_payload(result)
+    counts = payload.get("status_counts")
+    if not isinstance(counts, Mapping):
+        return {}
+    output: dict[str, int] = {}
+    for key, value in counts.items():
+        try:
+            output[str(key)] = int(value or 0)
+        except (TypeError, ValueError):
+            output[str(key)] = 0
+    return output
+
+
+def _moonshot_top_delta(result: ExperimentResult) -> Mapping[str, object]:
+    payload = _moonshot_payload(result)
+    deltas = payload.get("top_candidate_deltas")
+    if isinstance(deltas, list) and deltas:
+        first = deltas[0]
+        return first if isinstance(first, Mapping) else {}
+    return {}
+
+
+def _moonshot_active_view(result: ExperimentResult) -> Mapping[str, object]:
+    payload = _moonshot_payload(result)
+    suggestions = payload.get("active_view_suggestions")
+    if isinstance(suggestions, list) and suggestions:
+        first = suggestions[0]
+        return first if isinstance(first, Mapping) else {}
+    return {}
+
+
+def _moonshot_active_sequence(result: ExperimentResult) -> list[Mapping[str, object]]:
+    payload = _moonshot_payload(result)
+    sequence = payload.get("active_view_sequence")
+    if not isinstance(sequence, list):
+        return []
+    return [item for item in sequence if isinstance(item, Mapping)][:8]
+
+
+def _moonshot_portfolio_action(result: ExperimentResult) -> Mapping[str, object]:
+    payload = _moonshot_payload(result)
+    actions = payload.get("portfolio_actions")
+    if isinstance(actions, list) and actions:
+        first = actions[0]
+        return first if isinstance(first, Mapping) else {}
+    return {}
+
+
+def _moonshot_portfolio_available_actions(result: ExperimentResult) -> list[Mapping[str, object]]:
+    payload = _moonshot_payload(result)
+    actions = payload.get("portfolio_available_actions")
+    if not isinstance(actions, list):
+        return []
+    return [item for item in actions if isinstance(item, Mapping)][:12]
+
+
+def _moonshot_portfolio_rejected_actions(result: ExperimentResult) -> list[Mapping[str, object]]:
+    payload = _moonshot_payload(result)
+    actions = payload.get("portfolio_rejected_actions")
+    if not isinstance(actions, list):
+        return []
+    return [item for item in actions if isinstance(item, Mapping)][:12]
+
+
+def _moonshot_portfolio_dependency_edges(result: ExperimentResult) -> list[Mapping[str, object]]:
+    payload = _moonshot_payload(result)
+    edges = payload.get("portfolio_dependency_edges")
+    if not isinstance(edges, list):
+        return []
+    return [item for item in edges if isinstance(item, Mapping)][:12]
+
+
+def _moonshot_portfolio_execution_plan(result: ExperimentResult) -> list[Mapping[str, object]]:
+    payload = _moonshot_payload(result)
+    plan = payload.get("portfolio_execution_plan")
+    if not isinstance(plan, list):
+        return []
+    return [item for item in plan if isinstance(item, Mapping)][:8]
+
+
+def _moonshot_portfolio_risks(result: ExperimentResult) -> list[Mapping[str, object]]:
+    payload = _moonshot_payload(result)
+    risks = payload.get("portfolio_risks")
+    if not isinstance(risks, list):
+        return []
+    return [item for item in risks if isinstance(item, Mapping)][:8]
+
+
+def _moonshot_portfolio_kind(result: ExperimentResult) -> str:
+    action = _moonshot_portfolio_action(result)
+    if not action:
+        return ""
+    return str(action.get("kind", ""))
 
 
 def _metric(result: ExperimentResult, key: str) -> float:

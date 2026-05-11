@@ -8,6 +8,16 @@ from typing import Any, Sequence
 import numpy as np
 
 from .types import ProfileIntervalPx, UncertainProfileBand
+try:
+    from blender_blocking.geometry.morphology import (
+        binary_dilation as _binary_dilation,
+        binary_erosion as _binary_erosion,
+    )
+except ImportError:  # pragma: no cover - script-style imports
+    from geometry.morphology import (
+        binary_dilation as _binary_dilation,
+        binary_erosion as _binary_erosion,
+    )
 
 
 @dataclass(frozen=True)
@@ -284,31 +294,6 @@ def _optional_map(values: Any, shape: tuple[int, int], name: str) -> np.ndarray 
     if array.shape != shape:
         raise ValueError(f"{name} shape must match mask shape")
     return np.clip(array, 0.0, 1.0)
-
-
-def _binary_erosion(mask: np.ndarray, radius: int = 1) -> np.ndarray:
-    result = np.asarray(mask, dtype=bool)
-    for _ in range(max(1, int(radius))):
-        padded = np.pad(result, 1, mode="constant", constant_values=False)
-        result = np.logical_and.reduce(_neighbors(padded, result.shape))
-    return result
-
-
-def _binary_dilation(mask: np.ndarray, radius: int = 1) -> np.ndarray:
-    result = np.asarray(mask, dtype=bool)
-    for _ in range(max(1, int(radius))):
-        padded = np.pad(result, 1, mode="constant", constant_values=False)
-        result = np.logical_or.reduce(_neighbors(padded, result.shape))
-    return result
-
-
-def _neighbors(padded: np.ndarray, shape: Sequence[int]) -> list[np.ndarray]:
-    height, width = int(shape[0]), int(shape[1])
-    return [
-        padded[dy : dy + height, dx : dx + width]
-        for dy in range(3)
-        for dx in range(3)
-    ]
 
 
 def _unique_masks(masks: Sequence[np.ndarray]) -> tuple[np.ndarray, ...]:

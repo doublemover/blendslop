@@ -12,6 +12,7 @@ from . import (
     editable_retopology,
     human_constraint_learning,
     implicit_sdf_proxy,
+    portfolio_optimizer,
     shape_grammar_search,
 )
 
@@ -34,6 +35,7 @@ def register_builtins() -> None:
         implicit_sdf_proxy,
         editable_retopology,
         human_constraint_learning,
+        portfolio_optimizer,
     ):
         experiment = module.EXPERIMENT
         if experiment.experiment_id not in _REGISTRY:

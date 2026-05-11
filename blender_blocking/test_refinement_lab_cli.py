@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 from contextlib import redirect_stderr, redirect_stdout
 import io
 import json
@@ -13,10 +14,12 @@ import unittest
 
 try:
     from refinement_lab import cli
+    from refinement_lab.commands.common import REPO_ROOT, _run_options_from_args
     from refinement_lab.contracts import ExperimentResult
     from refinement_lab.result_index import ResultIndex
 except ModuleNotFoundError:  # pragma: no cover - package unittest path
     from blender_blocking.refinement_lab import cli
+    from blender_blocking.refinement_lab.commands.common import REPO_ROOT, _run_options_from_args
     from blender_blocking.refinement_lab.contracts import ExperimentResult
     from blender_blocking.refinement_lab.result_index import ResultIndex
 
@@ -350,6 +353,34 @@ class RefinementLabCliTests(unittest.TestCase):
             self.assertEqual(code, 0)
             payload = json.loads(out.read_text(encoding="utf-8"))
             self.assertEqual(payload["promotion"]["tier"], "degraded")
+
+    def test_run_options_resolve_relative_cache_root_under_repo(self) -> None:
+        args = argparse.Namespace(
+            html_report=False,
+            write_overlays=False,
+            bounds_debug=False,
+            autopsy=False,
+            fail_on_all_failed=True,
+            append_global_index=False,
+            report_failures="none",
+            adaptive_proposals=False,
+            lineage=False,
+            adaptive_max_proposals=1,
+            blender_exe=None,
+            cache_root=Path("temp/quality-refinement-cache"),
+            reference_cache=True,
+            candidate_cache=True,
+            resume_candidates=False,
+            debug_artifact_policy="none",
+            batch_index_writes=True,
+        )
+
+        options = _run_options_from_args(args)
+
+        self.assertEqual(
+            options.cache_root,
+            (REPO_ROOT / "temp" / "quality-refinement-cache").resolve(strict=False),
+        )
 
 
 def _write_square_mask(

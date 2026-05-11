@@ -14,6 +14,11 @@ try:
 except ImportError:  # pragma: no cover - supports direct script execution.
     from analytic_primitives import AnisotropicGaussianPrimitive, EllipsoidPrimitive
 
+try:
+    from geometry.morphology import boundary_band as _shared_boundary_band
+except ImportError:  # pragma: no cover - package import path
+    from ..geometry.morphology import boundary_band as _shared_boundary_band
+
 
 @dataclass(frozen=True)
 class OrthographicCamera:
@@ -305,39 +310,7 @@ def _boundary_iou(mask_a: np.ndarray, mask_b: np.ndarray, radius: int = 2) -> fl
 
 
 def _boundary_band(mask: np.ndarray, radius: int = 2) -> np.ndarray:
-    hard = np.asarray(mask, dtype=bool)
-    if not hard.any():
-        return np.zeros(hard.shape, dtype=bool)
-    radius = max(1, int(radius))
-    eroded = _binary_erosion(hard, radius=1)
-    boundary = np.logical_xor(hard, eroded)
-    return _binary_dilation(boundary, radius=radius)
-
-
-def _binary_erosion(mask: np.ndarray, radius: int = 1) -> np.ndarray:
-    result = np.asarray(mask, dtype=bool)
-    for _ in range(max(1, int(radius))):
-        padded = np.pad(result, 1, mode="constant", constant_values=False)
-        neighbors = [
-            padded[dy : dy + result.shape[0], dx : dx + result.shape[1]]
-            for dy in range(3)
-            for dx in range(3)
-        ]
-        result = np.logical_and.reduce(neighbors)
-    return result
-
-
-def _binary_dilation(mask: np.ndarray, radius: int = 1) -> np.ndarray:
-    result = np.asarray(mask, dtype=bool)
-    for _ in range(max(1, int(radius))):
-        padded = np.pad(result, 1, mode="constant", constant_values=False)
-        neighbors = [
-            padded[dy : dy + result.shape[0], dx : dx + result.shape[1]]
-            for dy in range(3)
-            for dx in range(3)
-        ]
-        result = np.logical_or.reduce(neighbors)
-    return result
+    return _shared_boundary_band(mask, radius=radius)
 
 
 def _signed_distance_loss(reference: np.ndarray, candidate: np.ndarray) -> float:

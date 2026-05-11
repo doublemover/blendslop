@@ -77,12 +77,29 @@ def apply_resfit_quality_floors(
     fail_reasons: list[str] = []
     degrade_reasons: list[str] = []
 
+    extras = getattr(metric, "extras", {}) or {}
     min_iou = _float_attr(metric, "area_iou_min")
     if min_iou is not None:
         if min_iou < 0.35:
-            fail_reasons.append(f"backend min IoU {min_iou:.3f} below 0.350")
+            message = _backend_iou_floor_message(
+                min_iou,
+                floor=0.35,
+                metric=metric,
+                extras=extras,
+            )
+            if _strict_backend_iou_floor_failure(config):
+                fail_reasons.append(message)
+            else:
+                degrade_reasons.append(message)
         elif min_iou < 0.55:
-            degrade_reasons.append(f"backend min IoU {min_iou:.3f} below 0.550")
+            degrade_reasons.append(
+                _backend_iou_floor_message(
+                    min_iou,
+                    floor=0.55,
+                    metric=metric,
+                    extras=extras,
+                )
+            )
 
     topology_score = _float_attr(metric, "topology_score")
     if topology_score is not None and topology_score < 0.75:
@@ -90,7 +107,6 @@ def apply_resfit_quality_floors(
             f"topology score {topology_score:.3f} below 0.750"
         )
 
-    extras = getattr(metric, "extras", {}) or {}
     topology = extras.get("topology") if isinstance(extras, Mapping) else None
     if isinstance(topology, Mapping):
         if topology.get("watertight") is False:
@@ -147,6 +163,42 @@ def _budget_limit_requires_degraded(config: Mapping[str, object]) -> bool:
         config.get("degrade_on_budget_exhaustion")
         or config.get("fail_on_budget_exhaustion")
         or config.get("require_optimizer_completion")
+    )
+
+
+def _strict_backend_iou_floor_failure(config: Mapping[str, object]) -> bool:
+    """Return whether weak primitive proxy/backend IoU should be fatal."""
+    return bool(
+        config.get("fail_on_quality_floor")
+        or config.get("fail_on_backend_quality_floor")
+        or config.get("fail_on_backend_iou_floor")
+        or config.get("fail_on_proxy_iou_floor")
+        or config.get("fail_on_internal_proxy_floor")
+        or config.get("require_backend_quality_floor")
+    )
+
+
+def _backend_iou_floor_message(
+    min_iou: float,
+    *,
+    floor: float,
+    metric: Any,
+    extras: Mapping[str, Any],
+) -> str:
+    source = "internal/proxy"
+    if isinstance(extras, Mapping):
+        raw_source = extras.get("backend_quality_source")
+        if raw_source:
+            source = str(raw_source).replace("_", " ")
+    primitive_count = None
+    if isinstance(extras, Mapping):
+        primitive_count = extras.get("primitive_count")
+    suffix = ""
+    if primitive_count is not None:
+        suffix = f" after emitting {primitive_count} primitive artifact(s)"
+    return (
+        f"primitive backend emitted renderable artifacts{suffix}, but {source} "
+        f"min IoU {min_iou:.3f} is below {floor:.3f}"
     )
 
 

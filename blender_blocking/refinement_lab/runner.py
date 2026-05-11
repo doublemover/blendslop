@@ -40,6 +40,8 @@ try:
         set_metric_path,
         set_render_aggregate_metrics,
     )
+    from blender_blocking.utils.json_io import load_json as _load_json_payload
+    from blender_blocking.utils.json_io import write_json as _write_json_payload
     from blender_blocking.utils.optional_deps import dependency_report
 except ImportError:  # pragma: no cover
     from config import BlockingConfig
@@ -48,6 +50,8 @@ except ImportError:  # pragma: no cover
         set_metric_path,
         set_render_aggregate_metrics,
     )
+    from utils.json_io import load_json as _load_json_payload
+    from utils.json_io import write_json as _write_json_payload
     from utils.optional_deps import dependency_report
 
 
@@ -74,6 +78,8 @@ class RunOptions:
     resume_candidates: bool = False
     debug_artifact_policy: str = "all"
     batch_index_writes: bool = True
+    moonshot_sidecars: bool = False
+    moonshot_experiments: tuple[str, ...] = ()
 
 
 class BaseRunner:
@@ -88,12 +94,25 @@ class BaseRunner:
         self.options = options
         self.base_config = base_config or BlockingConfig()
         self.run_root = Path(plan.output_root).resolve(strict=False)
+        self.cache_root = (
+            Path(options.cache_root).resolve(strict=False)
+            if options.cache_root is not None
+            else (self.run_root / ".cache").resolve(strict=False)
+        )
         self.index = ResultIndex(self.run_root, objective=plan.objective)
         self.cache_stats: dict[str, Any] = {
+            "reference_cache_hits": 0,
+            "reference_cache_misses": 0,
+            "reference_cache_writes": 0,
             "candidate_cache_hits": 0,
             "candidate_cache_misses": 0,
             "candidate_cache_writes": 0,
+            "candidate_cache_local_resume_writes": 0,
+            "candidate_cache_shared_writes": 0,
             "candidate_cache_sources": {},
+            "candidate_cache_skipped_hits": {},
+            "candidate_cache_no_hit_reasons": {},
+            "candidate_cache_key_schema": "refinement_candidate_effective_state_v2",
         }
 
     def run(self) -> tuple[bool, list[ExperimentResult]]:
@@ -380,9 +399,12 @@ class BaseRunner:
         spec = SyntheticShapeSpec.from_dict(spec_payload)
         output = self._case_dir(case) / "ref"
         resolution = tuple(self.base_config.render_silhouette.resolution)
-        if self.options.reference_cache and self.options.cache_root is not None:
+        if self.options.reference_cache:
             cache_dir = self._reference_cache_dir(case, resolution)
-            if not _reference_views_ready(cache_dir):
+            if _reference_views_ready(cache_dir):
+                self.cache_stats["reference_cache_hits"] += 1
+            else:
+                self.cache_stats["reference_cache_misses"] += 1
                 cache_dir.mkdir(parents=True, exist_ok=True)
                 render_views(
                     spec,
@@ -390,7 +412,11 @@ class BaseRunner:
                     resolution=resolution,
                     include_orbit=False,
                 )
-            rendered = _copy_reference_views(cache_dir, output)
+                self.cache_stats["reference_cache_writes"] += 1
+                _require_reference_views(cache_dir, context=f"cache:{cache_dir}")
+            rendered, copy_error = _copy_reference_views(cache_dir, output)
+            if copy_error:
+                raise RuntimeError(copy_error)
         else:
             rendered = render_views(
                 spec,
@@ -398,18 +424,19 @@ class BaseRunner:
                 resolution=resolution,
                 include_orbit=False,
             )
-        return {
+        references = {
             view: Path(rendered[view])
             for view in ("front", "side", "top")
             if view in rendered
         }
+        _require_reference_mapping(references, context=f"case:{case.case_id}")
+        return references
 
     def _reference_cache_dir(
         self,
         case: ExperimentCase,
         resolution: tuple[int, int],
     ) -> Path:
-        root = Path(self.options.cache_root or (self.run_root / ".cache"))
         spec_payload = (
             case.metadata.get("spec", {}) if isinstance(case.metadata, Mapping) else {}
         )
@@ -424,7 +451,7 @@ class BaseRunner:
             },
             length=24,
         )
-        return root / "references" / key[:2] / key
+        return self.cache_root / "references" / key[:2] / key
 
     def _candidate_state_key(
         self,
@@ -433,23 +460,28 @@ class BaseRunner:
         reference_paths: Mapping[str, Path],
     ) -> str:
         return stable_hash(
-            {
-                "schema": "refinement_candidate_state_v1",
-                "suite": self.plan.suite,
-                "track": self.plan.track,
-                "objective": self.plan.objective,
-                "case": case.to_dict(),
-                "variant": {
-                    "schema": "refinement_candidate_effective_variant_v1",
-                    "mode": variant.mode,
-                    "validation_mode": variant.validation_mode,
-                    "variant_hash": variant.variant_hash(),
-                },
-                "base_config": self.base_config.to_dict(),
-                "references": _reference_hashes(reference_paths),
-            },
+            self._candidate_state_key_material(case, variant, reference_paths),
             length=32,
         )
+
+    def _candidate_state_key_material(
+        self,
+        case: ExperimentCase,
+        variant: ExperimentVariant,
+        reference_paths: Mapping[str, Path],
+    ) -> Mapping[str, Any]:
+        case_payload = dict(case.to_dict())
+        case_payload.pop("reference_paths", None)
+        return {
+            "schema": "refinement_candidate_effective_state_v2",
+            "suite": self.plan.suite,
+            "track": self.plan.track,
+            "objective": self.plan.objective,
+            "case": case_payload,
+            "variant": _candidate_cache_variant_payload(variant),
+            "base_config": self.base_config.to_dict(),
+            "references": _reference_hashes(reference_paths),
+        }
 
     def _local_candidate_state_path(
         self,
@@ -462,8 +494,7 @@ class BaseRunner:
         self,
         key: str,
     ) -> Path:
-        root = Path(self.options.cache_root or (self.run_root / ".cache"))
-        return root / "candidates" / key[:2] / key / "candidate-state.json"
+        return self.cache_root / "candidates" / key[:2] / key / "candidate-state.json"
 
     def _load_reusable_candidate(
         self,
@@ -480,6 +511,9 @@ class BaseRunner:
         if self.options.candidate_cache:
             candidates.append((self._shared_candidate_state_path(key), "shared_cache"))
         for path, source in candidates:
+            if not path.exists():
+                self._record_candidate_cache_no_hit(f"{source}:missing_state")
+                continue
             result = self._load_candidate_state(path, key)
             if result is not None:
                 self._record_candidate_cache_hit(source)
@@ -502,21 +536,27 @@ class BaseRunner:
         try:
             state = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
+            self._record_candidate_cache_skip("unreadable_state")
             return None
         if state.get("schema_version") != "refinement_candidate_state_v1":
+            self._record_candidate_cache_skip("schema_mismatch")
             return None
         if state.get("state_key") != key:
+            self._record_candidate_cache_skip("key_mismatch")
             return None
         result_payload = state.get("result")
         if not isinstance(result_payload, Mapping):
+            self._record_candidate_cache_skip("missing_result")
             return None
         try:
             result = ExperimentResult.from_dict(
                 {**dict(result_payload), "run_id": self.plan.run_id}
             )
         except Exception:
+            self._record_candidate_cache_skip("invalid_result")
             return None
         if not _result_artifacts_ready(result):
+            self._record_candidate_cache_skip("artifacts_missing")
             return None
         return result
 
@@ -568,20 +608,34 @@ class BaseRunner:
             "written_utc": utc_now(),
             "result": result.to_dict(),
         }
-        paths = []
+        paths: list[tuple[Path, str]] = []
         if self.options.resume_candidates:
-            paths.append(self._local_candidate_state_path(case, variant))
+            paths.append((self._local_candidate_state_path(case, variant), "local_resume"))
         if self.options.candidate_cache:
-            paths.append(self._shared_candidate_state_path(key))
-        for path in paths:
+            paths.append((self._shared_candidate_state_path(key), "shared_cache"))
+        for path, destination in paths:
             _write_json(path, payload)
             self.cache_stats["candidate_cache_writes"] += 1
+            if destination == "local_resume":
+                self.cache_stats["candidate_cache_local_resume_writes"] += 1
+            elif destination == "shared_cache":
+                self.cache_stats["candidate_cache_shared_writes"] += 1
 
     def _record_candidate_cache_hit(self, source: str) -> None:
         self.cache_stats["candidate_cache_hits"] += 1
         sources = self.cache_stats["candidate_cache_sources"]
         if isinstance(sources, dict):
             sources[source] = int(sources.get(source, 0)) + 1
+
+    def _record_candidate_cache_skip(self, reason: str) -> None:
+        skipped = self.cache_stats["candidate_cache_skipped_hits"]
+        if isinstance(skipped, dict):
+            skipped[reason] = int(skipped.get(reason, 0)) + 1
+
+    def _record_candidate_cache_no_hit(self, reason: str) -> None:
+        no_hits = self.cache_stats["candidate_cache_no_hit_reasons"]
+        if isinstance(no_hits, dict):
+            no_hits[reason] = int(no_hits.get(reason, 0)) + 1
 
     def _write_cache_stats(self) -> Path | None:
         if not (
@@ -596,6 +650,7 @@ class BaseRunner:
             "reference_cache_enabled": bool(self.options.reference_cache),
             "candidate_cache_enabled": bool(self.options.candidate_cache),
             "resume_candidates_enabled": bool(self.options.resume_candidates),
+            "cache_root": self.cache_root.as_posix(),
             **self.cache_stats,
         }
         path = self.run_root / "cache-stats.json"
@@ -656,6 +711,52 @@ class BaseRunner:
                 "autopsy": autopsy_payload,
             }
         )
+        moonshot_payload: Mapping[str, Any] = {}
+        moonshot_artifacts: dict[str, Path] = {}
+        if self.options.moonshot_sidecars:
+            moonshot_payload, moonshot_artifacts = self._run_moonshot_sidecars(
+                case,
+                variant,
+                scored_result,
+                bounds_debug=bounds_payload,
+                autopsy=autopsy_payload,
+            )
+            metrics = copy.deepcopy(dict(scored_result.metrics))
+            metrics["moonshots"] = json_safe(moonshot_payload)
+            set_metric_path(
+                metrics,
+                "moonshot.ran_count",
+                float(moonshot_payload.get("ran_count", 0) or 0),
+            )
+            set_metric_path(
+                metrics,
+                "moonshot.error_count",
+                float(moonshot_payload.get("error_count", 0) or 0),
+            )
+            for item in moonshot_payload.get("results", ()) or ():
+                if not isinstance(item, Mapping):
+                    continue
+                experiment_id = str(item.get("experiment_id", ""))
+                status = str(item.get("status", ""))
+                if experiment_id:
+                    set_metric_path(
+                        metrics,
+                        f"moonshot.experiments.{experiment_id}.ran",
+                        1.0 if status == "ran" else 0.0,
+                    )
+            backend_result = copy.deepcopy(dict(scored_result.backend_result))
+            backend_result["moonshot_evidence"] = json_safe(moonshot_payload)
+            scored_result = ExperimentResult.from_dict(
+                {
+                    **scored_result.to_dict(),
+                    "metrics": metrics,
+                    "backend_result": backend_result,
+                    "artifacts": {
+                        **scored_result.to_dict().get("artifacts", {}),
+                        **{key: path.as_posix() for key, path in moonshot_artifacts.items()},
+                    },
+                }
+            )
         score_payload = score_result(scored_result, objective=self.plan.objective)
         return ExperimentResult(
             run_id=result.run_id,
@@ -671,15 +772,111 @@ class BaseRunner:
             result_json=result.result_json,
             render_paths=result.render_paths,
             reference_paths=result.reference_paths,
-            backend_result=result.backend_result,
-            metrics=result.metrics,
+            backend_result=scored_result.backend_result,
+            metrics=scored_result.metrics,
             score=score_payload,
-            artifacts=result.artifacts,
+            artifacts={**dict(scored_result.artifacts), **moonshot_artifacts},
             autopsy=autopsy_payload,
             bounds_debug=bounds_payload,
             warnings=result.warnings,
             errors=result.errors,
         )
+
+    def _run_moonshot_sidecars(
+        self,
+        case: ExperimentCase,
+        variant: ExperimentVariant,
+        result: ExperimentResult,
+        *,
+        bounds_debug: Mapping[str, Any],
+        autopsy: Mapping[str, Any],
+    ) -> tuple[Mapping[str, Any], dict[str, Path]]:
+        try:
+            from blender_blocking.moonshots import MoonshotRequest, list_experiments, run_experiment
+        except Exception:  # pragma: no cover - script-style imports
+            from moonshots import MoonshotRequest, list_experiments, run_experiment  # type: ignore
+
+        experiment_ids = self.options.moonshot_experiments or tuple(
+            experiment.experiment_id for experiment in list_experiments()
+        )
+        variant_dir = self._case_variant_dir(case, variant)
+        moonshot_root = variant_dir / "moonshots"
+        case_payload = case.to_dict()
+        candidate_payload = {
+            **result.to_dict(),
+            "case": case_payload,
+            "variant": variant.to_dict(),
+            "bounds_debug": json_safe(bounds_debug),
+            "autopsy": json_safe(autopsy),
+        }
+        results = []
+        status_counts: dict[str, int] = {}
+        artifacts: dict[str, Path] = {}
+        for experiment_id in experiment_ids:
+            prior_results = tuple(dict(item) for item in results)
+            request = MoonshotRequest(
+                experiment_id=experiment_id,
+                target=None,
+                candidate=candidate_payload,
+                config={
+                    "case": case_payload,
+                    "variant": variant.to_dict(),
+                    "target_signals": _signals_from_case(case),
+                    "refinement_result": result.to_dict(),
+                    "bounds_debug": json_safe(bounds_debug),
+                    "autopsy": json_safe(autopsy),
+                    "prior_moonshot_results": prior_results,
+                },
+                artifact_root=moonshot_root.as_posix(),
+                allow_research_execution=True,
+            )
+            try:
+                sidecar_result = run_experiment(request)
+            except Exception as exc:
+                try:
+                    from blender_blocking.moonshots.contracts import error_result
+                except Exception:  # pragma: no cover
+                    from moonshots.contracts import error_result  # type: ignore
+
+                sidecar_result = error_result(
+                    request,
+                    error=f"{type(exc).__name__}: {exc}",
+                )
+            payload = sidecar_result.to_dict()
+            results.append(payload)
+            status = str(payload.get("status", "unknown"))
+            status_counts[status] = status_counts.get(status, 0) + 1
+            for key, value in payload.get("artifacts", {}).items():
+                if value:
+                    artifacts[f"moonshot_{experiment_id}_{key}"] = Path(str(value))
+        summary = {
+            "schema_version": "refinement_moonshot_evidence_v1",
+            "enabled": True,
+            "case_id": case.case_id,
+            "variant_id": variant.variant_id,
+            "experiment_count": len(results),
+            "status_counts": dict(sorted(status_counts.items())),
+            "ran_count": int(status_counts.get("ran", 0)),
+            "skipped_count": int(status_counts.get("skipped", 0)),
+            "unsupported_count": int(status_counts.get("unsupported", 0)),
+            "error_count": int(status_counts.get("error", 0)),
+            "top_candidate_deltas": _moonshot_top_candidate_deltas(results),
+            "active_view_suggestions": _moonshot_active_view_suggestions(results),
+            "active_view_sequence": _moonshot_active_view_sequence(results),
+            "sdf_extraction_plans": _moonshot_sdf_extraction_plans(results),
+            "retopology_phase_plans": _moonshot_retopology_phase_plans(results),
+            "portfolio_available_actions": _moonshot_portfolio_available_actions(results),
+            "portfolio_actions": _moonshot_portfolio_actions(results),
+            "portfolio_rejected_actions": _moonshot_portfolio_rejected_actions(results),
+            "portfolio_dependency_edges": _moonshot_portfolio_dependency_edges(results),
+            "portfolio_execution_plan": _moonshot_portfolio_execution_plan(results),
+            "portfolio_risks": _moonshot_portfolio_risks(results),
+            "results": results,
+        }
+        summary_path = moonshot_root / "summary.json"
+        _write_json(summary_path, summary)
+        artifacts["moonshot_summary"] = summary_path
+        return summary, artifacts
 
     def _print_result_row(self, result: ExperimentResult) -> None:
         category = ""
@@ -1088,10 +1285,10 @@ def _result_from_payload(
     reference_paths: Mapping[str, Path],
     errors: Sequence[str] = (),
 ) -> ExperimentResult:
-    backend_result = (
-        payload.get("backend_result", {}) if isinstance(payload, Mapping) else {}
-    )
+    backend_result = _backend_result_from_payload(payload)
     metrics = _metrics_from_payload(payload)
+    if not metrics.get("validation_mode"):
+        metrics["validation_mode"] = variant.validation_mode
     set_metric_path(metrics, "variant.diagnostic_only", bool(variant.diagnostic_only))
     artifacts = _artifacts_from_payload(payload)
     render_paths = {
@@ -1114,7 +1311,7 @@ def _result_from_payload(
         result_json=result_json,
         render_paths=render_paths,
         reference_paths={key: Path(value) for key, value in reference_paths.items()},
-        backend_result=backend_result if isinstance(backend_result, Mapping) else {},
+        backend_result=backend_result,
         metrics=metrics,
         artifacts=artifacts,
         warnings=tuple(
@@ -1170,25 +1367,12 @@ def _metrics_from_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             if validation_mode == "render-iou":
                 metrics["min_view_iou"] = min_required
         set_render_aggregate_metrics(metrics)
-    backend = payload.get("backend_result", {})
+    backend = _backend_result_from_payload(payload)
     selected = backend.get("selected") if isinstance(backend, Mapping) else None
     source = selected if isinstance(selected, Mapping) else backend
     metric_result = (
         source.get("metric_result", {}) if isinstance(source, Mapping) else {}
     )
-    if isinstance(metric_result, Mapping):
-        for key in (
-            "area_iou_mean",
-            "area_iou_min",
-            "boundary_iou_mean",
-            "topology_score",
-            "editability_score",
-            "complexity_penalty",
-            "elapsed_s",
-        ):
-            if isinstance(metric_result.get(key), (int, float)):
-                target_key = namespace_metric_key(key)
-                set_metric_path(metrics, target_key, float(metric_result[key]))
     for bundle in _evaluation_bundles_from_payload(payload):
         for group in bundle.get("metric_groups", ()) or ():
             if not isinstance(group, Mapping):
@@ -1210,7 +1394,128 @@ def _metrics_from_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
                     metrics["editability_score"] = numeric
                 elif name == "topology.score":
                     metrics["topology_score"] = numeric
+    if isinstance(metric_result, Mapping):
+        _set_metric_result_metrics(metrics, metric_result)
     return metrics
+
+
+def _backend_result_from_payload(payload: Mapping[str, Any]) -> Mapping[str, Any]:
+    if not isinstance(payload, Mapping):
+        return {}
+    backend = payload.get("backend_result")
+    if isinstance(backend, Mapping):
+        return backend
+    if any(
+        key in payload
+        for key in (
+            "selected",
+            "candidates",
+            "scores",
+            "policy",
+            "pareto_report",
+            "cost_report",
+        )
+    ):
+        return payload
+    return {}
+
+
+def _set_metric_result_per_view(
+    metrics: dict[str, Any],
+    metric_result: Mapping[str, Any],
+) -> None:
+    per_view = metric_result.get("per_view")
+    if not isinstance(per_view, Mapping):
+        return
+    for view, item in per_view.items():
+        if not isinstance(item, Mapping):
+            continue
+        for source_key, target_key in (
+            ("area_iou", f"backend.per_view.{view}.area_iou"),
+            ("boundary_iou", f"backend.per_view.{view}.boundary_iou"),
+            (
+                "signed_distance_loss",
+                f"backend.per_view.{view}.signed_distance_loss",
+            ),
+        ):
+            raw = item.get(source_key)
+            if isinstance(raw, (int, float)):
+                set_metric_path(metrics, target_key, float(raw))
+
+
+def _set_metric_result_metrics(
+    metrics: dict[str, Any],
+    metric_result: Mapping[str, Any],
+) -> None:
+    for key in (
+        "area_iou_mean",
+        "area_iou_min",
+        "boundary_iou_mean",
+        "topology_score",
+        "editability_score",
+        "complexity_penalty",
+        "elapsed_s",
+    ):
+        if isinstance(metric_result.get(key), (int, float)):
+            target_key = namespace_metric_key(key)
+            set_metric_path(metrics, target_key, float(metric_result[key]))
+            if key == "topology_score":
+                metrics["topology_score"] = float(metric_result[key])
+            elif key == "editability_score":
+                metrics["editability_score"] = float(metric_result[key])
+    _set_metric_result_per_view(metrics, metric_result)
+    _set_metric_result_render_qa(metrics, metric_result)
+
+
+def _set_metric_result_render_qa(
+    metrics: dict[str, Any],
+    metric_result: Mapping[str, Any],
+) -> None:
+    extras = metric_result.get("extras")
+    if not isinstance(extras, Mapping):
+        return
+    render_qa = extras.get("render_qa")
+    if not isinstance(render_qa, Mapping):
+        return
+    status = render_qa.get("status")
+    if status is not None:
+        set_metric_path(metrics, "render.qa.status", str(status))
+    missing = render_qa.get("missing_required_metrics")
+    if isinstance(missing, bool):
+        set_metric_path(metrics, "render.qa.missing_required_metrics", missing)
+    per_view = render_qa.get("per_view")
+    if not isinstance(per_view, Mapping):
+        return
+    for view, item in per_view.items():
+        if not isinstance(item, Mapping):
+            continue
+        area_value = item.get("area_iou", item.get("iou"))
+        if isinstance(area_value, (int, float)):
+            value = float(area_value)
+            set_metric_path(metrics, f"render.per_view.{view}.area_iou", value)
+            metrics[f"{view}_iou"] = value
+        for source_key, target_key in (
+            ("boundary_iou", f"render.per_view.{view}.boundary_iou"),
+            (
+                "signed_distance_loss",
+                f"render.per_view.{view}.signed_distance_loss",
+            ),
+        ):
+            raw = item.get(source_key)
+            if isinstance(raw, (int, float)):
+                set_metric_path(metrics, target_key, float(raw))
+    required_values = [
+        metrics.get(f"{view}_iou")
+        for view in ("front", "side", "top")
+        if isinstance(metrics.get(f"{view}_iou"), (int, float))
+    ]
+    if len(required_values) == 3:
+        min_required = float(min(required_values))
+        set_metric_path(metrics, "render.min_view_iou", min_required)
+        metrics["min_view_iou"] = min_required
+        set_metric_path(metrics, "render.average_iou", sum(required_values) / 3.0)
+        metrics["average_iou"] = sum(required_values) / 3.0
+    set_render_aggregate_metrics(metrics)
 
 
 def _evaluation_bundles_from_payload(
@@ -1249,7 +1554,7 @@ def _artifacts_from_payload(payload: Mapping[str, Any]) -> dict[str, Path]:
     artifacts: dict[str, Path] = {}
     if not isinstance(payload, Mapping):
         return artifacts
-    backend = payload.get("backend_result", {})
+    backend = _backend_result_from_payload(payload)
     selected = backend.get("selected") if isinstance(backend, Mapping) else None
     sources = []
     if isinstance(selected, Mapping):
@@ -1334,21 +1639,291 @@ def _apply_config_overrides(target: object, overrides: Mapping[str, Any]) -> Non
             setattr(target, key, value)
 
 
+def _candidate_cache_variant_payload(variant: ExperimentVariant) -> Mapping[str, Any]:
+    ignored_parameters = {
+        "adaptive_loop_generation",
+        "adaptive_loop_parent_result",
+        "adaptive_loop_parent_mode",
+        "adaptive_loop_contributing_parent_results",
+    }
+    parameters = {
+        key: value
+        for key, value in dict(variant.parameters).items()
+        if key not in ignored_parameters
+    }
+    return {
+        "schema": "refinement_candidate_effective_variant_v2",
+        "mode": variant.mode,
+        "validation_mode": variant.validation_mode,
+        "parameters": json_safe(parameters),
+        "cli_args": tuple(variant.cli_args),
+        "config_overrides": json_safe(variant.config_overrides),
+    }
+
+
+def _signals_from_case(case: ExperimentCase) -> Mapping[str, Mapping[str, Any]]:
+    spec = case.metadata.get("spec", {}) if isinstance(case.metadata, Mapping) else {}
+    if not isinstance(spec, Mapping):
+        spec = {}
+    parameters = spec.get("parameters", {})
+    if not isinstance(parameters, Mapping):
+        parameters = {}
+    family = str(
+        parameters.get(
+            "primitive",
+            parameters.get(
+                "profile_kind",
+                parameters.get("blockout_kind", case.synthetic_definition),
+            ),
+        )
+        or ""
+    )
+    complexity = 0.25
+    if family in {"chair", "vehicle", "adversarial", "checkerboard_breakup"}:
+        complexity = 0.65
+    elif family in {"box", "cube", "rect", "block"}:
+        complexity = 0.18
+    hole_count = 1 if family in {"chair", "torus", "checkerboard_breakup"} else 0
+    band_samples = int(parameters.get("profile_samples", 24) or 24)
+    return {
+        "surface": {
+            "available": bool(spec),
+            "constraint_count": len(tuple(case.required_views)),
+            "surface_point_count": int(parameters.get("surface_point_count", 0) or 0),
+            "target_views": tuple(case.required_views),
+        },
+        "profile": {
+            "available": bool(spec),
+            "view_count": len(tuple(case.required_views)),
+            "band_samples": band_samples,
+            "interval_count": max(band_samples, int(band_samples * (1.0 + complexity))),
+            "hole_count": hole_count,
+            "mean_width": float(parameters.get("width", parameters.get("radius", 1.0)) or 1.0),
+            "max_width": float(parameters.get("width", parameters.get("radius", 1.0)) or 1.0),
+            "complexity": complexity,
+        },
+        "constraints": {
+            "available": bool(case.required_views),
+            "constraint_count": len(tuple(case.required_views)),
+            "constraint_views": {view: 1 for view in case.required_views},
+        },
+        "uncertainty": {
+            "available": bool(case.known_ambiguity_notes),
+            "overall_confidence_mean": 0.82 if case.known_ambiguity_notes else 0.95,
+            "overall_boundary_uncertainty_mean": 0.22 if case.known_ambiguity_notes else 0.05,
+            "consistency": 0.72 if case.known_ambiguity_notes else 0.88,
+            "view_details": {},
+        },
+        "topology": {
+            "available": bool(spec),
+            "score": max(0.35, 1.0 - complexity * 0.35),
+            "complexity": complexity,
+            "detail": "synthetic_case_metadata",
+        },
+    }
+
+
+def _moonshot_top_candidate_deltas(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    deltas = []
+    for result in results:
+        experiment_id = str(result.get("experiment_id", ""))
+        metrics = result.get("metrics")
+        if not isinstance(metrics, Mapping):
+            continue
+        for key in (
+            "volumetric_iou_delta",
+            "topology_score_delta",
+            "editability_score_delta",
+            "expected_objective_delta",
+            "best_expected_metric_delta",
+        ):
+            value = metrics.get(key)
+            if isinstance(value, (int, float)):
+                deltas.append(
+                    {
+                        "experiment_id": experiment_id,
+                        "metric": key,
+                        "delta": float(value),
+                    }
+                )
+    deltas.sort(key=lambda item: abs(float(item["delta"])), reverse=True)
+    return deltas[:8]
+
+
+def _moonshot_active_view_suggestions(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    suggestions = []
+    for result in results:
+        if result.get("experiment_id") != "active_view_planning":
+            continue
+        evidence = result.get("degradation", {}).get("evidence") if isinstance(result.get("degradation"), Mapping) else None
+        if not isinstance(evidence, Mapping):
+            continue
+        requests = evidence.get("requests")
+        if isinstance(requests, Sequence) and not isinstance(requests, (str, bytes)):
+            suggestions.extend(item for item in requests if isinstance(item, Mapping))
+    suggestions.sort(
+        key=lambda item: float(item.get("expected_metric_delta", item.get("score", 0.0)) or 0.0),
+        reverse=True,
+    )
+    return suggestions[:5]
+
+
+def _moonshot_active_view_sequence(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    sequence = []
+    for result in results:
+        if result.get("experiment_id") != "active_view_planning":
+            continue
+        evidence = _moonshot_evidence(result)
+        rows = evidence.get("sequence_plan")
+        if isinstance(rows, Sequence) and not isinstance(rows, (str, bytes)):
+            sequence.extend(item for item in rows if isinstance(item, Mapping))
+    sequence.sort(key=lambda item: int(item.get("order", 999) or 999))
+    return sequence[:8]
+
+
+def _moonshot_sdf_extraction_plans(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    plans = []
+    for result in results:
+        if result.get("experiment_id") != "implicit_sdf_proxy":
+            continue
+        plan = _moonshot_evidence(result).get("extraction_plan")
+        if isinstance(plan, Mapping):
+            plans.append(plan)
+    return plans[:4]
+
+
+def _moonshot_retopology_phase_plans(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    phases = []
+    for result in results:
+        if result.get("experiment_id") != "editable_retopology":
+            continue
+        rows = _moonshot_evidence(result).get("phase_plan")
+        if isinstance(rows, Sequence) and not isinstance(rows, (str, bytes)):
+            phases.extend(item for item in rows if isinstance(item, Mapping))
+    return phases[:8]
+
+
+def _moonshot_portfolio_actions(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    actions = []
+    for result in results:
+        if result.get("experiment_id") != "moonshot_portfolio_optimizer":
+            continue
+        evidence = result.get("degradation", {}).get("evidence") if isinstance(result.get("degradation"), Mapping) else None
+        if not isinstance(evidence, Mapping):
+            continue
+        selected = evidence.get("selected_actions")
+        if isinstance(selected, Sequence) and not isinstance(selected, (str, bytes)):
+            actions.extend(item for item in selected if isinstance(item, Mapping))
+    actions.sort(
+        key=lambda item: float(item.get("score", 0.0) or 0.0),
+        reverse=True,
+    )
+    return actions[:8]
+
+
+def _moonshot_portfolio_available_actions(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    actions = []
+    for result in results:
+        if result.get("experiment_id") != "moonshot_portfolio_optimizer":
+            continue
+        evidence = _moonshot_evidence(result)
+        rows = evidence.get("available_actions")
+        if isinstance(rows, Sequence) and not isinstance(rows, (str, bytes)):
+            actions.extend(item for item in rows if isinstance(item, Mapping))
+    actions.sort(
+        key=lambda item: float(item.get("score", 0.0) or 0.0),
+        reverse=True,
+    )
+    return actions[:12]
+
+
+def _moonshot_portfolio_rejected_actions(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    actions = []
+    for result in results:
+        if result.get("experiment_id") != "moonshot_portfolio_optimizer":
+            continue
+        evidence = _moonshot_evidence(result)
+        rows = evidence.get("rejected_actions")
+        if isinstance(rows, Sequence) and not isinstance(rows, (str, bytes)):
+            actions.extend(item for item in rows if isinstance(item, Mapping))
+    actions.sort(
+        key=lambda item: (str(item.get("rejection", "")), -float(item.get("score", 0.0) or 0.0)),
+    )
+    return actions[:12]
+
+
+def _moonshot_portfolio_dependency_edges(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    edges = []
+    for result in results:
+        if result.get("experiment_id") != "moonshot_portfolio_optimizer":
+            continue
+        rows = _moonshot_evidence(result).get("dependency_edges")
+        if isinstance(rows, Sequence) and not isinstance(rows, (str, bytes)):
+            edges.extend(item for item in rows if isinstance(item, Mapping))
+    return edges[:12]
+
+
+def _moonshot_portfolio_execution_plan(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    plan = []
+    for result in results:
+        if result.get("experiment_id") != "moonshot_portfolio_optimizer":
+            continue
+        rows = _moonshot_evidence(result).get("execution_plan")
+        if isinstance(rows, Sequence) and not isinstance(rows, (str, bytes)):
+            plan.extend(item for item in rows if isinstance(item, Mapping))
+    return plan[:8]
+
+
+def _moonshot_portfolio_risks(
+    results: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    risks = []
+    for result in results:
+        if result.get("experiment_id") != "moonshot_portfolio_optimizer":
+            continue
+        rows = _moonshot_evidence(result).get("risk_register")
+        if isinstance(rows, Sequence) and not isinstance(rows, (str, bytes)):
+            risks.extend(item for item in rows if isinstance(item, Mapping))
+    risks.sort(key=lambda item: float(item.get("risk", 0.0) or 0.0), reverse=True)
+    return risks[:8]
+
+
+def _moonshot_evidence(result: Mapping[str, Any]) -> Mapping[str, Any]:
+    degradation = result.get("degradation")
+    if isinstance(degradation, Mapping):
+        evidence = degradation.get("evidence")
+        if isinstance(evidence, Mapping):
+            return evidence
+    return {}
+
+
 def _load_json(path: Path) -> Mapping[str, Any]:
-    if not Path(path).exists():
-        return {}
-    try:
-        return json.loads(Path(path).read_text(encoding="utf-8"))
-    except Exception:
-        return {}
+    payload = _load_json_payload(path, default={})
+    return payload if isinstance(payload, Mapping) else {}
 
 
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n",
-        encoding="utf-8",
-    )
+    _write_json_payload(path, payload)
 
 
 def _write_text(path: Path, text: str) -> None:
@@ -1360,17 +1935,50 @@ def _reference_views_ready(directory: Path) -> bool:
     return all((Path(directory) / f"{view}.png").exists() for view in ("front", "side", "top"))
 
 
-def _copy_reference_views(source_dir: Path, output_dir: Path) -> dict[str, Path]:
+def _copy_reference_views(source_dir: Path, output_dir: Path) -> tuple[dict[str, Path], str | None]:
     output_dir.mkdir(parents=True, exist_ok=True)
     rendered: dict[str, Path] = {}
+    missing: list[str] = []
     for view in ("front", "side", "top"):
         source = Path(source_dir) / f"{view}.png"
         if not source.exists():
+            missing.append(view)
             continue
         target = output_dir / source.name
         _link_or_copy(source, target)
         rendered[view] = target
-    return rendered
+    missing.extend(
+        view
+        for view, path in rendered.items()
+        if not Path(path).exists()
+    )
+    if missing:
+        return rendered, f"reference_generation_missing_views:{','.join(sorted(set(missing)))}"
+    return rendered, None
+
+
+def _require_reference_views(directory: Path, *, context: str) -> None:
+    missing = [
+        view
+        for view in ("front", "side", "top")
+        if not (Path(directory) / f"{view}.png").exists()
+    ]
+    if missing:
+        raise RuntimeError(
+            f"reference_generation_missing_views:{','.join(missing)}:{context}"
+        )
+
+
+def _require_reference_mapping(reference_paths: Mapping[str, Path], *, context: str) -> None:
+    missing = [
+        view
+        for view in ("front", "side", "top")
+        if view not in reference_paths or not Path(reference_paths[view]).exists()
+    ]
+    if missing:
+        raise RuntimeError(
+            f"reference_generation_missing_views:{','.join(missing)}:{context}"
+        )
 
 
 def _link_or_copy(source: Path, target: Path) -> None:

@@ -51,7 +51,13 @@ from blender_blocking.utils.generation_context import GenerationContext
 from blender_blocking.utils.progress import progress_bar
 from blender_blocking.validation.silhouette_iou import canonicalize_mask, mask_from_image_array
 from blender_blocking.e2e.constants import *
-from blender_blocking.e2e.console import _print_candidate_table, _print_kv_table, _print_section, _status_icon
+from blender_blocking.e2e.console import (
+    _display_path,
+    _format_metric,
+    _print_section,
+    _status_icon,
+    _console_print,
+)
 from blender_blocking.e2e.payloads import _e2e_payload_with_evaluation
 
 
@@ -88,68 +94,77 @@ def _print_backend_summary(result: object) -> bool:
     passed = _backend_status_ok(status)
 
     _print_section("Backend Result")
-    _print_kv_table(
-        (
-            ("status", f"{_status_icon(passed)} {status}"),
-            ("backend", summary_source.get("backend_name") if summary_source else None),
-            (
-                "candidate",
-                summary_source.get("candidate_id") if summary_source else None,
-            ),
-            ("mesh", summary_source.get("mesh_path") if summary_source else None),
-            (
-                "primitives",
-                summary_source.get("primitive_path") if summary_source else None,
-            ),
-            ("volume", summary_source.get("volume_path") if summary_source else None),
-            (
-                "warnings",
-                len(summary_source.get("warnings", [])) if summary_source else None,
-            ),
-            (
-                "errors",
-                len(summary_source.get("errors", [])) if summary_source else None,
-            ),
-        )
-    )
+    details = [
+        f"status={_status_icon(passed)} {status}",
+    ]
+    if summary_source:
+        if summary_source.get("backend_name"):
+            details.append(f"backend={summary_source.get('backend_name')}")
+        if summary_source.get("candidate_id"):
+            details.append(f"candidate={summary_source.get('candidate_id')}")
+    _console_print("  " + " | ".join(details), color="green" if passed else "red")
+
+    artifacts = []
+    if summary_source:
+        for label, key in (
+            ("mesh", "mesh_path"),
+            ("primitives", "primitive_path"),
+            ("volume", "volume_path"),
+        ):
+            value = summary_source.get(key)
+            if value:
+                artifacts.append(f"{label}={_display_path(value)}")
+    if artifacts:
+        _console_print("  artifacts " + " | ".join(artifacts), color="dim")
+
+    warnings = len(summary_source.get("warnings", [])) if summary_source else 0
+    errors = len(summary_source.get("errors", [])) if summary_source else 0
 
     if data.get("candidates"):
-        print("\nCandidates:")
-        rows = []
+        counts: dict[str, int] = {}
+        ids: list[str] = []
         for candidate in data["candidates"]:
-            metric_result = candidate.get("metric_result", {}) or {}
-            mesh_path = candidate.get("mesh_path") or candidate.get(
-                "artifacts", {}
-            ).get("mesh_obj", "")
-            rows.append(
-                {
-                    "candidate": candidate.get("candidate_id", ""),
-                    "backend": candidate.get("backend_name", ""),
-                    "status": candidate.get("status", ""),
-                    "score": metric_result.get("scalar_score", ""),
-                    "warnings": len(candidate.get("warnings", [])),
-                    "errors": len(candidate.get("errors", [])),
-                    "artifact": mesh_path,
-                }
-            )
-        _print_candidate_table(rows)
+            candidate_status = str(candidate.get("status", "unknown"))
+            counts[candidate_status] = counts.get(candidate_status, 0) + 1
+            if candidate.get("candidate_id"):
+                ids.append(str(candidate.get("candidate_id")))
+        count_text = " ".join(f"{key}={value}" for key, value in sorted(counts.items()))
+        shown_ids = ",".join(ids[:4])
+        if len(ids) > 4:
+            shown_ids += f",+{len(ids) - 4}"
+        candidate_text = f"  candidates total={len(data['candidates'])}"
+        if count_text:
+            candidate_text += f" | {count_text}"
+        if shown_ids:
+            candidate_text += f" | ids={shown_ids}"
+        _console_print(candidate_text)
 
     metrics = summary_source.get("metric_result", {}) if summary_source else {}
     extras = metrics.get("extras", {}) if isinstance(metrics, dict) else {}
     if metrics:
-        _print_kv_table(
-            (
-                ("area_iou_mean", metrics.get("area_iou_mean")),
-                ("area_iou_min", metrics.get("area_iou_min")),
-                ("topology_score", metrics.get("topology_score")),
-                ("editability_score", metrics.get("editability_score")),
-                ("complexity_penalty", metrics.get("complexity_penalty")),
-                ("elapsed_s", metrics.get("elapsed_s")),
-                ("occupied_voxels", extras.get("occupied_voxels")),
-                ("primitive_count", extras.get("primitive_count")),
-                ("coverage_score", extras.get("coverage_score")),
-                ("loss_total", extras.get("loss_total")),
-            ),
-            title="\nMetrics:",
+        metric_parts = []
+        for label, value, precision in (
+            ("area_mean", metrics.get("area_iou_mean"), 4),
+            ("area_min", metrics.get("area_iou_min"), 4),
+            ("topology", metrics.get("topology_score"), 4),
+            ("editability", metrics.get("editability_score"), 4),
+            ("complexity", metrics.get("complexity_penalty"), 4),
+            ("elapsed", metrics.get("elapsed_s"), 2),
+            ("voxels", extras.get("occupied_voxels"), 0),
+            ("primitives", extras.get("primitive_count"), 0),
+            ("coverage", extras.get("coverage_score"), 4),
+            ("loss", extras.get("loss_total"), 4),
+        ):
+            if value is not None:
+                metric_parts.append(f"{label}={_format_metric(value, precision=precision)}")
+        health = f"warnings={warnings} errors={errors}"
+        if metric_parts:
+            _console_print("  metrics " + " | ".join(metric_parts) + f" | {health}")
+        else:
+            _console_print(f"  {health}")
+    elif warnings or errors:
+        _console_print(
+            f"  warnings={warnings} errors={errors}",
+            color="yellow" if warnings and not errors else "red",
         )
     return passed

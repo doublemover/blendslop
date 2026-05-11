@@ -5,6 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+try:
+    from blender_blocking.metrics.values import optional_float as _optional_float
+except ImportError:  # pragma: no cover - script-style imports
+    from metrics.values import optional_float as _optional_float
+
 
 @dataclass(frozen=True)
 class GeometryMetricReport:
@@ -256,15 +261,6 @@ def _normalize_vectors(vectors: Any) -> Any:
     if not valid.any():
         return np.empty((0, 3), dtype=float)
     return arr[valid] / norms[valid, None]
-
-
-def _optional_float(value: Any) -> float | None:
-    if value is None:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
 
 
 def _np() -> Any:

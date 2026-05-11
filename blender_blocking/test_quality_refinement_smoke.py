@@ -25,6 +25,8 @@ from scripts.run_quality_refinement_smoke import (
     preflight_phases,
     resolve_run_root,
     run_phases,
+    _run_phase_command,
+    _tee_stream,
     write_summary,
 )
 
@@ -228,26 +230,16 @@ class QualityRefinementSmokeTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         self.assertFalse(run_root.exists())
-        self.assertIn("Workload:", output.getvalue())
+        self.assertIn("Workload", output.getvalue())
 
-    def test_full_nightly_requires_explicit_yes_to_run(self) -> None:
-        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
-        output = io.StringIO()
+    def test_yes_confirmation_flag_is_removed(self) -> None:
         errors = io.StringIO()
-        with redirect_stdout(output), redirect_stderr(errors):
-            exit_code = smoke_main(
-                [
-                    "--profile",
-                    "full-nightly",
-                    "--run-root",
-                    str(run_root),
-                ]
-            )
+        with redirect_stderr(errors):
+            with self.assertRaises(SystemExit) as raised:
+                parse_args(["--yes"])
 
-        self.assertEqual(exit_code, 2)
-        self.assertFalse(run_root.exists())
-        self.assertIn("QUALITY / REFINEMENT SMOKE PLAN", output.getvalue())
-        self.assertIn("full-nightly is the broad opt-in workload", errors.getvalue())
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("unrecognized arguments: --yes", errors.getvalue())
 
     def test_full_nightly_allows_dry_run_without_yes(self) -> None:
         run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
@@ -265,7 +257,43 @@ class QualityRefinementSmokeTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         self.assertFalse(run_root.exists())
-        self.assertIn("Workload:", output.getvalue())
+        self.assertIn("Workload", output.getvalue())
+
+    def test_phase_command_decodes_utf8_output_without_mojibake(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        phase = PhaseCommand(
+            name="utf8-output",
+            description="unicode output decoding",
+            command=(
+                sys.executable,
+                "-c",
+                "import sys; sys.stdout.buffer.write('✓ unicode ok\\n'.encode('utf-8'))",
+            ),
+            artifacts=(),
+        )
+        output = io.StringIO()
+        try:
+            with redirect_stdout(output):
+                returncode, stdout_path, _stderr_path = _run_phase_command(
+                    phase,
+                    run_root=run_root,
+                )
+
+            self.assertEqual(returncode, 0)
+            self.assertIn("✓ unicode ok", output.getvalue())
+            self.assertNotIn("âœ", output.getvalue())
+            self.assertIn("✓ unicode ok", stdout_path.read_text(encoding="utf-8"))
+        finally:
+            shutil.rmtree(run_root, ignore_errors=True)
+
+    def test_tee_stream_adds_console_newline_for_partial_lines(self) -> None:
+        log = io.StringIO()
+        console = io.StringIO()
+
+        _tee_stream(["render     : 512x512 BLENDER_EEVEE"], log, console)
+
+        self.assertEqual(log.getvalue(), "render     : 512x512 BLENDER_EEVEE")
+        self.assertEqual(console.getvalue(), "render     : 512x512 BLENDER_EEVEE\n")
 
     def test_named_profiles_have_expected_phase_shapes(self) -> None:
         profiles = {
@@ -284,6 +312,13 @@ class QualityRefinementSmokeTests(unittest.TestCase):
             "primitive-fit-fast": ("refinement-primitive-fit",),
             "gaussian-diagnostic": ("refinement-gaussian-proxy",),
             "differentiable-smoke": ("refinement-differentiable-refine",),
+            "moonshot-smoke": (
+                "refinement-moonshot-sidecars",
+                "refinement-primitive-fit",
+                "refinement-gaussian-proxy",
+                "refinement-differentiable-refine",
+                "refinement-ensemble-selection",
+            ),
             "lpips-only": ("lpips-novel-view",),
         }
         for profile, expected_names in profiles.items():
@@ -352,7 +387,9 @@ class QualityRefinementSmokeTests(unittest.TestCase):
         self.assertIn("--warn-only", budget.command)
 
     def test_phase_resume_skips_completed_command_with_artifact(self) -> None:
-        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        run_root = resolve_run_root(
+            Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        )
         marker = run_root / "marker.txt"
         counter = run_root / "counter.txt"
         command = (
@@ -451,7 +488,7 @@ class QualityRefinementSmokeTests(unittest.TestCase):
             formatted,
         )
 
-    def test_summary_marks_missing_matrix_metrics_as_na(self) -> None:
+    def test_summary_uses_backend_matrix_metrics_when_render_metrics_absent(self) -> None:
         run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
         matrix_dir = run_root / "m" / "backend"
         matrix_dir.mkdir(parents=True)
@@ -466,7 +503,65 @@ class QualityRefinementSmokeTests(unittest.TestCase):
         try:
             path = write_summary(run_root, (), ())
             summary = path.read_text(encoding="utf-8")
-            self.assertIn("| `visual_hull_voxel` | 1 | 1 | n/a | n/a | n/a |", summary)
+            self.assertIn(
+                "| `visual_hull_voxel` | 1 | 1 | 0.9000 | n/a | n/a | min_iou:backend:1 |",
+                summary,
+            )
+        finally:
+            shutil.rmtree(run_root, ignore_errors=True)
+
+    def test_summary_writes_failed_matrix_row_details_and_machine_aliases(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        matrix_dir = run_root / "m" / "primitive-fit"
+        matrix_dir.mkdir(parents=True)
+        (matrix_dir / "matrix.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "e2e_synthetic_matrix_v1",
+                    "matrix": [
+                        {
+                            "suite": "primitive-fit",
+                            "case": "primitive-fit:capsule",
+                            "shape_id": "capsule_seed_1236",
+                            "mode": "primitive_fit_refine",
+                            "status": "fail",
+                            "passed": False,
+                            "result_json": "m/primitive-fit/result.json",
+                            "metrics": {
+                                "backend": {"area_iou_min": 0.002},
+                                "silhouette": {
+                                    "min_view_iou": 0.318,
+                                    "per_view": {
+                                        "front": {"area_iou": 0.318},
+                                        "side": {"area_iou": 0.319},
+                                        "top": {"area_iou": 0.374},
+                                    },
+                                },
+                            },
+                            "evaluation_bundle": {
+                                "errors": ["backend min IoU 0.002 below 0.350"]
+                            },
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        try:
+            path = write_summary(run_root, (), ())
+            summary = path.read_text(encoding="utf-8")
+            payload = json.loads((run_root / "summary.json").read_text(encoding="utf-8"))
+
+            self.assertIn("## Failed Matrix Rows", summary)
+            self.assertIn("primitive-fit:capsule", summary)
+            self.assertIn("backend min IoU 0.002 below 0.350", summary)
+            self.assertEqual(payload["matrix_failed"], 1)
+            self.assertEqual(payload["matrix_failed_rows"][0]["shape_id"], "capsule_seed_1236")
+            self.assertEqual(payload["matrix_failed_rows"][0]["render_metric_source"], "silhouette")
+            self.assertEqual(payload["required_refinement_failures"], [])
+            self.assertEqual(payload["required_refinement_failure_count"], 0)
+            self.assertEqual(payload["reference_cache_totals"]["hits"], 0)
+            self.assertEqual(payload["candidate_cache_totals"]["hits"], 0)
         finally:
             shutil.rmtree(run_root, ignore_errors=True)
 
@@ -515,6 +610,207 @@ class QualityRefinementSmokeTests(unittest.TestCase):
         finally:
             shutil.rmtree(run_root, ignore_errors=True)
 
+    def test_summary_quality_status_fails_on_all_error_refinement_rows(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        refinement_dir = run_root / "r" / "primitive-fit"
+        generation_dir = refinement_dir / "g00"
+        generation_dir.mkdir(parents=True)
+        (refinement_dir / "adaptive-loop-summary.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "refinement_adaptive_loop_summary_v1",
+                    "stopped_reason": "no_promotable_parents",
+                    "generation_count": 1,
+                    "generations": [
+                        {"generation": 0, "parent_health": {"promotable_count": 0}}
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        (generation_dir / "leaderboard.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "refinement_leaderboard_v1",
+                    "rows": [
+                        {
+                            "case_id": "box_seed_1234",
+                            "variant_id": "baseline",
+                            "status": "error",
+                            "promotable": False,
+                            "promotion_tier": "blocked_error",
+                        },
+                        {
+                            "case_id": "capsule_seed_1236",
+                            "variant_id": "baseline",
+                            "status": "error",
+                            "promotable": False,
+                            "promotion_tier": "blocked_error",
+                        },
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        try:
+            path = write_summary(run_root, (), ())
+            summary = path.read_text(encoding="utf-8")
+            payload = json.loads((run_root / "summary.json").read_text(encoding="utf-8"))
+
+            self.assertIn("Overall quality status: **fail**", summary)
+            self.assertIn("Required refinement failures: 1", summary)
+            self.assertIn("all_error_rows", summary)
+            self.assertEqual(payload["overall_quality_status"], "fail")
+            self.assertEqual(payload["quality_status_reason"], "refinement_required_failures")
+            self.assertEqual(payload["refinement_error_rows"], 2)
+            self.assertEqual(payload["refinement_promotable_rows"], 0)
+            self.assertEqual(
+                payload["refinement_required_failures"][0]["failure_reasons"],
+                [
+                    "all_error_rows",
+                    "zero_promotable_candidates",
+                    "no_promotable_parents",
+                ],
+            )
+        finally:
+            shutil.rmtree(run_root, ignore_errors=True)
+
+    def test_summary_includes_moonshot_portfolio_actions(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        refinement_dir = run_root / "r" / "moonshot-sidecars"
+        generation_dir = refinement_dir / "g00"
+        generation_dir.mkdir(parents=True)
+        (refinement_dir / "adaptive-loop-summary.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "refinement_adaptive_loop_summary_v1",
+                    "stopped_reason": "complete",
+                    "generation_count": 1,
+                    "generations": [
+                        {"generation": 0, "parent_health": {"promotable_count": 1}}
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        (generation_dir / "leaderboard.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "refinement_leaderboard_v1",
+                    "moonshot_summary": {
+                        "status_counts": {"ran": 6},
+                        "portfolio_available_actions": [
+                            {
+                                "source": "shape_grammar_search",
+                                "kind": "compile_selected_shape_program",
+                                "score": 0.2234,
+                                "case_id": "box",
+                                "variant_id": "moonshot",
+                            }
+                        ],
+                        "portfolio_actions": [
+                            {
+                                "source": "active_view_planning",
+                                "kind": "capture_next_best_view",
+                                "score": 0.1234,
+                                "risk": 0.08,
+                                "case_id": "box",
+                                "variant_id": "moonshot",
+                            }
+                        ],
+                        "portfolio_rejected_actions": [
+                            {
+                                "source": "differentiable_primitives",
+                                "kind": "run_finite_difference_refinement_probe",
+                                "score": 0.03,
+                                "rejection": "blocked_prerequisite",
+                                "case_id": "box",
+                                "variant_id": "moonshot",
+                            }
+                        ],
+                        "active_view_sequence": [
+                            {
+                                "order": 1,
+                                "view_id": "top_oblique_060",
+                                "marginal_expected_metric_delta": 0.047,
+                                "case_id": "box",
+                                "variant_id": "moonshot",
+                            }
+                        ],
+                        "portfolio_dependency_edges": [
+                            {
+                                "before_kind": "capture_next_best_view",
+                                "after_kind": "compile_selected_shape_program",
+                                "type": "rerank",
+                                "case_id": "box",
+                                "variant_id": "moonshot",
+                            }
+                        ],
+                        "portfolio_execution_plan": [
+                            {
+                                "stage": "capture_and_constraints",
+                                "order": 1,
+                                "actions": [{"kind": "capture_next_best_view"}],
+                                "case_id": "box",
+                                "variant_id": "moonshot",
+                            }
+                        ],
+                        "portfolio_risks": [
+                            {
+                                "kind": "view_evidence",
+                                "level": "medium",
+                                "risk": 0.31,
+                                "case_id": "box",
+                                "variant_id": "moonshot",
+                            }
+                        ],
+                    },
+                    "rows": [
+                        {
+                            "case_id": "box",
+                            "variant_id": "moonshot",
+                            "status": "pass",
+                            "promotable": True,
+                            "parent_selectable": True,
+                            "promotion_tier": "promotable",
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        try:
+            path = write_summary(run_root, (), ())
+            summary = path.read_text(encoding="utf-8")
+            payload = json.loads((run_root / "summary.json").read_text(encoding="utf-8"))
+
+            self.assertIn("Available moonshot evidence:", summary)
+            self.assertIn("Portfolio actions:", summary)
+            self.assertIn("capture_next_best_view", summary)
+            self.assertIn("Rejected portfolio actions:", summary)
+            self.assertIn("blocked_prerequisite", summary)
+            self.assertIn("Portfolio dependencies:", summary)
+            self.assertIn("Portfolio execution stages:", summary)
+            self.assertIn("Portfolio risks:", summary)
+            self.assertEqual(
+                payload["moonshot_summary"]["portfolio_available_actions"][0]["kind"],
+                "compile_selected_shape_program",
+            )
+            self.assertEqual(
+                payload["moonshot_summary"]["portfolio_actions"][0]["kind"],
+                "capture_next_best_view",
+            )
+            self.assertEqual(
+                payload["moonshot_summary"]["portfolio_rejected_actions"][0]["rejection"],
+                "blocked_prerequisite",
+            )
+            self.assertEqual(
+                payload["moonshot_summary"]["portfolio_dependency_edges"][0]["after_kind"],
+                "compile_selected_shape_program",
+            )
+        finally:
+            shutil.rmtree(run_root, ignore_errors=True)
+
     def test_summary_includes_refinement_cache_stats(self) -> None:
         run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
         cache_dir = run_root / "r" / "primitive-fit"
@@ -523,6 +819,9 @@ class QualityRefinementSmokeTests(unittest.TestCase):
             json.dumps(
                 {
                     "schema_version": "refinement_cache_stats_v1",
+                    "reference_cache_hits": 1,
+                    "reference_cache_misses": 2,
+                    "reference_cache_writes": 1,
                     "candidate_cache_hits": 3,
                     "candidate_cache_misses": 2,
                     "candidate_cache_writes": 5,
@@ -537,11 +836,71 @@ class QualityRefinementSmokeTests(unittest.TestCase):
             payload = json.loads((run_root / "summary.json").read_text(encoding="utf-8"))
 
             self.assertIn("## Cache Stats", summary)
-            self.assertIn("| **total** | 3 | 2 | 5 |", summary)
+            self.assertIn("| **total** | 1 | 2 | 1 | 3 | 2 | 5 |", summary)
+            self.assertEqual(payload["cache_totals"]["reference_cache_hits"], 1)
+            self.assertEqual(payload["cache_totals"]["reference_cache_misses"], 2)
+            self.assertEqual(payload["cache_totals"]["reference_cache_writes"], 1)
             self.assertEqual(payload["cache_totals"]["candidate_cache_hits"], 3)
             self.assertEqual(
                 payload["cache_totals"]["candidate_cache_sources"]["shared_cache"],
                 3,
+            )
+        finally:
+            shutil.rmtree(run_root, ignore_errors=True)
+
+    def test_summary_warns_when_candidate_cache_has_duplicates_but_no_shared_hits(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        refinement_dir = run_root / "r" / "primitive-fit"
+        generation_dir = refinement_dir / "g00"
+        generation_dir.mkdir(parents=True)
+        (refinement_dir / "adaptive-loop-summary.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "refinement_adaptive_loop_summary_v1",
+                    "stopped_reason": "no_child_variants",
+                    "generation_count": 1,
+                    "generations": [
+                        {"generation": 0, "parent_health": {"promotable_count": 1}}
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        (generation_dir / "leaderboard.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "refinement_leaderboard_v1",
+                    "duplicate_quality_duplicate_row_count": 4,
+                    "rows": [
+                        {"status": "pass", "promotable": True, "parent_selectable": True}
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        (generation_dir / "cache-stats.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "refinement_cache_stats_v1",
+                    "candidate_cache_enabled": True,
+                    "candidate_cache_hits": 0,
+                    "candidate_cache_misses": 4,
+                    "candidate_cache_writes": 4,
+                    "candidate_cache_sources": {},
+                }
+            ),
+            encoding="utf-8",
+        )
+        try:
+            path = write_summary(run_root, (), ())
+            summary = path.read_text(encoding="utf-8")
+            payload = json.loads((run_root / "summary.json").read_text(encoding="utf-8"))
+
+            self.assertIn("## Cache Health Warnings", summary)
+            self.assertIn("candidate_cache_no_shared_hits_for_duplicates", summary)
+            self.assertEqual(
+                payload["cache_health_warnings"][0]["code"],
+                "candidate_cache_no_shared_hits_for_duplicates",
             )
         finally:
             shutil.rmtree(run_root, ignore_errors=True)

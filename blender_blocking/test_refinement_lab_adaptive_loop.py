@@ -7,7 +7,10 @@ import json
 import tempfile
 import unittest
 
-from blender_blocking.refinement_lab.adaptive import proposals_from_bundle
+from blender_blocking.refinement_lab.adaptive import (
+    proposals_from_bundle,
+    proposals_from_result_payload,
+)
 from blender_blocking.refinement_lab.adaptive_loop import (
     AdaptiveLoopOptions,
     _child_variants_from_results,
@@ -148,6 +151,131 @@ class AdaptiveLoopTests(unittest.TestCase):
         self.assertIn("--uv-strict", proposal.cli_args)
         self.assertIn("appearance", proposal.tags)
 
+    def test_degraded_primitive_fit_proxy_floor_gets_targeted_retry(self) -> None:
+        proposals = proposals_from_result_payload(
+            {
+                "backend_result": {
+                    "status": "degraded",
+                    "backend_name": "primitive_fit_refine",
+                    "warnings": (
+                        "primitive backend emitted renderable artifacts, but internal/proxy min IoU 0.310 is below 0.350",
+                    ),
+                    "metric_result": {
+                        "area_iou_min": 0.31,
+                        "area_iou_mean": 0.36,
+                    },
+                }
+            }
+        )
+        by_title = {proposal.title: proposal for proposal in proposals}
+
+        self.assertIn("Primitive-fit proxy mismatch retry", by_title)
+        proposal = by_title["Primitive-fit proxy mismatch retry"]
+        self.assertTrue(proposal.diagnostic_only)
+        self.assertIn("--primitive-max-objective-evaluations", proposal.cli_args)
+        self.assertIn("bounds-probe", proposal.tags)
+
+    def test_degraded_primitive_fit_proxy_retry_wins_single_child_slot(self) -> None:
+        proposals = proposals_from_result_payload(
+            {
+                "backend_result": {
+                    "status": "degraded",
+                    "backend_name": "primitive_fit_refine",
+                    "warnings": (
+                        "primitive backend emitted renderable artifacts, but internal/proxy min IoU 0.310 is below 0.350",
+                    ),
+                    "metric_result": {"area_iou_min": 0.31},
+                    "evaluation_bundle": {
+                        "status": "fail",
+                        "metric_groups": (),
+                        "failures": ("silhouette_required_metrics_missing",),
+                        "metrics": {},
+                    },
+                }
+            },
+            max_proposals=1,
+        )
+
+        self.assertEqual(proposals[0].title, "Primitive-fit proxy mismatch retry")
+
+    def test_shape_program_missing_render_qa_gets_compile_validation_retry(self) -> None:
+        proposals = proposals_from_result_payload(
+            {
+                "backend_result": {
+                    "status": "degraded",
+                    "backend_name": "shape_program",
+                    "metric_result": {
+                        "extras": {
+                            "render_qa": {
+                                "status": "missing",
+                                "missing_required_metrics": True,
+                            }
+                        }
+                    },
+                }
+            }
+        )
+        by_title = {proposal.title: proposal for proposal in proposals}
+
+        self.assertIn("Shape-program render-QA compile check", by_title)
+        proposal = by_title["Shape-program render-QA compile check"]
+        self.assertEqual(proposal.validation_mode, "render-iou")
+        self.assertIn("--shape-run-export-qa", proposal.cli_args)
+
+    def test_shape_program_render_qa_retry_survives_nested_bundle_proposals(self) -> None:
+        proposals = proposals_from_result_payload(
+            {
+                "backend_result": {
+                    "status": "degraded",
+                    "backend_name": "shape_program",
+                    "metric_result": {
+                        "extras": {
+                            "render_qa": {
+                                "status": "missing",
+                                "missing_required_metrics": True,
+                            }
+                        }
+                    },
+                    "evaluation_bundle": {
+                        "status": "fail",
+                        "metric_groups": (),
+                        "failures": ("silhouette_required_metrics_missing",),
+                        "metrics": {},
+                    },
+                }
+            }
+        )
+        titles = {proposal.title for proposal in proposals}
+
+        self.assertIn("Shape-program render-QA compile check", titles)
+
+    def test_shape_program_render_qa_retry_wins_single_child_slot(self) -> None:
+        proposals = proposals_from_result_payload(
+            {
+                "backend_result": {
+                    "status": "degraded",
+                    "backend_name": "shape_program",
+                    "metric_result": {
+                        "extras": {
+                            "render_qa": {
+                                "status": "missing",
+                                "missing_required_metrics": True,
+                            }
+                        }
+                    },
+                    "evaluation_bundle": {
+                        "status": "fail",
+                        "metric_groups": (),
+                        "failures": ("silhouette_required_metrics_missing",),
+                        "metrics": {},
+                    },
+                }
+            },
+            max_proposals=1,
+        )
+
+        self.assertEqual(proposals[0].title, "Shape-program render-QA compile check")
+
     def test_loop_runs_child_generation_from_ranked_adaptive_variants(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             harness = _FakeHarness()
@@ -276,6 +404,77 @@ class AdaptiveLoopTests(unittest.TestCase):
                     "promotion_state"
                 ],
                 "metric_only_candidate",
+            )
+
+    def test_loop_uses_high_render_topology_blocked_candidate_as_repair_parent(self) -> None:
+        class RepairableTopologyRunner(_FakeRunner):
+            def run(self) -> tuple[bool, list[ExperimentResult]]:
+                generation = len(self.harness.plans)
+                self.harness.plans.append(self.plan)
+                variant = self.plan.variants[0]
+                return True, [
+                    ExperimentResult(
+                        run_id=self.plan.run_id,
+                        case_id=self.plan.cases[0].case_id,
+                        variant_id=variant.variant_id,
+                        mode=variant.mode,
+                        status="pass",
+                        exit_code=0,
+                        started_utc="s",
+                        finished_utc="f",
+                        elapsed_s=1.0,
+                        backend_result={"status": "success"},
+                        metrics={
+                            "average_iou": 0.93,
+                            "front_iou": 0.94,
+                            "side_iou": 0.92,
+                            "top_iou": 0.93,
+                            "topology": {"score": 0.4},
+                        },
+                    )
+                ]
+
+        class RepairableTopologyHarness(_FakeHarness):
+            def factory(
+                self,
+                plan: ExperimentPlan,
+                _options: RunOptions,
+                _base_config: object,
+            ) -> RepairableTopologyRunner:
+                return RepairableTopologyRunner(self, plan)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            harness = RepairableTopologyHarness()
+            summary = run_adaptive_loop(
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="coordinate",
+                objective="reliability_first",
+                output_root=Path(tmp) / "loop",
+                max_runs=1,
+                options=AdaptiveLoopOptions(
+                    generations=2,
+                    parent_top_k=1,
+                    children_per_parent=1,
+                    run_options=RunOptions(
+                        html_report=False,
+                        write_overlays=False,
+                        append_global_index=False,
+                        write_lineage=False,
+                    ),
+                ),
+                runner_factory=harness.factory,
+            )
+
+            self.assertEqual(len(harness.plans), 2)
+            self.assertEqual(summary.generations[0].parent_health["promotable_count"], 0)
+            self.assertEqual(
+                summary.generations[0].parent_health["parent_selectable_count"],
+                1,
+            )
+            self.assertEqual(
+                summary.generations[0].parent_health["top_parent_selectable_ids"],
+                [harness.plans[0].variants[0].variant_id],
             )
 
     def test_child_variant_dedupe_preserves_contributing_parents(self) -> None:

@@ -113,6 +113,12 @@ class SilhouetteIntersectionBackend(BaseBackend):
                 extrude_profile,
                 triangulate_object,
             )
+            from integration.blender_ops.silhouette_boolean import (
+                apply_boolean,
+                apply_transforms,
+                mesh_counts,
+                split_contours,
+            )
             from integration.blender_ops.scene_setup import add_camera, add_lighting, setup_scene
             from integration.shape_matching.contour_analyzer import find_contours
             from utils.blender_version import resolve_boolean_solver
@@ -150,56 +156,6 @@ class SilhouetteIntersectionBackend(BaseBackend):
                     errors=("silhouette_intersection found no usable contours",),
                 )
 
-            def _split_contours(
-                contours: List[np.ndarray], hierarchy: Optional[np.ndarray]
-            ) -> Tuple[List[int], Dict[int, List[int]]]:
-                if not contours:
-                    return [], {}
-                if hierarchy is None or len(hierarchy) == 0:
-                    outer = list(range(len(contours)))
-                    return outer, {}
-                outer = [i for i, h in enumerate(hierarchy[0]) if h[3] == -1]
-                holes: Dict[int, List[int]] = {idx: [] for idx in outer}
-                for idx, h in enumerate(hierarchy[0]):
-                    parent = h[3]
-                    if parent != -1 and parent in holes:
-                        holes[parent].append(idx)
-                if not outer:
-                    outer = list(range(len(contours)))
-                return outer, holes
-
-            def _mesh_counts(obj: object) -> Tuple[int, int]:
-                if obj is None or getattr(obj, "type", None) != "MESH":
-                    return 0, 0
-                return len(obj.data.vertices), len(obj.data.polygons)
-
-            def _apply_transforms(obj: object) -> None:
-                bpy.ops.object.select_all(action="DESELECT")
-                obj.select_set(True)
-                bpy.context.view_layer.objects.active = obj
-                bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-                bpy.ops.object.mode_set(mode="EDIT")
-                bpy.ops.mesh.normals_make_consistent(inside=False)
-                bpy.ops.object.mode_set(mode="OBJECT")
-                triangulate_object(obj)
-                clean_mesh_for_boolean(obj)
-                obj.select_set(False)
-
-            def _apply_boolean(
-                base: object, other: object, operation: str, solver: str
-            ) -> bool:
-                if base is None or other is None:
-                    return False
-                modifier = base.modifiers.new(name=f"{operation}_Op", type="BOOLEAN")
-                modifier.operation = operation
-                modifier.object = other
-                modifier.solver = solver
-                bpy.context.view_layer.objects.active = base
-                bpy.ops.object.modifier_apply(modifier=modifier.name)
-                bpy.data.objects.remove(other, do_unlink=True)
-                verts, faces = _mesh_counts(base)
-                return verts > 0 and faces > 0
-
             largest_only_cfg = request.config.get("largest_component_only", None)
             largest_only = bool(largest_only_cfg) if largest_only_cfg is not None else False
             solver_override = str(request.config.get("boolean_solver", "auto"))
@@ -219,7 +175,7 @@ class SilhouetteIntersectionBackend(BaseBackend):
                 source_size: Tuple[int, int],
                 normalize_bounds: Optional[Tuple[float, float, float, float]],
             ) -> Optional[object]:
-                outer, holes = _split_contours(contours, hierarchy)
+                outer, holes = split_contours(contours, hierarchy)
                 if not outer:
                     return None
                 if largest_only:
@@ -239,7 +195,12 @@ class SilhouetteIntersectionBackend(BaseBackend):
                     center_extrusion(obj, extrude_distance=extrude_distance)
                     obj.scale = scale
                     obj.rotation_euler = rotation
-                    _apply_transforms(obj)
+                    apply_transforms(
+                        obj,
+                        bpy_module=bpy,
+                        triangulate_object=triangulate_object,
+                        clean_mesh_for_boolean=clean_mesh_for_boolean,
+                    )
 
                     for hole_idx in holes.get(idx, []):
                         hole_obj = create_mesh_from_contours(
@@ -255,15 +216,26 @@ class SilhouetteIntersectionBackend(BaseBackend):
                         center_extrusion(hole_obj, extrude_distance=extrude_distance)
                         hole_obj.scale = scale
                         hole_obj.rotation_euler = rotation
-                        _apply_transforms(hole_obj)
-                        _apply_boolean(obj, hole_obj, "DIFFERENCE", solver)
+                        apply_transforms(
+                            hole_obj,
+                            bpy_module=bpy,
+                            triangulate_object=triangulate_object,
+                            clean_mesh_for_boolean=clean_mesh_for_boolean,
+                        )
+                        apply_boolean(
+                            obj,
+                            hole_obj,
+                            "DIFFERENCE",
+                            solver,
+                            bpy_module=bpy,
+                        )
                     parts.append(obj)
 
                 if not parts:
                     return None
                 base = parts[0]
                 for extra in parts[1:]:
-                    _apply_boolean(base, extra, "UNION", solver)
+                    apply_boolean(base, extra, "UNION", solver, bpy_module=bpy)
                 return base
 
             front_obj = _build_silhouette_object(
@@ -308,7 +280,7 @@ class SilhouetteIntersectionBackend(BaseBackend):
             bpy.ops.object.modifier_apply(modifier=modifier.name)
             bpy.data.objects.remove(side_obj, do_unlink=True)
 
-            final_verts, final_faces = _mesh_counts(base_obj)
+            final_verts, final_faces = mesh_counts(base_obj)
             if final_verts == 0 or final_faces == 0:
                 return CandidateResult(
                     candidate_id=request.candidate_id,

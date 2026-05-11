@@ -3,14 +3,24 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping
 
 import numpy as np
 
 try:
     from metrics.silhouette import silhouette_metric_result
+    from geometry.morphology import (
+        as_bool_mask as _shared_as_bool_mask,
+        binary_dilation as _binary_dilation,
+        binary_erosion as _binary_erosion,
+    )
 except Exception:  # pragma: no cover - package import path
     from blender_blocking.metrics.silhouette import silhouette_metric_result
+    from blender_blocking.geometry.morphology import (
+        as_bool_mask as _shared_as_bool_mask,
+        binary_dilation as _binary_dilation,
+        binary_erosion as _binary_erosion,
+    )
 
 from .schemas import json_safe
 
@@ -245,40 +255,8 @@ def _add_false_island(mask: np.ndarray, size: int = 3) -> np.ndarray:
     return candidate
 
 
-def _binary_erosion(mask: np.ndarray, radius: int = 1) -> np.ndarray:
-    result = np.asarray(mask, dtype=bool)
-    for _ in range(max(1, int(radius))):
-        padded = np.pad(result, 1, mode="constant", constant_values=False)
-        neighbors = _neighbors(padded, result.shape)
-        result = np.logical_and.reduce(neighbors)
-    return result
-
-
-def _binary_dilation(mask: np.ndarray, radius: int = 1) -> np.ndarray:
-    result = np.asarray(mask, dtype=bool)
-    for _ in range(max(1, int(radius))):
-        padded = np.pad(result, 1, mode="constant", constant_values=False)
-        neighbors = _neighbors(padded, result.shape)
-        result = np.logical_or.reduce(neighbors)
-    return result
-
-
-def _neighbors(padded: np.ndarray, shape: Sequence[int]) -> list[np.ndarray]:
-    height, width = int(shape[0]), int(shape[1])
-    return [
-        padded[dy : dy + height, dx : dx + width]
-        for dy in range(3)
-        for dx in range(3)
-    ]
-
-
 def _as_bool_mask(mask: Any) -> np.ndarray:
-    array = np.asarray(mask)
-    if array.ndim != 2:
-        raise ValueError("sensitivity masks must be 2D")
-    if array.size == 0:
-        raise ValueError("sensitivity masks cannot be empty")
-    return array.astype(bool, copy=False)
+    return _shared_as_bool_mask(mask, name="sensitivity masks", allow_empty=False)
 
 
 def _drop(

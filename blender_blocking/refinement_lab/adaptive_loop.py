@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
-import json
 from pathlib import Path
 from typing import Any, Callable, Mapping, Protocol, Sequence
 
@@ -15,8 +14,10 @@ from .runner import RunOptions, runner_for_plan
 
 try:
     from blender_blocking.config import BlockingConfig
+    from blender_blocking.utils.json_io import write_json as _write_json
 except ImportError:  # pragma: no cover
     from config import BlockingConfig
+    from utils.json_io import write_json as _write_json
 
 
 class _RunnerLike(Protocol):
@@ -255,10 +256,7 @@ def run_adaptive_loop(
         ),
         stopped_reason=stopped_reason,
     )
-    summary_path.write_text(
-        json.dumps(json_safe(summary.to_dict()), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    _write_json(summary_path, summary.to_dict())
     return summary
 
 
@@ -303,6 +301,13 @@ def _select_parent_results(
     ]
     if promotable:
         return tuple(promotable[:parent_top_k])
+    parent_selectable = [
+        result
+        for result, _score in ranked
+        if promotion_decision(result).parent_selectable
+    ]
+    if parent_selectable:
+        return tuple(parent_selectable[:parent_top_k])
     if allow_diagnostics:
         return tuple(result for result, _score in ranked[:parent_top_k])
     return ()
@@ -318,6 +323,8 @@ def _parent_health_summary(
     states: dict[str, int] = {}
     tiers: dict[str, int] = {}
     promotable: list[ExperimentResult] = []
+    parent_selectable: list[ExperimentResult] = []
+    quality_blocked_parent_selectable: list[ExperimentResult] = []
     blocked_topology: list[ExperimentResult] = []
     for result in results:
         decision = promotion_decision(result)
@@ -325,6 +332,10 @@ def _parent_health_summary(
         tiers[decision.tier] = tiers.get(decision.tier, 0) + 1
         if decision.promotable:
             promotable.append(result)
+        if decision.parent_selectable:
+            parent_selectable.append(result)
+            if not decision.promotable:
+                quality_blocked_parent_selectable.append(result)
         if decision.state == "blocked_topology":
             blocked_topology.append(result)
     render_ranked = sorted(
@@ -335,6 +346,8 @@ def _parent_health_summary(
     return {
         "result_count": len(results),
         "promotable_count": len(promotable),
+        "parent_selectable_count": len(parent_selectable),
+        "quality_blocked_parent_selectable_count": len(quality_blocked_parent_selectable),
         "blocked_count": len(results) - len(promotable),
         "promotion_state_counts": dict(sorted(states.items())),
         "promotion_tier_counts": dict(sorted(tiers.items())),
@@ -344,6 +357,15 @@ def _parent_health_summary(
             for result, _score in ranked
             if promotion_decision(result).promotable
         ][:parent_top_k],
+        "top_parent_selectable_ids": [
+            result.variant_id
+            for result, _score in ranked
+            if promotion_decision(result).parent_selectable
+        ][:parent_top_k],
+        "quality_blocked_parent_selectable": [
+            _parent_health_result_row(result)
+            for result in quality_blocked_parent_selectable[:parent_top_k]
+        ],
         "top_render_winners": [
             _parent_health_result_row(result)
             for result in render_ranked[:parent_top_k]
@@ -368,7 +390,9 @@ def _parent_health_result_row(result: ExperimentResult) -> Mapping[str, Any]:
         "promotion_state": decision.state,
         "promotion_tier": decision.tier,
         "promotable": decision.promotable,
+        "parent_selectable": decision.parent_selectable,
         "blockers": list(decision.blockers),
+        "parent_selection_blockers": list(decision.blocking_for_parent_selection),
     }
 
 
@@ -398,7 +422,7 @@ def _child_variants_from_results(
                 parent=result,
                 generation=generation,
                 seen_ids=seen_ids,
-                force_diagnostic_only=not promotion_decision(result).promotable,
+                force_diagnostic_only=not promotion_decision(result).parent_selectable,
             )
             effective_key = _effective_child_variant_key(variant)
             existing_index = seen_effective.get(effective_key)
@@ -560,19 +584,5 @@ def _write_generation_adaptive_outputs(
         "variant_count": len(child_variants),
         "variants": [variant.to_dict() for variant in child_variants],
     }
-    proposal_path.write_text(
-        json.dumps(json_safe(proposal_payload), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    variant_path.write_text(
-        json.dumps(json_safe(variant_payload), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-
-
-def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(json_safe(payload), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    _write_json(proposal_path, proposal_payload)
+    _write_json(variant_path, variant_payload)
