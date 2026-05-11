@@ -243,6 +243,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                 cost_fail_max_backend_wall_ms=args.cost_fail_max_backend_wall_ms,
                 progress=args.progress,
                 strict_skips=args.synthetic_strict_skips,
+                allow_failed_rows=args.synthetic_allow_failed_rows,
             )
             if args.quality_budget_json:
                 from scripts.quality_budget import evaluate_budget_files, write_report

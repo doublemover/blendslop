@@ -11,6 +11,7 @@ import unittest
 
 from integration.blender_ops.render_utils import parse_orbit_view_degrees
 from config import BlockingConfig
+from e2e.validator import E2EValidator
 from test_e2e_validation import (
     _aggregate_novel_reports,
     _apply_cli_args,
@@ -161,6 +162,19 @@ class E2ENovelViewCliTests(unittest.TestCase):
         self.assertEqual(summary["image_count"], 2)
         self.assertAlmostEqual(summary["psnr"], 29.0)
         self.assertAlmostEqual(summary["ssim"], 0.865)
+
+    def test_novel_reference_map_prefers_inferred_orbit_references(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            front = root / "front.png"
+            orbit = root / "orbit_045.png"
+            front.write_bytes(b"front")
+            orbit.write_bytes(b"orbit")
+            validator = E2EValidator(novel_view_names=("orbit_045",))
+
+            refs = validator._novel_reference_map({"front": str(front)})
+
+        self.assertEqual(refs, {"orbit_045": str(orbit)})
 
     def test_texture_material_cli_flags_apply_to_shape_program_config(self) -> None:
         args = _parse_args(

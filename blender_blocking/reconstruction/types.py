@@ -523,6 +523,13 @@ class CandidateRequest:
     def candidate_artifact_root(self) -> Optional[Path]:
         if self.artifact_root is None:
             return None
+        raw_candidate_path = Path(str(self.candidate_id))
+        if raw_candidate_path.is_absolute() or any(
+            part == ".." for part in raw_candidate_path.parts
+        ):
+            raise ValueError(
+                f"candidate_id escapes artifact root: {self.candidate_id!r}"
+            )
         artifact_root = self.artifact_root.resolve(strict=False)
         candidate_root = (
             artifact_root

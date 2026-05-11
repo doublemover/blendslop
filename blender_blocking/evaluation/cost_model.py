@@ -326,13 +326,15 @@ def cost_report_from_candidate(result: Any) -> CostReport:
     total = sum(stage.wall_ms for stage in stages)
     throughput = {}
     if isinstance(visual_hull, Mapping):
-        elapsed_ms = max(total, 1e-9)
         active = float(visual_hull.get("active_voxels", 0.0) or 0.0)
         total_voxels = float(visual_hull.get("total_voxels", 0.0) or 0.0)
-        if active:
-            throughput["active_voxels_per_ms"] = active / elapsed_ms
-        if total_voxels:
-            throughput["voxels_per_ms"] = total_voxels / elapsed_ms
+        if total > 0.0:
+            if active:
+                throughput["active_voxels_per_ms"] = active / total
+            if total_voxels:
+                throughput["voxels_per_ms"] = total_voxels / total
+        elif active or total_voxels:
+            throughput["invalid_reason"] = "missing_or_zero_total_wall_ms"
     return CostReport(total_wall_ms=total, stages=tuple(stages), throughput=throughput)
 
 
@@ -347,14 +349,19 @@ def cost_report_from_mapping(payload: Mapping[str, Any]) -> CostReport:
     total = _optional_float(payload.get("total_wall_ms"))
     if total is None:
         total = sum(stage.wall_ms for stage in stages)
+    throughput = (
+        dict(payload.get("throughput", {}) or {})
+        if isinstance(payload.get("throughput", {}), Mapping)
+        else {}
+    )
+    if total <= 0.0 and throughput:
+        throughput = {"invalid_reason": "missing_or_zero_total_wall_ms"}
     return CostReport(
         total_wall_ms=float(total),
         peak_memory_mb=_optional_float(payload.get("peak_memory_mb")),
         stages=stages,
         cache=dict(cache_payload) if isinstance(cache_payload, Mapping) else {},
-        throughput=dict(payload.get("throughput", {}) or {})
-        if isinstance(payload.get("throughput", {}), Mapping)
-        else {},
+        throughput=throughput,
     )
 
 

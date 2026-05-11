@@ -5,11 +5,34 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Iterable, Mapping, Sequence
 
+try:
+    from blender_blocking.metrics.namespaces import (
+        get_metric_path,
+        has_complete_required_render_views,
+        optional_float,
+        render_view_iou,
+        required_render_metrics_missing,
+    )
+except ImportError:  # pragma: no cover - script-style imports
+    from metrics.namespaces import (
+        get_metric_path,
+        has_complete_required_render_views,
+        optional_float,
+        render_view_iou,
+        required_render_metrics_missing,
+    )
+
 from .contracts import ExperimentResult, json_safe
+
+try:
+    from .preset_catalog import get_track_preset
+except ImportError:  # pragma: no cover - script-style imports
+    from preset_catalog import get_track_preset
 
 
 OBJECTIVES = {
     "quality_win",
+    "reliability_first",
     "min_view_iou",
     "mean_iou",
     "profile_editable",
@@ -57,6 +80,7 @@ class PromotionDecision:
     requires_review: bool
     backend_status: str
     backend_degraded: bool
+    state: str
     blockers: tuple[str, ...] = ()
 
     @property
@@ -70,6 +94,7 @@ class PromotionDecision:
             "requires_review": self.requires_review,
             "backend_status": self.backend_status,
             "backend_degraded": self.backend_degraded,
+            "state": self.state,
             "blockers": list(self.blockers),
             "rank": self.rank,
         }
@@ -83,7 +108,9 @@ def score_result(
 ) -> dict[str, object]:
     if objective not in OBJECTIVES:
         raise ValueError(f"unknown refinement objective: {objective}")
-    if objective == "min_view_iou":
+    if objective == "reliability_first":
+        terms = _reliability_first_terms(result)
+    elif objective == "min_view_iou":
         terms = _min_view_terms(result)
     elif objective == "mean_iou":
         terms = _mean_iou_terms(result)
@@ -99,6 +126,8 @@ def score_result(
         terms = _quality_terms(result)
     terms = terms + _promotion_terms(result)
     total = sum(term.weighted for term in terms)
+    if objective == "reliability_first" and not promotion_decision(result).promotable:
+        total = 0.0
     return {
         "objective": objective,
         "total": total,
@@ -166,13 +195,31 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
         blockers.append("missing_required_metrics")
     if catastrophic_view_failure(result) > 0.0:
         blockers.append("catastrophic_view_failure")
+    if proxy_render_namespace_violation(result) > 0.0:
+        blockers.append("proxy_render_namespace_violation")
+    topology_blocker = _topology_blocker(result)
+    if topology_blocker:
+        blockers.append(topology_blocker)
+    editability_blocker = _editability_blocker(result)
+    if editability_blocker:
+        blockers.append(editability_blocker)
     if backend_status == "unreported":
         blockers.append("unreported_backend_status")
 
     hard_blocked = any(
         item.startswith("result_status:")
         or item.startswith("backend_status:")
-        or item in {"missing_required_metrics", "catastrophic_view_failure"}
+        or item
+        in {
+            "missing_required_metrics",
+            "catastrophic_view_failure",
+            "topology_below_floor",
+            "topology_not_watertight",
+            "topology_boundary_edges",
+            "topology_non_manifold_edges",
+            "editability_roundtrip_missing",
+            "proxy_render_namespace_violation",
+        }
         for item in blockers
     )
     if hard_blocked:
@@ -187,6 +234,12 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
         tier = "unverified"
     else:
         tier = "promotable"
+    state = _promotion_state(
+        tier=tier,
+        backend_status=backend_status,
+        blockers=blockers,
+        result=result,
+    )
 
     return PromotionDecision(
         tier=tier,
@@ -194,15 +247,33 @@ def promotion_decision(result: ExperimentResult) -> PromotionDecision:
         requires_review=tier != "promotable",
         backend_status=backend_status,
         backend_degraded=backend_degraded,
+        state=state,
         blockers=tuple(blockers),
     )
 
 
 def metric_value(result: ExperimentResult, key: str, default: float = 0.0) -> float:
-    value = result.metrics.get(key)
+    value = get_metric_path(result.metrics, key)
+    if value is None:
+        value = result.metrics.get(
+            {
+                "render.average_iou": "average_iou",
+                "render.min_view_iou": "min_view_iou",
+                "render.boundary_iou_mean": "boundary_iou_mean",
+                "render.signed_distance_loss_mean": "signed_distance_loss_mean",
+                "topology.score": "topology_score",
+                "editability.qa_score": "editability_score",
+                "editability.export_roundtrip_score": "export_roundtrip_score",
+                "cost.total_wall_ms": "cost_total_wall_ms",
+            }.get(key, "")
+        )
     if value is None:
         backend_metrics = _selected_metric_result(result)
-        value = backend_metrics.get(key) if isinstance(backend_metrics, Mapping) else None
+        value = (
+            get_metric_path(backend_metrics, key)
+            if isinstance(backend_metrics, Mapping)
+            else None
+        )
     try:
         return float(default if value is None else value)
     except (TypeError, ValueError):
@@ -212,8 +283,10 @@ def metric_value(result: ExperimentResult, key: str, default: float = 0.0) -> fl
 def required_views_all_pass(result: ExperimentResult) -> float:
     if result.status != "pass":
         return 0.0
+    if not has_complete_required_render_views(result.metrics):
+        return 0.0
     for view in ("front", "side", "top"):
-        value = result.view_iou(view)
+        value = render_view_iou(result.metrics, view)
         if value is None or value < 0.7:
             return 0.0
     return 1.0
@@ -221,18 +294,14 @@ def required_views_all_pass(result: ExperimentResult) -> float:
 
 def catastrophic_view_failure(result: ExperimentResult) -> float:
     for view in ("front", "side", "top"):
-        value = result.view_iou(view)
+        value = render_view_iou(result.metrics, view)
         if value is None or value < 0.2:
             return 1.0
     return 0.0
 
 
 def missing_required_metrics(result: ExperimentResult) -> float:
-    render_iou_mode = result.metrics.get("validation_mode") == "render-iou"
-    has_any_view = any(result.view_iou(view) is not None for view in ("front", "side", "top"))
-    if render_iou_mode and not has_any_view:
-        return 1.0
-    if not has_any_view and result.status == "pass":
+    if result.status == "pass" and required_render_metrics_missing(result.metrics):
         return 1.0
     return 0.0
 
@@ -251,11 +320,54 @@ def artifact_escape(result: ExperimentResult) -> float:
 
 
 def metric_only_candidate(result: ExperimentResult) -> float:
-    if any(result.view_iou(view) is not None for view in ("front", "side", "top")):
+    if any(render_view_iou(result.metrics, view) is not None for view in ("front", "side", "top")):
         return 0.0
-    if metric_value(result, "area_iou_mean") > 0.9:
+    backend_mean = get_metric_path(result.metrics, "backend.area_iou_mean")
+    if backend_mean is None:
+        backend_mean = metric_value(result, "area_iou_mean")
+    if optional_float(backend_mean) and float(backend_mean) > 0.9:
         return 1.0
     return 0.0
+
+
+def proxy_render_namespace_violation(result: ExperimentResult) -> float:
+    backend_min = optional_float(get_metric_path(result.metrics, "backend.area_iou_min"))
+    render_min = optional_float(get_metric_path(result.metrics, "render.min_view_iou"))
+    if render_min is None:
+        render_min = result.min_iou if result.min_iou > 0.0 else None
+    if backend_min is None:
+        return 0.0
+    if backend_min >= 0.9 and (render_min is None or render_min <= 0.2):
+        return 1.0
+    return 0.0
+
+
+def _reliability_first_terms(result: ExperimentResult) -> list[ScoreTerm]:
+    decision = promotion_decision(result)
+    if not decision.promotable:
+        return [
+            ScoreTerm(
+                "promotion_required",
+                0.0,
+                1.0,
+                "blocked candidates receive a hard zero reliability score",
+            ),
+            ScoreTerm(
+                "blocking_state",
+                1.0,
+                0.0,
+                decision.state,
+            ),
+        ]
+    return [
+        ScoreTerm("promotion_ready", 1.0, 1000.0),
+        ScoreTerm("min_view_iou", result.min_iou, 800.0),
+        ScoreTerm("boundary_iou_mean", metric_value(result, "render.boundary_iou_mean"), 450.0),
+        ScoreTerm("signed_distance_loss", metric_value(result, "render.signed_distance_loss_mean"), -250.0),
+        ScoreTerm("topology_score", metric_value(result, "topology.score"), 220.0),
+        ScoreTerm("editability_score", metric_value(result, "editability.qa_score"), 160.0),
+        ScoreTerm("elapsed_s", min(result.elapsed_s, 60.0), -4.0),
+    ]
 
 
 def _quality_terms(result: ExperimentResult) -> list[ScoreTerm]:
@@ -263,14 +375,19 @@ def _quality_terms(result: ExperimentResult) -> list[ScoreTerm]:
         ScoreTerm("required_views_all_pass", required_views_all_pass(result), 1000.0),
         ScoreTerm("min_view_iou", result.min_iou, 400.0),
         ScoreTerm("average_iou", result.avg_iou, 250.0),
-        ScoreTerm("boundary_iou_mean", metric_value(result, "boundary_iou_mean"), 150.0),
-        ScoreTerm("topology_score", metric_value(result, "topology_score"), 120.0),
-        ScoreTerm("editability_score", metric_value(result, "editability_score"), 80.0),
+        ScoreTerm("boundary_iou_mean", metric_value(result, "render.boundary_iou_mean"), 150.0),
+        ScoreTerm("topology_score", metric_value(result, "topology.score"), 120.0),
+        ScoreTerm("editability_score", metric_value(result, "editability.qa_score"), 80.0),
         ScoreTerm("complexity_penalty", metric_value(result, "complexity_penalty"), -60.0),
         ScoreTerm("elapsed_s", min(result.elapsed_s, 30.0), -10.0),
         ScoreTerm("catastrophic_view_failure", catastrophic_view_failure(result), -250.0),
         ScoreTerm("missing_required_metrics", missing_required_metrics(result), -100.0),
         ScoreTerm("artifact_escape", artifact_escape(result), -100.0),
+        ScoreTerm(
+            "proxy_render_namespace_violation",
+            proxy_render_namespace_violation(result),
+            -2000.0,
+        ),
     ]
 
 
@@ -278,7 +395,7 @@ def _min_view_terms(result: ExperimentResult) -> list[ScoreTerm]:
     return [
         ScoreTerm("min_view_iou", result.min_iou, 1000.0),
         ScoreTerm("average_iou", result.avg_iou, 200.0),
-        ScoreTerm("topology_score", metric_value(result, "topology_score"), 100.0),
+        ScoreTerm("topology_score", metric_value(result, "topology.score"), 100.0),
         ScoreTerm("missing_required_metrics", missing_required_metrics(result), -500.0),
     ]
 
@@ -295,8 +412,8 @@ def _profile_editable_terms(result: ExperimentResult) -> list[ScoreTerm]:
     return [
         ScoreTerm("min_view_iou", result.min_iou, 500.0),
         ScoreTerm("average_iou", result.avg_iou, 350.0),
-        ScoreTerm("topology_score", metric_value(result, "topology_score"), 200.0),
-        ScoreTerm("editability_score", metric_value(result, "editability_score"), 160.0),
+        ScoreTerm("topology_score", metric_value(result, "topology.score"), 200.0),
+        ScoreTerm("editability_score", metric_value(result, "editability.qa_score"), 160.0),
         ScoreTerm("complexity_penalty", metric_value(result, "complexity_penalty"), -75.0),
         ScoreTerm("catastrophic_view_failure", catastrophic_view_failure(result), -500.0),
     ]
@@ -451,6 +568,79 @@ def _backend_degraded(result: ExperimentResult) -> bool:
         if isinstance(degradation, Mapping) and _truthy(degradation.get("degraded")):
             return True
     return False
+
+
+def _topology_blocker(result: ExperimentResult) -> str:
+    topology_score = optional_float(get_metric_path(result.metrics, "topology.score"))
+    if topology_score is None:
+        topology_score = optional_float(result.metrics.get("topology_score"))
+    if topology_score is not None and topology_score < 0.75:
+        return "topology_below_floor"
+    watertight = get_metric_path(result.metrics, "topology.watertight")
+    if watertight is False:
+        return "topology_not_watertight"
+    boundary_edges = optional_float(get_metric_path(result.metrics, "topology.boundary_edges"))
+    if boundary_edges is not None and boundary_edges > 0:
+        return "topology_boundary_edges"
+    non_manifold = optional_float(get_metric_path(result.metrics, "topology.non_manifold_edges"))
+    if non_manifold is not None and non_manifold > 0:
+        return "topology_non_manifold_edges"
+    return ""
+
+
+def _editability_blocker(result: ExperimentResult) -> str:
+    if not _requires_editability_gate(result):
+        return ""
+    roundtrip = get_metric_path(result.metrics, "editability.export_roundtrip_score")
+    if roundtrip is None:
+        return ""
+    value = optional_float(roundtrip)
+    if value is not None and value <= 0.0:
+        return "editability_roundtrip_missing"
+    return ""
+
+
+def _requires_editability_gate(result: ExperimentResult) -> bool:
+    raw = get_metric_path(result.metrics, "editability.export_roundtrip_required")
+    if raw is not None:
+        return _truthy(raw)
+    try:
+        track = get_track_preset(result.track)
+    except Exception:
+        return False
+    tags = {str(tag).lower() for tag in track.tags}
+    return bool(tags.intersection({"editable", "printable"}))
+
+
+def _promotion_state(
+    *,
+    tier: str,
+    backend_status: str,
+    blockers: Sequence[str],
+    result: ExperimentResult,
+) -> str:
+    blocker_set = set(blockers)
+    if tier == "promotable":
+        return "promotable"
+    if "missing_required_metrics" in blocker_set:
+        if metric_only_candidate(result) > 0.0:
+            return "metric_only_candidate"
+        return "blocked_missing_render_metrics"
+    if "catastrophic_view_failure" in blocker_set:
+        return "blocked_required_view_failure"
+    if any(item.startswith("topology_") for item in blocker_set):
+        return "blocked_topology"
+    if any(item.startswith("editability_") for item in blocker_set):
+        return "blocked_editability"
+    if "proxy_render_namespace_violation" in blocker_set:
+        return "diagnostic_only"
+    if backend_status == "research_only":
+        return "research_only"
+    if "metric_only_candidate" in blocker_set:
+        return "metric_only_candidate"
+    if backend_status in _BACKEND_FAILURE_STATUSES:
+        return "diagnostic_only"
+    return tier
 
 
 def _truthy(value: Any) -> bool:

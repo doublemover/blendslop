@@ -80,6 +80,15 @@ def add_constraints_quality_args(parser: argparse.ArgumentParser) -> None:
         help="Treat skipped synthetic matrix rows as failures.",
     )
     misc.add_argument(
+        "--synthetic-allow-failed-rows",
+        action="store_true",
+        help=(
+            "Return success for a completed synthetic matrix even when candidate "
+            "rows fail quality/status gates. Runtime errors and strict skips "
+            "still fail the command."
+        ),
+    )
+    misc.add_argument(
         "--quality-report-json",
         type=Path,
         default=None,

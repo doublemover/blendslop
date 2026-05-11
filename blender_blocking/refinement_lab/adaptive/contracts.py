@@ -22,6 +22,7 @@ class RefinementProposal:
     priority: int = 50
     risk: str = "medium"
     source_evidence: Mapping[str, Any] = field(default_factory=dict)
+    diagnostic_only: bool = False
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -37,6 +38,7 @@ class RefinementProposal:
             "priority": self.priority,
             "risk": self.risk,
             "source_evidence": dict(self.source_evidence),
+            "diagnostic_only": self.diagnostic_only,
         }
 
     def to_variant(self, *, parent_variant_id: str = "") -> ExperimentVariant:
@@ -62,7 +64,7 @@ class RefinementProposal:
             tags=("adaptive",) + self.tags,
             parent_variant_id=parent_variant_id,
             stage="adaptive_refinement",
-            diagnostic_only=False,
+            diagnostic_only=self.diagnostic_only,
         )
 
 

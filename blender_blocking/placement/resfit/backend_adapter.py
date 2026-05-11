@@ -51,7 +51,7 @@ from .penalties import (
 )
 from .profiles import _build_per_view_profile_summary, _collect_profile_rows, _profile_rows_to_slices
 from .signals import _collect_target_signals
-from .status import resfit_candidate_status
+from .status import apply_resfit_quality_floors, resfit_candidate_status
 
 
 def run_primitive_fit_pipeline(request: object) -> object:
@@ -423,6 +423,14 @@ def run_primitive_fit_pipeline(request: object) -> object:
         initial_primitives=initial_primitives,
         max_runtime_s=max_runtime_s,
         max_objective_evaluations=max_objective_evaluations,
+    )
+    status, degraded, errors_out, warnings = apply_resfit_quality_floors(
+        config=config,
+        status=status,
+        degraded=degraded,
+        errors=errors_out,
+        warnings=warnings,
+        metric=metric,
     )
     return CandidateResult(
         candidate_id=candidate_id,

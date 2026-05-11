@@ -11,10 +11,22 @@ import re
 from typing import Any, Mapping, Optional, Sequence
 
 try:
+    from blender_blocking.metrics.namespaces import (
+        get_metric_path,
+        render_average_iou,
+        render_min_view_iou,
+        render_view_iou,
+    )
     from blender_blocking.utils.path_safety import (
         compact_path_segment as _compact_path_segment,
     )
 except ImportError:  # pragma: no cover - script-style imports
+    from metrics.namespaces import (
+        get_metric_path,
+        render_average_iou,
+        render_min_view_iou,
+        render_view_iou,
+    )
     from utils.path_safety import compact_path_segment as _compact_path_segment
 
 
@@ -516,32 +528,20 @@ class ExperimentResult:
 
     @property
     def avg_iou(self) -> float:
-        return float(self.metrics.get("average_iou", self.metrics.get("area_iou_mean", 0.0)) or 0.0)
+        value = render_average_iou(self.metrics)
+        if value is None:
+            value = get_metric_path(self.metrics, "render.average_iou")
+        if value is None:
+            value = self.metrics.get("average_iou")
+        return float(value or 0.0)
 
     @property
     def min_iou(self) -> float:
-        values = [
-            self.view_iou(view)
-            for view in ("front", "side", "top")
-            if self.view_iou(view) is not None
-        ]
-        return min(values) if values else float(self.metrics.get("area_iou_min", 0.0) or 0.0)
+        value = render_min_view_iou(self.metrics)
+        return float(value or 0.0)
 
     def view_iou(self, view: str) -> Optional[float]:
-        key = f"{view}_iou"
-        value = self.metrics.get(key)
-        if value is None:
-            views = self.metrics.get("views", {})
-            if isinstance(views, Mapping):
-                view_data = views.get(view, {})
-                if isinstance(view_data, Mapping):
-                    value = view_data.get("iou", view_data.get("area_iou"))
-        if value is None:
-            return None
-        try:
-            return float(value)
-        except (TypeError, ValueError):
-            return None
+        return render_view_iou(self.metrics, view)
 
     def validate(self) -> None:
         if self.status not in _RESULT_STATUSES:

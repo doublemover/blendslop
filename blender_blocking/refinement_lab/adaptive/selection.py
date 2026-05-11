@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Mapping, Sequence
 
 from .autopsy import _autopsy_plan_proposals
+from ..contracts import ExperimentVariant
 from .contracts import RefinementProposal
 from .mutations import (
     _active_view_capture,

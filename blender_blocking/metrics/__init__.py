@@ -1,48 +1,93 @@
 """Pure-Python metric helpers."""
 
-from metrics.silhouette import (
-    SilhouetteMetricResult,
-    boundary_iou,
-    signed_distance_silhouette_loss,
-    soft_iou,
-)
-from metrics.surface import (
-    SurfaceDistanceReport,
-    VolumeOverlapReport,
-    chamfer_distance,
-    surface_score,
-    volume_overlap,
-)
-from metrics.topology import (
-    TopologyReport,
-    TopologyRepairResult,
-    mesh_topology_report,
-    safe_topology_repair,
-    topology_repair_plan,
-    topology_penalty,
-)
-from metrics.topology_guard import (
-    MeshChangeGuardDecision,
-    MeshChangeGuardPolicy,
-    evaluate_mesh_change,
-    guard_policy_from_config,
-)
-from metrics.retopology_policy import (
-    RetopologyDecision,
-    RetopologyPolicy,
-    evaluate_retopology_policy,
-    retopology_decision_from_mesh,
-    retopology_decision_from_metrics,
-    retopology_policy_from_config,
-)
-from metrics.budgets import (
-    BudgetCheck,
-    BudgetReport,
-    BudgetThreshold,
-    compare_metric_delta,
-    evaluate_budgets,
-    load_budget_file,
-)
+try:
+    from .silhouette import (
+        SilhouetteMetricResult,
+        boundary_iou,
+        signed_distance_silhouette_loss,
+        soft_iou,
+    )
+    from .surface import (
+        SurfaceDistanceReport,
+        VolumeOverlapReport,
+        chamfer_distance,
+        surface_score,
+        volume_overlap,
+    )
+    from .topology import (
+        TopologyReport,
+        TopologyRepairResult,
+        mesh_topology_report,
+        safe_topology_repair,
+        topology_repair_plan,
+        topology_penalty,
+    )
+    from .topology_guard import (
+        MeshChangeGuardDecision,
+        MeshChangeGuardPolicy,
+        evaluate_mesh_change,
+        guard_policy_from_config,
+    )
+    from .retopology_policy import (
+        RetopologyDecision,
+        RetopologyPolicy,
+        evaluate_retopology_policy,
+        retopology_decision_from_mesh,
+        retopology_decision_from_metrics,
+        retopology_policy_from_config,
+    )
+    from .budgets import (
+        BudgetCheck,
+        BudgetReport,
+        BudgetThreshold,
+        compare_metric_delta,
+        evaluate_budgets,
+        load_budget_file,
+    )
+except ImportError:  # pragma: no cover - script-style imports
+    from metrics.silhouette import (
+        SilhouetteMetricResult,
+        boundary_iou,
+        signed_distance_silhouette_loss,
+        soft_iou,
+    )
+    from metrics.surface import (
+        SurfaceDistanceReport,
+        VolumeOverlapReport,
+        chamfer_distance,
+        surface_score,
+        volume_overlap,
+    )
+    from metrics.topology import (
+        TopologyReport,
+        TopologyRepairResult,
+        mesh_topology_report,
+        safe_topology_repair,
+        topology_repair_plan,
+        topology_penalty,
+    )
+    from metrics.topology_guard import (
+        MeshChangeGuardDecision,
+        MeshChangeGuardPolicy,
+        evaluate_mesh_change,
+        guard_policy_from_config,
+    )
+    from metrics.retopology_policy import (
+        RetopologyDecision,
+        RetopologyPolicy,
+        evaluate_retopology_policy,
+        retopology_decision_from_mesh,
+        retopology_decision_from_metrics,
+        retopology_policy_from_config,
+    )
+    from metrics.budgets import (
+        BudgetCheck,
+        BudgetReport,
+        BudgetThreshold,
+        compare_metric_delta,
+        evaluate_budgets,
+        load_budget_file,
+    )
 
 __all__ = [
     "BudgetCheck",

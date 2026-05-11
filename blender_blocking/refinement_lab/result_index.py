@@ -8,6 +8,10 @@ from typing import Iterable, Mapping
 
 from .contracts import ExperimentResult, json_safe
 from .parameter_search import promotion_decision, rank_results, score_result
+try:
+    from blender_blocking.metrics.namespaces import get_metric_path
+except ImportError:  # pragma: no cover
+    from metrics.namespaces import get_metric_path
 
 
 class ResultIndex:
@@ -197,7 +201,13 @@ def _fastest_acceptable(rows: list[Mapping[str, object]]) -> Mapping[str, object
 
 
 def _metric(result: ExperimentResult, key: str) -> float:
+    aliases = {
+        "topology_score": "topology.score",
+        "editability_score": "editability.qa_score",
+    }
     value = result.metrics.get(key)
+    if value is None and key in aliases:
+        value = get_metric_path(result.metrics, aliases[key])
     if value is None and isinstance(result.backend_result, Mapping):
         selected = result.backend_result.get("selected")
         source = selected if isinstance(selected, Mapping) else result.backend_result

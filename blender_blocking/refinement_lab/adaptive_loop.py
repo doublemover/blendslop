@@ -10,7 +10,7 @@ from typing import Any, Callable, Mapping, Protocol, Sequence
 from .adaptive import RefinementProposal, merge_proposals, proposals_from_result_payload
 from .contracts import ExperimentPlan, ExperimentResult, ExperimentVariant, json_safe, safe_slug, stable_hash
 from .matrix import build_experiment_plan
-from .parameter_search import rank_results
+from .parameter_search import promotion_decision, rank_results
 from .runner import RunOptions, runner_for_plan
 
 try:
@@ -33,6 +33,7 @@ class AdaptiveLoopOptions:
     parent_top_k: int = 3
     children_per_parent: int = 4
     stop_when_no_children: bool = True
+    allow_diagnostic_children: bool = False
     run_options: RunOptions = field(default_factory=RunOptions)
 
     def __post_init__(self) -> None:
@@ -102,6 +103,7 @@ def run_adaptive_loop(
     objective: str,
     output_root: Path,
     seed: int = 0,
+    case_count: int | None = None,
     max_runs: int | None = None,
     top_k: int = 10,
     external_variants: Sequence[ExperimentVariant | Mapping[str, Any]] = (),
@@ -131,6 +133,7 @@ def run_adaptive_loop(
             objective=objective,
             output_root=generation_root,
             seed=seed + generation,
+            case_count=case_count,
             max_runs=max_runs,
             top_k=top_k,
             external_variants=current_variants,
@@ -148,6 +151,7 @@ def run_adaptive_loop(
             results,
             objective=objective,
             parent_top_k=options.parent_top_k,
+            allow_diagnostics=options.allow_diagnostic_children,
         )
         proposals, child_variants = _child_variants_from_results(
             selected,
@@ -178,6 +182,10 @@ def run_adaptive_loop(
                 variant_path=variant_path,
             )
         )
+        if not selected and options.stop_when_no_children:
+            stopped_reason = "no_promotable_parents"
+            current_variants = ()
+            break
         if not child_variants and options.stop_when_no_children:
             stopped_reason = "no_child_variants"
             current_variants = ()
@@ -239,9 +247,19 @@ def _select_parent_results(
     *,
     objective: str,
     parent_top_k: int,
+    allow_diagnostics: bool = False,
 ) -> tuple[ExperimentResult, ...]:
     ranked = rank_results(results, objective=objective)
-    return tuple(result for result, _score in ranked[:parent_top_k])
+    promotable = [
+        result
+        for result, _score in ranked
+        if promotion_decision(result).promotable
+    ]
+    if promotable:
+        return tuple(promotable[:parent_top_k])
+    if allow_diagnostics:
+        return tuple(result for result, _score in ranked[:parent_top_k])
+    return ()
 
 
 def _child_variants_from_results(
@@ -269,6 +287,7 @@ def _child_variants_from_results(
                 parent=result,
                 generation=generation,
                 seen_ids=seen_ids,
+                force_diagnostic_only=not promotion_decision(result).promotable,
             )
             variants.append(variant)
     return tuple(proposal_pairs), tuple(variants)
@@ -293,6 +312,7 @@ def _variant_for_child(
     parent: ExperimentResult,
     generation: int,
     seen_ids: set[str],
+    force_diagnostic_only: bool = False,
 ) -> ExperimentVariant:
     base = proposal.to_variant(parent_variant_id=parent.variant_id)
     unique_hash = stable_hash(
@@ -335,7 +355,7 @@ def _variant_for_child(
         tags=tags,
         parent_variant_id=parent.variant_id,
         stage=f"adaptive_loop_generation_{generation + 1}",
-        diagnostic_only=base.diagnostic_only,
+        diagnostic_only=base.diagnostic_only or force_diagnostic_only,
     )
 
 

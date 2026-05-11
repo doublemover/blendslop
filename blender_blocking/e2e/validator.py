@@ -262,12 +262,19 @@ class E2EValidator:
                 print("ERROR: Reconstruction did not produce a renderable Blender mesh")
                 if workflow.reconstruction_result is not None:
                     _print_backend_summary(workflow.reconstruction_result)
+                failure_code = (
+                    "missing_mesh_artifact"
+                    if validation_mode == "novel-view"
+                    else "missing_renderable_mesh"
+                )
                 result_payload, _cost_passed = self._attach_cost_outputs(
                     {
                         "mode": mode,
                         "validation_mode": validation_mode,
                         "status": "failed",
-                        "error": "missing_renderable_mesh",
+                        "error": failure_code,
+                        "failure_code": failure_code,
+                        "expected_artifact_key": "mesh_obj",
                         "backend_result": backend_payload,
                     },
                     backend_payload,
@@ -609,7 +616,9 @@ class E2EValidator:
 
         references = self._novel_reference_map(reference_paths)
         pair_reports: Dict[str, Dict[str, Any]] = {}
-        missing_views: list[str] = []
+        missing_views: list[str] = [
+            view for view in self.novel_view_names if view not in references
+        ]
         table_rows: list[dict[str, object]] = []
 
         for view, reference_path in references.items():
@@ -617,16 +626,41 @@ class E2EValidator:
             if not rendered_path:
                 missing_views.append(view)
                 continue
-            ref_image, render_image, warnings = _load_novel_pair(
-                reference_path,
-                rendered_path,
-            )
-            report = image_pair_report(
-                ref_image,
-                render_image,
-                compute_ssim=self.novel_compute_ssim,
-                compute_lpips=self.novel_compute_lpips,
-            ).to_dict()
+            try:
+                ref_image, render_image, warnings = _load_novel_pair(
+                    reference_path,
+                    rendered_path,
+                )
+                report = image_pair_report(
+                    ref_image,
+                    render_image,
+                    compute_ssim=self.novel_compute_ssim,
+                    compute_lpips=self.novel_compute_lpips,
+                ).to_dict()
+            except ValueError as exc:
+                report = {
+                    "psnr": None,
+                    "ssim": None,
+                    "lpips": None,
+                    "mse": None,
+                    "image_count": 0,
+                    "warnings": (),
+                    "failure_code": "image_size_mismatch",
+                    "error": str(exc),
+                }
+                warnings = ()
+            except Exception as exc:
+                report = {
+                    "psnr": None,
+                    "ssim": None,
+                    "lpips": None,
+                    "mse": None,
+                    "image_count": 0,
+                    "warnings": (),
+                    "failure_code": "render_failed",
+                    "error": str(exc),
+                }
+                warnings = ()
             if warnings:
                 report["warnings"] = list(report.get("warnings", [])) + list(warnings)
             gate = _novel_view_gate(
@@ -636,6 +670,8 @@ class E2EValidator:
                 lpips_threshold=self.novel_lpips_threshold,
             )
             report["gate"] = gate
+            if not gate["passed"] and "failure_code" not in report:
+                report["failure_code"] = _novel_failure_code(report, gate)
             report["reference_path"] = str(reference_path)
             report["rendered_path"] = str(rendered_path)
             pair_reports[view] = report
@@ -714,13 +750,27 @@ class E2EValidator:
         self,
         reference_paths: Mapping[str, str],
     ) -> Dict[str, str]:
-        references: Dict[str, str] = {
+        novel_references: Dict[str, str] = dict(self.novel_view_reference_paths)
+        reference_dir: Path | None = None
+        for path in reference_paths.values():
+            if path:
+                reference_dir = Path(path).parent
+                break
+        for view in self.novel_view_names:
+            if view in novel_references:
+                continue
+            if reference_dir is None:
+                continue
+            inferred = reference_dir / f"{view}.png"
+            if inferred.exists():
+                novel_references[view] = str(inferred)
+        if novel_references or self.novel_view_names:
+            return novel_references
+        return {
             view: str(path)
             for view, path in reference_paths.items()
             if view in {"front", "side", "top"} and path
         }
-        references.update(self.novel_view_reference_paths)
-        return references
 
     def _attach_cost_outputs(
         self,
@@ -789,6 +839,26 @@ class E2EValidator:
             )
 
         print("-" * 60)
+
+
+def _novel_failure_code(
+    report: Mapping[str, Any],
+    gate: Mapping[str, Any],
+) -> str:
+    failures = " ".join(str(item) for item in gate.get("failures", ()) or ())
+    dependency_state = report.get("dependency_state", {})
+    lpips_state = (
+        dependency_state.get("lpips")
+        if isinstance(dependency_state, Mapping)
+        else None
+    )
+    if "LPIPS" in failures and isinstance(lpips_state, Mapping):
+        dependency = lpips_state.get("lpips")
+        if isinstance(dependency, Mapping) and not dependency.get("available", False):
+            return "lpips_dependency_missing"
+    if "missing" in failures:
+        return "metric_below_threshold"
+    return "metric_below_threshold"
 
 def test_with_sample_images(
     *,

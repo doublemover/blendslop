@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Sequence
+
 from .specs import DEFAULT_VIEWS, SyntheticShapeSpec, SyntheticViewSpec
 
 
@@ -9,6 +11,7 @@ def canonical_view_jobs(
     spec: SyntheticShapeSpec,
     resolution: tuple[int, int] = (256, 256),
     include_orbit: bool = False,
+    orbit_angles: Sequence[float] | None = None,
 ) -> tuple[SyntheticViewSpec, ...]:
     views = [
         SyntheticViewSpec(
@@ -24,11 +27,25 @@ def canonical_view_jobs(
         )
         for view in DEFAULT_VIEWS
     ]
-    if include_orbit:
-        for angle in range(0, 360, 30):
+    angles: tuple[float, ...] = ()
+    if orbit_angles is not None:
+        seen: set[int] = set()
+        normalized: list[float] = []
+        for raw in orbit_angles:
+            rounded = int(round(float(raw) % 360.0))
+            if rounded in seen:
+                continue
+            seen.add(rounded)
+            normalized.append(float(rounded))
+        angles = tuple(normalized)
+    elif include_orbit:
+        angles = tuple(float(angle) for angle in range(0, 360, 30))
+    if angles:
+        for angle in angles:
+            rounded = int(round(angle % 360.0))
             views.append(
                 SyntheticViewSpec(
-                    f"orbit_{angle:03d}",
+                    f"orbit_{rounded:03d}",
                     "orthographic",
                     azimuth_deg=float(angle),
                     elevation_deg=0.0,

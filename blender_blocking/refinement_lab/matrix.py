@@ -35,6 +35,7 @@ def build_experiment_plan(
     objective: str,
     output_root: Path,
     seed: int = 0,
+    case_count: int | None = None,
     modes: Sequence[str] | None = None,
     max_runs: int | None = None,
     top_k: int = 10,
@@ -48,7 +49,7 @@ def build_experiment_plan(
     cases = resolve_suite_cases(
         suite_preset,
         seed=seed or suite_preset.default_seed,
-        count=suite_preset.default_count,
+        count=case_count if case_count is not None else suite_preset.default_count,
         custom_reference_paths=custom_reference_paths,
     )
     effective_modes = tuple(modes or track_preset.modes)
@@ -74,6 +75,7 @@ def build_experiment_plan(
             "search": search,
             "objective": objective,
             "seed": seed,
+            "case_count": case_count,
             "modes": effective_modes,
             "max_runs": effective_max_runs,
             "variants": [variant.variant_hash() for variant in variants],

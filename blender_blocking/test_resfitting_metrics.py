@@ -9,7 +9,7 @@ import numpy as np
 
 from placement.resfit_objective import ResFitObjectiveResult
 from placement.resfit_optimizer import CoordinateDescentConfig, coordinate_descent_optimize
-from placement.resfit.status import resfit_candidate_status
+from placement.resfit.status import apply_resfit_quality_floors, resfit_candidate_status
 from placement.resfitting import ResidualFitter
 from primitives.superfrustum import SuperFrustum
 
@@ -302,6 +302,48 @@ class TestResfittingMetrics(unittest.TestCase):
 
         self.assertEqual(status, "degraded")
         self.assertTrue(degraded)
+
+    def test_primitive_quality_floors_fail_low_backend_iou(self) -> None:
+        metric = SimpleNamespace(
+            area_iou_min=0.12,
+            topology_score=0.95,
+            extras={"topology": {"watertight": True, "boundary_edges": 0}},
+        )
+
+        status, degraded, errors, warnings = apply_resfit_quality_floors(
+            config={},
+            status="success",
+            degraded=False,
+            errors=(),
+            warnings=(),
+            metric=metric,
+        )
+
+        self.assertEqual(status, "failed")
+        self.assertFalse(degraded)
+        self.assertIn("backend min IoU", "\n".join(errors))
+        self.assertEqual(warnings, ())
+
+    def test_primitive_quality_floors_degrade_bad_topology(self) -> None:
+        metric = SimpleNamespace(
+            area_iou_min=0.8,
+            topology_score=0.55,
+            extras={"topology": {"watertight": False, "boundary_edges": 12}},
+        )
+
+        status, degraded, errors, warnings = apply_resfit_quality_floors(
+            config={},
+            status="success",
+            degraded=False,
+            errors=(),
+            warnings=(),
+            metric=metric,
+        )
+
+        self.assertEqual(status, "degraded")
+        self.assertTrue(degraded)
+        self.assertEqual(errors, ())
+        self.assertIn("topology score", "\n".join(warnings))
 
 
 if __name__ == "__main__":

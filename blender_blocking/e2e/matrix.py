@@ -42,6 +42,7 @@ from blender_blocking.evaluation.silhouette_eval import (
     missing_silhouette_view,
     summarize_silhouette_views,
 )
+from blender_blocking.metrics.namespaces import namespace_metric_key, set_metric_path
 from blender_blocking.integration.blender_ops.render_utils import (
     parse_orbit_view_degrees,
     render_orthogonal_views,
@@ -91,6 +92,7 @@ def run_synthetic_suite_matrix(
     cost_fail_max_backend_wall_ms: Optional[float] = None,
     progress: bool = False,
     strict_skips: bool = False,
+    allow_failed_rows: bool = False,
 ) -> bool:
     """Run a synthetic suite across reconstruction modes.
 
@@ -163,15 +165,20 @@ def run_synthetic_suite_matrix(
             / "ref"
             / compact_path_segment(spec.shape_id, max_length=36, fallback="shape")
         )
-        include_orbit = bool(
-            validation_mode == "novel-view"
-            and any(parse_orbit_view_degrees(view) is not None for view in novel_view_names)
+        orbit_angles = tuple(
+            angle
+            for angle in (
+                parse_orbit_view_degrees(view) for view in novel_view_names
+            )
+            if angle is not None
         )
+        include_orbit = bool(validation_mode == "novel-view" and orbit_angles)
         rendered = render_views(
             spec,
             reference_dir,
             resolution=tuple(base.render_silhouette.resolution),
             include_orbit=include_orbit,
+            orbit_angles=orbit_angles if orbit_angles else None,
         )
         reference_paths = {
             key: str(rendered[key])
@@ -299,8 +306,10 @@ def run_synthetic_suite_matrix(
     skipped_failures = [
         row for row in matrix if row["status"] == "skip" and not row["passed"]
     ]
-    failed = [row for row in matrix if row["status"] in {"fail", "error"}]
+    failed = [row for row in matrix if row["status"] == "fail"]
+    errors = [row for row in matrix if row["status"] == "error"]
     cost_summary = _matrix_cost_summary(matrix)
+    contract_passed = not errors and not skipped_failures
     summary = {
         "schema_version": "e2e_synthetic_matrix_v1",
         "generated_at": _utc_now(),
@@ -309,11 +318,14 @@ def run_synthetic_suite_matrix(
         "run_id": run_label,
         "modes": list(modes),
         "output_root": output_root.as_posix(),
-        "passed": not failed and not skipped_failures,
+        "passed": not failed and contract_passed,
+        "contract_passed": contract_passed,
+        "allow_failed_rows": allow_failed_rows,
         "counts": {
             "total": len(matrix),
             "passed": sum(1 for row in matrix if row["status"] == "pass"),
-            "failed": len(failed),
+            "failed": len(failed) + len(errors),
+            "errors": len(errors),
             "skipped": sum(1 for row in matrix if row["status"] == "skip"),
         },
         "cost_report": cost_summary,
@@ -333,12 +345,14 @@ def run_synthetic_suite_matrix(
     _print_kv_table(
         (
             ("passed", summary["passed"]),
+            ("contract_passed", summary["contract_passed"]),
             ("total", summary["counts"]["total"]),
             ("failed", summary["counts"]["failed"]),
+            ("errors", summary["counts"]["errors"]),
             ("skipped", summary["counts"]["skipped"]),
         )
     )
-    return bool(summary["passed"])
+    return bool(summary["contract_passed"] if allow_failed_rows else summary["passed"])
 
 def _run_pure_mask_matrix_rows(
     *,
@@ -645,8 +659,11 @@ def _definition_name_from_spec(spec: object) -> str:
         f"Cannot infer registry definition for {getattr(spec, 'shape_id', '<unknown>')}"
     )
 
-def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float]:
-    metrics: Dict[str, float] = {"passed": 1.0 if passed else 0.0}
+def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, Any]:
+    metrics: Dict[str, Any] = {"passed": 1.0 if passed else 0.0}
+    validation_mode = str(payload.get("validation_mode") or "")
+    if validation_mode:
+        metrics["validation_mode"] = validation_mode
     for key in (
         "average_iou",
         "min_view_iou",
@@ -654,8 +671,20 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
         "missing_required_metric_count",
     ):
         value = payload.get(key)
-        if isinstance(value, (int, float)):
-            metrics[key] = float(value)
+        if not isinstance(value, (int, float)):
+            continue
+        numeric = float(value)
+        if key == "average_iou" and validation_mode == "render-iou":
+            set_metric_path(metrics, "render.average_iou", numeric)
+            metrics[key] = numeric
+        elif key == "min_view_iou" and validation_mode == "render-iou":
+            set_metric_path(metrics, "render.min_view_iou", numeric)
+            metrics[key] = numeric
+        elif key in {
+            "failed_required_view_count",
+            "missing_required_metric_count",
+        }:
+            set_metric_path(metrics, f"render.{key}", numeric)
     summary = payload.get("silhouette_summary")
     if isinstance(summary, Mapping):
         for key in (
@@ -667,45 +696,75 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
         ):
             value = summary.get(key)
             if isinstance(value, (int, float)):
-                metrics[f"silhouette_{key}"] = float(value)
+                numeric = float(value)
+                set_metric_path(metrics, f"render.{key}", numeric)
+                set_metric_path(metrics, f"silhouette.{key}", numeric)
     novel = payload.get("novel_view")
     if isinstance(novel, Mapping):
         for key in ("psnr", "ssim", "lpips", "mse", "image_count"):
             value = novel.get(key)
             if isinstance(value, (int, float)):
-                metrics[f"novel_view_{key}"] = float(value)
+                set_metric_path(metrics, f"novel_view.{key}", float(value))
     novel_summary = payload.get("novel_view_summary")
     if isinstance(novel_summary, Mapping):
         value = novel_summary.get("passed")
         if isinstance(value, bool):
-            metrics["novel_view_passed"] = 1.0 if value else 0.0
+            set_metric_path(metrics, "novel_view.passed", 1.0 if value else 0.0)
     cost_report = payload.get("cost_report")
     if isinstance(cost_report, Mapping):
         value = cost_report.get("combined_total_wall_ms")
         if isinstance(value, (int, float)):
-            metrics["cost_combined_total_wall_ms"] = float(value)
+            numeric = float(value)
+            set_metric_path(metrics, "cost.total_wall_ms", numeric)
+            metrics["cost_combined_total_wall_ms"] = numeric
         validation = cost_report.get("validation")
         if isinstance(validation, Mapping):
             value = validation.get("total_wall_ms")
             if isinstance(value, (int, float)):
-                metrics["cost_validation_total_wall_ms"] = float(value)
+                numeric = float(value)
+                set_metric_path(metrics, "cost.stage.validation.wall_ms", numeric)
+                metrics["cost_validation_total_wall_ms"] = numeric
         backend_cost = cost_report.get("backend")
         if isinstance(backend_cost, Mapping):
             value = backend_cost.get("total_wall_ms")
             if isinstance(value, (int, float)):
-                metrics["cost_backend_total_wall_ms"] = float(value)
+                numeric = float(value)
+                set_metric_path(metrics, "cost.stage.backend.wall_ms", numeric)
+                metrics["cost_backend_total_wall_ms"] = numeric
     cost_gate = payload.get("cost_gate")
     if isinstance(cost_gate, Mapping):
         value = cost_gate.get("passed")
         if isinstance(value, bool):
-            metrics["cost_gate_passed"] = 1.0 if value else 0.0
+            numeric = 1.0 if value else 0.0
+            set_metric_path(metrics, "cost.gate_passed", numeric)
+            metrics["cost_gate_passed"] = numeric
     views = payload.get("views", {})
     if isinstance(views, Mapping):
         for view, view_payload in views.items():
-            if isinstance(view_payload, Mapping) and isinstance(
-                view_payload.get("iou"), (int, float)
+            if not isinstance(view_payload, Mapping):
+                continue
+            value = view_payload.get("iou", view_payload.get("area_iou"))
+            if isinstance(value, (int, float)):
+                numeric = float(value)
+                set_metric_path(metrics, f"render.per_view.{view}.area_iou", numeric)
+                metrics[f"{view}_iou"] = numeric
+            for source_key, target_key in (
+                ("boundary_iou", f"render.per_view.{view}.boundary_iou"),
+                ("signed_distance_loss", f"render.per_view.{view}.signed_distance_loss"),
             ):
-                metrics[f"{view}_iou"] = float(view_payload["iou"])
+                raw = view_payload.get(source_key)
+                if isinstance(raw, (int, float)):
+                    set_metric_path(metrics, target_key, float(raw))
+        required_values = [
+            metrics.get(f"{view}_iou")
+            for view in ("front", "side", "top")
+            if isinstance(metrics.get(f"{view}_iou"), (int, float))
+        ]
+        if len(required_values) == 3:
+            min_required = float(min(required_values))
+            set_metric_path(metrics, "render.min_view_iou", min_required)
+            if validation_mode == "render-iou":
+                metrics["min_view_iou"] = min_required
     backend = payload.get("backend_result")
     backend_payload = backend if isinstance(backend, Mapping) else payload
     status = backend_payload.get("status")
@@ -716,33 +775,9 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
         status = selected.get("status")
         metrics["backend_status_ok"] = 1.0 if _backend_status_ok(status) else 0.0
         metric_result = selected.get("metric_result", {})
-        if isinstance(metric_result, Mapping):
-            for key in (
-                "area_iou_mean",
-                "area_iou_min",
-                "boundary_iou_mean",
-                "topology_score",
-                "editability_score",
-                "complexity_penalty",
-                "elapsed_s",
-            ):
-                value = metric_result.get(key)
-                if isinstance(value, (int, float)):
-                    metrics[key] = float(value)
+        _add_backend_metric_result(metrics, metric_result)
     elif isinstance(backend_payload.get("metric_result"), Mapping):
-        metric_result = backend_payload["metric_result"]
-        for key in (
-            "area_iou_mean",
-            "area_iou_min",
-            "boundary_iou_mean",
-            "topology_score",
-            "editability_score",
-            "complexity_penalty",
-            "elapsed_s",
-        ):
-            value = metric_result.get(key)
-            if isinstance(value, (int, float)):
-                metrics[key] = float(value)
+        _add_backend_metric_result(metrics, backend_payload["metric_result"])
     for bundle in _evaluation_bundle_sequence(payload):
         for group in bundle.get("metric_groups", ()) or ():
             if not isinstance(group, Mapping):
@@ -750,11 +785,46 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, float
             for metric in group.get("metrics", ()) or ():
                 if not isinstance(metric, Mapping):
                     continue
-                name = str(metric.get("name", "")).replace(".", "_")
+                name = str(metric.get("name", ""))
                 value = metric.get("value")
                 if name and isinstance(value, (int, float, bool)):
-                    metrics[name] = float(value)
+                    numeric = float(value)
+                    metrics[name.replace(".", "_")] = numeric
+                    set_metric_path(metrics, name, numeric)
+                    alias = namespace_metric_key(name)
+                    if alias != name:
+                        set_metric_path(metrics, alias, numeric)
+                    if name == "silhouette.min_view_iou":
+                        metrics["area_iou_min"] = numeric
+                    elif name == "silhouette.average_iou":
+                        metrics["area_iou_mean"] = numeric
+                    elif name == "silhouette.mean_boundary_iou":
+                        metrics["boundary_iou_mean"] = numeric
+                    elif name == "editability.editable_reconstruction_index":
+                        metrics["editability_score"] = numeric
+                    elif name == "topology.score":
+                        metrics["topology_score"] = numeric
     return metrics
+
+
+def _add_backend_metric_result(
+    metrics: Dict[str, Any],
+    metric_result: Any,
+) -> None:
+    if not isinstance(metric_result, Mapping):
+        return
+    for key in (
+        "area_iou_mean",
+        "area_iou_min",
+        "boundary_iou_mean",
+        "topology_score",
+        "editability_score",
+        "complexity_penalty",
+        "elapsed_s",
+    ):
+        value = metric_result.get(key)
+        if isinstance(value, (int, float)):
+            set_metric_path(metrics, namespace_metric_key(key), float(value))
 
 def _evaluation_bundle_sequence(
     payload: Mapping[str, Any],

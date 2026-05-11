@@ -60,6 +60,29 @@ class RefinementLabScoringTests(unittest.TestCase):
         self.assertIn("terms", score)
         self.assertGreater(score["total"], 0)
 
+    def test_reliability_first_hard_zeroes_blocked_candidate(self) -> None:
+        blocked = ExperimentResult(
+            run_id="r",
+            case_id="c",
+            variant_id="blocked",
+            mode="gaussian_ellipsoid_proxy",
+            status="pass",
+            exit_code=0,
+            started_utc="s",
+            finished_utc="f",
+            elapsed_s=1.0,
+            backend_result={"status": "success"},
+            metrics={
+                "validation_mode": "backend-status",
+                "backend": {"area_iou_mean": 0.99, "area_iou_min": 0.99},
+            },
+        )
+
+        score = score_result(blocked, objective="reliability_first")
+
+        self.assertEqual(score["total"], 0.0)
+        self.assertEqual(score["promotion"]["state"], "metric_only_candidate")
+
     def test_degraded_backend_loses_to_full_success(self) -> None:
         full = _result(
             "full",
@@ -99,10 +122,53 @@ class RefinementLabScoringTests(unittest.TestCase):
         ranked = rank_results([metric_only, full], objective="quality_win")
         self.assertEqual(ranked[0][0].variant_id, "full")
         self.assertEqual(promotion_decision(metric_only).tier, "blocked")
+        self.assertEqual(
+            promotion_decision(metric_only).state,
+            "metric_only_candidate",
+        )
         self.assertIn(
             "missing_required_metrics",
             promotion_decision(metric_only).blockers,
         )
+
+    def test_topology_failure_blocks_promotion(self) -> None:
+        bad_topology = _result(
+            "bad-topology",
+            0.9,
+            0.9,
+            0.9,
+            0.9,
+            metrics={"topology": {"score": 0.4}},
+        )
+
+        decision = promotion_decision(bad_topology)
+
+        self.assertFalse(decision.promotable)
+        self.assertEqual(decision.state, "blocked_topology")
+
+    def test_proxy_render_namespace_violation_is_flagged(self) -> None:
+        result = _result(
+            "gaussian",
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            metrics={
+                "backend": {"area_iou_min": 0.97, "area_iou_mean": 0.98},
+                "render": {
+                    "min_view_iou": 0.0,
+                    "per_view": {
+                        "front": {"area_iou": 0.0},
+                        "side": {"area_iou": 0.0},
+                        "top": {"area_iou": 0.0},
+                    },
+                },
+            },
+        )
+
+        decision = promotion_decision(result)
+
+        self.assertIn("proxy_render_namespace_violation", decision.blockers)
 
     def test_research_only_requires_review_across_objectives(self) -> None:
         result = _result(

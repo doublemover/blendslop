@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Sequence
 from typing import Any
 
 from .silhouette_render_jobs import canonical_view_jobs
@@ -66,6 +67,7 @@ def render_views(
     output_dir: Path,
     resolution: tuple[int, int] = (256, 256),
     include_orbit: bool = False,
+    orbit_angles: Sequence[float] | None = None,
 ) -> dict[str, Path]:
     bpy = require_bpy()
     try:
@@ -101,7 +103,12 @@ def render_views(
         background_color=(1.0, 1.0, 1.0, 1.0),
         silhouette_color=(0.0, 0.0, 0.0, 1.0),
     ) as session:
-        for view in canonical_view_jobs(spec, resolution=resolution, include_orbit=include_orbit):
+        for view in canonical_view_jobs(
+            spec,
+            resolution=resolution,
+            include_orbit=include_orbit,
+            orbit_angles=orbit_angles,
+        ):
             path = output_dir / f"{view.view_name}.png"
             if view.view_name == "top":
                 top_scale = max(width, depth, 1e-3) * (1.0 + 2.0 * view.padding)

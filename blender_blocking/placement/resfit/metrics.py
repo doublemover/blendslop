@@ -61,6 +61,13 @@ def build_resfit_candidate_metrics(
         "elapsed_time_budget",
         "objective_evaluation_budget",
     }
+    accepted_moves = sum(int(record.get("accepted_moves", 0) or 0) for record in history_records)
+    rejected_moves = sum(int(record.get("rejected_moves", 0) or 0) for record in history_records)
+    fail_reason = ""
+    if not result.primitives:
+        fail_reason = "no_primitives_emitted"
+    elif improved <= 0.0:
+        fail_reason = "objective_did_not_improve"
     budget_outcome = (
         "accepted_after_improvement"
         if budget_limited and improved > 0.0 and result.primitives
@@ -114,14 +121,20 @@ def build_resfit_candidate_metrics(
             "objective": {
                 "initial_total": result.initial_loss.total,
                 "final_total": result.final_loss.total,
+                "objective_before": result.initial_loss.total,
+                "objective_after": result.final_loss.total,
                 "improvement": improved,
                 "improvement_ratio": improvement_ratio,
                 "improved": improved > 0.0,
+                "accepted_move_count": accepted_moves,
+                "rejected_move_count": rejected_moves,
                 "termination_reason": result.optimization_termination_reason,
                 "objective_evaluations": result.objective_evaluations,
                 "history_length": len(history_records),
                 "selected_attempt": result.selected_attempt,
                 "attempts": list(result.attempts),
+                "per_view": per_view,
+                "fail_reason": fail_reason,
             },
             "budget": {
                 "limited": budget_limited,
@@ -141,8 +154,14 @@ def build_resfit_candidate_metrics(
             "final_loss": result.final_loss.terms,
             "initial_total": result.initial_loss.total,
             "final_total": result.final_loss.total,
+            "objective_before": result.initial_loss.total,
+            "objective_after": result.final_loss.total,
             "objective_improvement": improved,
             "objective_improvement_ratio": improvement_ratio,
+            "accepted_move_count": accepted_moves,
+            "rejected_move_count": rejected_moves,
+            "termination_reason": result.optimization_termination_reason,
+            "fail_reason": fail_reason,
             "surface_proxy_iou": surface_proxy_iou,
             "silhouette_proxy_iou": silhouette_proxy_iou,
             "optimization_termination_reason": result.optimization_termination_reason,

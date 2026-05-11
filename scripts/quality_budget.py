@@ -88,6 +88,7 @@ def evaluate_budget_payloads(
     threshold_checks = []
     for threshold in thresholds:
         threshold_checks.extend(_evaluate_threshold(threshold, current_records))
+    threshold_checks = _prioritize_checks(threshold_checks)
 
     comparison_checks = []
     if comparisons:
@@ -100,6 +101,7 @@ def evaluate_budget_payloads(
                     has_baseline=baseline_payload is not None,
                 )
             )
+    comparison_checks = _prioritize_checks(comparison_checks)
 
     threshold_passed = all(
         check["passed"] or not check.get("required", True) for check in threshold_checks
@@ -151,8 +153,7 @@ def _evaluate_threshold(
             float(threshold["threshold"]),
             operator_mode,
         )
-        checks.append(
-            {
+        check = {
                 **_record_selector(record),
                 "id": threshold.get("id", ""),
                 "metric": metric,
@@ -163,7 +164,9 @@ def _evaluate_threshold(
                 "passed": passed,
                 "message": message,
             }
-        )
+        check["category"] = _check_category(check, record.data)
+        check["impact_rank"] = _impact_rank(check)
+        checks.append(check)
     return checks
 
 
@@ -537,7 +540,7 @@ def _base_check(
     passed: bool,
     message: str,
 ) -> dict[str, Any]:
-    return {
+    check = {
         "id": selector.get("id", ""),
         "artifact": str(selector.get("artifact", "*")),
         "case": str(selector.get("case", "*")),
@@ -550,6 +553,68 @@ def _base_check(
         "passed": passed,
         "message": message,
     }
+    check["category"] = _check_category(check, {})
+    check["impact_rank"] = _impact_rank(check)
+    return check
+
+
+def _prioritize_checks(checks: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    return sorted(
+        (dict(check) for check in checks),
+        key=lambda check: (
+            bool(check.get("passed", False)),
+            int(check.get("impact_rank", 99)),
+            str(check.get("mode", "")),
+            str(check.get("case", "")),
+            str(check.get("metric", "")),
+        ),
+    )
+
+
+def _check_category(check: Mapping[str, Any], record_data: Mapping[str, Any]) -> str:
+    if check.get("passed"):
+        return "passed"
+    metric = str(check.get("metric", ""))
+    message = str(check.get("message", ""))
+    value = check.get("value")
+    status = str(record_data.get("status", ""))
+    row_passed = bool(record_data.get("passed", False))
+    if row_passed and status == "pass" and metric and value is not None:
+        return "contract_mismatch"
+    if value is None or "missing" in message:
+        if _is_optional_or_research_missing(check):
+            return "research_optional_missing"
+        return "coverage_missing"
+    if "topology" in metric or "editability" in metric:
+        return "topology_editability_failure"
+    return "quality_below_floor"
+
+
+def _is_optional_or_research_missing(check: Mapping[str, Any]) -> bool:
+    if not bool(check.get("required", True)):
+        return True
+    metric = str(check.get("metric", ""))
+    return any(part in metric for part in ("lpips", "geometry.recoverable"))
+
+
+def _impact_rank(check: Mapping[str, Any]) -> int:
+    category = str(check.get("category", ""))
+    metric = str(check.get("metric", ""))
+    if category == "contract_mismatch":
+        return 0
+    if "per_view" in metric or "min_view_iou" in metric:
+        return 1
+    if category == "topology_editability_failure":
+        return 2
+    if "geometry" in metric:
+        return 3
+    if category == "coverage_missing":
+        return 4
+    if category == "research_optional_missing":
+        return 5
+    if category == "quality_below_floor":
+        return 1
+    return 9
 
 
 def _utc_now() -> str:

@@ -340,6 +340,13 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
         warnings.append("coverage signal is zero; surface proxy may be under-constrained")
 
     elapsed = time.perf_counter() - start
+    per_view_scores = _per_view_scores(uncertainty_signal)
+    transform_diagnostics = _proxy_transform_diagnostics(
+        target,
+        per_view_scores=per_view_scores,
+        coverage=coverage,
+    )
+
     metrics = CandidateMetrics(
         area_iou_min=coverage,
         area_iou_mean=coverage,
@@ -369,11 +376,18 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             "mesh_topology": mesh_topology,
             "editable_proxy": editable_proxy_summary,
             "proxy_distillation": distillation_report.to_dict(),
+            "proxy_render_namespace": "backend_proxy_only",
+            "transform_diagnostics": transform_diagnostics,
+            "render_proxy_disagreement_policy": {
+                "high_proxy_iou_floor": 0.9,
+                "catastrophic_render_iou_floor": 0.2,
+                "action": "require_render_iou_preflight_before_parameter_fanout",
+            },
             "normalized_config": _compact_config_summary(normalized),
             "warnings": tuple(warnings),
             "surface_points": point_meta,
         },
-        per_view=_per_view_scores(uncertainty_signal),
+        per_view=per_view_scores,
     )
 
     return CandidateResult(
@@ -387,3 +401,44 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
         warnings=tuple(warnings),
         payload=primitives,
     )
+
+
+def _proxy_transform_diagnostics(
+    target: Any,
+    *,
+    per_view_scores: Mapping[str, Any],
+    coverage: float,
+) -> dict[str, Any]:
+    diagnostics: dict[str, Any] = {
+        "projected_bbox_ratios": {},
+        "centroid_deltas": {},
+        "axis_permutation_best_candidate": "not_evaluated_without_render_iou",
+        "top_view_footprint_failure": False,
+        "proxy_coverage": float(coverage),
+    }
+    constraints = getattr(target, "constraints", ()) or ()
+    for constraint in constraints:
+        view = str(getattr(constraint, "view", ""))
+        bbox = getattr(constraint, "bbox", None)
+        score = per_view_scores.get(view, {}) if isinstance(per_view_scores, Mapping) else {}
+        confidence = (
+            float(score.get("area_iou", 0.0))
+            if isinstance(score, Mapping)
+            else 0.0
+        )
+        if bbox is not None:
+            width = float(getattr(bbox, "width", 0.0) or 0.0)
+            height = float(getattr(bbox, "height", 0.0) or 0.0)
+            diagnostics["projected_bbox_ratios"][view] = {
+                "target_width": width,
+                "target_height": height,
+                "confidence_scaled_area": float(width * height * confidence),
+            }
+            diagnostics["centroid_deltas"][view] = {
+                "x": 0.0,
+                "y": 0.0,
+                "status": "not_evaluated_without_render_iou",
+            }
+        if view == "top" and confidence < 0.35:
+            diagnostics["top_view_footprint_failure"] = True
+    return diagnostics

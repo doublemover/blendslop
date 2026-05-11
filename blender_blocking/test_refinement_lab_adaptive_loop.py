@@ -35,8 +35,8 @@ class _FakeRunner:
                     finished_utc="f",
                     elapsed_s=1.0,
                     backend_result={
-                        "status": "degraded",
-                        "degraded": True,
+                        "status": "success",
+                        "degraded": False,
                         "metric_result": {
                             "area_iou_min": 0.42,
                             "area_iou_mean": 0.58,
@@ -185,6 +185,76 @@ class AdaptiveLoopTests(unittest.TestCase):
             self.assertTrue(
                 (Path(tmp) / "loop" / "g00" / "adaptive-loop-variants.json").exists()
             )
+
+    def test_loop_stops_when_no_promotable_parent_exists(self) -> None:
+        class BlockedRunner(_FakeRunner):
+            def run(self) -> tuple[bool, list[ExperimentResult]]:
+                self.harness.plans.append(self.plan)
+                variant = self.plan.variants[0]
+                return True, [
+                    ExperimentResult(
+                        run_id=self.plan.run_id,
+                        case_id=self.plan.cases[0].case_id,
+                        variant_id=variant.variant_id,
+                        mode=variant.mode,
+                        status="pass",
+                        exit_code=0,
+                        started_utc="s",
+                        finished_utc="f",
+                        elapsed_s=1.0,
+                        backend_result={
+                            "status": "success",
+                            "metric_result": {
+                                "area_iou_min": 0.99,
+                                "area_iou_mean": 0.99,
+                            },
+                        },
+                        metrics={
+                            "validation_mode": "backend-status",
+                            "backend": {
+                                "area_iou_min": 0.99,
+                                "area_iou_mean": 0.99,
+                            },
+                        },
+                    )
+                ]
+
+        class BlockedHarness(_FakeHarness):
+            def factory(
+                self,
+                plan: ExperimentPlan,
+                _options: RunOptions,
+                _base_config: object,
+            ) -> BlockedRunner:
+                return BlockedRunner(self, plan)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            harness = BlockedHarness()
+            summary = run_adaptive_loop(
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="coordinate",
+                objective="reliability_first",
+                output_root=Path(tmp) / "loop",
+                max_runs=1,
+                options=AdaptiveLoopOptions(
+                    generations=2,
+                    parent_top_k=1,
+                    children_per_parent=2,
+                    run_options=RunOptions(
+                        html_report=False,
+                        write_overlays=False,
+                        append_global_index=False,
+                        write_lineage=False,
+                    ),
+                ),
+                runner_factory=harness.factory,
+            )
+
+            self.assertEqual(len(harness.plans), 1)
+            self.assertEqual(summary.stopped_reason, "no_promotable_parents")
+            self.assertEqual(summary.generations[0].selected_parent_ids, ())
+            self.assertEqual(summary.generations[0].child_variant_count, 0)
 
 
 if __name__ == "__main__":

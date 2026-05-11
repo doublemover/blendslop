@@ -21,7 +21,7 @@ from scripts.run_quality_refinement_smoke import (
 
 
 class QualityRefinementSmokeTests(unittest.TestCase):
-    def test_default_plan_has_matrix_lpips_and_refinement_phases(self) -> None:
+    def test_default_plan_is_bounded_interactive_profile(self) -> None:
         run_id = uuid.uuid4().hex
         args = parse_args(
             [
@@ -35,14 +35,30 @@ class QualityRefinementSmokeTests(unittest.TestCase):
 
         self.assertTrue(str(run_root).endswith(run_id))
         self.assertTrue(any(phase.name.startswith("matrix-") for phase in phases))
-        self.assertIn("lpips-novel-view", {phase.name for phase in phases})
-        self.assertTrue(any(phase.name.startswith("refinement-") for phase in phases))
+        self.assertNotIn("lpips-novel-view", {phase.name for phase in phases})
+        self.assertFalse(any(phase.name.startswith("refinement-") for phase in phases))
         matrix_commands = [
             phase.command for phase in phases if phase.name.startswith("matrix-")
         ]
         self.assertTrue(
             all(",".join(DEFAULT_AMBITIOUS_MODES) in command for command in matrix_commands)
         )
+
+    def test_full_nightly_preserves_broad_workload(self) -> None:
+        args = parse_args(
+            [
+                "--profile",
+                "full-nightly",
+                "--run-root",
+                f"temp/quality-refinement-runs/{uuid.uuid4().hex}",
+            ]
+        )
+
+        _run_root, phases = build_phase_plan(args)
+
+        self.assertTrue(any(phase.name.startswith("matrix-") for phase in phases))
+        self.assertIn("lpips-novel-view", {phase.name for phase in phases})
+        self.assertTrue(any(phase.name.startswith("refinement-") for phase in phases))
 
     def test_run_root_must_stay_under_temp(self) -> None:
         with self.assertRaises(ValueError):
@@ -51,6 +67,8 @@ class QualityRefinementSmokeTests(unittest.TestCase):
     def test_lpips_phase_is_separate_from_open3d_visual_hull_phase(self) -> None:
         args = parse_args(
             [
+                "--profile",
+                "full-nightly",
                 "--run-root",
                 f"temp/quality-refinement-runs/{uuid.uuid4().hex}",
                 "--matrix-suites",
@@ -99,6 +117,56 @@ class QualityRefinementSmokeTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         self.assertFalse(run_root.exists())
+        self.assertIn("Workload:", output.getvalue())
+
+    def test_named_profiles_have_expected_phase_shapes(self) -> None:
+        profiles = {
+            "contract": ("matrix-",),
+            "visual-hull-fast": ("refinement-visual-hull-quality",),
+            "primitive-fit-fast": ("refinement-primitive-fit",),
+            "gaussian-diagnostic": ("refinement-gaussian-proxy",),
+            "differentiable-smoke": ("refinement-differentiable-refine",),
+            "lpips-only": ("lpips-novel-view",),
+        }
+        for profile, expected_names in profiles.items():
+            with self.subTest(profile=profile):
+                args = parse_args(
+                    [
+                        "--profile",
+                        profile,
+                        "--dry-run",
+                        "--run-root",
+                        f"temp/quality-refinement-runs/{uuid.uuid4().hex}",
+                    ]
+                )
+                _run_root, phases = build_phase_plan(args)
+                phase_names = tuple(phase.name for phase in phases)
+                for expected in expected_names:
+                    self.assertTrue(
+                        any(name.startswith(expected) for name in phase_names),
+                        phase_names,
+                    )
+
+    def test_contract_profile_keeps_quality_budget_warn_only(self) -> None:
+        args = parse_args(
+            [
+                "--profile",
+                "contract",
+                "--dry-run",
+                "--run-root",
+                f"temp/quality-refinement-runs/{uuid.uuid4().hex}",
+                "--matrix-suites",
+                "smoke",
+            ]
+        )
+
+        _run_root, phases = build_phase_plan(args)
+        matrix = next(phase for phase in phases if phase.name == "matrix-smoke")
+        budget = next(phase for phase in phases if phase.name == "quality-budget-smoke")
+
+        self.assertIn("--synthetic-allow-failed-rows", matrix.command)
+        self.assertNotIn("--quality-budget-json", matrix.command)
+        self.assertIn("--warn-only", budget.command)
 
     def test_command_format_quotes_windows_paths(self) -> None:
         formatted = format_command(

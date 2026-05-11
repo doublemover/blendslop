@@ -67,6 +67,7 @@ _VALID_REFINEMENT_SEARCH = {"grid", "random", "coordinate", "successive_halving"
 
 _VALID_REFINEMENT_OBJECTIVES = {
     "quality_win",
+    "reliability_first",
     "min_view_iou",
     "mean_iou",
     "profile_editable",

@@ -97,6 +97,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_sdf_projection", "test_sdf_projection"),
     ("pure_synthetic_factory", "test_synthetic_factory"),
     ("pure_quality_budget", "test_quality_budget"),
+    ("pure_quality_metric_namespaces", "test_quality_metric_namespaces"),
     ("pure_cost_model", "test_cost_model"),
     ("pure_evaluation_baselines", "test_evaluation_baselines"),
     ("pure_evaluation_calibration", "test_evaluation_calibration"),

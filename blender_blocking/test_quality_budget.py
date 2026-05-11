@@ -258,8 +258,9 @@ class QualityBudgetTests(unittest.TestCase):
         report = evaluate_budget_payloads(current, budget)
 
         self.assertTrue(report["passed"])
-        self.assertEqual(report["checks"][0]["value"], 0.74)
-        self.assertEqual(report["checks"][1]["mode"], "max")
+        by_id = {check["id"]: check for check in report["checks"]}
+        self.assertEqual(by_id["recoverable.fscore"]["value"], 0.74)
+        self.assertEqual(by_id["ambiguity.gap"]["mode"], "max")
 
     def test_synthetic_geometry_matrix_metrics_are_budgetable(self) -> None:
         current = {

@@ -65,7 +65,7 @@ DEFAULT_REFINEMENT_TARGETS = (
         suite="synthetic-visual-hull",
         track="visual-hull-quality",
         search="successive_halving",
-        objective="quality_win",
+        objective="reliability_first",
         uses_open3d_path=True,
     ),
     RefinementTarget(
@@ -73,30 +73,130 @@ DEFAULT_REFINEMENT_TARGETS = (
         suite="synthetic-primitive-fit",
         track="primitive-fit",
         search="successive_halving",
-        objective="quality_win",
+        objective="reliability_first",
     ),
     RefinementTarget(
         name="gaussian-proxy",
         suite="synthetic-primitive-fit",
         track="gaussian-proxy",
         search="successive_halving",
-        objective="quality_win",
+        objective="reliability_first",
     ),
     RefinementTarget(
         name="differentiable-refine",
         suite="synthetic-primitive-fit",
         track="differentiable-refine",
         search="successive_halving",
-        objective="quality_win",
+        objective="reliability_first",
     ),
     RefinementTarget(
         name="ensemble-selection",
         suite="synthetic-smoke",
         track="ensemble-selection",
         search="successive_halving",
-        objective="quality_win",
+        objective="reliability_first",
     ),
 )
+
+
+@dataclass(frozen=True)
+class SmokeProfile:
+    name: str
+    description: str
+    matrix_suites: tuple[str, ...] = ()
+    modes: tuple[str, ...] = DEFAULT_AMBITIOUS_MODES
+    matrix_count: int = 1
+    lpips_enabled: bool = False
+    lpips_suite: str = "smoke"
+    lpips_modes: tuple[str, ...] = DEFAULT_LPIPS_MODES
+    lpips_count: int = 1
+    refinement_targets: tuple[str, ...] = ()
+    refinement_case_count: int | None = 1
+    refinement_generations: int = 1
+    refinement_max_runs: int = 3
+    refinement_top_k: int = 2
+    refinement_parent_top_k: int = 1
+    refinement_children_per_parent: int = 1
+    matrix_budget_mode: str = "gating"
+    matrix_allow_failed_rows: bool = False
+    stop_on_failure: bool = False
+    expected_artifacts: tuple[str, ...] = ("commands.md", "summary.md", "summary.json")
+
+
+SMOKE_PROFILES: dict[str, SmokeProfile] = {
+    "interactive": SmokeProfile(
+        name="interactive",
+        description="Bounded default profile: short backend-status contract matrix.",
+        matrix_suites=("adversarial-silhouettes",),
+        matrix_count=1,
+        stop_on_failure=True,
+    ),
+    "contract": SmokeProfile(
+        name="contract",
+        description="Backend-status contract matrices only.",
+        matrix_suites=DEFAULT_MATRIX_SUITES,
+        matrix_count=1,
+        matrix_budget_mode="warn",
+        matrix_allow_failed_rows=True,
+        stop_on_failure=True,
+    ),
+    "visual-hull-fast": SmokeProfile(
+        name="visual-hull-fast",
+        description="One visual-hull render-IoU adaptive loop.",
+        refinement_targets=("visual-hull-quality",),
+        refinement_max_runs=3,
+        refinement_generations=1,
+        stop_on_failure=True,
+    ),
+    "primitive-fit-fast": SmokeProfile(
+        name="primitive-fit-fast",
+        description="One primitive-fit render-IoU adaptive loop.",
+        refinement_targets=("primitive-fit",),
+        refinement_max_runs=3,
+        refinement_generations=1,
+        stop_on_failure=True,
+    ),
+    "gaussian-diagnostic": SmokeProfile(
+        name="gaussian-diagnostic",
+        description="One gaussian render-IoU preflight plus diagnostic output.",
+        refinement_targets=("gaussian-proxy",),
+        refinement_max_runs=1,
+        refinement_generations=1,
+        refinement_top_k=1,
+        stop_on_failure=True,
+    ),
+    "differentiable-smoke": SmokeProfile(
+        name="differentiable-smoke",
+        description="Cheap differentiable refinement smoke pass.",
+        refinement_targets=("differentiable-refine",),
+        refinement_max_runs=1,
+        refinement_generations=1,
+        refinement_top_k=1,
+        stop_on_failure=True,
+    ),
+    "lpips-only": SmokeProfile(
+        name="lpips-only",
+        description="Novel-view PSNR/SSIM/LPIPS validation only.",
+        lpips_enabled=True,
+        lpips_count=1,
+        stop_on_failure=True,
+    ),
+    "full-nightly": SmokeProfile(
+        name="full-nightly",
+        description="Broad matrix, LPIPS, and adaptive quality sweep.",
+        matrix_suites=DEFAULT_MATRIX_SUITES,
+        matrix_count=3,
+        lpips_enabled=True,
+        lpips_count=2,
+        refinement_targets=tuple(target.name for target in DEFAULT_REFINEMENT_TARGETS),
+        refinement_case_count=None,
+        refinement_max_runs=8,
+        refinement_top_k=4,
+        refinement_generations=2,
+        refinement_parent_top_k=2,
+        refinement_children_per_parent=2,
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -108,6 +208,8 @@ class PhaseCommand:
     requires_blender: bool = False
     uses_open3d_path: bool = False
     uses_torch_lpips_path: bool = False
+    expected_candidate_count: int = 0
+    expected_blender_invocations: int = 0
 
 
 @dataclass(frozen=True)
@@ -170,13 +272,52 @@ def _blender_cmd(blender_exe: str) -> str:
 
 def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand, ...]]:
     run_root = resolve_run_root(args.run_root)
-    modes = _parse_csv(args.modes) or DEFAULT_AMBITIOUS_MODES
-    matrix_suites = _parse_csv(args.matrix_suites) or DEFAULT_MATRIX_SUITES
-    lpips_modes = _parse_csv(args.lpips_modes) or DEFAULT_LPIPS_MODES
+    profile = _profile(args.profile)
+    modes = _parse_csv(args.modes) or profile.modes
+    matrix_suites = _parse_csv(args.matrix_suites) or profile.matrix_suites
+    matrix_count = args.matrix_count if args.matrix_count is not None else profile.matrix_count
+    lpips_suite = args.lpips_suite or profile.lpips_suite
+    lpips_modes = _parse_csv(args.lpips_modes) or profile.lpips_modes
+    lpips_count = args.lpips_count if args.lpips_count is not None else profile.lpips_count
+    refinement_targets = (
+        args.refinement_targets
+        if args.refinement_targets is not None
+        else ",".join(profile.refinement_targets)
+    )
+    refinement_max_runs = (
+        args.refinement_max_runs
+        if args.refinement_max_runs is not None
+        else profile.refinement_max_runs
+    )
+    refinement_case_count = (
+        args.refinement_case_count
+        if args.refinement_case_count is not None
+        else profile.refinement_case_count
+    )
+    refinement_top_k = (
+        args.refinement_top_k
+        if args.refinement_top_k is not None
+        else profile.refinement_top_k
+    )
+    refinement_generations = (
+        args.refinement_generations
+        if args.refinement_generations is not None
+        else profile.refinement_generations
+    )
+    refinement_parent_top_k = (
+        args.refinement_parent_top_k
+        if args.refinement_parent_top_k is not None
+        else profile.refinement_parent_top_k
+    )
+    refinement_children_per_parent = (
+        args.refinement_children_per_parent
+        if args.refinement_children_per_parent is not None
+        else profile.refinement_children_per_parent
+    )
     blender_exe = _blender_cmd(args.blender_exe)
     phases: list[PhaseCommand] = []
 
-    if not args.no_synthetic_matrix:
+    if matrix_suites and not args.no_synthetic_matrix:
         for suite in matrix_suites:
             suite_dir = run_root / "m" / compact_path_segment(
                 suite,
@@ -188,34 +329,44 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
             quality_report = suite_dir / "quality.json"
             cost_report = suite_dir / "cost.json"
             use_blender = suite not in {"adversarial-silhouettes", "capture-noise"}
+            matrix_args = [
+                "--synthetic-matrix",
+                "--synthetic-suite",
+                suite,
+                "--synthetic-count",
+                str(matrix_count),
+                "--synthetic-modes",
+                ",".join(modes),
+                "--validation-mode",
+                "backend-status",
+                "--synthetic-output-root",
+                _repo_path(output_root),
+                "--result-json",
+                _repo_path(result_json),
+                "--cost-report-json",
+                _repo_path(cost_report),
+                "--cost-track-memory",
+                "--synthetic-strict-skips",
+                "--run-id",
+                f"{args.run_id_prefix}_{suite}",
+                "--no-progress",
+            ]
+            if profile.matrix_allow_failed_rows:
+                matrix_args.append("--synthetic-allow-failed-rows")
+            matrix_artifacts: list[Path] = [result_json, cost_report, output_root]
+            if profile.matrix_budget_mode == "gating":
+                matrix_args.extend(
+                    [
+                        "--quality-budget-json",
+                        _repo_path(REPO_ROOT / args.quality_budget_json),
+                        "--quality-report-json",
+                        _repo_path(quality_report),
+                    ]
+                )
+                matrix_artifacts.insert(1, quality_report)
             command = _e2e_command(
                 blender_exe=blender_exe if use_blender else None,
-                args=(
-                    "--synthetic-matrix",
-                    "--synthetic-suite",
-                    suite,
-                    "--synthetic-count",
-                    str(args.matrix_count),
-                    "--synthetic-modes",
-                    ",".join(modes),
-                    "--validation-mode",
-                    "backend-status",
-                    "--synthetic-output-root",
-                    _repo_path(output_root),
-                    "--result-json",
-                    _repo_path(result_json),
-                    "--quality-budget-json",
-                    _repo_path(REPO_ROOT / args.quality_budget_json),
-                    "--quality-report-json",
-                    _repo_path(quality_report),
-                    "--cost-report-json",
-                    _repo_path(cost_report),
-                    "--cost-track-memory",
-                    "--synthetic-strict-skips",
-                    "--run-id",
-                    f"{args.run_id_prefix}_{suite}",
-                    "--no-progress",
-                ),
+                args=tuple(matrix_args),
             )
             phases.append(
                 PhaseCommand(
@@ -225,12 +376,31 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                         "backend-status matrix"
                     ),
                     command=command,
-                    artifacts=(result_json, quality_report, cost_report, output_root),
+                    artifacts=tuple(matrix_artifacts),
                     requires_blender=use_blender,
+                    expected_candidate_count=matrix_count * len(modes),
+                    expected_blender_invocations=1 if use_blender else 0,
                 )
             )
+            if profile.matrix_budget_mode == "warn":
+                phases.append(
+                    PhaseCommand(
+                        name=f"quality-budget-{suite}",
+                        description=(
+                            "Warn-only quality budget report for contract matrix "
+                            "evidence"
+                        ),
+                        command=_quality_budget_command(
+                            result_json=result_json,
+                            budget_json=REPO_ROOT / args.quality_budget_json,
+                            report_json=quality_report,
+                            warn_only=True,
+                        ),
+                        artifacts=(quality_report,),
+                    )
+                )
 
-    if not args.no_lpips_novel:
+    if profile.lpips_enabled and not args.no_lpips_novel:
         lpips_root = run_root / "lpips"
         phases.append(
             PhaseCommand(
@@ -243,9 +413,9 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                     args=(
                         "--synthetic-matrix",
                         "--synthetic-suite",
-                        args.lpips_suite,
+                        lpips_suite,
                         "--synthetic-count",
-                        str(args.lpips_count),
+                        str(lpips_count),
                         "--synthetic-modes",
                         ",".join(lpips_modes),
                         "--validation-mode",
@@ -278,11 +448,13 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                 ),
                 requires_blender=True,
                 uses_torch_lpips_path=True,
+                expected_candidate_count=lpips_count * len(lpips_modes),
+                expected_blender_invocations=1,
             )
         )
 
-    if not args.no_refinement_loop:
-        selected = _selected_refinement_targets(args.refinement_targets)
+    if refinement_targets and not args.no_refinement_loop:
+        selected = _selected_refinement_targets(refinement_targets)
         for target in selected:
             target_root = run_root / "r" / compact_path_segment(
                 target.name,
@@ -300,7 +472,13 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                         blender_exe=blender_exe,
                         result_root=target_root,
                         target=target,
-                        args=args,
+                        case_count=refinement_case_count,
+                        max_runs=refinement_max_runs,
+                        top_k=refinement_top_k,
+                        generations=refinement_generations,
+                        parent_top_k=refinement_parent_top_k,
+                        children_per_parent=refinement_children_per_parent,
+                        seed=args.seed,
                     ),
                     artifacts=(
                         target_root / "adaptive-loop-summary.json",
@@ -309,10 +487,24 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                     requires_blender=True,
                     uses_open3d_path=target.uses_open3d_path,
                     uses_torch_lpips_path=target.uses_torch_lpips_path,
+                    expected_candidate_count=(
+                        refinement_max_runs
+                        * refinement_generations
+                        * max(1, refinement_case_count or 1)
+                    ),
+                    expected_blender_invocations=1,
                 )
             )
 
     return run_root, tuple(phases)
+
+
+def _profile(name: str) -> SmokeProfile:
+    try:
+        return SMOKE_PROFILES[str(name)]
+    except KeyError as exc:
+        known = ", ".join(sorted(SMOKE_PROFILES))
+        raise ValueError(f"unknown profile {name!r}; known: {known}") from exc
 
 
 def _e2e_command(
@@ -340,9 +532,15 @@ def _refinement_loop_command(
     blender_exe: str,
     result_root: Path,
     target: RefinementTarget,
-    args: argparse.Namespace,
+    case_count: int | None,
+    max_runs: int,
+    top_k: int,
+    generations: int,
+    parent_top_k: int,
+    children_per_parent: int,
+    seed: int,
 ) -> tuple[str, ...]:
-    return (
+    command = [
         blender_exe,
         "--background",
         "--python-exit-code",
@@ -360,22 +558,47 @@ def _refinement_loop_command(
         "--objective",
         target.objective,
         "--max-runs",
-        str(args.refinement_max_runs),
+        str(max_runs),
         "--top-k",
-        str(args.refinement_top_k),
+        str(top_k),
         "--generations",
-        str(args.refinement_generations),
+        str(generations),
         "--parent-top-k",
-        str(args.refinement_parent_top_k),
+        str(parent_top_k),
         "--children-per-parent",
-        str(args.refinement_children_per_parent),
+        str(children_per_parent),
         "--result-root",
         _repo_path(result_root),
         "--seed",
-        str(args.seed),
+        str(seed),
         "--report-failures",
         "all",
-    )
+    ]
+    if case_count is not None:
+        command.extend(("--case-count", str(case_count)))
+    return tuple(command)
+
+
+def _quality_budget_command(
+    *,
+    result_json: Path,
+    budget_json: Path,
+    report_json: Path,
+    warn_only: bool,
+) -> tuple[str, ...]:
+    command = [
+        _python_cmd(),
+        _repo_path(REPO_ROOT / "scripts" / "quality_budget.py"),
+        "--current",
+        _repo_path(result_json),
+        "--budget",
+        _repo_path(budget_json),
+        "--report",
+        _repo_path(report_json),
+    ]
+    if warn_only:
+        command.append("--warn-only")
+    return tuple(command)
 
 
 def _selected_refinement_targets(raw: str | None) -> tuple[RefinementTarget, ...]:
@@ -486,9 +709,29 @@ def _assert_temp_child(path: Path) -> None:
 
 
 def _print_plan(run_root: Path, phases: Sequence[PhaseCommand]) -> None:
+    candidates = sum(phase.expected_candidate_count for phase in phases)
+    blender_starts = sum(phase.expected_blender_invocations for phase in phases)
+    artifact_count = sum(len(phase.artifacts) for phase in phases) + 3
     print("QUALITY / REFINEMENT SMOKE PLAN")
     print(f"Run root: {_repo_path(run_root)}")
-    print(f"Phases: {len(phases)}")
+    print(
+        "Workload: "
+        f"{len(phases)} phases, "
+        f"{candidates} expected candidates, "
+        f"{blender_starts} expected Blender starts, "
+        f"{artifact_count} expected artifact roots/files"
+    )
+    print()
+    print("| # | Phase | Candidates | Blender starts | Artifacts |")
+    print("| ---: | --- | ---: | ---: | ---: |")
+    for index, phase in enumerate(phases, start=1):
+        print(
+            "| "
+            f"{index} | `{phase.name}` | "
+            f"{phase.expected_candidate_count} | "
+            f"{phase.expected_blender_invocations} | "
+            f"{len(phase.artifacts)} |"
+        )
     for index, phase in enumerate(phases, start=1):
         print()
         print(f"{index}. {phase.name}")
@@ -519,6 +762,7 @@ def write_summary(
 ) -> Path:
     path = run_root / "summary.md"
     matrix_rows = _collect_matrix_rows(run_root)
+    budget_reports = _collect_budget_reports(run_root)
     lines = [
         "# Quality Refinement Smoke Summary",
         "",
@@ -542,6 +786,11 @@ def write_summary(
         lines.extend(_matrix_summary_lines(matrix_rows))
     else:
         lines.append("No synthetic matrix JSON rows were found.")
+    lines.extend(["", "## Quality Budget Reports", ""])
+    if budget_reports:
+        lines.extend(_budget_summary_lines(budget_reports))
+    else:
+        lines.append("No quality budget report JSON files were found.")
     lines.extend(
         [
             "",
@@ -556,7 +805,7 @@ def write_summary(
         ]
     )
     path.write_text("\n".join(lines), encoding="utf-8")
-    _write_machine_summary(run_root, results, matrix_rows)
+    _write_machine_summary(run_root, results, matrix_rows, budget_reports)
     return path
 
 
@@ -564,6 +813,7 @@ def _write_machine_summary(
     run_root: Path,
     results: Sequence[PhaseResult],
     matrix_rows: Sequence[dict],
+    budget_reports: Sequence[dict],
 ) -> None:
     payload = {
         "schema_version": "quality_refinement_smoke_summary_v1",
@@ -575,12 +825,24 @@ def _write_machine_summary(
                 "passed": result.passed,
                 "elapsed_s": result.elapsed_s,
                 "artifacts": [_repo_path(path) for path in result.phase.artifacts],
+                "expected_candidate_count": result.phase.expected_candidate_count,
+                "expected_blender_invocations": result.phase.expected_blender_invocations,
             }
             for result in results
         ],
         "matrix_row_count": len(matrix_rows),
         "matrix_passed": sum(1 for row in matrix_rows if row.get("passed")),
         "matrix_failed": sum(1 for row in matrix_rows if not row.get("passed")),
+        "quality_budget_reports": [
+            {
+                "path": report["_quality_report_json"],
+                "passed": report.get("passed"),
+                "threshold_passed": report.get("threshold_passed"),
+                "comparison_passed": report.get("comparison_passed"),
+                "failed_required_checks": _failed_required_check_count(report),
+            }
+            for report in budget_reports
+        ],
     }
     (run_root / "summary.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
@@ -606,6 +868,56 @@ def _collect_matrix_rows(run_root: Path) -> list[dict]:
     return rows
 
 
+def _collect_budget_reports(run_root: Path) -> list[dict]:
+    reports: list[dict] = []
+    for path in sorted(run_root.glob("**/quality.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(payload, dict) or "threshold_passed" not in payload:
+            continue
+        enriched = dict(payload)
+        enriched["_quality_report_json"] = _repo_path(path)
+        reports.append(enriched)
+    return reports
+
+
+def _budget_summary_lines(reports: Sequence[dict]) -> list[str]:
+    lines = [
+        "| Report | Passed | Thresholds | Comparisons | Failed required checks |",
+        "| --- | --- | --- | --- | ---: |",
+    ]
+    for report in reports:
+        lines.append(
+            "| "
+            f"`{report['_quality_report_json']}` | "
+            f"{_pass_text(report.get('passed'))} | "
+            f"{_pass_text(report.get('threshold_passed'))} | "
+            f"{_pass_text(report.get('comparison_passed'))} | "
+            f"{_failed_required_check_count(report)} |"
+        )
+    return lines
+
+
+def _pass_text(value: object) -> str:
+    return "pass" if value else "fail"
+
+
+def _failed_required_check_count(report: dict) -> int:
+    failed = 0
+    for key in ("checks", "comparison_checks"):
+        checks = report.get(key)
+        if not isinstance(checks, list):
+            continue
+        for check in checks:
+            if not isinstance(check, dict):
+                continue
+            if check.get("required", True) and not check.get("passed"):
+                failed += 1
+    return failed
+
+
 def _matrix_summary_lines(rows: Sequence[dict]) -> list[str]:
     by_mode: dict[str, dict[str, float]] = {}
     for row in rows:
@@ -627,9 +939,9 @@ def _matrix_summary_lines(rows: Sequence[dict]) -> list[str]:
         bucket["total"] += 1.0
         if row.get("passed"):
             bucket["passed"] += 1.0
-        _accumulate_metric(bucket, metrics, "min_iou", "min_iou")
-        _accumulate_metric(bucket, metrics, "boundary_iou", "boundary")
-        _accumulate_metric(bucket, metrics, "signed_distance_loss", "sdf")
+        _accumulate_metric(bucket, metrics, "render.min_view_iou", "min_iou")
+        _accumulate_metric(bucket, metrics, "render.boundary_iou_mean", "boundary")
+        _accumulate_metric(bucket, metrics, "render.signed_distance_loss_mean", "sdf")
 
     lines = [
         "| Mode | Passed | Total | Avg min IoU | Avg Boundary IoU | Avg SDF Loss |",
@@ -664,10 +976,22 @@ def _accumulate_metric(
     metric_name: str,
     prefix: str,
 ) -> None:
-    value = metrics.get(metric_name)
+    value = _lookup_metric(metrics, metric_name)
     if isinstance(value, (int, float)):
         bucket[f"{prefix}_sum"] += float(value)
         bucket[f"{prefix}_count"] += 1.0
+
+
+def _lookup_metric(metrics: dict, metric_name: str) -> object:
+    if metric_name in metrics:
+        return metrics[metric_name]
+    current: object = metrics
+    for part in metric_name.split("."):
+        if isinstance(current, dict) and part in current:
+            current = current[part]
+        else:
+            return None
+    return current
 
 
 def _average(bucket: dict[str, float], prefix: str, *, missing: float = 0.0) -> float:
@@ -690,6 +1014,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             "novel-view smoke, and closed-loop refinement sweeps."
         )
     )
+    parser.add_argument(
+        "--profile",
+        default="interactive",
+        choices=tuple(sorted(SMOKE_PROFILES)),
+        help="Named workload profile. Use full-nightly for the old broad sweep.",
+    )
     parser.add_argument("--run-root", default=None)
     parser.add_argument("--blender-exe", default=None)
     parser.add_argument("--dry-run", action="store_true")
@@ -697,26 +1027,27 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--stop-on-failure", action="store_true")
     parser.add_argument("--seed", type=int, default=1234)
     parser.add_argument("--run-id-prefix", default="quality_refinement")
-    parser.add_argument("--modes", default=",".join(DEFAULT_AMBITIOUS_MODES))
-    parser.add_argument("--matrix-suites", default=",".join(DEFAULT_MATRIX_SUITES))
-    parser.add_argument("--matrix-count", type=int, default=3)
+    parser.add_argument("--modes", default=None)
+    parser.add_argument("--matrix-suites", default=None)
+    parser.add_argument("--matrix-count", type=int, default=None)
     parser.add_argument(
         "--quality-budget-json",
         default="configs/quality_perf_budget-smoke.json",
     )
-    parser.add_argument("--lpips-suite", default="smoke")
-    parser.add_argument("--lpips-modes", default=",".join(DEFAULT_LPIPS_MODES))
-    parser.add_argument("--lpips-count", type=int, default=2)
+    parser.add_argument("--lpips-suite", default=None)
+    parser.add_argument("--lpips-modes", default=None)
+    parser.add_argument("--lpips-count", type=int, default=None)
     parser.add_argument("--lpips-angles", default="45,135")
     parser.add_argument("--lpips-psnr-threshold", type=float, default=0.0)
     parser.add_argument("--lpips-ssim-threshold", type=float, default=0.0)
     parser.add_argument("--lpips-threshold", type=float, default=1.0)
     parser.add_argument("--refinement-targets", default=None)
-    parser.add_argument("--refinement-max-runs", type=int, default=8)
-    parser.add_argument("--refinement-top-k", type=int, default=4)
-    parser.add_argument("--refinement-generations", type=int, default=2)
-    parser.add_argument("--refinement-parent-top-k", type=int, default=2)
-    parser.add_argument("--refinement-children-per-parent", type=int, default=2)
+    parser.add_argument("--refinement-case-count", type=int, default=None)
+    parser.add_argument("--refinement-max-runs", type=int, default=None)
+    parser.add_argument("--refinement-top-k", type=int, default=None)
+    parser.add_argument("--refinement-generations", type=int, default=None)
+    parser.add_argument("--refinement-parent-top-k", type=int, default=None)
+    parser.add_argument("--refinement-children-per-parent", type=int, default=None)
     parser.add_argument("--no-synthetic-matrix", action="store_true")
     parser.add_argument("--no-lpips-novel", action="store_true")
     parser.add_argument("--no-refinement-loop", action="store_true")
@@ -738,7 +1069,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         phases,
         dry_run=args.dry_run,
         clean_first=args.clean_first,
-        stop_on_failure=args.stop_on_failure,
+        stop_on_failure=args.stop_on_failure or _profile(args.profile).stop_on_failure,
     )
 
 

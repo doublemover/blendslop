@@ -34,6 +34,12 @@ def _add_plan_args(parser: argparse.ArgumentParser) -> None:
         "--result-root", type=Path, default=Path("temp/refinement-runs/adhoc")
     )
     parser.add_argument("--seed", type=int, default=1234)
+    parser.add_argument(
+        "--case-count",
+        type=int,
+        default=None,
+        help="Limit synthetic suite cases for bounded smoke and diagnostic runs.",
+    )
     parser.add_argument("--max-runs", type=int, default=None)
     parser.add_argument("--top-k", type=int, default=10)
     parser.add_argument("--variant-file", type=Path, action="append", default=[])

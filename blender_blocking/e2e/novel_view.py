@@ -58,14 +58,37 @@ def _load_novel_pair(reference_path: str, rendered_path: str) -> tuple[Any, Any,
     reference = load_image(reference_path)
     rendered = load_image(rendered_path)
     warnings: list[str] = []
-    if np.asarray(reference).shape != np.asarray(rendered).shape:
+    reference_shape = np.asarray(reference).shape
+    rendered_shape = np.asarray(rendered).shape
+    if reference_shape[:2] != rendered_shape[:2]:
         if not PIL_AVAILABLE:
             raise ValueError(
                 "novel-view reference/render image shapes differ and Pillow is unavailable"
             )
         rendered = _resize_image_like(rendered, reference)
         warnings.append("rendered image resized to match reference for image metrics")
+    reference = _normalize_metric_image(reference)
+    rendered = _normalize_metric_image(rendered)
+    if np.asarray(reference).shape != np.asarray(rendered).shape:
+        raise ValueError("reference and candidate images must have matching shapes")
     return reference, rendered, tuple(warnings)
+
+def _normalize_metric_image(image: Any) -> np.ndarray:
+    array = np.asarray(image)
+    if array.ndim == 2:
+        return np.repeat(array[:, :, None], 3, axis=2).astype(np.uint8)
+    if array.ndim != 3:
+        raise ValueError("image must be a 2D grayscale or 3D color array")
+    if array.shape[2] == 3:
+        return array.astype(np.uint8)
+    if array.shape[2] >= 4:
+        rgb = array[:, :, :3].astype(np.float32)
+        alpha = array[:, :, 3:4].astype(np.float32) / 255.0
+        composited = rgb * alpha + 255.0 * (1.0 - alpha)
+        return np.clip(composited, 0.0, 255.0).astype(np.uint8)
+    if array.shape[2] == 1:
+        return np.repeat(array, 3, axis=2).astype(np.uint8)
+    raise ValueError("image color channel count is unsupported")
 
 def _resize_image_like(image: Any, reference: Any) -> np.ndarray:
     reference_shape = np.asarray(reference).shape

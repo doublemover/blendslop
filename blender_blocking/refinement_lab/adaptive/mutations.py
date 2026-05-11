@@ -53,8 +53,6 @@ def _content_adaptive_patches(
             "visual_hull_voxel,primitive_fit_refine,shape_program,differentiable_refine",
             "--ensemble-policy",
             "research_fidelity",
-            "--validation-mode",
-            "backend-status",
             "--shape-residual-policy",
             "suggest_patches",
             "--primitive-loss-weights-json",
@@ -88,7 +86,7 @@ def _visual_hull_resolution(
         mode="visual_hull_voxel",
         cli_args=(
             "--validation-mode",
-            "backend-status",
+            "render-iou",
             "--vh-backend",
             "sparse_hash",
             "--vh-resolution",
@@ -151,7 +149,7 @@ def _topology_preserving_mesh(
         mode="visual_hull_voxel",
         cli_args=(
             "--validation-mode",
-            "backend-status",
+            "render-iou",
             "--vh-backend",
             "chunked",
             "--vh-resolution",
@@ -201,6 +199,8 @@ def _shape_program_editability(
         tags=("shape-program", "editable", "research"),
         priority=50,
         risk="high",
+        validation_mode="backend-status",
+        diagnostic_only=True,
         source={"metrics": metrics, "failures": failures},
     )
 
@@ -238,6 +238,8 @@ def _appearance_asset_audit(
         tags=("appearance", "uv", "material", "editable", "asset-delivery"),
         priority=35,
         risk="medium",
+        validation_mode="backend-status",
+        diagnostic_only=True,
         source={"metrics": metrics, "failures": failures},
     )
 
@@ -291,6 +293,8 @@ def _compile_or_crosscheck(
         expected_win={"candidate.status": f"escape {status}"},
         tags=("research", "crosscheck", "ensemble"),
         priority=70,
+        validation_mode="backend-status",
+        diagnostic_only=True,
         source={"metrics": metrics, "failures": failures, "status": status},
     )
 
@@ -319,6 +323,8 @@ def _active_view_capture(
         tags=("active-view", "ambiguity", "human-input"),
         priority=15,
         risk="low",
+        validation_mode="backend-status",
+        diagnostic_only=True,
         source={"metrics": metrics, "failures": failures},
     )
 
@@ -335,17 +341,37 @@ def _proposal(
     priority: int,
     source: Mapping[str, Any],
     risk: str = "medium",
+    validation_mode: str = "render-iou",
+    diagnostic_only: bool = False,
 ) -> RefinementProposal:
-    proposal_id = f"{safe_slug(slug)}_{stable_hash({'slug': slug, 'args': list(cli_args)}, length=8)}"
+    normalized_args = _without_validation_mode(cli_args)
+    proposal_id = f"{safe_slug(slug)}_{stable_hash({'slug': slug, 'args': list(normalized_args), 'validation_mode': validation_mode}, length=8)}"
     return RefinementProposal(
         proposal_id=proposal_id,
         title=title,
         hypothesis=hypothesis,
         expected_win=expected_win,
         mode=mode,
-        cli_args=tuple(str(item) for item in cli_args),
+        validation_mode=validation_mode,
+        cli_args=tuple(str(item) for item in normalized_args),
         tags=tuple(str(item) for item in tags),
         priority=priority,
         risk=risk,
         source_evidence=source,
+        diagnostic_only=diagnostic_only,
     )
+
+
+def _without_validation_mode(cli_args: Sequence[str]) -> tuple[str, ...]:
+    stripped: list[str] = []
+    skip_next = False
+    for item in cli_args:
+        if skip_next:
+            skip_next = False
+            continue
+        text = str(item)
+        if text == "--validation-mode":
+            skip_next = True
+            continue
+        stripped.append(text)
+    return tuple(stripped)

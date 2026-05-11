@@ -38,6 +38,7 @@ def _cmd_loop(args: argparse.Namespace) -> int:
         objective=args.objective or track.default_objective,
         output_root=args.result_root,
         seed=args.seed,
+        case_count=args.case_count,
         max_runs=args.max_runs,
         top_k=args.top_k,
         external_variants=external_variants,

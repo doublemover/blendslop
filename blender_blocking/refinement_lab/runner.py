@@ -32,9 +32,14 @@ from .result_index import ResultIndex, append_global_index
 
 try:
     from blender_blocking.config import BlockingConfig
+    from blender_blocking.metrics.namespaces import (
+        namespace_metric_key,
+        set_metric_path,
+    )
     from blender_blocking.utils.optional_deps import dependency_report
 except ImportError:  # pragma: no cover
     from config import BlockingConfig
+    from metrics.namespaces import namespace_metric_key, set_metric_path
     from utils.optional_deps import dependency_report
 
 
@@ -682,15 +687,47 @@ def _metrics_from_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
     metrics: dict[str, Any] = {}
     if not isinstance(payload, Mapping):
         return metrics
-    metrics["validation_mode"] = payload.get("validation_mode")
-    if isinstance(payload.get("average_iou"), (int, float)):
-        metrics["average_iou"] = float(payload["average_iou"])
+    validation_mode = str(payload.get("validation_mode") or "")
+    metrics["validation_mode"] = validation_mode
+    if validation_mode == "render-iou" and isinstance(payload.get("average_iou"), (int, float)):
+        value = float(payload["average_iou"])
+        set_metric_path(metrics, "render.average_iou", value)
+        metrics["average_iou"] = value
+    if validation_mode == "render-iou" and isinstance(payload.get("min_view_iou"), (int, float)):
+        value = float(payload["min_view_iou"])
+        set_metric_path(metrics, "render.min_view_iou", value)
+        metrics["min_view_iou"] = value
     views = payload.get("views", {})
     if isinstance(views, Mapping):
         metrics["views"] = json_safe(views)
         for view, item in views.items():
-            if isinstance(item, Mapping) and isinstance(item.get("iou"), (int, float)):
-                metrics[f"{view}_iou"] = float(item["iou"])
+            if not isinstance(item, Mapping):
+                continue
+            area_value = item.get("iou", item.get("area_iou"))
+            if isinstance(area_value, (int, float)):
+                value = float(area_value)
+                set_metric_path(metrics, f"render.per_view.{view}.area_iou", value)
+                metrics[f"{view}_iou"] = value
+            for source_key, target_key in (
+                ("boundary_iou", f"render.per_view.{view}.boundary_iou"),
+                (
+                    "signed_distance_loss",
+                    f"render.per_view.{view}.signed_distance_loss",
+                ),
+            ):
+                raw = item.get(source_key)
+                if isinstance(raw, (int, float)):
+                    set_metric_path(metrics, target_key, float(raw))
+        required_values = [
+            metrics.get(f"{view}_iou")
+            for view in ("front", "side", "top")
+            if isinstance(metrics.get(f"{view}_iou"), (int, float))
+        ]
+        if len(required_values) == 3:
+            min_required = float(min(required_values))
+            set_metric_path(metrics, "render.min_view_iou", min_required)
+            if validation_mode == "render-iou":
+                metrics["min_view_iou"] = min_required
     backend = payload.get("backend_result", {})
     selected = backend.get("selected") if isinstance(backend, Mapping) else None
     source = selected if isinstance(selected, Mapping) else backend
@@ -708,7 +745,8 @@ def _metrics_from_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             "elapsed_s",
         ):
             if isinstance(metric_result.get(key), (int, float)):
-                metrics[key] = float(metric_result[key])
+                target_key = namespace_metric_key(key)
+                set_metric_path(metrics, target_key, float(metric_result[key]))
     for bundle in _evaluation_bundles_from_payload(payload):
         for group in bundle.get("metric_groups", ()) or ():
             if not isinstance(group, Mapping):
@@ -722,9 +760,20 @@ def _metrics_from_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
                     continue
                 numeric = float(value)
                 metrics[name.replace(".", "_")] = numeric
+                set_metric_path(metrics, name, numeric)
                 alias = _bundle_metric_alias(name)
                 if alias:
-                    metrics.setdefault(alias, numeric)
+                    set_metric_path(metrics, alias, numeric)
+                if name == "silhouette.min_view_iou":
+                    metrics["area_iou_min"] = numeric
+                elif name == "silhouette.average_iou":
+                    metrics["area_iou_mean"] = numeric
+                elif name == "silhouette.mean_boundary_iou":
+                    metrics["boundary_iou_mean"] = numeric
+                elif name == "editability.editable_reconstruction_index":
+                    metrics["editability_score"] = numeric
+                elif name == "topology.score":
+                    metrics["topology_score"] = numeric
     return metrics
 
 
@@ -746,12 +795,13 @@ def _evaluation_bundles_from_payload(
 
 def _bundle_metric_alias(name: str) -> str:
     aliases = {
-        "silhouette.min_view_iou": "area_iou_min",
-        "silhouette.average_iou": "area_iou_mean",
-        "silhouette.mean_boundary_iou": "boundary_iou_mean",
+        "silhouette.min_view_iou": "render.min_view_iou",
+        "silhouette.average_iou": "render.average_iou",
+        "silhouette.mean_boundary_iou": "render.boundary_iou_mean",
+        "silhouette.mean_signed_distance_loss": "render.signed_distance_loss_mean",
         "topology.score": "topology_score",
         "topology.penalty": "topology_penalty",
-        "editability.editable_reconstruction_index": "editability_score",
+        "editability.editable_reconstruction_index": "editability.qa_score",
         "editability.complexity_penalty": "complexity_penalty",
         "geometry.fscore_tau": "geometry_fscore_tau",
         "geometry.volumetric_iou": "geometry_volumetric_iou",
