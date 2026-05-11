@@ -27,12 +27,15 @@ from reconstruction.backends.shape_program import (
     build_shape_program_from_target,
 )
 from reconstruction.types import (
+    Bounds2D,
     Bounds3D,
     CandidateMetrics,
     CandidateRequest,
     CandidateResult,
+    OrthographicCameraSpec,
     ProfileBand,
     ProfileIntervalPx,
+    ViewConstraint,
 )
 from reconstruction.types import ReconstructionTarget
 
@@ -525,6 +528,68 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         distillation = result.metric_result.extras["proxy_distillation"]
         self.assertGreater(distillation["arbitration_score"], 0.0)
         self.assertEqual(distillation["primitive_count"], 2)
+
+    def test_gaussian_bounds_seed_prefers_per_view_bbox_intersection(self) -> None:
+        surface_points = np.array(
+            [
+                [-0.1, -0.1, -0.1],
+                [0.1, 0.1, 0.1],
+                [0.0, 0.0, 0.0],
+            ],
+            dtype=float,
+        )
+        target = ReconstructionTarget(
+            constraints=(
+                ViewConstraint(
+                    view="front",
+                    mask=np.ones((128, 128), dtype=np.uint8),
+                    camera=OrthographicCameraSpec("front", "y", resolution=(128, 128)),
+                    bbox=Bounds2D(10, 20, 110, 120),
+                ),
+                ViewConstraint(
+                    view="side",
+                    mask=np.ones((128, 128), dtype=np.uint8),
+                    camera=OrthographicCameraSpec("side", "x", resolution=(128, 128)),
+                    bbox=Bounds2D(24, 14, 104, 114),
+                ),
+                ViewConstraint(
+                    view="top",
+                    mask=np.ones((128, 128), dtype=np.uint8),
+                    camera=OrthographicCameraSpec("top", "z", resolution=(128, 128)),
+                    bbox=Bounds2D(12, 22, 112, 102),
+                ),
+            ),
+            extras={"surface_points": surface_points, "unit_scale": 0.02},
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            result = GaussianEllipsoidBackend().reconstruct(
+                CandidateRequest(
+                    candidate_id="gaussian-bbox-seed",
+                    backend_name="gaussian_ellipsoid_proxy",
+                    target=target,
+                    config={
+                        "family": "gaussian",
+                        "primitive_count": 1,
+                        "target_point_count": 3,
+                        "export_mesh_proxy": False,
+                    },
+                    artifact_root=Path(tmp),
+                )
+            )
+
+        diagnostics = result.metric_result.extras["initialization_diagnostics"]
+        bounds_proxy = diagnostics["bounds_proxy"]
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(bounds_proxy["source"], "per_view_bbox_intersection")
+        self.assertEqual(bounds_proxy["reason"], "per_view_bbox_intersection_seed")
+        np.testing.assert_allclose(bounds_proxy["center"], [0.0, 0.0, 1.0])
+        np.testing.assert_allclose(bounds_proxy["radii"], [1.0, 0.8, 1.0])
+        self.assertEqual(
+            diagnostics["bbox_intersection_seed"]["view_bboxes"]["front"]["width"],
+            100.0,
+        )
 
     def test_shape_program_compiled_appearance_summary_reads_uv_materials(self) -> None:
         image = _FakeImage(256, 128)

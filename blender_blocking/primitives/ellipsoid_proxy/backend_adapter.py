@@ -115,6 +115,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             primitives = tuple(initialize_gaussians_from_points(seed_points, init_config))
         initialization_diagnostics = _initialization_diagnostics(
             seed_points,
+            target=target,
             family=family,
             include_bounds_proxy=bool(normalized["include_bounds_proxy"]),
             min_radius=float(normalized["min_radius"]),
@@ -427,6 +428,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
 def _initialization_diagnostics(
     points: np.ndarray,
     *,
+    target: Any,
     family: str,
     include_bounds_proxy: bool,
     min_radius: float,
@@ -443,25 +445,176 @@ def _initialization_diagnostics(
         return diagnostics
     mins = np.min(points, axis=0)
     maxs = np.max(points, axis=0)
-    center = (mins + maxs) * 0.5
-    radii = np.maximum((maxs - mins) * 0.5, float(min_radius))
+    point_center = (mins + maxs) * 0.5
+    point_radii = np.maximum((maxs - mins) * 0.5, float(min_radius))
     diagnostics["source_bounds"] = {
         "min": mins.tolist(),
         "max": maxs.tolist(),
-        "center": center.tolist(),
-        "radii": radii.tolist(),
+        "center": point_center.tolist(),
+        "radii": point_radii.tolist(),
+        "source": "surface_points",
     }
+    bbox_seed = _bbox_intersection_seed(target, min_radius=float(min_radius))
+    if bbox_seed:
+        diagnostics["bbox_intersection_seed"] = bbox_seed
     if not include_bounds_proxy:
         return diagnostics
+    seed = bbox_seed or diagnostics["source_bounds"]
+    center = np.asarray(seed.get("center", point_center), dtype=float)
+    radii = np.asarray(seed.get("radii", point_radii), dtype=float)
     diagnostics["bounds_proxy"] = {
         "enabled": True,
         "family": family,
         "center": center.tolist(),
         "radii": radii.tolist(),
         "opacity": float(np.clip(opacity, 0.0, 1.0)),
-        "reason": "per_view_bbox_intersection_seed",
+        "reason": str(seed.get("reason", "surface_point_bounds_seed")),
+        "source": str(seed.get("source", "surface_points")),
     }
     return diagnostics
+
+
+def _bbox_intersection_seed(target: Any, *, min_radius: float) -> dict[str, Any]:
+    bounds = getattr(target, "bounds", None)
+    if bounds is not None:
+        try:
+            mins = np.asarray(
+                [bounds.min_x, bounds.min_y, bounds.min_z],
+                dtype=float,
+            )
+            maxs = np.asarray(
+                [bounds.max_x, bounds.max_y, bounds.max_z],
+                dtype=float,
+            )
+        except Exception:
+            mins = np.empty((0,), dtype=float)
+            maxs = np.empty((0,), dtype=float)
+        if mins.shape == (3,) and maxs.shape == (3,) and np.all(maxs > mins):
+            return _bounds_seed_payload(
+                mins,
+                maxs,
+                source="target_bounds",
+                reason="target_bounds_seed",
+            )
+
+    bbox_bounds = _bounds_from_constraint_bboxes(target, min_radius=min_radius)
+    if bbox_bounds is None:
+        return {}
+    mins, maxs, details = bbox_bounds
+    payload = _bounds_seed_payload(
+        mins,
+        maxs,
+        source="per_view_bbox_intersection",
+        reason="per_view_bbox_intersection_seed",
+    )
+    payload["view_bboxes"] = details
+    return payload
+
+
+def _bounds_seed_payload(
+    mins: np.ndarray,
+    maxs: np.ndarray,
+    *,
+    source: str,
+    reason: str,
+) -> dict[str, Any]:
+    center = (mins + maxs) * 0.5
+    radii = np.maximum((maxs - mins) * 0.5, 1.0e-8)
+    return {
+        "min": mins.tolist(),
+        "max": maxs.tolist(),
+        "center": center.tolist(),
+        "radii": radii.tolist(),
+        "source": source,
+        "reason": reason,
+    }
+
+
+def _bounds_from_constraint_bboxes(
+    target: Any,
+    *,
+    min_radius: float,
+) -> tuple[np.ndarray, np.ndarray, Mapping[str, Any]] | None:
+    constraints = getattr(target, "constraints", ()) or ()
+    by_view: dict[str, Any] = {}
+    for constraint in constraints:
+        bbox = getattr(constraint, "bbox", None)
+        view = str(getattr(constraint, "view", "")).lower().strip()
+        if view and bbox is not None:
+            by_view[view] = bbox
+    if not by_view:
+        return None
+
+    scale = _target_unit_scale(target)
+    front = by_view.get("front")
+    side = by_view.get("side")
+    top = by_view.get("top")
+    width = _bbox_extent(front, "width", scale)
+    depth = _bbox_extent(side, "width", scale)
+    height_values = [
+        value
+        for value in (
+            _bbox_extent(front, "height", scale),
+            _bbox_extent(side, "height", scale),
+        )
+        if value is not None
+    ]
+    height = max(height_values) if height_values else None
+    if top is not None:
+        top_width = _bbox_extent(top, "width", scale)
+        top_depth = _bbox_extent(top, "height", scale)
+        width = width if width is not None else top_width
+        depth = depth if depth is not None else top_depth
+    if width is None and depth is not None:
+        width = depth
+    if depth is None and width is not None:
+        depth = width
+    if height is None and (width is not None or depth is not None):
+        height = max(float(width or 0.0), float(depth or 0.0), scale)
+    if width is None or depth is None or height is None:
+        return None
+    width = max(float(width), float(min_radius) * 2.0)
+    depth = max(float(depth), float(min_radius) * 2.0)
+    height = max(float(height), float(min_radius) * 2.0)
+    mins = np.asarray([-width * 0.5, -depth * 0.5, 0.0], dtype=float)
+    maxs = np.asarray([width * 0.5, depth * 0.5, height], dtype=float)
+    details = {
+        view: {
+            "x0": float(getattr(bbox, "x0", 0.0)),
+            "y0": float(getattr(bbox, "y0", 0.0)),
+            "x1": float(getattr(bbox, "x1", 0.0)),
+            "y1": float(getattr(bbox, "y1", 0.0)),
+            "width": float(getattr(bbox, "width", 0.0)),
+            "height": float(getattr(bbox, "height", 0.0)),
+        }
+        for view, bbox in sorted(by_view.items())
+    }
+    return mins, maxs, details
+
+
+def _bbox_extent(bbox: Any, field: str, scale: float) -> float | None:
+    if bbox is None:
+        return None
+    try:
+        value = float(getattr(bbox, field))
+    except (TypeError, ValueError):
+        return None
+    if value <= 0.0:
+        return None
+    return value * scale
+
+
+def _target_unit_scale(target: Any) -> float:
+    extras = getattr(target, "extras", {}) or {}
+    if isinstance(extras, Mapping):
+        for key in ("unit_scale", "bbox_unit_scale"):
+            try:
+                value = float(extras.get(key))
+            except (TypeError, ValueError):
+                continue
+            if value > 0.0:
+                return value
+    return 0.01
 
 
 def _prepend_bounds_proxy(
