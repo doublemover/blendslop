@@ -1777,6 +1777,14 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--blender-exe", default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--preflight-only", action="store_true")
+    parser.add_argument(
+        "--yes",
+        action="store_true",
+        help=(
+            "Acknowledge and run the opt-in full-nightly workload. "
+            "Short profiles do not require this flag."
+        ),
+    )
     parser.add_argument("--clean-first", action="store_true")
     parser.add_argument("--stop-on-failure", action="store_true")
     parser.add_argument("--serial", action="store_true")
@@ -1848,6 +1856,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("ERROR: no phases selected", file=sys.stderr)
         return 2
     full_nightly = profile.name == "full-nightly"
+    if full_nightly and not args.dry_run and not args.preflight_only and not args.yes:
+        _print_plan(run_root, phases)
+        print(
+            "\nERROR: full-nightly is the broad opt-in workload. "
+            "Run with --dry-run or --preflight-only first, then add --yes "
+            "when you are ready to spend the full runtime.",
+            file=sys.stderr,
+        )
+        return 2
     resume = _bool_default(args.resume, full_nightly)
     max_workers = args.max_workers if args.max_workers is not None else (4 if full_nightly else 1)
     max_blender_workers = (

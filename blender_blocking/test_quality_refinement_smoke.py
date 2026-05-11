@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 import io
 import json
 from pathlib import Path
@@ -178,6 +178,43 @@ class QualityRefinementSmokeTests(unittest.TestCase):
                     "adversarial-silhouettes",
                     "--matrix-count",
                     "1",
+                ]
+            )
+
+        self.assertEqual(exit_code, 0)
+        self.assertFalse(run_root.exists())
+        self.assertIn("Workload:", output.getvalue())
+
+    def test_full_nightly_requires_explicit_yes_to_run(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        output = io.StringIO()
+        errors = io.StringIO()
+        with redirect_stdout(output), redirect_stderr(errors):
+            exit_code = smoke_main(
+                [
+                    "--profile",
+                    "full-nightly",
+                    "--run-root",
+                    str(run_root),
+                ]
+            )
+
+        self.assertEqual(exit_code, 2)
+        self.assertFalse(run_root.exists())
+        self.assertIn("QUALITY / REFINEMENT SMOKE PLAN", output.getvalue())
+        self.assertIn("full-nightly is the broad opt-in workload", errors.getvalue())
+
+    def test_full_nightly_allows_dry_run_without_yes(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = smoke_main(
+                [
+                    "--profile",
+                    "full-nightly",
+                    "--dry-run",
+                    "--run-root",
+                    str(run_root),
                 ]
             )
 
