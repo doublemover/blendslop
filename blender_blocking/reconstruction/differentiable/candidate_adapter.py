@@ -486,14 +486,28 @@ def _boundary_sdf_improvement_summary(
         final_terms,
         "signed_distance",
     )
+    worst_boundary_improvement = _loss_delta(
+        initial_terms,
+        final_terms,
+        "worst_boundary_iou_loss",
+    )
+    worst_signed_distance_improvement = _loss_delta(
+        initial_terms,
+        final_terms,
+        "worst_signed_distance_loss",
+    )
     area_improvement = _loss_delta(initial_terms, final_terms, "area_iou")
     return {
         "boundary_loss_improvement": boundary_improvement,
         "signed_distance_loss_improvement": signed_distance_improvement,
+        "worst_boundary_loss_improvement": worst_boundary_improvement,
+        "worst_signed_distance_loss_improvement": worst_signed_distance_improvement,
         "area_iou_loss_improvement": area_improvement,
         "boundary_or_sdf_improved": (
             boundary_improvement > 1.0e-9
             or signed_distance_improvement > 1.0e-9
+            or worst_boundary_improvement > 1.0e-9
+            or worst_signed_distance_improvement > 1.0e-9
         ),
     }
 

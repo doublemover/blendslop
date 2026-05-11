@@ -5,6 +5,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import numpy as np
@@ -19,6 +20,7 @@ from reconstruction.types import (
     ViewConstraint,
 )
 from primitives.soft_silhouette import soft_mask_metrics
+from reconstruction.differentiable.candidate_adapter import _boundary_sdf_improvement_summary
 from reconstruction.differentiable.status import differentiable_candidate_status
 
 
@@ -236,6 +238,7 @@ class TestDifferentiableRender(unittest.TestCase):
             parsed["loss_weights_dict"]["signed_distance"],
             weights.signed_distance,
         )
+        self.assertTrue(parsed["optimize_boundary_sdf_first"])
 
     def test_evaluate_render_loss_scores_boundary_and_sdf_terms(self) -> None:
         target = np.zeros((20, 20), dtype=np.float64)
@@ -270,8 +273,43 @@ class TestDifferentiableRender(unittest.TestCase):
             loss.per_view["front"]["signed_distance_loss"],
         )
         self.assertAlmostEqual(
+            loss.terms["worst_boundary_iou_loss"],
+            loss.per_view["front"]["boundary_iou_loss"],
+        )
+        self.assertAlmostEqual(
+            loss.terms["worst_signed_distance_loss"],
+            loss.per_view["front"]["signed_distance_loss"],
+        )
+        self.assertAlmostEqual(
             loss.total,
             loss.terms["boundary_iou"] + 2.0 * loss.terms["signed_distance"],
+        )
+
+    def test_boundary_sdf_summary_counts_worst_view_improvement(self) -> None:
+        initial = SimpleNamespace(
+            terms={
+                "boundary_iou": 0.25,
+                "signed_distance": 0.20,
+                "worst_boundary_iou_loss": 0.90,
+                "worst_signed_distance_loss": 0.70,
+            }
+        )
+        final = SimpleNamespace(
+            terms={
+                "boundary_iou": 0.25,
+                "signed_distance": 0.20,
+                "worst_boundary_iou_loss": 0.55,
+                "worst_signed_distance_loss": 0.40,
+            }
+        )
+
+        summary = _boundary_sdf_improvement_summary(initial, final)
+
+        self.assertTrue(summary["boundary_or_sdf_improved"])
+        self.assertAlmostEqual(summary["worst_boundary_loss_improvement"], 0.35)
+        self.assertAlmostEqual(
+            summary["worst_signed_distance_loss_improvement"],
+            0.30,
         )
 
     def test_soft_mask_metrics_hardens_low_opacity_overlap_for_diagnostics(self) -> None:
@@ -381,6 +419,7 @@ class TestDifferentiableRender(unittest.TestCase):
         optimization = result.metric_result.extras["optimization"]
 
         self.assertTrue(optimization["enabled"])
+        self.assertEqual(optimization["objective_policy"], "boundary_sdf_first")
         self.assertLessEqual(optimization["config"]["max_elapsed_s"], 0.001)
         self.assertIn(
             optimization["reason"],

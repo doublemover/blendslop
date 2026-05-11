@@ -137,14 +137,23 @@ def evaluate_render_loss(
             else 0.0
         )
 
+    worst_boundary_iou = float(
+        max((m.get("boundary_iou_loss", 1.0) for m in per_view.values()), default=0.0)
+    )
+    worst_signed_distance = float(
+        max((m.get("signed_distance_loss", 0.0) for m in per_view.values()), default=0.0)
+    )
     terms["silhouette_l2"] = silhouette_l2
     terms["soft_iou"] = soft_iou
     terms["area_iou"] = area_iou
     terms["boundary_iou"] = boundary_iou
     terms["boundary_iou_loss"] = boundary_iou
     terms["boundary_iou_score"] = float(1.0 - boundary_iou)
+    terms["worst_boundary_iou_loss"] = worst_boundary_iou
+    terms["worst_boundary_iou_score"] = float(1.0 - worst_boundary_iou)
     terms["signed_distance"] = signed_distance
     terms["signed_distance_loss"] = signed_distance
+    terms["worst_signed_distance_loss"] = worst_signed_distance
     terms["silhouette_weight_sum"] = float(silhouette_weight_sum)
 
     depth_losses = []

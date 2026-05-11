@@ -291,6 +291,9 @@ def _normalize_differentiable_config(config: Mapping[str, object]) -> tuple[
     normalized["calibrate_silhouette_bounds"] = bool(
         config.get("calibrate_silhouette_bounds", False)
     )
+    normalized["optimize_boundary_sdf_first"] = bool(
+        config.get("optimize_boundary_sdf_first", True)
+    )
     mesh_proxy_scale = _coerce_float(
         config.get("mesh_proxy_scale", 1.6),
         "mesh_proxy_scale",

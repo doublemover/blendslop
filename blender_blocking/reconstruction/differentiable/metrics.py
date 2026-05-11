@@ -83,6 +83,17 @@ def build_differentiable_candidate_metrics(
             boundary_sdf_improvement.get("signed_distance_loss_improvement", 0.0)
             or 0.0
         ),
+        "worst_boundary_loss_improvement": float(
+            boundary_sdf_improvement.get("worst_boundary_loss_improvement", 0.0)
+            or 0.0
+        ),
+        "worst_signed_distance_loss_improvement": float(
+            boundary_sdf_improvement.get(
+                "worst_signed_distance_loss_improvement",
+                0.0,
+            )
+            or 0.0
+        ),
         "boundary_or_sdf_improved": bool(
             boundary_sdf_improvement.get("boundary_or_sdf_improved")
         ),
