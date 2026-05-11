@@ -50,13 +50,17 @@ def autopsy_candidate(
             )
         )
     primary = _primary_findings(findings)[0]
-    return {
+    topology_plan = _topology_repair_plan_from_findings(findings)
+    payload: dict[str, object] = {
         "schema_version": "candidate_autopsy_v1",
         "category": primary["category"],
         "severity": primary["severity"],
         "summary": primary["summary"],
         "findings": findings,
     }
+    if topology_plan:
+        payload["topology_repair_plan"] = topology_plan
+    return payload
 
 
 def write_autopsy(
@@ -237,21 +241,137 @@ def _mesh_findings(result: ExperimentResult) -> list[dict[str, object]]:
             key: int(topology.get(key, 0) or 0)
             for key in (
                 "loose_vertices",
+                "boundary_edges",
                 "non_manifold_edges",
                 "degenerate_faces",
                 "zero_area_faces",
             )
         }
-        if any(value > 0 for value in bad_counts.values()) or float(topology.get("topology_score", 1.0) or 1.0) < 0.75:
+        topology_score = float(topology.get("topology_score", 1.0) or 1.0)
+        if any(value > 0 for value in bad_counts.values()) or topology_score < 0.75:
+            repair_plan = _topology_repair_plan(topology, bad_counts)
             findings.append(
                 _finding(
                     "mesh_topology_problem",
                     "medium",
                     "Mesh topology metrics indicate cleanup problems.",
-                    evidence=bad_counts | {"topology_score": topology.get("topology_score")},
+                    evidence={
+                        **bad_counts,
+                        "topology_score": topology.get("topology_score"),
+                        "repair_plan": repair_plan,
+                    },
+                    recommended_next_actions=tuple(repair_plan["actions"]),
                 )
             )
     return findings
+
+
+def _topology_repair_plan_from_findings(
+    findings: Sequence[Mapping[str, object]],
+) -> Mapping[str, object]:
+    for finding in findings:
+        if finding.get("category") != "mesh_topology_problem":
+            continue
+        evidence = finding.get("evidence")
+        if isinstance(evidence, Mapping) and isinstance(
+            evidence.get("repair_plan"),
+            Mapping,
+        ):
+            return evidence["repair_plan"]  # type: ignore[return-value]
+    return {}
+
+
+def _topology_repair_plan(
+    topology: Mapping[str, Any],
+    bad_counts: Mapping[str, int],
+) -> Mapping[str, object]:
+    actions: list[str] = []
+    probes: list[Mapping[str, object]] = []
+
+    if int(bad_counts.get("loose_vertices", 0)) > 0:
+        actions.append("remove tiny shells and isolated loose vertices")
+        probes.append(
+            _topology_probe(
+                "remove-tiny-shells",
+                "remove isolated dust shells before evaluating editability",
+                {"topology.loose_vertices": "decrease"},
+            )
+        )
+    if int(bad_counts.get("boundary_edges", 0)) > 0:
+        actions.append("fill boundary loops with guarded hole filling")
+        probes.append(
+            _topology_probe(
+                "fill-boundary-loops",
+                "fill only short boundary loops that preserve silhouette support",
+                {"topology.boundary_edges": "decrease"},
+            )
+        )
+    if int(bad_counts.get("non_manifold_edges", 0)) > 0:
+        actions.append("weld close vertices and split non-manifold edges")
+        probes.append(
+            _topology_probe(
+                "weld-close-vertices",
+                "merge close duplicate vertices before retrying mesh extraction",
+                {"topology.non_manifold_edges": "decrease"},
+            )
+        )
+    if (
+        int(bad_counts.get("degenerate_faces", 0)) > 0
+        or int(bad_counts.get("zero_area_faces", 0)) > 0
+    ):
+        actions.append("dissolve degenerate and zero-area faces")
+        probes.append(
+            _topology_probe(
+                "dissolve-degenerate-faces",
+                "remove zero-area faces before export round-trip checks",
+                {"topology.degenerate_faces": "decrease"},
+            )
+        )
+
+    topology_score = _float(topology.get("topology_score"), 1.0)
+    if topology_score < 0.75:
+        actions.append("retry mesh extraction/postprocess with topology repair enabled")
+        probes.append(
+            _topology_probe(
+                "retry-topology-postprocess",
+                "rerun mesh extraction with guarded topology_repair postprocess",
+                {"topology.score": "increase"},
+            )
+        )
+
+    actions.append("avoid repairs that erase silhouette detail")
+    if not probes:
+        probes.append(
+            _topology_probe(
+                "topology-recheck",
+                "rerun topology and export round-trip checks after repair",
+                {"topology.score": "increase"},
+            )
+        )
+
+    destructive_counts = (
+        int(bad_counts.get("boundary_edges", 0))
+        + int(bad_counts.get("non_manifold_edges", 0))
+    )
+    return {
+        "schema_version": "topology_repair_plan_v1",
+        "safe_automatic": destructive_counts <= 16,
+        "actions": actions,
+        "probes": probes,
+        "source_topology": json_safe(topology),
+    }
+
+
+def _topology_probe(
+    probe_id: str,
+    action: str,
+    expected_win: Mapping[str, str],
+) -> Mapping[str, object]:
+    return {
+        "probe_id": probe_id,
+        "action": action,
+        "expected_win": dict(expected_win),
+    }
 
 
 def _bounds_findings(
@@ -406,6 +526,9 @@ def _mesh_path(result: ExperimentResult) -> Path | None:
 
 
 def _topology(result: ExperimentResult) -> Mapping[str, Any]:
+    metric_topology = _topology_from_metrics(result.metrics)
+    if metric_topology:
+        return metric_topology
     backend = result.backend_result if isinstance(result.backend_result, Mapping) else {}
     selected = backend.get("selected") if isinstance(backend, Mapping) else None
     source = selected if isinstance(selected, Mapping) else backend
@@ -416,6 +539,31 @@ def _topology(result: ExperimentResult) -> Mapping[str, Any]:
         return topology
     mesh_quality = metrics.get("mesh_quality") if isinstance(metrics, Mapping) else None
     return mesh_quality if isinstance(mesh_quality, Mapping) else {}
+
+
+def _topology_from_metrics(metrics: Mapping[str, Any]) -> Mapping[str, Any]:
+    topology: dict[str, Any] = {}
+    topology_group = metrics.get("topology")
+    if isinstance(topology_group, Mapping):
+        topology.update(topology_group)
+    aliases = {
+        "score": "topology_score",
+        "topology_score": "topology_score",
+        "watertight": "watertight",
+        "connected_components": "connected_components",
+        "boundary_edges": "boundary_edges",
+        "non_manifold_edges": "non_manifold_edges",
+        "loose_vertices": "loose_vertices",
+        "degenerate_faces": "degenerate_faces",
+        "zero_area_faces": "zero_area_faces",
+    }
+    for source_key, target_key in aliases.items():
+        if source_key in topology and target_key not in topology:
+            topology[target_key] = topology[source_key]
+    for source_key in aliases.values():
+        if source_key in metrics and source_key not in topology:
+            topology[source_key] = metrics[source_key]
+    return topology
 
 
 def _backend_area_iou(result: ExperimentResult) -> float:
