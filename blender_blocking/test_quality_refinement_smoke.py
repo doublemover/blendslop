@@ -515,6 +515,37 @@ class QualityRefinementSmokeTests(unittest.TestCase):
         finally:
             shutil.rmtree(run_root, ignore_errors=True)
 
+    def test_summary_includes_refinement_cache_stats(self) -> None:
+        run_root = Path("temp") / "quality-refinement-runs" / uuid.uuid4().hex
+        cache_dir = run_root / "r" / "primitive-fit"
+        cache_dir.mkdir(parents=True)
+        (cache_dir / "cache-stats.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "refinement_cache_stats_v1",
+                    "candidate_cache_hits": 3,
+                    "candidate_cache_misses": 2,
+                    "candidate_cache_writes": 5,
+                    "candidate_cache_sources": {"shared_cache": 3},
+                }
+            ),
+            encoding="utf-8",
+        )
+        try:
+            path = write_summary(run_root, (), ())
+            summary = path.read_text(encoding="utf-8")
+            payload = json.loads((run_root / "summary.json").read_text(encoding="utf-8"))
+
+            self.assertIn("## Cache Stats", summary)
+            self.assertIn("| **total** | 3 | 2 | 5 |", summary)
+            self.assertEqual(payload["cache_totals"]["candidate_cache_hits"], 3)
+            self.assertEqual(
+                payload["cache_totals"]["candidate_cache_sources"]["shared_cache"],
+                3,
+            )
+        finally:
+            shutil.rmtree(run_root, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()

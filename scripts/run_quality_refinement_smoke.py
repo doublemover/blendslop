@@ -1499,6 +1499,7 @@ def write_summary(
     path = run_root / "summary.md"
     matrix_rows = _collect_matrix_rows(run_root)
     budget_reports = _collect_budget_reports(run_root)
+    cache_stats = _collect_cache_stats(run_root)
     quality = _quality_summary(results, matrix_rows, budget_reports)
     lines = [
         "# Quality Refinement Smoke Summary",
@@ -1533,6 +1534,11 @@ def write_summary(
         lines.extend(_budget_summary_lines(budget_reports))
     else:
         lines.append("No quality budget report JSON files were found.")
+    lines.extend(["", "## Cache Stats", ""])
+    if cache_stats:
+        lines.extend(_cache_summary_lines(cache_stats))
+    else:
+        lines.append("No refinement cache stats were found.")
     lines.extend(
         [
             "",
@@ -1547,7 +1553,14 @@ def write_summary(
         ]
     )
     path.write_text("\n".join(lines), encoding="utf-8")
-    _write_machine_summary(run_root, results, matrix_rows, budget_reports, quality)
+    _write_machine_summary(
+        run_root,
+        results,
+        matrix_rows,
+        budget_reports,
+        cache_stats,
+        quality,
+    )
     return path
 
 
@@ -1556,6 +1569,7 @@ def _write_machine_summary(
     results: Sequence[PhaseResult],
     matrix_rows: Sequence[dict],
     budget_reports: Sequence[dict],
+    cache_stats: Sequence[dict],
     quality: Mapping[str, object],
 ) -> None:
     payload = {
@@ -1598,6 +1612,8 @@ def _write_machine_summary(
             }
             for report in budget_reports
         ],
+        "cache_stats": cache_stats,
+        "cache_totals": _cache_totals(cache_stats),
     }
     (run_root / "summary.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
@@ -1713,6 +1729,73 @@ def _collect_budget_reports(run_root: Path) -> list[dict]:
         enriched["_quality_report_json"] = _repo_path(path)
         reports.append(enriched)
     return reports
+
+
+def _collect_cache_stats(run_root: Path) -> list[dict]:
+    stats: list[dict] = []
+    for path in sorted(run_root.glob("**/cache-stats.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        enriched = dict(payload)
+        enriched["_cache_stats_json"] = _repo_path(path)
+        stats.append(enriched)
+    return stats
+
+
+def _cache_summary_lines(stats: Sequence[dict]) -> list[str]:
+    lines = [
+        "| Report | Hits | Misses | Writes | Sources |",
+        "| --- | ---: | ---: | ---: | --- |",
+    ]
+    for row in stats:
+        sources = row.get("candidate_cache_sources")
+        if isinstance(sources, dict):
+            source_text = ", ".join(
+                f"{key}:{value}" for key, value in sorted(sources.items())
+            )
+        else:
+            source_text = ""
+        lines.append(
+            "| "
+            f"`{row.get('_cache_stats_json', '')}` | "
+            f"{int(row.get('candidate_cache_hits', 0) or 0)} | "
+            f"{int(row.get('candidate_cache_misses', 0) or 0)} | "
+            f"{int(row.get('candidate_cache_writes', 0) or 0)} | "
+            f"{source_text or 'n/a'} |"
+        )
+    totals = _cache_totals(stats)
+    lines.append(
+        "| **total** | "
+        f"{totals['candidate_cache_hits']} | "
+        f"{totals['candidate_cache_misses']} | "
+        f"{totals['candidate_cache_writes']} | "
+        f"{totals['candidate_cache_sources'] or 'n/a'} |"
+    )
+    return lines
+
+
+def _cache_totals(stats: Sequence[dict]) -> dict[str, object]:
+    totals = {
+        "candidate_cache_hits": 0,
+        "candidate_cache_misses": 0,
+        "candidate_cache_writes": 0,
+    }
+    sources: dict[str, int] = {}
+    for row in stats:
+        for key in totals:
+            totals[key] += int(row.get(key, 0) or 0)
+        row_sources = row.get("candidate_cache_sources")
+        if isinstance(row_sources, dict):
+            for source, count in row_sources.items():
+                sources[str(source)] = sources.get(str(source), 0) + int(count or 0)
+    return {
+        **totals,
+        "candidate_cache_sources": dict(sorted(sources.items())),
+    }
 
 
 def _budget_summary_lines(reports: Sequence[dict]) -> list[str]:
