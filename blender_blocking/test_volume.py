@@ -8,6 +8,7 @@ import sys
 import tempfile
 import types
 import unittest
+from unittest import mock
 
 import numpy as np
 
@@ -344,6 +345,92 @@ class VolumeGridTests(unittest.TestCase):
             self.assertIn("mesh extraction did not produce a mesh", "\n".join(result.warnings))
             if require_mesh:
                 self.assertTrue(result.errors)
+
+    def test_visual_hull_mesh_artifact_export_failure_fails_result(self) -> None:
+        backend = VisualHullBackend()
+        target = _build_full_view_target()
+        mesh = MeshExtractionResult(
+            status="ok",
+            method="fixture",
+            requested_method="fixture",
+            vertices=np.array(
+                [
+                    [-1.0, -1.0, 0.0],
+                    [1.0, -1.0, 0.0],
+                    [1.0, 1.0, 0.0],
+                    [-1.0, 1.0, 0.0],
+                ],
+                dtype=float,
+            ),
+            faces=np.array([[0, 1, 2], [0, 2, 3]], dtype=np.int64),
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            request = CandidateRequest(
+                candidate_id="vh-artifact-export-failure",
+                backend_name="visual_hull_voxel",
+                target=target,
+                config={
+                    "resolution": 6,
+                    "chunk_size": 2,
+                    "backend": "chunked",
+                    "mesh_method": "marching_cubes",
+                },
+                artifact_root=Path(tmpdir),
+            )
+            with (
+                mock.patch("volume.extract_mesh", return_value=mesh),
+                mock.patch(
+                    "reconstruction.backends.visual_hull.backend.write_visual_hull_mesh_artifact",
+                    side_effect=OSError("path too long"),
+                ),
+            ):
+                result = backend.reconstruct(request)
+
+        self.assertEqual(result.status, "failed")
+        self.assertFalse(result.degraded)
+        self.assertIsNone(result.mesh_path)
+        artifact_status = result.metric_result.extras["mesh_artifact_export"]
+        self.assertEqual(artifact_status["status"], "failed")
+        self.assertTrue(artifact_status["required_for_render"])
+        self.assertIn("path too long", "\n".join(result.warnings))
+        self.assertIn("path too long", "\n".join(result.errors))
+
+    def test_visual_hull_mesh_extraction_failure_degrades_or_fails(self) -> None:
+        backend = VisualHullBackend()
+        target = _build_full_view_target()
+
+        for require_mesh, expected_status in ((False, "degraded"), (True, "failed")):
+            with (
+                self.subTest(require_mesh=require_mesh),
+                tempfile.TemporaryDirectory() as tmpdir,
+                mock.patch(
+                    "volume.extract_mesh",
+                    side_effect=RuntimeError("marching cubes exploded"),
+                ),
+            ):
+                request = CandidateRequest(
+                    candidate_id=f"vh-mesh-exception-{require_mesh}",
+                    backend_name="visual_hull_voxel",
+                    target=target,
+                    config={
+                        "resolution": 6,
+                        "chunk_size": 2,
+                        "backend": "chunked",
+                        "mesh_method": "marching_cubes",
+                        "require_mesh": require_mesh,
+                    },
+                    artifact_root=Path(tmpdir),
+                )
+                result = backend.reconstruct(request)
+
+            self.assertEqual(result.status, expected_status)
+            self.assertEqual(result.degraded, expected_status == "degraded")
+            extraction_status = result.metric_result.extras["mesh_extraction"]
+            self.assertEqual(extraction_status["status"], "failed")
+            self.assertIn("marching cubes exploded", "\n".join(result.warnings))
+            if require_mesh:
+                self.assertIn("marching cubes exploded", "\n".join(result.errors))
 
     def test_openvdb_metadata_round_trip(self) -> None:
         grid = OpenVDBVolumeGrid.unavailable(

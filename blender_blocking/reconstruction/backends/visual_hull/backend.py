@@ -302,23 +302,61 @@ class VisualHullBackend(BaseBackend):
                 )
                 mesh_metrics["topology"] = topology.to_dict()
                 if root is not None:
-                    mesh_path = write_visual_hull_mesh_artifact(
-                        root=root,
-                        candidate_id=request.candidate_id,
-                        backend_name=self.name,
-                        vertices=final_mesh_result.vertices,
-                        faces=final_mesh_result.faces,
-                        artifacts=artifacts,
-                    )
+                    try:
+                        mesh_path = write_visual_hull_mesh_artifact(
+                            root=root,
+                            candidate_id=request.candidate_id,
+                            backend_name=self.name,
+                            vertices=final_mesh_result.vertices,
+                            faces=final_mesh_result.faces,
+                            artifacts=artifacts,
+                        )
+                        mesh_metrics["mesh_artifact_export"] = {
+                            "status": "exported",
+                            "path": str(mesh_path),
+                            "required_for_render": True,
+                        }
+                    except Exception as exc:
+                        message = f"mesh artifact export failed: {exc}"
+                        warnings.append(message)
+                        mesh_metrics["mesh_artifact_export"] = {
+                            "status": "failed",
+                            "message": str(exc),
+                            "error_type": type(exc).__name__,
+                            "required_for_render": True,
+                        }
+                else:
+                    mesh_metrics["mesh_artifact_export"] = {
+                        "status": "skipped",
+                        "reason": "no_artifact_root",
+                        "required_for_render": False,
+                    }
             elif getattr(mesh_result, "topology", None):
                 mesh_metrics["topology"] = dict(mesh_result.topology)
+                mesh_metrics["mesh_artifact_export"] = {
+                    "status": "skipped",
+                    "reason": "mesh_unavailable",
+                    "required_for_render": False,
+                }
                 if str(getattr(mesh_result, "method", "")) != "points":
                     warnings.append(
                         "mesh extraction did not produce a mesh: "
                         f"{getattr(mesh_result, 'message', 'unknown reason')}"
                     )
         except Exception as exc:
-            warnings.append(f"mesh extraction failed: {exc}")
+            message = f"mesh extraction failed: {exc}"
+            warnings.append(message)
+            mesh_metrics["mesh_extraction"] = {
+                "status": "failed",
+                "method": str(request.config.get("mesh_method", "marching_cubes")),
+                "message": str(exc),
+                "error_type": type(exc).__name__,
+            }
+            mesh_metrics["mesh_artifact_export"] = {
+                "status": "skipped",
+                "reason": "mesh_extraction_failed",
+                "required_for_render": False,
+            }
 
         occupied_voxels = int(stats.get("active_voxels", 0))
         topology_score = float(

@@ -53,6 +53,19 @@ def visual_hull_result_status(
     if postprocess_status.get("status") == "failed" and _postprocess_required(config):
         status = "failed"
         errors.append(str(postprocess_status.get("message", "mesh postprocess failed")))
+    mesh_extraction_payload = mesh_metrics.get("mesh_extraction")
+    if (
+        isinstance(mesh_extraction_payload, Mapping)
+        and mesh_extraction_payload.get("status") == "failed"
+    ):
+        message = str(
+            mesh_extraction_payload.get("message", "mesh extraction failed")
+        )
+        if _mesh_required(config):
+            status = "failed"
+            errors.append(message)
+        elif status == "success":
+            status = "degraded"
     if (
         mesh_result is not None
         and not mesh_result.available
@@ -66,6 +79,34 @@ def visual_hull_result_status(
             errors.append(message)
         elif status == "success":
             status = "degraded"
+    mesh_artifact_payload = mesh_metrics.get("mesh_artifact_export")
+    if isinstance(mesh_artifact_payload, Mapping):
+        artifact_required = bool(
+            mesh_artifact_payload.get("required_for_render")
+            or config.get("require_mesh_artifact")
+            or config.get("require_renderable_mesh")
+            or config.get("fail_on_mesh_artifact_skip")
+        )
+        artifact_status = mesh_artifact_payload.get("status")
+        if artifact_status == "failed":
+            message = str(
+                mesh_artifact_payload.get("message", "mesh artifact export failed")
+            )
+            if artifact_required:
+                status = "failed"
+                errors.append(message)
+            elif status == "success":
+                status = "degraded"
+        elif artifact_status == "skipped" and artifact_required:
+            status = "failed"
+            errors.append(
+                str(
+                    mesh_artifact_payload.get(
+                        "reason",
+                        "mesh artifact export skipped",
+                    )
+                )
+            )
     if (
         retopology_decision is not None
         and not retopology_decision.accepted_for_editing
