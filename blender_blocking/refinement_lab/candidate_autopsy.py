@@ -144,6 +144,32 @@ def _metric_findings(result: ExperimentResult) -> list[dict[str, object]]:
                 evidence=catastrophic,
             )
         )
+    if result.mode == "hybrid_loft_hull":
+        weak_views = {
+            view: result.view_iou(view)
+            for view in ("front", "side", "top")
+            if result.view_iou(view) is not None
+            and (result.view_iou(view) or 0.0) < 0.5
+        }
+        if weak_views:
+            findings.append(
+                _finding(
+                    "hybrid_loft_one_view_failure",
+                    "medium",
+                    "Hybrid loft has a one-view or thin-support silhouette collapse.",
+                    evidence={
+                        "weak_views": weak_views,
+                        "average_iou": result.avg_iou,
+                        "min_iou": result.min_iou,
+                    },
+                    recommended_next_actions=(
+                        "run visual_hull_voxel as the reliability baseline",
+                        "emit per-component support confidence for thin structures",
+                        "compare top-view footprint deltas before accepting loft output",
+                        "retry mesh extraction/postprocess instead of broad parameter fanout",
+                    ),
+                )
+            )
     views = result.metrics.get("views", {})
     if isinstance(views, Mapping):
         for view, payload in views.items():
