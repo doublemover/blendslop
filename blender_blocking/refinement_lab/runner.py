@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, is_dataclass
+from dataclasses import dataclass, is_dataclass, replace
 import copy
 import hashlib
 import json
@@ -29,7 +29,7 @@ from .contracts import (
     stable_hash,
     utc_now,
 )
-from .parameter_search import score_result
+from .parameter_search import promotion_decision, score_result
 from .parameters import apply_variant_parameter_to_config
 from .result_index import ResultIndex, append_global_index
 
@@ -580,18 +580,20 @@ class BaseRunner:
         results: Sequence[ExperimentResult],
     ) -> tuple[Path, Path]:
         proposals = []
+        sources_by_proposal: dict[str, list[ExperimentResult]] = {}
         for result in results:
             payload = {
                 "status": result.status,
                 "metrics": result.metrics,
                 "backend_result": result.backend_result,
             }
-            proposals.extend(
-                proposals_from_result_payload(
-                    payload,
-                    max_proposals=self.options.adaptive_max_proposals,
-                )
+            result_proposals = proposals_from_result_payload(
+                payload,
+                max_proposals=self.options.adaptive_max_proposals,
             )
+            proposals.extend(result_proposals)
+            for proposal in result_proposals:
+                sources_by_proposal.setdefault(proposal.proposal_id, []).append(result)
         ranked = merge_proposals(
             proposals,
             max_proposals=self.options.adaptive_max_proposals,
@@ -613,7 +615,13 @@ class BaseRunner:
             "run_id": self.plan.run_id,
             "source_result_count": len(results),
             "variant_count": len(ranked),
-            "variants": [proposal.to_variant().to_dict() for proposal in ranked],
+            "variants": [
+                _variant_from_adaptive_proposal(
+                    proposal,
+                    sources=sources_by_proposal.get(proposal.proposal_id, ()),
+                ).to_dict()
+                for proposal in ranked
+            ],
         }
         _write_json(proposal_path, proposal_payload)
         _write_json(variant_path, variant_payload)
@@ -917,6 +925,36 @@ def runner_for_plan(
     if options.subprocess_blender:
         return SubprocessRunner(plan=plan, options=options, base_config=base_config)
     return InProcessBlenderRunner(plan=plan, options=options, base_config=base_config)
+
+
+def _variant_from_adaptive_proposal(
+    proposal: Any,
+    *,
+    sources: Sequence[ExperimentResult],
+) -> ExperimentVariant:
+    variant = proposal.to_variant()
+    if not sources:
+        return variant
+    source_rows = tuple(str(result.variant_id) for result in sources)
+    has_promotable_source = any(promotion_decision(result).promotable for result in sources)
+    if has_promotable_source:
+        return replace(
+            variant,
+            parameters={
+                **dict(variant.parameters),
+                "adaptive_source_results": source_rows,
+            },
+        )
+    return replace(
+        variant,
+        diagnostic_only=True,
+        tags=tuple(dict.fromkeys(tuple(variant.tags) + ("diagnostic-only",))),
+        parameters={
+            **dict(variant.parameters),
+            "adaptive_source_results": source_rows,
+            "diagnostic_reason": "source_results_not_promotable",
+        },
+    )
 
 
 def _result_from_payload(

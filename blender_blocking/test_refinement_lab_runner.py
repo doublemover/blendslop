@@ -529,6 +529,76 @@ class RefinementLabRunnerTests(unittest.TestCase):
                 variants["variant_count"],
                 proposals["proposal_count"],
             )
+            self.assertTrue(
+                all(variant["diagnostic_only"] for variant in variants["variants"])
+            )
+            self.assertTrue(
+                all(
+                    variant["parameters"]["diagnostic_reason"]
+                    == "source_results_not_promotable"
+                    for variant in variants["variants"]
+                )
+            )
+
+    def test_runner_keeps_promotable_adaptive_outputs_normal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            case = ExperimentCase(
+                "case",
+                "default-vase",
+                "builtin_sample",
+                reference_paths={
+                    "front": Path("front.png"),
+                    "side": Path("side.png"),
+                    "top": Path("top.png"),
+                },
+            )
+            variant = ExperimentVariant("baseline", "baseline", "ensemble")
+            plan = ExperimentPlan(
+                plan_id="p",
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="grid",
+                objective="quality_win",
+                output_root=Path(tmp),
+                run_id="run",
+                cases=(case,),
+                variants=(variant,),
+            )
+            runner = InProcessBlenderRunner(plan=plan, options=RunOptions())
+            result = ExperimentResult(
+                run_id="run",
+                case_id="case",
+                variant_id="baseline",
+                mode="ensemble",
+                status="pass",
+                exit_code=0,
+                started_utc="2026-01-01T00:00:00Z",
+                finished_utc="2026-01-01T00:00:01Z",
+                elapsed_s=1.0,
+                backend_result={"status": "success"},
+                metrics={
+                    "render": {
+                        "min_view_iou": 0.92,
+                        "per_view": {
+                            "front": {"area_iou": 0.92, "boundary_iou": 0.1},
+                            "side": {"area_iou": 0.93, "boundary_iou": 0.1},
+                            "top": {"area_iou": 0.94, "boundary_iou": 0.1},
+                        },
+                    },
+                    "topology": {"score": 0.9},
+                },
+            )
+
+            _proposal_path, variant_path = runner._write_adaptive_outputs([result])
+
+            variants = json.loads(variant_path.read_text(encoding="utf-8"))
+            self.assertGreater(variants["variant_count"], 0)
+            self.assertTrue(
+                all(
+                    "diagnostic_reason" not in variant["parameters"]
+                    for variant in variants["variants"]
+                )
+            )
 
     def test_reference_generation_errors_become_result_rows(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
