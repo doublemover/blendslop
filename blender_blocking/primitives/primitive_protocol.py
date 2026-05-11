@@ -90,4 +90,5 @@ def unit_sphere_samples(n: int) -> np.ndarray:
 def signed_power(values: np.ndarray, exponent: float) -> np.ndarray:
     """Apply sign(x) * abs(x) ** exponent with stable zero handling."""
     values = np.asarray(values, dtype=np.float64)
+    values = np.where(np.abs(values) < 1e-12, 0.0, values)
     return np.sign(values) * np.power(np.abs(values), exponent)

@@ -175,8 +175,11 @@ class RefinementLabRunnerTests(unittest.TestCase):
 
         metrics = _metrics_from_payload(payload)
 
-        self.assertEqual(metrics["area_iou_min"], 0.74)
-        self.assertEqual(metrics["boundary_iou_mean"], 0.62)
+        self.assertEqual(metrics["silhouette"]["min_view_iou"], 0.74)
+        self.assertEqual(metrics["silhouette"]["mean_boundary_iou"], 0.62)
+        self.assertNotIn("area_iou_min", metrics)
+        self.assertNotIn("boundary_iou_mean", metrics)
+        self.assertNotIn("render", metrics)
         self.assertEqual(metrics["editability_score"], 0.81)
         self.assertEqual(metrics["silhouette_min_view_iou"], 0.74)
 
@@ -207,6 +210,107 @@ class RefinementLabRunnerTests(unittest.TestCase):
         runner = InProcessBlenderRunner(plan=plan, options=RunOptions())
 
         self.assertTrue(runner.run_root.is_absolute())
+
+    def test_candidate_state_resume_reuses_completed_result(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            refs = root / "refs"
+            refs.mkdir()
+            reference_paths = {}
+            for view in ("front", "side", "top"):
+                path = refs / f"{view}.png"
+                path.write_bytes(f"{view}-mask".encode("utf-8"))
+                reference_paths[view] = path
+            case = ExperimentCase(
+                "case",
+                "default-vase",
+                "builtin_sample",
+                reference_paths=reference_paths,
+            )
+            variant = ExperimentVariant("baseline", "baseline", "profile_loft")
+            plan = ExperimentPlan(
+                plan_id="p",
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="grid",
+                objective="quality_win",
+                output_root=root / "run",
+                run_id="run",
+                cases=(case,),
+                variants=(variant,),
+            )
+            runner = InProcessBlenderRunner(
+                plan=plan,
+                options=RunOptions(
+                    resume_candidates=True,
+                    html_report=False,
+                    write_lineage=False,
+                ),
+            )
+            result_json = runner._case_variant_dir(case, variant) / "result.json"
+            result_json.parent.mkdir(parents=True, exist_ok=True)
+            result_json.write_text('{"passed": true}\n', encoding="utf-8")
+            result = ExperimentResult(
+                run_id="run",
+                case_id="case",
+                variant_id="baseline",
+                mode="profile_loft",
+                status="pass",
+                exit_code=0,
+                started_utc="2026-01-01T00:00:00Z",
+                finished_utc="2026-01-01T00:00:01Z",
+                elapsed_s=1.0,
+                result_json=result_json,
+                reference_paths=reference_paths,
+            )
+
+            runner._write_candidate_state(case, variant, reference_paths, result)
+            reused = runner._load_reusable_candidate(case, variant, reference_paths)
+
+            self.assertIsNotNone(reused)
+            assert reused is not None
+            self.assertEqual(reused.status, "pass")
+            self.assertEqual(reused.variant_id, "baseline")
+
+    def test_run_option_cache_enables_visual_hull_volume_cache(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            case = ExperimentCase(
+                "case",
+                "default-vase",
+                "builtin_sample",
+                reference_paths={
+                    "front": Path("front.png"),
+                    "side": Path("side.png"),
+                    "top": Path("top.png"),
+                },
+            )
+            variant = ExperimentVariant("baseline", "baseline", "visual_hull_voxel")
+            plan = ExperimentPlan(
+                plan_id="p",
+                suite="default-vase",
+                track="visual-hull-quality",
+                search="grid",
+                objective="quality_win",
+                output_root=Path(tmp) / "run",
+                run_id="run",
+                cases=(case,),
+                variants=(variant,),
+            )
+            runner = InProcessBlenderRunner(
+                plan=plan,
+                options=RunOptions(
+                    cache_root=Path(tmp) / "cache",
+                    candidate_cache=True,
+                ),
+            )
+            cfg = BlockingConfig()
+
+            runner._apply_run_option_config(cfg)
+
+            self.assertTrue(cfg.visual_hull.enable_cache)
+            self.assertIn("visual-hull-volumes", cfg.visual_hull.cache_directory)
+            self.assertTrue(cfg.visual_hull.cache_read)
+            self.assertTrue(cfg.visual_hull.cache_write)
 
     def test_runner_compacts_long_case_variant_artifact_paths(self) -> None:
         case_id = "visual-hull-pipe_elbow_seed_1240-with-a-long-adversarial-capture-label"
@@ -308,6 +412,56 @@ class RefinementLabRunnerTests(unittest.TestCase):
                 variants["variant_count"],
                 proposals["proposal_count"],
             )
+
+    def test_reference_generation_errors_become_result_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            case = ExperimentCase(
+                "mask-case",
+                "synthetic-smoke",
+                "synthetic",
+                synthetic_shape_id="single_outlier_pixel_seed_1238",
+                synthetic_definition="single_outlier_pixel",
+                metadata={
+                    "spec": {
+                        "shape_id": "single_outlier_pixel_seed_1238",
+                        "family": "adversarial_silhouette",
+                        "seed": 1238,
+                        "parameters": {"mask_kind": "single_outlier_pixel"},
+                    }
+                },
+            )
+            variant = ExperimentVariant("ensemble-baseline", "baseline", "ensemble")
+            plan = ExperimentPlan(
+                plan_id="p",
+                suite="synthetic-smoke",
+                track="ensemble-selection",
+                search="grid",
+                objective="reliability_first",
+                output_root=Path(tmp) / "run",
+                run_id="run",
+                cases=(case,),
+                variants=(variant,),
+            )
+            runner = InProcessBlenderRunner(
+                plan=plan,
+                options=RunOptions(
+                    html_report=False,
+                    write_overlays=False,
+                    write_bounds_debug=False,
+                    write_autopsy=False,
+                    append_global_index=False,
+                    write_lineage=False,
+                    write_adaptive_proposals=False,
+                ),
+            )
+
+            ok, results = runner.run()
+
+            self.assertFalse(ok)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0].status, "error")
+            self.assertIn("reference_generation_failed", results[0].metrics.values())
+            self.assertTrue(results[0].result_json.exists())
 
     def test_runner_writes_lineage_with_artifact_hashes_and_reproduce_script(
         self,

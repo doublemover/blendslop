@@ -109,6 +109,7 @@ def _compact_config_summary(config: Mapping[str, Any]) -> dict[str, Any]:
         "opacity_range": (float(config.get("opacity_min", 0.0)), float(config.get("opacity_max", 1.0))),
         "covariance_floor": float(config.get("covariance_floor", 0.0)),
         "kmeans_iterations": int(config.get("kmeans_iterations", 0)),
+        "include_bounds_proxy": bool(config.get("include_bounds_proxy", False)),
         "editable_proxy_sigma": float(config.get("editable_proxy_sigma", 1.0)),
     }
 

@@ -78,6 +78,42 @@ def _add_run_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--report-failures", choices=("top", "all", "none"), default="top"
     )
+    parser.add_argument(
+        "--cache-root",
+        type=Path,
+        default=Path("temp/quality-refinement-cache"),
+        help="Shared temp cache root for references and candidate state.",
+    )
+    parser.add_argument(
+        "--reference-cache",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Reuse synthetic reference renders keyed by spec and render config.",
+    )
+    parser.add_argument(
+        "--candidate-cache",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Reuse completed candidate results keyed by case, variant, and references.",
+    )
+    parser.add_argument(
+        "--resume-candidates",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Resume completed candidates from the current run root.",
+    )
+    parser.add_argument(
+        "--debug-artifact-policy",
+        choices=("all", "failures", "top", "none"),
+        default="all",
+        help="Controls per-view debug image emission during render-IoU validation.",
+    )
+    parser.add_argument(
+        "--batch-index-writes",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Append refinement indexes in batches after a generation run.",
+    )
     parser.add_argument("--blender-exe", default=None)
 
 def _runtime_can_execute(args: argparse.Namespace) -> bool:
@@ -107,4 +143,10 @@ def _run_options_from_args(args: argparse.Namespace) -> RunOptions:
         adaptive_max_proposals=args.adaptive_max_proposals,
         subprocess_blender=args.blender_exe is not None,
         blender_executable=args.blender_exe,
+        cache_root=args.cache_root,
+        reference_cache=args.reference_cache,
+        candidate_cache=args.candidate_cache,
+        resume_candidates=args.resume_candidates,
+        debug_artifact_policy=args.debug_artifact_policy,
+        batch_index_writes=args.batch_index_writes,
     )

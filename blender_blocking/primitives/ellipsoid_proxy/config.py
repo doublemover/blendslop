@@ -192,6 +192,7 @@ def _normalize_gaussian_ellipsoid_config(
     normalized["opacity_max"] = opacity_max
     normalized["objective_weights"] = objective_weights
     normalized["export_mesh_proxy"] = bool(config.get("export_mesh_proxy", True))
+    normalized["include_bounds_proxy"] = bool(config.get("include_bounds_proxy", True))
     normalized["editable_proxy_sigma"] = _coerce_float(
         config.get("editable_proxy_sigma", 1.0),
         "editable_proxy_sigma",

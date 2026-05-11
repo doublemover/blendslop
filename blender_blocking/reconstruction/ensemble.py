@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from dataclasses import replace
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import time
 from typing import Any, Mapping, Sequence
@@ -92,7 +93,13 @@ class EnsembleRunner:
         requests: Sequence[CandidateRequest],
         *,
         total_timeout_s: float | None = None,
+        max_parallel_candidates: int = 1,
     ) -> EnsembleRunResult:
+        if max_parallel_candidates > 1 and total_timeout_s is None:
+            return self._run_requests_parallel(
+                requests,
+                max_parallel_candidates=max_parallel_candidates,
+            )
         results: list[CandidateResult] = []
         started_at = time.perf_counter()
         for request in requests:
@@ -117,41 +124,57 @@ class EnsembleRunner:
                         request,
                         budget=replace(request.budget, timeout_s=remaining),
                     )
-            try:
-                backend = get_backend(effective_request.backend_name)
-                errors = backend.validate_config(effective_request.config)
-                if errors:
-                    results.append(
-                        CandidateResult(
-                            candidate_id=effective_request.candidate_id,
-                            backend_name=effective_request.backend_name,
-                            status="failed",
-                            errors=tuple(errors),
-                        )
+            result = _run_candidate_request(effective_request)
+            if effective_request.budget.timeout_s is not None:
+                elapsed = time.perf_counter() - started_at
+                if total_timeout_s is not None and elapsed > total_timeout_s:
+                    result = replace(
+                        result,
+                        warnings=(
+                            *result.warnings,
+                            "ensemble total timeout elapsed during candidate",
+                        ),
+                        degraded=True,
                     )
-                    continue
-                result = backend.reconstruct(effective_request)
-                if effective_request.budget.timeout_s is not None:
-                    elapsed = time.perf_counter() - started_at
-                    if total_timeout_s is not None and elapsed > total_timeout_s:
-                        result = replace(
-                            result,
-                            warnings=(
-                                *result.warnings,
-                                "ensemble total timeout elapsed during candidate",
-                            ),
-                            degraded=True,
-                        )
-                results.append(result)
-            except Exception as exc:
-                results.append(
-                    CandidateResult(
-                        candidate_id=effective_request.candidate_id,
-                        backend_name=effective_request.backend_name,
+            results.append(result)
+        return self._result_from_candidates(results, requests)
+
+    def _run_requests_parallel(
+        self,
+        requests: Sequence[CandidateRequest],
+        *,
+        max_parallel_candidates: int,
+    ) -> EnsembleRunResult:
+        if not requests:
+            return self._result_from_candidates([], requests)
+        results: list[CandidateResult | None] = [None] * len(requests)
+        with ThreadPoolExecutor(max_workers=max(1, int(max_parallel_candidates))) as executor:
+            future_to_index = {
+                executor.submit(_run_candidate_request, request): index
+                for index, request in enumerate(requests)
+            }
+            for future in as_completed(future_to_index):
+                index = future_to_index[future]
+                try:
+                    results[index] = future.result()
+                except Exception as exc:
+                    request = requests[index]
+                    results[index] = CandidateResult(
+                        candidate_id=request.candidate_id,
+                        backend_name=request.backend_name,
                         status="failed",
                         errors=(str(exc),),
                     )
-                )
+        return self._result_from_candidates(
+            [result for result in results if result is not None],
+            requests,
+        )
+
+    def _result_from_candidates(
+        self,
+        results: Sequence[CandidateResult],
+        requests: Sequence[CandidateRequest],
+    ) -> EnsembleRunResult:
         selected, ranked = select_best(results, policy=self.selection_policy)
         bundles, autopsy_packs = _evaluation_outputs(
             results=results,
@@ -183,6 +206,7 @@ class EnsembleRunner:
         context: Any = None,
         budget: CandidateBudget = CandidateBudget(),
         total_timeout_s: float | None = None,
+        max_parallel_candidates: int = 1,
     ) -> EnsembleRunResult:
         requests = self.build_requests(
             target=target,
@@ -191,7 +215,32 @@ class EnsembleRunner:
             context=context,
             budget=budget,
         )
-        return self.run_requests(requests, total_timeout_s=total_timeout_s)
+        return self.run_requests(
+            requests,
+            total_timeout_s=total_timeout_s,
+            max_parallel_candidates=max_parallel_candidates,
+        )
+
+
+def _run_candidate_request(request: CandidateRequest) -> CandidateResult:
+    try:
+        backend = get_backend(request.backend_name)
+        errors = backend.validate_config(request.config)
+        if errors:
+            return CandidateResult(
+                candidate_id=request.candidate_id,
+                backend_name=request.backend_name,
+                status="failed",
+                errors=tuple(errors),
+            )
+        return backend.reconstruct(request)
+    except Exception as exc:
+        return CandidateResult(
+            candidate_id=request.candidate_id,
+            backend_name=request.backend_name,
+            status="failed",
+            errors=(str(exc),),
+        )
 
 
 def _evaluation_outputs(

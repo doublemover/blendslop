@@ -8,6 +8,7 @@ def differentiable_candidate_status(
     config: Mapping[str, object],
     optimized_primitives_present: bool,
     objective_improvement: float,
+    boundary_or_sdf_improved: bool,
     failed_required_views: int,
     warnings: tuple[str, ...],
 ) -> tuple[str, bool, tuple[str, ...], tuple[str, ...]]:
@@ -33,6 +34,17 @@ def differentiable_candidate_status(
         elif optimized_primitives_present:
             status = "degraded"
             degraded = True
+    if (
+        optimized_primitives_present
+        and objective_improvement > 0.0
+        and not boundary_or_sdf_improved
+        and status == "success"
+    ):
+        status = "degraded"
+        degraded = True
+        warnings = warnings + (
+            "differentiable refinement did not improve boundary or signed-distance losses",
+        )
     if optimized_primitives_present and failed_required_views and status == "success":
         status = "degraded"
         degraded = True

@@ -30,6 +30,32 @@ class QualityMetricNamespaceTests(unittest.TestCase):
         self.assertEqual(metrics["backend"]["area_iou_min"], 0.96)
         self.assertNotIn("render", metrics)
 
+    def test_backend_evaluation_bundle_silhouette_stays_out_of_render_namespace(self) -> None:
+        payload = {
+            "validation_mode": "backend-status",
+            "backend_result": {
+                "status": "success",
+                "evaluation_bundle": {
+                    "metric_groups": [
+                        {
+                            "metrics": [
+                                {"name": "silhouette.average_iou", "value": 0.99},
+                                {"name": "silhouette.min_view_iou", "value": 0.98},
+                            ]
+                        }
+                    ]
+                },
+            },
+        }
+
+        metrics = _matrix_metrics(payload, passed=True)
+
+        self.assertEqual(metrics["silhouette"]["average_iou"], 0.99)
+        self.assertNotIn("average_iou", metrics)
+        self.assertNotIn("min_view_iou", metrics)
+        self.assertNotIn("area_iou_mean", metrics)
+        self.assertNotIn("render", metrics)
+
     def test_render_iou_min_view_is_required_view_minimum(self) -> None:
         payload = {
             "validation_mode": "render-iou",
@@ -75,6 +101,38 @@ class QualityMetricNamespaceTests(unittest.TestCase):
             metrics["backend"]["area_iou_min"],
             metrics["render"]["min_view_iou"],
         )
+
+    def test_refinement_missing_renderable_mesh_does_not_use_backend_bundle_as_render_iou(self) -> None:
+        payload = {
+            "validation_mode": "render-iou",
+            "status": "failed",
+            "failure_code": "missing_renderable_mesh",
+            "backend_result": {
+                "status": "success",
+                "metric_result": {
+                    "area_iou_mean": 0.99,
+                    "area_iou_min": 0.98,
+                },
+                "evaluation_bundle": {
+                    "metric_groups": [
+                        {
+                            "metrics": [
+                                {"name": "silhouette.average_iou", "value": 0.97},
+                                {"name": "silhouette.min_view_iou", "value": 0.96},
+                            ]
+                        }
+                    ]
+                },
+            },
+        }
+
+        metrics = _metrics_from_payload(payload)
+
+        self.assertEqual(metrics["backend"]["area_iou_mean"], 0.99)
+        self.assertEqual(metrics["silhouette"]["average_iou"], 0.97)
+        self.assertNotIn("average_iou", metrics)
+        self.assertNotIn("min_view_iou", metrics)
+        self.assertNotIn("render", metrics)
 
 
 if __name__ == "__main__":

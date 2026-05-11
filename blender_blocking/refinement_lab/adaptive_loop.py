@@ -57,9 +57,12 @@ class GenerationRecord:
     child_variant_count: int
     proposal_path: Path
     variant_path: Path
+    failure_code: str = ""
+    error: str = ""
+    error_path: Path | None = None
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "generation": self.generation,
             "run_root": self.run_root.as_posix(),
             "plan_path": self.plan_path.as_posix(),
@@ -71,6 +74,13 @@ class GenerationRecord:
             "proposal_path": self.proposal_path.as_posix(),
             "variant_path": self.variant_path.as_posix(),
         }
+        if self.failure_code:
+            payload["failure_code"] = self.failure_code
+        if self.error:
+            payload["error"] = self.error
+        if self.error_path is not None:
+            payload["error_path"] = self.error_path.as_posix()
+        return payload
 
 
 @dataclass(frozen=True)
@@ -146,7 +156,27 @@ def run_adaptive_loop(
             parent_variant_count=len(current_variants),
         )
         plan.write(generation_root / "plan.json")
-        ok, results = runner_factory(plan, options.run_options, base_config).run()
+        failure_code = ""
+        error = ""
+        error_path: Path | None = None
+        try:
+            ok, results = runner_factory(plan, options.run_options, base_config).run()
+        except Exception as exc:
+            ok = False
+            results = []
+            failure_code = "runner_exception"
+            error = str(exc)
+            error_path = generation_root / "adaptive-loop-error.json"
+            _write_json(
+                error_path,
+                {
+                    "schema_version": "refinement_adaptive_loop_error_v1",
+                    "generation": generation,
+                    "failure_code": failure_code,
+                    "error": error,
+                    "exception_type": type(exc).__name__,
+                },
+            )
         selected = _select_parent_results(
             results,
             objective=objective,
@@ -180,8 +210,15 @@ def run_adaptive_loop(
                 child_variant_count=len(child_variants),
                 proposal_path=proposal_path,
                 variant_path=variant_path,
+                failure_code=failure_code,
+                error=error,
+                error_path=error_path,
             )
         )
+        if failure_code:
+            stopped_reason = failure_code
+            current_variants = ()
+            break
         if not selected and options.stop_when_no_children:
             stopped_reason = "no_promotable_parents"
             current_variants = ()
@@ -271,6 +308,7 @@ def _child_variants_from_results(
     proposal_pairs: list[tuple[RefinementProposal, ExperimentResult]] = []
     variants: list[ExperimentVariant] = []
     seen_ids: set[str] = set()
+    seen_effective: dict[str, int] = {}
     for result in results:
         payload = _proposal_payload_from_result(result)
         proposals = merge_proposals(
@@ -289,6 +327,16 @@ def _child_variants_from_results(
                 seen_ids=seen_ids,
                 force_diagnostic_only=not promotion_decision(result).promotable,
             )
+            effective_key = _effective_child_variant_key(variant)
+            existing_index = seen_effective.get(effective_key)
+            if existing_index is not None:
+                variants[existing_index] = _with_contributing_parent(
+                    variants[existing_index],
+                    result,
+                )
+                continue
+            seen_effective[effective_key] = len(variants)
+            variant = _with_contributing_parent(variant, result)
             variants.append(variant)
     return tuple(proposal_pairs), tuple(variants)
 
@@ -359,6 +407,42 @@ def _variant_for_child(
     )
 
 
+def _effective_child_variant_key(variant: ExperimentVariant) -> str:
+    ignored_parameters = {
+        "adaptive_loop_generation",
+        "adaptive_loop_parent_result",
+        "adaptive_loop_parent_mode",
+        "adaptive_loop_contributing_parent_results",
+    }
+    return stable_hash(
+        {
+            "mode": variant.mode,
+            "validation_mode": variant.validation_mode,
+            "parameters": {
+                key: value
+                for key, value in dict(variant.parameters).items()
+                if key not in ignored_parameters
+            },
+            "cli_args": variant.cli_args,
+            "config_overrides": variant.config_overrides,
+            "diagnostic_only": variant.diagnostic_only,
+        },
+        length=24,
+    )
+
+
+def _with_contributing_parent(
+    variant: ExperimentVariant,
+    parent: ExperimentResult,
+) -> ExperimentVariant:
+    parameters = dict(variant.parameters)
+    existing = tuple(parameters.get("adaptive_loop_contributing_parent_results") or ())
+    parent_id = str(parent.variant_id)
+    if parent_id not in existing:
+        parameters["adaptive_loop_contributing_parent_results"] = existing + (parent_id,)
+    return replace(variant, parameters=parameters)
+
+
 def _adaptive_id_token(value: str, *, max_length: int) -> str:
     slug = safe_slug(value, fallback="variant")
     if len(slug) <= max_length:
@@ -406,5 +490,13 @@ def _write_generation_adaptive_outputs(
     )
     variant_path.write_text(
         json.dumps(json_safe(variant_payload), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(json_safe(payload), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )

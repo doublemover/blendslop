@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -297,6 +298,39 @@ class QualityBudgetTests(unittest.TestCase):
 
         self.assertTrue(report["passed"])
         self.assertEqual(report["checks"][0]["value"], 0.08)
+
+    def test_backend_status_budget_does_not_require_render_metric_names(self) -> None:
+        current = {
+            "schema_version": "e2e_synthetic_matrix_v1",
+            "matrix": [
+                {
+                    "artifact": "e2e",
+                    "suite": "smoke",
+                    "shape_id": "box",
+                    "mode": "visual_hull_voxel",
+                    "passed": True,
+                    "metrics": {
+                        "passed": 1.0,
+                        "backend": {
+                            "area_iou_min": 0.82,
+                            "boundary_iou_mean": 0.61,
+                        },
+                    },
+                }
+            ],
+        }
+        budget = json.loads(
+            (REPO_ROOT / "configs" / "quality_perf_budget-backend-status-smoke.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        report = evaluate_budget_payloads(current, budget)
+
+        self.assertTrue(report["passed"], report)
+        metrics = {check["metric"] for check in report["checks"]}
+        self.assertIn("metrics.backend.area_iou_min", metrics)
+        self.assertNotIn("metrics.area_iou_min", metrics)
 
 
 if __name__ == "__main__":

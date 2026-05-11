@@ -10,16 +10,19 @@ Open3D-heavy visual-hull refinement processes.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import hashlib
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
+import threading
 import time
-from typing import Sequence
+from typing import Mapping, Sequence
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +33,8 @@ from blender_blocking.utils.path_safety import compact_path_segment
 
 TEMP_ROOT = REPO_ROOT / "temp"
 RUN_ROOT = TEMP_ROOT / "quality-refinement-runs"
+PHASE_STATE_SCHEMA = "quality_refinement_phase_state_v1"
+DEFAULT_CACHE_ROOT = TEMP_ROOT / "quality-refinement-cache"
 DEFAULT_BLENDER_EXE = (
     r"C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
 )
@@ -91,7 +96,7 @@ DEFAULT_REFINEMENT_TARGETS = (
     ),
     RefinementTarget(
         name="ensemble-selection",
-        suite="synthetic-smoke",
+        suite="synthetic-blender-smoke",
         track="ensemble-selection",
         search="successive_halving",
         objective="reliability_first",
@@ -123,6 +128,16 @@ class SmokeProfile:
     expected_artifacts: tuple[str, ...] = ("commands.md", "summary.md", "summary.json")
 
 
+@dataclass(frozen=True)
+class RefinementPhasePreflight:
+    result_root: Path
+    target: RefinementTarget
+    case_count: int | None
+    max_runs: int
+    top_k: int
+    seed: int
+
+
 SMOKE_PROFILES: dict[str, SmokeProfile] = {
     "interactive": SmokeProfile(
         name="interactive",
@@ -138,6 +153,55 @@ SMOKE_PROFILES: dict[str, SmokeProfile] = {
         matrix_count=1,
         matrix_budget_mode="warn",
         matrix_allow_failed_rows=True,
+        stop_on_failure=True,
+    ),
+    "contract-canary": SmokeProfile(
+        name="contract-canary",
+        description="One-row backend-status contract canary across full-nightly matrix suites.",
+        matrix_suites=DEFAULT_MATRIX_SUITES,
+        matrix_count=1,
+        matrix_budget_mode="warn",
+        matrix_allow_failed_rows=True,
+        stop_on_failure=True,
+    ),
+    "synthetic-family-canary": SmokeProfile(
+        name="synthetic-family-canary",
+        description="One-row synthetic family compatibility canary, including pure-mask suites.",
+        matrix_suites=(
+            "adversarial-silhouettes",
+            "capture-noise",
+            "smoke",
+            "blender-smoke",
+            "primitive-fit",
+            "visual-hull",
+        ),
+        matrix_count=1,
+        matrix_budget_mode="warn",
+        matrix_allow_failed_rows=True,
+        stop_on_failure=True,
+    ),
+    "adaptive-canary": SmokeProfile(
+        name="adaptive-canary",
+        description="One-case, one-variant adaptive canary for every refinement target.",
+        refinement_targets=tuple(target.name for target in DEFAULT_REFINEMENT_TARGETS),
+        refinement_case_count=1,
+        refinement_max_runs=1,
+        refinement_top_k=1,
+        refinement_generations=1,
+        refinement_parent_top_k=1,
+        refinement_children_per_parent=1,
+        stop_on_failure=True,
+    ),
+    "ensemble-canary": SmokeProfile(
+        name="ensemble-canary",
+        description="One-case ensemble adaptive canary on mesh-backed synthetic smoke.",
+        refinement_targets=("ensemble-selection",),
+        refinement_case_count=1,
+        refinement_max_runs=1,
+        refinement_top_k=1,
+        refinement_generations=1,
+        refinement_parent_top_k=1,
+        refinement_children_per_parent=1,
         stop_on_failure=True,
     ),
     "visual-hull-fast": SmokeProfile(
@@ -186,6 +250,8 @@ SMOKE_PROFILES: dict[str, SmokeProfile] = {
         description="Broad matrix, LPIPS, and adaptive quality sweep.",
         matrix_suites=DEFAULT_MATRIX_SUITES,
         matrix_count=3,
+        matrix_budget_mode="warn",
+        matrix_allow_failed_rows=True,
         lpips_enabled=True,
         lpips_count=2,
         refinement_targets=tuple(target.name for target in DEFAULT_REFINEMENT_TARGETS),
@@ -210,6 +276,9 @@ class PhaseCommand:
     uses_torch_lpips_path: bool = False
     expected_candidate_count: int = 0
     expected_blender_invocations: int = 0
+    refinement_preflight: RefinementPhasePreflight | None = None
+    depends_on: tuple[str, ...] = ()
+    inline_quality_budget: tuple[Path, Path, Path] | None = None
 
 
 @dataclass(frozen=True)
@@ -217,6 +286,11 @@ class PhaseResult:
     phase: PhaseCommand
     returncode: int
     elapsed_s: float
+    stdout_path: Path | None = None
+    stderr_path: Path | None = None
+    status: str = "pass"
+    reused: bool = False
+    original_elapsed_s: float | None = None
 
     @property
     def passed(self) -> bool:
@@ -255,6 +329,14 @@ def resolve_run_root(path: str | Path | None) -> Path:
     return root
 
 
+def resolve_cache_root(path: str | Path | None) -> Path:
+    root = _resolve_under_repo(path or (TEMP_ROOT / "quality-refinement-cache"))
+    temp = TEMP_ROOT.resolve(strict=False)
+    if root != temp and temp not in root.parents:
+        raise ValueError(f"cache root must stay under repo temp/: {root}")
+    return root
+
+
 def _repo_path(path: Path) -> str:
     try:
         return str(path.resolve(strict=False).relative_to(REPO_ROOT))
@@ -273,6 +355,13 @@ def _blender_cmd(blender_exe: str) -> str:
 def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand, ...]]:
     run_root = resolve_run_root(args.run_root)
     profile = _profile(args.profile)
+    full_nightly = profile.name == "full-nightly"
+    reference_cache = _bool_default(args.reference_cache, full_nightly)
+    candidate_cache = _bool_default(args.candidate_cache, full_nightly)
+    resume_candidates = _bool_default(args.resume_candidates, full_nightly)
+    debug_artifact_policy = args.debug_artifact_policy or (
+        "failures" if full_nightly else "all"
+    )
     modes = _parse_csv(args.modes) or profile.modes
     matrix_suites = _parse_csv(args.matrix_suites) or profile.matrix_suites
     matrix_count = args.matrix_count if args.matrix_count is not None else profile.matrix_count
@@ -397,6 +486,12 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                             warn_only=True,
                         ),
                         artifacts=(quality_report,),
+                        depends_on=(f"matrix-{suite}",),
+                        inline_quality_budget=(
+                            result_json,
+                            REPO_ROOT / args.quality_budget_json,
+                            quality_report,
+                        ),
                     )
                 )
 
@@ -479,6 +574,11 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                         parent_top_k=refinement_parent_top_k,
                         children_per_parent=refinement_children_per_parent,
                         seed=args.seed,
+                        cache_root=resolve_cache_root(args.cache_root),
+                        reference_cache=reference_cache,
+                        candidate_cache=candidate_cache,
+                        resume_candidates=resume_candidates,
+                        debug_artifact_policy=debug_artifact_policy,
                     ),
                     artifacts=(
                         target_root / "adaptive-loop-summary.json",
@@ -493,10 +593,22 @@ def build_phase_plan(args: argparse.Namespace) -> tuple[Path, tuple[PhaseCommand
                         * max(1, refinement_case_count or 1)
                     ),
                     expected_blender_invocations=1,
+                    refinement_preflight=RefinementPhasePreflight(
+                        result_root=target_root,
+                        target=target,
+                        case_count=refinement_case_count,
+                        max_runs=refinement_max_runs,
+                        top_k=refinement_top_k,
+                        seed=args.seed,
+                    ),
                 )
             )
 
     return run_root, tuple(phases)
+
+
+def _bool_default(value: bool | None, default: bool) -> bool:
+    return default if value is None else bool(value)
 
 
 def _profile(name: str) -> SmokeProfile:
@@ -539,6 +651,11 @@ def _refinement_loop_command(
     parent_top_k: int,
     children_per_parent: int,
     seed: int,
+    cache_root: Path,
+    reference_cache: bool,
+    candidate_cache: bool,
+    resume_candidates: bool,
+    debug_artifact_policy: str,
 ) -> tuple[str, ...]:
     command = [
         blender_exe,
@@ -573,7 +690,23 @@ def _refinement_loop_command(
         str(seed),
         "--report-failures",
         "all",
+        "--cache-root",
+        _repo_path(cache_root),
+        "--debug-artifact-policy",
+        debug_artifact_policy,
     ]
+    if reference_cache:
+        command.append("--reference-cache")
+    else:
+        command.append("--no-reference-cache")
+    if candidate_cache:
+        command.append("--candidate-cache")
+    else:
+        command.append("--no-candidate-cache")
+    if resume_candidates:
+        command.append("--resume-candidates")
+    else:
+        command.append("--no-resume-candidates")
     if case_count is not None:
         command.extend(("--case-count", str(case_count)))
     return tuple(command)
@@ -665,12 +798,25 @@ def run_phases(
     phases: Sequence[PhaseCommand],
     *,
     dry_run: bool = False,
+    preflight_only: bool = False,
     clean_first: bool = False,
     stop_on_failure: bool = False,
+    resume: bool = False,
+    force_phases: Sequence[str] = (),
+    serial: bool = False,
+    max_workers: int = 1,
+    max_blender_workers: int = 1,
+    max_open3d_workers: int = 1,
+    max_lpips_workers: int = 1,
 ) -> int:
     if dry_run:
         _print_plan(run_root, phases)
         return 0
+
+    preflight = preflight_phases(phases)
+    if preflight_only:
+        print(json.dumps(preflight, indent=2, sort_keys=True))
+        return 0 if preflight["passed"] else 1
 
     if clean_first and run_root.exists():
         _assert_temp_child(run_root)
@@ -678,27 +824,530 @@ def run_phases(
     run_root.mkdir(parents=True, exist_ok=True)
     recipe = write_command_recipe(run_root, phases)
     print(f"Saved command recipe: {_repo_path(recipe)}")
+    preflight_path = run_root / "preflight.json"
+    preflight_path.write_text(
+        json.dumps(preflight, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(f"Saved preflight report: {_repo_path(preflight_path)}")
+    if not preflight["passed"]:
+        for issue in preflight["issues"]:
+            print(
+                "PREFLIGHT FAIL: "
+                f"{issue.get('phase')} {issue.get('code')} "
+                f"{issue.get('case_id', '')} {issue.get('family', '')}"
+            )
+        write_summary(run_root, phases, ())
+        return 1
 
-    results: list[PhaseResult] = []
-    for phase in phases:
-        _print_phase_header(phase)
-        started = time.perf_counter()
-        completed = subprocess.run(phase.command, cwd=REPO_ROOT, check=False)
-        elapsed_s = time.perf_counter() - started
-        result = PhaseResult(
-            phase=phase,
-            returncode=completed.returncode,
-            elapsed_s=elapsed_s,
+    force_set = set(force_phases)
+    if serial or stop_on_failure or max_workers <= 1:
+        results = _run_phases_serial(
+            phases,
+            run_root=run_root,
+            resume=resume,
+            force_phases=force_set,
+            stop_on_failure=stop_on_failure,
         )
-        results.append(result)
-        status = "PASS" if result.passed else "FAIL"
-        print(f"{status}: {phase.name} ({elapsed_s:.1f}s)")
-        if not result.passed and stop_on_failure:
-            break
+    else:
+        results = _run_phases_parallel(
+            phases,
+            run_root=run_root,
+            resume=resume,
+            force_phases=force_set,
+            max_workers=max_workers,
+            max_blender_workers=max_blender_workers,
+            max_open3d_workers=max_open3d_workers,
+            max_lpips_workers=max_lpips_workers,
+        )
 
     summary = write_summary(run_root, phases, results)
     print(f"Saved summary: {_repo_path(summary)}")
     return 0 if results and all(result.passed for result in results) else 1
+
+
+def _run_phases_serial(
+    phases: Sequence[PhaseCommand],
+    *,
+    run_root: Path,
+    resume: bool,
+    force_phases: set[str],
+    stop_on_failure: bool,
+) -> list[PhaseResult]:
+    results: list[PhaseResult] = []
+    by_name: dict[str, PhaseResult] = {}
+    for phase in phases:
+        blocked_by = [
+            dep for dep in phase.depends_on if dep in by_name and not by_name[dep].passed
+        ]
+        if blocked_by:
+            result = PhaseResult(
+                phase=phase,
+                returncode=1,
+                elapsed_s=0.0,
+                status=f"blocked:{','.join(blocked_by)}",
+            )
+        else:
+            result = _run_one_phase_with_resume(
+                phase,
+                run_root=run_root,
+                resume=resume,
+                force=phase.name in force_phases,
+            )
+        results.append(result)
+        by_name[phase.name] = result
+        if not result.passed and stop_on_failure:
+            break
+    return results
+
+
+def _run_phases_parallel(
+    phases: Sequence[PhaseCommand],
+    *,
+    run_root: Path,
+    resume: bool,
+    force_phases: set[str],
+    max_workers: int,
+    max_blender_workers: int,
+    max_open3d_workers: int,
+    max_lpips_workers: int,
+) -> list[PhaseResult]:
+    pending = list(phases)
+    completed: dict[str, PhaseResult] = {}
+    ordered_results: list[PhaseResult] = []
+    running: dict[Future[PhaseResult], PhaseCommand] = {}
+    usage = {"blender": 0, "open3d": 0, "lpips": 0}
+
+    def can_start(phase: PhaseCommand) -> bool:
+        if len(running) >= max_workers:
+            return False
+        if phase.requires_blender and usage["blender"] >= max_blender_workers:
+            return False
+        if phase.uses_open3d_path and usage["open3d"] >= max_open3d_workers:
+            return False
+        if phase.uses_torch_lpips_path and usage["lpips"] >= max_lpips_workers:
+            return False
+        return True
+
+    def add_usage(phase: PhaseCommand, delta: int) -> None:
+        if phase.requires_blender:
+            usage["blender"] += delta
+        if phase.uses_open3d_path:
+            usage["open3d"] += delta
+        if phase.uses_torch_lpips_path:
+            usage["lpips"] += delta
+
+    with ThreadPoolExecutor(max_workers=max(1, max_workers)) as executor:
+        while pending or running:
+            made_progress = False
+            for phase in tuple(pending):
+                deps = [completed.get(dep) for dep in phase.depends_on]
+                if any(result is None for result in deps):
+                    continue
+                failed_deps = [
+                    result.phase.name for result in deps if result is not None and not result.passed
+                ]
+                if failed_deps:
+                    result = PhaseResult(
+                        phase=phase,
+                        returncode=1,
+                        elapsed_s=0.0,
+                        status=f"blocked:{','.join(failed_deps)}",
+                    )
+                    completed[phase.name] = result
+                    ordered_results.append(result)
+                    pending.remove(phase)
+                    made_progress = True
+                    continue
+                if not can_start(phase):
+                    continue
+                _print_phase_header(phase)
+                future = executor.submit(
+                    _execute_phase,
+                    phase,
+                    run_root=run_root,
+                    resume=resume,
+                    force=phase.name in force_phases,
+                    print_header=False,
+                )
+                running[future] = phase
+                add_usage(phase, 1)
+                pending.remove(phase)
+                made_progress = True
+            if not running:
+                if pending and not made_progress:
+                    for phase in pending:
+                        result = PhaseResult(
+                            phase=phase,
+                            returncode=1,
+                            elapsed_s=0.0,
+                            status="blocked:unsatisfied_dependencies",
+                        )
+                        completed[phase.name] = result
+                        ordered_results.append(result)
+                    pending.clear()
+                continue
+            done, _not_done = wait(tuple(running), return_when=FIRST_COMPLETED)
+            for future in done:
+                phase = running.pop(future)
+                add_usage(phase, -1)
+                try:
+                    result = future.result()
+                except Exception as exc:
+                    result = PhaseResult(
+                        phase=phase,
+                        returncode=2,
+                        elapsed_s=0.0,
+                        status="error",
+                        stderr_path=_write_phase_exception_log(
+                            run_root,
+                            phase,
+                            exc,
+                        ),
+                    )
+                    print(f"ERROR: {phase.name}: {exc}", file=sys.stderr)
+                completed[phase.name] = result
+                ordered_results.append(result)
+    by_name = {result.phase.name: result for result in ordered_results}
+    return [by_name[phase.name] for phase in phases if phase.name in by_name]
+
+
+def _run_one_phase_with_resume(
+    phase: PhaseCommand,
+    *,
+    run_root: Path,
+    resume: bool,
+    force: bool,
+) -> PhaseResult:
+    _print_phase_header(phase)
+    return _execute_phase(phase, run_root=run_root, resume=resume, force=force)
+
+
+def _execute_phase(
+    phase: PhaseCommand,
+    *,
+    run_root: Path,
+    resume: bool,
+    force: bool,
+    print_header: bool = False,
+) -> PhaseResult:
+    if print_header:
+        _print_phase_header(phase)
+    if resume and not force:
+        reused = _resume_phase_result(phase, run_root=run_root)
+        if reused is not None:
+            print(f"REUSE: {phase.name} ({reused.original_elapsed_s or 0.0:.1f}s original)")
+            return reused
+
+    started = time.perf_counter()
+    if phase.inline_quality_budget is not None:
+        returncode, stdout_path, stderr_path = _run_inline_quality_budget_phase(
+            phase,
+            run_root=run_root,
+        )
+    else:
+        returncode, stdout_path, stderr_path = _run_phase_command(
+            phase,
+            run_root=run_root,
+        )
+    elapsed_s = time.perf_counter() - started
+    result = PhaseResult(
+        phase=phase,
+        returncode=returncode,
+        elapsed_s=elapsed_s,
+        stdout_path=stdout_path,
+        stderr_path=stderr_path,
+        status="pass" if returncode == 0 else "fail",
+    )
+    if result.passed:
+        _write_phase_state(run_root, result)
+    status = "PASS" if result.passed else "FAIL"
+    print(f"{status}: {phase.name} ({elapsed_s:.1f}s)")
+    return result
+
+
+def preflight_phases(phases: Sequence[PhaseCommand]) -> dict[str, object]:
+    issues: list[dict[str, object]] = []
+    checked_refinement = 0
+    for phase in phases:
+        preflight = phase.refinement_preflight
+        if preflight is None:
+            continue
+        checked_refinement += 1
+        issues.extend(_preflight_refinement_phase(phase, preflight))
+    return {
+        "schema_version": "quality_refinement_preflight_v1",
+        "passed": not issues,
+        "checked_refinement_phases": checked_refinement,
+        "issue_count": len(issues),
+        "issues": issues,
+    }
+
+
+def _preflight_refinement_phase(
+    phase: PhaseCommand,
+    preflight: RefinementPhasePreflight,
+) -> list[dict[str, object]]:
+    try:
+        from blender_blocking.refinement_lab.matrix import build_experiment_plan
+        from blender_blocking.synthetic.registry import get_definition
+    except ImportError:  # pragma: no cover
+        from refinement_lab.matrix import build_experiment_plan
+        from synthetic.registry import get_definition
+
+    plan = build_experiment_plan(
+        suite=preflight.target.suite,
+        track=preflight.target.track,
+        search=preflight.target.search,
+        objective=preflight.target.objective,
+        output_root=preflight.result_root / "_preflight",
+        seed=preflight.seed,
+        case_count=preflight.case_count,
+        max_runs=preflight.max_runs,
+        top_k=preflight.top_k,
+    )
+    issues: list[dict[str, object]] = []
+    for case in plan.cases:
+        spec = case.metadata.get("spec", {}) if isinstance(case.metadata, Mapping) else {}
+        family = str(spec.get("family", ""))
+        definition_name = str(case.synthetic_definition or spec.get("shape_id", ""))
+        blender_supported = True
+        try:
+            definition = get_definition(definition_name)
+            blender_supported = bool(definition.blender_supported)
+        except Exception:
+            blender_supported = family in {
+                "analytic_primitive",
+                "profile_lathe",
+                "furniture",
+                "vehicle_mechanical",
+            }
+        if case.source == "synthetic" and not blender_supported:
+            issues.append(
+                {
+                    "phase": phase.name,
+                    "code": "unsupported_synthetic_family_for_refinement",
+                    "suite": preflight.target.suite,
+                    "track": preflight.target.track,
+                    "case_id": case.case_id,
+                    "synthetic_definition": definition_name,
+                    "family": family,
+                    "message": (
+                        "Refinement runners generate references with Blender mesh "
+                        "builders; this synthetic definition is pure-mask only."
+                    ),
+                }
+            )
+    return issues
+
+
+def _run_phase_command(
+    phase: PhaseCommand,
+    *,
+    run_root: Path,
+) -> tuple[int, Path, Path]:
+    log_dir = run_root / "phase-logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    stdout_path = (
+        log_dir / f"{compact_path_segment(phase.name, max_length=64)}.stdout.txt"
+    )
+    stderr_path = (
+        log_dir / f"{compact_path_segment(phase.name, max_length=64)}.stderr.txt"
+    )
+    with stdout_path.open(
+        "w",
+        encoding="utf-8",
+        errors="replace",
+    ) as stdout_file, stderr_path.open(
+        "w",
+        encoding="utf-8",
+        errors="replace",
+    ) as stderr_file:
+        process = subprocess.Popen(
+            phase.command,
+            cwd=REPO_ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            bufsize=1,
+        )
+        threads = []
+        if process.stdout is not None:
+            threads.append(
+                threading.Thread(
+                    target=_tee_stream,
+                    args=(process.stdout, stdout_file, sys.stdout),
+                    daemon=True,
+                )
+            )
+        if process.stderr is not None:
+            threads.append(
+                threading.Thread(
+                    target=_tee_stream,
+                    args=(process.stderr, stderr_file, sys.stderr),
+                    daemon=True,
+                )
+            )
+        for thread in threads:
+            thread.start()
+        returncode = process.wait()
+        for thread in threads:
+            thread.join()
+        for stream in (process.stdout, process.stderr):
+            if stream is not None:
+                stream.close()
+    return returncode, stdout_path, stderr_path
+
+
+def _run_inline_quality_budget_phase(
+    phase: PhaseCommand,
+    *,
+    run_root: Path,
+) -> tuple[int, Path, Path]:
+    if phase.inline_quality_budget is None:
+        raise ValueError("inline quality budget phase is missing payload paths")
+    result_json, budget_json, report_json = phase.inline_quality_budget
+    stdout_path, stderr_path = _phase_log_paths(run_root, phase)
+    warn_only = "--warn-only" in phase.command
+    try:
+        from scripts.quality_budget import evaluate_budget_files, write_report
+
+        report = evaluate_budget_files(
+            current_path=result_json,
+            budget_path=budget_json,
+            baseline_path=None,
+        )
+        write_report(report_json, report)
+        text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+        stdout_path.write_text(text, encoding="utf-8")
+        stderr_path.write_text("", encoding="utf-8")
+        print(text, end="")
+        returncode = 0 if warn_only or bool(report.get("passed")) else 1
+    except Exception as exc:
+        stdout_path.write_text("", encoding="utf-8")
+        stderr_path.write_text(f"{type(exc).__name__}: {exc}\n", encoding="utf-8")
+        print(f"INLINE QUALITY BUDGET ERROR: {exc}", file=sys.stderr)
+        returncode = 2
+    return returncode, stdout_path, stderr_path
+
+
+def _phase_log_paths(run_root: Path, phase: PhaseCommand) -> tuple[Path, Path]:
+    log_dir = run_root / "phase-logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    stem = compact_path_segment(phase.name, max_length=64)
+    return log_dir / f"{stem}.stdout.txt", log_dir / f"{stem}.stderr.txt"
+
+
+def _write_phase_exception_log(
+    run_root: Path,
+    phase: PhaseCommand,
+    exc: Exception,
+) -> Path:
+    _stdout_path, stderr_path = _phase_log_paths(run_root, phase)
+    stderr_path.write_text(f"{type(exc).__name__}: {exc}\n", encoding="utf-8")
+    return stderr_path
+
+
+def _phase_state_path(run_root: Path, phase: PhaseCommand) -> Path:
+    state_dir = run_root / ".phase-state"
+    state_dir.mkdir(parents=True, exist_ok=True)
+    return state_dir / f"{compact_path_segment(phase.name, max_length=80)}.json"
+
+
+def _phase_command_hash(phase: PhaseCommand) -> str:
+    payload = {
+        "name": phase.name,
+        "command": list(phase.command),
+        "artifacts": [_repo_path(path) for path in phase.artifacts],
+        "depends_on": list(phase.depends_on),
+        "inline_quality_budget": (
+            [_repo_path(path) for path in phase.inline_quality_budget]
+            if phase.inline_quality_budget
+            else None
+        ),
+    }
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _resume_phase_result(
+    phase: PhaseCommand,
+    *,
+    run_root: Path,
+) -> PhaseResult | None:
+    path = _phase_state_path(run_root, phase)
+    if not path.exists():
+        return None
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if state.get("schema_version") != PHASE_STATE_SCHEMA:
+        return None
+    if state.get("phase") != phase.name:
+        return None
+    if state.get("command_hash") != _phase_command_hash(phase):
+        return None
+    if int(state.get("returncode", 1)) != 0:
+        return None
+    if not all(_artifact_ready(path) for path in phase.artifacts):
+        return None
+    return PhaseResult(
+        phase=phase,
+        returncode=0,
+        elapsed_s=0.0,
+        stdout_path=_state_path_or_none(state.get("stdout_path")),
+        stderr_path=_state_path_or_none(state.get("stderr_path")),
+        status="reused",
+        reused=True,
+        original_elapsed_s=float(state.get("elapsed_s") or 0.0),
+    )
+
+
+def _write_phase_state(run_root: Path, result: PhaseResult) -> None:
+    if not result.passed:
+        return
+    payload = {
+        "schema_version": PHASE_STATE_SCHEMA,
+        "phase": result.phase.name,
+        "command_hash": _phase_command_hash(result.phase),
+        "returncode": result.returncode,
+        "status": result.status,
+        "elapsed_s": result.original_elapsed_s
+        if result.reused and result.original_elapsed_s is not None
+        else result.elapsed_s,
+        "stdout_path": _repo_path(result.stdout_path) if result.stdout_path else None,
+        "stderr_path": _repo_path(result.stderr_path) if result.stderr_path else None,
+        "artifacts": [_repo_path(path) for path in result.phase.artifacts],
+        "written_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+    }
+    path = _phase_state_path(run_root, result.phase)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _state_path_or_none(value: object) -> Path | None:
+    if not value:
+        return None
+    return _resolve_under_repo(str(value))
+
+
+def _artifact_ready(path: Path) -> bool:
+    path = Path(path)
+    if path.is_dir():
+        return True
+    return path.exists()
+
+
+def _tee_stream(source: object, log_file: object, console: object) -> None:
+    for line in source:  # type: ignore[operator]
+        log_file.write(line)
+        log_file.flush()
+        console.write(line)
+        console.flush()
 
 
 def _assert_temp_child(path: Path) -> None:
@@ -779,8 +1428,9 @@ def write_summary(
         if result is None:
             lines.append(f"| `{phase.name}` | not-run |  |")
         else:
-            status = "pass" if result.passed else f"fail ({result.returncode})"
-            lines.append(f"| `{phase.name}` | {status} | {result.elapsed_s:.1f} |")
+            status = _phase_status_text(result)
+            elapsed = result.original_elapsed_s if result.reused else result.elapsed_s
+            lines.append(f"| `{phase.name}` | {status} | {elapsed or 0.0:.1f} |")
     lines.extend(["", "## Matrix Rows", ""])
     if matrix_rows:
         lines.extend(_matrix_summary_lines(matrix_rows))
@@ -823,10 +1473,15 @@ def _write_machine_summary(
                 "name": result.phase.name,
                 "returncode": result.returncode,
                 "passed": result.passed,
+                "status": result.status,
+                "reused": result.reused,
+                "original_elapsed_s": result.original_elapsed_s,
                 "elapsed_s": result.elapsed_s,
                 "artifacts": [_repo_path(path) for path in result.phase.artifacts],
                 "expected_candidate_count": result.phase.expected_candidate_count,
                 "expected_blender_invocations": result.phase.expected_blender_invocations,
+                "stdout_path": _repo_path(result.stdout_path) if result.stdout_path else None,
+                "stderr_path": _repo_path(result.stderr_path) if result.stderr_path else None,
             }
             for result in results
         ],
@@ -848,6 +1503,16 @@ def _write_machine_summary(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _phase_status_text(result: PhaseResult) -> str:
+    if result.reused:
+        return "reused"
+    if result.status.startswith("blocked"):
+        return result.status
+    if result.passed:
+        return "pass"
+    return f"{result.status} ({result.returncode})"
 
 
 def _collect_matrix_rows(run_root: Path) -> list[dict]:
@@ -951,9 +1616,9 @@ def _matrix_summary_lines(rows: Sequence[dict]) -> list[str]:
         by_mode.items(),
         key=lambda item: (
             item[1]["passed"] / max(item[1]["total"], 1.0),
-            _average(item[1], "min_iou"),
-            _average(item[1], "boundary"),
-            -_average(item[1], "sdf", missing=1e9),
+            _sort_metric(_average(item[1], "min_iou")),
+            _sort_metric(_average(item[1], "boundary")),
+            -_sort_metric(_average(item[1], "sdf"), missing=1e9),
         ),
         reverse=True,
     )
@@ -994,16 +1659,25 @@ def _lookup_metric(metrics: dict, metric_name: str) -> object:
     return current
 
 
-def _average(bucket: dict[str, float], prefix: str, *, missing: float = 0.0) -> float:
+def _average(
+    bucket: dict[str, float],
+    prefix: str,
+    *,
+    missing: float | None = None,
+) -> float | None:
     count = bucket.get(f"{prefix}_count", 0.0)
     if count <= 0:
         return missing
     return bucket.get(f"{prefix}_sum", 0.0) / count
 
 
-def _fmt_metric(value: float) -> str:
-    if value == 1e9:
-        return ""
+def _sort_metric(value: float | None, *, missing: float = 0.0) -> float:
+    return missing if value is None else value
+
+
+def _fmt_metric(value: float | None) -> str:
+    if value is None or value == 1e9:
+        return "n/a"
     return f"{value:.4f}"
 
 
@@ -1023,8 +1697,37 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--run-root", default=None)
     parser.add_argument("--blender-exe", default=None)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--preflight-only", action="store_true")
     parser.add_argument("--clean-first", action="store_true")
     parser.add_argument("--stop-on-failure", action="store_true")
+    parser.add_argument("--serial", action="store_true")
+    parser.add_argument("--max-workers", type=int, default=None)
+    parser.add_argument("--max-blender-workers", type=int, default=None)
+    parser.add_argument("--max-open3d-workers", type=int, default=None)
+    parser.add_argument("--max-lpips-workers", type=int, default=None)
+    parser.add_argument("--resume", action=argparse.BooleanOptionalAction, default=None)
+    parser.add_argument("--force-phase", action="append", default=[])
+    parser.add_argument("--cache-root", default=str(DEFAULT_CACHE_ROOT))
+    parser.add_argument(
+        "--reference-cache",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    parser.add_argument(
+        "--candidate-cache",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    parser.add_argument(
+        "--resume-candidates",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    parser.add_argument(
+        "--debug-artifact-policy",
+        choices=("all", "failures", "top", "none"),
+        default=None,
+    )
     parser.add_argument("--seed", type=int, default=1234)
     parser.add_argument("--run-id-prefix", default="quality_refinement")
     parser.add_argument("--modes", default=None)
@@ -1032,7 +1735,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--matrix-count", type=int, default=None)
     parser.add_argument(
         "--quality-budget-json",
-        default="configs/quality_perf_budget-smoke.json",
+        default="configs/quality_perf_budget-backend-status-smoke.json",
     )
     parser.add_argument("--lpips-suite", default=None)
     parser.add_argument("--lpips-modes", default=None)
@@ -1056,6 +1759,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
+    profile = _profile(args.profile)
     try:
         run_root, phases = build_phase_plan(args)
     except ValueError as exc:
@@ -1064,12 +1768,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not phases:
         print("ERROR: no phases selected", file=sys.stderr)
         return 2
+    full_nightly = profile.name == "full-nightly"
+    resume = _bool_default(args.resume, full_nightly)
+    max_workers = args.max_workers if args.max_workers is not None else (4 if full_nightly else 1)
+    max_blender_workers = (
+        args.max_blender_workers if args.max_blender_workers is not None else (2 if full_nightly else 1)
+    )
+    max_open3d_workers = args.max_open3d_workers if args.max_open3d_workers is not None else 1
+    max_lpips_workers = args.max_lpips_workers if args.max_lpips_workers is not None else 1
     return run_phases(
         run_root,
         phases,
         dry_run=args.dry_run,
+        preflight_only=args.preflight_only,
         clean_first=args.clean_first,
-        stop_on_failure=args.stop_on_failure or _profile(args.profile).stop_on_failure,
+        stop_on_failure=args.stop_on_failure or profile.stop_on_failure,
+        resume=resume,
+        force_phases=args.force_phase,
+        serial=args.serial,
+        max_workers=max_workers,
+        max_blender_workers=max_blender_workers,
+        max_open3d_workers=max_open3d_workers,
+        max_lpips_workers=max_lpips_workers,
     )
 
 

@@ -22,9 +22,11 @@ from reconstruction.point_cloud import target_surface_points
 from reconstruction.types import CandidateMetrics, CandidateResult
 
 try:
+    from primitives.analytic_primitives import AnisotropicGaussianPrimitive, EllipsoidPrimitive
     from primitives.shape_program import ShapeNode, ShapeProgram, validate_shape_program
     from primitives.proxy_distillation import distill_proxy_field, write_proxy_field_npz
 except ImportError:  # pragma: no cover - package import path
+    from ..analytic_primitives import AnisotropicGaussianPrimitive, EllipsoidPrimitive
     from ..shape_program import ShapeNode, ShapeProgram, validate_shape_program
     from ..proxy_distillation import distill_proxy_field, write_proxy_field_npz
 
@@ -111,6 +113,19 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             primitives = tuple(initialize_ellipsoids_from_points(seed_points, init_config))
         else:
             primitives = tuple(initialize_gaussians_from_points(seed_points, init_config))
+        initialization_diagnostics = _initialization_diagnostics(
+            seed_points,
+            family=family,
+            include_bounds_proxy=bool(normalized["include_bounds_proxy"]),
+            min_radius=float(normalized["min_radius"]),
+            opacity=float(normalized["opacity_max"]),
+        )
+        primitives = _prepend_bounds_proxy(
+            primitives,
+            family=family,
+            diagnostics=initialization_diagnostics,
+            primitive_limit=adaptive_primitive_count,
+        )
     except Exception as exc:
         return CandidateResult(
             candidate_id=candidate_id,
@@ -156,6 +171,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
                 "requested_point_count": requested_point_count,
                 "adaptive_point_count": adaptive_point_count,
                 "adaptive_primitive_count": adaptive_primitive_count,
+                "initialization_diagnostics": initialization_diagnostics,
                 "normalized_config": _compact_config_summary(normalized),
             },
         )
@@ -277,6 +293,10 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             "point_source": str(point_meta.get("source", "target_surface_points")),
         },
         {
+            "stage": "bounds_intersection_seed",
+            "diagnostics": initialization_diagnostics,
+        },
+        {
             "stage": "fitted_proxy",
             "primitive_count": len(primitives),
             "complexity_penalty": complexity_penalty,
@@ -378,6 +398,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             "proxy_distillation": distillation_report.to_dict(),
             "proxy_render_namespace": "backend_proxy_only",
             "transform_diagnostics": transform_diagnostics,
+            "initialization_diagnostics": initialization_diagnostics,
             "render_proxy_disagreement_policy": {
                 "high_proxy_iou_floor": 0.9,
                 "catastrophic_render_iou_floor": 0.2,
@@ -401,6 +422,79 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
         warnings=tuple(warnings),
         payload=primitives,
     )
+
+
+def _initialization_diagnostics(
+    points: np.ndarray,
+    *,
+    family: str,
+    include_bounds_proxy: bool,
+    min_radius: float,
+    opacity: float,
+) -> dict[str, Any]:
+    diagnostics: dict[str, Any] = {
+        "bounds_proxy": {
+            "enabled": False,
+            "reason": "disabled" if not include_bounds_proxy else "insufficient_points",
+        },
+        "source_point_count": int(len(points)),
+    }
+    if len(points) == 0:
+        return diagnostics
+    mins = np.min(points, axis=0)
+    maxs = np.max(points, axis=0)
+    center = (mins + maxs) * 0.5
+    radii = np.maximum((maxs - mins) * 0.5, float(min_radius))
+    diagnostics["source_bounds"] = {
+        "min": mins.tolist(),
+        "max": maxs.tolist(),
+        "center": center.tolist(),
+        "radii": radii.tolist(),
+    }
+    if not include_bounds_proxy:
+        return diagnostics
+    diagnostics["bounds_proxy"] = {
+        "enabled": True,
+        "family": family,
+        "center": center.tolist(),
+        "radii": radii.tolist(),
+        "opacity": float(np.clip(opacity, 0.0, 1.0)),
+        "reason": "per_view_bbox_intersection_seed",
+    }
+    return diagnostics
+
+
+def _prepend_bounds_proxy(
+    primitives: Sequence[object],
+    *,
+    family: str,
+    diagnostics: Mapping[str, Any],
+    primitive_limit: int,
+) -> tuple[object, ...]:
+    bounds_proxy = diagnostics.get("bounds_proxy")
+    if not isinstance(bounds_proxy, Mapping) or not bounds_proxy.get("enabled"):
+        return tuple(primitives)
+    center = np.asarray(bounds_proxy.get("center", (0.0, 0.0, 0.0)), dtype=float)
+    radii = np.asarray(bounds_proxy.get("radii", (1.0, 1.0, 1.0)), dtype=float)
+    if center.shape != (3,) or radii.shape != (3,):
+        return tuple(primitives)
+    if str(family).lower().strip() in {"ellipsoid", "ellipsoids"}:
+        proxy: object = EllipsoidPrimitive(
+            center=center,
+            radii=radii,
+            density=1.0,
+            confidence=1.0,
+        )
+    else:
+        proxy = AnisotropicGaussianPrimitive(
+            center=center,
+            covariance=np.diag(np.maximum(radii, 1e-6) ** 2),
+            opacity=float(bounds_proxy.get("opacity", 1.0) or 1.0),
+            semantic_role="bounds_intersection_seed",
+            confidence=1.0,
+        )
+    limit = max(1, int(primitive_limit))
+    return (proxy, *tuple(primitives)[: max(0, limit - 1)])
 
 
 def _proxy_transform_diagnostics(

@@ -310,7 +310,7 @@ TRACKS: dict[str, TrackPreset] = {
             _p(
                 "gaussian_export_mesh_proxy",
                 "--gaussian-export-mesh-proxy",
-                (True, False),
+                (True,),
                 value_type="bool",
             ),
         ),

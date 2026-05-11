@@ -39,13 +39,28 @@ def _cost_group(result: Any) -> MetricGroup:
                 status="pass",
             )
         )
+    invalid_throughput_reasons: list[str] = []
     for name, value in report.throughput.items():
+        numeric = _float_or_none(value)
+        if numeric is None:
+            invalid_throughput_reasons.append(f"{name}={value}")
+            continue
         values.append(
             MetricValue(
                 f"cost.throughput.{name}",
-                float(value),
+                numeric,
                 higher_is_better=True,
                 status="pass",
+            )
+        )
+    if invalid_throughput_reasons:
+        values.append(
+            MetricValue(
+                "cost.throughput.valid",
+                False,
+                higher_is_better=True,
+                status="fail",
+                notes=tuple(invalid_throughput_reasons),
             )
         )
     for name, value in report.cache.items():

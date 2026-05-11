@@ -287,6 +287,20 @@ def _normalize_differentiable_config(config: Mapping[str, object]) -> tuple[
     if silhouette_bounds_padding is None:
         silhouette_bounds_padding = 1.0
     normalized["silhouette_bounds_padding"] = float(silhouette_bounds_padding)
+    normalized["include_bounds_proxy"] = bool(config.get("include_bounds_proxy", True))
+    normalized["calibrate_silhouette_bounds"] = bool(
+        config.get("calibrate_silhouette_bounds", False)
+    )
+    mesh_proxy_scale = _coerce_float(
+        config.get("mesh_proxy_scale", 1.6),
+        "mesh_proxy_scale",
+        errors,
+        min_value=0.05,
+        max_value=10.0,
+    )
+    if mesh_proxy_scale is None:
+        mesh_proxy_scale = 1.6
+    normalized["mesh_proxy_scale"] = float(mesh_proxy_scale)
 
     visual_hull_resolution = _coerce_int(
         config.get("visual_hull_resolution", config.get("resolution", 40)),

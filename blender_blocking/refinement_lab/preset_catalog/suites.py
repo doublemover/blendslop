@@ -21,6 +21,13 @@ SUITES: dict[str, SuitePreset] = {
         synthetic_suites=("smoke",),
         tags=("quick", "synthetic"),
     ),
+    "synthetic-blender-smoke": SuitePreset(
+        name="synthetic-blender-smoke",
+        source="synthetic",
+        description="Small synthetic sanity suite limited to Blender mesh-backed fixtures.",
+        synthetic_suites=("blender-smoke",),
+        tags=("quick", "synthetic", "blender"),
+    ),
     "synthetic-visual-hull": SuitePreset(
         name="synthetic-visual-hull",
         source="synthetic",

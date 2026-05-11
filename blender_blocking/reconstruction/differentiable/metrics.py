@@ -36,6 +36,9 @@ def build_differentiable_candidate_metrics(
     config_warnings: tuple[str, ...] | list[str],
     artifacts: Mapping[str, Any],
     backend_choice: str,
+    initialization_diagnostics: Mapping[str, Any],
+    boundary_sdf_improvement: Mapping[str, Any],
+    mesh_proxy_scale: float,
 ) -> tuple[CandidateMetrics, Mapping[str, Mapping[str, Any]], int]:
     area_iou_mean = 1.0 - float(loss.terms.get("area_iou", 1.0))
     soft_iou_mean = 1.0 - float(loss.terms.get("soft_iou", 1.0))
@@ -73,6 +76,16 @@ def build_differentiable_candidate_metrics(
             "soft_iou",
             fallback=max(0.0, soft_iou_mean),
         ),
+        "boundary_loss_improvement": float(
+            boundary_sdf_improvement.get("boundary_loss_improvement", 0.0) or 0.0
+        ),
+        "signed_distance_loss_improvement": float(
+            boundary_sdf_improvement.get("signed_distance_loss_improvement", 0.0)
+            or 0.0
+        ),
+        "boundary_or_sdf_improved": bool(
+            boundary_sdf_improvement.get("boundary_or_sdf_improved")
+        ),
     }
     metrics = CandidateMetrics(
         area_iou_min=max(0.0, area_iou_min),
@@ -92,6 +105,8 @@ def build_differentiable_candidate_metrics(
             "primitive_count": len(optimized_primitives),
             "surface_points": point_meta,
             "render_metadata": dict(getattr(render_batch, "metadata", {})),
+            "initialization_diagnostics": dict(initialization_diagnostics),
+            "mesh_proxy_scale": float(mesh_proxy_scale),
             "gate_summary": gate_summary,
             "topology": dict(topology_payload),
             "baseline_loss": dict(baseline_loss.terms),
@@ -102,6 +117,7 @@ def build_differentiable_candidate_metrics(
             "initial_warnings": tuple(initial_loss.warnings),
             "objective_total": float(loss.total),
             "objective_improvement": float(objective_improvement),
+            "boundary_sdf_improvement": dict(boundary_sdf_improvement),
             "zero_baseline_improvement": float(zero_baseline_improvement),
             "objective_improvement_record": dict(objective_improvement_record),
             "objective_history": objective_history,

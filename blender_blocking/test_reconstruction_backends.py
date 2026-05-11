@@ -495,8 +495,10 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
             )
 
         editable = result.metric_result.extras["editable_proxy"]
+        init_diagnostics = result.metric_result.extras["initialization_diagnostics"]
         program = editable["shape_program"]
         node = program["root_nodes"][0]
+        first_proxy = result.payload[0].to_ellipsoid()
         stages = {
             record["stage"]
             for record in result.metric_result.extras["objective_history"]
@@ -510,7 +512,15 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         self.assertEqual(editable["validation_errors"], [])
         self.assertEqual(node["primitive_type"], "ellipsoid")
         self.assertEqual(len(node["parameters"]["rotation_row_major"]), 9)
+        self.assertTrue(init_diagnostics["bounds_proxy"]["enabled"])
+        np.testing.assert_allclose(first_proxy.center, [0.0, 0.0, 0.0], atol=1e-8)
+        np.testing.assert_allclose(
+            sorted(first_proxy.radii.tolist()),
+            sorted([1.0, 0.5, 0.75]),
+            atol=1e-8,
+        )
         self.assertGreater(result.metric_result.editability_score, 0.7)
+        self.assertIn("bounds_intersection_seed", stages)
         self.assertIn("editable_proxy_distillation", stages)
         distillation = result.metric_result.extras["proxy_distillation"]
         self.assertGreater(distillation["arbitration_score"], 0.0)
@@ -701,6 +711,32 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         )
         self.assertEqual(by_id["skipped-second"].status, "skipped")
         self.assertIn("total timeout exhausted", by_id["skipped-second"].warnings[0])
+
+    def test_ensemble_parallel_candidates_preserve_request_order(self) -> None:
+        register_backend(_FakeBackend())
+        runner = EnsembleRunner()
+        requests = runner.build_requests(
+            target=ReconstructionTarget(),
+            candidates=(
+                CandidateConfig(
+                    backend_name="fake_plugin",
+                    candidate_id="first",
+                    config={"sleep_s": 0.01},
+                ),
+                CandidateConfig(
+                    backend_name="fake_plugin",
+                    candidate_id="second",
+                ),
+            ),
+        )
+
+        result = runner.run_requests(requests, max_parallel_candidates=2)
+
+        self.assertEqual(
+            [candidate.candidate_id for candidate in result.candidates],
+            ["first", "second"],
+        )
+        self.assertTrue(all(candidate.status == "success" for candidate in result.candidates))
 
     def test_candidate_artifact_root_is_scoped_and_rejects_escape(self) -> None:
         self.assertIsNone(

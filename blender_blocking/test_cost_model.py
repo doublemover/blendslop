@@ -114,6 +114,30 @@ class CostModelTests(unittest.TestCase):
             64.0,
         )
 
+    def test_invalid_throughput_reason_does_not_become_numeric_metric(self) -> None:
+        result = CandidateResult(
+            candidate_id="invalid-throughput",
+            backend_name="visual_hull_voxel",
+            status="success",
+            metric_result=CandidateMetrics(
+                extras={
+                    "cost": {
+                        "total_wall_ms": 0.0,
+                        "throughput": {
+                            "invalid_reason": "missing_or_zero_total_wall_ms",
+                        },
+                    }
+                }
+            ),
+        )
+
+        bundle = bundle_from_candidate(result=result, repo="test")
+        metrics = bundle.metric_index()
+
+        self.assertNotIn("cost.throughput.invalid_reason", metrics)
+        self.assertFalse(metrics["cost.throughput.valid"].value)
+        self.assertEqual(metrics["cost.throughput.valid"].status, "fail")
+
     def test_cost_report_attachment_preserves_candidate_metrics(self) -> None:
         result = CandidateResult(
             candidate_id="cost-attach",

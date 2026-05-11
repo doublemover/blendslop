@@ -147,16 +147,27 @@ def run_refinement_candidate(request: object) -> object:
                 ),
             )
         )
+        initialization_diagnostics = _bounds_seed_diagnostics(
+            points,
+            include_bounds_proxy=bool(parsed_config["include_bounds_proxy"]),
+            min_radius=float(parsed_config["min_radius"]),
+        )
+        primitives = _prepend_bounds_ellipsoid_seed(
+            primitives,
+            diagnostics=initialization_diagnostics,
+            primitive_limit=int(parsed_config["primitive_count"]),
+        )
         primitives = _apply_soft_silhouette_opacity_floor(
             primitives,
             floor=float(parsed_config["primitive_opacity_floor"]),
         )
-        primitives = _calibrate_primitives_to_silhouette_bounds(
-            primitives,
-            cameras=cameras,
-            silhouettes=silhouettes,
-            padding=float(parsed_config["silhouette_bounds_padding"]),
-        )
+        if bool(parsed_config["calibrate_silhouette_bounds"]):
+            primitives = _calibrate_primitives_to_silhouette_bounds(
+                primitives,
+                cameras=cameras,
+                silhouettes=silhouettes,
+                padding=float(parsed_config["silhouette_bounds_padding"]),
+            )
         renderables = tuple(renderable_from_primitive(primitive) for primitive in primitives)
         scene = RenderableScene(primitives=renderables)
         if backend_choice == "nvdiffrast":
@@ -251,7 +262,11 @@ def run_refinement_candidate(request: object) -> object:
     primitive_path = None
     mesh_path = None
     artifacts = {}
-    mesh_proxy = combine_primitive_meshes(optimized_primitives, resolution=20)
+    mesh_export_primitives = _scale_primitives_for_mesh_export(
+        optimized_primitives,
+        scale=float(parsed_config["mesh_proxy_scale"]),
+    )
+    mesh_proxy = combine_primitive_meshes(mesh_export_primitives, resolution=20)
     try:
         topology_report = mesh_topology_report(mesh_proxy.vertices, mesh_proxy.faces)
         topology_payload = topology_report.to_dict()
@@ -288,6 +303,17 @@ def run_refinement_candidate(request: object) -> object:
     objective_history = history_outputs["objective_history"]
     objective_improvement_record = history_outputs["objective_improvement_record"]
     history_payload = history_outputs["history_payload"]
+    objective_history.insert(
+        1,
+        {
+            "stage": "bounds_intersection_seed",
+            "diagnostics": initialization_diagnostics,
+        },
+    )
+    boundary_sdf_improvement = _boundary_sdf_improvement_summary(
+        initial_loss,
+        loss,
+    )
 
     primitive_path, mesh_path, artifacts = write_differentiable_candidate_artifacts(
         root=root,
@@ -339,6 +365,9 @@ def run_refinement_candidate(request: object) -> object:
         config_warnings=config_warnings,
         artifacts=artifacts,
         backend_choice=backend_choice,
+        initialization_diagnostics=initialization_diagnostics,
+        boundary_sdf_improvement=boundary_sdf_improvement,
+        mesh_proxy_scale=float(parsed_config["mesh_proxy_scale"]),
     )
     warnings = (
         tuple(loss.warnings)
@@ -351,6 +380,9 @@ def run_refinement_candidate(request: object) -> object:
         config=config,
         optimized_primitives_present=bool(optimized_primitives),
         objective_improvement=objective_improvement,
+        boundary_or_sdf_improved=bool(
+            boundary_sdf_improvement["boundary_or_sdf_improved"]
+        ),
         failed_required_views=failed_required_views,
         warnings=warnings,
     )
@@ -372,10 +404,162 @@ def run_refinement_candidate(request: object) -> object:
             "history": history_payload,
             "objective_history": objective_history,
             "objective_improvement": objective_improvement_record,
+            "boundary_sdf_improvement": boundary_sdf_improvement,
+            "mesh_proxy_scale": float(parsed_config["mesh_proxy_scale"]),
             "render_batch": render_batch,
             "view_signal_weights": dict(target_view_weights),
         },
     )
+
+
+def _bounds_seed_diagnostics(
+    points: np.ndarray,
+    *,
+    include_bounds_proxy: bool,
+    min_radius: float,
+) -> dict[str, Any]:
+    diagnostics: dict[str, Any] = {
+        "bounds_proxy": {
+            "enabled": False,
+            "reason": "disabled" if not include_bounds_proxy else "insufficient_points",
+        },
+        "source_point_count": int(len(points)),
+    }
+    if len(points) == 0:
+        return diagnostics
+    mins = np.min(points, axis=0)
+    maxs = np.max(points, axis=0)
+    center = (mins + maxs) * 0.5
+    radii = np.maximum((maxs - mins) * 0.5, float(min_radius))
+    diagnostics["source_bounds"] = {
+        "min": mins.tolist(),
+        "max": maxs.tolist(),
+        "center": center.tolist(),
+        "radii": radii.tolist(),
+    }
+    if include_bounds_proxy:
+        diagnostics["bounds_proxy"] = {
+            "enabled": True,
+            "center": center.tolist(),
+            "radii": radii.tolist(),
+            "reason": "per_view_bbox_intersection_seed",
+        }
+    return diagnostics
+
+
+def _prepend_bounds_ellipsoid_seed(
+    primitives: Sequence[object],
+    *,
+    diagnostics: Mapping[str, Any],
+    primitive_limit: int,
+) -> tuple[object, ...]:
+    bounds_proxy = diagnostics.get("bounds_proxy")
+    if not isinstance(bounds_proxy, Mapping) or not bounds_proxy.get("enabled"):
+        return tuple(primitives)
+    center = np.asarray(bounds_proxy.get("center", (0.0, 0.0, 0.0)), dtype=float)
+    radii = np.asarray(bounds_proxy.get("radii", (1.0, 1.0, 1.0)), dtype=float)
+    if center.shape != (3,) or radii.shape != (3,):
+        return tuple(primitives)
+    proxy = EllipsoidPrimitive(
+        center=center,
+        radii=radii,
+        density=1.0,
+        confidence=1.0,
+    )
+    limit = max(1, int(primitive_limit))
+    return (proxy, *tuple(primitives)[: max(0, limit - 1)])
+
+
+def _boundary_sdf_improvement_summary(
+    initial_loss: Any,
+    loss: Any,
+) -> dict[str, float | bool]:
+    initial_terms = getattr(initial_loss, "terms", {}) or {}
+    final_terms = getattr(loss, "terms", {}) or {}
+    boundary_improvement = _loss_delta(
+        initial_terms,
+        final_terms,
+        "boundary_iou",
+    )
+    signed_distance_improvement = _loss_delta(
+        initial_terms,
+        final_terms,
+        "signed_distance",
+    )
+    area_improvement = _loss_delta(initial_terms, final_terms, "area_iou")
+    return {
+        "boundary_loss_improvement": boundary_improvement,
+        "signed_distance_loss_improvement": signed_distance_improvement,
+        "area_iou_loss_improvement": area_improvement,
+        "boundary_or_sdf_improved": (
+            boundary_improvement > 1.0e-9
+            or signed_distance_improvement > 1.0e-9
+        ),
+    }
+
+
+def _loss_delta(
+    initial_terms: Mapping[str, Any],
+    final_terms: Mapping[str, Any],
+    key: str,
+) -> float:
+    try:
+        initial_value = float(initial_terms.get(key, 0.0) or 0.0)
+        final_value = float(final_terms.get(key, 0.0) or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+    if not math.isfinite(initial_value) or not math.isfinite(final_value):
+        return 0.0
+    return float(initial_value - final_value)
+
+
+def _scale_primitives_for_mesh_export(
+    primitives: Sequence[object],
+    *,
+    scale: float,
+) -> tuple[object, ...]:
+    parsed_scale = float(scale)
+    if not math.isfinite(parsed_scale) or abs(parsed_scale - 1.0) <= 1.0e-12:
+        return tuple(primitives)
+    parsed_scale = max(1.0e-6, parsed_scale)
+    scaled: list[object] = []
+    for primitive in primitives:
+        if isinstance(primitive, EllipsoidPrimitive):
+            scaled.append(
+                EllipsoidPrimitive(
+                    center=primitive.center,
+                    radii=primitive.radii * parsed_scale,
+                    rotation=primitive.rotation,
+                    density=primitive.density,
+                    confidence=primitive.confidence,
+                )
+            )
+        elif isinstance(primitive, AnisotropicGaussianPrimitive):
+            scaled.append(
+                AnisotropicGaussianPrimitive(
+                    center=primitive.center,
+                    covariance=primitive.covariance * (parsed_scale * parsed_scale),
+                    opacity=primitive.opacity,
+                    color=primitive.color,
+                    semantic_role=primitive.semantic_role,
+                    confidence=primitive.confidence,
+                )
+            )
+        elif isinstance(primitive, SuperquadricPrimitive):
+            scaled.append(
+                SuperquadricPrimitive(
+                    center=primitive.center,
+                    radii=primitive.radii * parsed_scale,
+                    rotation=primitive.rotation,
+                    epsilon1=primitive.epsilon1,
+                    epsilon2=primitive.epsilon2,
+                    density=primitive.density,
+                    confidence=primitive.confidence,
+                )
+            )
+        else:
+            scaled.append(primitive)
+    return tuple(scaled)
 
 
 def _apply_soft_silhouette_opacity_floor(

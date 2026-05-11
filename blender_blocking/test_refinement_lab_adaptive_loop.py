@@ -7,10 +7,14 @@ import json
 import tempfile
 import unittest
 
-from refinement_lab.adaptive import proposals_from_bundle
-from refinement_lab.adaptive_loop import AdaptiveLoopOptions, run_adaptive_loop
-from refinement_lab.contracts import ExperimentPlan, ExperimentResult
-from refinement_lab.runner import RunOptions
+from blender_blocking.refinement_lab.adaptive import proposals_from_bundle
+from blender_blocking.refinement_lab.adaptive_loop import (
+    AdaptiveLoopOptions,
+    _child_variants_from_results,
+    run_adaptive_loop,
+)
+from blender_blocking.refinement_lab.contracts import ExperimentPlan, ExperimentResult
+from blender_blocking.refinement_lab.runner import RunOptions
 
 
 class _FakeRunner:
@@ -255,6 +259,99 @@ class AdaptiveLoopTests(unittest.TestCase):
             self.assertEqual(summary.stopped_reason, "no_promotable_parents")
             self.assertEqual(summary.generations[0].selected_parent_ids, ())
             self.assertEqual(summary.generations[0].child_variant_count, 0)
+
+    def test_child_variant_dedupe_preserves_contributing_parents(self) -> None:
+        def result(parent_id: str) -> ExperimentResult:
+            return ExperimentResult(
+                run_id="run",
+                case_id="case",
+                variant_id=parent_id,
+                mode="ensemble",
+                status="pass",
+                exit_code=0,
+                started_utc="s",
+                finished_utc="f",
+                elapsed_s=1.0,
+                backend_result={
+                    "status": "success",
+                    "metric_result": {
+                        "area_iou_min": 0.42,
+                        "area_iou_mean": 0.58,
+                        "boundary_iou_mean": 0.18,
+                        "signed_distance_loss_mean": 0.2,
+                        "topology_score": 0.4,
+                        "editability_score": 0.3,
+                    },
+                },
+                metrics={
+                    "average_iou": 0.58,
+                    "front_iou": 0.58,
+                    "side_iou": 0.42,
+                    "top_iou": 0.74,
+                },
+            )
+
+        proposals, variants = _child_variants_from_results(
+            (result("parent-a"), result("parent-b")),
+            generation=0,
+            children_per_parent=2,
+        )
+
+        self.assertEqual(len(proposals), 4)
+        self.assertEqual(len(variants), 2)
+        contributing = variants[0].parameters[
+            "adaptive_loop_contributing_parent_results"
+        ]
+        self.assertIn("parent-a", contributing)
+        self.assertIn("parent-b", contributing)
+
+    def test_loop_writes_summary_when_runner_raises(self) -> None:
+        class RaisingHarness(_FakeHarness):
+            def factory(
+                self,
+                plan: ExperimentPlan,
+                _options: RunOptions,
+                _base_config: object,
+            ) -> object:
+                self.plans.append(plan)
+
+                class RaisingRunner:
+                    def run(self) -> tuple[bool, list[ExperimentResult]]:
+                        raise RuntimeError("synthetic family cannot render")
+
+                return RaisingRunner()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            harness = RaisingHarness()
+            summary = run_adaptive_loop(
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="coordinate",
+                objective="reliability_first",
+                output_root=Path(tmp) / "loop",
+                max_runs=1,
+                options=AdaptiveLoopOptions(
+                    generations=2,
+                    parent_top_k=1,
+                    children_per_parent=2,
+                    run_options=RunOptions(
+                        html_report=False,
+                        write_overlays=False,
+                        append_global_index=False,
+                        write_lineage=False,
+                    ),
+                ),
+                runner_factory=harness.factory,
+            )
+
+            self.assertEqual(summary.stopped_reason, "runner_exception")
+            self.assertEqual(len(summary.generations), 1)
+            self.assertFalse(summary.generations[0].ok)
+            self.assertEqual(summary.generations[0].failure_code, "runner_exception")
+            self.assertTrue(summary.summary_path.exists())
+            payload = json.loads(summary.summary_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["stopped_reason"], "runner_exception")
+            self.assertIn("error_path", payload["generations"][0])
 
 
 if __name__ == "__main__":

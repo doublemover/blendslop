@@ -89,6 +89,7 @@ class E2EValidator:
         cost_fail_max_wall_ms: Optional[float] = None,
         cost_fail_max_backend_wall_ms: Optional[float] = None,
         progress: bool = False,
+        debug_artifact_policy: str = "all",
     ) -> None:
         """
         Initialize validator.
@@ -141,6 +142,7 @@ class E2EValidator:
         self.cost_fail_max_backend_wall_ms = cost_fail_max_backend_wall_ms
         self.cost_recorder = CostRecorder(track_memory=cost_track_memory)
         self.progress = progress
+        self.debug_artifact_policy = str(debug_artifact_policy or "all")
         self.results = {}
         self.backend_result: Optional[Dict[str, Any]] = None
 
@@ -489,7 +491,7 @@ class E2EValidator:
                 required=True,
             )
 
-            if PIL_AVAILABLE:
+            if PIL_AVAILABLE and self._should_write_debug_artifacts(payload):
                 debug_dir = (
                     self.debug_output_dir
                     or TEMP_OUTPUT_ROOT / "e2e" / "dbg"
@@ -601,6 +603,16 @@ class E2EValidator:
         else:
             print("ERROR: No views to compare")
             return False, {}
+
+    def _should_write_debug_artifacts(self, payload: Mapping[str, Any]) -> bool:
+        policy = self.debug_artifact_policy
+        if policy == "none":
+            return False
+        if policy == "all":
+            return True
+        if policy in {"failures", "top"}:
+            return not bool(payload.get("passed"))
+        return True
 
     def _validate_novel_views(
         self,
@@ -888,6 +900,7 @@ def test_with_sample_images(
     cost_fail_max_wall_ms: Optional[float] = None,
     cost_fail_max_backend_wall_ms: Optional[float] = None,
     progress: bool = False,
+    debug_artifact_policy: str = "all",
 ) -> bool:
     """Test with built-in sample images."""
     base_dir = BLENDER_BLOCKING_ROOT
@@ -943,6 +956,7 @@ def test_with_sample_images(
         cost_fail_max_wall_ms=cost_fail_max_wall_ms,
         cost_fail_max_backend_wall_ms=cost_fail_max_backend_wall_ms,
         progress=progress,
+        debug_artifact_policy=debug_artifact_policy,
     )
     passed, results = validator.validate_reconstruction(
         reference_paths, num_slices=num_slices
@@ -985,6 +999,7 @@ def test_with_custom_images(
     cost_fail_max_wall_ms: Optional[float] = None,
     cost_fail_max_backend_wall_ms: Optional[float] = None,
     progress: bool = False,
+    debug_artifact_policy: str = "all",
 ) -> bool:
     """
     Test with custom reference images.
@@ -1025,6 +1040,7 @@ def test_with_custom_images(
         cost_fail_max_wall_ms=cost_fail_max_wall_ms,
         cost_fail_max_backend_wall_ms=cost_fail_max_backend_wall_ms,
         progress=progress,
+        debug_artifact_policy=debug_artifact_policy,
     )
     passed, results = validator.validate_reconstruction(
         reference_paths, num_slices=num_slices

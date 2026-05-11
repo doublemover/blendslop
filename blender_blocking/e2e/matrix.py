@@ -794,13 +794,7 @@ def _matrix_metrics(payload: Mapping[str, Any], passed: bool) -> Dict[str, Any]:
                     alias = namespace_metric_key(name)
                     if alias != name:
                         set_metric_path(metrics, alias, numeric)
-                    if name == "silhouette.min_view_iou":
-                        metrics["area_iou_min"] = numeric
-                    elif name == "silhouette.average_iou":
-                        metrics["area_iou_mean"] = numeric
-                    elif name == "silhouette.mean_boundary_iou":
-                        metrics["boundary_iou_mean"] = numeric
-                    elif name == "editability.editable_reconstruction_index":
+                    if name == "editability.editable_reconstruction_index":
                         metrics["editability_score"] = numeric
                     elif name == "topology.score":
                         metrics["topology_score"] = numeric

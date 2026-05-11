@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, is_dataclass
 import copy
+import hashlib
 import json
 import platform
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import time
@@ -24,6 +26,7 @@ from .contracts import (
     RefinementRunManifest,
     compact_path_segment,
     json_safe,
+    stable_hash,
     utc_now,
 )
 from .parameter_search import score_result
@@ -60,6 +63,12 @@ class RunOptions:
     subprocess_blender: bool = False
     blender_executable: str | None = None
     progress: bool = False
+    cache_root: Path | None = None
+    reference_cache: bool = False
+    candidate_cache: bool = False
+    resume_candidates: bool = False
+    debug_artifact_policy: str = "all"
+    batch_index_writes: bool = True
 
 
 class BaseRunner:
@@ -80,18 +89,43 @@ class BaseRunner:
         self._prepare_run_root()
         manifest = self._write_manifest()
         results: list[ExperimentResult] = []
+        index_buffer: list[ExperimentResult] = []
         total = len(self.plan.cases) * len(self.plan.variants)
         counter = 0
         for case in self.plan.cases:
-            references = self._prepare_case_references(case)
+            try:
+                references = self._prepare_case_references(case)
+            except Exception as exc:
+                for variant in self.plan.variants:
+                    counter += 1
+                    print(
+                        f"[{counter:03d}/{total:03d}] {variant.variant_id} ({variant.mode})"
+                    )
+                    result = self._reference_generation_error_result(
+                        case,
+                        variant,
+                        exc,
+                    )
+                    result = self._postprocess_result(case, variant, result)
+                    self._append_index_result(result, index_buffer)
+                    results.append(result)
+                    self._print_result_row(result)
+                if self.options.stop_on_first_error:
+                    break
+                continue
             for variant in self.plan.variants:
                 counter += 1
                 print(
                     f"[{counter:03d}/{total:03d}] {variant.variant_id} ({variant.mode})"
                 )
-                result = self._run_one(case, variant, references)
-                result = self._postprocess_result(case, variant, result)
-                self.index.append(result)
+                result = self._load_reusable_candidate(case, variant, references)
+                if result is None:
+                    result = self._run_one(case, variant, references)
+                    result = self._postprocess_result(case, variant, result)
+                    self._write_candidate_state(case, variant, references, result)
+                else:
+                    print("  reused cached candidate result")
+                self._append_index_result(result, index_buffer)
                 results.append(result)
                 self._print_result_row(result)
                 if self.options.stop_on_first_error and result.status == "error":
@@ -102,6 +136,7 @@ class BaseRunner:
                 and results[-1].status == "error"
             ):
                 break
+        self._flush_index_results(index_buffer)
         self.index.write_leaderboards(results)
         if self.options.append_global_index:
             global_path = self.run_root.parent / "global-index.jsonl"
@@ -126,6 +161,71 @@ class BaseRunner:
             self._write_lineage_outputs(results)
         passed_any = any(result.status == "pass" for result in results)
         return (passed_any or not self.options.fail_on_all_failed), results
+
+    def _append_index_result(
+        self,
+        result: ExperimentResult,
+        buffer: list[ExperimentResult],
+    ) -> None:
+        if self.options.batch_index_writes:
+            buffer.append(result)
+        else:
+            self.index.append(result)
+
+    def _flush_index_results(self, buffer: list[ExperimentResult]) -> None:
+        if not buffer:
+            return
+        self.index.append_many(buffer)
+        buffer.clear()
+
+    def _reference_generation_error_result(
+        self,
+        case: ExperimentCase,
+        variant: ExperimentVariant,
+        exc: Exception,
+    ) -> ExperimentResult:
+        started = utc_now()
+        variant_dir = self._case_variant_dir(case, variant)
+        variant_dir.mkdir(parents=True, exist_ok=True)
+        result_json = variant_dir / "result.json"
+        spec_payload = (
+            case.metadata.get("spec", {}) if isinstance(case.metadata, Mapping) else {}
+        )
+        payload = {
+            "schema_version": "refinement_reference_generation_error_v1",
+            "status": "error",
+            "failure_code": "reference_generation_failed",
+            "case_id": case.case_id,
+            "variant_id": variant.variant_id,
+            "mode": variant.mode,
+            "synthetic_family": spec_payload.get("family"),
+            "synthetic_shape_id": spec_payload.get("shape_id"),
+            "error": str(exc),
+            "exception_type": type(exc).__name__,
+        }
+        result_json.write_text(
+            json.dumps(json_safe(payload), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        return ExperimentResult(
+            run_id=self.plan.run_id,
+            case_id=case.case_id,
+            variant_id=variant.variant_id,
+            mode=variant.mode,
+            status="error",
+            exit_code=2,
+            started_utc=started,
+            finished_utc=utc_now(),
+            elapsed_s=0.0,
+            result_json=result_json,
+            reference_paths={},
+            metrics={
+                "validation_mode": "render-iou",
+                "failure_code": "reference_generation_failed",
+            },
+            artifacts={"result": result_json},
+            errors=(str(exc),),
+        )
 
     def _run_one(
         self,
@@ -163,24 +263,9 @@ class BaseRunner:
             search=self.plan.search,
             objective=self.plan.objective,
             output_root=self.run_root,
-            git=_git_info(),
-            environment=_environment_info(),
-            dependency_report=dependency_report(
-                (
-                    "numpy",
-                    "cv2",
-                    "PIL",
-                    "scipy",
-                    "skimage",
-                    "open3d",
-                    "trimesh",
-                    "torch",
-                    "torchvision",
-                    "lpips",
-                    "openvdb",
-                    "nvdiffrast",
-                )
-            ),
+            git=_cached_git_info(),
+            environment=_cached_environment_info(),
+            dependency_report=_cached_dependency_report(),
             plan_path=self.run_root / "plan.json",
             index_path=self.run_root / "index.jsonl",
             html_report_path=self.run_root / "report.html",
@@ -211,17 +296,161 @@ class BaseRunner:
         )
         spec = SyntheticShapeSpec.from_dict(spec_payload)
         output = self._case_dir(case) / "ref"
-        rendered = render_views(
-            spec,
-            output,
-            resolution=tuple(self.base_config.render_silhouette.resolution),
-            include_orbit=False,
-        )
+        resolution = tuple(self.base_config.render_silhouette.resolution)
+        if self.options.reference_cache and self.options.cache_root is not None:
+            cache_dir = self._reference_cache_dir(case, resolution)
+            if not _reference_views_ready(cache_dir):
+                cache_dir.mkdir(parents=True, exist_ok=True)
+                render_views(
+                    spec,
+                    cache_dir,
+                    resolution=resolution,
+                    include_orbit=False,
+                )
+            rendered = _copy_reference_views(cache_dir, output)
+        else:
+            rendered = render_views(
+                spec,
+                output,
+                resolution=resolution,
+                include_orbit=False,
+            )
         return {
             view: Path(rendered[view])
             for view in ("front", "side", "top")
             if view in rendered
         }
+
+    def _reference_cache_dir(
+        self,
+        case: ExperimentCase,
+        resolution: tuple[int, int],
+    ) -> Path:
+        root = Path(self.options.cache_root or (self.run_root / ".cache"))
+        spec_payload = (
+            case.metadata.get("spec", {}) if isinstance(case.metadata, Mapping) else {}
+        )
+        key = stable_hash(
+            {
+                "schema": "synthetic_reference_cache_v1",
+                "case_id": case.case_id,
+                "suite": case.suite,
+                "synthetic_definition": case.synthetic_definition,
+                "spec": spec_payload,
+                "resolution": resolution,
+            },
+            length=24,
+        )
+        return root / "references" / key[:2] / key
+
+    def _candidate_state_key(
+        self,
+        case: ExperimentCase,
+        variant: ExperimentVariant,
+        reference_paths: Mapping[str, Path],
+    ) -> str:
+        return stable_hash(
+            {
+                "schema": "refinement_candidate_state_v1",
+                "suite": self.plan.suite,
+                "track": self.plan.track,
+                "objective": self.plan.objective,
+                "case": case.to_dict(),
+                "variant": variant.to_dict(),
+                "base_config": self.base_config.to_dict(),
+                "references": _reference_hashes(reference_paths),
+            },
+            length=32,
+        )
+
+    def _local_candidate_state_path(
+        self,
+        case: ExperimentCase,
+        variant: ExperimentVariant,
+    ) -> Path:
+        return self._case_variant_dir(case, variant) / "candidate-state.json"
+
+    def _shared_candidate_state_path(
+        self,
+        key: str,
+    ) -> Path:
+        root = Path(self.options.cache_root or (self.run_root / ".cache"))
+        return root / "candidates" / key[:2] / key / "candidate-state.json"
+
+    def _load_reusable_candidate(
+        self,
+        case: ExperimentCase,
+        variant: ExperimentVariant,
+        reference_paths: Mapping[str, Path],
+    ) -> ExperimentResult | None:
+        if not (self.options.resume_candidates or self.options.candidate_cache):
+            return None
+        key = self._candidate_state_key(case, variant, reference_paths)
+        candidates: list[Path] = []
+        if self.options.resume_candidates:
+            candidates.append(self._local_candidate_state_path(case, variant))
+        if self.options.candidate_cache:
+            candidates.append(self._shared_candidate_state_path(key))
+        for path in candidates:
+            result = self._load_candidate_state(path, key)
+            if result is not None:
+                return result
+        return None
+
+    def _load_candidate_state(
+        self,
+        path: Path,
+        key: str,
+    ) -> ExperimentResult | None:
+        if not path.exists():
+            return None
+        try:
+            state = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+        if state.get("schema_version") != "refinement_candidate_state_v1":
+            return None
+        if state.get("state_key") != key:
+            return None
+        result_payload = state.get("result")
+        if not isinstance(result_payload, Mapping):
+            return None
+        try:
+            result = ExperimentResult.from_dict(
+                {**dict(result_payload), "run_id": self.plan.run_id}
+            )
+        except Exception:
+            return None
+        if not _result_artifacts_ready(result):
+            return None
+        return result
+
+    def _write_candidate_state(
+        self,
+        case: ExperimentCase,
+        variant: ExperimentVariant,
+        reference_paths: Mapping[str, Path],
+        result: ExperimentResult,
+    ) -> None:
+        if not (self.options.resume_candidates or self.options.candidate_cache):
+            return
+        key = self._candidate_state_key(case, variant, reference_paths)
+        payload = {
+            "schema_version": "refinement_candidate_state_v1",
+            "state_key": key,
+            "case_id": case.case_id,
+            "variant_id": variant.variant_id,
+            "status": result.status,
+            "written_utc": utc_now(),
+            "result": result.to_dict(),
+        }
+        paths = []
+        if self.options.resume_candidates:
+            paths.append(self._local_candidate_state_path(case, variant))
+        if self.options.candidate_cache:
+            paths.append(self._shared_candidate_state_path(key))
+        for path in paths:
+            _write_json(path, payload)
 
     def _case_dir(self, case: ExperimentCase) -> Path:
         return self.run_root / "c" / compact_path_segment(
@@ -487,6 +716,8 @@ class InProcessBlenderRunner(BaseRunner):
         _write_text(variant_dir / "command.txt", " ".join(command) + "\n")
         config = copy.deepcopy(self.base_config)
         _apply_variant_to_config(config, variant)
+        self._apply_run_option_config(config)
+        config.validate()
         _write_json(variant_dir / "config.json", config.to_dict())
         try:
             from blender_blocking.test_e2e_validation import test_with_custom_images
@@ -507,6 +738,7 @@ class InProcessBlenderRunner(BaseRunner):
                 run_id=f"{self.plan.run_id}-{case.case_id}-{variant.variant_id}",
                 progress=self.options.progress,
                 debug_output_dir=variant_dir / "dbg",
+                debug_artifact_policy=self.options.debug_artifact_policy,
             )
             status = "pass" if passed else "fail"
             exit_code = 0 if passed else 1
@@ -559,6 +791,26 @@ class InProcessBlenderRunner(BaseRunner):
             reference_paths=reference_paths,
             errors=errors,
         )
+
+    def _apply_run_option_config(self, config: BlockingConfig) -> None:
+        if self.options.cache_root is None:
+            return
+        if not (self.options.reference_cache or self.options.candidate_cache):
+            return
+        cache_dir = Path(self.options.cache_root) / "visual-hull-volumes"
+        config.visual_hull.enable_cache = True
+        config.visual_hull.cache_directory = str(cache_dir)
+        config.visual_hull.cache_namespace = stable_hash(
+            {
+                "schema": "visual_hull_cache_namespace_v1",
+                "suite": self.plan.suite,
+                "track": self.plan.track,
+                "base_config": self.base_config.to_dict(),
+            },
+            length=16,
+        )
+        config.visual_hull.cache_read = True
+        config.visual_hull.cache_write = True
 
 
 class SubprocessRunner(BaseRunner):
@@ -764,13 +1016,7 @@ def _metrics_from_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
                 alias = _bundle_metric_alias(name)
                 if alias:
                     set_metric_path(metrics, alias, numeric)
-                if name == "silhouette.min_view_iou":
-                    metrics["area_iou_min"] = numeric
-                elif name == "silhouette.average_iou":
-                    metrics["area_iou_mean"] = numeric
-                elif name == "silhouette.mean_boundary_iou":
-                    metrics["boundary_iou_mean"] = numeric
-                elif name == "editability.editable_reconstruction_index":
+                if name == "editability.editable_reconstruction_index":
                     metrics["editability_score"] = numeric
                 elif name == "topology.score":
                     metrics["topology_score"] = numeric
@@ -795,10 +1041,6 @@ def _evaluation_bundles_from_payload(
 
 def _bundle_metric_alias(name: str) -> str:
     aliases = {
-        "silhouette.min_view_iou": "render.min_view_iou",
-        "silhouette.average_iou": "render.average_iou",
-        "silhouette.mean_boundary_iou": "render.boundary_iou_mean",
-        "silhouette.mean_signed_distance_loss": "render.signed_distance_loss_mean",
         "topology.score": "topology_score",
         "topology.penalty": "topology_penalty",
         "editability.editable_reconstruction_index": "editability.qa_score",
@@ -920,6 +1162,104 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
 def _write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def _reference_views_ready(directory: Path) -> bool:
+    return all((Path(directory) / f"{view}.png").exists() for view in ("front", "side", "top"))
+
+
+def _copy_reference_views(source_dir: Path, output_dir: Path) -> dict[str, Path]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    rendered: dict[str, Path] = {}
+    for view in ("front", "side", "top"):
+        source = Path(source_dir) / f"{view}.png"
+        if not source.exists():
+            continue
+        target = output_dir / source.name
+        _link_or_copy(source, target)
+        rendered[view] = target
+    return rendered
+
+
+def _link_or_copy(source: Path, target: Path) -> None:
+    if target.exists():
+        try:
+            if target.stat().st_size == source.stat().st_size:
+                return
+        except OSError:
+            pass
+        target.unlink()
+    try:
+        target.hardlink_to(source)
+    except OSError:
+        shutil.copy2(source, target)
+
+
+def _reference_hashes(reference_paths: Mapping[str, Path]) -> dict[str, str]:
+    return {
+        str(view): _file_hash(Path(path))
+        for view, path in sorted(reference_paths.items())
+    }
+
+
+def _file_hash(path: Path) -> str:
+    hasher = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
+def _result_artifacts_ready(result: ExperimentResult) -> bool:
+    paths = []
+    if result.result_json is not None:
+        paths.append(result.result_json)
+    paths.extend(result.render_paths.values())
+    paths.extend(result.artifacts.values())
+    return all(Path(path).exists() for path in paths)
+
+
+_CACHED_DEPENDENCY_REPORT: dict[str, object] | None = None
+_CACHED_GIT_INFO: dict[str, object] | None = None
+_CACHED_ENVIRONMENT_INFO: dict[str, object] | None = None
+
+
+def _cached_dependency_report() -> dict[str, object]:
+    global _CACHED_DEPENDENCY_REPORT
+    if _CACHED_DEPENDENCY_REPORT is None:
+        _CACHED_DEPENDENCY_REPORT = dict(
+            dependency_report(
+                (
+                    "numpy",
+                    "cv2",
+                    "PIL",
+                    "scipy",
+                    "skimage",
+                    "open3d",
+                    "trimesh",
+                    "torch",
+                    "torchvision",
+                    "lpips",
+                    "openvdb",
+                    "nvdiffrast",
+                )
+            )
+        )
+    return dict(_CACHED_DEPENDENCY_REPORT)
+
+
+def _cached_git_info() -> dict[str, object]:
+    global _CACHED_GIT_INFO
+    if _CACHED_GIT_INFO is None:
+        _CACHED_GIT_INFO = _git_info()
+    return dict(_CACHED_GIT_INFO)
+
+
+def _cached_environment_info() -> dict[str, object]:
+    global _CACHED_ENVIRONMENT_INFO
+    if _CACHED_ENVIRONMENT_INFO is None:
+        _CACHED_ENVIRONMENT_INFO = _environment_info()
+    return dict(_CACHED_ENVIRONMENT_INFO)
 
 
 def _run_artifact_paths(run_root: Path) -> Mapping[str, Path]:

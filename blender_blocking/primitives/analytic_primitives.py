@@ -34,6 +34,11 @@ def _surface_mesh_from_parametric(
     closed_u: bool,
     closed_v: bool = False,
 ) -> MeshData:
+    if closed_u and not closed_v:
+        capped = _surface_mesh_with_collapsed_poles(vertices_grid)
+        if capped is not None:
+            return capped
+
     rows, cols, _ = vertices_grid.shape
     faces = []
     row_stop = rows if closed_v else rows - 1
@@ -51,6 +56,82 @@ def _surface_mesh_from_parametric(
                 )
             )
     return MeshData(vertices=vertices_grid.reshape((-1, 3)), faces=tuple(faces))
+
+
+def _surface_mesh_with_collapsed_poles(vertices_grid: np.ndarray) -> MeshData | None:
+    rows, cols, _ = vertices_grid.shape
+    if rows < 3 or cols < 3:
+        return None
+
+    collapsed_first = _row_collapsed(vertices_grid[0])
+    collapsed_last = _row_collapsed(vertices_grid[-1])
+    if not collapsed_first and not collapsed_last:
+        return None
+
+    vertices: list[np.ndarray] = []
+    row_offsets: list[tuple[int, int]] = []
+    for row_index in range(rows):
+        row = vertices_grid[row_index]
+        collapsed = (
+            (row_index == 0 and collapsed_first)
+            or (row_index == rows - 1 and collapsed_last)
+        )
+        row_offsets.append((len(vertices), 1 if collapsed else cols))
+        if collapsed:
+            vertices.append(np.asarray(row[0], dtype=np.float64))
+        else:
+            vertices.extend(np.asarray(vertex, dtype=np.float64) for vertex in row)
+
+    def vertex_index(row_index: int, col_index: int) -> int:
+        offset, count = row_offsets[row_index]
+        if count == 1:
+            return offset
+        return offset + (col_index % cols)
+
+    faces: list[tuple[int, ...]] = []
+    for row_index in range(rows - 1):
+        lower_count = row_offsets[row_index][1]
+        upper_count = row_offsets[row_index + 1][1]
+        if lower_count == 1 and upper_count == 1:
+            continue
+        for col_index in range(cols):
+            next_col = (col_index + 1) % cols
+            if lower_count == 1:
+                faces.append(
+                    (
+                        vertex_index(row_index, col_index),
+                        vertex_index(row_index + 1, col_index),
+                        vertex_index(row_index + 1, next_col),
+                    )
+                )
+            elif upper_count == 1:
+                faces.append(
+                    (
+                        vertex_index(row_index, col_index),
+                        vertex_index(row_index, next_col),
+                        vertex_index(row_index + 1, col_index),
+                    )
+                )
+            else:
+                faces.append(
+                    (
+                        vertex_index(row_index, col_index),
+                        vertex_index(row_index, next_col),
+                        vertex_index(row_index + 1, next_col),
+                        vertex_index(row_index + 1, col_index),
+                    )
+                )
+
+    return MeshData(vertices=np.asarray(vertices, dtype=np.float64), faces=tuple(faces))
+
+
+def _row_collapsed(row: np.ndarray) -> bool:
+    row = np.asarray(row, dtype=np.float64)
+    if len(row) <= 1:
+        return True
+    scale = max(1.0, float(np.linalg.norm(row[0])))
+    spread = np.linalg.norm(row - row[0][None, :], axis=1)
+    return bool(float(np.max(spread)) <= 1e-8 * scale)
 
 
 @dataclass

@@ -28,6 +28,22 @@ class ResultIndex:
             handle.write(json.dumps(payload, sort_keys=True, default=str) + "\n")
             handle.flush()
 
+    def append_many(self, results: Iterable[ExperimentResult]) -> None:
+        rows = [
+            json.dumps(
+                _relativize_result(result.to_dict(), self.run_root),
+                sort_keys=True,
+                default=str,
+            )
+            for result in results
+        ]
+        if not rows:
+            return
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open("a", encoding="utf-8") as handle:
+            handle.write("\n".join(rows) + "\n")
+            handle.flush()
+
     def load(self) -> list[ExperimentResult]:
         results, malformed = load_index(self.path, run_root=self.run_root)
         self.malformed_lines = malformed

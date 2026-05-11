@@ -114,6 +114,11 @@ def apply_resfit_quality_floors(
     if fail_reasons:
         status = "failed"
         degraded = False
+        warnings_out = [
+            warning
+            for warning in warnings_out
+            if "budget-limited primitive fit accepted" not in warning
+        ]
         errors_out.extend(fail_reasons)
     elif degrade_reasons and status == "success":
         status = "degraded"

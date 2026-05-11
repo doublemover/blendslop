@@ -11,6 +11,8 @@ from placement.resfit_objective import ResFitObjectiveResult
 from placement.resfit_optimizer import CoordinateDescentConfig, coordinate_descent_optimize
 from placement.resfit.status import apply_resfit_quality_floors, resfit_candidate_status
 from placement.resfitting import ResidualFitter
+from metrics.topology import mesh_topology_report
+from primitives.analytic_primitives import EllipsoidPrimitive, SuperquadricPrimitive
 from primitives.superfrustum import SuperFrustum
 
 
@@ -324,6 +326,29 @@ class TestResfittingMetrics(unittest.TestCase):
         self.assertIn("backend min IoU", "\n".join(errors))
         self.assertEqual(warnings, ())
 
+    def test_primitive_quality_floors_remove_accepted_warning_on_failure(self) -> None:
+        metric = SimpleNamespace(
+            area_iou_min=0.004,
+            topology_score=0.95,
+            extras={"topology": {"watertight": True, "boundary_edges": 0}},
+        )
+
+        status, _degraded, errors, warnings = apply_resfit_quality_floors(
+            config={},
+            status="success",
+            degraded=False,
+            errors=(),
+            warnings=(
+                "optimization stopped by elapsed_time_budget",
+                "budget-limited primitive fit accepted: objective improved and valid primitives were emitted",
+            ),
+            metric=metric,
+        )
+
+        self.assertEqual(status, "failed")
+        self.assertIn("backend min IoU 0.004 below 0.350", errors)
+        self.assertNotIn("budget-limited primitive fit accepted", "\n".join(warnings))
+
     def test_primitive_quality_floors_degrade_bad_topology(self) -> None:
         metric = SimpleNamespace(
             area_iou_min=0.8,
@@ -344,6 +369,26 @@ class TestResfittingMetrics(unittest.TestCase):
         self.assertTrue(degraded)
         self.assertEqual(errors, ())
         self.assertIn("topology score", "\n".join(warnings))
+
+    def test_analytic_ellipsoid_mesh_is_watertight(self) -> None:
+        mesh = EllipsoidPrimitive().to_mesh_data(resolution=24)
+        report = mesh_topology_report(mesh.vertices, mesh.faces)
+
+        self.assertTrue(report.watertight)
+        self.assertEqual(report.boundary_edges, 0)
+        self.assertEqual(report.non_manifold_edges, 0)
+        self.assertEqual(report.connected_components, 1)
+
+    def test_analytic_superquadric_mesh_is_watertight(self) -> None:
+        mesh = SuperquadricPrimitive(epsilon1=0.28, epsilon2=0.28).to_mesh_data(
+            resolution=24
+        )
+        report = mesh_topology_report(mesh.vertices, mesh.faces)
+
+        self.assertTrue(report.watertight)
+        self.assertEqual(report.boundary_edges, 0)
+        self.assertEqual(report.non_manifold_edges, 0)
+        self.assertEqual(report.connected_components, 1)
 
 
 if __name__ == "__main__":

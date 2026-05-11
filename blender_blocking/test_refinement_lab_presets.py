@@ -17,6 +17,7 @@ class RefinementLabPresetTests(unittest.TestCase):
         suites = set(list_suites())
         for name in (
             "default-vase",
+            "synthetic-blender-smoke",
             "synthetic-smoke",
             "synthetic-visual-hull",
             "synthetic-profile-band",

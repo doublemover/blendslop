@@ -19,6 +19,7 @@ from reconstruction.types import (
     ViewConstraint,
 )
 from primitives.soft_silhouette import soft_mask_metrics
+from reconstruction.differentiable.status import differentiable_candidate_status
 
 
 class TestDifferentiableRender(unittest.TestCase):
@@ -162,6 +163,19 @@ class TestDifferentiableRender(unittest.TestCase):
             self.assertEqual(result.metric_result.per_view, {})
             self.assertEqual(result.artifacts["primitive_json"], result.primitive_path)
             self.assertEqual(result.artifacts["mesh_obj"], result.mesh_path)
+            init_diag = result.metric_result.extras["initialization_diagnostics"]
+            first_primitive = result.payload["primitives"][0]
+            self.assertTrue(init_diag["bounds_proxy"]["enabled"])
+            np.testing.assert_allclose(
+                first_primitive.center,
+                [0.05, 0.15, 0.05],
+                atol=1e-8,
+            )
+            np.testing.assert_allclose(
+                first_primitive.radii,
+                [0.45, 0.25, 0.25],
+                atol=1e-8,
+            )
 
     def test_soft_renderer_per_view_losses_fill_required_candidate_metrics(self) -> None:
         metrics = diff_render._candidate_per_view_metrics(
@@ -301,6 +315,21 @@ class TestDifferentiableRender(unittest.TestCase):
         self.assertEqual(result.status, "failed")
         self.assertFalse(result.succeeded)
         self.assertIn("objective did not improve", "\n".join(result.errors))
+
+    def test_boundary_sdf_gate_degrades_average_only_improvement(self) -> None:
+        status, degraded, errors, warnings = differentiable_candidate_status(
+            config={},
+            optimized_primitives_present=True,
+            objective_improvement=0.1,
+            boundary_or_sdf_improved=False,
+            failed_required_views=0,
+            warnings=(),
+        )
+
+        self.assertEqual(status, "degraded")
+        self.assertTrue(degraded)
+        self.assertEqual(errors, ())
+        self.assertIn("boundary or signed-distance", "\n".join(warnings))
 
     def test_cpu_optimizer_honors_request_runtime_budget(self) -> None:
         request = CandidateRequest(

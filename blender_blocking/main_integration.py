@@ -1294,6 +1294,9 @@ class BlockingWorkflow:
                         memory_budget_mb=self.config.visual_hull.memory_budget_mb,
                     ),
                     total_timeout_s=self.config.ensemble.total_timeout_s,
+                    max_parallel_candidates=(
+                        self.config.ensemble.max_parallel_candidates
+                    ),
                 )
             self.reconstruction_result = result
             self._record_backend_manifest(
