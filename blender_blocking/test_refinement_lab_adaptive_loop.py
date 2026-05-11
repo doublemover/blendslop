@@ -259,6 +259,24 @@ class AdaptiveLoopTests(unittest.TestCase):
             self.assertEqual(summary.stopped_reason, "no_promotable_parents")
             self.assertEqual(summary.generations[0].selected_parent_ids, ())
             self.assertEqual(summary.generations[0].child_variant_count, 0)
+            self.assertEqual(summary.generations[0].parent_health["promotable_count"], 0)
+            self.assertEqual(
+                summary.generations[0].parent_health["promotion_state_counts"][
+                    "metric_only_candidate"
+                ],
+                1,
+            )
+
+            proposal_payload = json.loads(
+                summary.generations[0].proposal_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(proposal_payload["parent_health"]["promotable_count"], 0)
+            self.assertEqual(
+                proposal_payload["parent_health"]["top_render_winners"][0][
+                    "promotion_state"
+                ],
+                "metric_only_candidate",
+            )
 
     def test_child_variant_dedupe_preserves_contributing_parents(self) -> None:
         def result(parent_id: str) -> ExperimentResult:

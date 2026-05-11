@@ -60,6 +60,7 @@ class GenerationRecord:
     failure_code: str = ""
     error: str = ""
     error_path: Path | None = None
+    parent_health: Mapping[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -73,6 +74,7 @@ class GenerationRecord:
             "child_variant_count": self.child_variant_count,
             "proposal_path": self.proposal_path.as_posix(),
             "variant_path": self.variant_path.as_posix(),
+            "parent_health": json_safe(dict(self.parent_health)),
         }
         if self.failure_code:
             payload["failure_code"] = self.failure_code
@@ -183,6 +185,11 @@ def run_adaptive_loop(
             parent_top_k=options.parent_top_k,
             allow_diagnostics=options.allow_diagnostic_children,
         )
+        parent_health = _parent_health_summary(
+            results,
+            objective=objective,
+            parent_top_k=options.parent_top_k,
+        )
         proposals, child_variants = _child_variants_from_results(
             selected,
             generation=generation,
@@ -197,6 +204,7 @@ def run_adaptive_loop(
             selected=selected,
             proposals=proposals,
             child_variants=child_variants,
+            parent_health=parent_health,
         )
         records.append(
             GenerationRecord(
@@ -213,6 +221,7 @@ def run_adaptive_loop(
                 failure_code=failure_code,
                 error=error,
                 error_path=error_path,
+                parent_health=parent_health,
             )
         )
         if failure_code:
@@ -297,6 +306,70 @@ def _select_parent_results(
     if allow_diagnostics:
         return tuple(result for result, _score in ranked[:parent_top_k])
     return ()
+
+
+def _parent_health_summary(
+    results: Sequence[ExperimentResult],
+    *,
+    objective: str,
+    parent_top_k: int,
+) -> Mapping[str, Any]:
+    ranked = rank_results(results, objective=objective)
+    states: dict[str, int] = {}
+    tiers: dict[str, int] = {}
+    promotable: list[ExperimentResult] = []
+    blocked_topology: list[ExperimentResult] = []
+    for result in results:
+        decision = promotion_decision(result)
+        states[decision.state] = states.get(decision.state, 0) + 1
+        tiers[decision.tier] = tiers.get(decision.tier, 0) + 1
+        if decision.promotable:
+            promotable.append(result)
+        if decision.state == "blocked_topology":
+            blocked_topology.append(result)
+    render_ranked = sorted(
+        results,
+        key=lambda result: (result.min_iou, result.avg_iou, -result.elapsed_s),
+        reverse=True,
+    )
+    return {
+        "result_count": len(results),
+        "promotable_count": len(promotable),
+        "blocked_count": len(results) - len(promotable),
+        "promotion_state_counts": dict(sorted(states.items())),
+        "promotion_tier_counts": dict(sorted(tiers.items())),
+        "topology_blocked_count": len(blocked_topology),
+        "top_promotable_parent_ids": [
+            result.variant_id
+            for result, _score in ranked
+            if promotion_decision(result).promotable
+        ][:parent_top_k],
+        "top_render_winners": [
+            _parent_health_result_row(result)
+            for result in render_ranked[:parent_top_k]
+        ],
+        "top_ranked_candidates": [
+            _parent_health_result_row(result)
+            for result, _score in ranked[:parent_top_k]
+        ],
+    }
+
+
+def _parent_health_result_row(result: ExperimentResult) -> Mapping[str, Any]:
+    decision = promotion_decision(result)
+    return {
+        "variant_id": result.variant_id,
+        "case_id": result.case_id,
+        "mode": result.mode,
+        "status": result.status,
+        "avg_iou": result.avg_iou,
+        "min_iou": result.min_iou,
+        "elapsed_s": result.elapsed_s,
+        "promotion_state": decision.state,
+        "promotion_tier": decision.tier,
+        "promotable": decision.promotable,
+        "blockers": list(decision.blockers),
+    }
 
 
 def _child_variants_from_results(
@@ -460,12 +533,14 @@ def _write_generation_adaptive_outputs(
     selected: Sequence[ExperimentResult],
     proposals: Sequence[tuple[RefinementProposal, ExperimentResult]],
     child_variants: Sequence[ExperimentVariant],
+    parent_health: Mapping[str, Any],
 ) -> None:
     proposal_path.parent.mkdir(parents=True, exist_ok=True)
     proposal_payload = {
         "schema_version": "refinement_adaptive_loop_proposals_v1",
         "generation": generation,
         "selected_parent_ids": [result.variant_id for result in selected],
+        "parent_health": dict(parent_health),
         "proposal_count": len(proposals),
         "proposals": [
             {
@@ -481,6 +556,7 @@ def _write_generation_adaptive_outputs(
         "schema_version": "refinement_adaptive_loop_variants_v1",
         "generation": generation + 1,
         "parent_generation": generation,
+        "parent_health": dict(parent_health),
         "variant_count": len(child_variants),
         "variants": [variant.to_dict() for variant in child_variants],
     }
