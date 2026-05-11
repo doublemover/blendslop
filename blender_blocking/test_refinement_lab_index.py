@@ -8,7 +8,12 @@ import tempfile
 import unittest
 
 from refinement_lab.contracts import ExperimentResult
-from refinement_lab.result_index import ResultIndex, load_index
+from refinement_lab.result_index import (
+    ResultIndex,
+    append_global_index_many,
+    load_index,
+    query_global_index,
+)
 
 
 class RefinementLabIndexTests(unittest.TestCase):
@@ -46,6 +51,35 @@ class RefinementLabIndexTests(unittest.TestCase):
             results, malformed = load_index(path)
         self.assertEqual(results, [])
         self.assertEqual(malformed, 1)
+
+    def test_global_index_append_many_writes_queryable_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            global_path = root / "global-index.jsonl"
+            results = [
+                ExperimentResult(
+                    run_id="r",
+                    case_id=f"c-{index}",
+                    variant_id="v",
+                    mode="profile_loft",
+                    status="pass",
+                    exit_code=0,
+                    started_utc="s",
+                    finished_utc="f",
+                    elapsed_s=1.0,
+                    backend_result={"status": "success"},
+                    metrics={"average_iou": 0.9},
+                )
+                for index in range(3)
+            ]
+
+            append_global_index_many(results, global_path, run_root=root / "run")
+
+            lines = global_path.read_text(encoding="utf-8").splitlines()
+            rows = query_global_index(global_path, mode="profile_loft")
+            self.assertEqual(len(lines), 3)
+            self.assertEqual(len(rows), 3)
+            self.assertEqual({row["run_root"] for row in rows}, {(root / "run").as_posix()})
 
     def test_leaderboard_reports_duplicate_quality_fingerprints(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

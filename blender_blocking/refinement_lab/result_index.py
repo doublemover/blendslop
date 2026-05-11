@@ -83,11 +83,34 @@ def load_index(path: Path, *, run_root: Path | None = None) -> tuple[list[Experi
 
 
 def append_global_index(result: ExperimentResult, global_path: Path, *, run_root: Path) -> None:
+    append_global_index_many((result,), global_path, run_root=run_root)
+
+
+def append_global_index_many(
+    results: Iterable[ExperimentResult],
+    global_path: Path,
+    *,
+    run_root: Path,
+) -> None:
+    rows = [
+        json.dumps(
+            _global_index_payload(result, run_root=run_root),
+            sort_keys=True,
+            default=str,
+        )
+        for result in results
+    ]
+    if not rows:
+        return
     global_path.parent.mkdir(parents=True, exist_ok=True)
+    with global_path.open("a", encoding="utf-8") as handle:
+        handle.write("\n".join(rows) + "\n")
+
+
+def _global_index_payload(result: ExperimentResult, *, run_root: Path) -> dict[str, object]:
     payload = result.to_dict()
     payload["run_root"] = Path(run_root).as_posix()
-    with global_path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(payload, sort_keys=True, default=str) + "\n")
+    return payload
 
 
 def query_global_index(

@@ -664,6 +664,71 @@ class RefinementLabRunnerTests(unittest.TestCase):
             self.assertIn("reference_generation_failed", results[0].metrics.values())
             self.assertTrue(results[0].result_json.exists())
 
+    def test_candidate_execution_errors_become_result_rows(self) -> None:
+        class ExplodingRunner(InProcessBlenderRunner):
+            def _run_one(self, case, variant, reference_paths):
+                raise RuntimeError("candidate exploded")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            refs = root / "refs"
+            refs.mkdir()
+            reference_paths = {}
+            for view in ("front", "side", "top"):
+                path = refs / f"{view}.png"
+                path.write_bytes(f"{view}-mask".encode("utf-8"))
+                reference_paths[view] = path
+            case = ExperimentCase(
+                "case",
+                "default-vase",
+                "builtin_sample",
+                reference_paths=reference_paths,
+            )
+            variant = ExperimentVariant(
+                "bad-variant",
+                "bad variant",
+                "profile_loft",
+            )
+            plan = ExperimentPlan(
+                plan_id="p",
+                suite="default-vase",
+                track="profile-loft-refinement",
+                search="grid",
+                objective="quality_win",
+                output_root=root / "run",
+                run_id="run",
+                cases=(case,),
+                variants=(variant,),
+            )
+            runner = ExplodingRunner(
+                plan=plan,
+                options=RunOptions(
+                    html_report=False,
+                    write_bounds_debug=False,
+                    write_autopsy=False,
+                    write_lineage=False,
+                    write_adaptive_proposals=False,
+                ),
+            )
+
+            ok, results = runner.run()
+
+            self.assertFalse(ok)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0].status, "error")
+            self.assertEqual(
+                results[0].metrics["failure_code"],
+                "candidate_execution_failed",
+            )
+            self.assertEqual(
+                results[0].metrics["candidate"]["exception_type"],
+                "RuntimeError",
+            )
+            self.assertIn("RuntimeError: candidate exploded", results[0].errors)
+            self.assertTrue(results[0].result_json.exists())
+            self.assertTrue((root / "run" / "index.jsonl").exists())
+            self.assertTrue((root / "global-index.jsonl").exists())
+
     def test_runner_writes_lineage_with_artifact_hashes_and_reproduce_script(
         self,
     ) -> None:

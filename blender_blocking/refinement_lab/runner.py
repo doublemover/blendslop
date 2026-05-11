@@ -31,7 +31,7 @@ from .contracts import (
 )
 from .parameter_search import promotion_decision, score_result
 from .parameters import apply_variant_parameter_to_config
-from .result_index import ResultIndex, append_global_index
+from .result_index import ResultIndex, append_global_index, append_global_index_many
 
 try:
     from blender_blocking.config import BlockingConfig
@@ -129,13 +129,25 @@ class BaseRunner:
                 print(
                     f"[{counter:03d}/{total:03d}] {variant.variant_id} ({variant.mode})"
                 )
-                result = self._load_reusable_candidate(case, variant, references)
-                if result is None:
-                    result = self._run_one(case, variant, references)
-                    result = self._postprocess_result(case, variant, result)
-                    self._write_candidate_state(case, variant, references, result)
-                else:
-                    print("  reused cached candidate result")
+                candidate_started_utc = utc_now()
+                candidate_started_monotonic = time.perf_counter()
+                try:
+                    result = self._load_reusable_candidate(case, variant, references)
+                    if result is None:
+                        result = self._run_one(case, variant, references)
+                        result = self._postprocess_result(case, variant, result)
+                        self._write_candidate_state(case, variant, references, result)
+                    else:
+                        print("  reused cached candidate result")
+                except Exception as exc:
+                    result = self._candidate_execution_error_result(
+                        case,
+                        variant,
+                        references,
+                        exc,
+                        started_utc=candidate_started_utc,
+                        elapsed_s=time.perf_counter() - candidate_started_monotonic,
+                    )
                 self._append_index_result(result, index_buffer)
                 results.append(result)
                 self._print_result_row(result)
@@ -151,8 +163,11 @@ class BaseRunner:
         self.index.write_leaderboards(results)
         if self.options.append_global_index:
             global_path = self.run_root.parent / "global-index.jsonl"
-            for result in results:
-                append_global_index(result, global_path, run_root=self.run_root)
+            if self.options.batch_index_writes:
+                append_global_index_many(results, global_path, run_root=self.run_root)
+            else:
+                for result in results:
+                    append_global_index(result, global_path, run_root=self.run_root)
         if self.options.html_report:
             manifest = self._write_manifest(results=results)
             generate_report(
@@ -237,6 +252,62 @@ class BaseRunner:
             },
             artifacts={"result": result_json},
             errors=(str(exc),),
+        )
+
+    def _candidate_execution_error_result(
+        self,
+        case: ExperimentCase,
+        variant: ExperimentVariant,
+        reference_paths: Mapping[str, Path],
+        exc: Exception,
+        *,
+        started_utc: str,
+        elapsed_s: float,
+    ) -> ExperimentResult:
+        variant_dir = self._case_variant_dir(case, variant)
+        variant_dir.mkdir(parents=True, exist_ok=True)
+        result_json = variant_dir / "result.json"
+        error = f"{type(exc).__name__}: {exc}"
+        payload = {
+            "schema_version": "refinement_candidate_execution_error_v1",
+            "status": "error",
+            "failure_code": "candidate_execution_failed",
+            "case_id": case.case_id,
+            "variant_id": variant.variant_id,
+            "mode": variant.mode,
+            "suite": self.plan.suite,
+            "track": self.plan.track,
+            "objective": self.plan.objective,
+            "validation_mode": variant.validation_mode,
+            "error": str(exc),
+            "exception_type": type(exc).__name__,
+        }
+        result_json.write_text(
+            json.dumps(json_safe(payload), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        return ExperimentResult(
+            run_id=self.plan.run_id,
+            case_id=case.case_id,
+            variant_id=variant.variant_id,
+            mode=variant.mode,
+            status="error",
+            exit_code=2,
+            started_utc=started_utc,
+            finished_utc=utc_now(),
+            elapsed_s=max(0.0, float(elapsed_s)),
+            result_json=result_json,
+            reference_paths=reference_paths,
+            metrics={
+                "validation_mode": variant.validation_mode,
+                "failure_code": "candidate_execution_failed",
+                "candidate": {
+                    "failure_code": "candidate_execution_failed",
+                    "exception_type": type(exc).__name__,
+                },
+            },
+            artifacts={"result": result_json},
+            errors=(error,),
         )
 
     def _run_one(
