@@ -107,6 +107,18 @@ This writes nine PNGs: front, side, and top silhouettes for a vase, bottle, and 
 
 Inspect the render PNGs and `temp/quickstart/result.json`, including each required view, warnings, and failure reasons. This command exercises reconstruction and image validation; it does not promise a passing score or save a `.blend` scene. Use the [Python example](#create-and-save-a-blockout-in-blender) to save one. Blender arguments come before `--`; script arguments come after it.
 
+## Download the small comparison pack
+
+From the repository root in PowerShell 7.2 or later:
+
+```powershell
+.\scripts\Get-BlendslopSamples.ps1
+```
+
+The script saves to `temp/sample-pack` in this checkout, resolved from the script's location even when called from another working directory. The fixed pack contains 16 source meshes, their 16 matching SuperFit fitted outputs, and 12 PrimitiveAnything point clouds, plus configurations and notices. A fresh download is about **36 MB**, using about **44 MB** on disk; verified existing copies inside the destination are reused.
+
+The downloader uses PowerShell/.NET only, fetches selected ZIP entries rather than whole collections, and checks sizes, CRCs and available SHA256 pins. Use `-Folder` for another absolute destination or `-WhatIf` for a no-download preview. It doesn't install tools or execute downloaded models/pickle files. Source and license notices remain with the data. Point clouds are not solid-mesh ground truth; fitted outputs are not additional test subjects. DTU is excluded from this small pack.
+
 ## Prepare your own references
 
 - Use orthogonal front, side, and top views of the same object with consistent scale, orientation, and framing. Perspective photographs are not interchangeable with these views.

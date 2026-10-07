@@ -107,6 +107,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_comparable_geometry", "test_comparable_geometry"),
     ("pure_generation_context", "utils.test_generation_context"),
     ("pure_manifest_schema", "utils.test_manifest_schema"),
+    ("pure_sample_downloader_source", "test_sample_downloader_source"),
     ("pure_config_defaults", "test_config_defaults"),
     ("pure_config_validation", "test_config_validation"),
     ("pure_optional_deps", "test_optional_deps"),
