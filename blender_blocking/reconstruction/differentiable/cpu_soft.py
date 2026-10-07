@@ -74,14 +74,23 @@ class CpuSoftSilhouetteBackend:
         primitives = [primitive_from_renderable(primitive) for primitive in scene.primitives]
         view_stats: list[dict[str, object]] = []
         silhouettes = {}
+        from blender_blocking.primitives.shape_aware_silhouette import (
+            is_ellipse, ShapeAwareSilhouetteCache,
+        )
+        contour_reports = []
+        if any(not is_ellipse(part) for part in primitives):
+            cache = ShapeAwareSilhouetteCache(
+                [camera.to_orthographic_camera() for camera in cameras],
+                self.softness, self.min_variance)
+            silhouettes = cache.render(primitives)
+            contour_reports = [{"view": key[0], "part_index": key[1], **report}
+                               for key, report in cache.approximation_reports.items()]
         for camera in cameras:
             camera_name = camera.name
-            silhouettes[camera.name] = render_projected_soft_silhouette(
-                primitives,
-                camera.to_orthographic_camera(),
-                softness=self.softness,
-                min_variance=self.min_variance,
-            )
+            if camera.name not in silhouettes:
+                silhouettes[camera.name] = render_projected_soft_silhouette(
+                    primitives, camera.to_orthographic_camera(), softness=self.softness,
+                    min_variance=self.min_variance)
             mask = silhouettes[camera.name]
             if mask.ndim != 2:
                 raise ValueError(f"rendered silhouette for {camera_name} must be 2D")
@@ -102,6 +111,7 @@ class CpuSoftSilhouetteBackend:
             "primitive_count": len(primitives),
             "camera_count": len(view_stats),
             "view_stats": view_stats,
+            "contour_approximation_reports": contour_reports,
         }
         return RenderBatch(
             silhouettes=silhouettes,

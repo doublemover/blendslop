@@ -8,9 +8,13 @@ from types import SimpleNamespace
 import numpy as np
 
 from placement.resfit_objective import ResFitObjectiveResult
-from placement.resfit_optimizer import CoordinateDescentConfig, coordinate_descent_optimize
-from placement.resfit.backend_adapter import _family_pipeline_config
+from placement.resfit_optimizer import (CoordinateDescentConfig, coordinate_descent_optimize,
+                                       OptimizationBudget, OptimizationBudgetExhausted)
+from placement.resfit.backend_adapter import _family_pipeline_config, _fit_best_primitive_family
 from placement.resfit.config import ResFitPipelineConfig
+from placement.resfit.optimizer import fit_residual_primitives, fit_residual_primitives_multistart
+from placement.resfit_initialization import PrimitiveInitializationConfig
+from unittest.mock import Mock, patch
 from placement.resfit.initialization import _candidate_families
 from placement.resfit.metrics import build_resfit_candidate_metrics
 from placement.resfit.status import apply_resfit_quality_floors, resfit_candidate_status
@@ -18,6 +22,17 @@ from placement.resfitting import ResidualFitter
 from metrics.topology import mesh_topology_report
 from primitives.analytic_primitives import EllipsoidPrimitive, SuperquadricPrimitive
 from primitives.superfrustum import SuperFrustum
+
+
+class _InlineFitExecutor:
+    """Deterministic scheduling fixture; real IPC is tested separately."""
+    def map(self, jobs, *, timeout_s=None):
+        from blender_blocking.reconstruction.process_executor import JobOutcome
+        outcomes = []
+        for kind, payload, _ in jobs:
+            assert kind == "fit_start"
+            outcomes.append(JobOutcome("success", fit_residual_primitives(**payload)))
+        return outcomes
 
 
 class TestResfittingMetrics(unittest.TestCase):
@@ -269,6 +284,83 @@ class TestResfittingMetrics(unittest.TestCase):
         self.assertEqual(result.termination_reason, "objective_evaluation_budget")
         self.assertLessEqual(result.objective_evaluations, 3)
 
+    def test_budget_preserves_last_evaluated_improvement_without_rescoring(self):
+        primitive = SuperFrustum(position=(0., 0., 0.), orientation=(0., 0.),
+                                 radius_bottom=1., radius_top=1., height=2.)
+        calls = []
+        def objective(items):
+            value = float(items[0].position[0])
+            calls.append(value)
+            return ResFitObjectiveResult(total=(value - .1) ** 2, terms={"fixture": value})
+        result = coordinate_descent_optimize([primitive], objective,
+            CoordinateDescentConfig(iterations=10, max_objective_evaluations=2))
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(result.objective_evaluations, 2)
+        self.assertAlmostEqual(result.primitives[0].position[0], .1)
+        self.assertEqual(result.final_result.total, 0.)
+        self.assertEqual(result.history[-1].accepted_moves, 1)
+
+    def test_pipeline_counts_initial_loss_once_and_never_rescores_final_loss(self):
+        primitive = SuperFrustum(position=(0., 0., 0.), orientation=(0., 0.),
+                                 radius_bottom=1., radius_top=1., height=2.)
+        config = ResFitPipelineConfig(optimizer=CoordinateDescentConfig(
+            iterations=0, max_objective_evaluations=1))
+        evaluate = Mock(spec=["__call__"], return_value=ResFitObjectiveResult(total=1., terms={}))
+        with patch("placement.resfit.optimizer.ResFitObjectiveEvaluator", return_value=evaluate):
+            result = fit_residual_primitives(np.zeros((2, 3)), config, initial_primitives=[primitive])
+        self.assertEqual(evaluate.call_count, 1)
+        self.assertEqual(result.objective_evaluations, 1)
+        self.assertIs(result.initial_loss, result.final_loss)
+
+    def test_nested_failed_calls_consume_global_budget(self):
+        budget = OptimizationBudget(max_objective_evaluations=1)
+        child = budget.child(slots=8)
+        with self.assertRaisesRegex(ValueError, "fixture"):
+            child.evaluate(lambda _: (_ for _ in ()).throw(ValueError("fixture")), [])
+        self.assertEqual(budget.objective_evaluations, 1)
+        with self.assertRaises(OptimizationBudgetExhausted):
+            budget.child().evaluate(lambda _: None, [])
+        self.assertEqual(budget.objective_evaluations, 1)
+
+    def test_deadline_is_inherited_by_new_attempts(self):
+        budget = OptimizationBudget(max_elapsed_s=1., started_at=10.)
+        with patch("placement.resfit_optimizer.time.perf_counter", return_value=11.1):
+            child = budget.child()
+            self.assertEqual(child.reason(), "elapsed_time_budget")
+            with self.assertRaises(OptimizationBudgetExhausted):
+                child.evaluate(lambda _: None, [])
+        self.assertEqual(budget.objective_evaluations, 0)
+
+    def test_multistart_does_not_multiply_evaluation_budget(self):
+        config = ResFitPipelineConfig(primitive_family="ellipsoid",
+            initialization=PrimitiveInitializationConfig(primitive_count=1),
+            optimizer=CoordinateDescentConfig(iterations=8, max_objective_evaluations=5))
+        evaluate = Mock(spec=["__call__"], return_value=ResFitObjectiveResult(total=1., terms={}))
+        with patch("placement.resfit.optimizer.ResFitObjectiveEvaluator", return_value=evaluate):
+            result = fit_residual_primitives_multistart(np.array([[0.,0.,0.],[1.,1.,1.]]),
+                config, max_attempts=4, executor=_InlineFitExecutor())
+        self.assertEqual(evaluate.call_count, 5)
+        self.assertEqual(result.objective_evaluations, 5)
+        self.assertEqual(sum(a["objective_evaluations"] for a in result.attempts), 5)
+        self.assertEqual(len([a for a in result.attempts if a["status"] == "ok"]), 2)
+
+    def test_all_families_and_retries_share_one_budget(self):
+        config = ResFitPipelineConfig(initialization=PrimitiveInitializationConfig(primitive_count=1),
+            optimizer=CoordinateDescentConfig(iterations=8, max_objective_evaluations=7))
+        evaluate = Mock(spec=["__call__"], return_value=ResFitObjectiveResult(total=1., terms={}))
+        with patch("placement.resfit.optimizer.ResFitObjectiveEvaluator", return_value=evaluate), \
+                patch("blender_blocking.reconstruction.process_executor.current_worker_client",
+                      return_value=_InlineFitExecutor()):
+            result, *_ = _fit_best_primitive_family(surface=np.array([[0.,0.,0.],[1.,1.,1.]]),
+                base_config=config, primitive_families=("ellipsoid", "superfrustum", "superquadric"),
+                profile_rows=(), init_config=config.initialization, occupied_points=np.zeros((1,3)),
+                silhouette_hook=None, topology_penalty_hook=None, constraint_penalty_hook=None,
+                uncertainty_penalty_hook=None, max_attempts=2, share_budget_across_families=True)
+        self.assertEqual(evaluate.call_count, 7)
+        self.assertEqual(result.objective_evaluations, 7)
+        self.assertEqual([a["objective_evaluations"] for a in result.family_attempts], [2, 2, 3])
+        self.assertEqual(result.search_budget["scope"], "all_families_and_attempts")
+
     def test_candidate_families_deduplicates_configured_families(self) -> None:
         self.assertEqual(
             _candidate_families(
@@ -408,7 +500,7 @@ class TestResfittingMetrics(unittest.TestCase):
         self.assertIn("min IoU 0.120 is below 0.350", "\n".join(errors))
         self.assertEqual(warnings, ())
 
-    def test_resfit_metrics_use_required_view_support_for_backend_floor(self) -> None:
+    def test_resfit_metrics_do_not_treat_confidence_as_iou(self) -> None:
         result = SimpleNamespace(
             initial_loss=SimpleNamespace(total=2.0, terms={}),
             final_loss=SimpleNamespace(
@@ -446,10 +538,12 @@ class TestResfittingMetrics(unittest.TestCase):
             max_objective_evaluations=None,
         )
 
-        self.assertAlmostEqual(metric.area_iou_min, 0.38)
-        self.assertAlmostEqual(metric.area_iou_mean, 0.39)
-        self.assertAlmostEqual(metric.boundary_iou_mean, 0.39)
-        self.assertEqual(metric.extras["backend_quality_source"], "profile_per_view")
+        self.assertAlmostEqual(metric.area_iou_min, 0.2)
+        self.assertAlmostEqual(metric.area_iou_mean, 0.2)
+        self.assertAlmostEqual(metric.boundary_iou_mean, 0.2)
+        self.assertEqual(metric.per_view["side"]["area_iou"], 0.)
+        self.assertFalse(metric.per_view["side"]["passed"])
+        self.assertEqual(metric.extras["backend_quality_source"], "objective_proxy")
         self.assertAlmostEqual(metric.extras["objective_proxy_iou"], 0.2)
 
     def test_primitive_quality_floors_remove_accepted_warning_on_failure(self) -> None:

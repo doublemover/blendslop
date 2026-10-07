@@ -35,63 +35,45 @@ def _build_profile_silhouette_hook(
     profile_rows: Sequence[Mapping[str, Any]],
     uncertainty_by_view: Mapping[str, Mapping[str, Any]],
 ) -> Callable[[Sequence[object]], Mapping[str, float]]:
+    from collections import OrderedDict
+    from .profile_intervals import union_intervals, intersect_intervals, interval_disagreement, projected_row_intervals
+    from ..resfit_objective import _geometry_key
+    meshes = OrderedDict()
     def hook(primitives: Sequence[object]) -> Mapping[str, float]:
-        terms: dict[str, float] = {}
-        if not profile_rows:
-            return terms
-
-        by_view: dict[str, list[float]] = {}
+        by_view = {}
         for row in profile_rows:
             view = str(row.get("view", "generic"))
-            z_world = float(row.get("z_world", 0.0))
-            target_width = float(row.get("width_world", 0.0))
-            target_center = float(row.get("center_x_world", 0.0))
-            base_conf = float(row.get("confidence", 1.0))
-            view_signal = uncertainty_by_view.get(view, {})
-            confidence = float(view_signal.get("mean_confidence", 1.0))
-            weight = float(base_conf * confidence)
-            if weight <= 0.0:
-                continue
-
-            predicted_width = 0.0
-            predicted_centers: list[float] = []
-            for primitive in primitives:
-                if not hasattr(primitive, "profile_width_at_world_z"):
-                    continue
-                predicted_width = max(
-                    predicted_width,
-                    float(primitive.profile_width_at_world_z(z_world)),
-                )
-                center_attr = "position" if hasattr(primitive, "position") else "center"
-                position = np.asarray(getattr(primitive, center_attr, (0.0, 0.0, 0.0)))
-                if position.size == 3:
-                    predicted_centers.append(float(position[0]))
-            if not predicted_centers:
-                if predicted_width == 0.0:
-                    predicted_width = 0.0
-                predicted_center = 0.0
-            else:
-                predicted_center = float(np.mean(predicted_centers))
-
-            if target_width <= 0.0:
-                width_term = min(1.0, abs(predicted_width) * 0.1)
-            else:
-                normalized_width = (predicted_width - target_width) / target_width
-                width_term = normalized_width * normalized_width
-
-            width_scale = max(1e-3, target_width)
-            center_term = ((predicted_center - target_center) / width_scale) ** 2
-            row_term = width_term + 0.5 * center_term
-            by_view.setdefault(view, []).append(weight * row_term)
-
-        for view, values in by_view.items():
-            if not values:
-                terms[f"profile_{view}"] = 0.0
-            else:
-                terms[f"profile_{view}"] = float(np.mean(values))
-        terms["profile"] = float(sum(by_view_total(values) for values in by_view.values()))
-        return terms
-
+            axes = tuple(row.get("axes", {"front":(0,2), "side":(1,2), "top":(0,1)}.get(view,(0,2))))
+            vertical = float(row.get("vertical_world", row.get("z_world", 0)))
+            width, center = float(row.get("width_world", 0)), float(row.get("center_x_world", 0))
+            target = row.get("intervals_world", [(center-width*.5, center+width*.5)] if width else [])
+            predicted = []
+            for part in primitives:
+                mesh = None
+                if type(part).__name__ not in {"EllipsoidPrimitive", "AnisotropicGaussianPrimitive"}:
+                    from blender_blocking.reconstruction.mesh_io import mesh_arrays_from_object
+                    key = _geometry_key(part)
+                    if key is not None and key in meshes:
+                        mesh = meshes[key]
+                        meshes.move_to_end(key)
+                    else:
+                        mesh = mesh_arrays_from_object(part.to_mesh_data(16))
+                        if key is not None:
+                            meshes[key] = mesh
+                            while len(meshes) > 32:
+                                meshes.popitem(last=False)
+                predicted.extend(projected_row_intervals(part, axes, vertical, mesh))
+            predicted = union_intervals(predicted)
+            known = row.get("known_intervals_world")
+            if known is not None:
+                predicted, target = intersect_intervals(predicted, known), intersect_intervals(target, known)
+            viewport = row.get("viewport_world", (0, max(width,1e-3),0,1))
+            scale = max(float(viewport[1]-viewport[0]), float(row.get("pixel_world", 1e-3)))
+            weight = max(0., float(row.get("confidence",1))) * max(0., float(uncertainty_by_view.get(view,{}).get("mean_confidence",1)))
+            by_view.setdefault(view, []).append((weight, interval_disagreement(target,predicted,scale)))
+        # Return one normalized residual per view; never count an aggregate twice.
+        return {f"profile_{view}": float(sum(w*v for w,v in values) / sum(w for w,v in values))
+                for view, values in by_view.items() if sum(w for w,v in values) > 0}
     return hook
 
 
@@ -112,6 +94,7 @@ def _build_constraint_penalty_hook(
     *,
     constraint_signal: Mapping[str, Any],
     bounds: Any | None,
+    geometry_dependent: bool = False,
 ) -> PenaltyHook:
     score = float(constraint_signal.get("score", 1.0))
     count = int(constraint_signal.get("constraint_count", 0))
@@ -124,6 +107,9 @@ def _build_constraint_penalty_hook(
         extents = bounds_max - bounds_min
         extents = np.where(extents > 0.0, extents, 1.0)
 
+    from collections import OrderedDict
+    from ..resfit_objective import _geometry_key
+    extent_cache = OrderedDict()
     def hook(primitives: Sequence[object]) -> float:
         base = 0.0
         for primitive in primitives:
@@ -133,13 +119,27 @@ def _build_constraint_penalty_hook(
             if has_bounds:
                 position = np.asarray(getattr(primitive, center_attr), dtype=float)
                 if position.size == 3:
-                    below = np.maximum(bounds_min - position, 0.0)
-                    above = np.maximum(position - bounds_max, 0.0)
+                    if geometry_dependent and hasattr(primitive, "to_mesh_data"):
+                        key = _geometry_key(primitive)
+                        if key is not None and key in extent_cache:
+                            candidate_min, candidate_max = extent_cache[key]
+                            extent_cache.move_to_end(key)
+                        else:
+                            vertices = np.asarray(primitive.to_mesh_data(12).vertices, float)
+                            candidate_min, candidate_max = vertices.min(axis=0), vertices.max(axis=0)
+                            if key is not None:
+                                extent_cache[key] = (candidate_min, candidate_max)
+                                while len(extent_cache) > 64:
+                                    extent_cache.popitem(last=False)
+                    else:
+                        candidate_min = candidate_max = position
+                    below = np.maximum(bounds_min - candidate_min, 0.0)
+                    above = np.maximum(candidate_max - bounds_max, 0.0)
                     normal = (below + above) / extents
                     base += float(np.linalg.norm(normal) ** 2)
         # Weakly penalize strong constraint budgets or dense explicit constraint payloads.
         constraint_pressure = float((1.0 - score) * max(1, count) * 0.1)
-        return base + constraint_pressure
+        return base if geometry_dependent else base + constraint_pressure
 
     return hook
 

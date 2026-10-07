@@ -59,6 +59,8 @@ def _compile_program(program: ShapeProgram, config: Mapping[str, Any]) -> Any:
         lathe_segments=int(config.get("lathe_segments", 48)),
         bevel_modifier=bool(config.get("bevel_modifier", True)),
         weighted_normals=bool(config.get("weighted_normals", True)),
+        csg_options=config,
+        timeout_s=float(config.get("program_timeout_s", 45.)),
     )
 
 def _run_shape_program_export_qa(

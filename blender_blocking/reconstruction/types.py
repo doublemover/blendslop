@@ -261,12 +261,15 @@ class ViewConstraint:
     uncertainty: Optional[Any] = None
     diagnostics: Mapping[str, Any] = field(default_factory=dict)
 
+    valid_mask: Any = None
+
     def to_dict(self) -> JsonMap:
         return {
             "view": self.view,
             "camera": self.camera.to_dict(),
             "bbox": _json_value(self.bbox),
             "diagnostics": _json_value(self.diagnostics),
+            "has_valid_mask": self.valid_mask is not None,
             "has_uncertainty": self.uncertainty is not None,
             "uncertainty": _uncertainty_summary(self.uncertainty),
         }
@@ -572,7 +575,7 @@ class CandidateMetrics:
     constraint_report: Mapping[str, Any] = field(default_factory=dict)
     editability_score: float = 0.0
     complexity_penalty: float = 0.0
-    elapsed_s: float = 0.0
+    elapsed_s: Optional[float] = None
     mesh_quality: Optional[MeshQualityReport] = None
     extras: Mapping[str, Any] = field(default_factory=dict)
 
@@ -676,6 +679,7 @@ class CandidateResult:
     errors: Tuple[str, ...] = ()
     degraded: bool = False
     payload: Any = None
+    geometry: Any = field(default=None, compare=False, repr=False)
 
     @property
     def succeeded(self) -> bool:

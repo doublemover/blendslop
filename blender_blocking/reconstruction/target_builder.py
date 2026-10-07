@@ -69,6 +69,7 @@ def build_target_from_images(
     artifact_root: str | Path | None = None,
     bounds_minmax: Optional[tuple[Sequence[float], Sequence[float]]] = None,
     profile_samples: int = 100,
+    valid_evidence_masks: Optional[Mapping[str, np.ndarray]] = None,
 ) -> TargetBuildResult:
     """Extract masks, apply constraints, and build a backend-neutral target."""
     if not views:
@@ -140,6 +141,26 @@ def build_target_from_images(
             if bbox is not None:
                 bboxes[view] = Bounds2D.from_xyxy(bbox)
 
+    for view, supplied in (valid_evidence_masks or {}).items():
+        if view not in raw_masks:
+            raise ValueError("validity supplied for an absent view")
+        valid = np.asarray(supplied, bool)
+        if valid.shape != raw_masks[view].shape:
+            raise ValueError("validity dimensions must match camera image")
+        raw_masks[view] = np.asarray(raw_masks[view], bool) & valid
+        confidences[view] = np.where(valid, confidences[view], 0.)
+        probabilities[view] = np.where(valid, probabilities[view], 0.)
+        uncertainties[view] = _replace_uncertain_mask(uncertainties[view],hard_mask=raw_masks[view],
+            confidence=confidences[view],valid_mask=valid)
+        diagnostics[view] = {**dict(diagnostics[view]),'uncertainty':{
+            **dict(diagnostics[view].get('uncertainty',{})),
+            'confidence_mean':float(confidences[view][valid].mean()) if valid.any() else 0.,
+            'validity_restricted':True,'observed_pixels':int(valid.sum())}}
+        bbox = _bbox_from_mask(raw_masks[view])
+        bboxes.pop(view, None)
+        if bbox is not None:
+            bboxes[view] = Bounds2D.from_xyxy(bbox)
+
     profile_bands = {
         view: tuple(
             distributional_profile_bands(
@@ -157,12 +178,27 @@ def build_target_from_images(
         for view, bands in profile_bands.items()
     }
     explicit_bounds = _bounds_from_minmax(bounds_minmax)
-    inferred_bounds = _bounds_from_view_bboxes(bboxes, config)
+    calibration = getattr(getattr(config, "reconstruction", None), "view_calibration", {})
+    if explicit_bounds is not None:
+        if calibration:
+            from .projection_contract import validate_view_calibration
+            validate_view_calibration(calibration)
+        inferred_bounds = explicit_bounds
+    elif calibration:
+        from .projection_contract import bounds_from_calibrated_masks, visible_search_bounds
+        if valid_evidence_masks and any(not np.asarray(m, bool).all() for m in valid_evidence_masks.values()):
+            inferred_bounds = visible_search_bounds(raw_masks, bboxes, calibration, valid_evidence_masks)
+            warnings.append('partial_evidence_search_bounds: unknown crop regions do not assert object extents')
+        else:
+            inferred_bounds = bounds_from_calibrated_masks(raw_masks, bboxes, calibration)
+    else:
+        inferred_bounds = _bounds_from_view_bboxes(bboxes, config)
+        warnings.append("uncalibrated_orthographic_assumption: absolute scale and cross-view crop are ambiguous")
     bounds = explicit_bounds or inferred_bounds
     bounds_source = (
         "explicit_minmax"
         if explicit_bounds is not None
-        else "mask_bboxes"
+        else "calibrated_mask_extents" if calibration else "mask_bboxes"
         if inferred_bounds is not None
         else "missing"
     )
@@ -173,6 +209,7 @@ def build_target_from_images(
             bboxes=bboxes,
             uncertainties=uncertainties,
             diagnostics=diagnostics,
+            calibration=calibration,
         ),
         profile_bands=profile_bands,
         bounds=bounds,
@@ -185,10 +222,23 @@ def build_target_from_images(
             "uncertainty_views": sorted(uncertainties),
             "probability_views": sorted(probabilities),
             "profile_samples": int(profile_samples),
+            "validity_sha256": {view: __import__('hashlib').sha256(np.asarray(mask, bool).tobytes()).hexdigest()
+                                for view, mask in (valid_evidence_masks or {}).items()},
             "profile_band_distribution": profile_distribution,
             "bounds_source": bounds_source,
+            "view_calibration": calibration,
+            "projection_contract": "canonical_orthographic_xy_xz_yz; viewport_edges; metres_or_declared_world_units",
         },
     )
+    if valid_evidence_masks:
+        from .visibility import valid_evidence
+        updated = []
+        for constraint in target.constraints:
+            supplied = valid_evidence_masks.get(constraint.view)
+            current = replace(constraint, valid_mask=None if supplied is None else np.asarray(supplied, bool).copy())
+            valid_evidence(current)
+            updated.append(current)
+        target = replace(target, constraints=tuple(updated))
     artifact_paths = _write_target_artifacts(
         root,
         target=target,
@@ -419,6 +469,7 @@ def _replace_uncertain_mask(
     hard_mask: np.ndarray,
     confidence: np.ndarray,
     constraint_report: Optional[Mapping[str, Any]] = None,
+    valid_mask: np.ndarray | None = None,
 ) -> Any:
     if uncertain is None:
         return None
@@ -436,6 +487,13 @@ def _replace_uncertain_mask(
             probability[hard & ~previous_hard] = 1.0
             probability[~hard & previous_hard] = 0.0
     diagnostics = dict(getattr(uncertain, "diagnostics", {}) or {})
+    boundary=np.asarray(getattr(uncertain,'boundary_uncertainty',np.zeros(hard.shape)),float).copy()
+    if valid_mask is not None:
+        known=np.asarray(valid_mask,bool)
+        probability=np.where(known,probability,0.)
+        conf=np.where(known,conf,0.)
+        boundary=np.where(known,boundary,1.)
+        diagnostics.update(validity_restricted=True,observed_pixels=int(known.sum()))
     if constraint_report is not None:
         diagnostics["constraint_report"] = dict(constraint_report)
     try:
@@ -444,6 +502,7 @@ def _replace_uncertain_mask(
             foreground_prob=probability,
             hard_mask=hard,
             confidence=conf,
+            boundary_uncertainty=boundary,
             diagnostics=diagnostics,
         )
     except TypeError:
@@ -456,6 +515,7 @@ def _view_constraints(
     bboxes: Mapping[str, Bounds2D],
     uncertainties: Mapping[str, Any],
     diagnostics: Mapping[str, Mapping[str, Any]],
+    calibration: Mapping[str, Any] = {},
 ) -> tuple[ViewConstraint, ...]:
     from .targets import make_axis_camera
 
@@ -466,7 +526,10 @@ def _view_constraints(
             ViewConstraint(
                 view=view,
                 mask=mask,
-                camera=make_axis_camera(view, (int(width), int(height))),
+                camera=replace(make_axis_camera(view, (int(width), int(height))),
+                    bounds=Bounds2D(calibration[view]["world_bounds"][0], calibration[view]["world_bounds"][2],
+                        calibration[view]["world_bounds"][1], calibration[view]["world_bounds"][3]))
+                    if view in calibration else make_axis_camera(view, (int(width), int(height))),
                 bbox=bboxes.get(view),
                 uncertainty=uncertainties.get(view),
                 diagnostics=diagnostics.get(view, {}),

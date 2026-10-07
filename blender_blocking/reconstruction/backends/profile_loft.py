@@ -19,7 +19,8 @@ from .blender_metrics import candidate_metrics_from_blender_object
 def _mask_for_view(request: CandidateRequest, view: str) -> np.ndarray | None:
     for constraint in request.target.constraints:
         if constraint.view == view:
-            return np.asarray(constraint.mask, dtype=bool)
+            from ..visibility import valid_evidence
+            return np.asarray(constraint.mask, dtype=bool) & valid_evidence(constraint)
     return None
 
 
@@ -99,11 +100,21 @@ class ProfileLoftBackend(BaseBackend):
                 smoothing_window=int(request.config.get("smoothing_window", 3)),
                 enable_offsets=bool(request.config.get("enable_offsets", False)),
             )
+            from ..visibility import valid_evidence
+            partial = any(not valid_evidence(c).all() for c in request.target.constraints
+                          if c.view in {"front", "side"})
+            if request.target.extras.get("view_calibration") or partial:
+                from ..projection_contract import calibrated_profile
+                profile = calibrated_profile(request)
             slices = sample_elliptical_slices(
                 profile,
                 num_slices=int(request.config.get("num_slices", 10)),
                 sampling=str(request.config.get("sample_policy", "endpoints")),
             )
+            if request.config.get("adaptive_sections", False):
+                from ..adaptive_geometry import adaptive_slices
+                slices = adaptive_slices(profile, int(request.config.get("num_slices", 10)),
+                    int(request.config.get("max_sections", 64)), float(request.config.get("section_tolerance", .012)))
             obj = create_loft_mesh_from_slices(
                 slices,
                 name="Blockout_Mesh",
@@ -121,6 +132,38 @@ class ProfileLoftBackend(BaseBackend):
                 ),
             )
             if obj is not None:
+                if request.target.extras.get("view_calibration"):
+                    obj.location.x, obj.location.y = request.target.bounds.center[:2]
+                if request.config.get("contour_sections", False):
+                    from ..adaptive_geometry import contour_section_mesh
+                    from ..native_geometry import evaluated_arrays, GeometryArrays, NativeOwnedGeometry
+                    from ..projected_metrics import projected_mesh_metrics
+                    mesh = contour_section_mesh(request.target, slices, request.config.get("section_resolution", 64))
+                    if mesh is not None and mesh.available:
+                        baseline = evaluated_arrays(obj)
+                        proposal = GeometryArrays.capture(mesh.vertices, mesh.faces)
+                        def score(data):
+                            rows = projected_mesh_metrics(request.target, data.vertices, data.faces).values()
+                            from ..visibility import observed_area_score
+                            return observed_area_score(rows)
+                        from ..feature_evidence import mesh_empty_features
+                        baseline_features = mesh_empty_features(request.target, baseline)
+                        proposal_features = mesh_empty_features(request.target, proposal)
+                        required_feature_gain = not baseline_features["passed"] and proposal_features["passed"]
+                        if (proposal_features["passed"] and mesh.topology.get("watertight") and
+                            (required_feature_gain or score(proposal) > score(baseline)+1e-6)):
+                            obj.hide_render = True
+                            obj["blendslop_export_exclude"] = True
+                            owner = NativeOwnedGeometry(proposal, "ContourSectionLoft")
+                            output = owner.attach()
+                            obj.parent = output
+                            obj = output
+                from ..projection_contract import observed_holes
+                if any(pixels >= 4 for pixels in observed_holes(request.target).values()):
+                    from ..native_geometry import evaluated_arrays
+                    from ..feature_evidence import mesh_empty_features
+                    if not mesh_empty_features(request.target, evaluated_arrays(obj))["passed"]:
+                        raise ValueError("profile proposal fills a required known-empty feature")
                 generation_context = getattr(request.context, "generation_context", None)
                 if generation_context is not None:
                     apply_object_tags(obj, role="final", context=generation_context)
@@ -147,7 +190,8 @@ class ProfileLoftBackend(BaseBackend):
             editability_score=0.55,
             elapsed_s=elapsed_s,
             extras={
-                "slice_count": int(request.config.get("num_slices", 10)),
+                "slice_count": len(slices),
+                "adaptive_sections": bool(request.config.get("adaptive_sections", False)),
                 "front_mask_available": front_mask is not None,
                 "side_mask_available": side_mask is not None,
             },

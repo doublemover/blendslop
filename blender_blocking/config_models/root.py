@@ -83,7 +83,12 @@ class BlockingConfig:
         self.quality_budget.validate()
         self.refinement_lab.validate()
 
-        # Placeholder for mutually exclusive scale policies if added later.
+        calibration = self.reconstruction.view_calibration
+        if calibration and self.render_silhouette.view_calibration and calibration != self.render_silhouette.view_calibration:
+            raise ValueError("reconstruction and validation camera calibration differ")
+        if calibration:
+            import copy
+            self.render_silhouette.view_calibration = copy.deepcopy(calibration)
 
     def to_dict(self) -> Dict[str, object]:
         """Return a JSON-serializable dict matching the canonical schema."""

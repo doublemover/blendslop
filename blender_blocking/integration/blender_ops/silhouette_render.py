@@ -43,6 +43,7 @@ class SilhouetteRenderSession:
     original_camera: Optional[bpy.types.Object]
     render_settings: RenderSettingsSnapshot
     hidden_objects: Dict[bpy.types.Object, bool]
+    viewport_visibility: Dict[bpy.types.Object, Tuple[bool, bool]]
     original_materials: Dict[bpy.types.Object, List[Optional[bpy.types.Material]]]
     world: Optional[bpy.types.World]
     created_world: bool
@@ -61,6 +62,12 @@ class SilhouetteRenderSession:
         for obj, prev in self.hidden_objects.items():
             if hasattr(obj, "hide_render"):
                 obj.hide_render = prev
+
+        for obj, (hidden, hidden_viewport) in self.viewport_visibility.items():
+            if hasattr(obj, "hide_viewport"):
+                obj.hide_viewport = hidden_viewport
+            if hasattr(obj, "hide_set"):
+                obj.hide_set(hidden)
 
         for obj, mats in self.original_materials.items():
             if getattr(obj, "type", None) != "MESH":
@@ -124,15 +131,15 @@ def collect_target_objects(
     scene: bpy.types.Scene,
     target_objects: Optional[Iterable[bpy.types.Object]] = None,
 ) -> List[bpy.types.Object]:
-    """Collect renderable mesh targets."""
+    """Collect only meshes belonging to the evaluated output contract."""
+    from reconstruction.output_targets import output_mesh_targets
     if not BLENDER_AVAILABLE:
         return []
     if target_objects is None:
-        mesh_objects = [obj for obj in scene.objects if obj.type == "MESH"]
-        tagged = [obj for obj in mesh_objects if obj.get("blocktool_role") == "final"]
-        return tagged if tagged else mesh_objects
-
-    return [obj for obj in target_objects if getattr(obj, "type", None) == "MESH"]
+        meshes = output_mesh_targets(scene.objects)
+        tagged = [obj for obj in meshes if obj.get("blocktool_role") == "final"]
+        return output_mesh_targets(tagged) if tagged else meshes
+    return output_mesh_targets(target_objects)
 
 
 def _mesh_objects(scene: bpy.types.Scene) -> List[bpy.types.Object]:
@@ -472,6 +479,9 @@ def silhouette_session(
 
     mesh_objects = _mesh_objects(scene)
     hidden_objects: Dict[bpy.types.Object, bool] = {}
+    viewport_visibility = {obj: (obj.hide_get() if hasattr(obj, "hide_get") else False,
+                                getattr(obj, "hide_viewport", False))
+                           for obj in mesh_objects}
     for obj in mesh_objects:
         hidden_objects[obj] = getattr(obj, "hide_render", False)
         if obj in targets:
@@ -516,6 +526,7 @@ def silhouette_session(
         original_camera=original_camera,
         render_settings=render_settings,
         hidden_objects=hidden_objects,
+        viewport_visibility=viewport_visibility,
         original_materials=original_materials,
         world=world,
         created_world=created_world,

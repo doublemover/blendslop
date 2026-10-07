@@ -154,6 +154,14 @@ def soft_iou(
 
 def _signed_distance(mask: np.ndarray) -> np.ndarray:
     mask_bool = _as_bool(mask)
+    # A full or empty finite camera has no opposite-class pixel to measure.
+    # OpenCV returns its maximum float sentinel there; summing it overflows.
+    # Use an explicit finite image-diagonal saturation for absent boundaries.
+    if not mask_bool.size:
+        raise ValueError('signed-distance silhouette requires nonempty image dimensions')
+    if mask_bool.all() or not mask_bool.any():
+        distance = float(np.hypot(*mask_bool.shape))
+        return np.full(mask_bool.shape, distance if mask_bool.all() else -distance, dtype=np.float32)
     inside = cv2.distanceTransform(mask_bool.astype(np.uint8), cv2.DIST_L2, 3)
     outside = cv2.distanceTransform((~mask_bool).astype(np.uint8), cv2.DIST_L2, 3)
     return inside.astype(np.float32) - outside.astype(np.float32)
@@ -172,7 +180,7 @@ def signed_distance_silhouette_loss(
         raise ValueError("Masks must have matching shapes for signed-distance loss")
     ref_sdf = _signed_distance(ref)
     cand_sdf = _signed_distance(cand)
-    loss = float(np.mean(np.abs(ref_sdf - cand_sdf)))
+    loss = float(np.mean(np.abs(ref_sdf.astype(np.float64) - cand_sdf.astype(np.float64))))
     if normalize:
         denom = float(max(ref.shape)) if ref.shape else 1.0
         loss /= max(denom, 1.0)

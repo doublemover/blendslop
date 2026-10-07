@@ -73,6 +73,12 @@ def search_shape_program_candidates(
                 rule=rule,
             )
         )
+    bounds = seed_program.metadata.get("bounds")
+    if isinstance(bounds, Mapping):
+        center = {axis:(float(bounds["min_"+axis])+float(bounds["max_"+axis]))*.5 for axis in ("x","y","z") if "min_"+axis in bounds and "max_"+axis in bounds}
+        candidates = [replace(candidate, program=replace(candidate.program, root_nodes=tuple(
+            replace(node, parameters={**center, **dict(node.parameters)}) for node in candidate.program.root_nodes)))
+            for candidate in candidates]
     candidates = _dedupe_candidates(candidates)
     ranked = tuple(
         sorted(candidates, key=lambda candidate: candidate.score, reverse=True)[
@@ -332,9 +338,14 @@ def _dedupe_candidates(
 
 
 def _program_signature(program: ShapeProgram) -> str:
-    primitives = tuple(node.primitive_type for node in program.root_nodes)
-    rules = (str(program.metadata.get("selected_rule", "")),)
-    return repr((primitives, program.node_count(), program.residual_patch_count(), rules))
+    import hashlib, json
+    indices = {node.node_id: index for index, node in enumerate(program.root_nodes)}
+    payload = [{"operation": node.operation, "primitive": node.primitive_type,
+                "parameters": {key:value for key,value in node.parameters.items() if key != "source_rule"},
+                "children": [indices.get(child, child) for child in node.children]}
+               for node in program.root_nodes]
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"),
+        default=lambda value: value.tolist(), allow_nan=False).encode()).hexdigest()
 
 
 def _size_from_program(program: ShapeProgram) -> tuple[float, float, float]:

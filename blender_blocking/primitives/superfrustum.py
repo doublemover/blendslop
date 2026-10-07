@@ -156,17 +156,18 @@ class SuperFrustum:
         r2 = self.radius_top
         h = self.height / 2.0
 
-        p_cone = p_local + np.array([0.0, 0.0, h], dtype=np.float64)
-        q0 = np.linalg.norm(p_cone[:, :2], axis=1)
-        q1 = p_cone[:, 2]
+        # The capped-cone formula uses a centered axis and a half-height.
+        # Meshes and surface samples use the same [-height/2, height/2] extent.
+        q0 = np.linalg.norm(p_local[:, :2], axis=1)
+        q1 = p_local[:, 2]
         q = np.stack([q0, q1], axis=1)
 
-        k1 = np.array([r2, self.height], dtype=np.float64)
-        k2 = np.array([r2 - r1, 2.0 * self.height], dtype=np.float64)
+        k1 = np.array([r2, h], dtype=np.float64)
+        k2 = np.array([r2 - r1, 2.0 * h], dtype=np.float64)
 
         r_edge = np.where(q1 < 0.0, r1, r2)
         ca0 = q0 - np.minimum(q0, r_edge)
-        ca1 = np.abs(q1) - self.height
+        ca1 = np.abs(q1) - h
         ca = np.stack([ca0, ca1], axis=1)
 
         dot_k2 = float(np.dot(k2, k2))
@@ -249,37 +250,10 @@ class SuperFrustum:
         Returns:
             Signed distance (negative inside, positive outside, zero on surface)
         """
-        # Transform point to local coordinate system
-        # 1. Translate to origin
-        p = point - self.position
-
-        # 2. Rotate to align axis with Z
-        axis = self.get_axis_vector()
-        p_local = self._rotate_to_z_axis(p, axis)
-
-        # 3. Apply capped cone SDF (from Inigo Quilez)
-        # Cone is centered at origin, extends from -h/2 to +h/2 along Z
-        r1 = self.radius_bottom
-        r2 = self.radius_top
-        h = self.height / 2.0  # Half-height for centered cone
-
-        # Translate to cone's coordinate system (base at origin, extends upward)
-        p_cone = p_local + np.array([0, 0, h])
-
-        # Capped cone SDF (exact formula from IQ)
-        q = np.array([np.linalg.norm(p_cone[:2]), p_cone[2]])
-        k1 = np.array([r2, self.height])
-        k2 = np.array([r2 - r1, 2.0 * self.height])
-
-        ca = np.array(
-            [q[0] - min(q[0], r1 if q[1] < 0.0 else r2), abs(q[1]) - self.height]
-        )
-
-        cb = q - k1 + k2 * np.clip(np.dot(k1 - q, k2) / np.dot(k2, k2), 0.0, 1.0)
-
-        s = -1.0 if (cb[0] < 0.0 and ca[1] < 0.0) else 1.0
-
-        return s * np.sqrt(min(np.dot(ca, ca), np.dot(cb, cb)))
+        point = np.asarray(point, dtype=np.float64)
+        if point.shape != (3,):
+            raise ValueError("point must have shape (3,)")
+        return float(self.sdf_batch(point[None, :])[0])
 
     def _rotate_to_z_axis(self, point: np.ndarray, axis: np.ndarray) -> np.ndarray:
         """

@@ -60,9 +60,12 @@ class PrimitiveInitializationConfig:
     min_radius: float = 0.05
     covariance_floor: float = 1e-4
     kmeans_iterations: int = 8
+    kmeans_seed: str = "height"
 
     def validate(self) -> tuple[str, ...]:
         errors: list[str] = []
+        if self.kmeans_seed not in {"height", "farthest"}:
+            errors.append("kmeans_seed must be height or farthest")
         _validate_positive_int(self.primitive_count, "primitive_count", errors)
         _validate_positive_int(self.target_point_count, "target_point_count", errors)
         _validate_positive_int(self.kmeans_iterations, "kmeans_iterations", errors)
@@ -94,15 +97,28 @@ def deterministic_kmeans(
     points: np.ndarray,
     cluster_count: int,
     iterations: int = 8,
+    *,
+    seed_strategy: str = "height",
 ) -> tuple[np.ndarray, np.ndarray]:
     """Small deterministic k-means used for primitive centers."""
     points = np.asarray(points, dtype=np.float64)
     if points.size == 0:
         return np.zeros((0, 3), dtype=np.float64), np.zeros((0,), dtype=np.int64)
     cluster_count = max(1, min(int(cluster_count), len(points)))
-    order = np.argsort(points[:, 2], kind="mergesort")
-    seed_indices = np.linspace(0, len(points) - 1, cluster_count).round().astype(int)
-    centers = points[order[seed_indices]].copy()
+    if seed_strategy == "height":
+        # Preserve the established shared initializer; spread seeding is opt-in.
+        order = np.argsort(points[:, 2], kind="mergesort")
+        indices = np.linspace(0, len(points) - 1, cluster_count).round().astype(int)
+        centers = points[order[indices]].copy()
+    elif seed_strategy == "farthest":
+        centers = [points[0].copy()]
+        nearest = np.full(len(points), np.inf)
+        for _ in range(1, cluster_count):
+            nearest = np.minimum(nearest, np.sum((points - centers[-1]) ** 2, axis=1))
+            centers.append(points[int(np.argmax(nearest))].copy())
+        centers = np.asarray(centers)
+    else:
+        raise ValueError("seed_strategy must be height or farthest")
 
     labels = np.zeros((len(points),), dtype=np.int64)
     for _ in range(max(1, iterations)):
@@ -177,7 +193,8 @@ def initialize_ellipsoids_from_points(
     """Seed ellipsoids from deterministic clusters and local PCA."""
     points = bounded_point_sample(points, config.target_point_count)
     centers, labels = deterministic_kmeans(
-        points, config.primitive_count, config.kmeans_iterations
+        points, config.primitive_count, config.kmeans_iterations,
+        seed_strategy=config.kmeans_seed,
     )
     ellipsoids: List[EllipsoidPrimitive] = []
     for idx, center in enumerate(centers):
@@ -214,7 +231,8 @@ def initialize_superquadrics_from_points(
     """
     points = bounded_point_sample(points, config.target_point_count)
     centers, labels = deterministic_kmeans(
-        points, config.primitive_count, config.kmeans_iterations
+        points, config.primitive_count, config.kmeans_iterations,
+        seed_strategy=config.kmeans_seed,
     )
     superquadrics: List[SuperquadricPrimitive] = []
     for idx, center in enumerate(centers):
@@ -257,7 +275,8 @@ def initialize_gaussians_from_points(
     """Seed anisotropic Gaussians from deterministic clusters and local PCA."""
     points = bounded_point_sample(points, config.target_point_count)
     centers, labels = deterministic_kmeans(
-        points, config.primitive_count, config.kmeans_iterations
+        points, config.primitive_count, config.kmeans_iterations,
+        seed_strategy=config.kmeans_seed,
     )
     gaussians: List[AnisotropicGaussianPrimitive] = []
     for idx, center in enumerate(centers):
@@ -299,29 +318,27 @@ def initialize_from_profile_bands(
     if not slice_data:
         return []
 
-    per_primitive = max(1, len(slice_data) // config.primitive_count)
+    ordered = sorted(slice_data, key=lambda entry: float(entry["center"][2]))
+    if len(ordered) < 2:
+        # A single measured row contains no axial interval. Do not invent a
+        # cylinder height from its diameter and call that profile evidence.
+        return []
+    centers = np.asarray([entry["center"] for entry in ordered], dtype=np.float64)
+    radii = np.asarray([entry["radius"] for entry in ordered], dtype=np.float64)
+    # Shared endpoints guarantee full interval coverage and no dropped tail.
+    count = min(config.primitive_count, len(ordered) - 1)
+    knots = np.linspace(0, len(ordered) - 1, count + 1).round().astype(int)
     primitives: List[SuperFrustum] = []
-    for idx in range(config.primitive_count):
-        start = idx * per_primitive
-        end = min((idx + 1) * per_primitive, len(slice_data))
-        segment = slice_data[start:end]
-        if not segment:
+    for lower, upper in zip(knots[:-1], knots[1:]):
+        displacement = centers[upper] - centers[lower]
+        height = float(np.linalg.norm(displacement))
+        if height <= 0.:
             continue
-        centers = np.asarray([entry["center"] for entry in segment], dtype=np.float64)
-        radii = np.asarray([entry["radius"] for entry in segment], dtype=np.float64)
-        center = centers.mean(axis=0)
-        height = (
-            float(abs(centers[-1, 2] - centers[0, 2]))
-            if len(centers) > 1
-            else max(config.min_radius * 2.0, float(radii[0]) * 2.0)
-        )
-        primitives.append(
-            SuperFrustum(
-                position=tuple(center),
-                orientation=(0.0, 0.0),
-                radius_bottom=max(float(radii[0]), config.min_radius),
-                radius_top=max(float(radii[-1]), config.min_radius),
-                height=max(height, config.min_radius * 2.0),
-            )
-        )
+        axis = displacement / height
+        theta = float(np.arctan2(axis[1], axis[0]))
+        phi = float(np.arccos(np.clip(axis[2], -1., 1.)))
+        primitives.append(SuperFrustum(
+            position=tuple((centers[lower] + centers[upper]) * .5),
+            orientation=(theta, phi), radius_bottom=max(float(radii[lower]), config.min_radius),
+            radius_top=max(float(radii[upper]), config.min_radius), height=height))
     return primitives

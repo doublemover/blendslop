@@ -24,12 +24,13 @@ def compute_bounds_world(
     min_coords = mathutils.Vector((float("inf"),) * 3)
     max_coords = mathutils.Vector((float("-inf"),) * 3)
 
+    from reconstruction.output_targets import output_mesh_targets
     found = False
-    for obj in objects:
-        if getattr(obj, "type", None) != "MESH":
-            continue
-        for vertex in obj.bound_box:
-            world_coord = obj.matrix_world @ mathutils.Vector(vertex)
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    for obj in output_mesh_targets(objects):
+        evaluated = obj.evaluated_get(depsgraph)
+        for vertex in evaluated.bound_box:
+            world_coord = evaluated.matrix_world @ mathutils.Vector(vertex)
             min_coords.x = min(min_coords.x, world_coord.x)
             min_coords.y = min(min_coords.y, world_coord.y)
             min_coords.z = min(min_coords.z, world_coord.z)
@@ -93,9 +94,8 @@ def configure_ortho_camera_for_view(
         location = mathutils.Vector(
             (center.x, center.y, center.z + height_extent * distance_factor)
         )
-        # Match the reference-image convention used by target builders: world Y
-        # reads left/right in top silhouettes, while world X reads vertical.
-        rotation = (0.0, 0.0, math.radians(90))
+        # Canonical top: horizontal +X, vertical +Y (also used by hull and solvers).
+        rotation = (0.0, 0.0, 0.0)
     else:
         raise ValueError(f"Unknown view: {view}")
 

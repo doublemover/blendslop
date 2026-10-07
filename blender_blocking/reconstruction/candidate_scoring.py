@@ -304,7 +304,7 @@ def score_candidate(
             ),
             CandidateScoreTerm(
                 "time_penalty",
-                metrics.elapsed_s,
+                metrics.elapsed_s if metrics.elapsed_s is not None else 0.0,
                 weights.time_penalty,
             ),
             CandidateScoreTerm(
@@ -376,7 +376,8 @@ def rank_candidates(
             scored,
             key=lambda pair: (
                 -pair[1].total,
-                pair[0].metric_result.elapsed_s,
+                pair[0].metric_result.elapsed_s if pair[0].metric_result.elapsed_s is not None else float("inf"),
+                pair[0].candidate_id,
             ),
         )
     if policy == "editability_first":
@@ -441,16 +442,19 @@ def select_best(
         return None, []
     policy = _normalize_policy(policy)
     ranked = rank_candidates(results, policy=policy, weights=weights)
+    ranked_eligible = [(result, score) for result, score in ranked if result.succeeded]
+    if not ranked_eligible:
+        return None, ranked
     if _quality_selection_policy(policy):
         eligible = [
             (result, score)
-            for result, score in ranked
+            for result, score in ranked_eligible
             if not _metric_only_candidate(result)
         ]
         if eligible:
             return eligible[0][0], ranked
         return None, ranked
-    return ranked[0][0], ranked
+    return ranked_eligible[0][0], ranked
 
 
 def _normalize_policy(policy: str) -> str:

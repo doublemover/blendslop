@@ -317,6 +317,7 @@ class MeshExtractionResult:
     message: str = ""
     metrics: Mapping[str, Any] = field(default_factory=dict)
     topology: Mapping[str, Any] = field(default_factory=dict)
+    topology_receipt: Any = None
 
     @property
     def available(self) -> bool:
@@ -374,6 +375,9 @@ class MeshExtractionResult:
             "faces": int(len(self.faces)),
             "has_normals": self.normals is not None,
             "topology": dict(self.topology),
+            "topology_provenance": (
+                self.topology_receipt.identity() if self.topology_receipt is not None else None
+            ),
             "message": self.message,
             "metrics": dict(self.metrics),
         }

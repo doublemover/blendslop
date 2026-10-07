@@ -73,6 +73,10 @@ def _collect_target_view_signal_weights(
         uncertainty = getattr(constraint, "uncertainty", None)
         if uncertainty is not None:
             raw_confidence = np.asarray(getattr(uncertainty, "confidence", ()))
+            if getattr(constraint,'mask',None) is not None:
+                from reconstruction.visibility import valid_evidence
+                valid=valid_evidence(constraint)
+                if raw_confidence.shape==valid.shape:raw_confidence=raw_confidence[valid]
             if raw_confidence.size:
                 mean_conf = float(np.mean(raw_confidence))
                 if math.isfinite(mean_conf):
@@ -299,6 +303,9 @@ def primitive_from_renderable(renderable: RenderablePrimitive) -> object:
         return EllipsoidPrimitive.from_dict(params)
     if ptype in ("gaussian", "anisotropic_gaussian"):
         return AnisotropicGaussianPrimitive.from_dict(params)
+    if ptype == "deformed_superquadric":
+        from primitives.deformed_superquadric import DeformedSuperquadricPrimitive
+        return DeformedSuperquadricPrimitive.from_dict(params)
     if ptype == "superquadric":
         return SuperquadricPrimitive.from_dict(params)
     if ptype == "superfrustum":

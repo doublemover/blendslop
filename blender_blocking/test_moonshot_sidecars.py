@@ -104,7 +104,7 @@ class MoonshotSidecarTests(unittest.TestCase):
         first = run_experiment(self._request("shape_grammar_search")).to_dict()
         second = run_experiment(self._request("shape_grammar_search")).to_dict()
         self.assertEqual(first, second)
-        self.assertEqual(first["status"], "ran")
+        self.assertEqual(first["status"], "ran", first.get("errors") or first.get("degradation"))
         self.assertGreater(first["metrics"]["candidate_count"], 0)
         evidence = first["degradation"]["evidence"]
         self.assertTrue(evidence["selected_compile_plan"])
@@ -260,6 +260,7 @@ class MoonshotSidecarTests(unittest.TestCase):
             self.assertEqual(portfolio.status, "ran")
             self.assertEqual(portfolio.errors, ())
             self.assertTrue(Path(portfolio.artifacts["bundle"]).exists())
+            self.assertLessEqual(len(str(Path(portfolio.artifacts["bundle"]).resolve())), 258)
 
 
 class RefinementMoonshotIntegrationTests(unittest.TestCase):

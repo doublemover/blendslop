@@ -71,6 +71,13 @@ def _normalize_gaussian_ellipsoid_config(
     warnings: list[str] = []
     normalized: dict[str, Any] = {}
 
+    normalized['proxy_variant']=str(config.get('proxy_variant') or 'initializer_only')
+    if normalized['proxy_variant'] not in {'initializer_only','fitted_opaque_union_v1'}:
+        errors.append('proxy_variant must be initializer_only or fitted_opaque_union_v1')
+    for name,default,maximum in (('proxy_fit_resolution',48,256),('proxy_fit_evaluations',192,4096),('proxy_fit_iterations',2,16)):
+        normalized[name]=_coerce_int(config.get(name,default),name,min_value=1,max_value=maximum,
+            errors=errors,default=default)
+
     normalized["family"] = str(
         config.get(
             "family", config.get("proxy_family", config.get("primitive_family", "gaussian"))
@@ -216,6 +223,8 @@ def _normalize_gaussian_ellipsoid_config(
         errors=errors,
         default=1.0,
     )
+    if normalized['proxy_variant']=='fitted_opaque_union_v1' and normalized['editable_proxy_sigma']!=1.:
+        errors.append('fitted opaque proxy requires editable_proxy_sigma=1 to match its exported mesh isosurface')
     return normalized, errors, warnings
 
 

@@ -72,7 +72,10 @@ def run_refinement_candidate(request: object) -> object:
     from metrics.topology import mesh_topology_report
 
     start = time.perf_counter()
-    config = dict(getattr(request, "config", {}) or {})
+    from blender_blocking.reconstruction.option_receipts import copy_options
+    config = copy_options(getattr(request, "config", {}) or {})
+    if config.get('quality_preset')=='quality' and config.get('pixel_evidence_mode') is None:
+        config['pixel_evidence_mode']='pixel_reliability_v1'
     parsed_config, config_errors, config_warnings = _normalize_differentiable_config(config)
     if config_errors:
         return CandidateResult(
@@ -83,6 +86,9 @@ def run_refinement_candidate(request: object) -> object:
             warnings=tuple(config_warnings),
         )
     backend_choice = str(parsed_config["backend"])
+    if backend_choice == "dvx":
+        from .dvx_adapter import run_candidate
+        return run_candidate(request)
     candidate_id = getattr(request, "candidate_id")
     backend_name = getattr(request, "backend_name", "differentiable_refine")
     target = getattr(request, "target")
@@ -129,6 +135,15 @@ def run_refinement_candidate(request: object) -> object:
 
     try:
         cameras, silhouettes = _target_cameras_and_masks(target)
+        from blender_blocking.reconstruction.visibility import valid_evidence
+        valid_masks = {constraint.view:valid_evidence(constraint) for constraint in target.constraints}
+        pixel_evidence={};probability_masks={};pixel_weights={}
+        if parsed_config['pixel_evidence_mode']=='pixel_reliability_v1':
+            from reconstruction.pixel_evidence import observed_pixel_evidence
+            pixel_evidence={constraint.view:observed_pixel_evidence(constraint) for constraint in target.constraints}
+            probability_masks={name:record.foreground for name,record in pixel_evidence.items()}
+            pixel_weights={name:record.weights for name,record in pixel_evidence.items()}
+
         points, point_meta = target_surface_points(
             target,
             resolution=int(parsed_config["visual_hull_resolution"]),
@@ -139,6 +154,7 @@ def run_refinement_candidate(request: object) -> object:
             initialize_ellipsoids_from_points(
                 points,
                 PrimitiveInitializationConfig(
+                    kmeans_seed=str(config.get("kmeans_seed", "farthest")),
                     primitive_count=int(parsed_config["primitive_count"]),
                     target_point_count=int(parsed_config["target_point_count"]),
                     min_radius=float(parsed_config["min_radius"]),
@@ -147,11 +163,14 @@ def run_refinement_candidate(request: object) -> object:
                 ),
             )
         )
+        from reconstruction.projection_contract import permits_bounds_seed
+        seed_allowed, seed_evidence = permits_bounds_seed(target)
         initialization_diagnostics = _bounds_seed_diagnostics(
             points,
-            include_bounds_proxy=bool(parsed_config["include_bounds_proxy"]),
+            include_bounds_proxy=bool(parsed_config["include_bounds_proxy"]) and seed_allowed,
             min_radius=float(parsed_config["min_radius"]),
         )
+        initialization_diagnostics["bounds_seed_admission"] = seed_evidence
         primitives = _prepend_bounds_ellipsoid_seed(
             primitives,
             diagnostics=initialization_diagnostics,
@@ -178,6 +197,8 @@ def run_refinement_candidate(request: object) -> object:
                 min_variance=float(parsed_config["min_variance"]),
             )
         target_record = ReconstructionTarget(
+            valid_masks=valid_masks,
+            probability_masks=probability_masks,pixel_weights=pixel_weights,
             silhouettes=silhouettes,
             surface_points=points,
             depths=getattr(target, "depths", {}),
@@ -202,27 +223,107 @@ def run_refinement_candidate(request: object) -> object:
             parsed_config["loss_weights"],
             view_weights=target_view_weights,
         )
+        optimization_resolution = int(request.config.get("optimization_resolution", 128))
+        if not 32 <= optimization_resolution <= 512:
+            raise ValueError("optimization_resolution must be 32..512")
+        import cv2
+        from dataclasses import replace as data_replace
+        optimization_cameras = tuple(data_replace(c, image_size=(optimization_resolution,
+            max(32, round(c.image_size[1]/c.image_size[0]*optimization_resolution)))) for c in cameras)
+        optimization_silhouettes = {c.name: cv2.resize(silhouettes[c.name],c.image_size,
+            interpolation=cv2.INTER_AREA) for c in optimization_cameras}
+        optimization_target = ReconstructionTarget(silhouettes=optimization_silhouettes,surface_points=points,
+            valid_masks={c.name:cv2.resize(valid_masks[c.name].astype(np.uint8),c.image_size,interpolation=cv2.INTER_NEAREST).astype(bool) for c in optimization_cameras},
+            depths=getattr(target,"depths",{}))
+        if pixel_evidence:
+            from reconstruction.pixel_evidence import resize_pixel_evidence
+            coarse_evidence={camera.name:resize_pixel_evidence(pixel_evidence[camera.name],camera.image_size[::-1])
+                for camera in optimization_cameras}
+            optimization_target=data_replace(optimization_target,
+                silhouettes={name:record['hard_foreground'] for name,record in coarse_evidence.items()},
+                probability_masks={name:record['foreground'] for name,record in coarse_evidence.items()},
+                pixel_weights={name:record['reliability_weight'] for name,record in coarse_evidence.items()},
+                valid_masks={name:record['observed_fraction']>=1.-1e-6 for name,record in coarse_evidence.items()},
+                proposal_valid_masks={name:record['observed_fraction']>0. for name,record in coarse_evidence.items()})
+        if backend_choice != "cpu_soft_silhouette":
+            optimization_cameras, optimization_target = cameras, target_record
+        optimization_initial_batch = renderer.render(scene,optimization_cameras)
+        optimization_initial_loss = renderer.loss(optimization_initial_batch,optimization_target,
+            parsed_config["loss_weights"],view_weights=target_view_weights)
+        coarse_config = dict(parsed_config)
+        finish_enabled = bool(config.get("finest_finishing", True)) and bool(cameras) and optimization_resolution < max(c.image_size[0] for c in cameras)
+        if finish_enabled and parsed_config["max_objective_evaluations"]:
+            coarse_config["max_objective_evaluations"] = max(1, int(parsed_config["max_objective_evaluations"]*.7))
+        optimization_started = time.perf_counter()
+        optimization_allowance = _minimum_positive_float(
+            parsed_config["max_runtime_s"],
+            None if request_timeout_s is None else max(1e-6, request_timeout_s-(optimization_started-start)),
+        )
+        coarse_allowance = None if optimization_allowance is None else optimization_allowance*(.7 if finish_enabled else 1.)
         optimization_result = run_differentiable_optimization(
             backend_choice=backend_choice,
-            parsed_config=parsed_config,
+            parsed_config=coarse_config,
             primitives=tuple(primitives),
             renderer=renderer,
-            cameras=cameras,
-            target_record=target_record,
+            cameras=optimization_cameras,
+            target_record=optimization_target,
             target_view_weights=target_view_weights,
-            initial_render_batch=initial_render_batch,
-            initial_loss=initial_loss,
-            request_timeout_s=request_timeout_s,
+            initial_render_batch=optimization_initial_batch,
+            initial_loss=optimization_initial_loss,
+            request_timeout_s=coarse_allowance,
         )
+        coarse_summary = dict(optimization_result['optimization_summary'])
+        if finish_enabled:
+            used = int(coarse_summary.get('objective_evaluations', 0))
+            remaining_count = None if parsed_config['max_objective_evaluations'] is None else max(0, parsed_config['max_objective_evaluations']-used)
+            remaining_time = None if optimization_allowance is None else max(0., optimization_allowance-(time.perf_counter()-optimization_started))
+            if (remaining_count is None or remaining_count >= 2) and (remaining_time is None or remaining_time > .1):
+                fine_config = {**parsed_config, 'optimization_steps': max(1, min(2, parsed_config['optimization_steps'])),
+                    'max_objective_evaluations': remaining_count, 'optimization_initial_step': parsed_config['optimization_initial_step']*.5}
+                fine_parts = optimization_result['optimized_primitives']
+                fine_scene = RenderableScene(primitives=tuple(renderable_from_primitive(p) for p in fine_parts))
+                fine_batch = renderer.render(fine_scene, cameras)
+                fine_loss = renderer.loss(fine_batch, target_record, parsed_config['loss_weights'], view_weights=target_view_weights)
+                optimization_result = run_differentiable_optimization(backend_choice=backend_choice, parsed_config=fine_config,
+                    primitives=tuple(fine_parts), renderer=renderer, cameras=cameras, target_record=target_record,
+                    target_view_weights=target_view_weights, initial_render_batch=fine_batch, initial_loss=fine_loss, request_timeout_s=remaining_time)
+                optimization_result['optimization_summary']['coarse_stage'] = coarse_summary
+                optimization_result['optimization_summary']['finest_finishing'] = True
+                optimization_result['optimization_summary']['objective_evaluations'] += used
+            else:
+                optimization_result['optimization_summary']['finest_finishing'] = False
+                optimization_result['optimization_summary']['finest_finishing_reason'] = 'shared_allowance_exhausted'
         optimized_primitives = optimization_result["optimized_primitives"]
         optimization_history = optimization_result["optimization_history"]
         optimization_summary = optimization_result["optimization_summary"]
         render_batch = optimization_result["render_batch"]
         loss = optimization_result["loss"]
+        # Final report is re-evaluated at the original input resolution, same initial/final contract.
+        final_scene = RenderableScene(primitives=tuple(renderable_from_primitive(p) for p in optimized_primitives))
+        render_batch = renderer.render(final_scene,cameras)
+        loss = renderer.loss(render_batch,target_record,parsed_config["loss_weights"],view_weights=target_view_weights)
+        from .optimization import _optimizer_objective_total
+        initial_geometric = _optimizer_objective_total(initial_loss, parsed_config)
+        final_geometric = _optimizer_objective_total(loss, parsed_config)
+        admitted = bool(np.isfinite(final_geometric) and final_geometric < initial_geometric)
+        if not admitted:
+            optimized_primitives = tuple(primitives)
+            render_batch = initial_render_batch
+            loss = initial_loss
+        optimization_summary["full_resolution_admission"] = {
+            "accepted": admitted, "initial_geometric_objective": initial_geometric,
+            "proposed_geometric_objective": final_geometric,
+            "reason": "strict_full_resolution_geometric_improvement" if admitted else "retained_initial_full_resolution_state",
+        }
+        optimization_summary["shared_optimization_allowance_s"] = optimization_allowance
+        optimization_summary["optimization_resolution"] = optimization_resolution
+        optimization_summary["final_evaluation_resolution"] = [c.image_size for c in cameras]
+        optimization_summary["initial_total"] = initial_loss.total
+        optimization_summary["final_total"] = loss.total
     except Exception as exc:
         if backend_choice == "nvdiffrast":
             dependency_state = (
-                nvd_renderer.dependency_state if nvd_renderer is not None else {}
+                getattr(nvd_renderer, "dependency_state", {}) if nvd_renderer is not None else {}
             )
             status = "failed" if optional_dependency_policy == "fail" else "skipped"
             message = f"nvdiffrast render path unavailable: {exc}"
@@ -338,6 +439,7 @@ def run_refinement_candidate(request: object) -> object:
         target_view_weights=target_view_weights,
         view_signal_details=view_signal_details,
         target_signal_warnings=target_signal_warnings,
+        pixel_evidence=pixel_evidence,
     )
 
     elapsed = time.perf_counter() - start
@@ -386,6 +488,11 @@ def run_refinement_candidate(request: object) -> object:
         failed_required_views=failed_required_views,
         warnings=warnings,
     )
+    from dataclasses import replace as data_replace
+    from reconstruction.projected_metrics import projected_mesh_metrics
+    projected = projected_mesh_metrics(target,mesh_proxy.vertices,mesh_proxy.faces)
+    metrics = data_replace(metrics,per_view=projected,area_iou_mean=0.,area_iou_min=0.,boundary_iou_mean=0.,
+        extras={**metrics.extras,"soft_renderer_diagnostics":metrics.per_view,"projection_source":"exported_mesh_polygon_raster"})
     return CandidateResult(
         candidate_id=candidate_id,
         backend_name=backend_name,

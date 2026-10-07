@@ -53,6 +53,13 @@ class ResFitPipelineConfig:
     optimizer: CoordinateDescentConfig = field(default_factory=CoordinateDescentConfig)
     weights: ResFitLossWeights = field(default_factory=ResFitLossWeights)
     fail_on_regression: bool = True
+    max_primitives: int = 12
+    residual_rounds: int = 1
+    residual_refinement_steps: int = 1
+    max_residual_proposals: int = 3
+    objective_mode: str = "legacy_world_squared"
+    length_scale: float | None = None
+    refinement_strategy: str = "coordinate"
 
     def validate(self) -> tuple[str, ...]:
         errors: list[str] = []
@@ -61,8 +68,18 @@ class ResFitPipelineConfig:
         errors.extend(self.initialization.validate())
         errors.extend(self.optimizer.validate())
         errors.extend(self.weights.validate())
+        if self.objective_mode not in {"legacy_world_squared", "normalized_area_v1"}:
+            errors.append("unsupported objective_mode")
+        if self.refinement_strategy not in {"coordinate", "coupled_blocks"}:
+            errors.append("unsupported refinement_strategy")
+        if self.length_scale is not None and (not np.isfinite(self.length_scale) or self.length_scale <= 0.):
+            errors.append("length_scale must be positive and finite")
         if not isinstance(self.fail_on_regression, bool):
             errors.append(f"fail_on_regression must be bool, got {type(self.fail_on_regression)!r}")
+        if self.max_primitives < 1:
+            errors.append("max_primitives must be positive")
+        if min(self.residual_rounds, self.residual_refinement_steps, self.max_residual_proposals) < 0:
+            errors.append("residual search limits must be nonnegative")
         return tuple(errors)
 
 
@@ -79,6 +96,9 @@ class ResFitPipelineResult:
     selected_attempt: str = "default"
     attempts: tuple[Mapping[str, Any], ...] = ()
     family_attempts: tuple[Mapping[str, Any], ...] = ()
+    search_budget: Mapping[str, Any] = field(default_factory=dict)
+    residual_proposals: tuple[Mapping[str, Any], ...] = ()
+    parameter_visits: tuple = ()
 
     def primitive_dicts(self) -> tuple[Mapping[str, object], ...]:
         return tuple(
@@ -91,12 +111,20 @@ class ResFitPipelineResult:
 def _pipeline_config_summary(config: ResFitPipelineConfig) -> Mapping[str, Any]:
     return {
         "primitive_family": config.primitive_family,
+        "objective_mode": config.objective_mode,
+        "refinement_strategy": config.refinement_strategy,
+        "length_scale": config.length_scale,
+        "max_primitives": config.max_primitives,
+        "residual_rounds": config.residual_rounds,
+        "residual_refinement_steps": config.residual_refinement_steps,
+        "max_residual_proposals": config.max_residual_proposals,
         "initialization": {
             "primitive_count": config.initialization.primitive_count,
             "target_point_count": config.initialization.target_point_count,
             "min_radius": config.initialization.min_radius,
             "covariance_floor": config.initialization.covariance_floor,
             "kmeans_iterations": config.initialization.kmeans_iterations,
+            "kmeans_seed": config.initialization.kmeans_seed,
         },
         "optimizer": {
             "iterations": config.optimizer.iterations,

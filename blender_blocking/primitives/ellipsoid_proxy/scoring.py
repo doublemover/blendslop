@@ -96,6 +96,8 @@ def _topology_source(topology_signal: Mapping[str, Any], report: Mapping[str, An
 
 def _compact_config_summary(config: Mapping[str, Any]) -> dict[str, Any]:
     return {
+        "proxy_variant": config.get('proxy_variant','initializer_only'),
+        "proxy_fit_evaluations": config.get('proxy_fit_evaluations',192),
         "family": config.get("family"),
         "primitive_count": int(config.get("primitive_count", 0)),
         "target_point_count": int(config.get("target_point_count", 0)),

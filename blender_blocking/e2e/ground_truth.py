@@ -59,7 +59,20 @@ def _synthetic_ground_truth_row(
     *,
     reference_paths: Optional[Mapping[str, str]] = None,
     config: Optional[BlockingConfig] = None,
+    reference_mesh_path: Optional[Path] = None,
 ) -> Dict[str, Any]:
+    if reference_mesh_path is not None:
+        from blender_blocking.evaluation.comparable_geometry import compare_meshes
+        candidate_mesh = _mesh_path_from_payload(result_payload)
+        if candidate_mesh is None:
+            return {'available': False, 'reason': 'candidate mesh artifact not found'}
+        geometry = compare_meshes(reference_mesh_path, candidate_mesh)
+        payload = {'geometry_true': geometry}
+        return {'available': True, 'ground_truth_level': 'evaluated_blender_mesh',
+                'shape_id': getattr(spec, 'shape_id', ''), 'geometry_payload': payload,
+                'mesh_path': str(candidate_mesh), 'reference_mesh_path': str(reference_mesh_path),
+                'metrics': _flatten_geometry_payload(payload)}
+
     try:
         from blender_blocking.synthetic.ground_truth import (
             build_pure_artifacts,
@@ -140,6 +153,10 @@ def _synthetic_ground_truth_row(
     return row
 
 def _mesh_path_from_payload(payload: Mapping[str, Any]) -> Optional[Path]:
+    # The externally rendered mesh overrides internal branch/proxy artifacts.
+    validated_path = payload.get("mesh_path")
+    if validated_path and Path(str(validated_path)).is_file():
+        return Path(str(validated_path))
     candidates: list[str] = []
 
     def visit(value: Any) -> None:

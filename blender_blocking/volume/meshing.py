@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections import defaultdict, deque
-from typing import Any, Iterable, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 import numpy as np
 
@@ -57,6 +56,9 @@ def extract_surface_voxels(
 
 
 def surface_points(grid: VolumeGrid, *, max_voxels: Optional[int] = None) -> np.ndarray:
+    selective = getattr(grid, "surface_indices", None)
+    if callable(selective):
+        return grid.transform.index_to_world(selective(max_voxels=max_voxels))
     dense = grid.to_dense(max_voxels=max_voxels)
     occupied = _occupancy_for_surface(dense, grid.value_type, grid.default_value)
     surface = extract_surface_voxels(occupied, prefer_scipy=False)
@@ -73,6 +75,7 @@ def extract_mesh(
     level: Optional[float] = None,
     max_voxels: Optional[int] = None,
     allow_point_cloud_fallback: bool = False,
+    recorder: Any = None,
 ) -> MeshExtractionResult:
     """Extract a mesh from a volume grid when optional dependencies are available."""
     requested_method = method
@@ -116,6 +119,25 @@ def extract_mesh(
                 np.empty((0, 3), dtype=float), np.empty((0, 3), dtype=np.int64)
             ),
         )
+
+    selective = getattr(grid, "extract_selective_mesh", None)
+    if callable(selective) and canonical_method == "marching_cubes":
+        if level not in (None, .5):
+            return MeshExtractionResult.unavailable(
+                canonical_method, "Boolean hierarchy extraction requires level 0.5",
+                requested_method=requested_method, method_aliases=method_aliases)
+        try:
+            from dataclasses import replace
+            skimage_method = "lorensen" if "lorensen" in normalized_method else "lewiner"
+            result = selective(method=canonical_method, skimage_method=skimage_method,
+                               recorder=recorder)
+            # No global dense fallback disguised as sparse/adaptive execution.
+            return replace(result, requested_method=requested_method,
+                           method_aliases=method_aliases)
+        except Exception as exc:
+            return MeshExtractionResult.unavailable(
+                canonical_method, "selective hierarchy extraction failed: " + str(exc),
+                requested_method=requested_method, method_aliases=method_aliases)
 
     try:
         from skimage import measure
@@ -185,19 +207,22 @@ def extract_mesh(
         else "lorensen"
     )
 
+    # scikit-image documents face orientation using the left-hand convention.
+    # Blendslop exports right-handed outward material boundaries. Occupancy is
+    # high inside, whereas signed distance is negative inside: their winding
+    # choices must therefore be opposite instead of sharing the default.
+    gradient_direction = "descent" if grid.value_type == "signed_distance" else "ascent"
     try:
-        vertices, faces, normals, values = measure.marching_cubes(
-            field,
-            level=level,
-            spacing=(1.0, 1.0, 1.0),
-            method=skimage_method,
-        )
-    except TypeError:
-        vertices, faces, normals, values = measure.marching_cubes(
-            field,
-            level=level,
-            spacing=(1.0, 1.0, 1.0),
-        )
+        try:
+            vertices, faces, normals, values = measure.marching_cubes(
+                field, level=level, spacing=(1.0,1.0,1.0), method=skimage_method,
+                gradient_direction=gradient_direction, allow_degenerate=False)
+        except TypeError:
+            # Older supported versions may omit the method selector, but cannot
+            # silently omit the geometric winding/degeneracy contract.
+            vertices, faces, normals, values = measure.marching_cubes(
+                field, level=level, spacing=(1.0,1.0,1.0),
+                gradient_direction=gradient_direction, allow_degenerate=False)
     except Exception as exc:
         return MeshExtractionResult.unavailable(
             canonical_method,
@@ -210,7 +235,19 @@ def extract_mesh(
         )
 
     world_vertices = grid.transform.index_to_world(vertices + index_offset)
-    topology = _mesh_topology_summary(world_vertices.astype(float), faces.astype(np.int64))
+    # The returned field normals use high-to-low direction independently of
+    # triangle order. Apply the field sign and inverse-transpose voxel scale.
+    world_normals = np.asarray(normals,float) / grid.transform.voxel_size_array
+    if grid.value_type == "signed_distance":
+        world_normals = -world_normals
+    lengths = np.linalg.norm(world_normals,axis=1)
+    world_normals = np.divide(world_normals,lengths[:,None],out=np.zeros_like(world_normals),where=lengths[:,None]>0.)
+    from blender_blocking.evaluation.cost_model import timed_call
+    from blender_blocking.metrics.topology_receipt import ConnectivityTopologyReceipt
+    topology_receipt = timed_call(
+        recorder, "extraction_topology", ConnectivityTopologyReceipt.capture,
+        world_vertices, faces)
+    topology = topology_receipt.summary()
     return MeshExtractionResult(
         status="ok",
         method=canonical_method,
@@ -218,12 +255,16 @@ def extract_mesh(
         method_aliases=method_aliases,
         vertices=world_vertices.astype(float, copy=False),
         faces=faces.astype(np.int64, copy=False),
-        normals=normals.astype(float, copy=False),
+        normals=world_normals,
         values=values,
         topology=topology,
+        topology_receipt=topology_receipt,
         metrics={
             "vertex_count": int(len(vertices)),
             "face_count": int(len(faces)),
+            "gradient_direction": gradient_direction,
+            "winding_contract": "right-handed outward material boundary",
+            "normals_space": "world; field sign and inverse voxel scale applied",
             "level": float(level),
             "field_min": min_value,
             "field_max": max_value,
@@ -274,61 +315,8 @@ def _mesh_topology_summary(
     if face_count == 0:
         return _empty_mesh_topology(vertex_count)
 
-    edge_to_faces = defaultdict(list)
-    used_vertices: set[int] = set()
-    degenerate_faces = 0
-    for face_index, face in enumerate(face_array):
-        if len(face) < 3:
-            degenerate_faces += 1
-            continue
-        if len(set(int(v) for v in face)) < 3:
-            degenerate_faces += 1
-            continue
-        if any(int(v) < 0 or int(v) >= vertex_count for v in face):
-            degenerate_faces += 1
-            continue
-        used_vertices.update(int(v) for v in face)
-        for index, start in enumerate(face):
-            end = int(face[(index + 1) % len(face)])
-            if int(start) == end:
-                continue
-            edge = (int(start), end) if int(start) < end else (end, int(start))
-            edge_to_faces[edge].append(face_index)
-
-    edge_owners = (len(owners) for owners in edge_to_faces.values())
-    boundary_edges = sum(1 for owners in edge_owners if owners == 1)
-    non_manifold_edges = sum(1 for owners in edge_to_faces.values() if len(owners) > 2)
-    loose_vertices = vertex_count - len(used_vertices)
-    connected_components = _connected_components(used_vertices, edge_to_faces.keys())
-
-    watertight = (
-        boundary_edges == 0
-        and non_manifold_edges == 0
-        and degenerate_faces == 0
-        and face_count > 0
-    )
-    topology_score = _topology_score(
-        boundary_edges=boundary_edges,
-        non_manifold_edges=non_manifold_edges,
-        degenerate_faces=degenerate_faces,
-        loose_vertices=loose_vertices,
-        connected_components=connected_components,
-    )
-    return {
-        "vertex_count": vertex_count,
-        "face_count": face_count,
-        "edge_count": len(edge_to_faces),
-        "boundary_edges": boundary_edges,
-        "non_manifold_edges": non_manifold_edges,
-        "degenerate_faces": degenerate_faces,
-        "loose_vertices": loose_vertices,
-        "connected_components": connected_components,
-        "euler_characteristic": vertex_count - len(edge_to_faces) + face_count,
-        "watertight": watertight,
-        "topology_score": topology_score,
-        "topology_style": "mesh",
-        "has_faces": True,
-    }
+    from blender_blocking.metrics.topology_receipt import ConnectivityTopologyReceipt
+    return ConnectivityTopologyReceipt.capture(vertex_array, face_array).summary()
 
 
 def _empty_mesh_topology(vertex_count: int) -> dict[str, Any]:
@@ -347,47 +335,3 @@ def _empty_mesh_topology(vertex_count: int) -> dict[str, Any]:
         "topology_style": "none",
         "has_faces": False,
     }
-
-
-def _topology_score(
-    *,
-    boundary_edges: int,
-    non_manifold_edges: int,
-    degenerate_faces: int,
-    loose_vertices: int,
-    connected_components: int,
-) -> float:
-    score = 1.0
-    score -= min(0.35, non_manifold_edges * 0.02)
-    score -= min(0.25, boundary_edges * 0.01)
-    score -= min(0.20, degenerate_faces * 0.03)
-    score -= min(0.10, loose_vertices * 0.01)
-    score -= min(0.20, max(0, connected_components - 1) * 0.05)
-    return max(0.0, score)
-
-
-def _connected_components(
-    used_vertices: set[int], edges: Iterable[tuple[int, int]]
-) -> int:
-    if not used_vertices:
-        return 0
-
-    graph: dict[int, set[int]] = {vertex: set() for vertex in used_vertices}
-    for start, end in edges:
-        if start in graph and end in graph:
-            graph[start].add(end)
-            graph[end].add(start)
-
-    remaining = set(graph)
-    components = 0
-    while remaining:
-        components += 1
-        queue: deque[int] = deque([remaining.pop()])
-        while queue:
-            current = queue.popleft()
-            for neighbor in graph[current]:
-                if neighbor in remaining:
-                    remaining.remove(neighbor)
-                    queue.append(neighbor)
-
-    return components

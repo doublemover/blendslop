@@ -173,9 +173,18 @@ class E2EValidator:
         scene.render.resolution_percentage = 100
 
         # Fast rendering (we only need silhouettes)
-        scene.render.engine = config.engine
-        if config.engine == "BLENDER_EEVEE" and hasattr(scene, "eevee"):
-            scene.eevee.taa_render_samples = int(config.samples)
+        from blender_blocking.integration.blender_ops.render_utils import _resolve_render_engine
+        engine, _, warnings = _resolve_render_engine(scene, config.engine)
+        if engine is None:
+            raise RuntimeError(f'No render engine available for {config.engine}')
+        scene.render.engine = engine
+        self.render_engine_evidence = {'requested': config.engine, 'applied': engine, 'warnings': list(warnings)}
+        eevee = getattr(scene, "eevee", None)
+        samples_applied = None
+        if engine.startswith("BLENDER_EEVEE") and hasattr(eevee, "taa_render_samples"):
+            eevee.taa_render_samples = int(config.samples)
+            samples_applied = int(config.samples)
+        self.render_engine_evidence.update(samples_requested=int(config.samples), samples_applied=samples_applied)
 
     def extract_silhouette(self, image_path: str) -> np.ndarray:
         """
@@ -255,6 +264,8 @@ class E2EValidator:
             },
         ):
             payload = workflow.run_full_workflow(num_slices=num_slices)
+        if workflow.config.reconstruction.view_calibration:
+            self.render_config.view_calibration = dict(workflow.config.reconstruction.view_calibration)
         render_mesh = _find_renderable_mesh(payload) or _find_renderable_mesh(
             workflow.reconstruction_result
         )
@@ -362,6 +373,12 @@ class E2EValidator:
                 _artifact_line("result json", self.result_json)
             return passed, {}
 
+        # Retain the exact evaluated mesh used by external render validation.
+        from blender_blocking.evaluation.comparable_geometry import export_evaluated_object
+        evidence_root = self.artifact_root or self.render_output_dir
+        with self.cost_recorder.stage('serialization'):
+            render_mesh_path = export_evaluated_object(render_mesh, evidence_root / 'validated-mesh.obj')
+            self.cost_recorder.count('obj_export_bytes', render_mesh_path.stat().st_size)
         # Step 2: Setup rendering
         _print_section("2/4 Render Setup")
         with self.cost_recorder.stage("render_setup"):
@@ -407,23 +424,36 @@ class E2EValidator:
             "render_views",
             work_units={"views": float(len(render_views))},
         ):
-            rendered_paths = render_orthogonal_views(
-                str(output_dir),
-                views=render_views,
-                target_objects=[render_mesh] if render_mesh else None,
-                resolution=self.render_config.resolution,
-                margin_frac=self.render_config.margin_frac,
-                transparent_bg=self.render_config.transparent_bg,
-                color_mode=self.render_config.color_mode,
-                force_material=self.render_config.force_material,
-                background_color=self.render_config.background_color,
-                silhouette_color=self.render_config.silhouette_color,
-                camera_distance_factor=self.render_config.camera_distance_factor,
-                party_mode=self.render_config.party_mode,
-                filename_prefix=filename_prefix,
-                start_index=1,
-                progress_callback=render_progress.update,
-            )
+            if workflow.valid_evidence_masks or self.workflow_config.reconstruction.view_crops:
+                from dataclasses import replace as replace_render_config
+                rendered_paths = {}
+                for index, view in enumerate(render_views,1):
+                    image = workflow.views.get(view)
+                    resolution = (image.shape[1],image.shape[0]) if image is not None else self.render_config.resolution
+                    config = replace_render_config(self.render_config,resolution=resolution)
+                    rendered_paths.update(render_orthogonal_views(str(output_dir),views=(view,),
+                        target_objects=[render_mesh] if render_mesh else None,render_config=config,
+                        resolution=resolution,filename_prefix=filename_prefix,start_index=index,
+                        progress_callback=render_progress.update))
+            else:
+                rendered_paths = render_orthogonal_views(
+                    str(output_dir),
+                    views=render_views,
+                    target_objects=[render_mesh] if render_mesh else None,
+                    render_config=self.render_config,
+                    resolution=self.render_config.resolution,
+                    margin_frac=self.render_config.margin_frac,
+                    transparent_bg=self.render_config.transparent_bg,
+                    color_mode=self.render_config.color_mode,
+                    force_material=self.render_config.force_material,
+                    background_color=self.render_config.background_color,
+                    silhouette_color=self.render_config.silhouette_color,
+                    camera_distance_factor=self.render_config.camera_distance_factor,
+                    party_mode=self.render_config.party_mode,
+                    filename_prefix=filename_prefix,
+                    start_index=1,
+                    progress_callback=render_progress.update,
+                )
         render_progress.close()
 
         if not rendered_paths:
@@ -484,7 +514,9 @@ class E2EValidator:
                 compare_progress.update(1)
                 continue
 
-            ref_image = load_image(reference_paths[view])
+            ref_image = workflow.views.get(view)
+            if ref_image is None:
+                ref_image = load_image(reference_paths[view])
             render_image = load_image(rendered_paths[view])
 
             ref_mask = mask_from_image_array(
@@ -495,29 +527,43 @@ class E2EValidator:
                 extract_config=self.workflow_config.silhouette_extract_render,
             )
 
-            canonical = self.workflow_config.canonicalize
-            anchor = "center" if view == "top" else canonical.anchor
-            ref_canon = canonicalize_mask(
-                ref_mask,
-                output_size=canonical.output_size,
-                padding_frac=canonical.padding_frac,
-                anchor=anchor,
-            )
-            render_canon = canonicalize_mask(
-                render_mask,
-                output_size=canonical.output_size,
-                padding_frac=canonical.padding_frac,
-                anchor=anchor,
-            )
+            if self.render_config.view_calibration:
+                # Recorded pixels retain calibration, crop and negative space.
+                ref_canon, render_canon = ref_mask, render_mask
+            else:
+                canonical = self.workflow_config.canonicalize
+                anchor = "center" if view == "top" else canonical.anchor
+                ref_canon = canonicalize_mask(
+                    ref_mask,
+                    output_size=canonical.output_size,
+                    padding_frac=canonical.padding_frac,
+                    anchor=anchor,
+                )
+                render_canon = canonicalize_mask(
+                    render_mask,
+                    output_size=canonical.output_size,
+                    padding_frac=canonical.padding_frac,
+                    anchor=anchor,
+                )
 
             threshold = self.view_thresholds.get(view, self.iou_threshold)
-            payload = evaluate_silhouette_pair(
-                ref_canon,
-                render_canon,
-                view=view,
-                config=silhouette_gate,
-                required=True,
-            )
+            valid = workflow.valid_evidence_masks.get(view)
+            if valid is not None and not self.render_config.view_calibration:
+                raise ValueError('partial observation validation requires the matching calibrated pixel frame')
+            if valid is not None:
+                from blender_blocking.reconstruction.visibility import evaluate_visible_pair
+                from types import SimpleNamespace
+                payload = evaluate_visible_pair(ref_canon, render_canon,
+                    SimpleNamespace(mask=ref_canon, valid_mask=valid, view=view),
+                    config=silhouette_gate, required=True)
+            else:
+                payload = evaluate_silhouette_pair(
+                    ref_canon,
+                    render_canon,
+                    view=view,
+                    config=silhouette_gate,
+                    required=True,
+                )
 
             if PIL_AVAILABLE and self._should_write_debug_artifacts(payload):
                 debug_dir = (
@@ -545,7 +591,7 @@ class E2EValidator:
             table_rows.append(
                 {
                     "view": view,
-                    "iou": f"{float(payload['area_iou']):.3f}",
+                    "iou": f"{float(payload['area_iou']):.3f}" if payload["area_iou"] is not None else "N/A",
                     "threshold": f"{threshold:.3f}",
                     "status": "PASS" if payload["passed"] else "FAIL",
                     "intersection": payload["intersection"],
@@ -615,12 +661,16 @@ class E2EValidator:
                 "views": self.results,
                 "backend_result": backend_payload,
                 "rendered_paths": rendered_paths,
+                "render_engine": self.render_engine_evidence,
+                "mesh_path": str(render_mesh_path),
             }
             payload_out.update(_evaluation_outputs_from_payload(backend_payload))
             payload_out, cost_passed = self._attach_cost_outputs(
                 payload_out,
                 backend_payload,
             )
+            from blender_blocking.e2e.evidence import attach_evaluation_evidence
+            payload_out = attach_evaluation_evidence(payload_out)
             passed = passed and cost_passed
             payload_out["passed"] = passed
             if self.result_json:

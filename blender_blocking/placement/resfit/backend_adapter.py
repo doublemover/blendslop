@@ -23,6 +23,7 @@ from ..resfit_objective import (
 from ..resfit_optimizer import (
     CoordinateDescentConfig,
     OptimizationRecord,
+    OptimizationBudget,
     coordinate_descent_optimize,
 )
 from reconstruction.target_signals import collect_target_signals
@@ -47,6 +48,7 @@ from .artifacts import (
 )
 from .metrics import build_resfit_candidate_metrics
 from .optimizer import fit_residual_primitives_multistart
+from .hook_transport import RebuildableHook
 from .penalties import (
     _build_constraint_penalty_hook,
     _build_profile_silhouette_hook,
@@ -63,7 +65,8 @@ def run_primitive_fit_pipeline(request: object) -> object:
     from reconstruction.types import CandidateResult
 
     start = time.perf_counter()
-    config = dict(getattr(request, "config", {}) or {})
+    from blender_blocking.reconstruction.option_receipts import copy_options
+    config = copy_options(getattr(request, "config", {}) or {})
     target = getattr(request, "target", None)
     candidate_id = getattr(request, "candidate_id")
     backend_name = getattr(request, "backend_name", "primitive_fit_refine")
@@ -215,7 +218,17 @@ def run_primitive_fit_pipeline(request: object) -> object:
             errors=errors,
         ),
     )
+    residual_rounds = _coerce_int(config.get("residual_rounds", 1), "residual_rounds",
+                                  default=1, min_value=0, max_value=4, errors=errors)
+    residual_steps = _coerce_int(config.get("residual_refinement_steps", 1), "residual_refinement_steps",
+                                 default=1, min_value=0, max_value=8, errors=errors)
+    residual_proposals = _coerce_int(config.get("max_residual_proposals", 3), "max_residual_proposals",
+                                     default=3, min_value=0, max_value=8, errors=errors)
+    # Reserve one growth slot only for an automatically chosen initial count.
+    if "primitive_count" not in config and optimization_steps > 0 and residual_rounds and primitive_count > 1:
+        primitive_count -= 1
     init_config = PrimitiveInitializationConfig(
+        kmeans_seed=str(config.get("kmeans_seed", "height")),
         primitive_count=max(1, primitive_count),
         target_point_count=target_point_count,
         min_radius=_coerce_float(
@@ -297,6 +310,12 @@ def run_primitive_fit_pipeline(request: object) -> object:
         optimizer=optimizer_config,
         weights=weights,
         fail_on_regression=bool(config.get("fail_on_regression", True)),
+        objective_mode=str(config.get("objective_mode") or "legacy_world_squared"),
+        refinement_strategy=str(config.get("refinement_strategy") or "coordinate"),
+        length_scale=(float(np.max(np.ptp(np.asarray(target.bounds.to_min_max()), axis=0)))
+                      if target.bounds is not None else None),
+        max_primitives=configured_max_primitives, residual_rounds=residual_rounds,
+        residual_refinement_steps=residual_steps, max_residual_proposals=residual_proposals,
     )
     config_validation = list(errors)
     config_validation.extend(pipeline_config.validate())
@@ -336,25 +355,32 @@ def run_primitive_fit_pipeline(request: object) -> object:
         include_constraint_kinds=False,
         include_topology_details=False,
     )
-    profile_rows = _collect_profile_rows(signal_summary["profile"], getattr(target, "bounds", None))
+    profile_rows = _collect_profile_rows(signal_summary["profile"], getattr(target, "bounds", None), target)
 
     uncertainty_signal = signal_summary["uncertainty"]
     constraint_signal = signal_summary["constraints"]
     topology_signal = signal_summary["topology"]
 
+    hook_module = "blender_blocking.placement.resfit.penalties"
     silhouette_hook = None
     if profile_rows:
-        silhouette_hook = _build_profile_silhouette_hook(
-            profile_rows=profile_rows,
-            uncertainty_by_view=uncertainty_signal["view_details"],
-        )
+        silhouette_hook = RebuildableHook(hook_module, "_build_profile_silhouette_hook", kwargs={
+            "profile_rows": profile_rows, "uncertainty_by_view": uncertainty_signal["view_details"]})
+    if config.get("silhouette_objective", "profile_rows") == "mesh_union":
+        silhouette_hook = RebuildableHook("blender_blocking.placement.resfit.silhouette_union",
+                                        "mesh_union_silhouette_hook", args=(target,), kwargs={"resolution": 64})
+    topology_penalty_hook = RebuildableHook(hook_module, "_build_topology_penalty_hook", args=(topology_signal,))
+    revised_objective = pipeline_config.objective_mode == "normalized_area_v1"
+    if revised_objective:
+        # Input-only confidence/topology constants remain diagnostics. They do
+        # not masquerade as geometry-dependent fitting penalties.
+        topology_penalty_hook = None
+    constraint_penalty_hook = RebuildableHook(hook_module, "_build_constraint_penalty_hook", kwargs={
+        "constraint_signal": constraint_signal, "bounds": getattr(target, "bounds", None),
+        "geometry_dependent": revised_objective})
+    uncertainty_penalty_hook = (None if revised_objective else
+        RebuildableHook(hook_module, "_build_uncertainty_penalty_hook", args=(uncertainty_signal,)))
 
-    topology_penalty_hook = _build_topology_penalty_hook(topology_signal)
-    constraint_penalty_hook = _build_constraint_penalty_hook(
-        constraint_signal=constraint_signal,
-        bounds=getattr(target, "bounds", None),
-    )
-    uncertainty_penalty_hook = _build_uncertainty_penalty_hook(uncertainty_signal)
 
     try:
         (
@@ -378,6 +404,7 @@ def run_primitive_fit_pipeline(request: object) -> object:
             share_budget_across_families=bool(
                 config.get("share_budget_across_families", True)
             ),
+            target=target if config.get("whole_support_search", False) else None,
         )
     except Exception as exc:
         return CandidateResult(
@@ -436,6 +463,11 @@ def run_primitive_fit_pipeline(request: object) -> object:
         max_runtime_s=max_runtime_s,
         max_objective_evaluations=max_objective_evaluations,
     )
+    from reconstruction.projected_metrics import projected_mesh_metrics
+    per_view = projected_mesh_metrics(target, mesh_vertices, mesh_faces)
+    metric = replace(metric, per_view=per_view, area_iou_min=0., area_iou_mean=0., boundary_iou_mean=0.,
+        extras={**metric.extras, "profile_confidence_diagnostics": metric.per_view,
+            "projection_source":"exported_mesh_polygon_raster", "backend_quality_source":"exported_mesh_polygon_projection", "silhouette_objective":config.get("silhouette_objective","profile_rows")})
     status, degraded, errors_out, warnings = apply_resfit_quality_floors(
         config=config,
         status=status,
@@ -473,76 +505,130 @@ def _fit_best_primitive_family(
     uncertainty_penalty_hook: PenaltyHook | None,
     max_attempts: int,
     share_budget_across_families: bool,
+    target=None,
 ) -> tuple[ResFitPipelineResult, str, ResFitPipelineConfig, Sequence[object] | None, str]:
-    family_count = max(1, len(primitive_families))
-    summaries: list[Mapping[str, Any]] = []
-    best: tuple[ResFitPipelineResult, str, ResFitPipelineConfig, Sequence[object] | None, str] | None = None
-    for family in primitive_families:
-        family_config = _family_pipeline_config(
-            base_config,
-            family=family,
-            family_count=family_count,
-            share_budget=share_budget_across_families,
-        )
-        initial_primitives, profile_init_warning = _profile_initial_primitives(
-            family,
-            profile_rows=profile_rows,
-            init_config=init_config,
-        )
-        family_start = time.perf_counter()
-        try:
-            candidate = fit_residual_primitives_multistart(
-                surface,
-                family_config,
-                profile_primitives=initial_primitives,
-                occupied_points=occupied_points,
-                silhouette_hook=silhouette_hook,
-                topology_penalty_hook=topology_penalty_hook,
-                constraint_penalty_hook=constraint_penalty_hook,
-                uncertainty_penalty_hook=uncertainty_penalty_hook,
-                max_attempts=max_attempts,
+    from blender_blocking.reconstruction.process_executor import current_worker_client, PersistentProcessExecutor
+    from contextlib import nullcontext
+    worker = current_worker_client()
+    manager = nullcontext(worker) if worker is not None else PersistentProcessExecutor(2)
+    with manager as fit_executor:
+        family_count = max(1, len(primitive_families))
+        summaries: list[Mapping[str, Any]] = []
+        best: tuple[ResFitPipelineResult, str, ResFitPipelineConfig, Sequence[object] | None, str] | None = None
+        search_start = time.perf_counter()
+        shared_budget = OptimizationBudget(
+            max_objective_evaluations=base_config.optimizer.max_objective_evaluations,
+            max_elapsed_s=base_config.optimizer.max_elapsed_s,
+        ) if share_budget_across_families else None
+        for index, family in enumerate(primitive_families):
+            if shared_budget is not None and shared_budget.reason() is not None:
+                summaries.extend({"family": pending, "status": "skipped", "reason": shared_budget.reason(),
+                                  "objective_evaluations": 0, "elapsed_s": 0.0}
+                                 for pending in primitive_families[index:])
+                break
+            family_budget = (shared_budget.child(slots=family_count - index) if shared_budget is not None else
+                             OptimizationBudget(max_objective_evaluations=base_config.optimizer.max_objective_evaluations,
+                                                max_elapsed_s=base_config.optimizer.max_elapsed_s))
+            evaluation_before = family_budget.objective_evaluations
+            family_config = _family_pipeline_config(
+                base_config,
+                family=family,
+                family_count=family_count,
+                share_budget=False,
             )
-        except Exception as exc:
+            initial_primitives, profile_init_warning = _profile_initial_primitives(
+                family,
+                profile_rows=profile_rows,
+                init_config=init_config,
+            )
+            family_start = time.perf_counter()
+            whole_seed, whole_report = None, None
+            if target is not None:
+                from .initialization import whole_support_seed
+                remaining = family_budget.remaining_seconds()
+                if remaining is None or remaining > .05:
+                    try:
+                        whole_seed, whole_report = whole_support_seed(target,surface,family,
+                            max_elapsed_s=.5 if remaining is None else min(.5,remaining*.2))
+                    except Exception as exc:
+                        whole_report = {"status":"unavailable","error":str(exc)}
+            try:
+                candidate = fit_residual_primitives_multistart(
+                    surface,
+                    family_config,
+                    profile_primitives=initial_primitives,
+                    whole_primitives=whole_seed,
+                    occupied_points=occupied_points,
+                    silhouette_hook=silhouette_hook,
+                    topology_penalty_hook=topology_penalty_hook,
+                    constraint_penalty_hook=constraint_penalty_hook,
+                    uncertainty_penalty_hook=uncertainty_penalty_hook,
+                    max_attempts=max_attempts,
+                    budget=family_budget,
+                    executor=fit_executor,
+                )
+            except Exception as exc:
+                summaries.append(
+                    {
+                        "family": family,
+                        "status": "failed",
+                        "error": str(exc),
+                        "objective_evaluations": None,
+                        "reserved_objective_evaluations": family_budget.objective_evaluations - evaluation_before,
+                        "unreported_work_possible": True,
+                        "elapsed_s": time.perf_counter() - family_start,
+                        "profile_init_warning": profile_init_warning,
+                    }
+                )
+                continue
+            improvement = candidate.initial_loss.total - candidate.final_loss.total
             summaries.append(
                 {
                     "family": family,
-                    "status": "failed",
-                    "error": str(exc),
+                    "status": "ok",
+                    "selected_attempt": candidate.selected_attempt,
+                    "initial_total": candidate.initial_loss.total,
+                    "final_total": candidate.final_loss.total,
+                    "improvement": improvement,
+                    "primitive_count": len(candidate.primitives),
+                    "objective_evaluations": candidate.objective_evaluations,
+                    "reserved_objective_evaluations": candidate.search_budget.get("reserved_evaluation_charge", candidate.objective_evaluations),
+                    "unreported_work_possible": candidate.search_budget.get("unreported_work_possible", False),
+                    "max_objective_evaluations": family_budget.max_objective_evaluations,
+                    "max_elapsed_s": family_budget.max_elapsed_s,
+                    "optimizer_elapsed_s": candidate.optimizer_elapsed_s,
                     "elapsed_s": time.perf_counter() - family_start,
+                    "profile_initialized": bool(initial_primitives),
+                    "whole_support_seed": whole_report,
                     "profile_init_warning": profile_init_warning,
                 }
             )
-            continue
-        improvement = candidate.initial_loss.total - candidate.final_loss.total
-        summaries.append(
-            {
-                "family": family,
-                "status": "ok",
-                "selected_attempt": candidate.selected_attempt,
-                "initial_total": candidate.initial_loss.total,
-                "final_total": candidate.final_loss.total,
-                "improvement": improvement,
-                "primitive_count": len(candidate.primitives),
-                "objective_evaluations": candidate.objective_evaluations,
-                "optimizer_elapsed_s": candidate.optimizer_elapsed_s,
-                "elapsed_s": time.perf_counter() - family_start,
-                "profile_initialized": bool(initial_primitives),
-                "profile_init_warning": profile_init_warning,
-            }
+            if best is None or _family_result_is_better(candidate, best[0]):
+                best = (candidate, family, family_config, initial_primitives, profile_init_warning)
+        if best is None:
+            errors = [
+                str(summary.get("error", summary.get("reason", "unknown family fitting error")))
+                for summary in summaries
+                if summary.get("status") in {"failed", "skipped"}
+            ]
+            raise RuntimeError("all primitive family attempts failed: " + "; ".join(errors))
+        selected, family, family_config, initial_primitives, profile_init_warning = best
+        selected = replace(
+            selected,
+            family_attempts=tuple(summaries),
+            objective_evaluations=sum(int(row.get("objective_evaluations") or 0) for row in summaries),
+            optimizer_elapsed_s=time.perf_counter() - search_start,
+            search_budget={
+                "scope": "all_families_and_attempts" if share_budget_across_families else "per_family_all_attempts",
+                "max_objective_evaluations": base_config.optimizer.max_objective_evaluations,
+                "max_elapsed_s": base_config.optimizer.max_elapsed_s,
+                "includes_initial_and_failed_objectives": True,
+                "deadline_is_cooperative": True,
+                "reserved_evaluation_charge": sum(row.get("reserved_objective_evaluations", row.get("objective_evaluations") or 0) for row in summaries),
+                "unreported_work_possible": any(row.get("unreported_work_possible") for row in summaries),
+            },
         )
-        if best is None or _family_result_is_better(candidate, best[0]):
-            best = (candidate, family, family_config, initial_primitives, profile_init_warning)
-    if best is None:
-        errors = [
-            str(summary.get("error", "unknown family fitting error"))
-            for summary in summaries
-            if summary.get("status") == "failed"
-        ]
-        raise RuntimeError("all primitive family attempts failed: " + "; ".join(errors))
-    selected, family, family_config, initial_primitives, profile_init_warning = best
-    selected = replace(selected, family_attempts=tuple(summaries))
-    return selected, family, family_config, initial_primitives, profile_init_warning
-
+        return selected, family, family_config, initial_primitives, profile_init_warning
 
 def _family_pipeline_config(
     base_config: ResFitPipelineConfig,
@@ -582,7 +668,10 @@ def _profile_initial_primitives(
     try:
         slice_data = _profile_rows_to_slices(profile_rows, init_config)
         if slice_data:
-            return initialize_from_profile_bands(slice_data, init_config), ""
+            primitives = initialize_from_profile_bands(slice_data, init_config)
+            if primitives:
+                return primitives, ""
+        return None, "profile seed unavailable: insufficient exact intervals or noncircular cross-sections"
     except Exception as exc:
         return None, f"profile initialization failed: {exc}"
     return None, ""

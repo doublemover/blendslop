@@ -68,6 +68,16 @@ def _postprocess_mesh(
             ),
         }
 
+    if config.get("external_open3d_python"):
+        from .poisson_bridge import run_external_poisson
+        try:
+            processed = run_external_poisson(mesh_result, method, config)
+            return processed, {"method":method,"status":"ok","required":required,
+                "implementation":"explicit_open3d_cpu_helper","metrics":processed.metrics,
+                "message":"configured external CPU helper completed; Blender ABI kept isolated"}
+        except Exception as exc:
+            return mesh_result, {"method":method,"status":"failed" if required else "skipped","required":required,
+                "message":str(exc),"error_type":type(exc).__name__}
     dependency = _optional_dependency_status("open3d")
     if not dependency["available"]:
         status = "failed" if required else "skipped"

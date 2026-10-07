@@ -175,9 +175,7 @@ def _geometry_metric_values(
     values: list[MetricValue] = []
     for name, value, higher in (
         (f"{prefix}.chamfer_l1", report.chamfer_l1, False),
-        (f"{prefix}.chamfer_l1_normalized", report.chamfer_l1, False),
         (f"{prefix}.chamfer_l2", report.chamfer_l2, False),
-        (f"{prefix}.chamfer_l2_normalized", report.chamfer_l2, False),
         (f"{prefix}.fscore_tau", report.fscore_tau, True),
         (f"{prefix}.volumetric_iou", report.volumetric_iou, True),
         (f"{prefix}.normal_consistency", report.normal_consistency, True),
@@ -194,6 +192,10 @@ def _geometry_metric_values(
                     source=source,
                 )
             )
+    if source == "bbox_uniform_normalized_mesh_surface":
+        for suffix, value in (("chamfer_l1", report.chamfer_l1), ("chamfer_l2", report.chamfer_l2)):
+            if value is not None:
+                values.append(MetricValue(f"{prefix}.{suffix}_normalized", value, higher_is_better=False, status="pass", source=source))
     if report.fscore_tolerance is not None:
         values.append(
             MetricValue(

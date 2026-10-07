@@ -86,34 +86,36 @@ def visual_hull_projection_metrics_from_target(
     else:
         points = grid.transform.index_to_world(active_indices)
 
+    constraints = {str(c.view): c for c in target.constraints}
     per_view: dict[str, dict[str, Any]] = {}
     for name, view in zip(view_names, hull.views):
-        projected = _project_points_to_view_mask(
-            view,
-            points,
-            bounds_min=hull.bounds_min,
-            bounds_max=hull.bounds_max,
-            grid_shape=shape,
-        )
+        constraint = constraints.get(name)
+        if constraint is not None and target.extras.get('view_calibration', {}).get(name):
+            projected = _project_calibrated_points(target, constraint, points, grid)
+        else:
+            projected = _project_points_to_view_mask(
+                view,
+                points,
+                bounds_min=hull.bounds_min,
+                bounds_max=hull.bounds_max,
+                grid_shape=shape,
+            )
+        reference = view.silhouette
+        def measure(prediction):
+            if constraint is not None and constraint.valid_mask is not None:
+                from ..visibility import evaluate_visible_pair
+                observed_reference = np.asarray(getattr(constraint.mask, 'mask', constraint.mask), bool)
+                return evaluate_visible_pair(observed_reference, prediction, constraint, required=True)
+            return silhouette_metric_result(reference, prediction, view=name, required=True).to_dict()
         metric_mask = projected
         raw_metric = None
         if boundary_refine:
-            raw_metric = silhouette_metric_result(
-                view.silhouette,
-                projected,
-                view=name,
-                required=True,
-            ).to_dict()
+            raw_metric = measure(projected)
             # The visual hull is explicitly constrained by each input silhouette.
             # Clipping projection metrics to that silhouette removes voxel-center
             # dilation artifacts while preserving true under-coverage failures.
             metric_mask = np.logical_and(projected, view.silhouette)
-        metric = silhouette_metric_result(
-            view.silhouette,
-            metric_mask,
-            view=name,
-            required=True,
-        ).to_dict()
+        metric = measure(metric_mask)
         metric["candidate_projection_source"] = (
             "occupied_volume_voxel_centers_constraint_clipped"
             if boundary_refine
@@ -129,6 +131,23 @@ def visual_hull_projection_metrics_from_target(
             metric["raw_projection_source"] = "occupied_volume_voxel_centers"
         per_view[name] = metric
     return per_view
+
+
+def _project_calibrated_points(target, constraint, points, grid):
+    """Diagnostic voxel footprint in the recorded pixel frame, including crop."""
+    from ..projection_contract import project_vertices, viewport_for_constraint
+    mask = np.zeros(np.asarray(getattr(constraint.mask, 'mask', constraint.mask)).shape, bool)
+    if not len(points):
+        return mask
+    xy = np.floor(project_vertices(target, constraint, points)+.5).astype(np.int64)
+    inside = (xy[:,0]>=0)&(xy[:,0]<mask.shape[1])&(xy[:,1]>=0)&(xy[:,1]<mask.shape[0])
+    mask[xy[inside,1],xy[inside,0]] = True
+    axes, bounds = viewport_for_constraint(target, constraint)
+    minimum, maximum = target_bounds(target).to_min_max()
+    cell = (np.asarray(maximum)-minimum)/np.maximum(np.asarray(grid.shape)-1, 1)
+    radius_x = int(math.ceil(cell[axes[0]]/(bounds[1]-bounds[0])*mask.shape[1]*.55))
+    radius_y = int(math.ceil(cell[axes[1]]/(bounds[3]-bounds[2])*mask.shape[0]*.55))
+    return _dilate_rect(mask, radius_x=radius_x, radius_y=radius_y)
 
 
 def _target_view_names_with_masks(target: ReconstructionTarget) -> list[str]:

@@ -94,6 +94,10 @@ class ShapeProgram:
 
 
 PRIMITIVE_TYPES = {
+    "convex_hull",
+    "polygon_extrusion",
+    "generalized_sweep",
+    "deformed_superquadric",
     "box",
     "rounded_box",
     "cylinder",
@@ -112,6 +116,8 @@ PRIMITIVE_TYPES = {
 
 
 OPERATIONS = {
+    "subtract",
+    "intersect",
     "add",
     "union",
     "difference",
@@ -145,3 +151,32 @@ def validate_shape_program(program: ShapeProgram) -> tuple[str, ...]:
                 errors.append(f"constraint {constraint.kind!r} targets missing node {target!r}")
     return tuple(errors)
 
+
+
+COMPILED_PRIMITIVE_TYPES = PRIMITIVE_TYPES - {"capsule"}
+COMPILED_OPERATIONS = {"add", "union", "subtract", "difference", "intersect", "intersection"}
+
+
+def validate_compilable_program(program: ShapeProgram) -> tuple[str, ...]:
+    """Validate actual compiler capabilities separately from the authoring schema."""
+    errors = list(validate_shape_program(program))
+    for node in program.root_nodes:
+        if node.operation not in COMPILED_OPERATIONS:
+            errors.append(f"unsupported compiler operation {node.operation!r} on {node.node_id}")
+        if node.primitive_type not in COMPILED_PRIMITIVE_TYPES:
+            errors.append(f"unsupported compiler primitive {node.primitive_type!r} on {node.node_id}")
+        if node.children:
+            errors.append(f"unsupported compiler child references on {node.node_id}: {node.children!r}")
+        if node.primitive_type == 'deformed_superquadric':
+            try:
+                from .deformed_superquadric import DeformedSuperquadricPrimitive
+                DeformedSuperquadricPrimitive.from_program_parameters(node.parameters)
+            except Exception as exc:
+                errors.append(f'invalid deformed superquadric on {node.node_id}: {exc}')
+        if node.primitive_type == 'generalized_sweep':
+            try:
+                from .generalized_sweep import GeneralizedSweepPrimitive
+                GeneralizedSweepPrimitive.from_program_parameters(node.parameters)
+            except Exception as exc:
+                errors.append(f'invalid generalized sweep on {node.node_id}: {exc}')
+    return tuple(errors)

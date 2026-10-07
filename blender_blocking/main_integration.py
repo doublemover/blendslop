@@ -7,6 +7,7 @@ to create rough 3D blockouts from orthogonal reference images.
 
 from __future__ import annotations
 
+from dataclasses import replace
 import sys
 import math
 from pathlib import Path
@@ -150,6 +151,7 @@ class BlockingWorkflow:
         top_path: Optional[str] = None,
         config: Optional[BlockingConfig] = None,
         context: Optional[GenerationContext] = None,
+        valid_evidence_masks: Optional[Mapping[str, np.ndarray]] = None,
     ) -> None:
         """
         Initialize the blocking workflow.
@@ -170,6 +172,9 @@ class BlockingWorkflow:
         )
         self.context.config = self.config
         self.views: Dict[str, np.ndarray] = {}
+        self.valid_evidence_masks = dict(valid_evidence_masks or {})
+        self.evidence_input_receipt = {}
+        self._evidence_prepared = False
         self.processed_views: Dict[str, np.ndarray] = {}
         self.contours: Dict[str, List[np.ndarray]] = {}
         self.shape_analysis: Dict[str, List[Dict[str, Any]]] = {}
@@ -191,8 +196,19 @@ class BlockingWorkflow:
                 "No images loaded. Please provide at least one reference image."
             )
 
+        self._prepare_evidence_inputs()
         print(f"Loaded {len(self.views)} views: {', '.join(self.views.keys())}")
         return self.views
+
+    def _prepare_evidence_inputs(self):
+        if self._evidence_prepared:
+            return
+        from blender_blocking.reconstruction.visibility import prepare_evidence_inputs
+        self.views, self.valid_evidence_masks, calibration, self.evidence_input_receipt = prepare_evidence_inputs(
+            self.views, self.valid_evidence_masks, self.config.reconstruction.view_calibration,
+            self.config.reconstruction.view_crops, self.config.reconstruction.valid_evidence_files)
+        self.config.reconstruction.view_calibration = calibration
+        self._evidence_prepared = True
 
     def process_images(self) -> Dict[str, np.ndarray]:
         """Process images to extract edges and prepare for shape analysis."""
@@ -1099,6 +1115,7 @@ class BlockingWorkflow:
         """Build and cache the typed reconstruction target for backend modes."""
         if self.target_build is not None:
             return self.target_build
+        self._prepare_evidence_inputs()
         artifact_root = self._artifact_root()
         self.target_build = build_target_from_images(
             self.views,
@@ -1106,10 +1123,19 @@ class BlockingWorkflow:
             constraint_files=self.config.constraints.constraint_files,
             artifact_root=artifact_root,
             profile_samples=self.config.profile_sampling.num_samples,
+            valid_evidence_masks=self.valid_evidence_masks,
         )
         return self.target_build
 
     def _config_for_backend(self, backend_name: str) -> Dict[str, Any]:
+        from blender_blocking.reconstruction.quality_config import quality_config
+        config = self._raw_config_for_backend(backend_name)
+        shared = self.config.reconstruction.to_dict()
+        config.update({key: value for key, value in shared.items() if key.startswith('native_')})
+        config['quality_preset'] = self.config.reconstruction.quality_preset
+        return quality_config(config)
+
+    def _raw_config_for_backend(self, backend_name: str) -> Dict[str, Any]:
         """Return backend-specific config payloads from BlockingConfig."""
         backend_name = self._backend_name_for_mode(backend_name)
         if backend_name == "legacy":
@@ -1217,7 +1243,7 @@ class BlockingWorkflow:
         selected_mode = mode or self.config.reconstruction.reconstruction_mode
         backend_name = self._backend_name_for_mode(selected_mode)
         register_builtin_backends()
-        cost_recorder = CostRecorder()
+        cost_recorder = CostRecorder(track_memory=self.config.ensemble.diagnostic_allocations)
         with cost_recorder.stage(
             "build_target",
             work_units={
@@ -1240,11 +1266,19 @@ class BlockingWorkflow:
             generation_context=self.context,
             requested_mode=selected_mode,
             backend_name=backend_name,
+            cost_recorder=cost_recorder,
+            native_resident=self.config.ensemble.native_resident,
+            projection_diagnostics=self.config.ensemble.projection_diagnostics,
         )
+
+        from blender_blocking.reconstruction.native_geometry import GeometryCache
+        context.geometry_cache = GeometryCache()
 
         if selected_mode == "ensemble":
             runner = EnsembleRunner(
-                selection_policy=self.config.ensemble.selection_policy
+                selection_policy=self.config.ensemble.selection_policy,
+                evidence_routing=self.config.ensemble.evidence_routing,
+                max_render_candidates=self.config.ensemble.max_render_candidates,
             )
             candidates = self._configured_ensemble_candidates()
             with cost_recorder.stage(
@@ -1265,6 +1299,10 @@ class BlockingWorkflow:
                         self.config.ensemble.max_parallel_candidates
                     ),
                 )
+            if result.selected is not None:
+                selected = attach_cost_report_to_candidate(result.selected, cost_recorder.report())
+                result = replace(result, selected=selected, candidates=tuple(
+                    selected if c.candidate_id == selected.candidate_id else c for c in result.candidates))
             self.reconstruction_result = result
             self._record_backend_manifest(
                 result.to_dict(),
@@ -1320,7 +1358,8 @@ class BlockingWorkflow:
                         "constraints": float(len(target_build.target.constraints)),
                     },
                 ):
-                    result = backend.reconstruct(request)
+                    from blender_blocking.reconstruction.option_receipts import reconstruct_with_receipt
+                    result = reconstruct_with_receipt(backend, request)
 
         result = attach_cost_report_to_candidate(result, cost_recorder.report())
         self.reconstruction_result = result

@@ -110,9 +110,12 @@ def render_views(
             orbit_angles=orbit_angles,
         ):
             path = output_dir / f"{view.view_name}.png"
-            if view.view_name == "top":
-                top_scale = max(width, depth, 1e-3) * (1.0 + 2.0 * view.padding)
-                set_camera_top(session.camera, center, distance, top_scale)
+            if view.view_name in {"front", "side", "top"}:
+                from integration.blender_ops.camera_framing import configure_ortho_camera_for_view
+                configure_ortho_camera_for_view(session.camera, view.view_name, bounds_min, bounds_max,
+                    margin_frac=view.padding, resolution=resolution)
+                # Common image scale across canonical captures; different extents do not rescale the object.
+                session.camera.data.ortho_scale = max_dim*(1.+2.*view.padding)
             else:
                 import math
 
@@ -121,6 +124,8 @@ def render_views(
                 session.camera.rotation_euler.rotate_axis("Z", math.radians(view.roll_deg))
             render_silhouette_frame(session, path)
             paths[view.view_name] = path
+    from blender_blocking.evaluation.comparable_geometry import export_evaluated_object
+    paths['ground_truth_obj'] = export_evaluated_object(obj, output_dir / 'ground_truth.obj')
     bpy.data.objects.remove(obj, do_unlink=True)
     return paths
 

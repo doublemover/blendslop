@@ -159,6 +159,35 @@ def build_shape_program_from_target(
         residual_patches=tuple(residuals[:max_nodes]),
         metadata=metadata,
     )
+    if target.bounds is not None:
+        center = dict(zip(("x","y","z"), target.bounds.center))
+        program = replace_program_location(program, center)
+    if target.extras.get("view_calibration") and dominant_view in {"front","side"}:
+        from blender_blocking.placement.resfit.profiles import _collect_profile_rows
+        camera_rows = _collect_profile_rows({}, target.bounds, target)
+        front = sorted((row for row in camera_rows if row["view"] == "front" and row["width_world"] > 0
+                        and row.get('profile_width_exact',True)), key=lambda row:row["z_world"])
+        side = [row for row in camera_rows if row["view"] == "side" and row["width_world"] > 0
+                and row.get('profile_width_exact',True)]
+        if front and side:
+            cx, cy, cz = target.bounds.center
+            curve = []
+            for row in front:
+                other = min(side, key=lambda value:abs(value["z_world"]-row["z_world"]))
+                curve.append({"z_world":row["z_world"]-cz, "radius_x_world":row["width_world"]*.5,
+                    "radius_y_world":other["width_world"]*.5, "center_offset_world":row["center_x_world"]-cx,
+                    "center_y_offset_world":other["center_x_world"]-cy, "confidence":row["confidence"]})
+            from dataclasses import replace
+            program = replace(program, root_nodes=tuple(replace(node, parameters={**dict(node.parameters), "profile_curve":tuple(curve)})
+                if node.primitive_type == "lathe_profile" else node for node in program.root_nodes))
+        else:
+            # Do not fall back to the earlier pixel-width curve when either
+            # calibrated axis has only censored foreground rows.
+            from dataclasses import replace
+            program=replace(program,root_nodes=tuple(replace(node,primitive_type='rounded_box',parameters={
+                key:value for key,value in {**dict(node.parameters),
+                    'profile_seed_status':'censored-only profile declined; bounds prior is a hypothesis'}.items()
+                if key!='profile_curve'}) if node.primitive_type=='lathe_profile' else node for node in program.root_nodes))
     grammar = default_shape_program_grammar()
     search_result = search_shape_program_candidates(
         program,
@@ -166,7 +195,7 @@ def build_shape_program_from_target(
         max_candidates=int(config.get("program_search_candidates", 4)),
         objective=str(config.get("program_search_objective", "editable_balanced")),
     )
-    program = search_result.selected.program
+    # Grammar scores order exploration only; geometric selection occurs after compilation.
     program = ShapeProgram(
         schema_version=program.schema_version,
         program_id=program.program_id,
@@ -192,7 +221,7 @@ def build_shape_program_from_target(
         "realized_residual_node_ids": realized_residual_node_ids,
         "has_uncertainty": _has_uncertainty(target),
         "grammar_search": search_result.to_dict(),
-        "selected_grammar_candidate": search_result.selected.candidate_id,
+        "selected_grammar_candidate": "seed_pending_geometric_comparison",
         "program_validation_errors": list(validate_shape_program(program)),
     }
     return program, diagnostics
@@ -202,6 +231,8 @@ def _dominant_profile(target: ReconstructionTarget) -> tuple[str, tuple[ProfileB
     best_bands: tuple[ProfileBand, ...] = ()
     best_score = -1.0
     for view, bands in target.profile_bands.items():
+        if view not in {"front", "side"}:
+            continue
         score = 0.0
         for band in bands:
             score += max(0.0, float(getattr(band, "width_px", 0.0) or 0.0))
@@ -290,3 +321,8 @@ def _profile_curve_payload(
         duplicate["t"] = 1.0
         rows = [row, duplicate]
     return tuple(rows)
+
+
+def replace_program_location(program, center):
+    from dataclasses import replace
+    return replace(program, root_nodes=tuple(replace(node, parameters={**center, **dict(node.parameters)}) for node in program.root_nodes))

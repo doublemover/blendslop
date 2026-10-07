@@ -82,3 +82,42 @@ def _candidate_families(config: Mapping[str, object]) -> tuple[str, ...]:
         if item and item not in deduped:
             deduped.append(item)
     return tuple(deduped or ("superfrustum",))
+
+
+def whole_support_seed(target, points, family, *, max_elapsed_s=.5):
+    """A family-compatible, single oriented seed from direct mask supports."""
+    from blender_blocking.reconstruction.spatial_regions import pca_box
+    from blender_blocking.reconstruction.oriented_support import support_evidence, fit_whole_support
+    from blender_blocking.reconstruction.projection_contract import observed_holes
+    from blender_blocking.primitives.analytic_primitives import EllipsoidPrimitive, SuperquadricPrimitive, AnisotropicGaussianPrimitive
+    from blender_blocking.primitives.superfrustum import SuperFrustum
+    if len(points) < 8 or any(n >= 4 for n in observed_holes(target).values()):
+        return None, {"status":"incompatible_known_hole_or_insufficient_points"}
+    center, radii, frame = pca_box(points)
+    evidence = support_evidence(target)
+    normalized = family.lower().strip()
+    if normalized in {"superfrustum", "superfrusta", "frustum", "capsule", "capsules"}:
+        support_family,dimensions,rotation = "frustum", [np.sqrt(radii[1]*radii[2])]*2+[radii[0]], frame[:,[1,2,0]]
+    elif normalized in {"superquadric", "superquadrics", "boxy_superquadric"}:
+        support_family,dimensions,rotation = "box", radii, frame
+    else:
+        support_family,dimensions,rotation = "ellipsoid", radii, frame
+    fit = fit_whole_support(support_family,evidence,center=center,dimensions=dimensions,rotation=rotation,
+                            max_evaluations=64,max_elapsed_s=max_elapsed_s)
+    center,dimensions,rotation = fit['center'],fit['dimensions'],fit['rotation']
+    if support_family == "frustum":
+        axis = rotation[:,2]
+        part = SuperFrustum(position=center,
+            orientation=(np.arctan2(axis[1],axis[0]),np.arccos(np.clip(axis[2],-1.,1.))),
+            radius_bottom=dimensions[0],radius_top=dimensions[1],height=2.*dimensions[2])
+    elif support_family == "box":
+        # This is an explicitly approximate family-compatible proposal; the
+        # actual superquadric field/mesh is subsequently scored, not box supports.
+        part = SuperquadricPrimitive(center=center,radii=dimensions,rotation=rotation,epsilon1=.15,epsilon2=.15)
+    elif normalized in {"gaussian", "gaussians", "anisotropic_gaussian"}:
+        part = AnisotropicGaussianPrimitive(center=center,covariance=rotation@np.diag(dimensions**2)@rotation.T)
+    else:
+        part = EllipsoidPrimitive(center=center,radii=dimensions,rotation=rotation)
+    report = {k:v for k,v in fit.items() if k not in {'center','dimensions','rotation'}}
+    report['status']='proposal_only'
+    return (part,),report

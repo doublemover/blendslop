@@ -225,6 +225,7 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
                 "gaussian_ellipsoid_proxy",
                 "differentiable_refine",
                 "shape_program",
+                "implicit_residual",
             },
         )
         self.assertEqual(list_backend_aliases(), {"loft_profile": "profile_loft"})
@@ -287,14 +288,14 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
                 "optional_dependencies": ["skimage", "open3d", "openvdb"],
             },
             "hybrid_loft_hull": {
-                "requires_blender": False,
-                "supports_pure_python": True,
+                "requires_blender": True,
+                "supports_pure_python": False,
                 "supports_multi_view": True,
                 "supports_top_view": True,
                 "supports_uncertainty": True,
                 "supports_constraints": False,
                 "outputs_mesh": True,
-                "outputs_volume": True,
+                "outputs_volume": False,
                 "outputs_primitive_set": False,
                 "supports_gradients": False,
                 "editability_score": 0.45,
@@ -854,18 +855,13 @@ class ReconstructionBackendRegistryTests(unittest.TestCase):
         result = runner.run_requests(requests, total_timeout_s=0.001)
         by_id = {candidate.candidate_id: candidate for candidate in result.candidates}
 
-        self.assertEqual(by_id["slow-first"].status, "success")
-        self.assertTrue(by_id["slow-first"].degraded)
-        self.assertIn(
-            "ensemble total timeout elapsed during candidate",
-            by_id["slow-first"].warnings,
-        )
-        self.assertLessEqual(
-            by_id["slow-first"].metric_result.extras["request_budget"]["timeout_s"],
-            0.001,
-        )
-        self.assertEqual(by_id["skipped-second"].status, "skipped")
-        self.assertIn("total timeout exhausted", by_id["skipped-second"].warnings[0])
+        # A shared deadline includes queue and worker startup. Neither candidate
+        # may start after it expires, even if the backend would return success.
+        self.assertIsNone(result.selected)
+        for candidate in by_id.values():
+            self.assertEqual(candidate.status, "skipped")
+            self.assertIn("in queue", candidate.warnings[0])
+            self.assertFalse(candidate.succeeded)
 
     def test_ensemble_parallel_candidates_preserve_request_order(self) -> None:
         register_backend(_FakeBackend())

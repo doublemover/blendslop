@@ -65,6 +65,7 @@ def write_differentiable_candidate_artifacts(
     target_view_weights: Mapping[str, float],
     view_signal_details: Mapping[str, Any],
     target_signal_warnings: tuple[str, ...] | list[str],
+    pixel_evidence=None,
 ) -> tuple[Path | None, Path | None, dict[str, Path]]:
     if root is None:
         return None, None, {}
@@ -77,6 +78,12 @@ def write_differentiable_candidate_artifacts(
         from ..mesh_io import write_obj, write_primitive_set
 
     artifacts: dict[str, Path] = {}
+    if pixel_evidence:
+        import numpy as np
+        path=root/'h'/'pixel-evidence.npz';path.parent.mkdir(parents=True,exist_ok=True)
+        arrays={view+'__'+name:getattr(record,name) for view,record in pixel_evidence.items()
+            for name in ('foreground','valid','confidence','boundary_reliability','hard_mask')}
+        np.savez_compressed(path,**arrays);artifacts['pixel_evidence_npz']=path
     primitive_path = write_primitive_set(
         root / "p" / "diff.json",
         optimized_primitives,
@@ -87,6 +94,7 @@ def write_differentiable_candidate_artifacts(
             "surface_points": point_meta,
             "topology": dict(topology_payload),
             "optimization": dict(optimization_summary),
+            "pixel_evidence_mode":parsed_config.get('pixel_evidence_mode','view_mean_legacy'),
         },
     )
     artifacts["primitive_json"] = primitive_path

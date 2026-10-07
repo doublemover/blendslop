@@ -21,6 +21,7 @@ from .contracts import (
     VoxelTransform,
 )
 from .dense import DenseVolumeGrid
+from .hierarchical import HierarchicalOccupancyGrid
 from .meshing import extract_mesh, extract_surface_voxels, surface_points
 from .openvdb_adapter import (
     OpenVDBStatus,
@@ -56,6 +57,7 @@ __all__ = [
     "ChunkKey",
     "ChunkedVolumeGrid",
     "DenseVolumeGrid",
+    "HierarchicalOccupancyGrid",
     "FORMAT_VERSION",
     "MeshExtractionResult",
     "MESH_EXTRACT_METHOD_ALIASES",

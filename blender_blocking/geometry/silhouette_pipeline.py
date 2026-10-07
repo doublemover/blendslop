@@ -33,8 +33,8 @@ class ExtractionPolicy:
     max_border_contact_frac: float = 0.85
     morph_close_px: int = 0
     morph_open_px: int = 0
-    fill_holes: bool = True
-    largest_component_only: bool = True
+    fill_holes: bool = False
+    largest_component_only: bool = False
     min_component_area_px: int = 0
     min_component_area_frac: float = 0.0
     adaptive_threshold: bool = True
@@ -64,8 +64,8 @@ def _as_policy(config: Any = None, **overrides: Any) -> ExtractionPolicy:
         "max_border_contact_frac": 0.85,
         "morph_close_px": 0,
         "morph_open_px": 0,
-        "fill_holes": True,
-        "largest_component_only": True,
+        "fill_holes": False,
+        "largest_component_only": False,
         "min_component_area_px": 0,
         "min_component_area_frac": 0.0,
         "adaptive_threshold": True,

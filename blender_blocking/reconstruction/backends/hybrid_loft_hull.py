@@ -1,188 +1,160 @@
-"""Hybrid profile-loft plus visual-hull backend."""
-
+"""Reuse frozen loft/hull seeds, then admit actual hull-supported geometry."""
 from __future__ import annotations
-
+from dataclasses import replace
+import time
+import numpy as np
 from ..backend import BackendCapabilities, BaseBackend
-from ..types import CandidateMetrics, CandidateRequest, CandidateResult
+from ..types import CandidateRequest, CandidateResult, CandidateMetrics
 
 
 class HybridLoftHullBackend(BaseBackend):
-    def __init__(self) -> None:
-        super().__init__(
-            name="hybrid_loft_hull",
-            capabilities=BackendCapabilities(
-                requires_blender=False,
-                supports_pure_python=True,
-                supports_multi_view=True,
-                supports_top_view=True,
-                supports_uncertainty=True,
-                outputs_mesh=True,
-                outputs_volume=True,
-                editability_score=0.45,
-            ),
-        )
+    def __init__(self):
+        super().__init__(name='hybrid_loft_hull', capabilities=BackendCapabilities(
+            requires_blender=True, supports_pure_python=False, supports_multi_view=True,
+            supports_top_view=True, supports_uncertainty=True, outputs_mesh=True,
+            editability_score=.45))
 
-    def reconstruct(self, request: CandidateRequest) -> CandidateResult:
-        warnings: list[str] = []
-        artifacts = {}
-        profile_result = None
-
-        try:
+    def reconstruct(self, request):
+        from ..native_geometry import geometry_arrays, evaluated_arrays, NativeOwnedGeometry, GeometryArrays
+        from ..native_csg import boolean_mesh
+        from ..grouped_solids import balanced_union, solid_guard
+        from ..projected_metrics import projected_mesh_metrics
+        from ..spatial_regions import connected_point_regions
+        started = time.perf_counter()
+        seeds = dict(request.config.get('seed_results') or {})
+        reused = bool(seeds)
+        if not seeds:
+            # Standalone calls still produce each seed once. Ensemble runs attach
+            # the already completed hash-identified results on their shared queue.
             from .visual_hull import VisualHullBackend
-
-            hull_request = CandidateRequest(
-                candidate_id=f"{request.candidate_id}-visual_hull",
-                backend_name="visual_hull_voxel",
-                target=request.target,
-                config=request.config,
-                budget=request.budget,
-                artifact_root=request.artifact_root,
-                context=request.context,
-            )
-            hull_result = VisualHullBackend().reconstruct(hull_request)
-        except Exception as exc:
-            return CandidateResult(
-                candidate_id=request.candidate_id,
-                backend_name=self.name,
-                status="failed",
-                errors=(f"visual hull branch failed: {exc}",),
-            )
-
-        profile_config = _profile_config_from_hybrid(request.config)
-        try:
             from .profile_loft import ProfileLoftBackend
-
-            profile_request = CandidateRequest(
-                candidate_id=f"{request.candidate_id}-profile_loft",
-                backend_name="profile_loft",
-                target=request.target,
-                config=profile_config,
-                budget=request.budget,
-                artifact_root=request.artifact_root,
-                context=request.context,
-            )
-            profile_backend = ProfileLoftBackend()
-            profile_errors = profile_backend.validate_config(profile_config)
-            if profile_errors:
-                profile_result = CandidateResult(
-                    candidate_id=profile_request.candidate_id,
-                    backend_name=profile_backend.name,
-                    status="failed",
-                    errors=tuple(profile_errors),
-                )
-            else:
-                profile_result = profile_backend.reconstruct(profile_request)
-        except Exception as exc:
-            profile_result = CandidateResult(
-                candidate_id=f"{request.candidate_id}-profile_loft",
-                backend_name="profile_loft",
-                status="failed",
-                errors=(f"profile loft branch failed: {exc}",),
-            )
-
-        for key, value in hull_result.artifacts.items():
-            artifacts[f"hull_{key}"] = value
-        if profile_result is not None:
-            for key, value in profile_result.artifacts.items():
-                artifacts[f"profile_{key}"] = value
-
-        hull_ok = hull_result.succeeded
-        profile_ok = bool(profile_result and profile_result.succeeded)
-        if hull_ok and profile_ok:
-            status = "success"
-        elif hull_ok or profile_ok:
-            status = "degraded"
-        elif hull_result.status == "skipped" and profile_result is not None:
-            status = profile_result.status
+            for name, backend in [('visual_hull_voxel', VisualHullBackend()), ('profile_loft', ProfileLoftBackend())]:
+                config = dict(request.config)
+                if name == 'profile_loft':
+                    config = {'unit_scale': .01, 'num_slices': 10, 'num_samples': 100,
+                        'radial_segments': 24, **config.get('profile_sampling', {}),
+                        **config.get('mesh_from_profile', {}), 'quality_preset': request.config.get('quality_preset', 'default')}
+                    from ..quality_config import quality_config
+                    config = quality_config(config)
+                seed_request = replace(request, candidate_id=request.candidate_id+'-'+name, backend_name=name, config=config)
+                result = backend.reconstruct(seed_request)
+                if result.succeeded and result.geometry is None and result.payload is not None:
+                    result = replace(result, geometry=evaluated_arrays(result.payload))
+                seeds[name] = replace(result, payload=None)
+        successful = {name: r for name, r in seeds.items() if r.succeeded and r.geometry is not None}
+        if not successful:
+            return CandidateResult(request.candidate_id, self.name, 'failed', errors=('no valid loft/hull seed geometry',))
+        def score(data):
+            rows = projected_mesh_metrics(request.target, data.vertices, data.faces)
+            metric = CandidateMetrics(per_view=rows)
+            return (metric.area_iou_min, metric.area_iou_mean, metric.boundary_iou_mean), metric
+        structure_first = request.config.get('hybrid_mode', 'hull_first') == 'structure_first'
+        if structure_first and 'profile_loft' in successful:
+            retained_name, retained = 'profile_loft', successful['profile_loft']
         else:
-            status = hull_result.status
-
-        warnings.extend(hull_result.warnings)
-        if profile_result is not None:
-            warnings.extend(profile_result.warnings)
-        errors = list(hull_result.errors)
-        if profile_result is not None:
-            errors.extend(profile_result.errors)
-        if status in {"success", "degraded"}:
-            errors = []
-
-        profile_metrics = (
-            profile_result.metric_result if profile_result is not None else CandidateMetrics()
-        )
-        metrics = CandidateMetrics(
-            area_iou_min=hull_result.metric_result.area_iou_min,
-            area_iou_mean=hull_result.metric_result.area_iou_mean,
-            boundary_iou_mean=hull_result.metric_result.boundary_iou_mean,
-            topology_score=max(
-                hull_result.metric_result.topology_score,
-                profile_metrics.topology_score,
-            ),
-            topology_penalty=min(
-                _positive_or_one(hull_result.metric_result.topology_penalty),
-                _positive_or_one(profile_metrics.topology_penalty),
-            ),
-            constraint_score=max(
-                hull_result.metric_result.constraint_score,
-                profile_metrics.constraint_score,
-            ),
-            constraint_penalty=min(
-                _positive_or_one(hull_result.metric_result.constraint_penalty),
-                _positive_or_one(profile_metrics.constraint_penalty),
-            ),
-            editability_score=0.45,
-            complexity_penalty=max(
-                hull_result.metric_result.complexity_penalty,
-                profile_metrics.complexity_penalty,
-            ),
-            elapsed_s=(
-                hull_result.metric_result.elapsed_s + profile_metrics.elapsed_s
-            ),
-            extras={
-                "hybrid_strategy": "profile_loft_plus_visual_hull_backends",
-                "hull_status": hull_result.status,
-                "profile_status": profile_result.status if profile_result else "not_run",
-                "hull_metrics": hull_result.metric_result.to_dict(),
-                "profile_metrics": (
-                    profile_result.metric_result.to_dict()
-                    if profile_result is not None
-                    else {}
-                ),
-            },
-        )
-        return CandidateResult(
-            candidate_id=request.candidate_id,
-            backend_name=self.name,
-            status=status,
-            mesh_path=hull_result.mesh_path,
-            volume_path=hull_result.volume_path,
-            render_paths=hull_result.render_paths,
-            metric_result=metrics,
-            artifacts=artifacts,
-            warnings=tuple(warnings),
-            errors=tuple(errors),
-            degraded=status == "degraded",
-            payload={
-                "profile_payload": profile_result.payload if profile_result else None,
-                "hull_payload": hull_result.payload,
-                "profile_result": profile_result.to_dict() if profile_result else None,
-                "hull_result": hull_result.to_dict(),
-            },
-        )
-
-
-def _profile_config_from_hybrid(config: object) -> dict[str, object]:
-    if not isinstance(config, dict):
-        config = dict(config or {})
-    profile_sampling = dict(config.get("profile_sampling") or {})
-    mesh_from_profile = dict(config.get("mesh_from_profile") or {})
-    return {
-        "unit_scale": config.get("unit_scale", 0.01),
-        "num_slices": config.get("num_slices", 10),
-        **profile_sampling,
-        **mesh_from_profile,
-    }
-
-
-def _positive_or_one(value: float) -> float:
-    value = float(value)
-    return value if value > 0.0 else 1.0
+            retained_name, retained = max(successful.items(), key=lambda row: score(geometry_arrays(row[1].geometry))[0])
+        best = geometry_arrays(retained.geometry)
+        best_key, best_metrics = score(best)
+        attempts = []
+        editable_parts = []
+        hull_result, profile_result = successful.get('visual_hull_voxel'), successful.get('profile_loft')
+        if hull_result and profile_result:
+            hull = geometry_arrays(hull_result.geometry)
+            profile = geometry_arrays(profile_result.geometry)
+            editable_parts.append(profile)
+            try:
+                clipped, clip_report = boolean_mesh(profile, hull, operation='INTERSECT')
+                assembly = clipped if solid_guard(clipped)['valid_solid'] else profile
+                key, metric = score(assembly)
+                attempts.append({'operation': 'profile_intersect_hull', 'key': key, **clip_report})
+                from ..feature_evidence import mesh_empty_features
+                if (mesh_empty_features(request.target, assembly)['passed'] and
+                    key[0] >= best_key[0]-.002 and key[1] > best_key[1]+.002):
+                    best, best_key, best_metrics = assembly, key, metric
+                elif structure_first:
+                    assembly = best
+                # Residual surface regions must be spatially supported by the hull.
+                # This bounded addition never unions all unrepresented hull cells.
+                from contextlib import ExitStack
+                from ..native_geometry import GeometryCache
+                from ..native_queries import ResidentQueryBatch
+                from ..grouped_solids import production_union
+                from ..process_executor import current_worker_client, PersistentProcessExecutor
+                from mathutils import Vector
+                points = hull.vertices[np.linspace(0, len(hull.vertices)-1, min(4096, len(hull.vertices))).astype(int)]
+                scale = float(np.ptp(hull.vertices, axis=0).max())
+                from placement.resfit_initialization import initialize_ellipsoids_from_points, PrimitiveInitializationConfig
+                from reconstruction.mesh_io import combine_primitive_meshes
+                from scipy.spatial import cKDTree
+                rejected = np.zeros(len(points), bool)
+                query_stats = None
+                with ExitStack() as resources:
+                    native = request.config.get('native_batch_queries', False)
+                    query = resources.enter_context(ResidentQueryBatch(assembly)) if native else None
+                    queue = current_worker_client() or getattr(request.context, 'process_executor', None)
+                    if request.config.get('native_union_execution', False) and queue is None:
+                        queue = resources.enter_context(PersistentProcessExecutor(2))
+                    cache = GeometryCache()
+                    limit = min(4, int(request.config.get('hybrid_residual_parts', 3)))
+                    for index in range(limit):
+                        if request.budget.timeout_s and time.perf_counter()-started > request.budget.timeout_s*.8:
+                            break
+                        if query is not None:
+                            query.update_target(assembly)
+                            distances = query.proximity(points)['native_distance']
+                        else:
+                            tree = cache.scalar_bvh(assembly)
+                            distances = np.array([tree.find_nearest(Vector(p))[3] for p in points])
+                        remaining_points = (distances > scale*.035) & ~rejected
+                        if structure_first:
+                            from ..projected_metrics import projected_mesh_masks
+                            from ..geometry_selection import missing_observed_points
+                            predictions = projected_mesh_masks(request.target, assembly.vertices, assembly.faces)
+                            remaining_points &= missing_observed_points(request.target, predictions, points)
+                        regions = connected_point_regions(points[remaining_points], minimum=8, max_regions=4)
+                        if not regions:
+                            break
+                        region = regions[0]
+                        parts = initialize_ellipsoids_from_points(region, PrimitiveInitializationConfig(primitive_count=1))
+                        mesh = combine_primitive_meshes(parts, resolution=16)
+                        from ..grouped_solids import oriented_generated_mesh
+                        addition = oriented_generated_mesh(mesh)
+                        addition, _ = boolean_mesh(addition, hull, operation='INTERSECT')
+                        if not solid_guard(addition)['valid_solid']:
+                            rejected |= cKDTree(region).query(points)[0] < 1e-9
+                            continue
+                        remaining_s = None if not request.budget.timeout_s else max(.001, request.budget.timeout_s-(time.perf_counter()-started))
+                        candidate, report = production_union([assembly, addition], request.config,
+                                                             executor=queue, timeout_s=remaining_s)
+                        key, metric = score(candidate)
+                        admitted = (mesh_empty_features(request.target, candidate)['passed'] and
+                                    key[0] >= best_key[0]-.002 and key[1] > best_key[1]+.002)
+                        attempts.append({'operation': 'supported_residual_add', 'round': index,
+                            'query_target_hash': assembly.content_hash, 'key': key, 'admitted': admitted, **report})
+                        if admitted:
+                            assembly = candidate
+                            best, best_key, best_metrics = candidate, key, metric
+                            editable_parts.append(addition)
+                        else:
+                            rejected |= cKDTree(region).query(points)[0] < 1e-9
+                    if query is not None:
+                        query_stats = dict(query.stats)
+                        attempts.append({'operation': 'resident_residual_queries', 'statistics': query_stats,
+                                         'scope': 'one hybrid case/process; changed assembly updates only'})
+            except Exception as exc:
+                attempts.append({'status': 'retained_valid_incumbent', 'error': str(exc)})
+        # Store the retained mesh and editable assembly together, but export and
+        # render only the actual combined output.
+        owner = NativeOwnedGeometry(best, 'HybridCombined')
+        obj = owner.attach()
+        obj.use_fake_user = False
+        for index, data in enumerate(editable_parts):
+            part_owner = NativeOwnedGeometry(data, 'HybridEditablePart'+str(index))
+            child = part_owner.attach(); child.parent = obj; child.use_fake_user = False
+            child.hide_render = True; child.hide_set(True); child['blendslop_export_exclude'] = True
+        extras = {'hybrid_strategy': 'structure_first_observed_residuals' if structure_first else 'hull_first_supported_residuals',
+            'reused_seed_results': reused, 'seed_hashes': {name: geometry_arrays(r.geometry).content_hash for name, r in successful.items()},
+            'retained_seed': retained_name, 'attempts': attempts, 'solid_guard': solid_guard(best),
+            'topology': solid_guard(best), 'metrics_refer_to_output_hash': best.content_hash}
+        return CandidateResult(request.candidate_id, self.name, 'success', geometry=best, payload=obj,
+            metric_result=replace(best_metrics, editability_score=.45, elapsed_s=time.perf_counter()-started, extras=extras))

@@ -36,6 +36,7 @@ from blender_blocking.config import BlockingConfig
 from blender_blocking.config import CandidateConfig as ConfigCandidateConfig
 from blender_blocking.config import RenderConfig
 from blender_blocking.evaluation.cost_model import CostRecorder
+from blender_blocking.metrics.values import optional_float
 from blender_blocking.evaluation.silhouette_eval import (
     SilhouetteGateConfig,
     evaluate_silhouette_pair,
@@ -80,18 +81,15 @@ def _cost_payload(
         else {}
     )
     payload: Dict[str, Any] = {
-        "schema_version": "e2e_cost_report_v1",
+        "schema_version": "e2e_cost_report_v2",
+        "backend_is_nested_in_validation": True,
         "validation": dict(validation_cost),
     }
     if backend_cost:
         payload["backend"] = backend_cost
-        payload["combined_total_wall_ms"] = float(
-            validation_cost.get("total_wall_ms", 0.0) or 0.0
-        ) + float(backend_cost.get("total_wall_ms", 0.0) or 0.0)
-    else:
-        payload["combined_total_wall_ms"] = float(
-            validation_cost.get("total_wall_ms", 0.0) or 0.0
-        )
+    # The measured validation workflow already contains the backend. A missing
+    # outer measurement cannot be reconstructed by adding its nested children.
+    payload["combined_total_wall_ms"] = optional_float(validation_cost.get("total_wall_ms"))
     return payload
 
 def _cost_gate_report(
@@ -103,25 +101,17 @@ def _cost_gate_report(
     failures: list[str] = []
     validation = cost_payload.get("validation")
     backend = cost_payload.get("backend")
-    validation_wall_ms = (
-        float(validation.get("total_wall_ms", 0.0) or 0.0)
-        if isinstance(validation, Mapping)
-        else 0.0
-    )
-    backend_wall_ms = (
-        float(backend.get("total_wall_ms", 0.0) or 0.0)
-        if isinstance(backend, Mapping)
-        else 0.0
-    )
-    combined = float(cost_payload.get("combined_total_wall_ms", validation_wall_ms) or 0.0)
-    if max_wall_ms is not None and combined > float(max_wall_ms):
-        failures.append(
-            f"combined_total_wall_ms {combined:.3f} exceeds {float(max_wall_ms):.3f}"
-        )
-    if max_backend_wall_ms is not None and backend_wall_ms > float(max_backend_wall_ms):
-        failures.append(
-            f"backend_total_wall_ms {backend_wall_ms:.3f} exceeds {float(max_backend_wall_ms):.3f}"
-        )
+    validation_wall_ms = optional_float(validation.get("total_wall_ms")) if isinstance(validation, Mapping) else None
+    backend_wall_ms = optional_float(backend.get("total_wall_ms")) if isinstance(backend, Mapping) else None
+    combined = optional_float(cost_payload.get("combined_total_wall_ms", validation_wall_ms))
+    for name, value, limit in (("combined_total_wall_ms", combined, max_wall_ms),
+                               ("backend_total_wall_ms", backend_wall_ms, max_backend_wall_ms)):
+        if limit is None:
+            continue
+        if value is None:
+            failures.append(f"{name} unavailable; cannot verify {float(limit):.3f} limit")
+        elif value > float(limit):
+            failures.append(f"{name} {value:.3f} exceeds {float(limit):.3f}")
     return {
         "schema_version": "e2e_cost_gate_v1",
         "passed": not failures,
@@ -139,67 +129,42 @@ def _cost_gate_report(
 
 def _matrix_cost_summary(rows: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
     cost_rows: list[Dict[str, Any]] = []
-    combined_total = 0.0
-    backend_total = 0.0
-    validation_total = 0.0
-    max_combined = 0.0
-    max_backend = 0.0
     failed_gates = 0
     for row in rows:
-        cost = row.get("cost_report")
-        if not isinstance(cost, Mapping):
-            continue
+        cost = row.get("cost_report", {})
+        cost = cost if isinstance(cost, Mapping) else {}
         gate = row.get("cost_gate")
         validation = cost.get("validation")
         backend = cost.get("backend")
-        validation_wall_ms = (
-            float(validation.get("total_wall_ms", 0.0) or 0.0)
-            if isinstance(validation, Mapping)
-            else 0.0
-        )
-        backend_wall_ms = (
-            float(backend.get("total_wall_ms", 0.0) or 0.0)
-            if isinstance(backend, Mapping)
-            else 0.0
-        )
-        combined_wall_ms = float(
-            cost.get("combined_total_wall_ms", validation_wall_ms + backend_wall_ms)
-            or 0.0
-        )
-        combined_total += combined_wall_ms
-        backend_total += backend_wall_ms
-        validation_total += validation_wall_ms
-        max_combined = max(max_combined, combined_wall_ms)
-        max_backend = max(max_backend, backend_wall_ms)
-        gate_passed = None
-        if isinstance(gate, Mapping):
-            gate_passed = bool(gate.get("passed", False))
-            if not gate_passed:
-                failed_gates += 1
-        cost_rows.append(
-            {
-                "case": row.get("case", ""),
-                "name": row.get("name", ""),
-                "mode": row.get("mode", ""),
-                "status": row.get("status", ""),
-                "passed": bool(row.get("passed", False)),
-                "gate_passed": gate_passed,
-                "validation_total_wall_ms": validation_wall_ms,
-                "backend_total_wall_ms": backend_wall_ms,
-                "combined_total_wall_ms": combined_wall_ms,
-            }
-        )
-    count = len(cost_rows)
+        validation_wall_ms = optional_float(validation.get("total_wall_ms")) if isinstance(validation, Mapping) else None
+        backend_wall_ms = optional_float(backend.get("total_wall_ms")) if isinstance(backend, Mapping) else None
+        combined_wall_ms = optional_float(cost.get("combined_total_wall_ms", validation_wall_ms))
+        gate_passed = bool(gate.get("passed", False)) if isinstance(gate, Mapping) else None
+        if gate_passed is False:
+            failed_gates += 1
+        cost_rows.append({
+            "case": row.get("case", ""), "name": row.get("name", ""),
+            "mode": row.get("mode", ""), "status": row.get("status", ""),
+            "passed": bool(row.get("passed", False)), "gate_passed": gate_passed,
+            "validation_total_wall_ms": validation_wall_ms,
+            "backend_total_wall_ms": backend_wall_ms,
+            "combined_total_wall_ms": combined_wall_ms,
+        })
+    def complete_values(key):
+        values = [row[key] for row in cost_rows]
+        return values if values and all(value is not None for value in values) else None
+    validation_values = complete_values("validation_total_wall_ms")
+    backend_values = complete_values("backend_total_wall_ms")
+    combined_values = complete_values("combined_total_wall_ms")
     return {
-        "schema_version": "e2e_matrix_cost_report_v1",
-        "count": count,
-        "passed": failed_gates == 0,
-        "failed_gate_count": failed_gates,
-        "total_validation_wall_ms": validation_total,
-        "total_backend_wall_ms": backend_total,
-        "total_combined_wall_ms": combined_total,
-        "mean_combined_wall_ms": combined_total / count if count else 0.0,
-        "max_combined_wall_ms": max_combined,
-        "max_backend_wall_ms": max_backend,
+        "schema_version": "e2e_matrix_cost_report_v2", "count": len(cost_rows),
+        "passed": failed_gates == 0, "failed_gate_count": failed_gates,
+        "missing_cost_count": sum(row["combined_total_wall_ms"] is None for row in cost_rows),
+        "total_validation_wall_ms": sum(validation_values) if validation_values is not None else None,
+        "total_backend_wall_ms": sum(backend_values) if backend_values is not None else None,
+        "total_combined_wall_ms": sum(combined_values) if combined_values is not None else None,
+        "mean_combined_wall_ms": sum(combined_values) / len(combined_values) if combined_values is not None else None,
+        "max_combined_wall_ms": max(combined_values) if combined_values is not None else None,
+        "max_backend_wall_ms": max(backend_values) if backend_values is not None else None,
         "rows": cost_rows,
     }

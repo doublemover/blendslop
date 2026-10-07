@@ -38,21 +38,22 @@ def _run_open3d_poisson(
     point_cloud = o3d.geometry.PointCloud()
     point_cloud.points = source_mesh.vertices
     normals = np.asarray(getattr(source_mesh, "vertex_normals", ()), dtype=np.float64)
-    if normals.shape == vertices.shape and np.linalg.norm(normals, axis=1).sum() > 0.0:
+    cleaned_points = np.asarray(point_cloud.points)
+    use_mesh_normals = (normals.shape == cleaned_points.shape and np.isfinite(normals).all()
+                        and np.all(np.linalg.norm(normals, axis=1) > 1e-12))
+    if use_mesh_normals:
         point_cloud.normals = source_mesh.vertex_normals
     else:
         point_cloud.estimate_normals()
-        try:
-            point_cloud.orient_normals_consistent_tangent_plane(
-                int(config.get("poisson_normal_neighbors", 16))
-            )
-        except Exception:
-            pass
+        point_cloud.orient_normals_consistent_tangent_plane(
+            min(len(cleaned_points)-1, int(config.get("poisson_normal_neighbors", 16)))
+        )
 
     depth = int(config.get("poisson_depth", config.get("postprocess_depth", 8)))
     scale = float(config.get("poisson_scale", 1.1))
     linear_fit = bool(config.get("poisson_linear_fit", False))
-    kwargs = {"depth": depth, "scale": scale, "linear_fit": linear_fit}
+    threads = max(1, min(4, int(config.get("poisson_threads", 4))))
+    kwargs = {"depth": depth, "scale": scale, "linear_fit": linear_fit, "n_threads": threads}
     try:
         processed_mesh, densities = (
             o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
@@ -69,6 +70,14 @@ def _run_open3d_poisson(
             )
         )
 
+    densities_array = np.asarray(densities, dtype=np.float64)
+    density_quantile = config.get("poisson_density_quantile")
+    if density_quantile is not None and densities_array.size:
+        threshold = float(np.quantile(densities_array, float(density_quantile)))
+        if len(densities_array) != len(processed_mesh.vertices):
+            raise RuntimeError("Poisson density/vertex correspondence is invalid")
+        processed_mesh.remove_vertices_by_mask(densities_array < threshold)
+
     if bool(config.get("poisson_crop_to_input_bounds", True)) and len(faces):
         bbox = source_mesh.get_axis_aligned_bounding_box()
         crop_scale = float(config.get("poisson_crop_scale", 1.05))
@@ -76,11 +85,6 @@ def _run_open3d_poisson(
             bbox = bbox.scale(crop_scale, bbox.get_center())
         processed_mesh = processed_mesh.crop(bbox)
 
-    densities_array = np.asarray(densities, dtype=np.float64)
-    density_quantile = config.get("poisson_density_quantile")
-    if density_quantile is not None and densities_array.size:
-        threshold = float(np.quantile(densities_array, float(density_quantile)))
-        processed_mesh.remove_vertices_by_mask(densities_array < threshold)
 
     processed_mesh.remove_duplicated_vertices()
     processed_mesh.remove_degenerate_triangles()
@@ -99,6 +103,9 @@ def _run_open3d_poisson(
         "postprocess": method,
         "postprocess_backend": "open3d",
         "poisson_depth": depth,
+        "poisson_threads": threads,
+        "normal_source": "cleaned_mesh_vertex_normals" if use_mesh_normals else "estimated_oriented",
+        "density_filter_order": "before_crop_to_preserve_vertex_correspondence",
         "poisson_scale": scale,
         "poisson_linear_fit": linear_fit,
         "input_vertex_count": int(len(vertices)),

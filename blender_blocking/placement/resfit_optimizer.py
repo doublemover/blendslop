@@ -5,6 +5,7 @@ Deterministic optimizers for duck-typed ResFit primitives.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from copy import deepcopy
 import time
 from typing import Callable, List, Sequence, Tuple
 
@@ -12,8 +13,14 @@ import numpy as np
 
 try:
     from .resfit_objective import ResFitObjectiveResult
+    from .resfit_parameters import (apply_parameter_increment, clip_parameter_value,
+                                    discover_primitive_parameters, parameter_value,
+                                    set_parameter_value)
 except ImportError:  # pragma: no cover - supports direct script execution.
     from resfit_objective import ResFitObjectiveResult
+    from resfit_parameters import (apply_parameter_increment, clip_parameter_value,
+                                   discover_primitive_parameters, parameter_value,
+                                   set_parameter_value)
 
 
 ObjectiveFn = Callable[[Sequence[object]], ResFitObjectiveResult]
@@ -209,6 +216,76 @@ class OptimizationResult:
     termination_reason: str = "max_iterations"
     objective_evaluations: int = 0
     elapsed_s: float = 0.0
+    initial_result: ResFitObjectiveResult | None = None
+    final_result: ResFitObjectiveResult | None = None
+    parameter_visits: tuple[ParameterRef, ...] = ()
+
+
+class OptimizationBudgetExhausted(RuntimeError):
+    """Raised before starting an objective that would exceed a shared budget."""
+
+
+@dataclass
+class OptimizationBudget:
+    """Cooperative deadline and objective count shared by nested searches.
+
+    A running objective cannot be preempted. Failed objective calls still count.
+    Child allowances cap a family/attempt without resetting their parent budget.
+    """
+
+    max_objective_evaluations: int | None = None
+    max_elapsed_s: float | None = None
+    parent: OptimizationBudget | None = None
+    started_at: float = field(default_factory=time.perf_counter)
+    objective_evaluations: int = 0
+
+    def remaining_evaluations(self) -> int | None:
+        own = (None if self.max_objective_evaluations is None else
+               max(0, self.max_objective_evaluations - self.objective_evaluations))
+        inherited = None if self.parent is None else self.parent.remaining_evaluations()
+        available = [value for value in (own, inherited) if value is not None]
+        return min(available) if available else None
+
+    def remaining_seconds(self) -> float | None:
+        own = (None if self.max_elapsed_s is None else
+               max(0.0, self.max_elapsed_s - (time.perf_counter() - self.started_at)))
+        inherited = None if self.parent is None else self.parent.remaining_seconds()
+        available = [value for value in (own, inherited) if value is not None]
+        return min(available) if available else None
+
+    def reason(self) -> str | None:
+        count = self.remaining_evaluations()
+        if count is not None and count <= 0:
+            return "objective_evaluation_budget"
+        seconds = self.remaining_seconds()
+        if seconds is not None and seconds <= 0:
+            return "elapsed_time_budget"
+        return None
+
+    def child(self, *, slots: int = 1) -> OptimizationBudget:
+        slots = max(1, int(slots))
+        count = self.remaining_evaluations()
+        seconds = self.remaining_seconds()
+        # An allowance smaller than the slot count can score only some starts.
+        # Never manufacture one extra evaluation for each exhausted child.
+        return OptimizationBudget(
+            max_objective_evaluations=(None if count is None else
+                                       max(1, count // slots) if count else 0),
+            max_elapsed_s=None if seconds is None else seconds / slots,
+            parent=self,
+        )
+
+    def _record_evaluation(self) -> None:
+        self.objective_evaluations += 1
+        if self.parent is not None:
+            self.parent._record_evaluation()
+
+    def evaluate(self, objective_fn: ObjectiveFn, primitives: Sequence[object]) -> ResFitObjectiveResult:
+        reason = self.reason()
+        if reason is not None:
+            raise OptimizationBudgetExhausted(reason)
+        self._record_evaluation()
+        return objective_fn(primitives)
 
 
 def clone_primitive(primitive: object) -> object:
@@ -223,39 +300,33 @@ def clone_primitives(primitives: Sequence[object]) -> List[object]:
 
 
 def discover_parameters(primitives: Sequence[object]) -> List[ParameterRef]:
-    """Return mutable scalar parameter references for known primitive families."""
-    refs: List[ParameterRef] = []
-    for index, primitive in enumerate(primitives):
-        if hasattr(primitive, "center"):
-            refs.extend((index, "center", axis) for axis in range(3))
-        if hasattr(primitive, "position"):
-            refs.extend((index, "position", axis) for axis in range(3))
-        if hasattr(primitive, "radii"):
-            refs.extend((index, "radii", axis) for axis in range(3))
-        for attr in ("radius_bottom", "radius_top", "height", "epsilon1", "epsilon2", "opacity"):
-            if hasattr(primitive, attr):
-                refs.append((index, attr, None))
-    return refs
+    """Return family-specific scalar references, including coupled geometry."""
+    return discover_primitive_parameters(primitives)
+
+
+def ordered_parameter_refs(primitives, *, priority_parts=()):
+    """Changed parts first; other parts share control coverage round-robin."""
+    groups = {}
+    for ref in discover_parameters(primitives):
+        groups.setdefault(ref[0], []).append(ref)
+    ordered, seen = [], set()
+    for index in priority_parts:
+        if index in groups and index not in seen:
+            ordered.extend(groups.pop(index)); seen.add(index)
+    while any(groups.values()):
+        for index in sorted(groups):
+            if groups[index]:
+                ordered.append(groups[index].pop(0))
+    return ordered
 
 
 def _get_value(primitives: Sequence[object], ref: ParameterRef) -> float:
     index, attr, axis = ref
-    value = getattr(primitives[index], attr)
-    if axis is None:
-        return float(value)
-    return float(np.asarray(value, dtype=np.float64)[axis])
+    return parameter_value(primitives[index], attr, axis)
 
 
 def _clip_value(attr: str, value: float, bounds: ParameterBounds) -> float:
-    if attr in ("radii", "radius_bottom", "radius_top"):
-        return float(np.clip(value, bounds.min_radius, bounds.max_radius))
-    if attr == "height":
-        return float(np.clip(value, bounds.min_height, bounds.max_height))
-    if attr in ("epsilon1", "epsilon2"):
-        return float(np.clip(value, bounds.min_exponent, bounds.max_exponent))
-    if attr == "opacity":
-        return float(np.clip(value, bounds.min_opacity, bounds.max_opacity))
-    return float(value)
+    return clip_parameter_value(attr, value, bounds)
 
 
 def _set_value(
@@ -265,102 +336,111 @@ def _set_value(
     bounds: ParameterBounds,
 ) -> None:
     index, attr, axis = ref
-    value = _clip_value(attr, value, bounds)
-    primitive = primitives[index]
-    if axis is None:
-        setattr(primitive, attr, value)
-        return
-    vector = np.asarray(getattr(primitive, attr), dtype=np.float64).copy()
-    vector[axis] = value
-    setattr(primitive, attr, vector)
+    set_parameter_value(primitives[index], attr, axis, value, bounds)
 
 
 def coordinate_descent_optimize(
     primitives: Sequence[object],
     objective_fn: ObjectiveFn,
     config: CoordinateDescentConfig = CoordinateDescentConfig(),
+    *,
+    budget: OptimizationBudget | None = None,
+    on_progress: Callable | None = None,
+    priority_parts: Sequence[int] = (),
 ) -> OptimizationResult:
-    """
-    Optimize primitive parameters with bounded coordinate descent.
+    """Optimize with a shared budget, optional paired scoring, and retained losses.
 
-    This is intentionally simple and deterministic for early silhouette/surface
-    refinement. It provides a stable baseline before analytic gradients exist.
+    An objective may expose ``evaluate_batch(candidates, *, budget)``. It must
+    use ``budget.evaluate`` per score and yield results in candidate order,
+    returning a completed prefix if the allowance expires. Batches contain two
+    competing directions of one coordinate, never conflicting admitted moves.
     """
-    working = clone_primitives(primitives)
     config_errors = config.validate()
     if config_errors:
         raise ValueError("invalid optimizer config: " + ", ".join(config_errors))
-    refs = discover_parameters(working)
     start = time.perf_counter()
-    objective_evaluations = 0
-
-    def budget_reason() -> str | None:
-        if (
-            config.max_objective_evaluations is not None
-            and objective_evaluations >= config.max_objective_evaluations
-        ):
-            return "objective_evaluation_budget"
-        if (
-            config.max_elapsed_s is not None
-            and (time.perf_counter() - start) >= config.max_elapsed_s
-        ):
-            return "elapsed_time_budget"
-        return None
-
-    def evaluate(primitives_to_score: Sequence[object]) -> ResFitObjectiveResult:
-        nonlocal objective_evaluations
-        objective_evaluations += 1
-        return objective_fn(primitives_to_score)
-
-    current = evaluate(working)
-    best_loss = current.total
+    allowance = OptimizationBudget(
+        max_objective_evaluations=config.max_objective_evaluations,
+        max_elapsed_s=config.max_elapsed_s,
+        parent=budget,
+    )
+    working = clone_primitives(primitives)
+    refs = ordered_parameter_refs(working, priority_parts=priority_parts)
+    visited = []
+    initial = allowance.evaluate(objective_fn, working)
+    current = initial
     history: List[OptimizationRecord] = []
     step = float(config.initial_step)
     termination_reason = "zero_iterations" if config.iterations == 0 else "max_iterations"
     stopped = False
 
+    def checkpoint():
+        if on_progress is not None and np.isfinite(current.total):
+            on_progress(OptimizationResult(primitives=tuple(clone_primitives(working)),
+                history=tuple(history), best_loss=float(current.total),
+                termination_reason="scored_checkpoint", objective_evaluations=allowance.objective_evaluations,
+                elapsed_s=float(time.perf_counter() - start), initial_result=initial, final_result=current,
+                parameter_visits=tuple(visited)))
+
+    checkpoint()
     for iteration in range(max(0, config.iterations)):
-        reason = budget_reason()
+        reason = allowance.reason()
         if reason is not None:
             termination_reason = reason
             break
         accepted = 0
         rejected = 0
         for ref in refs:
-            reason = budget_reason()
+            reason = allowance.reason()
             if reason is not None:
                 termination_reason = reason
                 stopped = True
                 break
-            original = _get_value(working, ref)
-            best_value = original
-            local_best = best_loss
-            for direction in (1.0, -1.0):
-                reason = budget_reason()
-                if reason is not None:
-                    termination_reason = reason
-                    stopped = True
-                    break
-                _set_value(working, ref, original + direction * step, config.bounds)
-                trial = evaluate(working)
-                if trial.total < local_best:
-                    local_best = trial.total
-                    best_value = _get_value(working, ref)
-            if stopped:
-                _set_value(working, ref, original, config.bounds)
-                break
-            _set_value(working, ref, best_value, config.bounds)
-            if local_best < best_loss:
-                best_loss = local_best
+            visited.append(ref)
+            index = ref[0]
+            baseline = deepcopy(working[index])
+            best_primitive = baseline
+            local_best = current
+            # Competing directions share one immutable base. Only this
+            # coordinate's winner is admitted before the next base is built.
+            proposals = [deepcopy(working), deepcopy(working)]
+            for proposal, direction in zip(proposals, (1.0, -1.0)):
+                apply_parameter_increment(proposal, ref, direction * step, config.bounds)
+            batch_evaluate = getattr(objective_fn, "evaluate_batch", None)
+            completed = 0
+            try:
+                if callable(batch_evaluate):
+                    # The optional method yields an ordered completed prefix,
+                    # and must call allowance.evaluate once for each score.
+                    trials = batch_evaluate(proposals, budget=allowance)
+                else:
+                    trials = (allowance.evaluate(objective_fn, proposal) for proposal in proposals)
+                for trial in trials:
+                    if completed >= len(proposals):
+                        raise ValueError("objective batch returned too many results")
+                    proposal = proposals[completed]
+                    completed += 1
+                    if trial.total < local_best.total:
+                        local_best = trial
+                        best_primitive = deepcopy(proposal[index])
+                    else:
+                        rejected += 1
+            except OptimizationBudgetExhausted as exc:
+                termination_reason = str(exc)
+                stopped = True
+            if completed < len(proposals):
+                termination_reason = allowance.reason() or "incomplete_coordinate_batch"
+                stopped = True
+            # A first-direction winner survives a deadline/count cap that
+            # prevents the second direction from being scored.
+            working[index] = best_primitive
+            if local_best.total < current.total:
+                current = local_best
                 accepted += 1
-            else:
-                rejected += 2
-                _set_value(working, ref, original, config.bounds)
+                checkpoint()
+            if stopped:
+                break
 
-        if stopped:
-            break
-
-        current = evaluate(working)
         history.append(
             OptimizationRecord(
                 iteration=iteration,
@@ -369,9 +449,11 @@ def coordinate_descent_optimize(
                 accepted_moves=accepted,
                 step_size=step,
                 rejected_moves=rejected,
-                reason="accepted" if accepted else "no_coordinate_improved",
+                reason=termination_reason if stopped else "accepted" if accepted else "no_coordinate_improved",
             )
         )
+        if stopped:
+            break
         if accepted == 0:
             step *= config.step_decay
         if step < config.min_step:
@@ -381,10 +463,13 @@ def coordinate_descent_optimize(
     return OptimizationResult(
         primitives=tuple(working),
         history=tuple(history),
-        best_loss=float(best_loss),
+        best_loss=float(current.total),
         termination_reason=termination_reason,
-        objective_evaluations=int(objective_evaluations),
+        objective_evaluations=allowance.objective_evaluations,
         elapsed_s=float(time.perf_counter() - start),
+        initial_result=initial,
+        final_result=current,
+        parameter_visits=tuple(visited),
     )
 
 
@@ -393,16 +478,19 @@ def finite_difference_gradient(
     objective_fn: ObjectiveFn,
     epsilon: float = 1e-5,
 ) -> dict[ParameterRef, float]:
-    """Estimate objective gradients for discovered scalar parameters."""
+    """Estimate gradients with respect to dimensionless local adapter increments."""
+    if not np.isfinite(epsilon) or epsilon <= 0.0:
+        raise ValueError("epsilon must be finite and positive")
     working = clone_primitives(primitives)
     refs = discover_parameters(working)
     base = objective_fn(working).total
     gradients: dict[ParameterRef, float] = {}
     bounds = ParameterBounds()
     for ref in refs:
-        original = _get_value(working, ref)
-        _set_value(working, ref, original + epsilon, bounds)
+        index = ref[0]
+        baseline = deepcopy(working[index])
+        apply_parameter_increment(working, ref, epsilon, bounds)
         plus = objective_fn(working).total
-        _set_value(working, ref, original, bounds)
+        working[index] = baseline
         gradients[ref] = float((plus - base) / epsilon)
     return gradients

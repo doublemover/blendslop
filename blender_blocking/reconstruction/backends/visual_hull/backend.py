@@ -57,6 +57,10 @@ class VisualHullBackend(BaseBackend):
         )
 
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
+        from blender_blocking.evaluation.cost_model import timed_call
+        recorder = getattr(request.context, "cost_recorder", None)
+        from blender_blocking.reconstruction.native_geometry import GeometryArrays
+        geometry = None
         run_config = visual_hull_run_config(request.config)
         resolution = run_config.resolution
         requested_backend = run_config.requested_backend
@@ -71,11 +75,13 @@ class VisualHullBackend(BaseBackend):
             from reconstruction.point_cloud import visual_hull_grid_from_target
             from volume import extract_mesh
 
-            grid = visual_hull_grid_from_target(
+            grid = timed_call(recorder, "construction", visual_hull_grid_from_target,
                 request.target,
                 resolution=resolution,
                 chunk_size=request.config.get("chunk_size"),
                 backend=requested_backend,
+                adaptive=bool(request.config.get("adaptive_hull", False)),
+                conservative=bool(request.config.get("preserve_thin_features", False)),
                 boundary_refine=run_config.boundary_refine,
                 boundary_dilate_px=run_config.boundary_dilate_px,
                 cache_directory=run_config.cache_directory,
@@ -137,6 +143,7 @@ class VisualHullBackend(BaseBackend):
             "direct_sparse_builder": direct_sparse_builder,
         }
         mesh_metrics["volume_backend"] = volume_backend_metadata
+        mesh_metrics["adaptive_hull"] = getattr(grid, "adaptive_report", {})
 
         volume_metadata_extra = {
             "backend": self.name,
@@ -225,7 +232,7 @@ class VisualHullBackend(BaseBackend):
             str(constraint.view) for constraint in request.target.constraints
         )
         if root is not None:
-            volume_path = save_volume_artifacts(
+            volume_path = timed_call(recorder, "serialization", save_volume_artifacts,
                 grid=grid,
                 root=root,
                 candidate_id=request.candidate_id,
@@ -266,8 +273,9 @@ class VisualHullBackend(BaseBackend):
         )
         mesh_metrics["mesh_postprocess"] = postprocess_status
         try:
-            mesh_result = extract_mesh(
+            mesh_result = timed_call(recorder, "extraction", extract_mesh,
                 mesh_source_grid,
+                recorder=recorder,
                 method=str(request.config.get("mesh_method", "marching_cubes")),
                 allow_point_cloud_fallback=bool(
                     request.config.get("allow_point_cloud_fallback", False)
@@ -277,7 +285,7 @@ class VisualHullBackend(BaseBackend):
             final_mesh_result, postprocess_status = _postprocess_mesh(
                 mesh_result,
                 postprocess,
-                config=request.config,
+                config={**request.config, "postprocess_artifact_root": str(root / "poisson")} if root else request.config,
             )
             mesh_metrics["mesh_postprocess"] = postprocess_status
             if postprocess_status["status"] == "failed":
@@ -294,16 +302,40 @@ class VisualHullBackend(BaseBackend):
                 mesh_metrics["mesh_postprocess_result"] = final_mesh_result.to_dict()
             mesh_metrics["mesh"] = _mesh_metadata(final_mesh_result)
             if final_mesh_result.available:
-                from metrics.topology import mesh_topology_report
+                geometry = GeometryArrays.capture(final_mesh_result.vertices, final_mesh_result.faces)
+                if request.config.get('adaptive_hull', False):
+                    from ...adaptive_geometry import refine_hull_boundary
+                    from dataclasses import replace
+                    before_refinement = geometry.content_hash
+                    geometry, mesh_metrics['boundary_mesh_refinement'] = refine_hull_boundary(request.target, geometry, resolution)
+                    changed = geometry.content_hash != before_refinement
+                    final_mesh_result = replace(
+                        final_mesh_result, vertices=geometry.vertices, faces=geometry.faces,
+                        normals=None if changed else final_mesh_result.normals,
+                        values=None if changed else final_mesh_result.values)
+                    mesh_metrics["boundary_mesh_result"] = final_mesh_result.to_dict()
+                from blender_blocking.metrics.topology_receipt import topology_for_geometry
 
-                topology = mesh_topology_report(
-                    final_mesh_result.vertices,
-                    final_mesh_result.faces,
-                )
-                mesh_metrics["topology"] = topology.to_dict()
+                receipt = getattr(final_mesh_result, "topology_receipt", None)
+                cache = getattr(request.context, "geometry_cache", None)
+                if cache is not None:
+                    before_reuses = getattr(cache, "receipt_reuses", 0)
+                    mesh_metrics["topology"] = timed_call(
+                        recorder, "topology", cache.topology_report, geometry, receipt=receipt)
+                    reused = getattr(cache, "receipt_reuses", 0) > before_reuses
+                else:
+                    topology, reused = timed_call(
+                        recorder, "topology", topology_for_geometry, geometry, receipt)
+                    mesh_metrics["topology"] = topology
+                mesh_metrics["topology_reuse"] = {
+                    "extraction_receipt_reused": reused,
+                    "evaluator": "index_connectivity_v1",
+                    "scope": "index connectivity only; no geometric-solid qualification",
+                }
+                mesh_metrics["mesh"] = _mesh_metadata(final_mesh_result)
                 if root is not None:
                     try:
-                        mesh_path = write_visual_hull_mesh_artifact(
+                        mesh_path = timed_call(recorder, "serialization", write_visual_hull_mesh_artifact,
                             root=root,
                             candidate_id=request.candidate_id,
                             backend_name=self.name,
@@ -362,7 +394,7 @@ class VisualHullBackend(BaseBackend):
         topology_score = float(
             mesh_metrics.get("topology", {}).get("topology_score", 0.0)
         )
-        per_view_metrics = collect_visual_hull_projection_metrics(
+        per_view_metrics = timed_call(recorder, "projection", collect_visual_hull_projection_metrics,
             target=request.target,
             grid=grid,
             max_metric_voxels=run_config.projection_metric_max_voxels,
@@ -380,7 +412,7 @@ class VisualHullBackend(BaseBackend):
             warnings=warnings,
         )
         effective_editability_score = 0.15
-        editable_proxy = _maybe_emit_editable_proxy(
+        editable_proxy = timed_call(recorder, "editable_proxy", _maybe_emit_editable_proxy,
             target=request.target,
             candidate_id=request.candidate_id,
             root=root,
@@ -441,6 +473,7 @@ class VisualHullBackend(BaseBackend):
             errors=tuple(errors),
             degraded=degraded,
             payload=grid,
+            geometry=geometry,
         )
 
 

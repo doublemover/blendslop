@@ -68,8 +68,8 @@ class OrthographicCamera:
 def camera_grid(camera: OrthographicCamera) -> Tuple[np.ndarray, np.ndarray]:
     width, height = camera.image_size
     xmin, xmax, ymin, ymax = camera.world_bounds
-    xs = np.linspace(xmin, xmax, width, dtype=np.float64)
-    ys = np.linspace(ymax, ymin, height, dtype=np.float64)
+    xs = xmin + (np.arange(width, dtype=np.float64)+.5)/width*(xmax-xmin)
+    ys = ymax - (np.arange(height, dtype=np.float64)+.5)/height*(ymax-ymin)
     return np.meshgrid(xs, ys)
 
 
@@ -101,6 +101,19 @@ def primitive_projected_mean_cov(
         if not np.all(np.isfinite(center)):
             raise ValueError("primitive center contains non-finite values")
         return center, cov, opacity
+
+    # Worker imports can create equivalent classes under two package names.
+    # Dispatch numeric Gaussian covariance by attributes rather than class identity.
+    covariance = getattr(primitive, "covariance", None)
+    if hasattr(primitive, "center") and covariance is not None and not callable(covariance):
+        center = np.asarray(primitive.center, dtype=np.float64)
+        cov = _to_float_matrix2(covariance)
+        if center.shape != (3,) or cov.shape != (3, 3) or not np.isfinite(center).all():
+            raise ValueError("Gaussian projection requires a finite 3D center and 3x3 covariance")
+        opacity = float(getattr(primitive, "opacity", 1.0)) * float(getattr(primitive, "confidence", 1.0))
+        if not np.isfinite(opacity):
+            raise ValueError("primitive opacity/confidence contains non-finite values")
+        return center[axes], cov[np.ix_(axes, axes)], float(np.clip(opacity, 0.0, 1.0))
 
     if hasattr(primitive, "center") and hasattr(primitive, "radii"):
         center3 = np.asarray(getattr(primitive, "center"), dtype=np.float64)
@@ -147,6 +160,11 @@ def render_projected_soft_silhouette(
     occupancy = np.zeros(camera.image_size[::-1], dtype=np.float64)
 
     for primitive in primitives:
+        from .shape_aware_silhouette import is_ellipse, mesh_footprint
+        if not is_ellipse(primitive):
+            alpha = mesh_footprint(primitive, camera, softness)
+            occupancy = 1.0-(1.0-occupancy)*(1.0-alpha)
+            continue
         mean, cov, opacity = primitive_projected_mean_cov(primitive, camera)
         if opacity <= 0.0:
             continue
@@ -208,7 +226,10 @@ def soft_mask_metrics(predicted: np.ndarray, target: np.ndarray) -> Mapping[str,
             "area_abs_diff_ratio": 0.0,
         }
     hard_tgt = tgt >= 0.5
-    hard_pred, hard_threshold = _adaptive_hard_prediction(pred, hard_tgt)
+    # Geometry admission uses a fixed opaque/isosurface contract. A target-area
+    # adaptive mask is separately labeled and cannot supply admission terms.
+    hard_pred, hard_threshold = pred >= 0.5, 0.5
+    diagnostic_pred, diagnostic_threshold = _adaptive_hard_prediction(pred, hard_tgt)
     hard_union = float(np.logical_or(hard_pred, hard_tgt).sum())
     hard_iou = (
         float(np.logical_and(hard_pred, hard_tgt).sum()) / hard_union
@@ -231,6 +252,8 @@ def soft_mask_metrics(predicted: np.ndarray, target: np.ndarray) -> Mapping[str,
         "area_abs_diff_ratio": abs(float(pred.sum() - tgt.sum())) / pixel_count,
         "pred_boundary_area_ratio": float(_boundary_band(hard_pred).mean()),
         "target_boundary_area_ratio": float(_boundary_band(hard_tgt).mean()),
+        "diagnostic_adaptive_threshold": float(diagnostic_threshold),
+        "diagnostic_adaptive_area_ratio": float(diagnostic_pred.mean()),
         "pred_hard_threshold": float(hard_threshold),
         "pred_hard_area_ratio": float(hard_pred.mean()),
         "target_hard_area_ratio": float(hard_tgt.mean()),
@@ -360,3 +383,233 @@ def _nearest_distance(target: np.ndarray, chunk_size: int = 2048) -> np.ndarray:
         distances[start:end] = np.sqrt(np.min(np.sum(delta * delta, axis=2), axis=1))
     output[tuple(points.T)] = distances
     return output
+
+
+@dataclass(frozen=True)
+class _ProjectedEllipse:
+    signature: tuple[bytes, bytes, float]
+    alpha: np.ndarray
+    footprint: np.ndarray
+    vector: np.ndarray
+    sigmoid_active: np.ndarray
+    opacity: float
+    eigenvalues: np.ndarray
+    eigenvectors: np.ndarray
+
+
+def _project_ellipse(
+    mean: np.ndarray,
+    covariance: np.ndarray,
+    opacity: float,
+    pixels: np.ndarray,
+    softness: float,
+    min_variance: float,
+) -> _ProjectedEllipse:
+    covariance = 0.5 * (covariance + covariance.T)
+    eigenvalues, eigenvectors = np.linalg.eigh(covariance)
+    inverse = eigenvectors @ np.diag(1.0 / np.maximum(eigenvalues, min_variance)) @ eigenvectors.T
+    displacement = pixels - mean[None, None, :]
+    vector = np.einsum('ij,hwj->hwi', inverse, displacement)
+    q = np.einsum('hwi,ij,hwj->hw', displacement, inverse, displacement)
+    argument = softness * (q - 1.0)
+    footprint = 1.0 / (1.0 + np.exp(np.clip(argument, -60.0, 60.0)))
+    return _ProjectedEllipse(
+        signature=(mean.tobytes(), covariance.tobytes(), float(opacity)),
+        alpha=float(opacity) * footprint,
+        footprint=footprint,
+        vector=vector,
+        sigmoid_active=np.abs(argument) < 60.0,
+        opacity=float(opacity),
+        eigenvalues=eigenvalues,
+        eigenvectors=eigenvectors,
+    )
+
+
+def _covariance_floor_pullback(
+    gradient: np.ndarray,
+    eigenvalues: np.ndarray,
+    eigenvectors: np.ndarray,
+    floor: float,
+) -> np.ndarray:
+    """Derivative of the spectral variance floor, away from its kink."""
+    if np.all(eigenvalues > floor):
+        return gradient
+    clamped = np.maximum(eigenvalues, floor)
+    divided = np.empty((2, 2), dtype=np.float64)
+    for row in range(2):
+        for col in range(2):
+            difference = eigenvalues[row] - eigenvalues[col]
+            if abs(difference) <= 1e-12 * max(1.0, abs(eigenvalues[row]), abs(eigenvalues[col])):
+                divided[row, col] = float(eigenvalues[row] > floor)
+            else:
+                divided[row, col] = (clamped[row] - clamped[col]) / difference
+    local = eigenvectors.T @ gradient @ eigenvectors
+    return eigenvectors @ (divided * local) @ eigenvectors.T
+
+
+def _project_ellipse_alpha_batch(projected, pixels, softness, min_variance):
+    """Vectorized footprints for at most two independent parameter trials."""
+    means = np.stack([record[0] for record in projected])
+    covariances = np.stack([0.5 * (record[1] + record[1].T) for record in projected])
+    opacities = np.asarray([record[2] for record in projected], dtype=np.float64)
+    eigenvalues, eigenvectors = np.linalg.eigh(covariances)
+    inverse = np.einsum('bik,bk,bjk->bij', eigenvectors,
+                       1.0 / np.maximum(eigenvalues, min_variance), eigenvectors)
+    displacement = pixels[None, :, :, :] - means[:, None, None, :]
+    q = np.einsum('bhwi,bij,bhwj->bhw', displacement, inverse, displacement)
+    return opacities[:, None, None] / (1.0 + np.exp(np.clip(softness * (q - 1.0), -60.0, 60.0)))
+
+
+class ProjectedSilhouetteCache:
+    """Local ellipse contributions and analytic pullback for a fixed camera set.
+
+    Only footprints whose projected mean/covariance/opacity changed are rebuilt.
+    This cache contains numeric arrays, never Blender scene objects. A backward
+    call differentiates the most recent render, using prefix/suffix products so
+    a fully opaque footprint does not cause a division by zero.
+    """
+
+    def __init__(
+        self,
+        cameras: Sequence[OrthographicCamera],
+        softness: float = 24.0,
+        min_variance: float = 1e-6,
+    ) -> None:
+        self.cameras = tuple(cameras)
+        if len({camera.name for camera in self.cameras}) != len(self.cameras):
+            raise ValueError('camera names must be unique')
+        self.softness = float(softness)
+        self.min_variance = float(min_variance)
+        if not np.isfinite(self.softness) or self.softness <= 0.0:
+            raise ValueError('softness must be finite and positive')
+        if not np.isfinite(self.min_variance) or self.min_variance <= 0.0:
+            raise ValueError('min_variance must be finite and positive')
+        self._pixels = {
+            camera.name: np.stack(camera_grid(camera), axis=2) for camera in self.cameras
+        }
+        self._parts: dict[str, list[_ProjectedEllipse]] = {}
+        self._count = 0
+        self.recomputed_components = 0
+        self.reused_components = 0
+        self.generation = 0
+
+    def render(self, primitives: Sequence[object]) -> dict[str, np.ndarray]:
+        output: dict[str, np.ndarray] = {}
+        changed = len(primitives) != self._count
+        for camera in self.cameras:
+            previous = self._parts.get(camera.name, [])
+            parts: list[_ProjectedEllipse] = []
+            occupancy = np.zeros(camera.image_size[::-1], dtype=np.float64)
+            for index, primitive in enumerate(primitives):
+                mean, covariance, opacity = primitive_projected_mean_cov(primitive, camera)
+                covariance = 0.5 * (covariance + covariance.T)
+                signature = (mean.tobytes(), covariance.tobytes(), float(opacity))
+                if index < len(previous) and previous[index].signature == signature:
+                    part = previous[index]
+                    self.reused_components += 1
+                else:
+                    part = _project_ellipse(mean, covariance, opacity,
+                        self._pixels[camera.name], self.softness, self.min_variance)
+                    self.recomputed_components += 1
+                    changed = True
+                parts.append(part)
+                occupancy = 1.0 - (1.0 - occupancy) * (1.0 - part.alpha)
+            self._parts[camera.name] = parts
+            output[camera.name] = np.clip(occupancy, 0.0, 1.0)
+        self._count = len(primitives)
+        if changed:
+            self.generation += 1
+        return output
+
+    def render_coordinate_batch(
+        self,
+        base: Sequence[object],
+        candidates: Sequence[Sequence[object]],
+    ) -> tuple[dict[str, np.ndarray], ...]:
+        """Render paired single-part trials without changing the captured base.
+
+        Other part contributions are shared; changed footprints are computed as
+        one NumPy batch per view. No candidate is combined with another trial or
+        installed into the live contribution cache. Admission remains external.
+        """
+        if len(candidates) > 2:
+            raise ValueError('coordinate batches contain at most two candidates')
+        if any(len(candidate) != len(base) for candidate in candidates):
+            raise ValueError('coordinate candidates must retain the base part count')
+        base_masks = self.render(base)
+        changed = [set() for _ in candidates]
+        projected = {}
+        for camera in self.cameras:
+            view_records = []
+            for candidate_index, candidate in enumerate(candidates):
+                records = []
+                for index, primitive in enumerate(candidate):
+                    mean, covariance, opacity = primitive_projected_mean_cov(primitive, camera)
+                    covariance = 0.5 * (covariance + covariance.T)
+                    record = (mean, covariance, opacity)
+                    records.append(record)
+                    signature = (mean.tobytes(), covariance.tobytes(), float(opacity))
+                    if signature != self._parts[camera.name][index].signature:
+                        changed[candidate_index].add(index)
+                view_records.append(records)
+            projected[camera.name] = view_records
+        if any(len(indices) > 1 for indices in changed):
+            raise ValueError('each coordinate candidate may change only one projected part')
+        outputs = [dict(base_masks) for _ in candidates]
+        groups: dict[int, list[int]] = {}
+        for candidate_index, indices in enumerate(changed):
+            if indices:
+                groups.setdefault(next(iter(indices)), []).append(candidate_index)
+        for camera in self.cameras:
+            parts = self._parts[camera.name]
+            for changed_index, candidate_indices in groups.items():
+                other_transmittance = np.ones(camera.image_size[::-1], dtype=np.float64)
+                for index, part in enumerate(parts):
+                    if index != changed_index:
+                        other_transmittance *= 1.0 - part.alpha
+                records = [projected[camera.name][candidate_index][changed_index]
+                           for candidate_index in candidate_indices]
+                alphas = _project_ellipse_alpha_batch(records, self._pixels[camera.name],
+                    self.softness, self.min_variance)
+                for row, candidate_index in enumerate(candidate_indices):
+                    outputs[candidate_index][camera.name] = np.clip(
+                        1.0 - other_transmittance * (1.0 - alphas[row]), 0.0, 1.0)
+                self.recomputed_components += len(candidate_indices)
+                self.reused_components += (len(parts) - 1) * len(candidate_indices)
+        return tuple(outputs)
+
+    def backward(
+        self,
+        mask_gradients: Mapping[str, np.ndarray],
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Return gradients of 3D center, covariance, and rendered opacity."""
+        centers = np.zeros((self._count, 3), dtype=np.float64)
+        covariances = np.zeros((self._count, 3, 3), dtype=np.float64)
+        opacities = np.zeros(self._count, dtype=np.float64)
+        for camera in self.cameras:
+            if camera.name not in mask_gradients:
+                continue
+            gradient = np.asarray(mask_gradients[camera.name], dtype=np.float64)
+            if gradient.shape != camera.image_size[::-1] or not np.isfinite(gradient).all():
+                raise ValueError('mask gradient must be finite and match the camera image')
+            parts = self._parts.get(camera.name)
+            if parts is None:
+                raise ValueError('render must precede backward')
+            suffix = [np.ones_like(gradient) for _ in range(len(parts) + 1)]
+            for index in range(len(parts) - 1, -1, -1):
+                suffix[index] = suffix[index + 1] * (1.0 - parts[index].alpha)
+            prefix = np.ones_like(gradient)
+            axes = list(camera.axes)
+            for index, part in enumerate(parts):
+                alpha_gradient = gradient * prefix * suffix[index + 1]
+                coefficient = (-self.softness * part.opacity * part.footprint
+                    * (1.0 - part.footprint) * part.sigmoid_active * alpha_gradient)
+                # q=d^T S^-1 d: dq/dm=-2v and dq/dS=-v v^T.
+                centers[index, axes] += -2.0 * np.einsum('hw,hwi->i', coefficient, part.vector)
+                projected = -np.einsum('hw,hwi,hwj->ij', coefficient, part.vector, part.vector)
+                projected = _covariance_floor_pullback(projected, part.eigenvalues,
+                    part.eigenvectors, self.min_variance)
+                covariances[index][np.ix_(axes, axes)] += projected
+                opacities[index] += float(np.sum(alpha_gradient * part.footprint))
+                prefix *= 1.0 - part.alpha
+        return centers, covariances, opacities

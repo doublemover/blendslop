@@ -100,8 +100,8 @@ def _surface_mesh_with_collapsed_poles(vertices_grid: np.ndarray) -> MeshData | 
                 faces.append(
                     (
                         vertex_index(row_index, col_index),
-                        vertex_index(row_index + 1, col_index),
                         vertex_index(row_index + 1, next_col),
+                        vertex_index(row_index + 1, col_index),
                     )
                 )
             elif upper_count == 1:
@@ -422,6 +422,10 @@ class AnisotropicGaussianPrimitive:
 
     def to_ellipsoid(self, sigma: float = 1.0) -> EllipsoidPrimitive:
         eigvals, eigvecs = np.linalg.eigh(self.covariance)
+        # Eigenvector sign is arbitrary; an improper frame inverts the mesh
+        # winding even though it leaves this covariance/field unchanged.
+        if np.linalg.det(eigvecs) < 0.:
+            eigvecs[:, -1] *= -1.
         radii = sigma * np.sqrt(np.maximum(eigvals, 1e-8))
         return EllipsoidPrimitive(
             center=self.center,
@@ -454,11 +458,20 @@ class AnisotropicGaussianPrimitive:
     @classmethod
     def from_dict(cls, params: Mapping[str, object]) -> "AnisotropicGaussianPrimitive":
         color = params.get("color")
-        return cls(
+        covariance = np.asarray(params["covariance"], dtype=np.float64)
+        primitive = cls(
             center=params["center"],
-            covariance=np.asarray(params["covariance"], dtype=np.float64),
+            covariance=covariance,
             opacity=float(params.get("opacity", 1.0)),
             color=tuple(color) if color is not None else None,
             semantic_role=params.get("semantic_role"),
             confidence=float(params.get("confidence", 1.0)),
         )
+        # Reconditioning an already valid saved covariance can rotate a nearly
+        # repeated eigenspace and change the tessellated mesh on reload. Retain
+        # the exact validated record; invalid inputs still use constructor repair.
+        if (np.isfinite(covariance).all()
+                and np.allclose(covariance, covariance.T, rtol=0.0, atol=1e-12)
+                and np.linalg.eigvalsh((covariance + covariance.T) * 0.5).min() >= 1e-8 - 1e-12):
+            primitive.covariance = covariance.copy()
+        return primitive

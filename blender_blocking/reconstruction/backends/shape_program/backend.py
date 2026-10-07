@@ -151,11 +151,25 @@ class ShapeProgramBackend(BaseBackend):
             )
 
         started = time.perf_counter()
-        program, diagnostics = build_shape_program_from_target(
-            request.target,
-            config=request.config,
-            program_id=request.candidate_id,
-        )
+        routed_program = request.config.get("routed_program")
+        if routed_program is not None:
+            from dataclasses import replace
+            if not isinstance(routed_program, ShapeProgram):
+                raise ValueError("routed_program must be a validated ShapeProgram proposal")
+            program = replace(routed_program, program_id=request.candidate_id)
+            diagnostics = {"initialization":"reused_screened_whole_program",
+                           "proposal_evidence":request.config.get("routing_proposal_evidence",{})}
+        else:
+            program, diagnostics = build_shape_program_from_target(
+                request.target,
+                config=request.config,
+                program_id=request.candidate_id,
+            )
+        geometric_result = None
+        if _should_compile_blender(request):
+            from .geometry_search import geometric_program_search
+            program, geometric_result, geometric_search = geometric_program_search(request,program)
+            diagnostics["geometric_search"] = geometric_search
         program_errors = validate_shape_program(program)
         if program_errors:
             return CandidateResult(
@@ -215,6 +229,11 @@ class ShapeProgramBackend(BaseBackend):
             request,
             compiled=compiled,
         )
+        if geometric_result is not None:
+            render_per_view = geometric_result.metric_result.per_view
+            render_qa = {"status":"complete","missing_required_metrics":False,
+                "failed_required_views":[view for view,row in render_per_view.items() if not row["passed"]],
+                "source":"actual_compiled_fixed_camera_geometry"}
         if compiled is None:
             status = "research_only"
             warnings = (

@@ -274,7 +274,11 @@ def run_synthetic_suite_matrix(
                     result_payload,
                     reference_paths=reference_paths,
                     config=cfg,
+                    reference_mesh_path=rendered.get('ground_truth_obj'),
                 )
+                from blender_blocking.e2e.evidence import attach_evaluation_evidence
+                result_payload = attach_evaluation_evidence(result_payload, geometry_payload=ground_truth.get('geometry_payload'))
+                _json_dump(case_json, result_payload)
                 metrics.update(ground_truth.get("metrics", {}))
                 status = "pass" if passed else "fail"
                 message = ""

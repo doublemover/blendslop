@@ -71,7 +71,7 @@ def visual_hull_view_diagnostics_from_target(
     metric_map = per_view_metrics or {}
     diagnostics: dict[str, Any] = {
         "view_count": len(hull.views),
-        "required_view_count": len(view_names),
+        "required_view_count": sum(bool(metric_map.get(name, {}).get("required", True)) for name in view_names),
         "views": {},
     }
     ious: list[float] = []

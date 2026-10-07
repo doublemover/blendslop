@@ -110,23 +110,17 @@ def _sample_grid(points: np.ndarray, target_count: int) -> np.ndarray:
 def _sample_farthest_points(points: np.ndarray, target_count: int) -> np.ndarray:
     if len(points) <= target_count:
         return points.copy()
-    indices = []
-    selected = []
+    if target_count <= 1:
+        # Preserve the historical zero/single-sample behavior.
+        return points[:target_count].copy()
+    # Maintain the nearest selected point distance: O(N*K), O(N) memory.
     centroid = points.mean(axis=0)
-    start = int(np.argmax(np.linalg.norm(points - centroid, axis=1)))
-    indices.append(start)
-    selected.append(points[start])
-    for _ in range(1, target_count):
-        remaining = np.asarray(points)
-        selected_points = np.asarray(selected)
-        distances = np.min(
-            np.linalg.norm(remaining[:, None, :] - selected_points[None, :, :], axis=2),
-            axis=1,
-        )
-        next_idx = int(np.argmax(distances))
+    next_idx = int(np.argmax(np.linalg.norm(points - centroid, axis=1)))
+    indices = []
+    nearest = np.full(len(points), np.inf)
+    for _ in range(target_count):
         indices.append(next_idx)
-        selected.append(points[next_idx])
-    selected_points = np.asarray(selected)
-    if len(selected_points) <= 1:
-        return points[:target_count]
-    return selected_points
+        distances = np.linalg.norm(points - points[next_idx], axis=1)
+        np.minimum(nearest, distances, out=nearest)
+        next_idx = int(np.argmax(nearest))
+    return points[np.asarray(indices)]

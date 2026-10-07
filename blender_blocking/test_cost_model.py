@@ -43,6 +43,42 @@ class CostModelTests(unittest.TestCase):
         self.assertEqual(report.cache["hit_rate"], 0.5)
         self.assertEqual(report.throughput["voxels_per_ms"], 10.0)
 
+    def test_nested_spans_are_exclusive_and_missing_time_is_unavailable(self):
+        from unittest.mock import patch
+        with patch("evaluation.cost_model.perf_counter", side_effect=[0,1,2,5,8,9]):
+            recorder = CostRecorder()
+            with recorder.stage("outer"):
+                with recorder.stage("inner"):
+                    pass
+            report = recorder.report()
+        stages = {s.stage:s.wall_ms for s in report.stages}
+        self.assertEqual(stages["inner"], 3000)
+        self.assertEqual(stages["outer"], 4000)
+        self.assertEqual(report.total_wall_ms, 9000)
+        self.assertEqual(sum(stages.values()), report.total_wall_ms)
+        self.assertFalse(report.diagnostic_allocations)
+        self.assertIsNone(cost_report_from_candidate(CandidateResult("missing","none","skipped")).total_wall_ms)
+        self.assertIsNone(cost_report_from_mapping({}).total_wall_ms)
+
+
+    def test_fallback_does_not_fabricate_or_double_count_backend_time(self):
+        from evaluation.cost_model import CostReport
+        missing = CandidateResult("missing", "none", "skipped", metric_result=CandidateMetrics(
+            extras={"optimization":{"objective_evaluations":3}, "objective":{"improved":True}}))
+        self.assertIsNone(cost_report_from_candidate(missing).total_wall_ms)
+        attached = attach_cost_report_to_candidate(missing, CostReport(total_wall_ms=None))
+        self.assertIsNone(attached.metric_result.elapsed_s)
+        measured = CandidateResult("measured", "none", "success", metric_result=CandidateMetrics(
+            elapsed_s=2, extras={"optimization":{"elapsed_s":1}, "mesh_extraction":{"elapsed_s":.5}}))
+        report = cost_report_from_candidate(measured)
+        self.assertEqual(report.total_wall_ms, 2000)
+        self.assertEqual(sum(stage.wall_ms for stage in report.stages), 2000)
+        partial = CandidateResult("partial", "none", "success", metric_result=CandidateMetrics(
+            extras={"optimization":{"elapsed_s":1}}))
+        self.assertIsNone(cost_report_from_candidate(partial).total_wall_ms)
+        self.assertIsNone(cost_report_from_mapping({"total_wall_ms":None,
+            "stages":[{"stage":"partial", "wall_ms":10}]}).total_wall_ms)
+
     def test_mapping_round_trip_uses_explicit_total_or_stage_sum(self) -> None:
         payload = {
             "stages": [

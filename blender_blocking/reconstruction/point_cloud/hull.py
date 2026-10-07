@@ -89,6 +89,8 @@ def visual_hull_grid_from_target(
     backend: str = "dense",
     boundary_refine: bool = False,
     boundary_dilate_px: Optional[int] = None,
+    adaptive: bool = False,
+    conservative: bool = False,
     cache_directory: Optional[str | Path] = None,
     cache_namespace: str = "visual_hull",
     cache_read: bool = True,
@@ -100,6 +102,10 @@ def visual_hull_grid_from_target(
     | OpenVDBVolumeGrid
 ):
     """Build a visual-hull volume grid by intersecting target silhouette cones."""
+    if adaptive or any(getattr(c, "valid_mask", None) is not None for c in target.constraints):
+        from ..adaptive_geometry import hierarchical_hull
+        return hierarchical_hull(target, resolution, conservative=conservative,
+                                 chunk_size=chunk_size if chunk_size is not None else 16)
     requested_backend = _normalize_visual_hull_backend(backend)
     if requested_backend == "dense":
         return visual_hull_dense_grid_from_target(
@@ -305,6 +311,8 @@ def _build_visual_hull_from_target(
         mask = np.asarray(getattr(constraint.mask, "mask", constraint.mask)).astype(bool)
         if mask.ndim != 2:
             continue
+        from ..visibility import valid_evidence
+        mask = mask | ~valid_evidence(constraint)
         original_mask = mask
         if boundary_refine:
             radius = _auto_boundary_radius(mask, resolution, boundary_dilate_px)
@@ -313,6 +321,15 @@ def _build_visual_hull_from_target(
         bbox = getattr(constraint, "bbox", None)
         if bbox is not None and hasattr(bbox, "to_xyxy"):
             image_bounds = bbox.to_xyxy()
+        if getattr(constraint.camera, "bounds", None) is not None:
+            from ..projection_contract import viewport_for_constraint
+            axes, (xmin, xmax, ymin, ymax) = viewport_for_constraint(target, constraint)
+            lo, hi = np.asarray(bounds.to_min_max())
+            h, w = mask.shape
+            image_bounds = ((lo[axes[0]]-xmin)/(xmax-xmin)*w-.5,
+                (ymax-hi[axes[1]])/(ymax-ymin)*h-.5,
+                (hi[axes[0]]-xmin)/(xmax-xmin)*w+.5,
+                (ymax-lo[axes[1]])/(ymax-ymin)*h+.5)
         hull.add_view_from_silhouette(
             mask,
             angle=float(getattr(constraint.camera, "azimuth_deg", 0.0)),

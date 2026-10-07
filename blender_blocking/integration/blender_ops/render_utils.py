@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 import time
 import uuid
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Mapping, Any, Callable, Dict, List, Optional, Tuple
 
 try:
     import bpy
@@ -414,6 +414,7 @@ def render_orthogonal_views_detailed(
                         margin_frac=margin_frac,
                         resolution=resolution,
                         camera_distance_factor=camera_distance_factor,
+                        calibration=_config_value(render_config, "view_calibration", {}).get(view),
                     ):
                         warnings.append(f"unsupported_view_skipped:{view}")
                         continue
@@ -472,7 +473,23 @@ def _configure_validation_camera(
     margin_frac: float,
     resolution: Tuple[int, int],
     camera_distance_factor: float,
+    calibration: Optional[Mapping[str, Any]] = None,
 ) -> bool:
+    if calibration is not None:
+        from reconstruction.projection_contract import validate_view_calibration
+        validate_view_calibration({view: calibration})
+        xmin, xmax, ymin, ymax = calibration["world_bounds"]
+        aspect = resolution[0]/resolution[1]
+        if abs((xmax-xmin)/(ymax-ymin)-aspect) > 1e-5:
+            raise ValueError("calibrated camera aspect differs from render resolution")
+        configure_ortho_camera_for_view(camera, view, bounds_min, bounds_max,
+            margin_frac=0., resolution=resolution, distance_factor=camera_distance_factor)
+        axes = {"front": (0, 2), "side": (1, 2), "top": (0, 1)}[view]
+        camera.location[axes[0]] = (xmin+xmax)*.5
+        camera.location[axes[1]] = (ymin+ymax)*.5
+        # Blender ortho_scale is horizontal extent with landscape aspect, vertical with portrait.
+        camera.data.ortho_scale = max(xmax-xmin, ymax-ymin)
+        return True
     if view in {"front", "side", "top"}:
         configure_ortho_camera_for_view(
             camera,

@@ -2,6 +2,38 @@
 
 Complete guide to configuring Blender's Python environment to use the blocking tool dependencies.
 
+## Verification on 2026-10-06
+
+The original bounded comparison used Blender **5.0.1** and bundled Python 3.11.13.
+An installed **5.2.2 LTS** (`d13f752e3b9c`) follow-up with Python **3.13.13** now
+passes 82 quick groups, the evaluated-mesh identity/reference contract and 24/24
+fresh-process reconstruction checks. Actual OBJ/GLB/STL/native blend round trips
+are verified on a transformed-parent/bevel/material/units fixture. These are
+bounded core checks, not certification of every optional backend. No installation
+was needed; the earlier missing-executable blocker is withdrawn. Open3D is absent
+in this Python 3.13 environment. The repo allows open3d>=0.19.0; current Open3D 0.20.0 has a compatible Windows CPython 3.13 wheel. This is a missing local module, not a Python support limitation. See docs/branch-audit-20261006/open3d313-proposal.md for the unexecuted isolated setup proposal. Existing .venv312 Open3D 0.19.0 can be qualified separately via the explicit CPU helper.
+
+The E2E validator now resolves EEVEE engine names from the running Blender RNA
+capabilities, guards removed sample properties, and records requested/applied
+engine and samples. Evaluated mesh evidence uses world-space Z-up coordinates
+directly, including modifiers and all children of compiled shape-program roots.
+These changes reduce API assumptions; they do not replace testing a new version.
+
+For an existing configured installation, call
+`blender_blocking.verify_setup.configure_dependency_paths()` before importing
+the workflow. It exposes existing user dependency locations. Compiled packages
+must match **Blender's** Python ABI; never insert an unrelated project's venv
+site-packages into Blender. The installation instructions below are historical
+examples and need their version/path numbers adjusted to the selected build.
+
+Versioned raw results are in `temp/blender52-compat-20261006/`; the earlier 5.0
+reports remain separate. All nine decoded reference images and three ground-truth
+meshes agree across versions. See [the 5.2 verification report](../docs/branch-audit-20261006/blender52-verification.md)
+for dependencies, command isolation, per-method results and reproduction.
+
+See [the branch audit](../docs/branch-audit-20261006/README.md) for the current
+done/partial/missing ledger and exact comparison protocol.
+
 ## The Challenge
 
 Blender bundles its own Python interpreter, which doesn't have access to your virtual environment by default. We need to make the dependencies (numpy, opencv-python, Pillow, scipy, scikit-image, and Open3D) available to Blender's Python.

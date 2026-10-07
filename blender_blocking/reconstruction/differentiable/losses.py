@@ -64,7 +64,23 @@ def evaluate_render_loss(
         if target_mask is None:
             warnings.append(f"missing target silhouette for view {name}")
             continue
-        metrics = dict(soft_mask_metrics(predicted, target_mask))
+        valid = np.asarray(target.valid_masks.get(name,np.ones(np.shape(target_mask),bool)),bool)
+        if valid.shape != np.shape(target_mask):
+            raise ValueError("render loss visibility shape differs")
+        if not valid.any():
+            warnings.append(f"no observed pixels for view {name}")
+            continue
+        metrics = dict(soft_mask_metrics(np.asarray(predicted)*valid, np.asarray(target_mask)*valid))
+        if not valid.all():
+            from types import SimpleNamespace
+            from blender_blocking.reconstruction.visibility import evaluate_visible_pair
+            observed = evaluate_visible_pair(np.asarray(target_mask)>=.5,np.asarray(predicted)>=.5,
+                SimpleNamespace(mask=target_mask,valid_mask=valid),view=name)
+            metrics["soft_l2"] = float(np.mean((np.asarray(predicted)[valid]-np.asarray(target_mask)[valid])**2))
+            metrics["area_iou_loss"] = 1-observed["area_iou"]
+            metrics["boundary_iou_loss"] = 1-observed["boundary_iou"]
+            metrics["signed_distance_loss"] = observed["signed_distance_loss"]
+
         weight = _coerce_view_weight(
             configured_view_weights.get(name, 1.0),
             view_name=name,
@@ -171,7 +187,10 @@ def evaluate_render_loss(
             view_name=name,
             warnings=warnings,
         )
-        depth_value = float(np.mean((pred - tgt) ** 2))
+        valid = np.asarray(target.valid_masks.get(name,np.ones(tgt.shape,bool)),bool) & np.isfinite(pred) & np.isfinite(tgt)
+        if not valid.any():
+            continue
+        depth_value = float(np.mean((pred[valid] - tgt[valid]) ** 2))
         depth_losses.append(depth_value)
         if weight > 0.0:
             depth_terms_sum += depth_value * weight

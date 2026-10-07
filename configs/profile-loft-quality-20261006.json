@@ -1,0 +1,262 @@
+{
+  "reconstruction": {
+    "reconstruction_mode": "profile_loft",
+    "unit_scale": 0.01,
+    "num_slices": 10
+  },
+  "mesh_join": {
+    "mode": "boolean",
+    "boolean_solver": "auto",
+    "allow_degraded_simple_join": true,
+    "record_attempts": true,
+    "balanced_boolean_tree": true
+  },
+  "silhouette_extract_ref": {
+    "prefer_alpha": true,
+    "alpha_threshold": 127,
+    "alpha_min_coverage": 0.001,
+    "gray_threshold": null,
+    "invert_policy": "auto",
+    "polarity": "auto",
+    "min_area_frac": 0.0001,
+    "max_area_frac": 0.98,
+    "max_border_contact_frac": 0.95,
+    "morph_close_px": 0,
+    "morph_open_px": 0,
+    "fill_holes": true,
+    "largest_component_only": true,
+    "min_component_area_px": 0,
+    "candidate_scoring": true,
+    "emit_uncertainty": true
+  },
+  "silhouette_extract_render": {
+    "prefer_alpha": true,
+    "alpha_threshold": 127,
+    "alpha_min_coverage": 0.001,
+    "gray_threshold": null,
+    "invert_policy": "auto",
+    "polarity": "auto",
+    "min_area_frac": 0.0001,
+    "max_area_frac": 0.98,
+    "max_border_contact_frac": 0.95,
+    "morph_close_px": 0,
+    "morph_open_px": 0,
+    "fill_holes": true,
+    "largest_component_only": true,
+    "min_component_area_px": 0,
+    "candidate_scoring": true,
+    "emit_uncertainty": true
+  },
+  "silhouette_intersection": {
+    "extrude_distance": 1.0,
+    "contour_mode": "external",
+    "largest_component_only": null,
+    "silhouette_extract_override": null,
+    "boolean_solver": "auto"
+  },
+  "profile_sampling": {
+    "num_samples": 160,
+    "sample_policy": "endpoints",
+    "fill_strategy": "interp_linear",
+    "smoothing_window": 3
+  },
+  "mesh_from_profile": {
+    "radial_segments": 48,
+    "cap_mode": "fan",
+    "min_radius_u": 0.0,
+    "merge_threshold_u": 0.0,
+    "recalc_normals": true,
+    "shade_smooth": true,
+    "weld_degenerate_rings": true,
+    "adaptive_radial_segments": false,
+    "min_adaptive_radial_segments": 12,
+    "max_adaptive_radial_segments": 96,
+    "topology_strict": true,
+    "research_allow_low_radial_segments": false
+  },
+  "canonicalize": {
+    "output_size": 256,
+    "padding_frac": 0.1,
+    "anchor": "bottom_center",
+    "interp": "nearest",
+    "use_cache": true,
+    "digest_algorithm": "sha256",
+    "fill_holes": null,
+    "largest_component_only": null
+  },
+  "render_silhouette": {
+    "resolution": [
+      512,
+      512
+    ],
+    "engine": "BLENDER_EEVEE",
+    "transparent_bg": true,
+    "samples": 1,
+    "margin_frac": 0.08,
+    "color_mode": "RGBA",
+    "force_material": false,
+    "background_color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "silhouette_color": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "camera_distance_factor": 2.0,
+    "party_mode": false
+  },
+  "visual_hull": {
+    "backend": "dense",
+    "resolution": 96,
+    "max_resolution": 256,
+    "chunk_size": null,
+    "adaptive_max_depth": 5,
+    "boundary_refine": true,
+    "mesh_method": "marching_cubes",
+    "postprocess": "none",
+    "memory_budget_mb": null,
+    "occupancy_threshold": 0.5,
+    "uncertainty_aggregation": "min",
+    "enable_cache": false,
+    "cache_directory": null,
+    "cache_namespace": "visual_hull",
+    "cache_read": true,
+    "cache_write": true
+  },
+  "volume": {
+    "backend": "dense",
+    "sparse_chunk_size": 32,
+    "serialization": "npz",
+    "export_openvdb": false
+  },
+  "ensemble": {
+    "candidates": [],
+    "selection_policy": "best_score",
+    "max_parallel_candidates": 1,
+    "per_candidate_timeout_s": null,
+    "total_timeout_s": null,
+    "keep_all_artifacts": true,
+    "fail_if_no_candidate_passes_required_views": true
+  },
+  "primitive_fit": {
+    "primitive_families": [
+      "superquadric",
+      "superfrustum",
+      "ellipsoid"
+    ],
+    "target_point_count": 2048,
+    "min_primitives": 1,
+    "max_primitives": 6,
+    "optimization_steps": 12,
+    "checkpoint_cadence": 10,
+    "fail_on_regression": true,
+    "max_runtime_s": 8.0,
+    "max_objective_evaluations": 256,
+    "loss_weights": {
+      "surface_residual": 1.0,
+      "visual_hull_occupancy": 0.08,
+      "primitive_count": 0.01,
+      "overlap_penalty": 0.04,
+      "silhouette": 0.08,
+      "topology_penalty": 0.03,
+      "constraint_penalty": 0.05,
+      "uncertainty_penalty": 0.02
+    }
+  },
+  "gaussian_ellipsoid": {
+    "primitive_count": 32,
+    "initialization": "kmeans",
+    "min_radius": 0.0001,
+    "max_radius": null,
+    "opacity_min": 0.0,
+    "opacity_max": 1.0,
+    "renderer": "cpu_projected_ellipse",
+    "export_mesh_proxy": true
+  },
+  "differentiable_render": {
+    "backend": "cpu_soft_silhouette",
+    "optional_dependency_policy": "skip",
+    "gradient_mode": "finite_difference",
+    "finite_difference_epsilon": 0.0001,
+    "softness": 72.0,
+    "primitive_opacity_floor": 0.95,
+    "silhouette_bounds_padding": 0.92,
+    "target_point_count": 2048,
+    "optimization_steps": 6,
+    "optimization_initial_step": 0.05,
+    "optimization_step_decay": 0.5,
+    "optimization_min_step": 0.0001,
+    "max_objective_evaluations": 256,
+    "max_runtime_s": 20.0,
+    "loss_weights": {
+      "silhouette_l2": 0.6,
+      "soft_iou": 1.0,
+      "area_iou": 0.45,
+      "boundary_iou": 1.25,
+      "signed_distance": 0.65,
+      "depth_l2": 0.0
+    },
+    "primitive_count": 12
+  },
+  "shape_program": {
+    "root_strategy": "hybrid_profile_bounds",
+    "residual_policy": "suggest_patches",
+    "max_nodes": 64,
+    "editability_bias": 1.0,
+    "compile_blender": true,
+    "lathe_segments": 48,
+    "bevel_modifier": true,
+    "weighted_normals": true,
+    "run_export_qa": false,
+    "export_qa_targets": [
+      "obj",
+      "glb"
+    ],
+    "evaluate_texture_materials": false,
+    "uv_strict": false,
+    "material_target": "pbr"
+  },
+  "constraints": {
+    "constraint_files": [],
+    "fail_on_unsatisfied_hard_constraints": true,
+    "use_constraints_for_candidate_scoring": true
+  },
+  "synthetic_factory": {
+    "suite": "smoke",
+    "seed": 1234,
+    "output_root": "temp/synthetic",
+    "commit_small_fixtures_only": true,
+    "keep_heavy_artifacts": false
+  },
+  "quality_budget": {
+    "budget_json": null,
+    "compare_baseline": null,
+    "fail_on_regression": false,
+    "environment_compatibility": "warn"
+  },
+  "refinement_lab": {
+    "default_output_root": "temp/refinement-runs",
+    "default_suite": "default-vase",
+    "default_track": "profile-loft-refinement",
+    "default_search": "grid",
+    "default_objective": "quality_win",
+    "max_runs": null,
+    "top_k": 10,
+    "html_report": true,
+    "write_overlays": true,
+    "write_bounds_debug": true,
+    "write_autopsy": true,
+    "append_leaderboard": true,
+    "fail_on_all_failed": true,
+    "allow_subprocess_blender": false,
+    "blender_executable": null,
+    "copy_references": false,
+    "report_failures": "top",
+    "stop_on_first_error": false
+  }
+}

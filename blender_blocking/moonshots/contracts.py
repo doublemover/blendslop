@@ -131,9 +131,17 @@ def write_moonshot_artifact(
 ) -> str | None:
     if not request.artifact_root:
         return None
-    root = Path(str(request.artifact_root)) / _safe_segment(request.experiment_id)
+    from blender_blocking.utils.path_safety import compact_path_segment
+    base = Path(str(request.artifact_root))
+    safe_filename = _safe_filename(filename)
+    # Blender's bundled Windows Python can still enforce MAX_PATH. Leave room
+    # for the filename and legacy mkdir limit without relocating the given root.
+    base_length = len(str(base.resolve()))
+    room = min(48, 245 - base_length - 1, 258 - base_length - len(safe_filename) - 2)
+    segment = compact_path_segment(_safe_segment(request.experiment_id), max_length=room)
+    root = base / segment
     root.mkdir(parents=True, exist_ok=True)
-    path = root / _safe_filename(filename)
+    path = root / safe_filename
     path.write_text(
         json.dumps(_json_safe(payload), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

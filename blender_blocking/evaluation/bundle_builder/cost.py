@@ -26,7 +26,7 @@ def _cost_group(result: Any) -> MetricGroup:
             report.total_wall_ms,
             unit="ms",
             higher_is_better=False,
-            status="pass",
+            status="pass" if report.total_wall_ms is not None else "skip",
         ),
     ]
     if report.peak_memory_mb is not None:
@@ -72,7 +72,19 @@ def _cost_group(result: Any) -> MetricGroup:
                 status="pass",
             )
         )
+    grouped = {}
     for stage in report.stages:
+        if stage.stage not in grouped:
+            grouped[stage.stage] = stage
+        else:
+            previous = grouped[stage.stage]
+            units = dict(previous.work_units)
+            for key, value in stage.work_units.items():
+                units[key] = units.get(key, 0.0) + value
+            grouped[stage.stage] = replace(previous, wall_ms=previous.wall_ms + stage.wall_ms,
+                artifact_bytes=previous.artifact_bytes + stage.artifact_bytes, work_units=units,
+                notes=previous.notes + stage.notes)
+    for stage in grouped.values():
         safe_stage = str(stage.stage).replace(" ", "_")
         values.append(
             MetricValue(

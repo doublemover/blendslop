@@ -118,6 +118,9 @@ def _is_renderable_mesh(value: object) -> bool:
 def _find_renderable_mesh(value: object) -> Optional[object]:
     if _is_renderable_mesh(value):
         return value
+    if any(_is_renderable_mesh(child) for child in getattr(value, 'children_recursive', ())):
+        # Compiled shape programs use an Empty root. Keep the entire part tree.
+        return value
     if isinstance(value, Mapping):
         for key in ("profile_payload", "mesh", "object", "payload"):
             if key in value:

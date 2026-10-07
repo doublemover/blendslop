@@ -81,6 +81,7 @@ def register_builtin_backends() -> None:
     from .backends.gaussian_ellipsoid import GaussianEllipsoidBackend
     from .backends.differentiable_refine import DifferentiableRefinementBackend
     from .backends.shape_program import ShapeProgramBackend
+    from .backends.implicit_residual import ImplicitResidualBackend
 
     for backend, aliases in (
         (LegacySliceBackend(), ()),
@@ -92,5 +93,6 @@ def register_builtin_backends() -> None:
         (GaussianEllipsoidBackend(), ()),
         (DifferentiableRefinementBackend(), ()),
         (ShapeProgramBackend(), ()),
+        (ImplicitResidualBackend(), ()),
     ):
         register_backend(backend, replace=True, aliases=aliases)

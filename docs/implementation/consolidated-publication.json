@@ -1,0 +1,143 @@
+{
+  "source_commit": "69e3757fc84e48c8ebfa2ea83aad93509af7dcb3",
+  "publication_commit": "247e4b66226efda34ac96a2b955f9e034183e6e3",
+  "suites": [
+    {
+      "suite": "test_geometry_consistency",
+      "tests": 19,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_oriented_support",
+      "tests": 8,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_normalized_resfit",
+      "tests": 11,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_structural_routing",
+      "tests": 8,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_conditioned_geometry",
+      "tests": 11,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_polygon_extrusion",
+      "tests": 7,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_planar_retessellation",
+      "tests": 5,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_numeric_helper_session",
+      "tests": 5,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_toolchain_identity_cache",
+      "tests": 3,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_volume_winding_contract",
+      "tests": 3,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_fitted_proxy",
+      "tests": 11,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_generalized_sweep",
+      "tests": 10,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_exact_triangle_contacts",
+      "tests": 8,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_corrective_recovery",
+      "tests": 5,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_resfit_parameter_adapters",
+      "tests": 12,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_process_executor",
+      "tests": 11,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_volume",
+      "tests": 17,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "suite": "test_config_defaults",
+      "tests": 3,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    }
+  ],
+  "elapsed_s": 12.642970706998312,
+  "parsed_python_files": 573,
+  "publication_matches_worker_source": true,
+  "omitted_private_handoff_docs": [
+    "docs/branch-audit-20261006/implementation-remainder.md",
+    "docs/branch-audit-20261006/quality-implementation.md"
+  ],
+  "private_reference_scan": "passed",
+  "published_file_deletions": 0,
+  "quality_and_speed_gains": "unmeasured",
+  "blender": "not run: repository instruction"
+}

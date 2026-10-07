@@ -48,7 +48,10 @@ from .scoring import (
 def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
     """Build editable Gaussian/ellipsoid proxies from target signals."""
     start = time.perf_counter()
-    config = dict(getattr(request, "config", {}) or {})
+    from blender_blocking.reconstruction.option_receipts import copy_options
+    config = copy_options(getattr(request, "config", {}) or {})
+    from reconstruction.quality_config import quality_config
+    config = quality_config(config)
     candidate_id = getattr(request, "candidate_id")
     backend_name = getattr(request, "backend_name", "gaussian_ellipsoid_proxy")
     target = getattr(request, "target")
@@ -61,6 +64,8 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             status="failed",
             errors=tuple(errors),
         )
+
+    fit_report = {'variant': 'initializer_only', 'optimization_performed': False}
 
     family = normalized["family"]
     requested_primitive_count = int(normalized["primitive_count"])
@@ -109,6 +114,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             target_point_count=adaptive_point_count,
         )
         init_config = PrimitiveInitializationConfig(
+            kmeans_seed=str(config.get("kmeans_seed", "height")),
             primitive_count=max(1, adaptive_primitive_count),
             target_point_count=max(1, len(seed_points)),
             min_radius=float(normalized["min_radius"]),
@@ -119,14 +125,32 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             primitives = tuple(initialize_ellipsoids_from_points(seed_points, init_config))
         else:
             primitives = tuple(initialize_gaussians_from_points(seed_points, init_config))
+            sigma = float(config.get("cluster_sigma", 1.0))
+            if not 0.5 <= sigma <= 3.0:
+                raise ValueError("cluster_sigma must be finite and in [0.5, 3.0]")
+            # A one-sigma cluster contour covers less surface than the two-sigma
+            # ellipsoid initializer. This opt-in contour is used by the actual mesh.
+            if sigma != 1.0:
+                primitives = tuple(AnisotropicGaussianPrimitive(
+                    center=p.center, covariance=p.covariance * sigma**2,
+                    opacity=p.opacity, semantic_role=p.semantic_role,
+                    confidence=p.confidence) for p in primitives)
+        from reconstruction.projection_contract import permits_bounds_seed
+        seed_allowed, seed_evidence = permits_bounds_seed(target)
+        guard_enabled = bool(config.get("negative_space_seed_guard", False))
+        seed_evidence = {**seed_evidence, "guard_enabled": guard_enabled}
+        if not guard_enabled:
+            seed_allowed = True  # Preserve the legacy initializer unless explicitly requested.
         initialization_diagnostics = _initialization_diagnostics(
             seed_points,
             target=target,
             family=family,
-            include_bounds_proxy=bool(normalized["include_bounds_proxy"]),
+            include_bounds_proxy=bool(normalized["include_bounds_proxy"]) and seed_allowed,
             min_radius=float(normalized["min_radius"]),
             opacity=float(normalized["opacity_max"]),
         )
+        initialization_diagnostics["bounds_seed_admission"] = seed_evidence
+        initialization_diagnostics["cluster_sigma"] = float(config.get("cluster_sigma", 1.0))
         primitives = _prepend_bounds_proxy(
             primitives,
             family=family,
@@ -141,6 +165,17 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             errors=(str(exc),),
         )
 
+    if normalized['proxy_variant'] == 'fitted_opaque_union_v1':
+        try:
+            from .fitting import fit_proxy
+            budget=getattr(request,'budget',None)
+            timeout=getattr(budget,'timeout_s',None)
+            remaining=None if timeout is None else max(.001,float(timeout)-(time.perf_counter()-start))
+            primitives,fit_report=fit_proxy(primitives,target,points,family=family,
+                config={**config,**normalized},timeout_s=remaining)
+        except Exception as exc:
+            return CandidateResult(candidate_id=candidate_id,backend_name=backend_name,
+                status='failed',errors=('opaque proxy fitting failed: '+str(exc),))
     mesh_proxy = combine_primitive_meshes(primitives, resolution=20)
     mesh_topology = None
     mesh_topology_score = float(topology_signal.get("score", 0.4))
@@ -180,6 +215,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
                 "adaptive_primitive_count": adaptive_primitive_count,
                 "initialization_diagnostics": initialization_diagnostics,
                 "normalized_config": _compact_config_summary(normalized),
+                "geometry_fit": fit_report,
             },
         )
         artifacts["primitive_json"] = primitive_path
@@ -304,7 +340,8 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             "diagnostics": initialization_diagnostics,
         },
         {
-            "stage": "fitted_proxy",
+            "stage": "fitted_proxy" if normalized['proxy_variant']=='fitted_opaque_union_v1' else "initialized_proxy",
+            "geometry_fit": fit_report,
             "primitive_count": len(primitives),
             "complexity_penalty": complexity_penalty,
             "topology_source": topology_source,
@@ -367,7 +404,16 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
         warnings.append("coverage signal is zero; surface proxy may be under-constrained")
 
     elapsed = time.perf_counter() - start
-    per_view_scores = _per_view_scores(uncertainty_signal)
+    confidence_per_view = {
+        view: {"confidence": values["area_iou"], "source": "uncertainty_confidence"}
+        for view, values in _per_view_scores(uncertainty_signal).items()
+    }
+    from blender_blocking.reconstruction.projected_metrics import projected_mesh_metrics
+    projection_vertices, projection_faces = mesh_arrays_from_object(mesh_proxy)
+    per_view_scores = projected_mesh_metrics(target, projection_vertices, projection_faces)
+    areas = [v['area_iou'] for v in per_view_scores.values()]
+    boundaries = [v['boundary_iou'] for v in per_view_scores.values()]
+
     transform_diagnostics = _proxy_transform_diagnostics(
         target,
         per_view_scores=per_view_scores,
@@ -375,9 +421,9 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
     )
 
     metrics = CandidateMetrics(
-        area_iou_min=coverage,
-        area_iou_mean=coverage,
-        boundary_iou_mean=coverage,
+        area_iou_min=min(areas) if areas else 0.,
+        area_iou_mean=sum(areas)/len(areas) if areas else 0.,
+        boundary_iou_mean=sum(boundaries)/len(boundaries) if boundaries else 0.,
         topology_score=topology_score,
         uncertainty_consistency=uncertainty_consistency,
         constraint_score=constraint_score,
@@ -386,6 +432,7 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
         elapsed_s=elapsed,
         extras={
             "family": family,
+            "geometry_fit": fit_report,
             "objective_terms": objective_terms,
             "baseline_objective_terms": baseline_terms,
             "objective_history": objective_history,
@@ -403,7 +450,9 @@ def run_gaussian_ellipsoid_proxy(request: object) -> CandidateResult:
             "mesh_topology": mesh_topology,
             "editable_proxy": editable_proxy_summary,
             "proxy_distillation": distillation_report.to_dict(),
-            "proxy_render_namespace": "backend_proxy_only",
+            "proxy_render_namespace": "backend_mesh_polygon_projection",
+            "surface_coverage_score": coverage,
+            "confidence_per_view": confidence_per_view,
             "transform_diagnostics": transform_diagnostics,
             "initialization_diagnostics": initialization_diagnostics,
             "render_proxy_disagreement_policy": {

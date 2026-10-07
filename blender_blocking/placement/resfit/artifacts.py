@@ -114,6 +114,7 @@ def write_resfit_artifacts(
                 "elapsed_s": result.optimizer_elapsed_s,
                 "selected_attempt": result.selected_attempt,
                 "attempts": list(result.attempts),
+                "residual_proposals": list(result.residual_proposals),
                 "max_runtime_s": max_runtime_s,
                 "max_objective_evaluations": max_objective_evaluations,
             },

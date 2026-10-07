@@ -79,6 +79,10 @@ class ReconstructionTarget:
     silhouettes: Mapping[str, np.ndarray] = field(default_factory=dict)
     depths: Mapping[str, np.ndarray] = field(default_factory=dict)
     surface_points: np.ndarray | None = None
+    valid_masks: Mapping[str, np.ndarray] = field(default_factory=dict)
+    probability_masks: Mapping[str, np.ndarray] = field(default_factory=dict)
+    pixel_weights: Mapping[str, np.ndarray] = field(default_factory=dict)
+    proposal_valid_masks: Mapping[str,np.ndarray] = field(default_factory=dict)
 
 @dataclass(frozen=True)
 class LossWeights:

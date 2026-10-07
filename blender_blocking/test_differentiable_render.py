@@ -151,8 +151,10 @@ class TestDifferentiableRender(unittest.TestCase):
             result = diff_render.run_refinement_candidate(request)
             self.assertEqual(result.status, "success")
             self.assertTrue(result.succeeded)
-            self.assertEqual(result.metric_result.area_iou_min, 1.0)
-            self.assertEqual(result.metric_result.area_iou_mean, 1.0)
+            # A surface-point-only target has no measured silhouette views.
+            # Empty loss terms formerly manufactured a perfect IoU of 1.0.
+            self.assertEqual(result.metric_result.area_iou_min, 0.0)
+            self.assertEqual(result.metric_result.area_iou_mean, 0.0)
             self.assertGreater(result.metric_result.complexity_penalty, 0.0)
             self.assertIn("primitive_json", result.artifacts)
             self.assertIn("mesh_obj", result.artifacts)
@@ -312,7 +314,7 @@ class TestDifferentiableRender(unittest.TestCase):
             0.30,
         )
 
-    def test_soft_mask_metrics_hardens_low_opacity_overlap_for_diagnostics(self) -> None:
+    def test_low_opacity_hard_admission_is_separate_from_adaptive_diagnostics(self) -> None:
         target = np.zeros((20, 20), dtype=np.float64)
         target[5:15, 5:15] = 1.0
         predicted = np.zeros_like(target)
@@ -320,11 +322,12 @@ class TestDifferentiableRender(unittest.TestCase):
 
         metrics = soft_mask_metrics(predicted, target)
 
-        self.assertEqual(metrics["area_iou_loss"], 0.0)
-        self.assertLess(metrics["area_iou_loss"], 1.0)
-        self.assertLess(metrics["pred_hard_threshold"], 0.5)
-        self.assertGreater(metrics["boundary_iou"], 0.0)
-        self.assertGreaterEqual(metrics["pred_bbox_x0"], 0.0)
+        self.assertEqual(metrics["area_iou_loss"], 1.0)
+        self.assertEqual(metrics["pred_hard_threshold"], 0.5)
+        self.assertEqual(metrics["boundary_iou"], 0.0)
+        self.assertLess(metrics["pred_bbox_x0"], 0.0)
+        self.assertLess(metrics['diagnostic_adaptive_threshold'],.5)
+        self.assertEqual(metrics['diagnostic_adaptive_area_ratio'],.25)
 
     def test_objective_regression_can_fail_strict_candidate(self) -> None:
         request = CandidateRequest(
@@ -438,6 +441,7 @@ class _FakeNvdiffrastBackend:
     available = True
     unavailable_reason = None
     dependency_report = "dependencies satisfied"
+    dependency_state = {"available": True}
 
     def render(self, scene, cameras):
         _ = scene

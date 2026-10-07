@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from dataclasses import replace
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import time
 from typing import Any, Mapping, Sequence
@@ -57,8 +56,10 @@ class EnsembleRunResult:
 class EnsembleRunner:
     """Run multiple backends and select a candidate using a scoring policy."""
 
-    def __init__(self, *, selection_policy: str = "best_score") -> None:
+    def __init__(self, *, selection_policy: str = "best_score", evidence_routing: bool = False, max_render_candidates: int = 3) -> None:
         self.selection_policy = selection_policy
+        self.evidence_routing = evidence_routing
+        self.max_render_candidates = max_render_candidates
 
     def build_requests(
         self,
@@ -95,87 +96,77 @@ class EnsembleRunner:
         total_timeout_s: float | None = None,
         max_parallel_candidates: int = 1,
     ) -> EnsembleRunResult:
-        if max_parallel_candidates > 1 and total_timeout_s is None:
-            return self._run_requests_parallel(
-                requests,
-                max_parallel_candidates=max_parallel_candidates,
-            )
-        results: list[CandidateResult] = []
-        started_at = time.perf_counter()
-        for request in requests:
-            effective_request = request
-            if total_timeout_s is not None:
-                elapsed = time.perf_counter() - started_at
-                remaining = float(total_timeout_s) - elapsed
-                if remaining <= 0.0:
-                    results.append(
-                        CandidateResult(
-                            candidate_id=request.candidate_id,
-                            backend_name=request.backend_name,
-                            status="skipped",
-                            warnings=("ensemble total timeout exhausted before candidate",),
-                            metric_result=CandidateMetrics(),
-                        )
-                    )
-                    continue
-                timeout_s = request.budget.timeout_s
-                if timeout_s is None or timeout_s > remaining:
-                    effective_request = replace(
-                        request,
-                        budget=replace(request.budget, timeout_s=remaining),
-                    )
-            result = _run_candidate_request(effective_request)
-            if effective_request.budget.timeout_s is not None:
-                elapsed = time.perf_counter() - started_at
-                if total_timeout_s is not None and elapsed > total_timeout_s:
-                    result = replace(
-                        result,
-                        warnings=(
-                            *result.warnings,
-                            "ensemble total timeout elapsed during candidate",
-                        ),
-                        degraded=True,
-                    )
-            results.append(result)
-        return self._result_from_candidates(results, requests)
+        from .process_executor import PersistentProcessExecutor, candidate_payload, candidate_outcome
+        from contextlib import nullcontext
+        if not requests:
+            return self._result_from_candidates([], requests)
+        shared = getattr(requests[0].context, "process_executor", None)
+        manager = nullcontext(shared) if shared is not None else PersistentProcessExecutor(max_parallel_candidates)
+        with manager as executor:
+            if self.evidence_routing:
+                from .measured_selection import routing_run
+                results, selected, ledger = routing_run(
+                    requests, total_timeout_s, self.max_render_candidates, executor=executor)
+                run = self._result_from_candidates(results, requests, selected_override=selected, use_override=True)
+                return replace(run, pareto_report={**run.pareto_report, "routing_ledger": ledger})
+            deadline = None if total_timeout_s is None else time.time() + float(total_timeout_s)
+            ordinary = [r for r in requests if r.backend_name not in {"hybrid_loft_hull", "implicit_residual"}]
+            ids = [executor.submit("candidate", candidate_payload(request, executor),
+                timeout_s=request.budget.timeout_s, deadline=deadline) for request in ordinary]
+            results = [candidate_outcome(request, executor.result(job_id)) for request, job_id in zip(ordinary, ids)]
+            seeds = {r.backend_name: r for r in results if r.backend_name in {"profile_loft", "visual_hull_voxel"}}
+            for request in requests:
+                if request.backend_name == "hybrid_loft_hull":
+                    attached = replace(request, config={**request.config, "seed_results": seeds}) if seeds else request
+                    job_id = executor.submit("candidate", candidate_payload(attached, executor),
+                        timeout_s=request.budget.timeout_s, deadline=deadline)
+                    results.append(candidate_outcome(request, executor.result(job_id)))
+                elif request.backend_name == "implicit_residual":
+                    sources = {r.backend_name:r for r in results if r.succeeded and r.geometry is not None}
+                    attached = replace(request, config={**request.config, "seed_results": sources}) if sources and not request.config.get("seed_results") else request
+                    job_id = executor.submit("candidate", candidate_payload(attached, executor),
+                        timeout_s=request.budget.timeout_s, deadline=deadline)
+                    results.append(candidate_outcome(request, executor.result(job_id)))
+            by_id = {r.candidate_id: r for r in results}
+            results = [by_id[r.candidate_id] for r in requests]
+            return self._result_from_candidates(results, requests)
 
     def _run_requests_parallel(
         self,
         requests: Sequence[CandidateRequest],
         *,
         max_parallel_candidates: int,
+        total_timeout_s: float | None = None,
     ) -> EnsembleRunResult:
-        if not requests:
-            return self._result_from_candidates([], requests)
-        results: list[CandidateResult | None] = [None] * len(requests)
-        with ThreadPoolExecutor(max_workers=max(1, int(max_parallel_candidates))) as executor:
-            future_to_index = {
-                executor.submit(_run_candidate_request, request): index
-                for index, request in enumerate(requests)
-            }
-            for future in as_completed(future_to_index):
-                index = future_to_index[future]
-                try:
-                    results[index] = future.result()
-                except Exception as exc:
-                    request = requests[index]
-                    results[index] = CandidateResult(
-                        candidate_id=request.candidate_id,
-                        backend_name=request.backend_name,
-                        status="failed",
-                        errors=(str(exc),),
-                    )
-        return self._result_from_candidates(
-            [result for result in results if result is not None],
-            requests,
-        )
+        return self.run_requests(requests, total_timeout_s=total_timeout_s,
+                                 max_parallel_candidates=max_parallel_candidates)
 
     def _result_from_candidates(
         self,
         results: Sequence[CandidateResult],
         requests: Sequence[CandidateRequest],
+        *,
+        selected_override: CandidateResult | None = None,
+        use_override: bool = False,
     ) -> EnsembleRunResult:
         selected, ranked = select_best(results, policy=self.selection_policy)
+        if use_override:
+            selected = selected_override
+        from blender_blocking.reconstruction.native_geometry import NativeOwnedGeometry
+        if selected is not None and selected.geometry is not None and not isinstance(selected.geometry, NativeOwnedGeometry):
+            context = next((r.context for r in requests if r.candidate_id == selected.candidate_id), None)
+            if getattr(context, "blender_available", False):
+                owner = NativeOwnedGeometry(selected.geometry, "Selected_" + selected.candidate_id,
+                                            getattr(context, "cost_recorder", None))
+                selected = replace(selected, geometry=owner, payload=owner.attach())
+                results = [selected if r.candidate_id == selected.candidate_id else r for r in results]
+        for result in results:
+            if isinstance(result.geometry, NativeOwnedGeometry):
+                if selected is not None and result.candidate_id == selected.candidate_id:
+                    selected = replace(result, payload=result.geometry.attach())
+                else:
+                    result.geometry.release()
+        results = [selected if selected is not None and r.candidate_id == selected.candidate_id else r for r in results]
         bundles, autopsy_packs = _evaluation_outputs(
             results=results,
             requests=requests,
@@ -222,8 +213,10 @@ class EnsembleRunner:
         )
 
 
-def _run_candidate_request(request: CandidateRequest) -> CandidateResult:
+def _run_candidate_request(request: CandidateRequest, *, project_diagnostics=True) -> CandidateResult:
     try:
+        from .quality_config import quality_config
+        request = replace(request, config=quality_config(request.config))
         backend = get_backend(request.backend_name)
         errors = backend.validate_config(request.config)
         if errors:
@@ -233,7 +226,16 @@ def _run_candidate_request(request: CandidateRequest) -> CandidateResult:
                 status="failed",
                 errors=tuple(errors),
             )
-        return backend.reconstruct(request)
+        from blender_blocking.evaluation.cost_model import timed_call
+        recorder = getattr(request.context, "cost_recorder", None)
+        started = time.perf_counter()
+        from .option_receipts import reconstruct_with_receipt
+        result = timed_call(recorder, "candidate_backend", reconstruct_with_receipt, backend, request)
+        result = replace(result, metric_result=replace(result.metric_result, elapsed_s=time.perf_counter()-started))
+        if request.artifact_root is not None and getattr(request.context,"blender_available",False):
+            from .measured_selection import freeze_geometry
+            result = freeze_geometry(result, request, project_diagnostics=project_diagnostics)
+        return result
     except Exception as exc:
         return CandidateResult(
             candidate_id=request.candidate_id,

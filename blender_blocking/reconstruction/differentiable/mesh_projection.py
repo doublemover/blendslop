@@ -43,9 +43,8 @@ from .contracts import CameraSpec, RenderableScene
 
 
 def _target_cameras_and_masks(target: object) -> tuple[tuple[CameraSpec, ...], dict[str, np.ndarray]]:
-    from reconstruction.point_cloud import target_bounds
+    from reconstruction.projection_contract import pixel_cell_viewport
 
-    bounds = target_bounds(target)
     cameras = []
     silhouettes = {}
     for constraint in getattr(target, "constraints", ()):
@@ -53,15 +52,7 @@ def _target_cameras_and_masks(target: object) -> tuple[tuple[CameraSpec, ...], d
         if mask.ndim != 2:
             continue
         height, width = mask.shape
-        if constraint.view == "side":
-            axes = (1, 2)
-            world_bounds = (bounds.min_y, bounds.max_y, bounds.min_z, bounds.max_z)
-        elif constraint.view == "top":
-            axes = (0, 1)
-            world_bounds = (bounds.min_x, bounds.max_x, bounds.min_y, bounds.max_y)
-        else:
-            axes = (0, 2)
-            world_bounds = (bounds.min_x, bounds.max_x, bounds.min_z, bounds.max_z)
+        axes, world_bounds = pixel_cell_viewport(target, constraint)
         cameras.append(
             CameraSpec(
                 name=constraint.view,

@@ -157,6 +157,7 @@ def build_resfit_candidate_metrics(
                 "selected_attempt": result.selected_attempt,
                 "attempts": list(result.attempts),
                 "family_attempts": list(family_attempts),
+                "search_budget": dict(getattr(result, "search_budget", {}) or {}),
                 "per_view": per_view,
                 "fail_reason": fail_reason,
             },

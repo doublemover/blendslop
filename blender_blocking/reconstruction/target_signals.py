@@ -241,10 +241,16 @@ def collect_uncertainty_signal(constraints: Sequence[Any]) -> dict[str, Any]:
         uncertainty = getattr(constraint, "uncertainty", None)
         if uncertainty is None:
             continue
-        confidence = np.asarray(getattr(uncertainty, "confidence", ()), dtype=float).reshape(-1)
+        confidence = np.asarray(getattr(uncertainty, "confidence", ()), dtype=float)
         boundary = np.asarray(
             getattr(uncertainty, "boundary_uncertainty", ()), dtype=float
-        ).reshape(-1)
+        )
+        if getattr(constraint,'mask',None) is not None:
+            from .visibility import valid_evidence
+            valid=valid_evidence(constraint)
+            if confidence.shape==valid.shape:confidence=confidence[valid]
+            if boundary.shape==valid.shape:boundary=boundary[valid]
+        confidence=confidence.reshape(-1);boundary=boundary.reshape(-1)
         if confidence.size:
             confidence = np.clip(confidence.astype(float), 0.0, 1.0)
             means.append(float(confidence.mean()))

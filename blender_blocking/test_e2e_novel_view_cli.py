@@ -263,7 +263,7 @@ class E2ENovelViewCliTests(unittest.TestCase):
                 }
             }
         }
-        cost = _cost_payload({"total_wall_ms": 10.0, "stages": []}, backend)
+        cost = _cost_payload({"total_wall_ms": 50.0, "stages": []}, backend)
         passing = _cost_gate_report(
             cost,
             max_wall_ms=60.0,
@@ -280,6 +280,20 @@ class E2ENovelViewCliTests(unittest.TestCase):
         self.assertTrue(passing["passed"])
         self.assertFalse(failing["passed"])
         self.assertEqual(len(failing["failures"]), 2)
+
+    def test_missing_cost_is_unavailable_and_cannot_pass_a_requested_gate(self):
+        cost = _cost_payload({})
+        self.assertIsNone(cost["combined_total_wall_ms"])
+        gate = _cost_gate_report(cost, max_wall_ms=100, max_backend_wall_ms=100)
+        self.assertFalse(gate["passed"])
+        self.assertEqual(len(gate["failures"]), 2)
+        self.assertIsNone(gate["metrics"]["backend_total_wall_ms"])
+        summary = _matrix_cost_summary([{"cost_report":cost},
+            {"cost_report":_cost_payload({"total_wall_ms":10})}])
+        self.assertEqual(summary["count"], 2)
+        self.assertEqual(summary["missing_cost_count"], 1)
+        self.assertIsNone(summary["total_combined_wall_ms"])
+        self.assertIsNone(summary["mean_combined_wall_ms"])
 
     def test_matrix_metrics_and_summary_include_e2e_costs(self) -> None:
         payload = {

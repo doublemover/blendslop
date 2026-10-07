@@ -23,12 +23,14 @@ class StageCost:
     work_units: Mapping[str, float] = field(default_factory=dict)
     artifact_bytes: int = 0
     notes: tuple[str, ...] = ()
+    inclusive_wall_ms: float | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
             "stage": self.stage,
             "status": self.status,
             "wall_ms": self.wall_ms,
+            "inclusive_wall_ms": self.inclusive_wall_ms,
             "peak_memory_mb": self.peak_memory_mb,
             "work_units": json_safe(self.work_units),
             "artifact_bytes": self.artifact_bytes,
@@ -62,11 +64,14 @@ class CacheCost:
 
 @dataclass(frozen=True)
 class CostReport:
-    total_wall_ms: float
+    total_wall_ms: float | None
     peak_memory_mb: float | None = None
     stages: tuple[StageCost, ...] = ()
     cache: Mapping[str, float] = field(default_factory=dict)
     throughput: Mapping[str, float] = field(default_factory=dict)
+    counters: Mapping[str, float] = field(default_factory=dict)
+    process_memory: Mapping[str, Any] = field(default_factory=dict)
+    diagnostic_allocations: bool = False
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -75,6 +80,11 @@ class CostReport:
             "stages": [stage.to_dict() for stage in self.stages],
             "cache": json_safe(self.cache),
             "throughput": json_safe(self.throughput),
+            "counters": dict(self.counters),
+            "process_memory": dict(self.process_memory),
+            "diagnostic_allocations": self.diagnostic_allocations,
+            "python_peak_allocated_mb": self.peak_memory_mb,
+            "timing_semantics": "exclusive_named_spans; total_is_observed_wall",
         }
 
 
@@ -90,7 +100,7 @@ class StageTimer:
         work_units: Mapping[str, float] | None = None,
         artifact_bytes: int = 0,
         notes: tuple[str, ...] = (),
-        track_memory: bool = True,
+        track_memory: bool = False,
     ) -> None:
         self.stage = stage
         self.recorder = recorder
@@ -103,16 +113,25 @@ class StageTimer:
         self.wall_ms = 0.0
         self.peak_memory_mb: float | None = None
         self._started_tracemalloc = False
+        self.child_ms = 0.0
+        self.inclusive_wall_ms = 0.0
 
     def __enter__(self) -> "StageTimer":
         if self.track_memory and not tracemalloc.is_tracing():
             tracemalloc.start()
             self._started_tracemalloc = True
         self.start = perf_counter()
+        if self.recorder is not None:
+            self.recorder._active.append(self)
         return self
 
     def __exit__(self, exc_type: object, exc: object, _tb: object) -> None:
-        self.wall_ms = (perf_counter() - self.start) * 1000.0
+        self.inclusive_wall_ms = (perf_counter() - self.start) * 1000.0
+        self.wall_ms = max(0.0, self.inclusive_wall_ms - self.child_ms)
+        if self.recorder is not None:
+            assert self.recorder._active.pop() is self
+            if self.recorder._active:
+                self.recorder._active[-1].child_ms += self.inclusive_wall_ms
         if self.track_memory and tracemalloc.is_tracing():
             _current, peak = tracemalloc.get_traced_memory()
             self.peak_memory_mb = float(peak / (1024.0 * 1024.0))
@@ -134,6 +153,7 @@ class StageTimer:
             stage=self.stage,
             status=status or self.status,
             wall_ms=float(self.wall_ms),
+            inclusive_wall_ms=float(self.inclusive_wall_ms),
             peak_memory_mb=self.peak_memory_mb,
             work_units=dict(self.work_units),
             artifact_bytes=self.artifact_bytes,
@@ -144,11 +164,16 @@ class StageTimer:
 class CostRecorder:
     """Mutable run-cost accumulator for orchestration code."""
 
-    def __init__(self, *, track_memory: bool = True) -> None:
+    def __init__(self, *, track_memory: bool = False) -> None:
         self.track_memory = bool(track_memory)
         self.start = perf_counter()
         self.stages: list[StageCost] = []
         self.cache: dict[str, CacheCost] = {}
+        self._active: list[StageTimer] = []
+        self.counters: dict[str, float] = {}
+
+    def count(self, name: str, amount: float = 1) -> None:
+        self.counters[name] = self.counters.get(name, 0.0) + float(amount)
 
     def stage(
         self,
@@ -234,7 +259,10 @@ class CostRecorder:
         ]
         cache_payload = _flatten_cache(tuple(self.cache.values()))
         return CostReport(
-            total_wall_ms=sum(stage.wall_ms for stage in stages),
+            total_wall_ms=elapsed_ms if include_unaccounted_time else total_stage_ms,
+            counters=dict(self.counters),
+            process_memory=process_memory_snapshot(),
+            diagnostic_allocations=self.track_memory,
             peak_memory_mb=max(peak_values) if peak_values else None,
             stages=tuple(stages),
             cache=cache_payload,
@@ -255,8 +283,8 @@ def attach_cost_report_to_candidate(
     extras = getattr(metrics, "extras", {}) or {}
     extras_payload = dict(extras) if isinstance(extras, Mapping) else {}
     extras_payload[key] = report.to_dict()
-    elapsed_s = float(getattr(metrics, "elapsed_s", 0.0) or 0.0)
-    if elapsed_s <= 0.0 and report.total_wall_ms > 0.0:
+    elapsed_s = _optional_float(getattr(metrics, "elapsed_s", None))
+    if (elapsed_s is None or elapsed_s <= 0.0) and report.total_wall_ms is not None and report.total_wall_ms > 0.0:
         elapsed_s = float(report.total_wall_ms / 1000.0)
     try:
         updated_metrics = replace(metrics, extras=extras_payload, elapsed_s=elapsed_s)
@@ -267,7 +295,7 @@ def attach_cost_report_to_candidate(
 
 def cost_report_from_candidate(result: Any) -> CostReport:
     metrics = getattr(result, "metric_result", None)
-    elapsed_s = float(getattr(metrics, "elapsed_s", 0.0) or 0.0)
+    elapsed_s = _optional_float(getattr(metrics, "elapsed_s", None))
     extras = getattr(metrics, "extras", {}) or {}
     if isinstance(extras, Mapping):
         explicit_cost = extras.get("cost_report", extras.get("cost"))
@@ -278,10 +306,14 @@ def cost_report_from_candidate(result: Any) -> CostReport:
     visual_hull = extras.get("visual_hull_stats") if isinstance(extras, Mapping) else None
     mesh_extraction = extras.get("mesh_extraction") if isinstance(extras, Mapping) else None
     stages = []
-    if elapsed_s > 0.0:
-        stages.append(StageCost("backend_reconstruct", "pass", elapsed_s * 1000.0))
-    if isinstance(optimization, Mapping):
-        opt_elapsed = float(optimization.get("elapsed_s", 0.0) or 0.0)
+    if elapsed_s is not None:
+        # Unstructured metadata does not establish which subspan is nested in
+        # which other subspan. Keep the measured inclusive backend total once.
+        stage = StageCost("backend_reconstruct", "pass", elapsed_s * 1000.0,
+                          notes=("inclusive backend measurement; subspans not inferred",))
+        return CostReport(total_wall_ms=elapsed_s * 1000.0, stages=(stage,))
+    if isinstance(optimization, Mapping) and _optional_float(optimization.get("elapsed_s")) is not None:
+        opt_elapsed = float(optimization["elapsed_s"])
         stages.append(
             StageCost(
                 "primitive_fit",
@@ -292,10 +324,9 @@ def cost_report_from_candidate(result: Any) -> CostReport:
                 },
             )
         )
-    if isinstance(objective, Mapping) and not isinstance(optimization, Mapping):
-        opt_elapsed = float(
-            extras.get("optimizer_elapsed_s", objective.get("elapsed_s", 0.0)) or 0.0
-        )
+    objective_elapsed = _optional_float(extras.get("optimizer_elapsed_s", objective.get("elapsed_s"))) if isinstance(objective, Mapping) else None
+    if isinstance(objective, Mapping) and not isinstance(optimization, Mapping) and objective_elapsed is not None:
+        opt_elapsed = objective_elapsed
         stages.append(
             StageCost(
                 "primitive_objective",
@@ -310,7 +341,7 @@ def cost_report_from_candidate(result: Any) -> CostReport:
                 else (),
             )
         )
-    if isinstance(mesh_extraction, Mapping):
+    if isinstance(mesh_extraction, Mapping) and mesh_extraction.get("elapsed_s") is not None:
         elapsed = float(mesh_extraction.get("elapsed_s", 0.0) or 0.0)
         stages.append(
             StageCost(
@@ -327,12 +358,12 @@ def cost_report_from_candidate(result: Any) -> CostReport:
                 },
             )
         )
-    total = sum(stage.wall_ms for stage in stages)
+    total = None  # Partial subspan receipts cannot establish whole backend time.
     throughput = {}
     if isinstance(visual_hull, Mapping):
         active = float(visual_hull.get("active_voxels", 0.0) or 0.0)
         total_voxels = float(visual_hull.get("total_voxels", 0.0) or 0.0)
-        if total > 0.0:
+        if total is not None and total > 0.0:
             if active:
                 throughput["active_voxels_per_ms"] = active / total
             if total_voxels:
@@ -348,24 +379,27 @@ def cost_report_from_mapping(payload: Mapping[str, Any]) -> CostReport:
     stages = tuple(
         stage_cost_from_mapping(stage)
         for stage in stages_payload
-        if isinstance(stage, Mapping)
+        if isinstance(stage, Mapping) and _optional_float(stage.get("wall_ms")) is not None
     )
     total = _optional_float(payload.get("total_wall_ms"))
-    if total is None:
-        total = sum(stage.wall_ms for stage in stages)
+    if "total_wall_ms" not in payload:
+        total = sum(stage.wall_ms for stage in stages) if stages else None
     throughput = (
         dict(payload.get("throughput", {}) or {})
         if isinstance(payload.get("throughput", {}), Mapping)
         else {}
     )
-    if total <= 0.0 and throughput:
+    if (total is None or total <= 0.0) and throughput:
         throughput = {"invalid_reason": "missing_or_zero_total_wall_ms"}
     return CostReport(
-        total_wall_ms=float(total),
+        total_wall_ms=float(total) if total is not None else None,
         peak_memory_mb=_optional_float(payload.get("peak_memory_mb")),
         stages=stages,
         cache=dict(cache_payload) if isinstance(cache_payload, Mapping) else {},
         throughput=throughput,
+        counters=dict(payload.get("counters", {})),
+        process_memory=dict(payload.get("process_memory", {})),
+        diagnostic_allocations=bool(payload.get("diagnostic_allocations", False)),
     )
 
 
@@ -374,6 +408,7 @@ def stage_cost_from_mapping(payload: Mapping[str, Any]) -> StageCost:
         stage=str(payload.get("stage", "")),
         status=str(payload.get("status", "pass")),
         wall_ms=float(payload.get("wall_ms", 0.0) or 0.0),
+        inclusive_wall_ms=_optional_float(payload.get("inclusive_wall_ms")),
         peak_memory_mb=_optional_float(payload.get("peak_memory_mb")),
         work_units=dict(payload.get("work_units", {}) or {})
         if isinstance(payload.get("work_units", {}), Mapping)
@@ -402,3 +437,44 @@ def _flatten_cache(cache_items: tuple[CacheCost, ...]) -> dict[str, float]:
         payload["misses"] = float(total_misses)
         payload["hit_rate"] = float(total_hits / total) if total else 0.0
     return payload
+
+
+def process_memory_snapshot() -> dict[str, object]:
+    """Own-process working set and lifetime peak; distinct from tracemalloc."""
+    import os
+    if os.name != "nt":
+        try:
+            import resource
+            import sys
+            peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            return {"peak_working_set_bytes": int(peak if sys.platform == "darwin" else peak * 1024),
+                    "scope": "process_lifetime_peak", "source": "getrusage"}
+        except ImportError:
+            return {"available": False}
+    try:
+        import ctypes
+        from ctypes import wintypes
+        class Counters(ctypes.Structure):
+            _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD)] + [
+                (name, ctypes.c_size_t) for name in ("PeakWorkingSetSize", "WorkingSetSize",
+                "QuotaPeakPagedPoolUsage", "QuotaPagedPoolUsage", "QuotaPeakNonPagedPoolUsage",
+                "QuotaNonPagedPoolUsage", "PagefileUsage", "PeakPagefileUsage")]
+        value = Counters(); value.cb = ctypes.sizeof(value)
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.GetCurrentProcess.restype = wintypes.HANDLE
+        psapi = ctypes.WinDLL("psapi", use_last_error=True)
+        psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+        if not psapi.GetProcessMemoryInfo(kernel.GetCurrentProcess(), ctypes.byref(value), value.cb):
+            return {"available": False}
+        return {"working_set_bytes": int(value.WorkingSetSize),
+                "peak_working_set_bytes": int(value.PeakWorkingSetSize),
+                "scope": "process_lifetime_peak", "source": "GetProcessMemoryInfo"}
+    except (OSError, AttributeError):
+        return {"available": False}
+
+
+def timed_call(cost_recorder, stage, function, *args, **kwargs):
+    if cost_recorder is None:
+        return function(*args, **kwargs)
+    with cost_recorder.stage(stage):
+        return function(*args, **kwargs)

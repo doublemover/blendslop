@@ -39,7 +39,8 @@ def run_export_roundtrip_qa(
                 warnings=("Blender export QA requires bpy",),
             ),
         )
-    selected_objects = tuple(obj for obj in objects if obj is not None)
+    from reconstruction.output_targets import output_mesh_targets
+    selected_objects = tuple(output_mesh_targets(obj for obj in objects if obj is not None))
     if not selected_objects:
         return (
             ExportQAReport(
@@ -159,11 +160,34 @@ def _export_selected(target: str, path: Path) -> None:
         else:
             bpy.ops.export_scene.obj(filepath=str(path), use_selection=True)
         return
-    bpy.ops.export_scene.gltf(
-        filepath=str(path),
-        export_format="GLB",
-        use_selection=True,
-    )
+    # glTF coordinates are metres. Blender's importer converts them to the
+    # receiving scene's units, but this exporter does not apply scale_length.
+    # Uniformly scale hierarchy roots for export and restore them even on error.
+    unit_scale = float(bpy.context.scene.unit_settings.scale_length)
+    roots = set()
+    for obj in bpy.context.selected_objects:
+        root = obj
+        while root.parent is not None:
+            root = root.parent
+        roots.add(root)
+    saved = [(root, root.location.copy(), root.scale.copy()) for root in roots]
+    try:
+        if unit_scale != 1.0:
+            for root, location, scale in saved:
+                root.location = location * unit_scale
+                root.scale = scale * unit_scale
+            bpy.context.view_layer.update()
+        bpy.ops.export_scene.gltf(
+            filepath=str(path),
+            export_format="GLB",
+            use_selection=True,
+            export_apply=True,
+        )
+    finally:
+        for root, location, scale in saved:
+            root.location = location
+            root.scale = scale
+        bpy.context.view_layer.update()
 
 
 def _import_file(target: str, path: Path) -> None:

@@ -97,6 +97,7 @@ def _editable_proxy_node(
             "opacity": float(density),
             "confidence": float(confidence),
             "rotation_row_major": [float(value) for value in rotation.reshape(-1)],
+            "rotation": rotation.tolist(),
             "distillation": "gaussian_to_editable_ellipsoid",
         },
     )

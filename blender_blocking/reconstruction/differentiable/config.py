@@ -54,7 +54,7 @@ except ImportError:  # pragma: no cover - package import path.
 
 from .contracts import LossWeights
 
-_SUPPORTED_BACKENDS = {"cpu_soft_silhouette", "blender_finite_difference", "nvdiffrast"}
+_SUPPORTED_BACKENDS = {"cpu_soft_silhouette", "blender_finite_difference", "nvdiffrast", "dvx"}
 _DIFF_OPTIONAL_POLICIES = {"skip", "fail"}
 _DIFF_GRADIENT_MODES = {"finite_difference", "backend"}
 _DIFF_WEIGHT_DEFAULTS = {
@@ -292,6 +292,9 @@ def _normalize_differentiable_config(config: Mapping[str, object]) -> tuple[
     if silhouette_bounds_padding is None:
         silhouette_bounds_padding = 1.0
     normalized["silhouette_bounds_padding"] = float(silhouette_bounds_padding)
+    normalized["pixel_evidence_mode"]=str(config.get('pixel_evidence_mode') or 'view_mean_legacy')
+    if normalized['pixel_evidence_mode'] not in {'view_mean_legacy','pixel_reliability_v1'}:
+        errors.append('pixel_evidence_mode must be view_mean_legacy or pixel_reliability_v1')
     normalized["include_bounds_proxy"] = bool(config.get("include_bounds_proxy", True))
     normalized["calibrate_silhouette_bounds"] = bool(
         config.get("calibrate_silhouette_bounds", False)
@@ -300,14 +303,14 @@ def _normalize_differentiable_config(config: Mapping[str, object]) -> tuple[
         config.get("optimize_boundary_sdf_first", True)
     )
     mesh_proxy_scale = _coerce_float(
-        config.get("mesh_proxy_scale", 1.6),
+        config.get("mesh_proxy_scale", 1.0),
         "mesh_proxy_scale",
         errors,
         min_value=0.05,
         max_value=10.0,
     )
     if mesh_proxy_scale is None:
-        mesh_proxy_scale = 1.6
+        mesh_proxy_scale = 1.0
     normalized["mesh_proxy_scale"] = float(mesh_proxy_scale)
 
     visual_hull_resolution = _coerce_int(

@@ -104,6 +104,13 @@ def load_volume(
             raise ValueError("volume.npz hash does not match metadata")
 
     with np.load(npz_path, allow_pickle=False) as npz:
+        if metadata.backend == "hierarchical_occupancy":
+            from .hierarchical import HierarchicalOccupancyGrid
+            grid = HierarchicalOccupancyGrid(
+                metadata.transform.shape, metadata.bounds, npz["accepted_boxes"],
+                transform=metadata.transform, chunk_size=metadata.chunk_size)
+            grid.adaptive_report = dict(metadata.extra.get("adaptive_report", {}))
+            return grid
         if metadata.backend == "dense":
             return DenseVolumeGrid(
                 npz["data"],
@@ -156,6 +163,10 @@ def _metadata_for_grid(
 def _arrays_for_grid(
     grid: VolumeGrid, backend: str
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+    if backend == "hierarchical_occupancy":
+        return {"accepted_boxes": np.asarray(grid.accepted_boxes, np.int64)}, {
+            "serialization": "compact hierarchy intervals",
+            "adaptive_report": getattr(grid, "adaptive_report", {})}
     if backend == "dense":
         dense = grid.to_dense()
         return {"data": dense, "data_sha256": np.array(array_sha256(dense))}, {}

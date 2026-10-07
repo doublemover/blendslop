@@ -21,8 +21,8 @@ class SilhouetteExtractConfig:
     max_border_contact_frac: float = 0.95
     morph_close_px: int = 0
     morph_open_px: int = 0
-    fill_holes: bool = True
-    largest_component_only: bool = True
+    fill_holes: bool = False
+    largest_component_only: bool = False
     min_component_area_px: int = 0
     candidate_scoring: bool = True
     emit_uncertainty: bool = True
@@ -77,6 +77,16 @@ class SilhouetteExtractConfig:
 class ProfileSamplingConfig:
     """Configuration for sampling silhouettes into profiles."""
 
+    adaptive_sections: bool = False
+    max_sections: int = 64
+    section_tolerance: float = .012
+    contour_sections: bool = False
+    section_resolution: int = 64
+    adaptive_sections: bool = False
+    max_sections: int = 64
+    section_tolerance: float = .012
+    contour_sections: bool = False
+    section_resolution: int = 64
     num_samples: int = 100
     sample_policy: str = "endpoints"
     fill_strategy: str = "interp_linear"
@@ -97,6 +107,16 @@ class ProfileSamplingConfig:
         """Return a JSON-serializable dict."""
         return {
             "num_samples": self.num_samples,
+            "adaptive_sections": self.adaptive_sections,
+            "max_sections": self.max_sections,
+            "section_tolerance": self.section_tolerance,
+            "contour_sections": self.contour_sections,
+            "section_resolution": self.section_resolution,
+            "adaptive_sections": self.adaptive_sections,
+            "max_sections": self.max_sections,
+            "section_tolerance": self.section_tolerance,
+            "contour_sections": self.contour_sections,
+            "section_resolution": self.section_resolution,
             "sample_policy": self.sample_policy,
             "fill_strategy": self.fill_strategy,
             "smoothing_window": self.smoothing_window,
@@ -167,9 +187,12 @@ class RenderConfig:
     silhouette_color: Tuple[float, float, float, float] = (0.0, 0.0, 0.0, 1.0)
     camera_distance_factor: float = 2.0
     party_mode: bool = False
+    view_calibration: Dict[str, object] = field(default_factory=dict)
 
     def validate(self) -> None:
         """Validate configuration values."""
+        from reconstruction.projection_contract import validate_view_calibration
+        validate_view_calibration(self.view_calibration)
         if len(self.resolution) != 2:
             raise ValueError("resolution must be a (width, height) tuple")
         if any(val < 32 for val in self.resolution):
@@ -207,6 +230,7 @@ class RenderConfig:
             "silhouette_color": list(self.silhouette_color),
             "camera_distance_factor": self.camera_distance_factor,
             "party_mode": self.party_mode,
+            "view_calibration": self.view_calibration,
         }
 
 @dataclass
