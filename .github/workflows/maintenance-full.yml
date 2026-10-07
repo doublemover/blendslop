@@ -1,0 +1,99 @@
+name: Maintenance / full
+jobs:
+  test-blender-5:
+    name: Test with Blender 5.0
+    runs-on: ubuntu-latest
+    container:
+      image: nytimes/blender:5.0-cpu-ubuntu22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.source_sha }}
+        persist-credentials: false
+    - name: Verify and record source revision
+      shell: bash
+      env:
+        EXPECTED_SOURCE_SHA: ${{ inputs.source_sha }}
+      run: |
+        test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+        printf "Tested source: %s\n" "$EXPECTED_SOURCE_SHA"
+    - name: Verify Blender version
+      run: |
+        blender --version
+        blender --background --python-expr "import sys; print(f'Python: {sys.version}')"
+    - name: Install Python dependencies in Blender
+      run: |
+        # Find Blender's Python executable
+        BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*' | head -1)
+        echo "Blender Python: $BLENDER_PYTHON"
+
+        # Verify pip is available
+        $BLENDER_PYTHON -m pip --version
+
+        # Install dependencies
+        $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+
+        # Verify installation
+        $BLENDER_PYTHON -c "import numpy, cv2, PIL, scipy; print('Dependencies installed')"
+    - name: Run test suite
+      run: |
+        cd blender_blocking
+        blender --background --python test_runner.py
+    - name: Upload test logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-logs-blender-5
+        path: |
+          blender_blocking/*.log
+          blender_blocking/test_images/
+        retention-days: 7
+  test-blender-4:
+    name: Test with Blender 4.2 (LTS)
+    runs-on: ubuntu-latest
+    container:
+      image: nytimes/blender:4.2-cpu-ubuntu22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.source_sha }}
+        persist-credentials: false
+    - name: Verify and record source revision
+      shell: bash
+      env:
+        EXPECTED_SOURCE_SHA: ${{ inputs.source_sha }}
+      run: |
+        test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+        printf "Tested source: %s\n" "$EXPECTED_SOURCE_SHA"
+    - name: Verify Blender version
+      run: |
+        blender --version
+        blender --background --python-expr "import sys; print(f'Python: {sys.version}')"
+    - name: Install Python dependencies in Blender
+      run: |
+        BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*' | head -1)
+        echo "Blender Python: $BLENDER_PYTHON"
+        $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+        $BLENDER_PYTHON -c "import numpy, cv2, PIL, scipy; print('Dependencies installed')"
+    - name: Run test suite
+      run: |
+        cd blender_blocking
+        blender --background --python test_runner.py
+    - name: Upload test logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-logs-blender-4
+        path: |
+          blender_blocking/*.log
+          blender_blocking/test_images/
+        retention-days: 7
+'on':
+  workflow_call:
+    inputs:
+      source_sha:
+        type: string
+        required: true
+        description: Immutable source SHA resolved by the trusted adaptive dispatcher
