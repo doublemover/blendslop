@@ -241,8 +241,15 @@ class MoonshotSidecarTests(unittest.TestCase):
 
     def test_portfolio_optimizer_uses_short_bundle_name_for_long_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            long_variant = "shape_program-" + ("very_long_variant_segment_" * 6)
+            # Exercise filename compaction with a long but usable caller-owned root.
+            # A fixed suffix can exceed MAX_PATH before the writer gets a chance
+            # to compact its own experiment directory on deeply nested runners.
+            parent = Path(tmp) / "moonshots"
+            variant_room = 220 - len(str(parent.resolve())) - 1
+            self.assertGreater(variant_room, 0, "test temp parent exceeds fixture path budget")
+            long_variant = ("shape_program-" + ("very_long_variant_segment_" * 6))[:variant_room]
             root = Path(tmp) / "moonshots" / long_variant
+            self.assertLessEqual(len(str(root.resolve())), 220)
             active = run_experiment(self._request("active_view_planning", artifact_root=root))
             portfolio = run_experiment(
                 MoonshotRequest(
