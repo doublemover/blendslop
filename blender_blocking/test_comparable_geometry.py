@@ -84,7 +84,8 @@ class ComparableGeometryTests(unittest.TestCase):
     def test_render_collection_includes_all_shape_program_parts(self):
         from unittest.mock import patch
         from blender_blocking.integration.blender_ops import silhouette_render
-        mesh_a, mesh_b = SimpleNamespace(type="MESH"), SimpleNamespace(type="MESH")
+        mesh_a = SimpleNamespace(type="MESH", get=lambda key, default=None: default)
+        mesh_b = SimpleNamespace(type="MESH", get=lambda key, default=None: default)
         root = SimpleNamespace(type="EMPTY", children_recursive=[mesh_a, mesh_b])
         with patch.object(silhouette_render, "BLENDER_AVAILABLE", True):
             result = silhouette_render.collect_target_objects(None, [root, mesh_a])

@@ -336,18 +336,16 @@ class ResidualFitter:
                 r2 = radius_top[:, None]
                 h = heights[:, None] / 2.0
 
-                p_cone = p_local.copy()
-                p_cone[:, :, 2] += h
-                q0 = np.linalg.norm(p_cone[:, :, :2], axis=2)
-                q1 = p_cone[:, :, 2]
+                q0 = np.linalg.norm(p_local[:, :, :2], axis=2)
+                q1 = p_local[:, :, 2]
                 q = np.stack([q0, q1], axis=2)
 
-                k1 = np.stack([radius_top, heights], axis=1)
-                k2 = np.stack([radius_top - radius_bottom, 2.0 * heights], axis=1)
+                k1 = np.stack([radius_top, heights / 2.0], axis=1)
+                k2 = np.stack([radius_top - radius_bottom, heights], axis=1)
 
                 r_edge = np.where(q1 < 0.0, r1, r2)
                 ca0 = q0 - np.minimum(q0, r_edge)
-                ca1 = np.abs(q1) - heights[:, None]
+                ca1 = np.abs(q1) - h
                 ca = np.stack([ca0, ca1], axis=2)
 
                 dot_k2 = np.sum(k2 * k2, axis=1)
