@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "timezone": "America/Detroit",
+  "suites": [
+    {
+      "id": "full",
+      "workflow": "maintenance-full.yml",
+      "monthlyDay": 6,
+      "cron": "41 7 * * 5",
+      "paths": [
+        "**"
+      ],
+      "ignorePaths": [
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE",
+        "docs/**/*.md"
+      ],
+      "protectedPaths": [
+        ".github/**",
+        "docs/contracts/**",
+        "docs/support/**",
+        "docs/specs/**",
+        "docs/fixtures/**"
+      ],
+      "expectedJobs": [
+        {
+          "name": "Test with Blender 5.0"
+        },
+        {
+          "name": "Test with Blender 4.2 (LTS)"
+        }
+      ]
+    }
+  ],
+  "sourceRef": "main"
+}
