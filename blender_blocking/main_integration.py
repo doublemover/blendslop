@@ -758,6 +758,8 @@ class BlockingWorkflow:
             merge_threshold_u=self.config.mesh_from_profile.merge_threshold_u,
             recalc_normals=self.config.mesh_from_profile.recalc_normals,
             shade_smooth=self.config.mesh_from_profile.shade_smooth,
+            surface_mode=self.config.mesh_from_profile.surface_mode,
+            surface_subdivisions=self.config.mesh_from_profile.surface_subdivisions,
             weld_degenerate_rings=self.config.mesh_from_profile.weld_degenerate_rings,
         )
 

@@ -18,6 +18,8 @@ CONFIG_PARAMETER_PATHS: Mapping[str, tuple[str, str]] = {
     "profile_sample_policy": ("profile_sampling", "sample_policy"),
     "profile_fill_strategy": ("profile_sampling", "fill_strategy"),
     "profile_smoothing_window": ("profile_sampling", "smoothing_window"),
+    "mesh_surface_mode": ("mesh_from_profile", "surface_mode"),
+    "mesh_surface_subdivisions": ("mesh_from_profile", "surface_subdivisions"),
     "mesh_radial_segments": ("mesh_from_profile", "radial_segments"),
     "mesh_min_radius": ("mesh_from_profile", "min_radius_u"),
     "mesh_merge_threshold": ("mesh_from_profile", "merge_threshold_u"),

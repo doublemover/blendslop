@@ -1,5 +1,7 @@
 # Blendslop branch audit and bounded refinement pass — 2026-10-06
 
+Current quality follow-up: [surface, coverage and rounded-triangle backlog](quality-backlog-20261007.md). These remain independently qualified work.
+
 Latest saved-solid implementation and validation: [solid follow-through](solid-followthrough.md). Previous corrective implementation: [corrective batch](corrective-batch.md). Measurements of the earlier frozen source: [frozen final campaign results](quality-final-results.md). Frozen campaign preparation snapshot: [quality connections and handoff](quality-connections.md). Previous implementation checkpoint: [quality implementation handoff](quality-implementation.md). Earlier checkpoint: [scoped implementation follow-up](implementation-remainder.md). Measurements: [frozen native performance and metric phase](native-phase.md). This document retains its earlier snapshot.
 
 

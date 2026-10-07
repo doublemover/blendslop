@@ -126,6 +126,8 @@ class ProfileSamplingConfig:
 class LoftMeshOptions:
     """Configuration for loft mesh generation."""
 
+    surface_mode: str = "smooth"
+    surface_subdivisions: int = 4
     radial_segments: int = 24
     cap_mode: str = "fan"
     min_radius_u: float = 0.0
@@ -141,6 +143,11 @@ class LoftMeshOptions:
 
     def validate(self) -> None:
         """Validate configuration values."""
+        from geometry.loft_surface import SURFACE_MODES
+        if self.surface_mode not in SURFACE_MODES:
+            raise ValueError(f"surface_mode must be one of {SURFACE_MODES}")
+        if isinstance(self.surface_subdivisions, bool) or not isinstance(self.surface_subdivisions, int) or not 1 <= self.surface_subdivisions <= 16:
+            raise ValueError("surface_subdivisions must be an integer in [1, 16]")
         min_segments = 3 if self.research_allow_low_radial_segments else 12
         if self.radial_segments < min_segments:
             raise ValueError(f"radial_segments must be >= {min_segments}")
@@ -158,6 +165,8 @@ class LoftMeshOptions:
     def to_dict(self) -> Dict[str, object]:
         """Return a JSON-serializable dict."""
         return {
+            "surface_mode": self.surface_mode,
+            "surface_subdivisions": self.surface_subdivisions,
             "radial_segments": self.radial_segments,
             "cap_mode": self.cap_mode,
             "min_radius_u": self.min_radius_u,

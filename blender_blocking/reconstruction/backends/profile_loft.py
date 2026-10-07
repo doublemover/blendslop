@@ -127,6 +127,8 @@ class ProfileLoftBackend(BaseBackend):
                 merge_threshold_u=float(request.config.get("merge_threshold_u", 0.0)),
                 recalc_normals=bool(request.config.get("recalc_normals", True)),
                 shade_smooth=bool(request.config.get("shade_smooth", True)),
+                surface_mode=str(request.config.get("surface_mode", "smooth")),
+                surface_subdivisions=request.config.get("surface_subdivisions", 4),
                 weld_degenerate_rings=bool(
                     request.config.get("weld_degenerate_rings", True)
                 ),
@@ -190,6 +192,7 @@ class ProfileLoftBackend(BaseBackend):
             editability_score=0.55,
             elapsed_s=elapsed_s,
             extras={
+                "surface_mode": str(request.config.get("surface_mode", "smooth")),
                 "slice_count": len(slices),
                 "adaptive_sections": bool(request.config.get("adaptive_sections", False)),
                 "front_mask_available": front_mask is not None,

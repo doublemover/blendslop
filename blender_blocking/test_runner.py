@@ -117,6 +117,8 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_proxy_distillation", "test_proxy_distillation"),
     ("pure_image_processor_rgba", "test_image_processor_rgba"),
     ("pure_silhouette_extraction", "test_silhouette_extraction"),
+    ("pure_quality_contracts", "test_quality_contracts"),
+    ("pure_loft_surface", "test_loft_surface"),
     ("pure_profile_sampling", "test_profile_sampling"),
     ("pure_elliptical_profile", "test_elliptical_profile"),
     ("pure_slice_sampling", "test_slice_sampling"),

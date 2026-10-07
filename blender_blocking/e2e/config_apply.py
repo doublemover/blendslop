@@ -198,6 +198,8 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
         cfg.profile_sampling, "smoothing_window", args.profile_smoothing_window
     )
 
+    _set_if_not_none(cfg.mesh_from_profile, "surface_mode", args.mesh_surface_mode)
+    _set_if_not_none(cfg.mesh_from_profile, "surface_subdivisions", args.mesh_surface_subdivisions)
     _set_if_not_none(
         cfg.mesh_from_profile, "radial_segments", args.mesh_radial_segments
     )

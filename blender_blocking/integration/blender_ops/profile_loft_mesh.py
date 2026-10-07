@@ -7,6 +7,7 @@ import json
 from typing import List, Optional, Sequence, Tuple
 
 from geometry.profile_models import EllipticalSlice
+from geometry.loft_surface import prepare_loft_surface
 from integration.blender_ops.mesh_quality import collect_mesh_quality
 
 try:
@@ -222,6 +223,8 @@ def create_loft_mesh_from_slices(
     recalc_normals: bool = True,
     shade_smooth: bool = True,
     weld_degenerate_rings: bool = True,
+    surface_mode: str = "smooth",
+    surface_subdivisions: int = 4,
 ) -> Optional[object]:
     """Create a Blender mesh object lofted from elliptical slices."""
     if not BLENDER_AVAILABLE:
@@ -237,8 +240,9 @@ def create_loft_mesh_from_slices(
     radial_segments, radial_warnings = _resolve_radial_segments(
         slices, radial_segments, adaptive_radial_segments, target_edge_error_u
     )
+    surface_slices = prepare_loft_surface(slices, surface_mode, surface_subdivisions)
     prepared_slices, degenerate_count = _prepare_slices(
-        slices, min_radius_u, weld_degenerate_rings
+        surface_slices, min_radius_u, weld_degenerate_rings
     )
 
     bm = bmesh.new()
@@ -274,12 +278,25 @@ def create_loft_mesh_from_slices(
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.collection.objects.link(obj)
 
-    if shade_smooth:
+    if shade_smooth and surface_mode != "sharp":
         for polygon in obj.data.polygons:
-            polygon.use_smooth = True
+            # Caps and authored step shoulders stay planar. Blending their
+            # normals into the wall makes a closed lip look melted.
+            zs = [obj.data.vertices[i].co.z for i in polygon.vertices]
+            polygon.use_smooth = max(zs) - min(zs) > 1e-9
+        for edge in obj.data.edges:
+            a, b = (obj.data.vertices[i].co for i in edge.vertices)
+            if abs(a.z - b.z) <= 1e-9 and (
+                surface_mode == "stepped" or
+                abs(a.z - prepared_slices[0].z) <= 1e-9 or
+                abs(a.z - prepared_slices[-1].z) <= 1e-9
+            ):
+                edge.use_edge_sharp = True
 
     quality = collect_mesh_quality(obj)
     metadata = {
+        "surface_mode": surface_mode,
+        "surface_subdivisions": surface_subdivisions,
         "radial_segments": radial_segments,
         "adaptive_radial_segments": adaptive_radial_segments,
         "target_edge_error_u": target_edge_error_u,

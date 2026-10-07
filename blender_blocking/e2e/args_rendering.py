@@ -58,6 +58,10 @@ def add_render_args(parser: argparse.ArgumentParser) -> None:
 
 def add_profile_args(parser: argparse.ArgumentParser) -> None:
     profile = parser.add_argument_group("profile and loft")
+    profile.add_argument("--mesh-surface-mode", choices=("smooth", "stepped", "sharp"), default=None,
+                         help="Connected loft geometry: smooth curve, stepped shoulders, or sharp section corners")
+    profile.add_argument("--mesh-surface-subdivisions", type=int, default=None,
+                         help="Smooth loft sections per input interval, 1..16")
     profile.add_argument(
         "--profile-samples",
         type=int,
