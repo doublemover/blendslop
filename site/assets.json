@@ -1,0 +1,1426 @@
+{
+  "assets": [
+    {
+      "path": "assets/sphere-source-front.png",
+      "sha256": "f144908253fc9feb27d0d711b3d7538b3854fd43042375e22e6352e493d9e2a9",
+      "sourceSha256": "eba9d284644a9fb55f6e1f75e505a7be1b6b4b25a7c56dc814cf7ad7d5b31167",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 68313,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/sphere-source-side.png",
+      "sha256": "3d4e2485b87ad9d49c2fe24dc79c3cdf59c3478658b72e9084746f4bd7378ded",
+      "sourceSha256": "0c0095aa9e8314cef1e78b776aae51bdd970300460cfdc34c7fc3a1eb76d03a0",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 68314,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/sphere-source-top.png",
+      "sha256": "0465af7000debf707872cd655f68f363dd0eaeb7f62248b803428c6f5b89eb5f",
+      "sourceSha256": "3864b8d649383e6b3e1b58145d0afb56398617a6773637acb192de3cd62dc2dc",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 68321,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/sphere-source-oblique_35_28.png",
+      "sha256": "89fc9f8ca50aa6aa025772f543e3672e5adf2ab642ed4547210322a3fb528322",
+      "sourceSha256": "203b95c24b1310f0625f5dec3185b480177d08406140a7addc93f5edbc122652",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 68285,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/sphere-source-oblique_145_40.png",
+      "sha256": "e7a43188b4ca4271311bd7f7f042eab81fc33c6937a247b85449206df523abfe",
+      "sourceSha256": "7f84b7ec95125b258bc0b25eb8a20497aff76212ee47f9db8fa890cd5382a21b",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 68213,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/anisotropic_ellipsoid-source-front.png",
+      "sha256": "1bcf9f0aff2e8e6610e62b15589c6c69c3485974a78b7976f27d7b2047abe47d",
+      "sourceSha256": "8a0aa20308e58eb9f7245ce079df342b1ec13e7d4603990c832b2a04d44c23d0",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 69979,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/anisotropic_ellipsoid-source-side.png",
+      "sha256": "2b594ecffc8a1f632e4852a09fe15d6dc8f6e72b3b25047681c4ade2730c1ce4",
+      "sourceSha256": "356933b83399d0cec3c73a6fbb31271c8d3aa58ca698113e41178f5d9b937bea",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74373,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/anisotropic_ellipsoid-source-top.png",
+      "sha256": "32d68640339b229e7eb34ab6b1d25256a39735b4839a0e419bb3ad1cfdc1be3b",
+      "sourceSha256": "b795856a8fa285493c0aa1f0a2e543604d40d244d88e2bb398229fd7d3fe5928",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 71019,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/anisotropic_ellipsoid-source-oblique_35_28.png",
+      "sha256": "7ef75de27371a3bb9cadb162f3914ecbcbdd868dff9df1e25ab76ff539e01bae",
+      "sourceSha256": "02959d160da1f0fea2d510bd160532b542b4c8e218c79e5a2c1d854ca78eb7b5",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73141,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/anisotropic_ellipsoid-source-oblique_145_40.png",
+      "sha256": "0c1aa6f276d2e23460a654d1c0e7fdbabe9cee6d9c53a08f788cbb9f8e3e1290",
+      "sourceSha256": "7d411cade848829393927bf340ab2c8f9dffd996110d4f62318612e76a6e0fa7",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73290,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/cylinder-source-front.png",
+      "sha256": "326e8f34b23e2a3b1877dfbd0f535bdca786a3dd57b72239c9d9cf799cc315ef",
+      "sourceSha256": "ee3ff2f77a070ebbd15ed85c23a385f616a294f21c946f8d7bab5285e6657dd3",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 65544,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/cylinder-source-side.png",
+      "sha256": "326e8f34b23e2a3b1877dfbd0f535bdca786a3dd57b72239c9d9cf799cc315ef",
+      "sourceSha256": "9997512f091cb9c987bf6833135f86c0f5476ac68250f9861a9eedcf98a1563b",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 65544,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/cylinder-source-top.png",
+      "sha256": "e34bebdfbe972b1181dc76c538d96bc2f457b11ebdffddcd4e9847be48e2b22c",
+      "sourceSha256": "5e880d2aa35a8037589a6acf5f9eec646f58a4b10f1ad2ef5e948e9b83e1aaca",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 72086,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/cylinder-source-oblique_35_28.png",
+      "sha256": "8a156e0b41b7d85552a034a8e2ec93adbc43ecf5a4666772069391adf5c8dc49",
+      "sourceSha256": "93a3a7505076182ad899942864e1fc5c9826d43a44b62af45260f6434d83a6c8",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 64529,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/cylinder-source-oblique_145_40.png",
+      "sha256": "aa51abce7750bf183a406c6c1a8eb4fd94eaf76c20cff63a9342548dcbe88003",
+      "sourceSha256": "4df970ad7640590725abbeb2707ef5bf4483a1e2ffffbbd00797bdf73bcb6350",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 65189,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/tapered_frustum-source-front.png",
+      "sha256": "496ab2b68cc1a9f60c374027e6e68c2ba528ef4c56f959c341250f7158ae70ec",
+      "sourceSha256": "e1fea3fbb98e114d1072819dac72aa4a2a3c83378d8db6b57fcf3b3b9ec7fb47",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 70744,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/tapered_frustum-source-side.png",
+      "sha256": "496ab2b68cc1a9f60c374027e6e68c2ba528ef4c56f959c341250f7158ae70ec",
+      "sourceSha256": "e1fea3fbb98e114d1072819dac72aa4a2a3c83378d8db6b57fcf3b3b9ec7fb47",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 70744,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/tapered_frustum-source-top.png",
+      "sha256": "0ba1ae266ad8283d6d5b7f9a99599b1d81ffe6d103ad01a6b2b876219d89137d",
+      "sourceSha256": "bd0f57588df78e9dd4bd09721d9156df611bb87d86bc6618d6e4838f595ce5c3",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 70813,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/tapered_frustum-source-oblique_35_28.png",
+      "sha256": "c0bf6f0b8b6cca513c9b7f80a6f885efff8eea580c9e3e6f556a673858a58d1e",
+      "sourceSha256": "e9a85e6408650435e4f7103418d18b8019d2e37330cc34abbecf13c094e7e158",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 70300,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/tapered_frustum-source-oblique_145_40.png",
+      "sha256": "74298d92f5679fa555f52c13438c01ee5d5482f82741bebdc1a81f5145081288",
+      "sourceSha256": "d96d3b4e55653b4241e0cb428d419eb3948c8fe285d89b66e0883a804005d1a5",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 70593,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-source-front.png",
+      "sha256": "4149f60bb05ff755e5b49ac95f70d95d202ecc6f470a8c6db15fdac13bc783fe",
+      "sourceSha256": "2a6b01070b49263e76715083e706b8cf9d5a3d6e0b0fcc562e26daacbcf17e92",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74528,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-source-side.png",
+      "sha256": "050987324105dd50975da469b48d395a53fddde67a7134110baad3f41539e958",
+      "sourceSha256": "a276756778bedbb37181c62b671b6df02ef29c6f709f1bc17ebd7c190387f5e7",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74534,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-source-top.png",
+      "sha256": "d7e808d3573c17d94fab4d5b1a8ff10b0089c8205774823fc0167715a351d721",
+      "sourceSha256": "f83cefab3e08acef2f4ce1ac05b41035e1e3bb731143906505e636ce6c9ca65e",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74526,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-source-oblique_35_28.png",
+      "sha256": "8173657754fe76e6e68d9edf090980ab040fe0df48d940c2e96833ccab435e36",
+      "sourceSha256": "1c2c3e3e508d8b2e6243a2bac4f2190419a9bbc6bf1a0a384d019142488ff54c",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73660,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-source-oblique_145_40.png",
+      "sha256": "8bfb9871bd2f299fcdc2ffb991c627c13506c9d9c2ca0368564c8d451d556bd2",
+      "sourceSha256": "a74c5cfbea095653b61aca4f15e07b6f90e88bdb7713b1d00f069beb66ec350d",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73799,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-output-front.png",
+      "sha256": "05afc75a5d70ff82b405aea8b12d90fbfa760af4cc3a2f37f3f06221ef8e18ab",
+      "sourceSha256": "34fa33634b8d1a7cc42d15a7e8f0059df972418c1d7c9ef31d72f2c907923bbc",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74446,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-output-side.png",
+      "sha256": "05afc75a5d70ff82b405aea8b12d90fbfa760af4cc3a2f37f3f06221ef8e18ab",
+      "sourceSha256": "420cde05647866391f231e8161d8f9663283f0413f779090e30be4fdd01fa0a8",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74446,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-output-top.png",
+      "sha256": "09719f5b71509cac9adf383115c47db34888f80aa2cf17e57978298792f8cec1",
+      "sourceSha256": "155dea781e5c55b3b824c5087de178705cd8584dc87ac9d9a73d7705e7aabae9",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74598,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-output-oblique_35_28.png",
+      "sha256": "0a2efc06237357bd4bfd3f6bbf4a7bab88c1b6f32b7c8e465d59b98aea119d1e",
+      "sourceSha256": "7d088e53d93526db9c8a6cef17a94a26b8a45c4da3af144ed911e8994556aff4",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73658,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-output-oblique_145_40.png",
+      "sha256": "7b78aefb3d4b6006a089a4b2244fa1d2ba29c5ad19ef8fc8aad5add8bb7e4088",
+      "sourceSha256": "7444bbac4c062e37bf1c734d3965909960a2a0d478661e3eda65e3b7cb996733",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73651,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-inspection-front.png",
+      "sha256": "2e46556dfd1136cc748145872ac92e09ff9d22bf3eac25fa4771e6d7a4459f38",
+      "sourceSha256": "456b8a4a27e5aa0a5743f08bc13349e77211f95a59a5b0260434fb96d0b5988b",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 79709,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-inspection-oblique_35_28.png",
+      "sha256": "b82c7ed9fda9d28b5277deb9b139835a37390f1013d09455b466f8e79d85c0d2",
+      "sourceSha256": "4fa43a5025fdc60481bcfd27137c03692485cf0691a4e73e9e7f587830e18a30",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 81145,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-inspection-oblique_145_40.png",
+      "sha256": "e8d62a345962841577184ca604f779e33e06d49b60307f0afa41305141e0b749",
+      "sourceSha256": "30e29df95abd75e110606a14451b4a8cd5edca78322f10221350c7c049d6370d",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 80744,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-reference-inspection-front.png",
+      "sha256": "3c8d6715b102eb33bed68a9690bac3fe0a5f13851aac12eea9cc351c485e55f9",
+      "sourceSha256": "28864a7690b5458ff27a830473262a6568a25a73c57b10731051d578e01f8d5c",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 79527,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-reference-inspection-oblique_35_28.png",
+      "sha256": "7f2323ffc6f4f55e7a7ef81d5199f9c715e4bd62130114ed9ef3fadad94b4508",
+      "sourceSha256": "b04bc79e58beed9ec13012c338e85b705b3e8e4742fc2f076ac6bfbd7a8eadd8",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 80705,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/smooth_vase-reference-inspection-oblique_145_40.png",
+      "sha256": "9db925d24942ab63a2eb8c820e10cd1ecaedeb2875a535048a762812395272cd",
+      "sourceSha256": "2cf8e5b40d8331d4dc73f9fc35ddf1ef80e3cf52128e69fb06b7ed21f1213eb2",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 80355,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/torus-source-front.png",
+      "sha256": "f4396a3c14f8da414e7e0c3c0bea59e06936596e0efc3158730195d82776cc1e",
+      "sourceSha256": "d004d6fec7cc9a5a1826fd0ee19f4938f708453186ed982382b38a26044b42c4",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73263,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/torus-source-side.png",
+      "sha256": "8473d5b7df47780e5ea88dd10aef8bdd359dfc047d5f725293178d57f52e5646",
+      "sourceSha256": "a0f8d7e98c75d57930974618f36a109965300ecf7d9bd152f3bcb5c147f7b97f",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73262,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/torus-source-top.png",
+      "sha256": "db599fa1d144ee8d9ea7f02fca111861092bfda38590a21a5d90a05973cc7aec",
+      "sourceSha256": "472148e616e2d7cbb8103b014d3f1b411d397030ca49cc4567ed993aa3c46a69",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73968,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/torus-source-oblique_35_28.png",
+      "sha256": "eb88749c29744e8f9936d37321ef8937972783f8e7b9bf5c2786fb71cdcbbce0",
+      "sourceSha256": "ee4f1890f8210f0b964870022868da5fc6e3852ee16daf155fc6897e94c3cdb5",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73039,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/torus-source-oblique_145_40.png",
+      "sha256": "55c26d7efbb6f39d0bad0668e87ef5abd4b63a61991c0d3d5105bbb05cc8b0f1",
+      "sourceSha256": "a1d89802190d411823627bde4b82e1f18936cba045f4c3513a90f075c996b159",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73728,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/capsule-source-front.png",
+      "sha256": "23fbffacb73775dd4845c6da03ecbb424e7df0c9571c420c2237f13b394555f7",
+      "sourceSha256": "cea3cff0534060f7ca7fffc7c2322d3abfc543afef7350473abae520f98bfd04",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73499,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/capsule-source-side.png",
+      "sha256": "23fbffacb73775dd4845c6da03ecbb424e7df0c9571c420c2237f13b394555f7",
+      "sourceSha256": "103f7167ed25b6608564cb68328db2a6c9cd03b64bd70a81a6c00105671c9f4e",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73499,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/capsule-source-top.png",
+      "sha256": "cc3832d471640e52d251bd460f9ee973ada5b2395c7431307d50dc763c822415",
+      "sourceSha256": "42bcd34173e4a38284f7f7c7e94e630c3aa162a523e09656a5bc57a3879e65b9",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 75708,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/capsule-source-oblique_35_28.png",
+      "sha256": "1ae192db6e321fc0c1188f89eca84280185b97a947f37f4b6d86208c66960199",
+      "sourceSha256": "aeae91ee05794d7a44d7b885bc20cee2f9566426eaf8832e381db13871c4d2d5",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73879,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/capsule-source-oblique_145_40.png",
+      "sha256": "f081d9947ba77f004df7178c68e911baead00d625c0680260b9764367079c8ed",
+      "sourceSha256": "76da3caf89591dd5a177cafc2b2d13deb31e50aace52d3ee103b1e46189b0520",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74121,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_box-source-front.png",
+      "sha256": "06085b69007f3c2987cd6d0ad9cb5cf3ba49da73153955585cbab52d755cc633",
+      "sourceSha256": "e2e3fcf80234ec1cd826a63623b05cbd25b6b08b4c7211eea4825177017fdd8e",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 65489,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_box-source-side.png",
+      "sha256": "92c4cb8a8e89f7ff38cee2d339095cd0f0606a3c6d04c3d644a9def499904016",
+      "sourceSha256": "fa02db7c8dff67ab633e1b3d891b2eccf830b67903fca36eb1af2edf10e3f6ca",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 70030,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_box-source-top.png",
+      "sha256": "b1abeba384286562f875ddb5d6917a23918e979c87563d1825bef51429f113dd",
+      "sourceSha256": "e1b57a061b763f983dd9c0235a9548e988a98e13b54169a51dbcfe813dc0e5fd",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 67357,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_box-source-oblique_35_28.png",
+      "sha256": "19e6faa9d6ee86a6fef757b75bbbfed9722937b4485342d10fbcd6999eb4e2ea",
+      "sourceSha256": "7fc6ba8be6c0ef15b3e3675f138cd8c2a6e834615763958fef526ad6b6b1c153",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 62373,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_box-source-oblique_145_40.png",
+      "sha256": "1aba91019f2b4b4840db0abdc22be623bf58a1fd66586d2fb13f3a6a4aa9bf66",
+      "sourceSha256": "efd05692bccc78848357e5edbf0a29fdcaf217fbad6b6e6717d681c2047abced",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 64567,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/thin_plate-source-front.png",
+      "sha256": "0708947b0fba26a6f27acef5b7f8a6b3f5c7cdc5839d7b2b927d4965c912ab3a",
+      "sourceSha256": "db6d12a64324a07abe87af639483a4563fd258f9cafbc7e5ed3477d40503dae5",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 65610,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/thin_plate-source-side.png",
+      "sha256": "66b8e045022ab2ccd137f6cac6ca3a9c95d76b26c4bf04ca41ae3a7ea3861f1c",
+      "sourceSha256": "9de7668f7fa857d745c8136b1cca13abba60abde99103eeaaf6e8ca1080bc7b2",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 75155,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/thin_plate-source-top.png",
+      "sha256": "806af08b2c2a17fb5efa4d06f2b66a2641e140875190056ef9d0459947daaa7a",
+      "sourceSha256": "6dc8d13d1850c6e960f28e52bd22f5cfef31a1c44c5a321817f1a23a3723ff19",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74777,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/thin_plate-source-oblique_35_28.png",
+      "sha256": "0be963caef33712bcfa3b0fd4ade91a0f6d7ddda915d8f8906edad6127e159e9",
+      "sourceSha256": "6e33f4e78408d102b60eb2ca85007ac90fd63692a8a3723f7e8a30b1bb099013",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 71662,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/thin_plate-source-oblique_145_40.png",
+      "sha256": "0cf7b47c831b384c80ea567173d794e7ed37bfb699bae8df4ae992eafb9b88be",
+      "sourceSha256": "8366fcd7abb5ef72b0b3c7b9f38cf0ec77ee8cea3b289fb919c41b5e10d0dfe8",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 75080,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/concave_arch-source-front.png",
+      "sha256": "31fc249eed2f0784b1ce08ca8831d241fd3fa5d3e768bc19cc56dcd17016f21c",
+      "sourceSha256": "2f1582d53f3ea360874293232df855bd49f2a9c5d229cdcbee3d75b1a2f783b8",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 69204,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/concave_arch-source-side.png",
+      "sha256": "25c2ae5d76f1708c75d6e8c9dc5efd5efae0f3f40a17f053f85b03849e620f41",
+      "sourceSha256": "9a9c6f7323955e2bdbdc2def605f3cb12b35acc5cbce1df5a9167a188c5e2c0b",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73640,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/concave_arch-source-top.png",
+      "sha256": "64ed17f978c23d1867ff479a7b69333accbf1c1b6cbda1d8bb7faa50a9831dc5",
+      "sourceSha256": "4eb7bf9c461212eee3708e361d328acfe338b90e75401d0877d87126e58ecc24",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 72536,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/concave_arch-source-oblique_35_28.png",
+      "sha256": "9094c921266e04c41e5e7f7bc27b82280380b020de992fe8201fff15f9d63ecc",
+      "sourceSha256": "01ae4d4fe9d7b709d6e2297166df71f79af2b42eb08014625b54262d53a16133",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 69650,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/concave_arch-source-oblique_145_40.png",
+      "sha256": "ed43f717ca9f486cdf51264d3b197036739098ca6a82cf98cc9fdb3d03f1161e",
+      "sourceSha256": "3d89c06a7bbfbf024b4704ced0f5f82228abcd4ba3450388d17636fe0e7f19f9",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 71643,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/asymmetric_multipart_solid-source-front.png",
+      "sha256": "c9895362c767549f1260f35d6fdf60a660bbcde6c8c70f5729d72145169d2373",
+      "sourceSha256": "70cfebc1c9ac504fc992c71e13a5aeaca5a49d51155df23c98451cc967e69172",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 69675,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/asymmetric_multipart_solid-source-side.png",
+      "sha256": "aa4aeab664aad4a23013135219e59269b5646ae0795ac0285198c0b6342b96ba",
+      "sourceSha256": "2c98cab132c3eb47536599b92f8b6a10c39e6d95a77ed098a10bd92ad571fc17",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 72663,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/asymmetric_multipart_solid-source-top.png",
+      "sha256": "bd285851e471b85df21ae8ba7203679923691003e7a51fc7883828b66a0045bc",
+      "sourceSha256": "39024849d71452c9235116666affaf811cde46ad6d8e8bd8ff486dac75c56dc9",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 69967,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/asymmetric_multipart_solid-source-oblique_35_28.png",
+      "sha256": "d320303eb9c47238f2e29574831ea51e8543f439fefbb13ae4c26eb3c7cc5038",
+      "sourceSha256": "47f4e1873decf7e02ff3b673c52bc7ac4d706044ec79aa3c416782909560dee7",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 69103,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/asymmetric_multipart_solid-source-oblique_145_40.png",
+      "sha256": "ffafeb34a0fdfa1c7f3f9b5af303ebad30f28fb19df56e21a61d111833d0375b",
+      "sourceSha256": "0ca1b12e16c770be9ad996a5e692fc6dd283896046f7dacc3b5c0b45ad6afccd",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 70116,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-source-front.png",
+      "sha256": "3bf23013874d7f1578edade3d12eafc836cd71c4bbb4c5e0e63619f81fee8358",
+      "sourceSha256": "53bf7d1cf2a8e9842fc6a4cb81e4c399f811c30d6f137fa7c8d535f18fd2310e",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73762,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-source-side.png",
+      "sha256": "968939e22da38080a9223c4a7e26940dc6d4a88f3c21a85bc8eafc4349028e19",
+      "sourceSha256": "65a8b602b16c0d519522384d344a8c73d1ebcc59c696dd7c362385dd686b1a9d",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74126,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-source-top.png",
+      "sha256": "db4910179cd43d67ba8e49ee640cc66bb99f6150f28a29aca2b31dae21183414",
+      "sourceSha256": "f678156f80dc39785cac2504b61d9bc6099db51038439e079ad1f7e0ea7f9d75",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73001,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-source-oblique_35_28.png",
+      "sha256": "0f67df240ee8387514f198dcb3b87df1b8d69ab2f700c9e7840cc2a5257cb0f7",
+      "sourceSha256": "3417b4fc1365e7736850cdd1ee786d92d0fd88d6f8979efaff72783830f1816d",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 72053,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-source-oblique_145_40.png",
+      "sha256": "4abb13af3bf9db3e10de4dae32472f2bdda78eeae1dcc843f92b4eaa30fc80fe",
+      "sourceSha256": "ef5d9f70173745884d15de950714e7a8d4e1b3344fb25c9a0710970003644756",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74043,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-output-front.png",
+      "sha256": "efe68bbef2373378c0298f01d2242585231152ea1e651a7dce1213a43e0532a4",
+      "sourceSha256": "ec56062af693147c7bd296f67255986bb5b410b4ee00f1fa9cb85931c5969078",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73706,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-output-side.png",
+      "sha256": "fcc00a7f100e35eb0ab389b5ebf320c4c81d313db5d57efd961e84f8188b6f04",
+      "sourceSha256": "2d646eecf4d9b54867a64c30c1ef67f90a0d3741ff3ac2bd11b895a1f57f04f8",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 74077,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-output-top.png",
+      "sha256": "b2e0b8dfde4359cf984392852d87022a31de3767243b2afa3806f16c09024bc6",
+      "sourceSha256": "f3fe260a91e3a8fb11bf0f1be3822933deb40f7edcc608794c7c0e13e53d8c12",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73023,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-output-oblique_35_28.png",
+      "sha256": "7315689acef3e5c6c8289d822637818c6ae8a0f6adfbb774e42f926a691dd63b",
+      "sourceSha256": "3ea7c33c8a23f1986870806b96454c6ae4b3b7dc6397f2eb9115d61daa6159e9",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 72101,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-output-oblique_145_40.png",
+      "sha256": "1baacbc3d77fe10fa196c6fd5de9dd3783ad8b92a33c13acd1834f6bb5e2f6ed",
+      "sourceSha256": "85c7dbf0eab97bda6c0790548b3cbee438306c5ee5cbf9b6237b58ec85931e35",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 73883,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-reference-inspection-front.png",
+      "sha256": "894b80225302185111962cddef2481d878b266504735bd5f164bbdf1f8cefa8f",
+      "sourceSha256": "f8e60041c4dc726cf5efc500ffb47351873485cc4cd9eaa76ad6844142878fbc",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 77295,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-reference-inspection-oblique_35_28.png",
+      "sha256": "927770182ef74375ae8ac5dd328fffa0417532678cc590b2850ca4ca3e9da58b",
+      "sourceSha256": "c5a9f782a97930ed3efae938b6c89f671b5bebca389f321b20ae4eee4df8366d",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 78782,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-reference-inspection-oblique_145_40.png",
+      "sha256": "a6ba8775141c4c907b580d900cc14fb3abe4d2d0ee2f47630b1f04d5c50f856b",
+      "sourceSha256": "a8288b31a6d7529095fff76b33c041d581c3ae4387c0528fd4a5286039857dc7",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 78567,
+      "source": "retained project-authored synthetic fixture",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    }
+  ]
+}
