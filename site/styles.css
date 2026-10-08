@@ -500,6 +500,7 @@ dd{
 }
 .family-card img{
     width:100%;
+    height:auto;
     aspect-ratio:1.15;
     object-fit:contain;
     background:#c5c6c4;
