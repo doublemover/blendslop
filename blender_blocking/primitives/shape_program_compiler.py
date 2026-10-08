@@ -227,7 +227,19 @@ def _compile_node(
     params = node.parameters
     name = node.name or node.node_id
     warnings: list[str] = []
-    if primitive == 'generalized_sweep':
+    if primitive == "rounded_triangle":
+        from .rounded_triangle import RoundedTrianglePrimitive
+        part = RoundedTrianglePrimitive.from_program_parameters(params, world=False)
+        data = part.to_mesh_data()
+        mesh = bpy.data.meshes.new(name + "Mesh")
+        mesh.from_pydata(data.vertices.tolist(), [], data.faces)
+        mesh.update()
+        obj = bpy.data.objects.new(name, mesh)
+        obj.location = _location(params)
+        for polygon in mesh.polygons:
+            polygon.use_smooth = True
+        obj["blendslop_triangle_field_semantics"] = "signed zero-set field; not Euclidean distance"
+    elif primitive == 'generalized_sweep':
         from .generalized_sweep import GeneralizedSweepPrimitive
         part = GeneralizedSweepPrimitive.from_program_parameters(params,world=False)
         data = part.to_mesh_data(max(12,lathe_segments))

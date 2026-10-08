@@ -64,6 +64,7 @@ _add_dependency_path(
 from utils.progress import iter_progress, progress_print
 
 PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
+    ("pure_rounded_triangle", "test_rounded_triangle"),
     ("pure_geometry_consistency", "test_geometry_consistency"),
     ("pure_oriented_support", "test_oriented_support"),
     ("pure_normalized_resfit", "test_normalized_resfit"),
@@ -265,6 +266,9 @@ def run_test_suite(
     if blender_ok:
         print(f"\nOK: Running in Blender {version}")
         print(f"OK: Python {sys.version.split()[0]}")
+        results.update(run_unittest_modules(
+            [("native_quality_editing", "test_native_quality_editing")],
+            verbose=verbose, progress=progress))
     else:
         print("\nWARN: Blender not available - Blender-only tests will be skipped")
         print("      Run: blender --background --python test_runner.py")

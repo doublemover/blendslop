@@ -59,58 +59,11 @@ def quality_workload() -> dict:
 
 
 def rounded_triangle_mesh(parameters: dict | None = None):
-    """Closed lens-shaped pebble around a rounded triangular Minkowski outline."""
+    """Preserved frozen reference, shared with the editable production primitive."""
+    from primitives.rounded_triangle import rounded_triangle_arrays
     if parameters is None:
         parameters = quality_workload()["cases"][-1]["parameters"]
-    points = np.asarray(parameters["vertices_xy"], dtype=float)
-    radius = float(parameters["corner_radius"])
-    thickness = float(parameters["thickness"])
-    n = int(parameters["corner_segments"])
-    m = int(parameters["dome_segments"])
-    if (points.shape != (3, 2) or not np.isfinite(points).all() or
-            not math.isfinite(radius + thickness) or radius <= 0 or thickness <= 0 or
-            not 4 <= n <= 128 or not 8 <= m <= 256):
-        raise ValueError("invalid rounded triangular reference parameters")
-    a, b = points[1] - points[0], points[2] - points[0]
-    cross = a[0] * b[1] - a[1] * b[0]
-    if cross <= 0:
-        raise ValueError("triangle vertices must be counterclockwise and non-collinear")
-    center = points.mean(axis=0)
-    outline = []
-    for i, p in enumerate(points):
-        previous = p - points[(i - 1) % 3]
-        following = points[(i + 1) % 3] - p
-        normals = [np.array([edge[1], -edge[0]]) / np.linalg.norm(edge)
-                   for edge in (previous, following)]
-        start = math.atan2(normals[0][1], normals[0][0])
-        stop = math.atan2(normals[1][1], normals[1][0])
-        while stop <= start:
-            stop += 2 * math.pi
-        for angle in np.linspace(start, stop, n + 1):
-            outline.append(p + radius * np.array([math.cos(angle), math.sin(angle)]))
-    outline = np.asarray(outline)
-    count = len(outline)
-    vertices = [(*center, thickness / 2)]
-    for phi in np.linspace(0, math.pi, m + 1)[1:-1]:
-        xy = center + (outline - center) * math.sin(phi)
-        vertices.extend((float(x), float(y), thickness / 2 * math.cos(phi)) for x, y in xy)
-    bottom = len(vertices)
-    vertices.append((*center, -thickness / 2))
-    faces = []
-    for i in range(count):
-        j = (i + 1) % count
-        faces.append((0, 1 + i, 1 + j))
-    for row in range(m - 2):
-        a = 1 + row * count
-        b = a + count
-        for i in range(count):
-            j = (i + 1) % count
-            faces.extend(((a + i, b + i, b + j), (a + i, b + j, a + j)))
-    a = 1 + (m - 2) * count
-    for i in range(count):
-        j = (i + 1) % count
-        faces.append((a + i, bottom, a + j))
-    return np.asarray(vertices, dtype=float), np.asarray(faces, dtype=np.int64)
+    return rounded_triangle_arrays(parameters)
 
 
 def triangle_preservation(vertices, parameters=None) -> dict:

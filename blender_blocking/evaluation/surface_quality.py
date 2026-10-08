@@ -72,3 +72,42 @@ from sample allocation only and remain a topology failure elsewhere.
         "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
         "editability_verdict": "independent",
     }
+
+
+
+def circular_profile_continuity(vertices, *, height=2.6, radius_mean=.6,
+                                radius_amplitude=.2, radius_error_max=.0005,
+                                shoulder_width_max=.0005):
+    """Detect radius errors/planar shoulders on the frozen circular smooth vase.
+
+    Coordinates use the authored Z axis, center XY=(0,0), Z origin=0. Flat cap
+    center vertices are excluded; all nonzero radius rings remain. This metric
+    is inapplicable to offset/anisotropic profiles and does not smooth evidence.
+    """
+    vertices = np.asarray(vertices, float)
+    values = [height, radius_mean, radius_amplitude, radius_error_max, shoulder_width_max]
+    if (vertices.ndim != 2 or vertices.shape[1] != 3 or not len(vertices) or
+            not np.isfinite(vertices).all() or not np.isfinite(values).all() or
+            min(height, radius_mean, radius_error_max, shoulder_width_max) <= 0):
+        raise ValueError("invalid circular profile continuity input")
+    radii = np.linalg.norm(vertices[:, :2], axis=1)
+    active = radii > 1e-9
+    if not active.any():
+        raise ValueError("circular profile contains no nonzero radius rings")
+    z, radii = vertices[active, 2], radii[active]
+    expected = radius_mean + radius_amplitude * np.cos(2 * np.pi * z / height)
+    radius_error = float(np.max(np.abs(radii - expected)))
+    # Native mesh Z coordinates share identical float32 values within each ring.
+    levels, inverse = np.unique(z, return_inverse=True)
+    lower, upper = np.full(len(levels), np.inf), np.full(len(levels), -np.inf)
+    np.minimum.at(lower, inverse, radii)
+    np.maximum.at(upper, inverse, radii)
+    shoulders = upper - lower
+    widest = float(shoulders.max())
+    return {"protocol": "authored_circular_vase_radius_v1", "ring_count": len(levels),
+            "radius_error_max_world": radius_error, "planar_shoulder_width_max_world": widest,
+            "shoulder_ring_count": int((shoulders > shoulder_width_max).sum()),
+            "limits": {"radius_error_max_world": radius_error_max,
+                       "planar_shoulder_width_max_world": shoulder_width_max},
+            "passed": radius_error <= radius_error_max and widest <= shoulder_width_max,
+            "scope": "circular analytic profile geometry; shading and curvature are independent"}

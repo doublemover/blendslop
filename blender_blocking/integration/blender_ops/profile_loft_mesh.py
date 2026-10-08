@@ -311,7 +311,59 @@ def create_loft_mesh_from_slices(
         "warnings": list(radial_warnings),
         "quality": quality.to_dict(),
     }
+    recipe = {
+        "schema_version": 1,
+        "slices": [{"z": float(s.z), "rx": float(s.rx), "ry": float(s.ry),
+                    "cx": float(s.cx or 0.), "cy": float(s.cy or 0.)} for s in slices],
+        "options": {"radial_segments": radial_segments,
+                    "adaptive_radial_segments": adaptive_radial_segments,
+                    "target_edge_error_u": target_edge_error_u, "cap_mode": cap_mode,
+                    "min_radius_u": min_radius_u, "merge_threshold_u": merge_threshold_u,
+                    "recalc_normals": recalc_normals, "shade_smooth": shade_smooth,
+                    "weld_degenerate_rings": weld_degenerate_rings,
+                    "surface_mode": surface_mode, "surface_subdivisions": surface_subdivisions},
+    }
+    obj["loft_recipe_json"] = json.dumps(recipe, sort_keys=True)
     obj["loft_metadata_json"] = json.dumps(metadata, sort_keys=True)
     obj["mesh_quality_json"] = json.dumps(quality.to_dict(), sort_keys=True)
 
+    return obj
+
+
+
+def rebuild_loft_mesh(obj, *, slices=None, **options):
+    """Regenerate a saved loft after an artist edit, preserving object identity.
+
+    Validation/build happens before replacing geometry. Existing transforms,
+    tags, materials, parent, collection membership and modifiers stay attached.
+    The receipt describes the base geometry; downstream modifiers remain live.
+    """
+    if not BLENDER_AVAILABLE:
+        raise RuntimeError("loft regeneration requires Blender")
+    if getattr(obj, "type", None) != "MESH" or not obj.get("loft_recipe_json"):
+        raise ValueError("object has no saved loft recipe")
+    recipe = json.loads(obj["loft_recipe_json"])
+    if recipe.get("schema_version") != 1:
+        raise ValueError("unsupported loft recipe version")
+    original_options = recipe["options"]
+    unknown = set(options) - set(original_options)
+    if unknown:
+        raise ValueError("unknown loft edit options: " + ", ".join(sorted(unknown)))
+    sections = ([EllipticalSlice(**row) for row in recipe["slices"]]
+                if slices is None else list(slices))
+    replacement = create_loft_mesh_from_slices(
+        sections, name=obj.name + "_Regenerated", **{**original_options, **options})
+    old_mesh = obj.data
+    new_mesh = replacement.data
+    try:
+        for material in old_mesh.materials:
+            new_mesh.materials.append(material)
+        obj.data = new_mesh
+        for key in ("loft_recipe_json", "loft_metadata_json", "mesh_quality_json"):
+            obj[key] = replacement[key]
+    finally:
+        bpy.data.objects.remove(replacement, do_unlink=True)
+    # Reclaim only the replaced generated datablock when it has no other users.
+    if old_mesh.users == 0:
+        bpy.data.meshes.remove(old_mesh)
     return obj
