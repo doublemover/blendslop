@@ -42,6 +42,7 @@ def _object(vertices, faces, name):
 def _view(camera, name, lo, hi):
     from mathutils import Vector
     from integration.blender_ops.camera_framing import configure_ortho_camera_for_view
+    camera.data.type = "ORTHO"
     center = (lo + hi) / 2
     scale = max(hi - lo) * 1.16
     if name in {"front", "side", "top"}:
@@ -60,6 +61,18 @@ def _view(camera, name, lo, hi):
     camera.data.ortho_scale = scale
 
 
+def _replay_orthographic_camera(camera, record):
+    """Replay frozen square-frame cameras even if the scene starts perspective."""
+    from mathutils import Matrix
+    scale = float(record["ortho_scale"])
+    if not math.isfinite(scale) or scale <= 0:
+        raise ValueError("saved orthographic camera scale must be finite and positive")
+    camera.data.type = "ORTHO"
+    camera.data.shift_x = camera.data.shift_y = 0.
+    camera.matrix_world = Matrix(record["matrix_world"])
+    camera.data.ortho_scale = scale
+
+
 def _renders(obj, directory, bounds, views, *, camera_records=None):
     import bpy
     from integration.blender_ops.silhouette_render import silhouette_session, render_silhouette_frame
@@ -70,9 +83,7 @@ def _renders(obj, directory, bounds, views, *, camera_records=None):
         if camera_records is None:
             _view(camera,view,*bounds)
         else:
-            from mathutils import Matrix
-            camera.matrix_world = Matrix(camera_records[view]["matrix_world"])
-            camera.data.ortho_scale = camera_records[view]["ortho_scale"]
+            _replay_orthographic_camera(camera, camera_records[view])
     with silhouette_session(target_objects=[obj], resolution=(512, 512), color_mode="BW",
                             transparent_bg=False, engine="BLENDER_EEVEE",
                             background_color=(1, 1, 1, 1), silhouette_color=(0, 0, 0, 1)) as session:

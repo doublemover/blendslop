@@ -3,10 +3,23 @@ from __future__ import annotations
 import numpy as np
 
 
-def measure_profile_row(mask, valid):
+def measure_profile_row(mask, valid, coverage=None):
     mask, valid = np.asarray(mask, bool), np.asarray(valid, bool)
     if mask.ndim != 1 or mask.shape != valid.shape:
         raise ValueError("profile row and validity must be matching 1D arrays")
+    if coverage is not None:
+        from .coverage_evidence import coverage_interval
+        left_edge, right_edge = coverage_interval(coverage, valid)
+        record = measure_profile_row(np.asarray(coverage) >= .5, valid)
+        record.update(left_edge_px=left_edge, right_edge_px=right_edge,
+                      exact_width_px=(0. if not record["foreground"] and valid.all()
+                                      else None if left_edge is None or right_edge is None
+                                      else right_edge - left_edge),
+                      center_px=None if left_edge is None or right_edge is None else .5 * (left_edge + right_edge),
+                      width_lower_px=float(np.count_nonzero(
+                          (np.asarray(coverage) >= 1 - 1e-6) & valid)),
+                      edge_model="declared_linear_half_coverage_crossing")
+        return record
     foreground = np.flatnonzero(mask & valid)
     if not len(foreground):
         return {"observed": bool(valid.any()), "foreground": False,
@@ -28,11 +41,13 @@ def observed_profile_rows(target, constraint, world_heights):
     from .visibility import valid_evidence
     mask = np.asarray(getattr(constraint.mask, "mask", constraint.mask), bool)
     valid = valid_evidence(constraint)
+    from .coverage_evidence import constraint_coverage
+    coverage = constraint_coverage(constraint, valid)
     h, w = mask.shape
     _, (xmin, xmax, ymin, ymax) = pixel_cell_viewport(target, constraint)
     sx = (xmax - xmin) / w
     records = []
-    foreground_rows = np.flatnonzero(np.any(mask & valid, axis=1))
+    foreground_rows = np.flatnonzero(np.any((mask if coverage is None else coverage >= .5) & valid, axis=1))
     for z in world_heights:
         pixel = (ymax - z) / (ymax - ymin) * h - .5
         row = int(np.floor(pixel + .5))
@@ -50,7 +65,20 @@ def observed_profile_rows(target, constraint, world_heights):
         if not 0 <= row < h:
             record = measure_profile_row(np.zeros(w, bool), np.zeros(w, bool))
         else:
-            record = measure_profile_row(mask[row], valid[row])
+            record = measure_profile_row(mask[row], valid[row], None if coverage is None else coverage[row])
+        # The outer partially covered row mixes vertical cap coverage into
+        # its horizontal edge signal. Its half-crossing remains recorded, but
+        # is not an exact section. The flat-cap loft uses the nearest reliable
+        # interior section as a labeled proposal prior. Unknown rows are never
+        # normalized or promoted to exact observations.
+        if (coverage is not None and len(foreground_rows)
+                and row in (foreground_rows[0], foreground_rows[-1])
+                and 0 <= row < h and valid[row].all()
+                and np.max(coverage[row]) < 1 - 1 / 255
+                and record["foreground"]):
+            record["filtered_width_px"] = record["exact_width_px"]
+            record["exact_width_px"] = None
+            record["completion_reason"] = "partial_terminal_coverage_flat_cap_prior"
         record.update(sample_row=row, z_world=float(z), radius_lower_world=record["width_lower_px"] * sx * .5,
                       within_viewport=bool(0<=row<h),
                       exact_radius_world=None if record["exact_width_px"] is None else record["exact_width_px"] * sx * .5,

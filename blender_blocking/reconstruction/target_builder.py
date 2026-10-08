@@ -70,8 +70,14 @@ def build_target_from_images(
     bounds_minmax: Optional[tuple[Sequence[float], Sequence[float]]] = None,
     profile_samples: int = 100,
     valid_evidence_masks: Optional[Mapping[str, np.ndarray]] = None,
+    coverage_masks: Optional[Mapping[str, np.ndarray]] = None,
 ) -> TargetBuildResult:
-    """Extract masks, apply constraints, and build a backend-neutral target."""
+    """Extract hard masks and optional independently calibrated pixel coverage.
+
+    Coverage must already be linear foreground coverage, not segmentation
+    probability. It affects calibrated extent/profile proposals only; hard
+    masks and acceptance metrics retain their existing extraction contract.
+    """
     if not views:
         raise ValueError("at least one view is required")
 
@@ -161,6 +167,21 @@ def build_target_from_images(
         if bbox is not None:
             bboxes[view] = Bounds2D.from_xyxy(bbox)
 
+    # Copy and validate physical coverage after visibility is known. Hard-mask
+    # edits would invalidate a supplied original photometric measurement.
+    linear_coverage = {}
+    if coverage_masks and not constraint_set.is_empty():
+        raise ValueError("linear coverage cannot accompany hard-mask constraint edits")
+    from .coverage_evidence import constraint_coverage
+    from types import SimpleNamespace
+    for view, supplied in (coverage_masks or {}).items():
+        if view not in raw_masks:
+            raise ValueError("coverage supplied for an absent view")
+        valid = np.asarray((valid_evidence_masks or {}).get(
+            view, np.ones(raw_masks[view].shape, bool)), bool)
+        linear_coverage[view] = constraint_coverage(
+            SimpleNamespace(coverage_mask=supplied), valid).copy()
+
     profile_bands = {
         view: tuple(
             distributional_profile_bands(
@@ -187,10 +208,12 @@ def build_target_from_images(
     elif calibration:
         from .projection_contract import bounds_from_calibrated_masks, visible_search_bounds
         if valid_evidence_masks and any(not np.asarray(m, bool).all() for m in valid_evidence_masks.values()):
-            inferred_bounds = visible_search_bounds(raw_masks, bboxes, calibration, valid_evidence_masks)
+            inferred_bounds = visible_search_bounds(raw_masks, bboxes, calibration, valid_evidence_masks,
+                coverage_masks=linear_coverage)
             warnings.append('partial_evidence_search_bounds: unknown crop regions do not assert object extents')
         else:
-            inferred_bounds = bounds_from_calibrated_masks(raw_masks, bboxes, calibration)
+            inferred_bounds = bounds_from_calibrated_masks(
+                raw_masks, bboxes, calibration, coverage_masks=linear_coverage)
     else:
         inferred_bounds = _bounds_from_view_bboxes(bboxes, config)
         warnings.append("uncalibrated_orthographic_assumption: absolute scale and cross-view crop are ambiguous")
@@ -210,6 +233,7 @@ def build_target_from_images(
             uncertainties=uncertainties,
             diagnostics=diagnostics,
             calibration=calibration,
+            coverage_masks=linear_coverage,
         ),
         profile_bands=profile_bands,
         bounds=bounds,
@@ -224,6 +248,11 @@ def build_target_from_images(
             "profile_samples": int(profile_samples),
             "validity_sha256": {view: __import__('hashlib').sha256(np.asarray(mask, bool).tobytes()).hexdigest()
                                 for view, mask in (valid_evidence_masks or {}).items()},
+            "coverage_views": sorted(linear_coverage),
+            "coverage_sha256": {view: __import__('hashlib').sha256(
+                np.ascontiguousarray(mask, dtype='<f8').tobytes()).hexdigest()
+                for view, mask in linear_coverage.items()},
+            "coverage_contract": "declared_linear_foreground; unknown_zero; fitting_only",
             "profile_band_distribution": profile_distribution,
             "bounds_source": bounds_source,
             "view_calibration": calibration,
@@ -516,6 +545,7 @@ def _view_constraints(
     uncertainties: Mapping[str, Any],
     diagnostics: Mapping[str, Mapping[str, Any]],
     calibration: Mapping[str, Any] = {},
+    coverage_masks: Mapping[str, np.ndarray] | None = None,
 ) -> tuple[ViewConstraint, ...]:
     from .targets import make_axis_camera
 
@@ -533,6 +563,7 @@ def _view_constraints(
                 bbox=bboxes.get(view),
                 uncertainty=uncertainties.get(view),
                 diagnostics=diagnostics.get(view, {}),
+                coverage_mask=(coverage_masks or {}).get(view),
             )
         )
     return tuple(constraints)
@@ -644,4 +675,9 @@ def _write_target_artifacts(
         prob_path = target_dir / f"{view}-probability.npy"
         np.save(prob_path, np.asarray(probability, dtype=np.float32))
         paths[f"{view}_probability"] = prob_path
+    for constraint in target.constraints:
+        if constraint.coverage_mask is not None:
+            coverage_path = target_dir / f"{constraint.view}-coverage.npy"
+            np.save(coverage_path, np.asarray(constraint.coverage_mask, dtype='<f8'))
+            paths[f"{constraint.view}_coverage"] = coverage_path
     return paths

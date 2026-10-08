@@ -27,4 +27,9 @@ def target_evidence_hash(target):
                 if values.shape==mask.shape:values=np.where(valid,values,0.)
                 digest.update(str(values.shape).encode())
                 digest.update(np.ascontiguousarray(values).tobytes())
+        from .coverage_evidence import constraint_coverage
+        coverage = constraint_coverage(constraint, valid)
+        if coverage is not None:
+            digest.update(b'declared_linear_coverage_v1')
+            digest.update(np.ascontiguousarray(coverage, dtype='<f8').tobytes())
     return digest.hexdigest()

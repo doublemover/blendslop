@@ -12,7 +12,7 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "blender_blocking"), str(ROOT), str(ROOT / "scripts")]
 import test_runner  # expose existing qualified dependency paths after bundled packages
-from run_surface_quality_check import _object, _view, _write
+from run_surface_quality_check import _object, _view, _write, _replay_orthographic_camera
 
 
 def render_masks(obj, folder, bounds, views, *, camera_records=None):
@@ -29,9 +29,7 @@ def render_masks(obj, folder, bounds, views, *, camera_records=None):
             if camera_records is None:
                 _view(session.camera, view, *bounds)
             else:
-                from mathutils import Matrix
-                session.camera.matrix_world = Matrix(camera_records[view]["matrix_world"])
-                session.camera.data.ortho_scale = camera_records[view]["ortho_scale"]
+                _replay_orthographic_camera(session.camera, camera_records[view])
             path = folder / (view + "-mask.png")
             render_silhouette_frame(session, path)
             masks[view] = np.asarray(Image.open(path).convert("L")) < 128
