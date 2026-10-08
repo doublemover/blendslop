@@ -1421,6 +1421,63 @@
       "bytes": 78567,
       "source": "retained project-authored synthetic fixture",
       "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-inspection-front.png",
+      "sha256": "f019984dd4d8017fbb177d91b5e4f2fa7fade316edea12ac92ba8c42edb4dcb9",
+      "sourceSha256": "38119d66b302cf78d1244e938fe80afce7d9f9905e2723edb4d15a845c483854",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 154416,
+      "source": "new shaded inspection of exact retained actual triangular reconstruction",
+      "geometryHash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-inspection-oblique_35_28.png",
+      "sha256": "6443c88e83209f93005e6bc9ab3a736d89827efe528ae55cdc424e00ae160bdc",
+      "sourceSha256": "bd20ca44e6d0c0e8b81256df06fa260d5b161c17593579a4ffe270327b05876e",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 165271,
+      "source": "new shaded inspection of exact retained actual triangular reconstruction",
+      "geometryHash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-inspection-oblique_145_40.png",
+      "sha256": "304ce92bbe855db5bc99d9aa7f73e49bee33072923bdfda103c92847a2f78927",
+      "sourceSha256": "750d63ded40ee17fbd95554d614d75d992d232b535d86a9241944fc18b9fa78b",
+      "redactedMetadataChunks": [
+        "eXIf",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt",
+        "tEXt"
+      ],
+      "bytes": 170668,
+      "source": "new shaded inspection of exact retained actual triangular reconstruction",
+      "geometryHash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+      "pixelCopy": "original encoded pixels; ancillary text/EXIF metadata removed"
     }
   ]
 }

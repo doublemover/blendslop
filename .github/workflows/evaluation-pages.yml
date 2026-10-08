@@ -29,7 +29,7 @@ jobs:
         env:
           BUILD_SHA: ${{ github.sha }}
         run: node scripts/build-evaluation-site.mjs --out temp/pages-dist
-      - name: Check desktop/mobile rendering and honest verdict interactions
+      - name: Check desktop presentation and exact verdict interactions
         run: node scripts/check-evaluation-browser.mjs
       - name: Upload bounded browser inspection
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
