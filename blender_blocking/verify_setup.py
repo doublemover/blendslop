@@ -252,7 +252,13 @@ def verify_setup() -> bool:
     try:
         import bpy
 
-        print(f"  OK: Running in Blender {bpy.app.version_string}")
+        from utils.blender_version import require_supported_blender
+        try:
+            require_supported_blender()
+            print(f"  OK: Running in Blender {bpy.app.version_string}")
+        except RuntimeError as e:
+            errors.append(str(e))
+            print(f"  FAIL: {e}")
     except ImportError:
         warnings.append("Not running in Blender")
         print("  WARN: Not running in Blender (this is OK if testing outside Blender)")

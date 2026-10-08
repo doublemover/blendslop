@@ -70,7 +70,7 @@ Use this when changing presets or search logic. The command writes only the plan
 Inside Blender's Python, call the e2e CLI through Blender:
 
 ```powershell
-$blender = "C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
+$blender = "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
 
 & $blender --background --python blender_blocking\test_e2e_validation.py -- `
   --refinement-suite default-vase `
@@ -106,7 +106,7 @@ Use this form when you want the planner/reporting process outside Blender but ea
 ```powershell
 python blender_blocking\test_e2e_validation.py `
   --refinement-subprocess `
-  --refinement-blender-exe "C:\Program Files\Blender Foundation\Blender 5.0\blender.exe" `
+  --refinement-blender-exe "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" `
   --refinement-suite default-vase `
   --refinement-track visual-hull-transform `
   --refinement-max-runs 4 `
@@ -122,7 +122,7 @@ python -m blender_blocking.refinement_lab.cli run `
   --track profile-loft-refinement `
   --max-runs 1 `
   --result-root temp\refinement-runs\cli-smoke `
-  --blender-exe "C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
+  --blender-exe "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
 ```
 
 ## Rank, Report, Autopsy, Label, Promote
@@ -170,7 +170,7 @@ python -m blender_blocking.refinement_lab.cli loop `
   --parent-top-k 3 `
   --children-per-parent 4 `
   --result-root temp\refinement-runs\closed-loop `
-  --blender-exe "C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
+  --blender-exe "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
 ```
 
 The loop writes one compact `gXX/` run root per iteration plus

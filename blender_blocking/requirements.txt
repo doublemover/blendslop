@@ -28,4 +28,4 @@ open3d>=0.19.0
 # This tool must be run within Blender's Python environment
 
 # Installation for Blender's Python:
-# /Applications/Blender.app/Contents/Resources/3.6/python/bin/python3.10 -m pip install -r requirements.txt
+# /Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 -m pip install -r requirements.txt

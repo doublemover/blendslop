@@ -2,37 +2,24 @@
 
 Complete guide to configuring Blender's Python environment to use the blocking tool dependencies.
 
-## Verification on 2026-10-06
+## Supported runtime
 
-The original bounded comparison used Blender **5.0.1** and bundled Python 3.11.13.
-An installed **5.2.2 LTS** (`d13f752e3b9c`) follow-up with Python **3.13.13** now
-passes 82 quick groups, the evaluated-mesh identity/reference contract and 24/24
-fresh-process reconstruction checks. Actual OBJ/GLB/STL/native blend round trips
-are verified on a transformed-parent/bevel/material/units fixture. These are
-bounded core checks, not certification of every optional backend. No installation
-was needed; the earlier missing-executable blocker is withdrawn. Open3D is absent
-in this Python 3.13 environment. The repo allows open3d>=0.19.0; current Open3D 0.20.0 has a compatible Windows CPython 3.13 wheel. This is a missing local module, not a Python support limitation. See docs/branch-audit-20261006/open3d313-proposal.md for the unexecuted isolated setup proposal. Existing .venv312 Open3D 0.19.0 can be qualified separately via the explicit CPU helper.
+Use only the latest official stable Blender release: **5.2.2 LTS**, verified
+2026-10-08 against the [official download](https://www.blender.org/download/)
+and [release page](https://www.blender.org/releases/5-2/). Older Blender versions
+and previews are unsupported. CI checks the exact official archive checksum.
+The existing local 5.2.2 release has Python 3.13.13; no local upgrade or package
+installation is implied by changing the support policy.
 
-The E2E validator now resolves EEVEE engine names from the running Blender RNA
-capabilities, guards removed sample properties, and records requested/applied
-engine and samples. Evaluated mesh evidence uses world-space Z-up coordinates
-directly, including modifiers and all children of compiled shape-program roots.
-These changes reduce API assumptions; they do not replace testing a new version.
-
+Use the interpreter from that installation for all compiled dependencies.
 For an existing configured installation, call
 `blender_blocking.verify_setup.configure_dependency_paths()` before importing
-the workflow. It exposes existing user dependency locations. Compiled packages
-must match **Blender's** Python ABI; never insert an unrelated project's venv
-site-packages into Blender. The installation instructions below are historical
-examples and need their version/path numbers adjusted to the selected build.
+the workflow. Never insert an unrelated project's virtual environment into
+Blender. The path examples below target the supported 5.2 installation.
 
-Versioned raw results are in `temp/blender52-compat-20261006/`; the earlier 5.0
-reports remain separate. All nine decoded reference images and three ground-truth
-meshes agree across versions. See [the 5.2 verification report](../docs/branch-audit-20261006/blender52-verification.md)
-for dependencies, command isolation, per-method results and reproduction.
-
-See [the branch audit](../docs/branch-audit-20261006/README.md) for the current
-done/partial/missing ledger and exact comparison protocol.
+Earlier cross-version runs and their frozen outputs remain
+[historical evidence](../docs/branch-audit-20261006/blender52-verification.md).
+They do not establish support for another release or complete visual qualification.
 
 ## The Challenge
 
@@ -42,7 +29,7 @@ Blender bundles its own Python interpreter, which doesn't have access to your vi
 
 **⚠️ IMPORTANT: You MUST install dependencies directly into Blender's Python interpreter.**
 
-The virtual environment approach (using your project's venv) does NOT work reliably due to binary compatibility issues. Packages like Pillow include compiled C extensions that are Python version-specific. When your venv uses Python 3.13 but Blender uses Python 3.11, you'll get errors like:
+The virtual environment approach (using your project's venv) does NOT work reliably due to binary compatibility issues. Packages like Pillow include compiled C extensions that are Python version-specific. When your venv and Blender use different Python ABIs, you'll get errors like:
 
 ```
 ImportError: cannot import name '_imaging' from 'PIL'
@@ -57,7 +44,7 @@ Install packages directly into Blender's bundled Python interpreter.
 **macOS:**
 ```bash
 # Find Blender's Python (adjust version numbers as needed)
-BLENDER_PYTHON="/Applications/Blender.app/Contents/Resources/4.2/python/bin/python3.11"
+BLENDER_PYTHON="/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13"
 
 # Install dependencies
 $BLENDER_PYTHON -m pip install -r /path/to/blendslop/blender_blocking/requirements.txt
@@ -66,10 +53,10 @@ $BLENDER_PYTHON -m pip install -r /path/to/blendslop/blender_blocking/requiremen
 **Linux:**
 ```bash
 # Common Blender Python location
-BLENDER_PYTHON="/usr/share/blender/4.2/python/bin/python3.11"
+BLENDER_PYTHON="/usr/share/blender/5.2/python/bin/python3.13"
 
 # Or if installed via snap
-BLENDER_PYTHON="/snap/blender/current/4.2/python/bin/python3.11"
+BLENDER_PYTHON="/snap/blender/current/5.2/python/bin/python3.13"
 
 # Install dependencies
 $BLENDER_PYTHON -m pip install -r /path/to/blendslop/blender_blocking/requirements.txt
@@ -78,7 +65,7 @@ $BLENDER_PYTHON -m pip install -r /path/to/blendslop/blender_blocking/requiremen
 **Windows:**
 ```powershell
 # Common Blender Python location
-$BLENDER_PYTHON = "C:\Program Files\Blender Foundation\Blender 4.2\4.2\python\bin\python.exe"
+$BLENDER_PYTHON = "C:\Program Files\Blender Foundation\Blender 5.2\5.2\python\bin\python.exe"
 
 # Install dependencies
 & $BLENDER_PYTHON -m pip install -r "C:\path\to\blendslop\blender_blocking\requirements.txt"
@@ -144,12 +131,12 @@ Your Blender Python doesn't have access to the dependencies.
 
 On macOS/Linux, you may need admin permissions:
 ```bash
-sudo /Applications/Blender.app/Contents/Resources/4.2/python/bin/python3.11 -m pip install -r /path/to/blendslop/blender_blocking/requirements.txt
+sudo /Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 -m pip install -r /path/to/blendslop/blender_blocking/requirements.txt
 ```
 
 Or install for user only:
 ```bash
-/Applications/Blender.app/Contents/Resources/4.2/python/bin/python3.11 -m pip install --user -r /path/to/blendslop/blender_blocking/requirements.txt
+/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 -m pip install --user -r /path/to/blendslop/blender_blocking/requirements.txt
 ```
 
 ### "ImportError: numpy.core.multiarray failed to import"
@@ -180,7 +167,7 @@ $BLENDER_PYTHON -m pip install open3d
 `torch`, `torchvision`, and `lpips` are optional research dependencies used by LPIPS novel-view scoring and some experimental differentiable paths. On Windows/Blender 5, use the repository repair command instead of a loose `pip install torch`, because newer CPU wheels can import in Blender's standalone `python.exe` but fail once loaded inside the Blender process.
 
 ```powershell
-$BLENDER_PYTHON = "C:\Program Files\Blender Foundation\Blender 5.0\5.0\python\bin\python.exe"
+$BLENDER_PYTHON = "C:\Program Files\Blender Foundation\Blender 5.2\5.2\python\bin\python.exe"
 & $BLENDER_PYTHON blender_blocking\verify_setup.py --install-research-deps
 ```
 
@@ -237,7 +224,7 @@ cat > setup_blender_blocking.sh << 'EOF'
 
 # Configuration
 BLENDER_APP="/Applications/Blender.app"
-BLENDER_PYTHON="$BLENDER_APP/Contents/Resources/4.2/python/bin/python3.11"
+BLENDER_PYTHON="$BLENDER_APP/Contents/Resources/5.2/python/bin/python3.13"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "🔧 Setting up Blender Blocking Tool"

@@ -65,6 +65,7 @@ from utils.progress import iter_progress, progress_print
 
 PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_runner_cli", "test_runner_cli"),
+    ("pure_blender_runtime", "test_blender_runtime"),
     ("pure_rounded_triangle", "test_rounded_triangle"),
     ("pure_quality_coverage", "test_quality_coverage"),
     ("pure_capsule", "test_capsule"),
@@ -278,30 +279,13 @@ def run_test_suite(
         print("\nWARN: Blender not available - Blender-only tests will be skipped")
         print("      Run: blender --background --python test_runner.py")
 
-    # Test 2: Version compatibility
-    print("\n" + "-" * 70)
-    print("[2/8] Version Compatibility")
-    print("-" * 70)
-    if not blender_ok:
-        print("SKIPPED - Blender required")
-        results["version_compatibility"] = None
+    # Test 2: Current stable runtime and ordinary native API correctness.
+    if blender_ok:
+        results.update(run_unittest_modules(
+            [("native_runtime", "test_native_runtime")],
+            verbose=verbose, progress=progress))
     else:
-        try:
-            from test_version_compatibility import (
-                test_version_detection,
-                test_boolean_solver_compatibility,
-            )
-
-            version_ok = test_version_detection()
-            solver_ok = test_boolean_solver_compatibility()
-            results["version_compatibility"] = version_ok and solver_ok
-        except Exception as e:
-            print(f"FAIL: Test crashed: {e}")
-            if verbose:
-                import traceback
-
-                traceback.print_exc()
-            results["version_compatibility"] = False
+        results["native_runtime"] = None
 
     # Test 3: Boolean solver enum
     print("\n" + "-" * 70)
@@ -772,6 +756,9 @@ def run_named_phase(
 def main() -> None:
     """Main entry point for test runner."""
     args = _parse_args(_runner_argv())
+    if check_blender_available()[0]:
+        from utils.blender_version import require_supported_blender
+        require_supported_blender()
     phases = _selected_phases(args)
 
     if phases:

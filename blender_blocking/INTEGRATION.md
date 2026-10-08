@@ -53,7 +53,7 @@ scipy
 ```
 
 ### Blender
-- Blender 4.2 LTS or 5.0 with Python API (bpy) (tested)
+- Blender 5.2.2 LTS stable with its bundled Python API (bpy); older releases and previews are unsupported
 
 Install Python dependencies:
 ```bash
@@ -63,7 +63,7 @@ pip install -r requirements.txt
 For Blender's Python environment:
 ```bash
 # macOS example (adjust path for your Blender version)
-/Applications/Blender.app/Contents/Resources/4.2/python/bin/python3.11 -m pip install -r /path/to/blendslop/blender_blocking/requirements.txt
+/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 -m pip install -r /path/to/blendslop/blender_blocking/requirements.txt
 ```
 
 ## Usage

@@ -23,41 +23,41 @@ There is no trained image-to-3D model or packaged Blender add-on to install. The
 ### 1. Get this branch
 
 ```bash
-git clone --branch cloud/quality-consistency-20261006 https://github.com/doublemover/blendslop.git
+git clone --branch main https://github.com/doublemover/blendslop.git
 cd blendslop
 ```
 
-The commands below run from the repository root. This README describes the feature branch above; `main` has a smaller, older implementation.
+The commands below run from the repository root. The reconstruction framework and completed implementation are integrated in `main`.
 
 ### 2. Configure Blender's Python
 
 Use the Python interpreter bundled with your Blender installation. NumPy, OpenCV, Pillow, SciPy, and other compiled packages must match that interpreter's ABI. Do not attach an unrelated project's virtual environment to Blender.
 
-The recorded native comparisons used Blender **5.0.1** and **5.2.2 LTS**. The existing CI workflow declares **4.2 LTS** and **5.0** jobs. These are bounded historical checks and configured CI targets, not a compatibility certification for every path in this branch. See the [version verification report](docs/branch-audit-20261006/blender52-verification.md).
+Only the latest official stable release is supported: **Blender 5.2.2 LTS**, verified on 2026-10-08 against the [official download](https://www.blender.org/download/) and [5.2 release page](https://www.blender.org/releases/5-2/). CI pins its official archive and runs full and quick correctness checks; older releases and previews are unsupported. Previous cross-version comparisons remain [historical evidence](docs/branch-audit-20261006/blender52-verification.md), not current support targets.
 
 **Windows / PowerShell** — adjust both paths to the same installation:
 
 ```powershell
-$blender = 'C:\Program Files\Blender Foundation\Blender 5.0\blender.exe'
-$py = 'C:\Program Files\Blender Foundation\Blender 5.0\5.0\python\bin\python.exe'
+$blender = 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe'
+$py = 'C:\Program Files\Blender Foundation\Blender 5.2\5.2\python\bin\python.exe'
 & $py -m pip install --user -r blender_blocking/requirements.txt
 & $blender --background --python-exit-code 1 --python blender_blocking/verify_setup.py
 ```
 
-**macOS / bash or zsh** — example paths for Blender 5.0:
+**macOS / bash or zsh** — example paths for Blender 5.2:
 
 ```bash
 BLENDER='/Applications/Blender.app/Contents/MacOS/Blender'
-PY='/Applications/Blender.app/Contents/Resources/5.0/python/bin/python3.11'
+PY='/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13'
 "$PY" -m pip install --user -r blender_blocking/requirements.txt
 "$BLENDER" --background --python-exit-code 1 --python blender_blocking/verify_setup.py
 ```
 
 **Linux** — use the same shell commands after setting `BLENDER` and `PY` to the executable and bundled `python/bin/python3.x` in your Blender installation. Paths and Python versions vary by distribution and build.
 
-The verifier exposes the matching Python user site and an existing `~/blender_python_packages` directory. Keep that shared directory free of packages from a different Python ABI. For path discovery and import troubleshooting, see [Blender setup](blender_blocking/BLENDER_SETUP.md); older path examples there need adjustment to your build.
+The verifier exposes the matching Python user site and an existing `~/blender_python_packages` directory. Keep that shared directory free of packages from a different Python ABI. For path discovery and import troubleshooting, see [Blender setup](blender_blocking/BLENDER_SETUP.md); use the exact supported installation.
 
-The [requirements file](blender_blocking/requirements.txt) includes the scientific/image stack, `tqdm`, `scikit-image`, and Open3D. Marching-cubes extraction uses scikit-image; Open3D is used by optional Poisson/native-qualification paths. If an optional wheel or runtime is unavailable, inspect the reported skip and avoid claiming that capability is validated. Torch/LPIPS, DVX, Shapely, OpenVDB, and NVIDIA-only nvdiffrast serve additional research paths and are not all installed by this command. Do not install them just to try the basic loft example.
+The [requirements file](blender_blocking/requirements.txt) includes the scientific/image stack, `tqdm`, `scikit-image`, and Open3D. Marching-cubes extraction uses scikit-image; Open3D is used by optional Poisson/native-qualification paths. If an optional wheel or runtime is unavailable, inspect the reported skip and avoid claiming that capability is validated. Shapely 2.x is required for continuous contours and canonical pixel coverage. Torch/LPIPS, DVX, OpenVDB, and NVIDIA-only nvdiffrast serve additional research paths and are not all installed by this command. Do not install them just to try the basic loft example.
 
 ### 3. Generate the tiny example inputs
 

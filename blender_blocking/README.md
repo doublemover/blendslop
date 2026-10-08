@@ -72,14 +72,14 @@ blender_blocking/
 ├── create_test_images.py       # Test image generator
 ├── verify_setup.py             # Dependency verification
 ├── test_runner.py              # Main CI/CD test runner
-├── test_version_compatibility.py # Version detection & API compatibility tests
+├── test_native_runtime.py        # Current release & native solver checks
 ├── test_blender_boolean.py     # Blender API compatibility tests
 ├── test_integration.py         # Test suite
 ├── test_e2e_validation.py      # E2E validation with IoU
 ├── refinement_lab/             # Experiment plans, ranking, reports, and diagnostics
 ├── requirements.txt            # Dependencies
 ├── utils/                      # Utility modules
-│   └── blender_version.py      # Version detection & compatibility
+│   └── blender_version.py      # Current release identity & solver checks
 ├── primitives/                 # Blender primitive spawning
 │   └── primitives.py
 ├── shape_matching/             # Slice-based shape analysis
@@ -98,7 +98,7 @@ blender_blocking/
 ## Requirements
 
 - Python 3.8+
-- Blender 4.2 LTS or 5.0 (tested)
+- Blender 5.2.2 LTS stable only; older releases and previews unsupported
 - Dependencies: numpy, opencv-python, Pillow, scipy
 
 See [QUICKSTART.md](QUICKSTART.md) for installation instructions.
@@ -134,7 +134,7 @@ blender --background --python test_runner.py -- --verbose
 
 The legacy test runner executes these suites:
 1. **Pure Python** - Config, geometry, and image-processing tests (no Blender required)
-2. **Version Compatibility** - Detects Blender version and validates API compatibility
+2. **Current Runtime** - Enforces the supported stable release and checks native solver behavior
 3. **Boolean Solver Enum** - Validates Blender API enums for current version
 4. **MeshJoiner Integration** - Tests mesh joining with actual Blender operations
 5. **Full Workflow** - End-to-end procedural generation
@@ -184,23 +184,17 @@ refinement-loop artifacts. Generated internals use compact directory names to
 stay inside Blender and Windows path limits. These are diagnostics only and must
 not be committed.
 
-### Supported Blender Versions
+### Supported Blender Release
 
-Tested and supported versions:
-- **Blender 5.0**: Uses EXACT boolean solver
-- **Blender 4.2 (LTS)**: Uses FAST boolean solver
-
-Older versions are unverified and may require compatibility updates.
-
-Version detection is automatic - no configuration required.
+Only the latest official stable release is supported: **5.2.2 LTS**, verified
+2026-10-08. Older releases and previews are unsupported. Runtime entry checks
+reject them; the current default boolean solver is EXACT.
 
 ### CI/CD Integration
 
-See **[CI_CD.md](CI_CD.md)** for:
-- GitHub Actions workflow example
-- GitLab CI configuration
-- Docker-based testing with Blender containers
-- Multi-version testing strategy (Blender 4.2 LTS, 5.0)
+[CI_CD.md](CI_CD.md) describes the single stable full/quick workflows, official
+archive verification and scheduled immutable source checks. There is no older
+version matrix or Docker-image support requirement.
 
 ### For Agents/Automated Workflows
 
@@ -210,8 +204,7 @@ blender --background --python test_runner.py -- --quick
 ```
 
 **Quality gates before merge:**
-- All tests pass in Blender 5.0: `blender --background --python test_runner.py`
-- All tests pass in Blender 4.2 (LTS)
+- Full correctness checks pass in Blender 5.2.2 LTS: `blender --background --python test_runner.py`
 - Exit code 0 = pass, 1 = fail, 2 = runner error
 
 See the Testing section in this README for detailed testing instructions.

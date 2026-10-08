@@ -42,7 +42,7 @@ class NativeGeometryTests(unittest.TestCase):
         owner.detach();owner.release()
         self.assertNotIn(name,bpy.data.objects);self.assertNotIn(meshname,bpy.data.meshes)
 
-    @unittest.skipIf(bpy is None or (bpy and bpy.app.version < (5,2,0)), 'Blender 5.2 query API required')
+    @unittest.skipIf(bpy is None, 'native Blender required')
     def test_raycast_and_proximity_match_scalar_fixtures_with_clipping(self):
         from blender_blocking.reconstruction.native_queries import raycast_batch,proximity_batch,scalar_raycast
         a=tetra();cache=GeometryCache()
@@ -69,7 +69,7 @@ class NativeGeometryTests(unittest.TestCase):
         self.assertEqual(report['connected_components'],1)
 
 
-    @unittest.skipIf(bpy is None or (bpy and bpy.app.version < (5,2,0)), 'Blender 5.2 SDF API required')
+    @unittest.skipIf(bpy is None, 'native Blender required')
     def test_sdf_extracts_zero_level_with_a_nonempty_closed_self_union(self):
         from blender_blocking.reconstruction.native_csg import sdf_grid_mesh
         data = tetra()

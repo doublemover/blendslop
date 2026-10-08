@@ -159,9 +159,6 @@ scene.render.image_settings.color_mode = 'RGBA'
 # Headless Blender execution
 blender --background --python test_e2e.py -- --test-images test_images/
 
-# Docker container with Blender pre-installed
-docker run -v $(pwd):/workspace blender:4.2 \
-    blender --background --python /workspace/test_e2e.py
 ```
 
 ## Validation Metrics
