@@ -1,0 +1,3 @@
+# Optional editable polygon extrusion and constrained planar retessellation.
+# Install into the interpreter that evaluates this representation, not globally.
+shapely>=2.1,<3

@@ -34,9 +34,11 @@ def sample_elliptical_slices(
     rx_interp = np.interp(t_values, heights_t, rx_values)
     ry_interp = np.interp(t_values, heights_t, ry_values)
 
+    cx = np.interp(t_values, heights_t, profile.cx) if profile.cx is not None else np.zeros(len(t_values))
+    cy = np.interp(t_values, heights_t, profile.cy) if profile.cy is not None else np.zeros(len(t_values))
     slices: List[EllipticalSlice] = []
-    for t, rx, ry in zip(t_values, rx_interp, ry_interp):
+    for t, rx, ry, x, y in zip(t_values, rx_interp, ry_interp, cx, cy):
         z = profile.z0 + float(t) * profile.world_height
-        slices.append(EllipticalSlice(z=z, rx=float(rx), ry=float(ry)))
+        slices.append(EllipticalSlice(z=z, rx=float(rx), ry=float(ry), cx=float(x), cy=float(y)))
 
     return slices

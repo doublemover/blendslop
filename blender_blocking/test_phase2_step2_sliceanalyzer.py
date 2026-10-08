@@ -8,7 +8,7 @@ Usage:
     /Applications/Blender.app/Contents/MacOS/Blender --background --python test_phase2_step2_sliceanalyzer.py
 
 Then open Blender GUI to inspect the result:
-    /Applications/Blender.app/Contents/MacOS/Blender test_output/phase2_step2.blend
+    /Applications/Blender.app/Contents/MacOS/Blender ../temp/phase2_step2.blend
 """
 
 from __future__ import annotations
@@ -296,7 +296,7 @@ def test_sliceanalyzer_integration() -> None:
         print(f"  Faces: {len(final_mesh.data.polygons):,}")
 
         # Save for visual inspection
-        output_path = Path("test_output/phase2_step2.blend")
+        output_path = Path(__file__).resolve().parents[1] / "temp" / "phase2_step2.blend"
         output_path.parent.mkdir(parents=True, exist_ok=True)
         bpy.ops.wm.save_as_mainfile(filepath=str(output_path))
         print(f"\n✓ Saved to {output_path}")

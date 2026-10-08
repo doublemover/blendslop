@@ -1,0 +1,180 @@
+{
+  "$schema": "./quality_perf_budget.schema.json",
+  "schema_version": "quality_perf_budget_v1",
+  "name": "nightly",
+  "description": "Broad nightly budgets. These are intentionally generous absolute limits; baseline comparisons catch most regressions.",
+  "thresholds": [
+    {
+      "id": "bench.nightly.rows.ok",
+      "artifact": "benchmark",
+      "case": "nightly",
+      "metric": "metrics.status_ok",
+      "mode": "min",
+      "threshold": 1.0,
+      "required": true
+    },
+    {
+      "id": "bench.nightly.visual_hull.max_ms",
+      "artifact": "benchmark",
+      "case": "nightly",
+      "name": "visual_hull_reconstruct",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 5000.0,
+      "required": true
+    },
+    {
+      "id": "bench.nightly.target_builder.max_ms",
+      "artifact": "benchmark",
+      "case": "nightly",
+      "name": "target_builder",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 500.0,
+      "required": true
+    },
+    {
+      "id": "bench.nightly.geometry_metrics.max_ms",
+      "artifact": "benchmark",
+      "case": "nightly",
+      "name": "geometry_metrics",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 750.0,
+      "required": true
+    },
+    {
+      "id": "bench.nightly.shape_program_build.max_ms",
+      "artifact": "benchmark",
+      "case": "nightly",
+      "name": "shape_program_build",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 300.0,
+      "required": true
+    },
+    {
+      "id": "e2e.nightly.rows.pass",
+      "artifact": "e2e",
+      "metric": "metrics.passed",
+      "mode": "min",
+      "threshold": 1.0,
+      "required": true
+    },
+    {
+      "id": "e2e.nightly.render_iou.floor",
+      "artifact": "e2e",
+      "metric": "metrics.average_iou",
+      "mode": "min",
+      "threshold": 0.6,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.editability.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.editability.editable_reconstruction_index",
+      "mode": "min",
+      "threshold": 0.65,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.min_view_iou.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.min_view_iou",
+      "mode": "min",
+      "threshold": 0.70,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.boundary_iou.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_boundary_iou",
+      "mode": "min",
+      "threshold": 0.58,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.sdf_loss.max",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_signed_distance_loss",
+      "mode": "max",
+      "threshold": 0.18,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.recoverable_fscore.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.geometry.recoverable.fscore_tau",
+      "mode": "min",
+      "threshold": 0.70,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.visual_hull.catastrophic_view.max",
+      "artifact": "evaluation",
+      "metric": "metrics.diagnostics.visual_hull.catastrophic_view_failure",
+      "mode": "max",
+      "threshold": 0.0,
+      "required": false
+    },
+    {
+      "id": "e2e.nightly.synthetic.true_chamfer_l1.max",
+      "artifact": "e2e",
+      "metric": "metrics.synthetic_geometry_true_chamfer_l1",
+      "mode": "max",
+      "threshold": 0.18,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.true_volume_iou.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.geometry.true.volumetric_iou",
+      "mode": "min",
+      "threshold": 0.40,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.export_qa.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.export.qa_score",
+      "mode": "min",
+      "threshold": 0.75,
+      "required": false
+    }
+  ],
+  "comparisons": [
+    {
+      "id": "bench.nightly.per_iter.regression_pct",
+      "artifact": "benchmark",
+      "case": "nightly",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max_percent_increase",
+      "threshold": 15.0,
+      "required": false
+    },
+    {
+      "id": "e2e.nightly.iou.regression_abs",
+      "artifact": "e2e",
+      "metric": "metrics.average_iou",
+      "mode": "max_absolute_decrease",
+      "threshold": 0.02,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.boundary.regression_abs",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_boundary_iou",
+      "mode": "max_absolute_decrease",
+      "threshold": 0.03,
+      "required": false
+    },
+    {
+      "id": "evaluation.nightly.editability.regression_abs",
+      "artifact": "evaluation",
+      "metric": "metrics.editability.editable_reconstruction_index",
+      "mode": "max_absolute_decrease",
+      "threshold": 0.04,
+      "required": false
+    }
+  ]
+}

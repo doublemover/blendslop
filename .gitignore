@@ -13,12 +13,17 @@ stacked_cubes.py
 __pycache__/
 *.py[cod]
 *$py.class
+.venv/
+.venv*/
+venv/
 
 # Blender temp files
 *.blend1
 *.blend2
 
 # Generated test artifacts
+temp/
+test_output/
 test_images/
 blender_blocking/test_images/
 blender_blocking/test_output/

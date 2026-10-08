@@ -2,9 +2,41 @@
 
 Complete guide to configuring Blender's Python environment to use the blocking tool dependencies.
 
+## Verification on 2026-10-06
+
+The original bounded comparison used Blender **5.0.1** and bundled Python 3.11.13.
+An installed **5.2.2 LTS** (`d13f752e3b9c`) follow-up with Python **3.13.13** now
+passes 82 quick groups, the evaluated-mesh identity/reference contract and 24/24
+fresh-process reconstruction checks. Actual OBJ/GLB/STL/native blend round trips
+are verified on a transformed-parent/bevel/material/units fixture. These are
+bounded core checks, not certification of every optional backend. No installation
+was needed; the earlier missing-executable blocker is withdrawn. Open3D is absent
+in this Python 3.13 environment. The repo allows open3d>=0.19.0; current Open3D 0.20.0 has a compatible Windows CPython 3.13 wheel. This is a missing local module, not a Python support limitation. See docs/branch-audit-20261006/open3d313-proposal.md for the unexecuted isolated setup proposal. Existing .venv312 Open3D 0.19.0 can be qualified separately via the explicit CPU helper.
+
+The E2E validator now resolves EEVEE engine names from the running Blender RNA
+capabilities, guards removed sample properties, and records requested/applied
+engine and samples. Evaluated mesh evidence uses world-space Z-up coordinates
+directly, including modifiers and all children of compiled shape-program roots.
+These changes reduce API assumptions; they do not replace testing a new version.
+
+For an existing configured installation, call
+`blender_blocking.verify_setup.configure_dependency_paths()` before importing
+the workflow. It exposes existing user dependency locations. Compiled packages
+must match **Blender's** Python ABI; never insert an unrelated project's venv
+site-packages into Blender. The installation instructions below are historical
+examples and need their version/path numbers adjusted to the selected build.
+
+Versioned raw results are in `temp/blender52-compat-20261006/`; the earlier 5.0
+reports remain separate. All nine decoded reference images and three ground-truth
+meshes agree across versions. See [the 5.2 verification report](../docs/branch-audit-20261006/blender52-verification.md)
+for dependencies, command isolation, per-method results and reproduction.
+
+See [the branch audit](../docs/branch-audit-20261006/README.md) for the current
+done/partial/missing ledger and exact comparison protocol.
+
 ## The Challenge
 
-Blender bundles its own Python interpreter, which doesn't have access to your virtual environment by default. We need to make the dependencies (numpy, opencv-python, Pillow, scipy) available to Blender's Python.
+Blender bundles its own Python interpreter, which doesn't have access to your virtual environment by default. We need to make the dependencies (numpy, opencv-python, Pillow, scipy, scikit-image, and Open3D) available to Blender's Python.
 
 ## REQUIRED Setup: Install to Blender's Python
 
@@ -69,6 +101,8 @@ import numpy as np
 import cv2
 from PIL import Image
 import scipy
+import skimage
+import open3d
 
 print("✓ All dependencies available!")
 
@@ -122,8 +156,55 @@ Or install for user only:
 
 Version mismatch between numpy and Blender's Python. Install a compatible version:
 ```bash
-$BLENDER_PYTHON -m pip install "numpy<2.0" opencv-python Pillow scipy
+$BLENDER_PYTHON -m pip install -r /path/to/blendslop/blender_blocking/requirements.txt
 ```
+
+### Visual hull only emits point clouds instead of meshes
+
+Install or repair `scikit-image` in Blender's Python. Visual hull marching-cubes extraction requires `skimage.measure.marching_cubes`.
+
+```bash
+$BLENDER_PYTHON -m pip install scikit-image
+```
+
+### Poisson postprocess is skipped
+
+Install or repair `open3d` in Blender's Python. Poisson and screened-Poisson postprocess modes are explicit optional stages and will report a structured skip when Open3D is unavailable.
+
+```bash
+$BLENDER_PYTHON -m pip install open3d
+```
+
+### LPIPS / torch / torchvision are unavailable
+
+`torch`, `torchvision`, and `lpips` are optional research dependencies used by LPIPS novel-view scoring and some experimental differentiable paths. On Windows/Blender 5, use the repository repair command instead of a loose `pip install torch`, because newer CPU wheels can import in Blender's standalone `python.exe` but fail once loaded inside the Blender process.
+
+```powershell
+$BLENDER_PYTHON = "C:\Program Files\Blender Foundation\Blender 5.0\5.0\python\bin\python.exe"
+& $BLENDER_PYTHON blender_blocking\verify_setup.py --install-research-deps
+```
+
+Dry-run the exact commands first:
+
+```powershell
+& $BLENDER_PYTHON blender_blocking\verify_setup.py --install-research-deps --dry-run
+```
+
+The supported plan installs the CPU-only `torch==2.5.1+cpu` / `torchvision==0.20.1+cpu` pair, `sympy==1.13.1`, and `lpips==0.1.4` into the active Blender Python user site. This is appropriate for AMD/non-CUDA machines. It does not install `nvdiffrast`.
+
+On Windows, Open3D and CPU PyTorch can load incompatible native runtimes inside the same Blender process. The setup verifier probes the LPIPS/PyTorch stack in isolated Blender subprocesses so availability reporting cannot crash the main process. If you need both Open3D postprocessing and LPIPS metrics for one asset, run those phases in separate Blender invocations.
+
+### OpenVDB export is skipped
+
+OpenVDB is optional. The tool probes both `pyopenvdb` and `openvdb` bindings and falls back to sparse NPZ interchange when neither binding is available. A plain `pip install openvdb` often has no Windows wheel, so direct `.vdb` export usually requires a compatible Blender-bundled binding, conda package, or source-built OpenVDB Python binding for the exact Python runtime.
+
+Use `require_openvdb=true`, `openvdb_required=true`, `fail_on_openvdb_skip=true`, or `export_openvdb_required=true` only when a missing direct `.vdb` binding should fail the candidate instead of recording a structured NPZ fallback.
+
+### nvdiffrast is unavailable
+
+`nvdiffrast` is NVIDIA's differentiable rasterizer. It is optional and not a normal dependency for this project. The `differentiable_refine` backend always has the deterministic `cpu_soft_silhouette` path; the `nvdiffrast` path is only for machines with the NVIDIA CUDA stack and the source-built NVlabs extension.
+
+There is no official ROCm version of `nvdiffrast`. On AMD/ROCm machines, keep using `cpu_soft_silhouette` for mesh/primitive refinement, or treat ROCm GSplat-style Gaussian splatting as a separate research backend instead of a drop-in replacement.
 
 ### Different Python versions
 

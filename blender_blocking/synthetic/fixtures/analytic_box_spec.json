@@ -1,0 +1,53 @@
+{
+  "expected_failure_modes": [],
+  "family": "analytic_primitive",
+  "generator_version": "synthetic-shape-factory-v1",
+  "intended_challenges": [
+    "analytic_exact"
+  ],
+  "known_dimensions": {
+    "depth": 1.0,
+    "height": 1.0,
+    "width": 1.0
+  },
+  "materials": {
+    "base_color": [
+      0.2,
+      0.2,
+      0.2,
+      1.0
+    ]
+  },
+  "parameters": {
+    "dimensions": {
+      "depth": 1.0,
+      "height": 1.0,
+      "width": 1.0
+    },
+    "primitive": "box"
+  },
+  "seed": 0,
+  "shape_id": "box_fixture_seed_0000",
+  "symmetry": [
+    "x",
+    "y",
+    "z"
+  ],
+  "transforms": {
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation_deg": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  }
+}

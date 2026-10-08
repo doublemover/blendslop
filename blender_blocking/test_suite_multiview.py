@@ -564,7 +564,7 @@ def test_object(obj_config: Dict[str, Any], resolution: int = 128) -> Dict[str, 
     print(f"  Ground truth: {ground_truth.sum():,} voxels in {vox_time:.1f}s")
 
     # Render turntable
-    turntable_dir = Path(f"test_output/suite/{obj_config['name']}")
+    turntable_dir = Path(__file__).resolve().parents[1] / "temp" / "suite" / str(obj_config["name"])
     print(f"Rendering turntable to {turntable_dir}...")
     render_turntable(obj, turntable_dir, num_views=12)
 
@@ -637,7 +637,7 @@ def main() -> None:
             )
 
     # Save results
-    results_path = Path("test_output/suite/test_results.json")
+    results_path = Path(__file__).resolve().parents[1] / "temp" / "suite" / "test_results.json"
     results_path.parent.mkdir(parents=True, exist_ok=True)
     with open(results_path, "w") as f:
         json.dump(all_results, f, indent=2)

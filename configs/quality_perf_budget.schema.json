@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blendslop.local/schema/quality_perf_budget_v1.json",
+  "title": "Blendslop Quality And Performance Budget",
+  "type": "object",
+  "required": ["schema_version", "thresholds"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "const": "quality_perf_budget_v1"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "thresholds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/threshold"
+      }
+    },
+    "comparisons": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/comparison"
+      },
+      "default": []
+    }
+  },
+  "$defs": {
+    "selector": {
+      "type": "object",
+      "properties": {
+        "artifact": {
+          "type": "string",
+          "description": "Artifact family, usually benchmark or e2e. Use * or omit for any."
+        },
+        "case": {
+          "type": "string",
+          "description": "Benchmark case or synthetic suite case. Use * or omit for any."
+        },
+        "name": {
+          "type": "string",
+          "description": "Record name. Benchmark records use the benchmark name; e2e matrix records use shape_id/mode."
+        },
+        "mode": {
+          "type": "string",
+          "description": "Reconstruction mode for e2e records."
+        },
+        "shape_id": {
+          "type": "string",
+          "description": "Synthetic shape id for e2e records."
+        }
+      }
+    },
+    "threshold": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/selector"
+        },
+        {
+          "type": "object",
+          "required": ["id", "metric", "mode", "threshold"],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "metric": {
+              "type": "string",
+              "description": "Dotted metric path in the selected JSON record, such as metrics.per_iter_ms or metrics.average_iou."
+            },
+            "mode": {
+              "enum": ["min", "max", "equal"]
+            },
+            "threshold": {
+              "type": "number"
+            },
+            "required": {
+              "type": "boolean",
+              "default": true
+            },
+            "allow_missing": {
+              "type": "boolean",
+              "default": false,
+              "description": "When true, a selector with no matching records passes, but matching records must still satisfy the threshold."
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "comparison": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/selector"
+        },
+        {
+          "type": "object",
+          "required": ["id", "metric", "mode", "threshold"],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "metric": {
+              "type": "string"
+            },
+            "mode": {
+              "enum": [
+                "max_percent_increase",
+                "max_percent_decrease",
+                "max_absolute_increase",
+                "max_absolute_decrease"
+              ]
+            },
+            "threshold": {
+              "type": "number"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

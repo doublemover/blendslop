@@ -1,0 +1,25 @@
+{
+  "expected_failure_modes": [
+    "component_dropout"
+  ],
+  "family": "capture_noise",
+  "generator_version": "synthetic-shape-factory-v1",
+  "intended_challenges": [],
+  "known_dimensions": {
+    "canvas_height": 256.0,
+    "canvas_width": 256.0
+  },
+  "materials": {},
+  "parameters": {
+    "base_mask": "center_disc",
+    "degradation": "missing_top_view",
+    "resolution": [
+      256,
+      256
+    ]
+  },
+  "seed": 0,
+  "shape_id": "missing_top_view_fixture_seed_0000",
+  "symmetry": [],
+  "transforms": {}
+}

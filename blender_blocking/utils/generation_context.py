@@ -52,6 +52,7 @@ class GenerationContext:
     stages: List[StageTiming] = field(default_factory=list)
     logs: List[Dict[str, object]] = field(default_factory=list)
     config: Optional["BlockingConfig"] = None
+    artifact_root: Optional[str] = None
 
     def apply_seed(self) -> None:
         """Seed RNGs for deterministic runs when a seed is provided."""
@@ -102,6 +103,8 @@ class GenerationContext:
         }
         if self.config is not None:
             data["config"] = self.config.to_dict()
+        if self.artifact_root is not None:
+            data["artifact_root"] = self.artifact_root
         try:
             json.dumps(data)
         except TypeError as exc:

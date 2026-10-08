@@ -159,7 +159,7 @@ def inspect_blend_file(blend_path: Path) -> None:
 
 
 if __name__ == "__main__":
-    blend_file = Path("test_output/phase2_step2.blend")
+    blend_file = Path(__file__).resolve().parents[1] / "temp" / "phase2_step2.blend"
     if not blend_file.exists():
         print(f"Error: {blend_file} not found")
         sys.exit(1)

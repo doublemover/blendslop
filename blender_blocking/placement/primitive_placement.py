@@ -5,6 +5,8 @@ Positions and scales primitives based on slice analysis and joins them using boo
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 try:
     import bpy
     import bmesh
@@ -31,14 +33,17 @@ except ImportError:
             return Vector((self.x + other.x, self.y + other.y, self.z + other.z))
 
 
+import json
 import math
 import sys
+import time
 import numpy as np
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+from integration.blender_ops.mesh_quality import MeshQualityReport, collect_mesh_quality
 from utils.blender_version import resolve_boolean_solver
 
 
@@ -285,8 +290,202 @@ class PrimitivePlacer:
         return created_objects
 
 
+@dataclass(frozen=True)
+class JoinAttempt:
+    """One measured mesh join attempt."""
+
+    mode: str
+    success: bool
+    elapsed_s: float
+    warnings: Tuple[str, ...]
+    quality: Optional[MeshQualityReport]
+    solver_requested: Optional[str] = None
+    solver_resolved: Optional[str] = None
+    object_count: int = 0
+
+    def to_dict(self) -> Dict[str, object]:
+        """Return a JSON-safe dictionary."""
+        return {
+            "mode": self.mode,
+            "success": self.success,
+            "elapsed_s": self.elapsed_s,
+            "warnings": list(self.warnings),
+            "quality": self.quality.to_dict() if self.quality is not None else None,
+            "solver_requested": self.solver_requested,
+            "solver_resolved": self.solver_resolved,
+            "object_count": self.object_count,
+        }
+
+
+@dataclass(frozen=True)
+class JoinResult:
+    """Structured result for mesh joins and explicit fallback metadata."""
+
+    object: Any
+    attempts: Tuple[JoinAttempt, ...]
+    selected_mode: Optional[str]
+    degraded: bool
+    fatal_error: Optional[str]
+
+    def to_dict(self) -> Dict[str, object]:
+        """Return a JSON-safe dictionary."""
+        return {
+            "object_name": getattr(self.object, "name", None),
+            "attempts": [attempt.to_dict() for attempt in self.attempts],
+            "selected_mode": self.selected_mode,
+            "degraded": self.degraded,
+            "fatal_error": self.fatal_error,
+        }
+
+
 class MeshJoiner:
     """Joins multiple mesh objects using boolean operations."""
+
+    @staticmethod
+    def join_result(
+        objects: List[bpy.types.Object],
+        target_name: str = "Joined_Mesh",
+        mode: str = "auto",
+        voxel_size: Optional[float] = None,
+        solver: Optional[str] = None,
+        allow_degraded_simple_join: bool = True,
+    ) -> JoinResult:
+        """Join mesh objects and return measured attempts plus fallback status."""
+        if not objects:
+            return JoinResult(
+                object=None,
+                attempts=(),
+                selected_mode=None,
+                degraded=False,
+                fatal_error="No objects provided for joining",
+            )
+
+        if len(objects) == 1:
+            objects[0].name = target_name
+            quality = collect_mesh_quality(objects[0])
+            attempt = JoinAttempt(
+                mode="single",
+                success=True,
+                elapsed_s=0.0,
+                warnings=(),
+                quality=quality,
+                object_count=1,
+            )
+            result = JoinResult(
+                object=objects[0],
+                attempts=(attempt,),
+                selected_mode="single",
+                degraded=False,
+                fatal_error=None,
+            )
+            MeshJoiner._store_join_metadata(objects[0], result)
+            return result
+
+        attempts: List[JoinAttempt] = []
+        fatal_errors: List[str] = []
+        mode_order = MeshJoiner._join_mode_order(
+            mode, len(objects), allow_degraded_simple_join
+        )
+
+        for attempt_mode in mode_order:
+            attempt_objects = MeshJoiner._duplicate_objects_for_attempt(
+                objects, f"JoinAttempt_{attempt_mode}"
+            )
+            start = time.perf_counter()
+            warnings: List[str] = []
+            joined_obj = None
+            quality = None
+            solver_resolved = None
+            try:
+                if attempt_mode == "boolean":
+                    solver_resolved = resolve_boolean_solver(solver)
+                    if solver_resolved != solver and solver not in {None, "auto"}:
+                        warnings.append(
+                            f"boolean_solver_fallback:{solver}->{solver_resolved}"
+                        )
+                    joined_obj = MeshJoiner.join_with_boolean_union(
+                        attempt_objects,
+                        target_name=target_name,
+                        solver=solver_resolved,
+                    )
+                elif attempt_mode == "voxel":
+                    joined_obj = MeshJoiner.join_with_voxel_remesh(
+                        attempt_objects,
+                        target_name=target_name,
+                        voxel_size=voxel_size,
+                    )
+                elif attempt_mode == "simple":
+                    if mode == "simple":
+                        warnings.append(
+                            "simple_join_requested_disconnected_shells_possible"
+                        )
+                    else:
+                        warnings.append(
+                            "simple_join_degraded_internal_overlaps_possible"
+                        )
+                    joined_obj = MeshJoiner.join_simple(
+                        attempt_objects,
+                        target_name=target_name,
+                    )
+                else:
+                    raise ValueError(f"Unknown mesh join mode: {attempt_mode}")
+
+                quality = collect_mesh_quality(joined_obj)
+                if quality.vertices == 0 or quality.faces == 0:
+                    warnings.append("joined_mesh_empty")
+                    raise RuntimeError("Joined mesh is empty")
+
+                elapsed_s = time.perf_counter() - start
+                attempt = JoinAttempt(
+                    mode=attempt_mode,
+                    success=True,
+                    elapsed_s=elapsed_s,
+                    warnings=tuple(warnings),
+                    quality=quality,
+                    solver_requested=solver,
+                    solver_resolved=solver_resolved,
+                    object_count=len(objects),
+                )
+                attempts.append(attempt)
+                degraded = attempt_mode == "simple" and mode != "simple"
+                MeshJoiner._remove_objects(objects)
+                result = JoinResult(
+                    object=joined_obj,
+                    attempts=tuple(attempts),
+                    selected_mode=attempt_mode,
+                    degraded=degraded,
+                    fatal_error=None,
+                )
+                MeshJoiner._store_join_metadata(joined_obj, result)
+                return result
+            except Exception as exc:
+                elapsed_s = time.perf_counter() - start
+                warnings.append(str(exc))
+                attempts.append(
+                    JoinAttempt(
+                        mode=attempt_mode,
+                        success=False,
+                        elapsed_s=elapsed_s,
+                        warnings=tuple(warnings),
+                        quality=quality,
+                        solver_requested=solver,
+                        solver_resolved=solver_resolved,
+                        object_count=len(objects),
+                    )
+                )
+                fatal_errors.append(f"{attempt_mode}: {exc}")
+                cleanup_targets = list(attempt_objects)
+                if joined_obj is not None:
+                    cleanup_targets.append(joined_obj)
+                MeshJoiner._remove_objects(cleanup_targets)
+
+        return JoinResult(
+            object=None,
+            attempts=tuple(attempts),
+            selected_mode=None,
+            degraded=False,
+            fatal_error="; ".join(fatal_errors) if fatal_errors else "join failed",
+        )
 
     @staticmethod
     def join(
@@ -295,45 +494,105 @@ class MeshJoiner:
         mode: str = "auto",
         voxel_size: Optional[float] = None,
         solver: Optional[str] = None,
+        allow_degraded_simple_join: bool = True,
     ) -> bpy.types.Object:
-        """
-        Join multiple objects using the requested join mode.
+        """Join multiple objects and return the legacy joined object."""
+        result = MeshJoiner.join_result(
+            objects,
+            target_name=target_name,
+            mode=mode,
+            voxel_size=voxel_size,
+            solver=solver,
+            allow_degraded_simple_join=allow_degraded_simple_join,
+        )
+        if result.object is None:
+            raise RuntimeError(result.fatal_error or "Mesh join failed")
+        if result.degraded:
+            print("Warning: Mesh join used degraded simple join fallback.")
+        return result.object
 
-        Args:
-            objects: List of mesh objects to join
-            target_name: Name for the resulting joined mesh
-            mode: "auto", "boolean", "voxel", or "simple"
-            voxel_size: Optional voxel size for remesh mode
+    @staticmethod
+    def join_objects(
+        objects: List[bpy.types.Object],
+        target_name: str = "Joined_Mesh",
+        mode: str = "auto",
+        voxel_size: Optional[float] = None,
+        solver: Optional[str] = None,
+        allow_degraded_simple_join: bool = True,
+    ) -> bpy.types.Object:
+        """Compatibility wrapper for callers using a join_objects name."""
+        return MeshJoiner.join(
+            objects,
+            target_name=target_name,
+            mode=mode,
+            voxel_size=voxel_size,
+            solver=solver,
+            allow_degraded_simple_join=allow_degraded_simple_join,
+        )
 
-        Returns:
-            Joined mesh object
-        """
+    @staticmethod
+    def _join_mode_order(
+        mode: str, object_count: int, allow_degraded_simple_join: bool = True
+    ) -> List[str]:
         if mode == "auto":
-            mode = "boolean" if len(objects) <= 8 else "voxel"
-
-        if mode == "voxel":
-            try:
-                return MeshJoiner.join_with_voxel_remesh(
-                    objects, target_name=target_name, voxel_size=voxel_size
-                )
-            except Exception as exc:
-                print(f"Warning: Voxel remesh join failed: {exc}. Falling back.")
-                try:
-                    return MeshJoiner.join_with_boolean_union(
-                        objects, target_name=target_name, solver=solver
-                    )
-                except Exception:
-                    return MeshJoiner.join_simple(objects, target_name=target_name)
-
+            first = "boolean" if object_count <= 8 else "voxel"
+            second = "voxel" if first == "boolean" else "boolean"
+            order = [first, second]
+            if allow_degraded_simple_join:
+                order.append("simple")
+            return order
         if mode == "boolean":
-            return MeshJoiner.join_with_boolean_union(
-                objects, target_name=target_name, solver=solver
-            )
-
+            order = ["boolean", "voxel"]
+            if allow_degraded_simple_join:
+                order.append("simple")
+            return order
+        if mode == "voxel":
+            order = ["voxel", "boolean"]
+            if allow_degraded_simple_join:
+                order.append("simple")
+            return order
         if mode == "simple":
-            return MeshJoiner.join_simple(objects, target_name=target_name)
-
+            return ["simple"]
         raise ValueError(f"Unknown mesh join mode: {mode}")
+
+    @staticmethod
+    def _duplicate_objects_for_attempt(
+        objects: List[bpy.types.Object], prefix: str
+    ) -> List[bpy.types.Object]:
+        duplicates = []
+        for index, obj in enumerate(objects):
+            duplicate = obj.copy()
+            duplicate.data = obj.data.copy()
+            duplicate.name = f"{prefix}_{index:03d}"
+            collection = (
+                obj.users_collection[0] if obj.users_collection else bpy.context.collection
+            )
+            collection.objects.link(duplicate)
+            duplicates.append(duplicate)
+        return duplicates
+
+    @staticmethod
+    def _remove_objects(objects: List[bpy.types.Object]) -> None:
+        seen = set()
+        for obj in objects:
+            if obj is None or id(obj) in seen:
+                continue
+            seen.add(id(obj))
+            try:
+                if bpy.data.objects.get(obj.name) is not None:
+                    bpy.data.objects.remove(obj, do_unlink=True)
+            except ReferenceError:
+                continue
+
+    @staticmethod
+    def _store_join_metadata(obj: bpy.types.Object, result: JoinResult) -> None:
+        obj["join_result_json"] = json.dumps(result.to_dict(), sort_keys=True)
+        obj["join_selected_mode"] = result.selected_mode or ""
+        obj["join_degraded"] = bool(result.degraded)
+        if result.attempts and result.attempts[-1].quality is not None:
+            obj["mesh_quality_json"] = json.dumps(
+                result.attempts[-1].quality.to_dict(), sort_keys=True
+            )
 
     @staticmethod
     def join_with_boolean_union(
@@ -356,29 +615,44 @@ class MeshJoiner:
 
         if len(objects) == 1:
             objects[0].name = target_name
+            quality = collect_mesh_quality(objects[0])
+            objects[0]["mesh_quality_json"] = json.dumps(
+                quality.to_dict(), sort_keys=True
+            )
+            objects[0]["join_degraded"] = False
             return objects[0]
 
-        # Start with the first object as base
-        base_obj = objects[0]
-        base_obj.name = target_name
+        resolved_solver = resolve_boolean_solver(solver)
+        work = list(objects)
+        round_index = 0
+        while len(work) > 1:
+            next_round = []
+            for pair_index in range(0, len(work), 2):
+                base_obj = work[pair_index]
+                if pair_index + 1 >= len(work):
+                    next_round.append(base_obj)
+                    continue
+                obj = work[pair_index + 1]
+                modifier = base_obj.modifiers.new(
+                    name=f"Union_{round_index}_{pair_index // 2}",
+                    type="BOOLEAN",
+                )
+                modifier.operation = "UNION"
+                modifier.object = obj
+                modifier.solver = resolved_solver
 
-        # Apply boolean union with each subsequent object
-        for i, obj in enumerate(objects[1:], 1):
-            # Create boolean modifier
-            modifier = base_obj.modifiers.new(name=f"Union_{i}", type="BOOLEAN")
-            modifier.operation = "UNION"
-            modifier.object = obj
-            # Use version-aware solver selection (EXACT for 5.0+, FAST for 4.x)
-            modifier.solver = resolve_boolean_solver(solver)
+                bpy.context.view_layer.objects.active = base_obj
+                bpy.ops.object.modifier_apply(modifier=modifier.name)
+                bpy.data.objects.remove(obj, do_unlink=True)
+                next_round.append(base_obj)
+            work = next_round
+            round_index += 1
 
-            # Apply the modifier
-            bpy.context.view_layer.objects.active = base_obj
-            bpy.ops.object.modifier_apply(modifier=modifier.name)
-
-            # Delete the source object
-            bpy.data.objects.remove(obj, do_unlink=True)
-
-        return base_obj
+        work[0].name = target_name
+        quality = collect_mesh_quality(work[0])
+        work[0]["mesh_quality_json"] = json.dumps(quality.to_dict(), sort_keys=True)
+        work[0]["join_degraded"] = False
+        return work[0]
 
     @staticmethod
     def join_with_voxel_remesh(
@@ -421,6 +695,9 @@ class MeshJoiner:
         bpy.context.view_layer.objects.active = joined
         bpy.ops.object.modifier_apply(modifier=modifier.name)
 
+        quality = collect_mesh_quality(joined)
+        joined["mesh_quality_json"] = json.dumps(quality.to_dict(), sort_keys=True)
+        joined["join_degraded"] = False
         return joined
 
     @staticmethod
@@ -456,6 +733,9 @@ class MeshJoiner:
         # Rename
         joined_obj = bpy.context.active_object
         joined_obj.name = target_name
+        quality = collect_mesh_quality(joined_obj)
+        joined_obj["mesh_quality_json"] = json.dumps(quality.to_dict(), sort_keys=True)
+        joined_obj["join_degraded"] = True
 
         return joined_obj
 

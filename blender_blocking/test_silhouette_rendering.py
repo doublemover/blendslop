@@ -26,6 +26,9 @@ from integration.blender_ops.silhouette_render import (
     silhouette_session,
 )
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+TEMP_OUTPUT_ROOT = REPO_ROOT / "temp"
+
 
 def _load_mask(image_path: Path) -> np.ndarray:
     image = bpy.data.images.load(str(image_path))
@@ -65,7 +68,7 @@ class TestSilhouetteRendering(unittest.TestCase):
         extra.data.materials.append(mat)
 
         bounds_min, bounds_max = compute_bounds_world([target])
-        output_dir = Path("test_output/render_isolation")
+        output_dir = TEMP_OUTPUT_ROOT / "render_isolation"
         output_dir.mkdir(parents=True, exist_ok=True)
 
         with silhouette_session(
@@ -118,7 +121,7 @@ class TestSilhouetteRendering(unittest.TestCase):
         obj = bpy.context.active_object
         obj.name = "TestRender_Cylinder"
 
-        output_dir = Path("test_output/render_framing")
+        output_dir = TEMP_OUTPUT_ROOT / "render_framing"
         output_dir.mkdir(parents=True, exist_ok=True)
 
         outputs = render_orthogonal_views(

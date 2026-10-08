@@ -1,0 +1,22 @@
+{
+  "base_head": "c3005d493011078adfbf9fbe63a512cfc1672c8b",
+  "pure_tests": {
+    "count": 22,
+    "passed": true
+  },
+  "native_tests": {
+    "count": 2,
+    "passed": true,
+    "blender": "5.2.2 LTS",
+    "python": "3.13.13",
+    "log_path": "temp\\tasks\\native-edit-check\\log.txt",
+    "log_sha256": "3d1aefd320651dee9e8d28215281ff3efa8aa182dee598b2ebdb51fc62ea1c5e"
+  },
+  "retained_default_triangle": {
+    "coordinates_equal": true,
+    "triangles_equal": true,
+    "geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64"
+  },
+  "full_suite_rerun": false,
+  "seven_control_batch_rerun": false
+}

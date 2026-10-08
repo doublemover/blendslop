@@ -1,0 +1,414 @@
+{
+  "aggregate_accepted": false,
+  "boundary_owner": {
+    "blockers": [],
+    "eligible": [
+      {
+        "bytes": 450136,
+        "path": "input.npz",
+        "sha256": "32395e0f7fed261febe0a78382d41c7dc6b4b59c0302435dc301e9bf13c6aa57"
+      }
+    ],
+    "eligible_bytes": 450136,
+    "mode": "read_only",
+    "mutation_supported": false,
+    "protocol": "run-ownership-dry-run-v1",
+    "retained_bytes": 3222,
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\native-qualification\\owned-6eds4ssx",
+    "status": "dry_run_ready",
+    "unknown_files": []
+  },
+  "camera_border_inventory": {
+    "front": {
+      "candidate_border_foreground_pixels": 0,
+      "reference_border_foreground_pixels": 0
+    },
+    "oblique_145_40": {
+      "candidate_border_foreground_pixels": 53,
+      "reference_border_foreground_pixels": 54
+    },
+    "oblique_35_28": {
+      "candidate_border_foreground_pixels": 48,
+      "reference_border_foreground_pixels": 49
+    },
+    "side": {
+      "candidate_border_foreground_pixels": 0,
+      "reference_border_foreground_pixels": 0
+    },
+    "top": {
+      "candidate_border_foreground_pixels": 0,
+      "reference_border_foreground_pixels": 0
+    }
+  },
+  "camera_limitation": "Both frozen oblique source/candidate masks touch an image edge; silhouette passes cover those observed frames. Future fixture framing is fixed with projected AABB corners; old references and cameras are preserved.",
+  "checks": {
+    "focused_pure": {
+      "log": "temp/tasks/native-edit-check/triangle-final-pure.log",
+      "passed": 56,
+      "run": 56
+    },
+    "native_future_oblique_bounds_without_renders": {
+      "log": "temp/tasks/native-edit-check/oblique-fit-check.log",
+      "passed": 1,
+      "run": 1
+    },
+    "native_semantic_width_corner_thickness_dome": {
+      "log": "temp/tasks/native-edit-check/triangle-final-check.log",
+      "passed": 1,
+      "run": 1
+    }
+  },
+  "environment_changes": false,
+  "historical_cleanup": false,
+  "ownership": {
+    "blockers": [],
+    "eligible": [],
+    "eligible_bytes": 0,
+    "mode": "read_only",
+    "mutation_supported": false,
+    "protocol": "run-ownership-dry-run-v1",
+    "retained_bytes": 1032903,
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9",
+    "status": "dry_run_ready",
+    "unknown_files": []
+  },
+  "protocol": "actual-triangle-support-reconstruction-v1",
+  "publication": false,
+  "reference_surface_qualification": "missing; vase normal/distance limits were not transferred",
+  "render_count_new": 5,
+  "result": {
+    "aggregate_accepted": false,
+    "blocker": "surface reference qualification remains independent of support/mask/topology success",
+    "boundary": {
+      "backend": "Open3D 0.19.0",
+      "between_component_pairs": 0,
+      "body_count_limitation": "surface component count does not establish material body count for cavities",
+      "boundary_qualified": true,
+      "cache_hit": false,
+      "certificate_scope": "actual retained coordinates and connectivity; edits invalidate receipt",
+      "exact_pair_verification": {
+        "complete": true,
+        "component_count": 1,
+        "counts": {},
+        "non_disjoint_pairs": 0,
+        "predicate_version": "exact_binary64_triangle_contacts_v1",
+        "qualification_policy": "only exactly disjoint native reports are removed; contact/degenerate/unverified reports remain blocking",
+        "relations": {},
+        "reported_pairs": 0,
+        "samples": [],
+        "unverified_pairs": 0,
+        "verified_pairs": 0
+      },
+      "geometry_content_hash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+      "helper_python": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+      "helper_source_sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25",
+      "intersection_pair_provenance": [],
+      "intersection_sample": [],
+      "manifold_validated": true,
+      "material_body_count": null,
+      "owned_run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\native-qualification\\owned-6eds4ssx",
+      "qualification": "Open3D edge/vertex/orientability screen plus exact verification of reported triangle pairs",
+      "qualification_cost_boundary": "identity verification, solid guard, transfer and actual helper execution",
+      "qualification_elapsed_s": 11.412895199995546,
+      "reason": null,
+      "reported_self_intersections": 0,
+      "self_intersections": 0,
+      "self_intersections_scope": "exact non-disjoint reported triangle pairs; null when incomplete",
+      "single_solid_qualified": true,
+      "solid_guard": {
+        "boundary_edges": 0,
+        "connected_components": 1,
+        "degenerate_faces": 0,
+        "edge_count": 18711,
+        "euler_characteristic": 2,
+        "face_count": 12474,
+        "geometric_degenerate_faces": 0,
+        "loose_vertices": 0,
+        "non_manifold_edges": 0,
+        "orientation_errors": 0,
+        "pass": true,
+        "passed": true,
+        "penalty": 0.0,
+        "reason": "",
+        "required": true,
+        "self_intersection_qualification": "not_established_by_index_topology",
+        "signed_volume": 0.6037560232500864,
+        "single_solid_qualified": false,
+        "topology_and_volume_valid": true,
+        "topology_score": 1.0,
+        "valid_solid": true,
+        "valid_solid_scope": "legacy topology/volume screen; boundary intersections untested",
+        "vertex_count": 6239,
+        "watertight": true
+      },
+      "status": "qualified",
+      "toolchain_identity": "22a77b7668350a1507c13ec04fe8b12c6338e92a18378235d581c731fe34709e",
+      "triangle_count": 12474,
+      "triangle_predicate_sha256": "452bbd520fe8e394be7ab734ec29f613d8e7eb008486778176224e6922d5ea3d",
+      "within_component_pairs": 0,
+      "within_part_boundary_guard": {
+        "component_count": 1,
+        "elapsed_s": 6.514999999999418,
+        "geometry_scope": "within indexed parts only; between-part overlap permitted",
+        "indexed_adjacency_contacts": 83556,
+        "limitation": "surface guard; closed topology/volume and external single-solid qualification are separate",
+        "passed": true,
+        "predicate_version": "exact_binary64_triangle_contacts_v1",
+        "reason": null,
+        "status": "checked",
+        "sweep_axis": 2,
+        "tested_pairs": 155849
+      }
+    },
+    "editability": {
+      "exact_restoration": true,
+      "object_scale_changed": true,
+      "scope": "live object edit; semantic corner/depth controls covered separately by native compiler tests"
+    },
+    "elapsed_seconds": 14.895811299997149,
+    "geometry_hash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+    "npz_sha256": "02be8b8c1f719d8cc5b01168d5fc8c2ff22fb8beafdb7f396d1dfbea34a6298f",
+    "obj_sha256": "5fbc257f49843ef3ecbb1274d655eb075f179d88f1cad54f8a19d3c202309876",
+    "program": {
+      "constraints": [],
+      "metadata": {
+        "parts": 1,
+        "proposal": "fitted_whole_oriented_rounded_triangle",
+        "support_fit": {
+          "evidence_scope": "observed support bounds; full masks and retained geometry admission still required",
+          "family": "rounded_triangle",
+          "support_elapsed_s": 0.026690600003348663,
+          "support_evaluations": 139,
+          "support_squared_residual": 0.0,
+          "termination": "solver_completed"
+        }
+      },
+      "program_id": "triangle-support",
+      "residual_patches": [],
+      "root_nodes": [
+        {
+          "children": [],
+          "editable": true,
+          "name": "whole_rounded_triangle",
+          "node_id": "whole_rounded_triangle",
+          "operation": "add",
+          "parameters": {
+            "corner_radius_world": 0.16555002099727076,
+            "front_fraction": 0.5054832174920212,
+            "height_world": 0.4795511282050785,
+            "rotation": [
+              [
+                -0.9999999959946931,
+                -8.94975952512796e-05,
+                -8.909592558977233e-07
+              ],
+              [
+                -8.949598796384788e-05,
+                0.9999986102235507,
+                -0.00166479471223685
+              ],
+              [
+                1.0399531409962387e-06,
+                -0.001664794625831719,
+                -0.9999986142279257
+              ]
+            ],
+            "scale_xy": [
+              0.9932650237777112,
+              0.9947676434297791
+            ],
+            "x": -4.102666017005013e-05,
+            "y": 0.0011442513795320297,
+            "z": 0.0019401367792599173
+          },
+          "primitive_type": "rounded_triangle"
+        }
+      ],
+      "schema_version": "1"
+    },
+    "silhouette": {
+      "front": {
+        "area_iou": 0.996520080424808,
+        "area_ratio": 0.9981167608286252,
+        "boundary_iou": 0.9529742060010529,
+        "centroid_delta_px": [
+          0.005942449495933033,
+          -0.014380178725190262
+        ],
+        "intersection": 38659,
+        "iou": 0.996520080424808,
+        "pass": true,
+        "passed": true,
+        "pixel_difference": 0.000514984130859375,
+        "precision": 0.9991987593693461,
+        "reason": "",
+        "recall": 0.9973170291257126,
+        "ref_area": 38763,
+        "render_area": 38690,
+        "required": true,
+        "signed_distance_loss": 0.00029279884581612237,
+        "soft_iou": null,
+        "threshold": 0.7,
+        "thresholds": {
+          "max_signed_distance_loss": 0.05,
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8
+        },
+        "union": 38794,
+        "view": "front",
+        "warnings": []
+      },
+      "oblique_145_40": {
+        "area_iou": 0.994463054732704,
+        "area_ratio": 1.005260740678886,
+        "boundary_iou": 0.885198969367306,
+        "centroid_delta_px": [
+          -0.1815940566232257,
+          -0.13040743038311575
+        ],
+        "intersection": 71842,
+        "iou": 0.994463054732704,
+        "pass": true,
+        "passed": true,
+        "pixel_difference": 0.00152587890625,
+        "precision": 0.9946145006991458,
+        "reason": "",
+        "recall": 0.9998469096627838,
+        "ref_area": 71853,
+        "render_area": 72231,
+        "required": true,
+        "signed_distance_loss": 0.0007135617344804501,
+        "soft_iou": null,
+        "threshold": 0.7,
+        "thresholds": {
+          "max_signed_distance_loss": 0.05,
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8
+        },
+        "union": 72242,
+        "view": "oblique_145_40",
+        "warnings": []
+      },
+      "oblique_35_28": {
+        "area_iou": 0.9942851293949061,
+        "area_ratio": 1.0050596871569704,
+        "boundary_iou": 0.8928685641189639,
+        "centroid_delta_px": [
+          0.20729743200445228,
+          -0.17201378566213066
+        ],
+        "intersection": 58284,
+        "iou": 0.9942851293949061,
+        "pass": true,
+        "passed": true,
+        "pixel_difference": 0.001277923583984375,
+        "precision": 0.9946244816464445,
+        "reason": "",
+        "recall": 0.9996569703622393,
+        "ref_area": 58304,
+        "render_area": 58599,
+        "required": true,
+        "signed_distance_loss": 0.0006545060143654524,
+        "soft_iou": null,
+        "threshold": 0.7,
+        "thresholds": {
+          "max_signed_distance_loss": 0.05,
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8
+        },
+        "union": 58619,
+        "view": "oblique_35_28",
+        "warnings": []
+      },
+      "side": {
+        "area_iou": 0.995165725864814,
+        "area_ratio": 1.0003192477362433,
+        "boundary_iou": 0.9360599078341014,
+        "centroid_delta_px": [
+          0.04909662920155711,
+          0.12877499836326933
+        ],
+        "intersection": 34378,
+        "iou": 0.995165725864814,
+        "pass": true,
+        "passed": true,
+        "pixel_difference": 0.000637054443359375,
+        "precision": 0.9974178199437143,
+        "reason": "",
+        "recall": 0.99773624332482,
+        "ref_area": 34456,
+        "render_area": 34467,
+        "required": true,
+        "signed_distance_loss": 0.0003681817809404464,
+        "soft_iou": null,
+        "threshold": 0.7,
+        "thresholds": {
+          "max_signed_distance_loss": 0.05,
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8
+        },
+        "union": 34545,
+        "view": "side",
+        "warnings": []
+      },
+      "top": {
+        "area_iou": 0.9957906701214637,
+        "area_ratio": 1.0037038111539838,
+        "boundary_iou": 0.9024717593110391,
+        "centroid_delta_px": [
+          -0.003868406213655362,
+          -0.39485829057502997
+        ],
+        "intersection": 103380,
+        "iou": 0.9957906701214637,
+        "pass": true,
+        "passed": true,
+        "pixel_difference": 0.001667022705078125,
+        "precision": 0.9960497157722324,
+        "reason": "",
+        "recall": 0.999738895819432,
+        "ref_area": 103407,
+        "render_area": 103790,
+        "required": true,
+        "signed_distance_loss": 0.0007598607980749961,
+        "soft_iou": null,
+        "threshold": 0.7,
+        "thresholds": {
+          "max_signed_distance_loss": 0.05,
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8
+        },
+        "union": 103817,
+        "view": "top",
+        "warnings": []
+      }
+    },
+    "surface_observation": {
+      "candidate_geometry_hash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+      "distance_p95_world": 0.002281279978342354,
+      "editability_verdict": "independent",
+      "normal_angle_mean_degrees": 0.5603901620479966,
+      "normal_angle_p95_degrees": 2.9707811690593298,
+      "normal_interpretation": "geometric face normals, not shading normals",
+      "normal_orientation": "oriented; opposite normals are 180 degrees",
+      "protocol": "shared_world_area_sample_to_triangle_v1",
+      "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+      "sample_count_per_direction": 4096,
+      "sampled_max_distance_world": 0.0028801681473851204,
+      "seed": 61007,
+      "silhouette_verdict": "independent",
+      "surface_status": "blocked: independent reference tessellation/noise qualification absent",
+      "symmetric_mean_distance_world": 0.000923875637811559,
+      "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+      "units": "unchanged Blender world coordinates; no fitting or normalization"
+    },
+    "triangle_preservation": {
+      "passed": true,
+      "support_error_world": 0.0028190535215933954,
+      "surface_verdict": "independent; not implied by support/thickness",
+      "thickness_error_world": 0.0004495358273861605
+    }
+  },
+  "result_path": "temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\results.json",
+  "result_sha256": "a0745537ee5e5694fb558a0103fe59b4bf41e4aefb123f148a72bbe241291831"
+}

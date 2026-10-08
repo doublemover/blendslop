@@ -180,6 +180,71 @@ def test_projection_non_centered_bounds() -> bool:
     return True
 
 
+def test_projection_respects_image_bounds() -> bool:
+    """Ensure projection can map world bounds to the selected silhouette bbox."""
+    print("\n" + "=" * 70)
+    print("TEST: Projection Respects Image Bounds")
+    print("=" * 70)
+
+    silhouette = np.zeros((64, 64), dtype=bool)
+    silhouette[16:48, 16:48] = True
+    view = CameraView(
+        silhouette=silhouette,
+        angle=0.0,
+        view_type="lateral",
+        image_bounds=(16.0, 16.0, 48.0, 48.0),
+    )
+
+    bounds_min = np.array([-1.0, -1.0, -1.0])
+    bounds_max = np.array([1.0, 1.0, 1.0])
+    center = np.array([0.0, 0.0, 0.0])
+    lower_left = np.array([-1.0, 0.0, -1.0])
+    upper_right = np.array([1.0, 0.0, 1.0])
+
+    center_u, center_v = view.project_point(center, (bounds_min, bounds_max))
+    left_u, bottom_v = view.project_point(lower_left, (bounds_min, bounds_max))
+    right_u, top_v = view.project_point(upper_right, (bounds_min, bounds_max))
+
+    print(f"  Center projection -> ({center_u}, {center_v})")
+    print(f"  ROI corners -> ({left_u}, {bottom_v}) and ({right_u}, {top_v})")
+
+    assert abs(center_u - 32) <= 1
+    assert abs(center_v - 32) <= 1
+    assert left_u == 16
+    assert top_v == 16
+    assert right_u == 47
+    assert bottom_v == 47
+
+    print("\nOK Image-bounds projection test PASSED")
+    return True
+
+
+def test_side_projection_uses_rotated_extent() -> bool:
+    """Ensure side views normalize against rotated X/Y footprint extent."""
+    print("\n" + "=" * 70)
+    print("TEST: Side Projection Uses Rotated Extent")
+    print("=" * 70)
+
+    silhouette = np.ones((64, 64), dtype=bool)
+    view = CameraView(silhouette=silhouette, angle=90.0, view_type="lateral")
+
+    bounds_min = np.array([-2.0, -0.5, -1.0])
+    bounds_max = np.array([2.0, 0.5, 1.0])
+    left_depth = np.array([0.0, -0.5, 0.0])
+    right_depth = np.array([0.0, 0.5, 0.0])
+
+    left_u, _left_v = view.project_point(left_depth, (bounds_min, bounds_max))
+    right_u, _right_v = view.project_point(right_depth, (bounds_min, bounds_max))
+
+    print(f"  Side depth endpoints -> u={left_u}, u={right_u}")
+
+    assert left_u == 0
+    assert right_u == 63
+
+    print("\nOK Side rotated extent test PASSED")
+    return True
+
+
 def test_single_view_reconstruction() -> bool:
     """Test reconstruction with single view (should give cone)."""
     print("\n" + "=" * 70)
@@ -418,6 +483,8 @@ def run_all_tests() -> int:
         ("Basic Instantiation", test_basic_instantiation),
         ("Camera View", test_camera_view),
         ("Projection Non-Centered Bounds", test_projection_non_centered_bounds),
+        ("Projection Image Bounds", test_projection_respects_image_bounds),
+        ("Side Projection Rotated Extent", test_side_projection_uses_rotated_extent),
         ("Single View Reconstruction", test_single_view_reconstruction),
         ("3-View Reconstruction", test_three_view_reconstruction),
         ("8-View Reconstruction", test_eight_view_reconstruction),
@@ -473,6 +540,12 @@ class TestVisualHull(unittest.TestCase):
 
     def test_projection_non_centered_bounds(self) -> None:
         self.assertTrue(test_projection_non_centered_bounds())
+
+    def test_projection_respects_image_bounds(self) -> None:
+        self.assertTrue(test_projection_respects_image_bounds())
+
+    def test_side_projection_uses_rotated_extent(self) -> None:
+        self.assertTrue(test_side_projection_uses_rotated_extent())
 
     def test_single_view_reconstruction(self) -> None:
         self.assertTrue(test_single_view_reconstruction())

@@ -1,0 +1,74 @@
+{
+  "expected_failure_modes": [],
+  "family": "profile_lathe",
+  "generator_version": "synthetic-shape-factory-v1",
+  "intended_challenges": [
+    "profile_bands"
+  ],
+  "known_dimensions": {
+    "height": 1.9246,
+    "max_radius": 0.82
+  },
+  "materials": {
+    "base_color": [
+      0.18,
+      0.18,
+      0.18,
+      1.0
+    ]
+  },
+  "parameters": {
+    "height": 1.9246,
+    "profile": [
+      [
+        -1.0,
+        0.32,
+        -0.06
+      ],
+      [
+        -0.55,
+        0.55,
+        0.05
+      ],
+      [
+        -0.05,
+        0.35,
+        0.12
+      ],
+      [
+        0.45,
+        0.5,
+        -0.04
+      ],
+      [
+        1.0,
+        0.22,
+        0.0
+      ]
+    ],
+    "profile_kind": "asymmetric_vase",
+    "segments": 96
+  },
+  "seed": 0,
+  "shape_id": "asymmetric_vase_fixture_seed_0000",
+  "symmetry": [
+    "approximate_z_axis_radial"
+  ],
+  "transforms": {
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation_deg": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  }
+}

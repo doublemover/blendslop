@@ -1,0 +1,66 @@
+{
+  "adaptive_policy_checks": {
+    "config_validated": true,
+    "passed": 28,
+    "run": 28
+  },
+  "aggregate_visual_acceptance": false,
+  "common_base": "c5780fcb2847fcd43edbeb3ac8de63e3186db389",
+  "completed_candidate": "a86090ef57641ef3e3b026dde7d18d1e443f536a",
+  "cross_version_ci": "pending; no Blender 5.0/4.2 result claimed",
+  "environment_changes": false,
+  "full_candidate_commits_beyond_common_base": 155,
+  "integration_branch": "integration/main-completed-20261008",
+  "logs": {
+    "adaptive-policy.log": "79e4d6d07b925d0b390c49a1c51e90f7ae37dc1912818a550fe18848a83a3429",
+    "targeted-native.stderr.log": "da626a2143677026cc79d6020f10d68b39ecab26775d5ff4058e266b744a19e6",
+    "targeted-native.stdout.log": "97d86596ebb4b251766e918c0d9bf06a43700c9dd1a14119b4f72d7659133d0c",
+    "targeted-pure.log": "bf0bb01bdfb3caccf7e49061bba809b566f45d03f3629d7fb2c32a430c55e5e9"
+  },
+  "main_before": "5d13125ed26d4b53716578265a70b1269e03ca31",
+  "main_only_maintenance_files": "preserved verbatim",
+  "merge_conflicts": [],
+  "native_checks": {
+    "blender": "5.2.2 LTS",
+    "errors": 0,
+    "failures": 0,
+    "passed": true,
+    "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+    "run": 11,
+    "scope": "native artist edits and connected loft; no quality render or performance campaign",
+    "skips": 0
+  },
+  "new_render_or_performance_campaign": false,
+  "protocol": "main-integration-targeted-v1",
+  "pure_checks": {
+    "errors": 0,
+    "failures": 0,
+    "modules": [
+      "test_profile_regularization",
+      "test_loft_surface",
+      "test_rounded_triangle",
+      "test_capsule",
+      "test_run_ownership",
+      "test_exact_triangle_contacts",
+      "test_ray_box_filter",
+      "test_geometry_consistency",
+      "test_toolchain_identity_cache",
+      "test_corrective_recovery",
+      "test_oriented_support",
+      "test_program_pose_aliases",
+      "test_structural_routing"
+    ],
+    "passed": true,
+    "run": 108,
+    "skips": [
+      "test_linked_generated_path_cannot_adopt_external_file (test_run_ownership.RunOwnershipTests.test_linked_generated_path_cannot_adopt_external_file): host does not grant symlink creation"
+    ]
+  },
+  "quality_blockers": [
+    "calibrated vase oblique_145_40 boundary IoU 0.789001 below required 0.8",
+    "triangle reference noise/surface limits unqualified; both retained oblique frames clipped",
+    "full actual twelve-family reconstruction and independent family qualification incomplete",
+    "historical smooth intent remains ambiguous from scalloped ellipse-strip input",
+    "further producer adoption/promotion/crash/lock handling incomplete; no reclamation executor"
+  ]
+}
