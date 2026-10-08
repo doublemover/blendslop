@@ -1,0 +1,225 @@
+{
+  "scope": "Complete numeric gate inventory for current two actual reconstruction cases and retained recent superseded vase attempts; intentional controls kept separate. Older 2026-10-06 252-driver-cell campaign is a different historical source/protocol, not current failing-case labels.",
+  "published_source": "69eb23128a18006501b2a1f89e8df129bfdc048f",
+  "live_site_commit": "d5e981659a18c435ccbe7cc072b873e5b1707645",
+  "published_numeric_failures": [
+    {
+      "scope": "published_actual",
+      "case": "smooth_vase",
+      "view": "oblique_145_40",
+      "metric": "boundary_iou",
+      "value": 0.7890010090817356,
+      "threshold": 0.8,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.010998990918264395,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 1.3748738647830494
+    }
+  ],
+  "superseded_attempt_numeric_failures": [
+    {
+      "scope": "superseded_pre_endpoint_fix",
+      "case": "smooth_vase",
+      "view": "front",
+      "metric": "boundary_iou",
+      "value": 0.7714532539834901,
+      "threshold": 0.8,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.028546746016509972,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 3.5683432520637464
+    },
+    {
+      "scope": "superseded_pre_endpoint_fix",
+      "case": "smooth_vase",
+      "view": "oblique_145_40",
+      "metric": "boundary_iou",
+      "value": 0.5830872483221476,
+      "threshold": 0.8,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.2169127516778524,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 27.114093959731548
+    },
+    {
+      "scope": "superseded_pre_endpoint_fix",
+      "case": "smooth_vase",
+      "view": "oblique_35_28",
+      "metric": "boundary_iou",
+      "value": 0.6067047476355464,
+      "threshold": 0.8,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.19329525236445366,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 24.161906545556707
+    },
+    {
+      "scope": "superseded_pre_endpoint_fix",
+      "case": "smooth_vase",
+      "view": "side",
+      "metric": "boundary_iou",
+      "value": 0.7714532539834901,
+      "threshold": 0.8,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.028546746016509972,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 3.5683432520637464
+    },
+    {
+      "scope": "superseded_pre_endpoint_fix",
+      "case": "smooth_vase",
+      "view": "all surface samples",
+      "metric": "symmetric_mean_distance_world",
+      "value": 0.006114154368751734,
+      "threshold": 0.003,
+      "required_direction": "<=",
+      "absolute_failure_margin": 0.003114154368751734,
+      "units": "Blender world units",
+      "relative_to_threshold_percent": 103.8051456250578
+    },
+    {
+      "scope": "superseded_pre_endpoint_fix",
+      "case": "smooth_vase",
+      "view": "all surface samples",
+      "metric": "normal_angle_p95_degrees",
+      "value": 4.643508399791778,
+      "threshold": 2.5,
+      "required_direction": "<=",
+      "absolute_failure_margin": 2.143508399791778,
+      "units": "degrees",
+      "relative_to_threshold_percent": 85.74033599167112
+    }
+  ],
+  "intentional_control_numeric_failures": [
+    {
+      "scope": "intentional_negative_control",
+      "case": "filled_cavity",
+      "view": "front",
+      "metric": "area_iou",
+      "value": 0.5959297520661156,
+      "threshold": 0.7,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.10407024793388431,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 14.867178276269188
+    },
+    {
+      "scope": "intentional_negative_control",
+      "case": "incorrect_depth",
+      "view": "side",
+      "metric": "area_iou",
+      "value": 0.09090909090909091,
+      "threshold": 0.7,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.609090909090909,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 87.01298701298701
+    },
+    {
+      "scope": "intentional_negative_control",
+      "case": "incorrect_depth",
+      "view": "top",
+      "metric": "area_iou",
+      "value": 0.09090909090909091,
+      "threshold": 0.7,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.609090909090909,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 87.01298701298701
+    },
+    {
+      "scope": "intentional_negative_control",
+      "case": "missing_multipart",
+      "view": "front",
+      "metric": "area_iou",
+      "value": 0.5801754285386688,
+      "threshold": 0.7,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.11982457146133119,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 17.117795923047314
+    },
+    {
+      "scope": "intentional_negative_control",
+      "case": "missing_multipart",
+      "view": "oblique_35_28",
+      "metric": "area_iou",
+      "value": 0.6500178768518087,
+      "threshold": 0.7,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.04998212314819128,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 7.140303306884468
+    },
+    {
+      "scope": "intentional_negative_control",
+      "case": "missing_multipart",
+      "view": "side",
+      "metric": "area_iou",
+      "value": 0.39058052821548395,
+      "threshold": 0.7,
+      "required_direction": ">=",
+      "absolute_failure_margin": 0.309419471784516,
+      "units": "dimensionless normalized ratio",
+      "relative_to_threshold_percent": 44.20278168350229
+    }
+  ],
+  "published_pixel_counts": {
+    "width": 512,
+    "height": 512,
+    "missingPixels": 998,
+    "extraPixels": 0,
+    "areaIntersection": 107467,
+    "areaUnion": 108465,
+    "bandIntersection": 7819,
+    "bandUnion": 9910,
+    "missingBandPixels": 893,
+    "extraBandPixels": 1198
+  },
+  "published_filled_mismatch_canvas_percent": 0.380706787109375,
+  "published_boundary_deficit_percentage_points": 1.0998990918264395,
+  "local_outline": {
+    "boundary_iou": 0.9795431299011251,
+    "minimum": 0.8,
+    "above_threshold_absolute": 0.1795431299011251,
+    "all_five_passed": true
+  },
+  "local_surface": {
+    "symmetric_mean_distance_world": 0.00037735653809598327,
+    "normal_angle_p95_degrees": 1.1023958517158643,
+    "surface_passed": true
+  },
+  "same_underlying_gate_labels": [
+    "hero vase failure",
+    "smooth-vase case failed",
+    "silhouette verdict failed",
+    "required-view failed",
+    "aggregate not accepted (published vase)"
+  ],
+  "incomplete_not_numeric_failures": {
+    "triangle": "raw surface measured; independent triangle reference-noise/family limits absent",
+    "other_ten_families": "actual reconstructed outputs unrun",
+    "missing_shaded_views": "vase side/top generated but omitted from gallery; triangle side/top actual shade never generated, source12 masksallfive exist",
+    "local_prior_vase": "later native helper timeout15s; not a geometry numeric failure",
+    "historical_scalloped_vase": "native helper timeout15s and no authored smooth intent"
+  },
+  "root_cause_confirmed": "Declared AgX display transfer maps grayscale128/255 to physical foreground coverage0.783447265625; hard-mask fitting discards filtered edge coverage and produced measured inset bounds. Explicit half-coverage fitting/flat-cap proposal and correct ORTHO replay produce strict passing local silhouette and improved raw surface at unchanged512px/reference/gates.",
+  "root_cause_caution": "No isolated ablation attributes an exact fraction of the gain to coverage, terminal completion and camera fix. The first local perspective-camera image comparison was invalid; this does not establish a perspective error in the published baseline. Border-clipped frozen views still qualify visible frames only.",
+  "source_paths": [
+    "site/data.json",
+    "site/diagnostics.json",
+    "docs/quality-implementation-20261008/profile-repair-evidence.json",
+    "docs/quality-implementation-20261008/triangle-support-evidence.json",
+    "docs/quality-implementation-20261008/coverage-evidence.json",
+    "docs/quality-calibration-20261008/evidence.json"
+  ],
+  "new_native_qualification": {
+    "geometry_hash": "7447cc402285c2a09daaa2098d4316d9808b5665fcc9f732c165bb7309af9c49",
+    "status": "qualified",
+    "qualification_seconds": 10.072614999997313,
+    "helper_allowance_seconds": 15.0,
+    "accepted_for_this_vase": true,
+    "source": "native-allowance-evidence.json",
+    "older_timeout_preserved": true
+  }
+}
