@@ -227,7 +227,17 @@ def _compile_node(
     params = node.parameters
     name = node.name or node.node_id
     warnings: list[str] = []
-    if primitive == "rounded_triangle":
+    if primitive == "capsule":
+        from .capsule import CapsulePrimitive
+        data = CapsulePrimitive.from_program_parameters(params, world=False).to_mesh_data(max(8, lathe_segments))
+        mesh = bpy.data.meshes.new(name + "Mesh")
+        mesh.from_pydata(data.vertices.tolist(), [], data.faces)
+        mesh.update()
+        obj = bpy.data.objects.new(name, mesh)
+        obj.location = _location(params)
+        for polygon in mesh.polygons:
+            polygon.use_smooth = True
+    elif primitive == "rounded_triangle":
         from .rounded_triangle import RoundedTrianglePrimitive
         part = RoundedTrianglePrimitive.from_program_parameters(params, world=False)
         data = part.to_mesh_data()

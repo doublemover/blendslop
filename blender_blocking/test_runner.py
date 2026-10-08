@@ -65,6 +65,9 @@ from utils.progress import iter_progress, progress_print
 
 PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_rounded_triangle", "test_rounded_triangle"),
+    ("pure_quality_coverage", "test_quality_coverage"),
+    ("pure_capsule", "test_capsule"),
+    ("pure_run_ownership", "test_run_ownership"),
     ("pure_geometry_consistency", "test_geometry_consistency"),
     ("pure_oriented_support", "test_oriented_support"),
     ("pure_normalized_resfit", "test_normalized_resfit"),

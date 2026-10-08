@@ -277,20 +277,16 @@ def _part_object(bpy: Any, part: dict[str, Any]) -> Any:
 
 
 def _capsule_mesh(bpy: Any, radius: float, segment_height: float) -> Any:
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=radius, location=(0, 0, segment_height / 2.0))
-    top = bpy.context.active_object
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=radius, location=(0, 0, -segment_height / 2.0))
-    bottom = bpy.context.active_object
-    bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=radius, depth=segment_height, location=(0, 0, 0))
-    cylinder = bpy.context.active_object
-    for other in (top, bottom):
-        modifier = cylinder.modifiers.new(name=f"union_{other.name}", type="BOOLEAN")
-        modifier.operation = "UNION"
-        modifier.object = other
-        bpy.context.view_layer.objects.active = cylinder
-        bpy.ops.object.modifier_apply(modifier=modifier.name)
-        bpy.data.objects.remove(other, do_unlink=True)
-    return cylinder
+    from blender_blocking.primitives.capsule import CapsulePrimitive
+    data = CapsulePrimitive(radius=radius, segment_height=segment_height).to_mesh_data(48)
+    mesh = bpy.data.meshes.new("synthetic_capsule")
+    mesh.from_pydata(data.vertices.tolist(), [], data.faces)
+    mesh.update()
+    obj = bpy.data.objects.new("synthetic_capsule", mesh)
+    bpy.context.collection.objects.link(obj)
+    for polygon in mesh.polygons:
+        polygon.use_smooth = True
+    return obj
 
 
 def _superquadric_mesh(bpy: Any, params: dict[str, Any]) -> Any:

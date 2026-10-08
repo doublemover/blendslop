@@ -144,12 +144,14 @@ class ProgramAndProfileConsistencyTests(unittest.TestCase):
     def test_compiler_capabilities_fail_closed_before_scene_mutation(self):
         from primitives.shape_program import ShapeNode, ShapeProgram, validate_compilable_program
         from primitives.shape_program_compiler import compile_shape_program
-        for node in (ShapeNode('a','add','capsule'), ShapeNode('a','mirror','box'),
+        for node in (ShapeNode('a','add','capsule',{'width_world':.8,'height_world':.2}), ShapeNode('a','mirror','box'),
                      ShapeNode('a','add','box',children=('child',))):
             program = ShapeProgram('shape-program-v1','p',(node,))
             self.assertTrue(validate_compilable_program(program))
             with self.assertRaisesRegex(ValueError,'cannot compile'):
                 compile_shape_program(program)
+        capsule = ShapeProgram('shape-program-v1','cap',(ShapeNode('a','add','capsule'),))
+        self.assertEqual(validate_compilable_program(capsule),())
         good = ShapeProgram('shape-program-v1','p',(ShapeNode('a','add','box'),ShapeNode('b','subtract','sphere')))
         self.assertEqual(validate_compilable_program(good),())
 

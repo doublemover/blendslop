@@ -60,3 +60,39 @@ class NativeQualityEditingTests(unittest.TestCase):
         self.assertGreater(np.ptp(arrays[2].vertices[:, 0]), np.ptp(arrays[0].vertices[:, 0]))
         self.assertAlmostEqual(arrays[3].vertices[:, 2].max(), .336, places=6)
         self.assertAlmostEqual(arrays[3].vertices[:, 2].min(), -.144, places=6)
+
+
+    def test_compound_reference_keeps_authored_world_coordinates_and_live_edits(self):
+        from synthetic.quality_contracts import quality_workload
+        from synthetic.quality_references import build_quality_reference, quality_feature_verdict
+        for case in quality_workload()["cases"]:
+            if case["name"] not in {"concave_arch", "asymmetric_multipart_solid"}:
+                continue
+            reference = build_quality_reference(case)
+            before = evaluated_arrays(reference.object)
+            self.assertEqual(quality_feature_verdict(case["name"], before)["status"], "passed")
+            part = reference.sources[1]
+            location = part.location.copy()
+            part.location.z += .1
+            bpy.context.view_layer.update()
+            self.assertNotEqual(evaluated_arrays(reference.object).content_hash, before.content_hash)
+            part.location = location
+            bpy.context.view_layer.update()
+            self.assertEqual(evaluated_arrays(reference.object).content_hash, before.content_hash)
+
+
+    def test_capsule_compiler_and_synthetic_builder_are_closed(self):
+        from synthetic.quality_contracts import quality_workload
+        from synthetic.quality_references import build_quality_reference
+        from reconstruction.grouped_solids import solid_guard
+        case = next(r for r in quality_workload()["cases"] if r["name"] == "capsule")
+        obj = build_quality_reference(case).object
+        data = evaluated_arrays(obj)
+        guard = solid_guard(data)
+        self.assertTrue(guard["valid_solid"], guard)
+        self.assertEqual(guard["geometric_degenerate_faces"], 0)
+        self.assertEqual(guard["non_manifold_edges"], 0)
+        self.assertAlmostEqual(np.ptp(data.vertices[:, 2]), 2., places=6)
+        node = ShapeNode("capsule", "add", "capsule", {"width_world": .8, "height_world": 2.})
+        compiled = compile_shape_program(ShapeProgram("1", "cap", (node,)), weighted_normals=False)
+        self.assertTrue(solid_guard(evaluated_arrays(compiled.root_object))["valid_solid"])

@@ -154,7 +154,7 @@ def validate_shape_program(program: ShapeProgram) -> tuple[str, ...]:
 
 
 
-COMPILED_PRIMITIVE_TYPES = PRIMITIVE_TYPES - {"capsule"}
+COMPILED_PRIMITIVE_TYPES = PRIMITIVE_TYPES.copy()
 COMPILED_OPERATIONS = {"add", "union", "subtract", "difference", "intersect", "intersection"}
 
 
@@ -168,6 +168,12 @@ def validate_compilable_program(program: ShapeProgram) -> tuple[str, ...]:
             errors.append(f"unsupported compiler primitive {node.primitive_type!r} on {node.node_id}")
         if node.children:
             errors.append(f"unsupported compiler child references on {node.node_id}: {node.children!r}")
+        if node.primitive_type == "capsule":
+            try:
+                from .capsule import CapsulePrimitive
+                CapsulePrimitive.from_program_parameters(node.parameters)
+            except Exception as exc:
+                errors.append(f"invalid capsule on {node.node_id}: {exc}")
         if node.primitive_type == "rounded_triangle":
             try:
                 from .rounded_triangle import RoundedTrianglePrimitive

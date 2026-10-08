@@ -17,7 +17,11 @@ def whole_program_geometry(program, *, resolution=16):
     center = position_vector(params)
     sizes = np.asarray([params.get(k, 1.) for k in DIMENSION_KEYS], float)
     frame = rotation_matrix(params)
-    if node.primitive_type == "rounded_triangle":
+    if node.primitive_type == "capsule":
+        from primitives.capsule import CapsulePrimitive
+        mesh = CapsulePrimitive.from_program_parameters(params).to_mesh_data(resolution)
+        vertices, faces = mesh.vertices, mesh.faces
+    elif node.primitive_type == "rounded_triangle":
         from primitives.rounded_triangle import RoundedTrianglePrimitive
         mesh = RoundedTrianglePrimitive.from_program_parameters(params).to_mesh_data(resolution)
         vertices, faces = mesh.vertices, mesh.faces
