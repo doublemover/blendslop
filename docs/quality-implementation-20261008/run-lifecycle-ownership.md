@@ -1,0 +1,18 @@
+# RUN-CLEANUP1 ownership design and read-only first stage
+
+The implementation remains opt-in preparation. No deletion executor exists and no existing run has been adopted, reclaimed or swept. User outputs and shared caches have no implicit disposable classification.
+
+| Producer | Ownership boundary | Retain | Proposed disposable work |
+| --- | --- | --- | --- |
+| `reconstruction/types.py:526` candidate artifact roots | One candidate below its declared run root | Selected mesh, program, configuration, source hashes and concise result | Unselected candidate intermediate arrays only after explicit registration and completed child joins |
+| `reconstruction/differentiable/helper_session.py:28` numeric worker directory | One helper session with one lease | Command/version/error/log tail and result pointer | Transport arrays, temporary worker files after the worker is joined |
+| `reconstruction/native_qualification.py:93` helper temporary directory | One qualification invocation | Geometry identity, raw boundary verdict and helper error | Numeric transport copies after helper exit |
+| `refinement_lab/runner.py:1062` and `:1196` candidate outputs/logs | One variant beneath a run | Selected exports, plan, metrics, failures and capped log tails | Unselected scratch meshes and bulky full logs after final report promotion |
+| `scripts/run_quality_refinement_smoke.py:1017` phase execution | One declared run and owned phase children | Recipe, summary, source/environment hashes and error tails | Registered phase scratch after all owned children finish |
+| `e2e/validator.py:206` native render/test outputs | One new test run below declared output root | Required masks/renders, evaluated mesh, result and debugging summary | Explicitly registered transient render intermediates; existing retained validation evidence stays outside adoption |
+
+Each new run should have `run-ownership.json` (schema version, resolved root, unique run ID, owner token, state, registered artifact relative paths, categories, SHA256 and byte counts) and `run-lease.json` (matching ID/token, active or released state). Categories are final output, diagnostic, disposable and shared-input pointer. Shared assets stay outside the run; only pointers/hashes are registered within it. Producers reserve scratch bytes before writing; promotion of selected outputs is atomic and precedes lease release. On failure/cancel, diagnostics retain the original computation error separately from cleanup errors.
+
+`utils/run_ownership.py:plan_run_reclamation` implements read-only inspection. It refuses active/unknown/mismatched leases, crashed states, missing manifests, path escapes, links/junctions, duplicate/control-file records, changed bytes/hashes, unknown categories and unknown files. It verifies at most 256 MiB total file content, 1 MiB manifest, 64 KiB lease, 4096 records and 8192 inventory entries/32 levels. These are inspection bounds, not deletion or retention policy. The returned eligible byte count is advisory only; `mutation_supported` is always false. A future executor must recheck lease identity, resolved paths and content immediately before each file mutation and retain locked-file leftovers without ACL changes.
+
+The initial 256 MiB/failure and 2 GiB total diagnostic proposals remain unadopted pending real producer byte inventories. Crash recovery needs an explicit ownership/lease identity protocol, not PID disappearance alone. Success/failure/cancel/crash, interrupted promotion, concurrent leases and locked Windows files need lifecycle integration fixtures before introducing reclamation. Historical artifacts require a separately approved scoped cleanup action. The focused inspector tests do not certify a deletion implementation.

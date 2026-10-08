@@ -1,0 +1,30 @@
+{
+  "mode": "read_only",
+  "mutation_supported": false,
+  "inspector_tests": {
+    "run": 6,
+    "passed": 5,
+    "skipped": 1,
+    "skip_reason": "host symlink creation privilege unavailable; no privilege change attempted"
+  },
+  "historical_run_inspection": {
+    "protocol": "run-ownership-dry-run-v1",
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\local-validation-20261007\\source\\temp\\e2e",
+    "mode": "read_only",
+    "status": "blocked",
+    "mutation_supported": false,
+    "eligible": [],
+    "eligible_bytes": 0,
+    "retained_bytes": 0,
+    "blockers": [
+      "[WinError 2] The system cannot find the file specified: 'C:\\\\Users\\\\sneak\\\\Development\\\\blendslop\\\\temp\\\\tasks\\\\local-validation-20261007\\\\source\\\\temp\\\\e2e\\\\run-ownership.json'"
+    ],
+    "unknown_files": []
+  },
+  "source_sha256": {
+    "blender_blocking/utils/run_ownership.py": "fcf3a88f7c27b3c096c92602b8166442b99f4d7779f75632ea12600aaf312e8a",
+    "blender_blocking/test_run_ownership.py": "2f274bc29ad8f0fd791ea7ab3b46b21d598340dfcfa811b437426bb116f68f00"
+  },
+  "producer_adoption": "planned; existing retained runs were not adopted",
+  "deletion_performed": false
+}
