@@ -1,0 +1,289 @@
+{
+  "$schema": "./quality_perf_budget.schema.json",
+  "schema_version": "quality_perf_budget_v1",
+  "name": "quality-smoke",
+  "description": "Loose local/CI smoke budgets for e2e synthetic rows and short pure-Python benchmark cases.",
+  "thresholds": [
+    {
+      "id": "e2e.synthetic.rows.pass",
+      "artifact": "e2e",
+      "metric": "metrics.passed",
+      "mode": "min",
+      "threshold": 1.0,
+      "required": true,
+      "description": "Every synthetic matrix row must pass or be an allowed skip."
+    },
+    {
+      "id": "e2e.synthetic.render_iou.floor",
+      "artifact": "e2e",
+      "metric": "metrics.average_iou",
+      "mode": "min",
+      "threshold": 0.55,
+      "required": false,
+      "description": "Renderable mesh rows with IoU output should stay above the smoke floor."
+    },
+    {
+      "id": "e2e.visual_hull.min_iou.floor",
+      "artifact": "e2e",
+      "mode": "visual_hull_voxel",
+      "metric": "metrics.area_iou_min",
+      "threshold": 0.94,
+      "required": true,
+      "allow_missing": true,
+      "description": "Visual hull is the geometric baseline and should retain strong required-view overlap when present."
+    },
+    {
+      "id": "e2e.visual_hull.boundary.floor",
+      "artifact": "e2e",
+      "mode": "visual_hull_voxel",
+      "metric": "metrics.boundary_iou_mean",
+      "threshold": 0.7,
+      "required": true,
+      "allow_missing": true,
+      "description": "Visual hull boundary refinement should preserve thin/detail contours instead of only area overlap."
+    },
+    {
+      "id": "e2e.gaussian.min_iou.floor",
+      "artifact": "e2e",
+      "mode": "gaussian_ellipsoid_proxy",
+      "metric": "metrics.area_iou_min",
+      "threshold": 0.94,
+      "required": true,
+      "allow_missing": true,
+      "description": "Gaussian/ellipsoid proxy should keep its strong IoU/throughput baseline when present."
+    },
+    {
+      "id": "e2e.gaussian.topology.floor",
+      "artifact": "e2e",
+      "mode": "gaussian_ellipsoid_proxy",
+      "metric": "metrics.topology_score",
+      "threshold": 0.75,
+      "required": true,
+      "allow_missing": true,
+      "description": "Gaussian/ellipsoid proxy must expose usable editable topology or an equivalent editable primitive-set topology score."
+    },
+    {
+      "id": "e2e.primitive.min_iou.floor",
+      "artifact": "e2e",
+      "mode": "primitive_fit_refine",
+      "metric": "metrics.area_iou_min",
+      "threshold": 0.65,
+      "required": true,
+      "allow_missing": true,
+      "description": "Primitive fitting cannot pass by status alone; it must clear a real silhouette floor."
+    },
+    {
+      "id": "e2e.primitive.elapsed.max",
+      "artifact": "e2e",
+      "mode": "primitive_fit_refine",
+      "metric": "metrics.elapsed_s",
+      "threshold_mode": "max",
+      "threshold": 25.0,
+      "required": true,
+      "allow_missing": true,
+      "description": "Primitive fitting should be bounded enough for iterative quality work."
+    },
+    {
+      "id": "e2e.differentiable.min_iou.floor",
+      "artifact": "e2e",
+      "mode": "differentiable_refine",
+      "metric": "metrics.area_iou_min",
+      "threshold": 0.65,
+      "required": true,
+      "allow_missing": true,
+      "description": "Differentiable refinement should improve beyond broad-overlap weak candidates."
+    },
+    {
+      "id": "e2e.differentiable.boundary.floor",
+      "artifact": "e2e",
+      "mode": "differentiable_refine",
+      "metric": "metrics.boundary_iou_mean",
+      "threshold": 0.25,
+      "required": true,
+      "allow_missing": true,
+      "description": "Differentiable refinement is specifically expected to improve boundary fit."
+    },
+    {
+      "id": "bench.canonicalize.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "canonicalize_mask",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 100.0,
+      "required": true
+    },
+    {
+      "id": "bench.compare.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "compare_silhouettes",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 120.0,
+      "required": true
+    },
+    {
+      "id": "bench.extract.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "extract_binary_silhouette",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 60.0,
+      "required": true
+    },
+    {
+      "id": "bench.pipeline.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "silhouette_pipeline",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 250.0,
+      "required": true
+    },
+    {
+      "id": "bench.volume_surface.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "volume_surface_vectorized",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 250.0,
+      "required": true
+    },
+    {
+      "id": "bench.target_builder.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "target_builder",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 250.0,
+      "required": true
+    },
+    {
+      "id": "bench.geometry_metrics.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "geometry_metrics",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 250.0,
+      "required": true
+    },
+    {
+      "id": "bench.shape_program_build.max_ms",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "name": "shape_program_build",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max",
+      "threshold": 120.0,
+      "required": true
+    },
+    {
+      "id": "evaluation.editability.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.editability.editable_reconstruction_index",
+      "mode": "min",
+      "threshold": 0.5,
+      "required": false,
+      "description": "When evaluation bundles are provided, editable Blender output should clear a loose smoke floor."
+    },
+    {
+      "id": "evaluation.silhouette.min_view_iou.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.min_view_iou",
+      "mode": "min",
+      "threshold": 0.55,
+      "required": false,
+      "description": "Required-view area IoU smoke floor; catches missing or badly aligned reference views."
+    },
+    {
+      "id": "evaluation.silhouette.boundary.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_boundary_iou",
+      "mode": "min",
+      "threshold": 0.35,
+      "required": false,
+      "description": "Boundary IoU smoke floor; catches blobby boundaries that area IoU can hide."
+    },
+    {
+      "id": "evaluation.silhouette.sdf.max",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.mean_signed_distance_loss",
+      "mode": "max",
+      "threshold": 0.35,
+      "required": false,
+      "description": "Signed-distance silhouette loss smoke ceiling."
+    },
+    {
+      "id": "evaluation.silhouette.missing_required.max",
+      "artifact": "evaluation",
+      "metric": "metrics.silhouette.missing_required_metric_count",
+      "mode": "max",
+      "threshold": 0.0,
+      "required": false,
+      "description": "Backends should not omit required per-view Boundary IoU or signed-distance loss fields."
+    },
+    {
+      "id": "evaluation.visual_hull.catastrophic_view.max",
+      "artifact": "evaluation",
+      "metric": "metrics.diagnostics.visual_hull.catastrophic_view_failure",
+      "mode": "max",
+      "threshold": 0.0,
+      "required": false,
+      "description": "Visual-hull candidates should not hide catastrophic per-view projection collapse."
+    },
+    {
+      "id": "e2e.synthetic.true_chamfer_l1.smoke",
+      "artifact": "e2e",
+      "metric": "metrics.synthetic_geometry_true_chamfer_l1",
+      "mode": "max",
+      "threshold": 0.35,
+      "required": false,
+      "description": "Analytic synthetic rows with mesh artifacts should expose true-geometry Chamfer L1 and stay within a loose smoke ceiling."
+    },
+    {
+      "id": "evaluation.geometry.recoverable_fscore.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.geometry.recoverable.fscore_tau",
+      "mode": "min",
+      "threshold": 0.55,
+      "required": false,
+      "description": "When recoverability evidence exists, surface fit to the silhouette-recoverable envelope should clear the smoke floor."
+    },
+    {
+      "id": "evaluation.export_qa.floor",
+      "artifact": "evaluation",
+      "metric": "metrics.export.qa_score",
+      "mode": "min",
+      "threshold": 0.6,
+      "required": false,
+      "description": "When export QA evidence is present, the asset round-trip score should not be empty or failing."
+    }
+  ],
+  "comparisons": [
+    {
+      "id": "bench.quality_smoke.per_iter.regression_pct",
+      "artifact": "benchmark",
+      "case": "quality-smoke",
+      "metric": "metrics.per_iter_ms",
+      "mode": "max_percent_increase",
+      "threshold": 25.0,
+      "required": false,
+      "description": "Any matching benchmark may slow down by at most 25 percent versus baseline before warning/failing when regression gating is enabled."
+    },
+    {
+      "id": "e2e.synthetic.iou.regression_abs",
+      "artifact": "e2e",
+      "metric": "metrics.average_iou",
+      "mode": "max_absolute_decrease",
+      "threshold": 0.03,
+      "required": false,
+      "description": "Renderable synthetic IoU should not drop by more than 0.03 versus baseline."
+    }
+  ]
+}

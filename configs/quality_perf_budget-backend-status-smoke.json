@@ -1,0 +1,53 @@
+{
+  "name": "backend-status-quality-smoke",
+  "schema_version": "quality_perf_budget_v1",
+  "thresholds": [
+    {
+      "artifact": "e2e",
+      "id": "e2e.synthetic.rows.pass",
+      "metric": "metrics.passed",
+      "mode": "*",
+      "operator": "min",
+      "required": true,
+      "threshold": 1.0
+    },
+    {
+      "artifact": "e2e",
+      "id": "e2e.backend.min_iou.floor",
+      "metric": "metrics.backend.area_iou_min",
+      "mode": "*",
+      "operator": "min",
+      "required": false,
+      "threshold": 0.35
+    },
+    {
+      "artifact": "e2e",
+      "id": "e2e.backend.boundary.floor",
+      "metric": "metrics.backend.boundary_iou_mean",
+      "mode": "*",
+      "operator": "min",
+      "required": false,
+      "threshold": 0.25
+    },
+    {
+      "artifact": "e2e",
+      "id": "e2e.cost.total_wall.max",
+      "metric": "metrics.cost.total_wall_ms",
+      "mode": "*",
+      "operator": "max",
+      "required": false,
+      "threshold": 60000.0
+    }
+  ],
+  "comparisons": [
+    {
+      "artifact": "e2e",
+      "id": "e2e.backend.iou.regression_abs",
+      "metric": "metrics.backend.area_iou_min",
+      "mode": "*",
+      "operator": "max_absolute_decrease",
+      "required": false,
+      "threshold": 0.05
+    }
+  ]
+}

@@ -6,46 +6,35 @@ on:
     paths:
       - 'blender_blocking/**'
       - '.github/workflows/blender-tests.yml'
+      - '.github/actions/setup-blender/**'
+      - '.github/ci/setup-blender.sh'
   pull_request:
     branches: [ main ]
     paths:
       - 'blender_blocking/**'
+      - '.github/workflows/blender-tests.yml'
+      - '.github/actions/setup-blender/**'
+      - '.github/ci/setup-blender.sh'
 
 jobs:
   test-blender-5:
     name: Test with Blender 5.0
-    runs-on: ubuntu-latest
-    container:
-      image: nytimes/blender:5.0-cpu-ubuntu22.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify Blender version
-        run: |
-          blender --version
-          blender --background --python-expr "import sys; print(f'Python: {sys.version}')"
-
-      - name: Install Python dependencies in Blender
-        run: |
-          # Find Blender's Python executable
-          BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*' | head -1)
-          echo "Blender Python: $BLENDER_PYTHON"
-
-          # Verify pip is available
-          $BLENDER_PYTHON -m pip --version
-
-          # Install dependencies
-          $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
-
-          # Verify installation
-          $BLENDER_PYTHON -c "import numpy, cv2, PIL, scipy; print('Dependencies installed')"
+      - name: Setup Blender
+        uses: ./.github/actions/setup-blender
+        with:
+          version: '5.0.0'
 
       - name: Run test suite
         run: |
           cd blender_blocking
-          blender --background --python test_runner.py
+          xvfb-run -a blender --background --factory-startup --python-exit-code 1 --python test_runner.py
 
       - name: Upload test logs on failure
         if: failure()
@@ -59,30 +48,22 @@ jobs:
 
   test-blender-4:
     name: Test with Blender 4.2 (LTS)
-    runs-on: ubuntu-latest
-    container:
-      image: nytimes/blender:4.2-cpu-ubuntu22.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify Blender version
-        run: |
-          blender --version
-          blender --background --python-expr "import sys; print(f'Python: {sys.version}')"
-
-      - name: Install Python dependencies in Blender
-        run: |
-          BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*' | head -1)
-          echo "Blender Python: $BLENDER_PYTHON"
-          $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
-          $BLENDER_PYTHON -c "import numpy, cv2, PIL, scipy; print('Dependencies installed')"
+      - name: Setup Blender
+        uses: ./.github/actions/setup-blender
+        with:
+          version: '4.2.0'
 
       - name: Run test suite
         run: |
           cd blender_blocking
-          blender --background --python test_runner.py
+          xvfb-run -a blender --background --factory-startup --python-exit-code 1 --python test_runner.py
 
       - name: Upload test logs on failure
         if: failure()
@@ -96,20 +77,19 @@ jobs:
 
   quick-check:
     name: Quick smoke test (pre-merge)
-    runs-on: ubuntu-latest
-    container:
-      image: nytimes/blender:5.0-cpu-ubuntu22.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*' | head -1)
-          $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+      - name: Setup Blender
+        uses: ./.github/actions/setup-blender
+        with:
+          version: '5.0.0'
 
       - name: Run quick tests
         run: |
           cd blender_blocking
-          blender --background --python test_runner.py -- --quick
+          xvfb-run -a blender --background --factory-startup --python-exit-code 1 --python test_runner.py -- --quick

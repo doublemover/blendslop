@@ -21,6 +21,14 @@ Exit codes:
 - `1`: One or more tests failed
 - `2`: Test runner error (not running in Blender, etc.)
 
+Pure-Python refinement lab coverage is included in the pure phase:
+
+```bash
+python blender_blocking/test_runner.py --phase pure --no-progress
+```
+
+Full refinement sweeps are intentionally not part of default CI because they generate reports, renders, and per-variant artifacts. Keep those under ignored `temp/refinement-runs/` and upload them only as ad hoc diagnostic artifacts when a workflow explicitly asks for them.
+
 ## GitHub Actions Workflow
 
 Create `.github/workflows/blender-tests.yml`:
@@ -57,7 +65,7 @@ jobs:
           echo "Blender Python: $BLENDER_PYTHON"
 
           # Install dependencies
-          $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+          $BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
 
       - name: Run tests
         run: |
@@ -87,7 +95,7 @@ jobs:
         run: |
           BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*')
           echo "Blender Python: $BLENDER_PYTHON"
-          $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+          $BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
 
       - name: Run tests
         run: |
@@ -121,7 +129,7 @@ test:blender-5:
   before_script:
     - BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*')
     - echo "Installing dependencies in Blender Python $BLENDER_PYTHON"
-    - $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+    - $BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
   script:
     - cd blender_blocking
     - blender --background --python test_runner.py
@@ -140,7 +148,7 @@ test:blender-4:
   image: "nytimes/blender:4.2-cpu-ubuntu22.04"
   before_script:
     - BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*')
-    - $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+    - $BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
   script:
     - cd blender_blocking
     - blender --background --python test_runner.py
@@ -177,7 +185,7 @@ docker run --rm \
   nytimes/blender:5.0-cpu-ubuntu22.04 \
   bash -c "
     BLENDER_PYTHON=\$(blender --background --python-expr 'import sys; print(sys.executable)' 2>&1 | grep -oP '/[^ ]+python[0-9.]*')
-    \$BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+    \$BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
     blender --background --python test_runner.py
   "
 ```
@@ -191,7 +199,7 @@ FROM nytimes/blender:5.0-cpu-ubuntu22.04
 
 # Install Python dependencies
 RUN BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*') && \
-    $BLENDER_PYTHON -m pip install numpy opencv-python Pillow scipy
+    $BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
 
 # Set working directory
 WORKDIR /workspace
@@ -218,6 +226,40 @@ Test against multiple Blender versions to catch compatibility issues early:
 | 3.6 | 3.10 | EOL | Drop support |
 
 **Recommendation**: Test against current + previous LTS release minimum.
+
+## Optional Refinement Diagnostics Job
+
+Use this only for manual workflow dispatch or a failing reconstruction branch. It runs one small refinement smoke and uploads the ignored run root for inspection:
+
+```yaml
+  refinement-smoke:
+    name: Refinement lab smoke
+    runs-on: ubuntu-latest
+    container:
+      image: nytimes/blender:5.0-cpu-ubuntu22.04
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies in Blender Python
+        run: |
+          BLENDER_PYTHON=$(blender --background --python-expr "import sys; print(sys.executable)" 2>&1 | grep -oP '/[^ ]+python[0-9.]*')
+          $BLENDER_PYTHON -m pip install -r blender_blocking/requirements.txt
+      - name: Run refinement smoke
+        run: |
+          blender --background --python blender_blocking/test_e2e_validation.py -- \
+            --refinement-suite default-vase \
+            --refinement-track profile-loft-refinement \
+            --refinement-max-runs 1 \
+            --refinement-result-root temp/refinement-runs/ci-smoke-profile \
+            --refinement-html-report \
+            --no-progress
+      - name: Upload refinement artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: refinement-smoke
+          path: temp/refinement-runs/ci-smoke-profile
+```
 
 ## What Tests Must Verify
 
@@ -296,7 +338,7 @@ chmod +x .git/hooks/pre-commit
 python3 -m ensurepip --default-pip
 
 # Or use system pip with target
-pip install --target=/path/to/blender/python/lib numpy opencv-python Pillow scipy
+pip install --target=/path/to/blender/python/lib -r blender_blocking/requirements.txt
 ```
 
 ### Tests timeout in CI

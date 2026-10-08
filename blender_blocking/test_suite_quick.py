@@ -59,7 +59,7 @@ def main() -> None:
             )
 
     # Save results
-    results_path = Path("test_output/suite/quick_test_results.json")
+    results_path = Path(__file__).resolve().parents[1] / "temp" / "suite" / "quick_test_results.json"
     results_path.parent.mkdir(parents=True, exist_ok=True)
     with open(results_path, "w") as f:
         json.dump(all_results, f, indent=2)

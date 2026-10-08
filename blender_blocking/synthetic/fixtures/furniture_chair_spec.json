@@ -1,0 +1,127 @@
+{
+  "expected_failure_modes": [
+    "silhouette_ambiguity",
+    "thin_leg_loss",
+    "internal_overlap",
+    "non_manifold_risk"
+  ],
+  "family": "furniture",
+  "generator_version": "synthetic-shape-factory-v1",
+  "intended_challenges": [
+    "multi_part",
+    "thin_supports"
+  ],
+  "known_dimensions": {
+    "depth": 1.2,
+    "height": 1.6,
+    "width": 2.0
+  },
+  "materials": {
+    "base_color": [
+      0.24,
+      0.24,
+      0.24,
+      1.0
+    ]
+  },
+  "parameters": {
+    "blockout_kind": "chair",
+    "boolean_intent": "union",
+    "parts": [
+      {
+        "center": [
+          0,
+          0,
+          0.55
+        ],
+        "name": "seat",
+        "size": [
+          1.0,
+          1.0,
+          0.14
+        ],
+        "type": "box"
+      },
+      {
+        "center": [
+          0,
+          -0.45,
+          1.05
+        ],
+        "name": "back",
+        "size": [
+          1.0,
+          0.12,
+          1.0
+        ],
+        "type": "box"
+      },
+      {
+        "center": [
+          -0.38,
+          -0.38,
+          0.28
+        ],
+        "height": 0.55,
+        "name": "leg_-0.38_-0.38",
+        "radius": 0.0372,
+        "type": "cylinder"
+      },
+      {
+        "center": [
+          -0.38,
+          0.38,
+          0.28
+        ],
+        "height": 0.55,
+        "name": "leg_-0.38_0.38",
+        "radius": 0.0372,
+        "type": "cylinder"
+      },
+      {
+        "center": [
+          0.38,
+          -0.38,
+          0.28
+        ],
+        "height": 0.55,
+        "name": "leg_0.38_-0.38",
+        "radius": 0.0372,
+        "type": "cylinder"
+      },
+      {
+        "center": [
+          0.38,
+          0.38,
+          0.28
+        ],
+        "height": 0.55,
+        "name": "leg_0.38_0.38",
+        "radius": 0.0372,
+        "type": "cylinder"
+      }
+    ]
+  },
+  "seed": 0,
+  "shape_id": "chair_fixture_seed_0000",
+  "symmetry": [
+    "bilateral"
+  ],
+  "transforms": {
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation_deg": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  }
+}

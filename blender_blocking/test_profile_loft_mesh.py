@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import math
+import json
+import sys
 import unittest
+from pathlib import Path
 
 import bpy
 import bmesh
+
+sys.path.insert(0, str(Path(__file__).parent))
 
 from geometry.profile_models import EllipticalSlice
 from integration.blender_ops.profile_loft_mesh import create_loft_mesh_from_slices
@@ -31,6 +36,39 @@ def _bounds_for_object(
 
 
 class TestProfileLoftMesh(unittest.TestCase):
+    def test_surface_modes_are_connected_and_keep_flat_caps(self) -> None:
+        slices = [EllipticalSlice(z=z, rx=r, ry=r)
+                  for z, r in ((0.0, 1.0), (1.0, .6), (2.0, 1.0))]
+        for mode in ("smooth", "stepped", "sharp"):
+            with self.subTest(mode=mode):
+                _clear_scene()
+                obj = create_loft_mesh_from_slices(slices, radial_segments=48,
+                                                  surface_mode=mode)
+                bm = bmesh.new()
+                bm.from_mesh(obj.data)
+                self.assertFalse([edge for edge in bm.edges if not edge.is_manifold])
+                bm.verts.ensure_lookup_table()
+                seen = set()
+                pending = [bm.verts[0]]
+                while pending:
+                    vertex = pending.pop()
+                    if vertex in seen:
+                        continue
+                    seen.add(vertex)
+                    pending.extend(edge.other_vert(vertex) for edge in vertex.link_edges)
+                self.assertEqual(len(seen), len(bm.verts))
+                bm.free()
+                planar = [p for p in obj.data.polygons if
+                          max(obj.data.vertices[i].co.z for i in p.vertices) -
+                          min(obj.data.vertices[i].co.z for i in p.vertices) <= 1e-9]
+                self.assertTrue(planar)
+                self.assertFalse(any(p.use_smooth for p in planar))
+                if mode == "sharp":
+                    self.assertFalse(any(p.use_smooth for p in obj.data.polygons))
+                else:
+                    self.assertTrue(any(p.use_smooth for p in obj.data.polygons))
+                self.assertEqual(json.loads(obj["loft_metadata_json"])["surface_mode"], mode)
+
     def test_loft_cylinder_bounds(self) -> None:
         _clear_scene()
         slices = [
@@ -106,4 +144,4 @@ class TestProfileLoftMesh(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(argv=[__file__])

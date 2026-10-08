@@ -1,0 +1,27 @@
+{
+  "expected_failure_modes": [
+    "silhouette_ambiguity"
+  ],
+  "family": "adversarial_silhouette",
+  "generator_version": "synthetic-shape-factory-v1",
+  "intended_challenges": [
+    "profile_bands"
+  ],
+  "known_dimensions": {
+    "canvas_height": 256.0,
+    "canvas_width": 256.0
+  },
+  "materials": {},
+  "parameters": {
+    "mask_kind": "checkerboard_breakup",
+    "polarity": "dark_on_light",
+    "resolution": [
+      256,
+      256
+    ]
+  },
+  "seed": 0,
+  "shape_id": "checkerboard_breakup_fixture_seed_0000",
+  "symmetry": [],
+  "transforms": {}
+}

@@ -1,0 +1,43 @@
+{
+  "reconstruction": {
+    "reconstruction_mode": "legacy",
+    "num_slices": 80,
+    "unit_scale": 0.01
+  },
+  "render_silhouette": {
+    "resolution": [384, 384],
+    "engine": "BLENDER_EEVEE",
+    "transparent_bg": true,
+    "samples": 1,
+    "margin_frac": 0.08,
+    "color_mode": "RGBA",
+    "force_material": false,
+    "background_color": [1.0, 1.0, 1.0, 1.0],
+    "silhouette_color": [0.0, 0.0, 0.0, 1.0],
+    "camera_distance_factor": 2.0,
+    "party_mode": false
+  },
+  "canonicalize": {
+    "output_size": 256,
+    "padding_frac": 0.1,
+    "anchor": "bottom_center",
+    "interp": "nearest",
+    "use_cache": true,
+    "digest_algorithm": "sha256",
+    "fill_holes": true,
+    "largest_component_only": true
+  },
+  "synthetic_factory": {
+    "suite": "smoke",
+    "seed": 1234,
+    "output_root": "temp/quality-smoke/synthetic",
+    "commit_small_fixtures_only": true,
+    "keep_heavy_artifacts": false
+  },
+  "quality_budget": {
+    "budget_json": "configs/quality_perf_budget-smoke.json",
+    "compare_baseline": null,
+    "fail_on_regression": false,
+    "environment_compatibility": "warn"
+  }
+}

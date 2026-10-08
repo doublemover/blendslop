@@ -1,0 +1,350 @@
+{
+  "protocol": "quality-coverage-references-v1",
+  "status": "prepared_unmeasured",
+  "units": "Blender world units; no independent centering, scaling or alignment",
+  "seed": 61007,
+  "sample_count_per_direction": 4096,
+  "normal_orientation": "oriented geometric triangle normals; no absolute-dot flip allowance",
+  "seams": "caps and authored corners retained; area samples omit measure-zero edges only",
+  "resolution": [
+    512,
+    512
+  ],
+  "camera_projection": "orthographic, shared reference frame",
+  "views": [
+    "front",
+    "side",
+    "top",
+    "oblique_35_28",
+    "oblique_145_40"
+  ],
+  "oblique_degrees": [
+    [
+      35,
+      28
+    ],
+    [
+      145,
+      40
+    ]
+  ],
+  "limits": {
+    "timeout_seconds": 1200,
+    "max_rss_bytes": 8589934592,
+    "required_cases": 12
+  },
+  "dependencies": [
+    "Blender native Python",
+    "NumPy",
+    "SciPy",
+    "Pillow",
+    "OpenCV"
+  ],
+  "held_out_before_tuning": [
+    "torus",
+    "thin_plate",
+    "concave_arch",
+    "asymmetric_multipart_solid",
+    "rounded_triangle_dot"
+  ],
+  "contracts": {
+    "existing_silhouette_gates": "unchanged; require each existing area, boundary and signed-distance gate",
+    "surface": {
+      "symmetric_mean_distance_world_max": 0.003,
+      "normal_angle_p95_degrees_max": 2.5,
+      "scope": "smooth-vase analytic contract only; other families require independent tessellation/noise qualification before acceptance",
+      "derivation": "vase max r=.8, 192 radial sectors: chord error <=.8*(1-cos(pi/192))=.000108; 65 input sections over2.6 and |r''|<=.2*(2*pi/2.6)^2 yield linear section error <=.000247; directional face-normal discretization <=sqrt(.9375^2+1.36^2) degrees. Budgets include declared approximation allowance, not candidate measurements"
+    },
+    "rounded_triangle": {
+      "support_directions": 24,
+      "support_distance_world_max": 0.005,
+      "thickness_world_error_max": 0.005,
+      "surface_status": "requires reference tessellation/noise qualification"
+    },
+    "topology": "one closed oriented component for each required solid; cavities/features are separate gates",
+    "editability": "explicit artist-edit response receipt required; absence is blocked",
+    "aggregate": "any required-case failure or unavailable required metric blocks acceptance"
+  },
+  "cases": [
+    {
+      "name": "sphere",
+      "parameters": {
+        "primitive": "sphere",
+        "radius": 0.8
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "anisotropic_ellipsoid",
+      "parameters": {
+        "primitive": "ellipsoid",
+        "radii": [
+          0.9,
+          0.55,
+          0.7
+        ]
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "cylinder",
+      "parameters": {
+        "primitive": "cylinder",
+        "radius": 0.65,
+        "height": 1.6
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "tapered_frustum",
+      "parameters": {
+        "primitive": "frustum",
+        "radius_bottom": 0.8,
+        "radius_top": 0.35,
+        "height": 1.8
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "smooth_vase",
+      "parameters": {
+        "builder": "analytic_vase",
+        "height": 2.6,
+        "radius_mean": 0.6,
+        "radius_amplitude": 0.2
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "torus",
+      "parameters": {
+        "primitive": "torus",
+        "major_radius": 0.7,
+        "minor_radius": 0.22
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "capsule",
+      "parameters": {
+        "primitive": "capsule",
+        "radius": 0.4,
+        "segment_height": 1.2
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "rounded_box",
+      "parameters": {
+        "primitive": "rounded_box",
+        "dimensions": {
+          "width": 1.6,
+          "depth": 1.1,
+          "height": 1.3
+        },
+        "radius": 0.15
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "thin_plate",
+      "parameters": {
+        "primitive": "box",
+        "dimensions": {
+          "width": 1.6,
+          "depth": 0.08,
+          "height": 1.2
+        }
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "concave_arch",
+      "parameters": {
+        "builder": "compound",
+        "parts": [
+          {
+            "type": "box",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              1.8,
+              0.4,
+              1.8
+            ]
+          },
+          {
+            "type": "box",
+            "center": [
+              0,
+              0,
+              -0.3
+            ],
+            "size": [
+              1.0,
+              0.8,
+              1.4
+            ],
+            "boolean": "subtract"
+          }
+        ]
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "asymmetric_multipart_solid",
+      "parameters": {
+        "builder": "compound",
+        "parts": [
+          {
+            "type": "box",
+            "center": [
+              0,
+              0,
+              -0.25
+            ],
+            "size": [
+              1.6,
+              0.65,
+              0.5
+            ]
+          },
+          {
+            "type": "box",
+            "center": [
+              -0.4,
+              0.1,
+              0.4
+            ],
+            "size": [
+              0.45,
+              0.45,
+              1.1
+            ]
+          },
+          {
+            "type": "box",
+            "center": [
+              0.45,
+              -0.08,
+              0.12
+            ],
+            "size": [
+              0.35,
+              0.45,
+              0.65
+            ]
+          }
+        ]
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "rounded_triangle_dot",
+      "parameters": {
+        "builder": "rounded_triangle",
+        "vertices_xy": [
+          [
+            0,
+            0.9
+          ],
+          [
+            -0.7794228634059948,
+            -0.45
+          ],
+          [
+            0.7794228634059948,
+            -0.45
+          ]
+        ],
+        "corner_radius": 0.16,
+        "thickness": 0.48,
+        "dome": "z=+-thickness/2*cos(phi), outline_scale=sin(phi)",
+        "corner_segments": 32,
+        "dome_segments": 64
+      },
+      "status": "unmeasured"
+    }
+  ],
+  "execution_scope": "authored references, live object edits and three negative controls; no reconstruction pass implied",
+  "feature_contracts": {
+    "thin_plate": {
+      "depth_axis": 1,
+      "expected_depth_world": 0.08,
+      "max_error_world": 0.005
+    },
+    "concave_arch": {
+      "empty_points_world": [
+        [
+          0,
+          0,
+          -0.5
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "occupied_points_world": [
+        [
+          -0.7,
+          0,
+          0
+        ],
+        [
+          0.7,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0.7
+        ]
+      ]
+    },
+    "asymmetric_multipart_solid": {
+      "occupied_points_world": [
+        [
+          0,
+          0,
+          -0.25
+        ],
+        [
+          -0.4,
+          0.1,
+          0.8
+        ],
+        [
+          0.45,
+          -0.08,
+          0.35
+        ]
+      ]
+    }
+  },
+  "negative_controls": {
+    "incorrect_depth": {
+      "family": "thin_plate",
+      "depth_scale": 0.1
+    },
+    "filled_cavity": {
+      "family": "concave_arch",
+      "remove_subtract_modifier": true
+    },
+    "missing_multipart": {
+      "family": "asymmetric_multipart_solid",
+      "remove_union_modifiers": true
+    }
+  },
+  "silhouette_observation": {
+    "min_area_iou": 0.7,
+    "boundary_radius_px": 2,
+    "boundary_and_signed_distance": "measured; reconstruction thresholds must come from its declared config"
+  },
+  "edit_contract": "change source X scale by 1.05 and restore; compound upper part also edited independently"
+}

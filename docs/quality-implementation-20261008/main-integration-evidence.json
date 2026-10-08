@@ -1,0 +1,132 @@
+{
+  "adaptive_policy_checks": {
+    "config_validated": true,
+    "passed": 28,
+    "run": 28
+  },
+  "aggregate_visual_acceptance": false,
+  "ci_provisioning_repair": {
+    "adaptive_policy": "28 passed",
+    "local_runtime_changes": false,
+    "manifest_mirrors_identical": [
+      "RWTH Aachen",
+      "NLUUG"
+    ],
+    "scheduled_source_identity_unchanged": true,
+    "sha256": {
+      "4.2.0": "4f4fd7646af01f6fee9d420408318381a6e52571268eb7cf9cd5033bd9e7a359",
+      "5.0.0": "9de96e81432afba9c0a715c7233f1eff616705b75226dc5d0fa2708ddfb0e525"
+    },
+    "static_yaml_bash_source_guard_checks": "passed",
+    "target_releases": [
+      "5.0.0",
+      "4.2.0"
+    ],
+    "test_scope_reduced": false
+  },
+  "ci_regression_repairs": {
+    "local_installs": false,
+    "pure_checks": {
+      "errors": 0,
+      "failures": 0,
+      "modules": [
+        "test_runner_cli",
+        "test_deformed_superquadric",
+        "test_implicit_pipeline",
+        "test_pixel_projection",
+        "test_quality_geometry",
+        "test_quality_refinement_smoke"
+      ],
+      "passed": true,
+      "run": 99,
+      "skips": 0
+    },
+    "real_blender_cli": {
+      "blender": "5.2.2 LTS",
+      "checks": 6,
+      "default_launcher_argv_checked": true,
+      "headless": true,
+      "passed": true
+    },
+    "required_dependency_declared": "Shapely>=2.0.0,<3",
+    "runner_cli_tests_registered": true,
+    "shapely_existing_local_version": "2.1.1"
+  },
+  "common_base": "c5780fcb2847fcd43edbeb3ac8de63e3186db389",
+  "completed_candidate": "a86090ef57641ef3e3b026dde7d18d1e443f536a",
+  "cross_version_ci": {
+    "initial_head": "eb504186dfd851987f2b3b507abd255bcf86d3f8",
+    "initial_result": "failed before checkout; nonexistent Docker image tags; no tests ran",
+    "initial_run": 37845681445,
+    "provisioning_repair_failures": [
+      "both full jobs rejected Blender launcher flags before suites",
+      "quick: four geometry suites require undeclared Shapely 2.x",
+      "quick: one assertion hardcodes Windows path separators"
+    ],
+    "provisioning_repair_head": "74e4fe76e869262c97a7a77692b37d69395f09cd",
+    "provisioning_repair_run": 37846689811,
+    "provisioning_repair_setup": "all three jobs passed pinned archive/dependency setup",
+    "repair_result": "runner/dependency/platform fixes checked locally; final hosted CI pending at this checkpoint"
+  },
+  "environment_changes": false,
+  "full_candidate_commits_beyond_common_base": 155,
+  "integration_branch": "integration/main-completed-20261008",
+  "logs": {
+    "adaptive-policy.log": "79e4d6d07b925d0b390c49a1c51e90f7ae37dc1912818a550fe18848a83a3429",
+    "blender-4-ci.log": "646bbe08521fabab3ad22802bd589501b37357ac80d3169d2872985ff1dfdafe",
+    "blender-5-ci.log": "af8792408c933799a7a6b548087c9d8937ca688a8e1ff7fd858fda14304c5001",
+    "ci-regression-native.stderr.log": "3a1d80f08720120e749b506374a5fbf6314c7a20230419d0f97398cee35da5f1",
+    "ci-regression-native.stdout.log": "97d86596ebb4b251766e918c0d9bf06a43700c9dd1a14119b4f72d7659133d0c",
+    "ci-regression-pure.log": "2cb168270a8721edf62c5c6a8b78b4f261c12308e0133c382c4f26c94e09e451",
+    "quick-ci.log": "f649f72690726d0db0da8b636a9db3b2b9a8f49d9ef47f2ff1fe29da63aa9cf2",
+    "targeted-native.stderr.log": "da626a2143677026cc79d6020f10d68b39ecab26775d5ff4058e266b744a19e6",
+    "targeted-native.stdout.log": "97d86596ebb4b251766e918c0d9bf06a43700c9dd1a14119b4f72d7659133d0c",
+    "targeted-pure.log": "bf0bb01bdfb3caccf7e49061bba809b566f45d03f3629d7fb2c32a430c55e5e9"
+  },
+  "main_before": "5d13125ed26d4b53716578265a70b1269e03ca31",
+  "main_only_maintenance_files": "merge preserved all verbatim; subsequent shared CI provisioning repair retains cadence and immutable source guard",
+  "merge_conflicts": [],
+  "native_checks": {
+    "blender": "5.2.2 LTS",
+    "errors": 0,
+    "failures": 0,
+    "passed": true,
+    "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+    "run": 11,
+    "scope": "native artist edits and connected loft; no quality render or performance campaign",
+    "skips": 0
+  },
+  "new_render_or_performance_campaign": false,
+  "protocol": "main-integration-targeted-v1",
+  "pure_checks": {
+    "errors": 0,
+    "failures": 0,
+    "modules": [
+      "test_profile_regularization",
+      "test_loft_surface",
+      "test_rounded_triangle",
+      "test_capsule",
+      "test_run_ownership",
+      "test_exact_triangle_contacts",
+      "test_ray_box_filter",
+      "test_geometry_consistency",
+      "test_toolchain_identity_cache",
+      "test_corrective_recovery",
+      "test_oriented_support",
+      "test_program_pose_aliases",
+      "test_structural_routing"
+    ],
+    "passed": true,
+    "run": 108,
+    "skips": [
+      "test_linked_generated_path_cannot_adopt_external_file (test_run_ownership.RunOwnershipTests.test_linked_generated_path_cannot_adopt_external_file): host does not grant symlink creation"
+    ]
+  },
+  "quality_blockers": [
+    "calibrated vase oblique_145_40 boundary IoU 0.789001 below required 0.8",
+    "triangle reference noise/surface limits unqualified; both retained oblique frames clipped",
+    "full actual twelve-family reconstruction and independent family qualification incomplete",
+    "historical smooth intent remains ambiguous from scalloped ellipse-strip input",
+    "further producer adoption/promotion/crash/lock handling incomplete; no reclamation executor"
+  ]
+}

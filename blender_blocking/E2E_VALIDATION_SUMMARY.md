@@ -206,7 +206,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: failed-renders
-          path: blender_blocking/test_output/e2e_renders/
+          path: temp/e2e/renders/
 ```
 
 ## Benefits

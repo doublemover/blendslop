@@ -1,0 +1,480 @@
+"""Stage-level cost accounting for reconstruction and evaluation runs."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field, replace
+from time import perf_counter
+from typing import Any, Mapping
+import tracemalloc
+
+from .schemas import json_safe
+try:
+    from blender_blocking.metrics.values import optional_float as _optional_float
+except ImportError:  # pragma: no cover - script-style imports
+    from metrics.values import optional_float as _optional_float
+
+
+@dataclass(frozen=True)
+class StageCost:
+    stage: str
+    status: str
+    wall_ms: float
+    peak_memory_mb: float | None = None
+    work_units: Mapping[str, float] = field(default_factory=dict)
+    artifact_bytes: int = 0
+    notes: tuple[str, ...] = ()
+    inclusive_wall_ms: float | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "stage": self.stage,
+            "status": self.status,
+            "wall_ms": self.wall_ms,
+            "inclusive_wall_ms": self.inclusive_wall_ms,
+            "peak_memory_mb": self.peak_memory_mb,
+            "work_units": json_safe(self.work_units),
+            "artifact_bytes": self.artifact_bytes,
+            "notes": list(self.notes),
+        }
+
+
+@dataclass(frozen=True)
+class CacheCost:
+    namespace: str
+    hits: int = 0
+    misses: int = 0
+    entries: int = 0
+    bytes_stored: int = 0
+
+    @property
+    def hit_rate(self) -> float:
+        total = self.hits + self.misses
+        return float(self.hits / total) if total else 0.0
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "namespace": self.namespace,
+            "hits": self.hits,
+            "misses": self.misses,
+            "entries": self.entries,
+            "bytes_stored": self.bytes_stored,
+            "hit_rate": self.hit_rate,
+        }
+
+
+@dataclass(frozen=True)
+class CostReport:
+    total_wall_ms: float | None
+    peak_memory_mb: float | None = None
+    stages: tuple[StageCost, ...] = ()
+    cache: Mapping[str, float] = field(default_factory=dict)
+    throughput: Mapping[str, float] = field(default_factory=dict)
+    counters: Mapping[str, float] = field(default_factory=dict)
+    process_memory: Mapping[str, Any] = field(default_factory=dict)
+    diagnostic_allocations: bool = False
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "total_wall_ms": self.total_wall_ms,
+            "peak_memory_mb": self.peak_memory_mb,
+            "stages": [stage.to_dict() for stage in self.stages],
+            "cache": json_safe(self.cache),
+            "throughput": json_safe(self.throughput),
+            "counters": dict(self.counters),
+            "process_memory": dict(self.process_memory),
+            "diagnostic_allocations": self.diagnostic_allocations,
+            "python_peak_allocated_mb": self.peak_memory_mb,
+            "timing_semantics": "exclusive_named_spans; total_is_observed_wall",
+        }
+
+
+class StageTimer:
+    """Context manager for stage-level wall-time and memory accounting."""
+
+    def __init__(
+        self,
+        stage: str,
+        *,
+        recorder: "CostRecorder | None" = None,
+        status: str = "pass",
+        work_units: Mapping[str, float] | None = None,
+        artifact_bytes: int = 0,
+        notes: tuple[str, ...] = (),
+        track_memory: bool = False,
+    ) -> None:
+        self.stage = stage
+        self.recorder = recorder
+        self.status = status
+        self.work_units = dict(work_units or {})
+        self.artifact_bytes = int(artifact_bytes)
+        self.notes = tuple(notes)
+        self.track_memory = bool(track_memory)
+        self.start = 0.0
+        self.wall_ms = 0.0
+        self.peak_memory_mb: float | None = None
+        self._started_tracemalloc = False
+        self.child_ms = 0.0
+        self.inclusive_wall_ms = 0.0
+
+    def __enter__(self) -> "StageTimer":
+        if self.track_memory and not tracemalloc.is_tracing():
+            tracemalloc.start()
+            self._started_tracemalloc = True
+        self.start = perf_counter()
+        if self.recorder is not None:
+            self.recorder._active.append(self)
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, _tb: object) -> None:
+        self.inclusive_wall_ms = (perf_counter() - self.start) * 1000.0
+        self.wall_ms = max(0.0, self.inclusive_wall_ms - self.child_ms)
+        if self.recorder is not None:
+            assert self.recorder._active.pop() is self
+            if self.recorder._active:
+                self.recorder._active[-1].child_ms += self.inclusive_wall_ms
+        if self.track_memory and tracemalloc.is_tracing():
+            _current, peak = tracemalloc.get_traced_memory()
+            self.peak_memory_mb = float(peak / (1024.0 * 1024.0))
+            if self._started_tracemalloc:
+                tracemalloc.stop()
+        if exc_type is not None and self.status == "pass":
+            self.status = "error"
+            self.notes = self.notes + (str(exc) if exc else str(exc_type),)
+        if self.recorder is not None:
+            self.recorder.add_stage(self.cost())
+
+    def cost(
+        self,
+        *,
+        status: str | None = None,
+        notes: tuple[str, ...] | None = None,
+    ) -> StageCost:
+        return StageCost(
+            stage=self.stage,
+            status=status or self.status,
+            wall_ms=float(self.wall_ms),
+            inclusive_wall_ms=float(self.inclusive_wall_ms),
+            peak_memory_mb=self.peak_memory_mb,
+            work_units=dict(self.work_units),
+            artifact_bytes=self.artifact_bytes,
+            notes=self.notes if notes is None else tuple(notes),
+        )
+
+
+class CostRecorder:
+    """Mutable run-cost accumulator for orchestration code."""
+
+    def __init__(self, *, track_memory: bool = False) -> None:
+        self.track_memory = bool(track_memory)
+        self.start = perf_counter()
+        self.stages: list[StageCost] = []
+        self.cache: dict[str, CacheCost] = {}
+        self._active: list[StageTimer] = []
+        self.counters: dict[str, float] = {}
+
+    def count(self, name: str, amount: float = 1) -> None:
+        self.counters[name] = self.counters.get(name, 0.0) + float(amount)
+
+    def stage(
+        self,
+        name: str,
+        *,
+        status: str = "pass",
+        work_units: Mapping[str, float] | None = None,
+        artifact_bytes: int = 0,
+        notes: tuple[str, ...] = (),
+    ) -> StageTimer:
+        return StageTimer(
+            name,
+            recorder=self,
+            status=status,
+            work_units=work_units,
+            artifact_bytes=artifact_bytes,
+            notes=notes,
+            track_memory=self.track_memory,
+        )
+
+    def add_stage(self, cost: StageCost) -> None:
+        self.stages.append(cost)
+
+    def record_cache(
+        self,
+        namespace: str,
+        *,
+        hits: int = 0,
+        misses: int = 0,
+        entries: int = 0,
+        bytes_stored: int = 0,
+    ) -> None:
+        key = str(namespace)
+        current = self.cache.get(key, CacheCost(key))
+        self.cache[key] = CacheCost(
+            namespace=key,
+            hits=current.hits + int(hits),
+            misses=current.misses + int(misses),
+            entries=max(current.entries, int(entries)),
+            bytes_stored=max(current.bytes_stored, int(bytes_stored)),
+        )
+
+    def cache_hit(self, namespace: str, *, entries: int = 0, bytes_stored: int = 0) -> None:
+        self.record_cache(
+            namespace,
+            hits=1,
+            entries=entries,
+            bytes_stored=bytes_stored,
+        )
+
+    def cache_miss(self, namespace: str, *, entries: int = 0, bytes_stored: int = 0) -> None:
+        self.record_cache(
+            namespace,
+            misses=1,
+            entries=entries,
+            bytes_stored=bytes_stored,
+        )
+
+    def report(
+        self,
+        *,
+        throughput: Mapping[str, float] | None = None,
+        include_unaccounted_time: bool = True,
+    ) -> CostReport:
+        stages = list(self.stages)
+        total_stage_ms = sum(stage.wall_ms for stage in stages)
+        elapsed_ms = (perf_counter() - self.start) * 1000.0
+        if include_unaccounted_time and elapsed_ms > total_stage_ms:
+            unaccounted = elapsed_ms - total_stage_ms
+            if unaccounted > 0.001:
+                stages.append(
+                    StageCost(
+                        stage="unaccounted",
+                        status="pass",
+                        wall_ms=float(unaccounted),
+                        notes=("time outside named stages",),
+                    )
+                )
+        peak_values = [
+            stage.peak_memory_mb
+            for stage in stages
+            if stage.peak_memory_mb is not None
+        ]
+        cache_payload = _flatten_cache(tuple(self.cache.values()))
+        return CostReport(
+            total_wall_ms=elapsed_ms if include_unaccounted_time else total_stage_ms,
+            counters=dict(self.counters),
+            process_memory=process_memory_snapshot(),
+            diagnostic_allocations=self.track_memory,
+            peak_memory_mb=max(peak_values) if peak_values else None,
+            stages=tuple(stages),
+            cache=cache_payload,
+            throughput=dict(throughput or {}),
+        )
+
+
+def attach_cost_report_to_candidate(
+    result: Any,
+    report: CostReport,
+    *,
+    key: str = "cost_report",
+) -> Any:
+    """Return a CandidateResult-like object with a serialized cost report attached."""
+    metrics = getattr(result, "metric_result", None)
+    if metrics is None:
+        return result
+    extras = getattr(metrics, "extras", {}) or {}
+    extras_payload = dict(extras) if isinstance(extras, Mapping) else {}
+    extras_payload[key] = report.to_dict()
+    elapsed_s = _optional_float(getattr(metrics, "elapsed_s", None))
+    if (elapsed_s is None or elapsed_s <= 0.0) and report.total_wall_ms is not None and report.total_wall_ms > 0.0:
+        elapsed_s = float(report.total_wall_ms / 1000.0)
+    try:
+        updated_metrics = replace(metrics, extras=extras_payload, elapsed_s=elapsed_s)
+        return replace(result, metric_result=updated_metrics)
+    except TypeError:
+        return result
+
+
+def cost_report_from_candidate(result: Any) -> CostReport:
+    metrics = getattr(result, "metric_result", None)
+    elapsed_s = _optional_float(getattr(metrics, "elapsed_s", None))
+    extras = getattr(metrics, "extras", {}) or {}
+    if isinstance(extras, Mapping):
+        explicit_cost = extras.get("cost_report", extras.get("cost"))
+        if isinstance(explicit_cost, Mapping):
+            return cost_report_from_mapping(explicit_cost)
+    optimization = extras.get("optimization") if isinstance(extras, Mapping) else None
+    objective = extras.get("objective") if isinstance(extras, Mapping) else None
+    visual_hull = extras.get("visual_hull_stats") if isinstance(extras, Mapping) else None
+    mesh_extraction = extras.get("mesh_extraction") if isinstance(extras, Mapping) else None
+    stages = []
+    if elapsed_s is not None:
+        # Unstructured metadata does not establish which subspan is nested in
+        # which other subspan. Keep the measured inclusive backend total once.
+        stage = StageCost("backend_reconstruct", "pass", elapsed_s * 1000.0,
+                          notes=("inclusive backend measurement; subspans not inferred",))
+        return CostReport(total_wall_ms=elapsed_s * 1000.0, stages=(stage,))
+    if isinstance(optimization, Mapping) and _optional_float(optimization.get("elapsed_s")) is not None:
+        opt_elapsed = float(optimization["elapsed_s"])
+        stages.append(
+            StageCost(
+                "primitive_fit",
+                "pass",
+                opt_elapsed * 1000.0,
+                work_units={
+                    "objective_evaluations": float(optimization.get("objective_evaluations", 0.0) or 0.0)
+                },
+            )
+        )
+    objective_elapsed = _optional_float(extras.get("optimizer_elapsed_s", objective.get("elapsed_s"))) if isinstance(objective, Mapping) else None
+    if isinstance(objective, Mapping) and not isinstance(optimization, Mapping) and objective_elapsed is not None:
+        opt_elapsed = objective_elapsed
+        stages.append(
+            StageCost(
+                "primitive_objective",
+                "pass" if bool(objective.get("improved", True)) else "warn",
+                opt_elapsed * 1000.0,
+                work_units={
+                    "objective_evaluations": float(objective.get("objective_evaluations", 0.0) or 0.0),
+                    "history_length": float(objective.get("history_length", 0.0) or 0.0),
+                },
+                notes=(str(objective.get("termination_reason", "")),)
+                if objective.get("termination_reason")
+                else (),
+            )
+        )
+    if isinstance(mesh_extraction, Mapping) and mesh_extraction.get("elapsed_s") is not None:
+        elapsed = float(mesh_extraction.get("elapsed_s", 0.0) or 0.0)
+        stages.append(
+            StageCost(
+                "mesh_extraction",
+                str(mesh_extraction.get("status", "pass")),
+                elapsed * 1000.0,
+                work_units={
+                    "vertices": float(
+                        mesh_extraction.get("vertex_count", mesh_extraction.get("vertices", 0.0)) or 0.0
+                    ),
+                    "faces": float(
+                        mesh_extraction.get("face_count", mesh_extraction.get("faces", 0.0)) or 0.0
+                    ),
+                },
+            )
+        )
+    total = None  # Partial subspan receipts cannot establish whole backend time.
+    throughput = {}
+    if isinstance(visual_hull, Mapping):
+        active = float(visual_hull.get("active_voxels", 0.0) or 0.0)
+        total_voxels = float(visual_hull.get("total_voxels", 0.0) or 0.0)
+        if total is not None and total > 0.0:
+            if active:
+                throughput["active_voxels_per_ms"] = active / total
+            if total_voxels:
+                throughput["voxels_per_ms"] = total_voxels / total
+        elif active or total_voxels:
+            throughput["invalid_reason"] = "missing_or_zero_total_wall_ms"
+    return CostReport(total_wall_ms=total, stages=tuple(stages), throughput=throughput)
+
+
+def cost_report_from_mapping(payload: Mapping[str, Any]) -> CostReport:
+    stages_payload = payload.get("stages", ()) or ()
+    cache_payload = payload.get("cache", {}) or {}
+    stages = tuple(
+        stage_cost_from_mapping(stage)
+        for stage in stages_payload
+        if isinstance(stage, Mapping) and _optional_float(stage.get("wall_ms")) is not None
+    )
+    total = _optional_float(payload.get("total_wall_ms"))
+    if "total_wall_ms" not in payload:
+        total = sum(stage.wall_ms for stage in stages) if stages else None
+    throughput = (
+        dict(payload.get("throughput", {}) or {})
+        if isinstance(payload.get("throughput", {}), Mapping)
+        else {}
+    )
+    if (total is None or total <= 0.0) and throughput:
+        throughput = {"invalid_reason": "missing_or_zero_total_wall_ms"}
+    return CostReport(
+        total_wall_ms=float(total) if total is not None else None,
+        peak_memory_mb=_optional_float(payload.get("peak_memory_mb")),
+        stages=stages,
+        cache=dict(cache_payload) if isinstance(cache_payload, Mapping) else {},
+        throughput=throughput,
+        counters=dict(payload.get("counters", {})),
+        process_memory=dict(payload.get("process_memory", {})),
+        diagnostic_allocations=bool(payload.get("diagnostic_allocations", False)),
+    )
+
+
+def stage_cost_from_mapping(payload: Mapping[str, Any]) -> StageCost:
+    return StageCost(
+        stage=str(payload.get("stage", "")),
+        status=str(payload.get("status", "pass")),
+        wall_ms=float(payload.get("wall_ms", 0.0) or 0.0),
+        inclusive_wall_ms=_optional_float(payload.get("inclusive_wall_ms")),
+        peak_memory_mb=_optional_float(payload.get("peak_memory_mb")),
+        work_units=dict(payload.get("work_units", {}) or {})
+        if isinstance(payload.get("work_units", {}), Mapping)
+        else {},
+        artifact_bytes=int(payload.get("artifact_bytes", 0) or 0),
+        notes=tuple(str(item) for item in payload.get("notes", ()) or ()),
+    )
+
+
+def _flatten_cache(cache_items: tuple[CacheCost, ...]) -> dict[str, float]:
+    payload: dict[str, float] = {}
+    total_hits = 0
+    total_misses = 0
+    for item in cache_items:
+        prefix = f"{item.namespace}."
+        payload[prefix + "hits"] = float(item.hits)
+        payload[prefix + "misses"] = float(item.misses)
+        payload[prefix + "entries"] = float(item.entries)
+        payload[prefix + "bytes_stored"] = float(item.bytes_stored)
+        payload[prefix + "hit_rate"] = item.hit_rate
+        total_hits += item.hits
+        total_misses += item.misses
+    if cache_items:
+        total = total_hits + total_misses
+        payload["hits"] = float(total_hits)
+        payload["misses"] = float(total_misses)
+        payload["hit_rate"] = float(total_hits / total) if total else 0.0
+    return payload
+
+
+def process_memory_snapshot() -> dict[str, object]:
+    """Own-process working set and lifetime peak; distinct from tracemalloc."""
+    import os
+    if os.name != "nt":
+        try:
+            import resource
+            import sys
+            peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            return {"peak_working_set_bytes": int(peak if sys.platform == "darwin" else peak * 1024),
+                    "scope": "process_lifetime_peak", "source": "getrusage"}
+        except ImportError:
+            return {"available": False}
+    try:
+        import ctypes
+        from ctypes import wintypes
+        class Counters(ctypes.Structure):
+            _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD)] + [
+                (name, ctypes.c_size_t) for name in ("PeakWorkingSetSize", "WorkingSetSize",
+                "QuotaPeakPagedPoolUsage", "QuotaPagedPoolUsage", "QuotaPeakNonPagedPoolUsage",
+                "QuotaNonPagedPoolUsage", "PagefileUsage", "PeakPagefileUsage")]
+        value = Counters(); value.cb = ctypes.sizeof(value)
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.GetCurrentProcess.restype = wintypes.HANDLE
+        psapi = ctypes.WinDLL("psapi", use_last_error=True)
+        psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+        if not psapi.GetProcessMemoryInfo(kernel.GetCurrentProcess(), ctypes.byref(value), value.cb):
+            return {"available": False}
+        return {"working_set_bytes": int(value.WorkingSetSize),
+                "peak_working_set_bytes": int(value.PeakWorkingSetSize),
+                "scope": "process_lifetime_peak", "source": "GetProcessMemoryInfo"}
+    except (OSError, AttributeError):
+        return {"available": False}
+
+
+def timed_call(cost_recorder, stage, function, *args, **kwargs):
+    if cost_recorder is None:
+        return function(*args, **kwargs)
+    with cost_recorder.stage(stage):
+        return function(*args, **kwargs)

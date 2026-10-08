@@ -1,6 +1,6 @@
 # Implementation Master Spec (Single Source of Truth)
 
-This document replaces all prior roadmaps/specs and is the only authoritative implementation guide for the Blender Automated Blocking Tool. Foundations must be completed first. The dual-profile + loft + canonical IoU path is optional and must not break the legacy pipeline.
+This document replaces all prior roadmaps/specs and is the authoritative baseline for the Blender Automated Blocking Tool. The legacy pipeline remains default, while the 2026 ambitious reconstruction extensions add typed backend contracts, candidate ensembles, visual hull volumes, primitive fitting, uncertainty, constraints, synthetic fixtures, and topology-aware validation as opt-in foundations.
 
 ## 1) Scope, Non-Goals, and Defaults
 
@@ -10,10 +10,13 @@ This document replaces all prior roadmaps/specs and is the only authoritative im
 - Optional dual-profile loft path (opt-in flag).
 - Canonical silhouette extraction, framing, and IoU validation.
 - Metadata tagging and run manifest for outputs.
+- Typed reconstruction backend registry and candidate ensemble execution.
+- Optional visual-hull volume reconstruction and mesh extraction.
+- Optional primitive/ellipsoid/Gaussian proxy fitting with differentiable-rendering-inspired losses.
+- Synthetic shape factory fixtures, quality budgets, uncertainty maps, and human correction constraints.
 
 ### Non-Goals (Out)
-- Full multi-view visual hull or turntable fusion.
-- ML-based segmentation or learned reconstruction.
+- Required external ML dependencies or mandatory GPU reconstruction.
 - Blender UI add-ons or operator UX beyond scripts.
 - Non-axis-aligned inputs (tilted silhouettes) in v1.
 
@@ -31,7 +34,7 @@ This spec defines canonical names. Any legacy names must be treated as aliases.
 - `cap_mode` uses `"fan" | "none"` (canonical). `"ngon"` is allowed as a legacy optional value for compatibility but is not the default.
 
 ## 3) Module Layout (Canonical)
-All new pure-Python logic goes into `geometry/` and `validation/` and must not import `bpy`.
+Pure-Python logic lives in feature packages (`geometry/`, `validation/`, `metrics/`, `reconstruction/`, `constraints/`, `synthetic/`, and `volume/`) and must not import `bpy`. Blender adapters stay under `integration/blender_ops/` and `placement/`.
 
 ```
 blender_blocking/
@@ -41,9 +44,24 @@ blender_blocking/
     silhouette.py
     dual_profile.py
     slicing.py
+  metrics/
+    silhouette.py
+    surface.py
+    topology.py
+    budgets.py
   validation/
     __init__.py
     silhouette_iou.py
+  reconstruction/
+    backend.py
+    registry.py
+    ensemble.py
+    target_builder.py
+    point_cloud.py
+    backends/
+  constraints/
+  synthetic/
+  volume/
   integration/
     blender_ops/
       camera_framing.py
@@ -101,7 +119,7 @@ Per-slice loft data:
 All configuration fields and valid values are defined in the embedded schema in **Section 19**. Treat the schema as the single source of truth for config structure and defaults.
 
 Implementation rules:
-- `BlockingConfig` composes these groups: `ReconstructionConfig`, `SilhouetteExtractConfig`, `ProfileSamplingConfig`, `LoftMeshOptions`, `RenderConfig`, `CanonicalizeConfig`.
+- `BlockingConfig` composes these groups: `ReconstructionConfig`, `SilhouetteExtractConfig`, `ProfileSamplingConfig`, `LoftMeshOptions`, `RenderConfig`, `CanonicalizeConfig`, `VisualHullConfig`, `VolumeConfig`, `EnsembleConfig`, `PrimitiveFitConfig`, `GaussianEllipsoidConfig`, `DifferentiableRenderConfig`, `ConstraintConfig`, `SyntheticFactoryConfig`, and `QualityBudgetConfig`.
 - Defaults must preserve current behavior unless a phase explicitly changes them (see Section 1 defaults).
 - Render and canonicalization sizes must be easy to override via config and passed through to `render_orthogonal_views` and `canonicalize_mask`.
 
@@ -291,7 +309,20 @@ Store a JSON-like dict in `scene["blocktool_manifest"]` with:
 - Optional loft pipeline generates a watertight mesh without booleans.
 - IoU validation is robust to resolution/framing differences.
 - Metadata and manifest present for every run.
+- Every non-legacy reconstruction mode returns a structured `CandidateResult` with status, warnings/errors, artifacts, and metrics.
+- Ensemble mode writes all-candidate metadata and selects by explicit score terms.
+- Visual hull, primitive fitting, Gaussian/ellipsoid, and differentiable-refine paths are opt-in and must report optional dependency skips explicitly.
 - Tests are deterministic and partitioned by environment.
+
+### 18.1 Ambitious Backend Completion Requirements
+- Non-legacy reconstruction modes are routed through `reconstruction/registry.py` and backend-owned implementations under `reconstruction/backends/`; `main_integration.py` may keep direct legacy behavior only.
+- Visual hull backends must support dense, chunked, sparse-hash, and OpenVDB-labeled modes. Chunked/sparse/OpenVDB modes must build directly into chunk storage instead of requiring a dense-first conversion.
+- OpenVDB is optional. When `pyopenvdb` or `openvdb` bindings are installed, `volume/openvdb_adapter.py` must export and import direct `.vdb` grids. When bindings are absent or lack required APIs, the backend must return structured `OpenVDBStatus` data and keep NPZ sparse interchange artifacts.
+- Visual hull mesh postprocess modes `poisson` and `screened_poisson` must run Open3D Poisson reconstruction when `open3d` is installed. Missing or unusable Open3D must be an explicit skip or failure according to `postprocess_required`, `require_postprocess`, or `fail_on_postprocess_skip`.
+- Differentiable rendering must provide a deterministic CPU soft-silhouette backend and an optional `nvdiffrast.torch` backend. Missing `nvdiffrast`/`torch`, missing raster context, or unusable GPU runtime must obey `optional_dependency_policy="skip" | "fail"` and must not silently fall back to CPU when the user requested `nvdiffrast`.
+- Primitive, Gaussian/ellipsoid, visual hull, and differentiable backends must emit `CandidateResult` metrics with per-view data where views exist, topology reports for mesh-producing paths, artifacts, warnings/errors, and objective or loss histories where an objective is evaluated.
+- Synthetic fixtures must remain deterministic and generated outputs must stay under ignored artifact roots. Commit only small fixture specs, budget JSON, schemas, and docs.
+- Quality budgets must be runnable against current artifacts and optional baseline artifacts; `fail_on_regression` must produce a nonzero runner/benchmark exit when required checks fail.
 
 ## 19) Canonical Schemas (Embedded)
 These replace standalone JSON schema files.
@@ -331,7 +362,21 @@ These replace standalone JSON schema files.
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "reconstruction_mode": { "type": "string", "enum": ["legacy", "loft_profile"] },
+    "reconstruction_mode": {
+      "type": "string",
+      "enum": [
+        "legacy",
+        "loft_profile",
+        "profile_loft",
+        "silhouette_intersection",
+        "visual_hull_voxel",
+        "hybrid_loft_hull",
+        "primitive_fit_refine",
+        "gaussian_ellipsoid_proxy",
+        "differentiable_refine",
+        "ensemble"
+      ]
+    },
     "unit_scale": { "type": "number", "minimum": 0.0 },
     "num_slices": { "type": "integer", "minimum": 1 },
     "mesh_join_mode": { "type": "string", "enum": ["auto", "boolean", "voxel", "simple"] },
@@ -340,7 +385,16 @@ These replace standalone JSON schema files.
     "profile_sampling": { "$ref": "#/definitions/profile_sampling" },
     "mesh_from_profile": { "$ref": "#/definitions/mesh_from_profile" },
     "canonicalize": { "$ref": "#/definitions/canonicalize" },
-    "render_silhouette": { "$ref": "#/definitions/render_silhouette" }
+    "render_silhouette": { "$ref": "#/definitions/render_silhouette" },
+    "visual_hull": { "$ref": "#/definitions/visual_hull" },
+    "volume": { "$ref": "#/definitions/volume" },
+    "ensemble": { "$ref": "#/definitions/ensemble" },
+    "primitive_fit": { "$ref": "#/definitions/primitive_fit" },
+    "gaussian_ellipsoid": { "$ref": "#/definitions/gaussian_ellipsoid" },
+    "differentiable_render": { "$ref": "#/definitions/differentiable_render" },
+    "constraints": { "$ref": "#/definitions/constraints" },
+    "synthetic_factory": { "$ref": "#/definitions/synthetic_factory" },
+    "quality_budget": { "$ref": "#/definitions/quality_budget" }
   },
   "required": ["reconstruction_mode", "unit_scale", "num_slices"],
   "definitions": {
@@ -355,7 +409,12 @@ These replace standalone JSON schema files.
         "morph_close_px": { "type": "integer", "minimum": 0 },
         "morph_open_px": { "type": "integer", "minimum": 0 },
         "fill_holes": { "type": "boolean" },
-        "largest_component_only": { "type": "boolean" }
+        "largest_component_only": { "type": "boolean" },
+        "polarity": { "type": "string", "enum": ["auto", "dark_foreground", "light_foreground", "alpha_foreground"] },
+        "min_area_frac": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "max_area_frac": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "min_component_area_px": { "type": "integer", "minimum": 0 },
+        "emit_uncertainty": { "type": "boolean" }
       }
     },
     "profile_sampling": {
@@ -378,7 +437,10 @@ These replace standalone JSON schema files.
         "merge_threshold_u": { "type": "number", "minimum": 0.0 },
         "recalc_normals": { "type": "boolean" },
         "shade_smooth": { "type": "boolean" },
-        "weld_degenerate_rings": { "type": "boolean" }
+        "weld_degenerate_rings": { "type": "boolean" },
+        "adaptive_radial_segments": { "type": "boolean" },
+        "max_adaptive_radial_segments": { "type": "integer", "minimum": 3 },
+        "topology_strict": { "type": "boolean" }
       }
     },
     "canonicalize": {
@@ -400,6 +462,104 @@ These replace standalone JSON schema files.
         "transparent_bg": { "type": "boolean" },
         "samples": { "type": "integer", "minimum": 1 },
         "margin_frac": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+      }
+    },
+    "visual_hull": {
+      "type": "object",
+      "properties": {
+        "backend": { "type": "string", "enum": ["dense", "chunked", "sparse_hash", "openvdb"] },
+        "resolution": { "type": "integer", "minimum": 1 },
+        "max_resolution": { "type": "integer", "minimum": 1 },
+        "chunk_size": { "type": ["integer", "null"], "minimum": 1 },
+        "adaptive_max_depth": { "type": "integer", "minimum": 0 },
+        "boundary_refine": { "type": "boolean" },
+        "mesh_method": { "type": "string", "enum": ["marching_cubes", "lewiner", "dual_contouring", "points"] },
+        "postprocess": { "type": "string", "enum": ["none", "poisson", "screened_poisson", "smooth_guarded", "topology_repair"] },
+        "postprocess_required": { "type": "boolean" },
+        "require_postprocess": { "type": "boolean" },
+        "fail_on_postprocess_skip": { "type": "boolean" },
+        "poisson_depth": { "type": "integer", "minimum": 1 },
+        "poisson_scale": { "type": "number", "exclusiveMinimum": 0.0 },
+        "poisson_linear_fit": { "type": "boolean" },
+        "poisson_crop_to_input_bounds": { "type": "boolean" },
+        "poisson_crop_scale": { "type": "number", "exclusiveMinimum": 0.0 },
+        "poisson_density_quantile": { "type": ["number", "null"], "minimum": 0.0, "maximum": 1.0 },
+        "memory_budget_mb": { "type": ["integer", "null"], "minimum": 1 },
+        "occupancy_threshold": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "uncertainty_aggregation": { "type": "string", "enum": ["min", "product", "logit_sum"] }
+      }
+    },
+    "volume": {
+      "type": "object",
+      "properties": {
+        "backend": { "type": "string", "enum": ["dense", "chunked", "sparse_hash", "openvdb"] },
+        "sparse_chunk_size": { "type": "integer", "minimum": 1 },
+        "serialization": { "type": "string", "enum": ["npz"] },
+        "export_openvdb": { "type": "boolean" }
+      }
+    },
+    "ensemble": {
+      "type": "object",
+      "properties": {
+        "selection_policy": { "type": "string", "enum": ["best_score", "quality_first", "editability_first", "fast_preview", "pareto"] },
+        "max_parallel_candidates": { "type": "integer", "minimum": 1 },
+        "keep_all_artifacts": { "type": "boolean" }
+      }
+    },
+    "primitive_fit": {
+      "type": "object",
+      "properties": {
+        "primitive_families": { "type": "array", "items": { "type": "string", "enum": ["superfrustum", "ellipsoid", "superquadric"] } },
+        "target_point_count": { "type": "integer", "minimum": 1 },
+        "min_primitives": { "type": "integer", "minimum": 0 },
+        "max_primitives": { "type": "integer", "minimum": 1 },
+        "optimization_steps": { "type": "integer", "minimum": 0 },
+        "checkpoint_cadence": { "type": "integer", "minimum": 1 },
+        "fail_on_regression": { "type": "boolean" },
+        "loss_weights": { "type": "object" }
+      }
+    },
+    "gaussian_ellipsoid": {
+      "type": "object",
+      "properties": {
+        "primitive_count": { "type": "integer", "minimum": 1 },
+        "initialization": { "type": "string", "enum": ["farthest_point", "kmeans", "grid"] },
+        "min_radius": { "type": "number", "exclusiveMinimum": 0.0 },
+        "max_radius": { "type": ["number", "null"] },
+        "opacity_min": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "opacity_max": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "renderer": { "type": "string", "enum": ["cpu_projected_ellipse", "gpu_splat"] },
+        "export_mesh_proxy": { "type": "boolean" }
+      }
+    },
+    "differentiable_render": {
+      "type": "object",
+      "properties": {
+        "backend": { "type": "string", "enum": ["cpu_soft_silhouette", "blender_finite_difference", "nvdiffrast"] },
+        "optional_dependency_policy": { "type": "string", "enum": ["skip", "fail"] },
+        "gradient_mode": { "type": "string", "enum": ["finite_difference", "backend"] },
+        "finite_difference_epsilon": { "type": "number", "exclusiveMinimum": 0.0 },
+        "softness": { "type": "number", "exclusiveMinimum": 0.0 },
+        "min_variance": { "type": "number", "exclusiveMinimum": 0.0 },
+        "visual_hull_resolution": { "type": "integer", "minimum": 1 },
+        "primitive_count": { "type": "integer", "minimum": 1 },
+        "target_point_count": { "type": "integer", "minimum": 1 },
+        "min_radius": { "type": "number", "exclusiveMinimum": 0.0 },
+        "covariance_floor": { "type": "number", "minimum": 0.0 },
+        "kmeans_iterations": { "type": "integer", "minimum": 1 },
+        "chunk_size": { "type": ["integer", "null"], "minimum": 1 },
+        "loss_weights": { "type": "object" }
+      }
+    },
+    "constraints": { "type": "object" },
+    "synthetic_factory": { "type": "object" },
+    "quality_budget": {
+      "type": "object",
+      "properties": {
+        "budget_json": { "type": ["string", "null"] },
+        "compare_baseline": { "type": ["string", "null"] },
+        "fail_on_regression": { "type": "boolean" },
+        "environment_compatibility": { "type": "string", "enum": ["warn", "strict", "ignore"] }
       }
     }
   }

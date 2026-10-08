@@ -18,10 +18,12 @@ Already configured Blender? Jump straight to the [QUICKSTART](QUICKSTART.md).
 - **[BLENDER_SETUP.md](BLENDER_SETUP.md)** - Blender Python configuration guide ⭐ Start here
 - **[QUICKSTART.md](QUICKSTART.md)** - Get started in minutes
 - **[INTEGRATION.md](INTEGRATION.md)** - Detailed API and usage guide
+- **[REFINEMENT_LAB.md](REFINEMENT_LAB.md)** - Run reconstruction experiments, rank candidates, and inspect failure diagnostics
 - **Testing** - See the Testing section below for local and CI commands
 - **[CI_CD.md](CI_CD.md)** - CI/CD testing with real Blender (GitHub Actions, Docker)
 - **[../AGENTS.md](../AGENTS.md)** - Quality gates for agents/crews (pre-commit, testing requirements)
 - **[E2E_VALIDATION_SUMMARY.md](E2E_VALIDATION_SUMMARY.md)** - Validation framework details
+- **[../docs/QUALITY_PERF_GATES.md](../docs/QUALITY_PERF_GATES.md)** - Runner phases, synthetic matrix, budget JSON, and artifact policy
 
 ## What It Does
 
@@ -64,6 +66,7 @@ blender_blocking/
 ├── BLENDER_SETUP.md            # ⭐ Blender Python setup guide
 ├── QUICKSTART.md               # Quick start guide
 ├── INTEGRATION.md              # Detailed API guide
+├── REFINEMENT_LAB.md           # Experiment and ranking workflow
 ├── CI_CD.md                    # CI/CD guide (GitHub Actions, Docker)
 ├── main_integration.py         # Main workflow
 ├── create_test_images.py       # Test image generator
@@ -73,6 +76,7 @@ blender_blocking/
 ├── test_blender_boolean.py     # Blender API compatibility tests
 ├── test_integration.py         # Test suite
 ├── test_e2e_validation.py      # E2E validation with IoU
+├── refinement_lab/             # Experiment plans, ranking, reports, and diagnostics
 ├── requirements.txt            # Dependencies
 ├── utils/                      # Utility modules
 │   └── blender_version.py      # Version detection & compatibility
@@ -115,13 +119,20 @@ blender --background --python test_runner.py
 # Quick tests (for pre-commit)
 blender --background --python test_runner.py -- --quick
 
+# Phase-based runner entry points
+python test_runner.py --phase pure
+blender --background --python test_runner.py -- --phase quick
+blender --background --python test_runner.py -- --phase blender
+python test_runner.py --phase bench --bench-case quality-smoke --budget-json ../configs/quality_perf_budget-smoke.json
+blender --background --python test_runner.py -- --phase quality-smoke --budget-json ../configs/quality_perf_budget-smoke.json
+
 # Verbose output
 blender --background --python test_runner.py -- --verbose
 ```
 
 ### Test Suite
 
-The test runner executes 7 test suites:
+The legacy test runner executes these suites:
 1. **Pure Python** - Config, geometry, and image-processing tests (no Blender required)
 2. **Version Compatibility** - Detects Blender version and validates API compatibility
 3. **Boolean Solver Enum** - Validates Blender API enums for current version
@@ -129,6 +140,49 @@ The test runner executes 7 test suites:
 5. **Full Workflow** - End-to-end procedural generation
 6. **E2E Validation** - Complete pipeline with IoU comparison (reference → 3D → render → compare)
 7. **Dependency Check** - Verifies all packages installed correctly
+
+The phase runner adds named phases for `pure`, `quick`, `blender`, `bench`, `nightly`, and `quality-smoke`. Benchmark and quality-smoke phases write JSON artifacts and optional budget reports; see [../docs/QUALITY_PERF_GATES.md](../docs/QUALITY_PERF_GATES.md).
+
+### Refinement Experiments
+
+Use the refinement lab when tuning reconstruction output quality instead of changing one value at a time by hand:
+
+```bash
+python -m blender_blocking.refinement_lab.cli list-tracks
+python -m blender_blocking.refinement_lab.cli plan --suite default-vase --track visual-hull-transform --max-runs 4 --out temp/refinement-runs/plan-smoke.json
+```
+
+Run actual reconstruction variants through Blender:
+
+```bash
+blender --background --python blender_blocking/test_e2e_validation.py -- --refinement-suite default-vase --refinement-track profile-loft-refinement --refinement-max-runs 1 --refinement-result-root temp/refinement-runs/smoke-profile --no-progress
+```
+
+Generated lab artifacts belong under ignored `temp/refinement-runs/`; see [REFINEMENT_LAB.md](REFINEMENT_LAB.md).
+
+### Ambitious Quality/Refinement Smoke
+
+Use the repo-level orchestration script when you want one repeatable pass that
+compares the ambitious backends on synthetic fixtures, exercises LPIPS
+novel-view scoring, and runs closed-loop refinement sweeps:
+
+```powershell
+python scripts\run_quality_refinement_smoke.py --dry-run
+python scripts\run_quality_refinement_smoke.py --clean-first
+```
+
+The default matrix covers `visual_hull_voxel`, `primitive_fit_refine`,
+`gaussian_ellipsoid_proxy`, and `differentiable_refine` across adversarial,
+primitive-fit, visual-hull, and smoke synthetic suites. LPIPS runs in its own
+Blender process so Torch/LPIPS never shares a process with Open3D-heavy
+visual-hull postprocess work. Closed-loop refinement runs launch the planner
+itself inside Blender so synthetic references are generated where `bpy` exists.
+Outputs go under
+`temp/quality-refinement-runs/<timestamp>/` and include `commands.md`,
+`summary.md`, `summary.json`, matrix JSON, quality reports, cost reports, and
+refinement-loop artifacts. Generated internals use compact directory names to
+stay inside Blender and Windows path limits. These are diagnostics only and must
+not be committed.
 
 ### Supported Blender Versions
 

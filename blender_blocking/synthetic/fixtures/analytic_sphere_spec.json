@@ -1,0 +1,47 @@
+{
+  "expected_failure_modes": [],
+  "family": "analytic_primitive",
+  "generator_version": "synthetic-shape-factory-v1",
+  "intended_challenges": [
+    "analytic_exact"
+  ],
+  "known_dimensions": {
+    "diameter": 1.3194,
+    "radius": 0.6597
+  },
+  "materials": {
+    "base_color": [
+      0.2,
+      0.2,
+      0.2,
+      1.0
+    ],
+    "roughness": 0.55
+  },
+  "parameters": {
+    "primitive": "sphere",
+    "radius": 0.6597
+  },
+  "seed": 0,
+  "shape_id": "sphere_fixture_seed_0000",
+  "symmetry": [
+    "radial"
+  ],
+  "transforms": {
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation_deg": [
+      -3.797,
+      7.3979,
+      -7.6948
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  }
+}

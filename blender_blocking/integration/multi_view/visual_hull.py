@@ -50,6 +50,7 @@ class CameraView:
         view_type: str = "lateral",
         camera_distance: float = 1.0,
         focal_length: Optional[float] = None,
+        image_bounds: Optional[Tuple[float, float, float, float]] = None,
     ) -> None:
         """
         Initialize camera view.
@@ -72,6 +73,19 @@ class CameraView:
         self.focal_length = focal_length or camera_distance  # Default to orthographic
 
         self.height, self.width = silhouette.shape
+        self.image_bounds = self._coerce_image_bounds(image_bounds)
+
+    def _coerce_image_bounds(
+        self, image_bounds: Optional[Tuple[float, float, float, float]]
+    ) -> Tuple[float, float, float, float]:
+        if image_bounds is None:
+            return (0.0, 0.0, float(self.width), float(self.height))
+        x0, y0, x1, y1 = (float(value) for value in image_bounds)
+        x0 = max(0.0, min(float(self.width - 1), x0))
+        y0 = max(0.0, min(float(self.height - 1), y0))
+        x1 = max(x0 + 1.0, min(float(self.width), x1))
+        y1 = max(y0 + 1.0, min(float(self.height), y1))
+        return (x0, y0, x1, y1)
 
     def is_point_in_silhouette_cone(
         self, point_3d: np.ndarray, voxel_bounds: Tuple[np.ndarray, np.ndarray]
@@ -142,19 +156,52 @@ class CameraView:
             world_x = rotated_x + center[0]
             world_y = point_3d[2]  # Z becomes vertical in image
 
-        # Normalize to [0, 1] based on voxel bounds
-        x_range = max_bounds[0] - min_bounds[0]
+        # Normalize to [0, 1] based on the projected horizontal extent.  For
+        # side views this is the rotated X/Y footprint, not always X bounds.
+        x_min, x_max = self.projected_horizontal_bounds(min_bounds, max_bounds)
+        x_range = x_max - x_min
         y_range_idx = 1 if self.view_type == "top" else 2
         y_range = max_bounds[y_range_idx] - min_bounds[y_range_idx]
 
-        x_norm = (world_x - min_bounds[0]) / x_range if x_range > 0 else 0.5
+        x_norm = (world_x - x_min) / x_range if x_range > 0 else 0.5
         y_norm = (world_y - min_bounds[y_range_idx]) / y_range if y_range > 0 else 0.5
+        x_norm = max(0.0, min(1.0, x_norm))
+        y_norm = max(0.0, min(1.0, y_norm))
 
-        # Map to pixel coordinates
-        u = int(x_norm * (self.width - 1))
-        v = int((1.0 - y_norm) * (self.height - 1))  # Flip Y (image origin top-left)
+        x0, y0, x1, y1 = self.image_bounds
+        u_span = max(1.0, (x1 - x0) - 1.0)
+        v_span = max(1.0, (y1 - y0) - 1.0)
+
+        # Map to pixel coordinates.  Bounds are exclusive x1/y1 values, so a
+        # normalized coordinate of 1.0 lands on the last pixel inside the ROI.
+        u = int(x0 + x_norm * u_span + 1e-9)
+        v = int(y0 + (1.0 - y_norm) * v_span + 1e-9)  # Flip Y (image origin top-left)
 
         return (u, v)
+
+    def projected_horizontal_bounds(
+        self, min_bounds: np.ndarray, max_bounds: np.ndarray
+    ) -> Tuple[float, float]:
+        """Return the world-space horizontal projection extent for this view."""
+        if self.view_type == "top":
+            return float(min_bounds[0]), float(max_bounds[0])
+
+        center = (min_bounds + max_bounds) / 2.0
+        angle_rad = math.radians(self.angle)
+        cos_a = math.cos(-angle_rad)
+        sin_a = math.sin(-angle_rad)
+        corners = (
+            (min_bounds[0], min_bounds[1]),
+            (min_bounds[0], max_bounds[1]),
+            (max_bounds[0], min_bounds[1]),
+            (max_bounds[0], max_bounds[1]),
+        )
+        projected = []
+        for x, y in corners:
+            local_x = float(x - center[0])
+            local_y = float(y - center[1])
+            projected.append(local_x * cos_a - local_y * sin_a + float(center[0]))
+        return min(projected), max(projected)
 
 
 class MultiViewVisualHull:
@@ -217,6 +264,7 @@ class MultiViewVisualHull:
         angle: float = 0.0,
         view_type: str = "lateral",
         camera_distance: float = 1.0,
+        image_bounds: Optional[Tuple[float, float, float, float]] = None,
     ) -> None:
         """
         Convenience method to add a view from silhouette image.
@@ -227,7 +275,13 @@ class MultiViewVisualHull:
             view_type: 'lateral' or 'top'
             camera_distance: Distance from center
         """
-        view = CameraView(silhouette, angle, view_type, camera_distance)
+        view = CameraView(
+            silhouette,
+            angle,
+            view_type,
+            camera_distance,
+            image_bounds=image_bounds,
+        )
         self.add_view(view)
 
     def reconstruct(
@@ -436,14 +490,20 @@ class MultiViewVisualHull:
             y_min = bounds_min[2]
             y_range = bounds_max[2] - bounds_min[2]
 
-        x_range = bounds_max[0] - bounds_min[0]
+        x_min, x_max = view.projected_horizontal_bounds(bounds_min, bounds_max)
+        x_range = x_max - x_min
 
         world_x, world_y = np.broadcast_arrays(world_x, world_y)
-        x_norm = (world_x - bounds_min[0]) / x_range
+        x_norm = (world_x - x_min) / x_range
         y_norm = (world_y - y_min) / y_range
+        x_norm = np.clip(x_norm, 0.0, 1.0)
+        y_norm = np.clip(y_norm, 0.0, 1.0)
 
-        u = (x_norm * (view.width - 1)).astype(int)
-        v = ((1.0 - y_norm) * (view.height - 1)).astype(int)
+        x0, y0, x1, y1 = view.image_bounds
+        u_span = max(1.0, (x1 - x0) - 1.0)
+        v_span = max(1.0, (y1 - y0) - 1.0)
+        u = np.floor(x0 + x_norm * u_span + 1e-9).astype(int)
+        v = np.floor(y0 + (1.0 - y_norm) * v_span + 1e-9).astype(int)
 
         valid = (u >= 0) & (u < view.width) & (v >= 0) & (v < view.height)
 

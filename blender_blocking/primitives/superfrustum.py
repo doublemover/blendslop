@@ -15,6 +15,11 @@ import numpy as np
 from typing import Dict, Tuple
 import math
 
+try:
+    from .primitive_protocol import MeshData
+except ImportError:  # pragma: no cover - supports direct script execution.
+    from primitive_protocol import MeshData
+
 
 class SuperFrustum:
     """
@@ -75,6 +80,29 @@ class SuperFrustum:
         z = np.cos(phi)
         return np.array([x, y, z], dtype=np.float64)
 
+    def _axis_rotation_matrix(self) -> np.ndarray:
+        """Cached rotation from world-space to the frustum's local z-aligned frame."""
+        axis = self.get_axis_vector()
+        return self._rotation_matrix_to_z(axis)
+
+    def radius_at_world_z(self, z_world: float) -> float:
+        """Return the interpolated profile radius at a world-space z coordinate.
+
+        The radius is derived in local frustum coordinates and clipped to the
+        nearest end-cap interpolation range for numerical stability.
+        """
+        axis_position = np.array([self.position[0], self.position[1], float(z_world)])
+        rot = self._axis_rotation_matrix()
+        local = np.asarray((axis_position - self.position) @ rot.T, dtype=np.float64)
+        local_z = float(local[2])
+        half_height = max(self.height * 0.5, 1e-9)
+        t = np.clip((local_z + half_height) / (2.0 * half_height), 0.0, 1.0)
+        return float((1.0 - t) * self.radius_bottom + t * self.radius_top)
+
+    def profile_width_at_world_z(self, z_world: float) -> float:
+        """Return an approximate world-space profile width from the local model."""
+        return float(2.0 * self.radius_at_world_z(z_world))
+
     @staticmethod
     def _rotation_matrix_to_z(axis: np.ndarray) -> np.ndarray:
         """Return a rotation matrix that aligns the given axis with +Z."""
@@ -128,17 +156,18 @@ class SuperFrustum:
         r2 = self.radius_top
         h = self.height / 2.0
 
-        p_cone = p_local + np.array([0.0, 0.0, h], dtype=np.float64)
-        q0 = np.linalg.norm(p_cone[:, :2], axis=1)
-        q1 = p_cone[:, 2]
+        # The capped-cone formula uses a centered axis and a half-height.
+        # Meshes and surface samples use the same [-height/2, height/2] extent.
+        q0 = np.linalg.norm(p_local[:, :2], axis=1)
+        q1 = p_local[:, 2]
         q = np.stack([q0, q1], axis=1)
 
-        k1 = np.array([r2, self.height], dtype=np.float64)
-        k2 = np.array([r2 - r1, 2.0 * self.height], dtype=np.float64)
+        k1 = np.array([r2, h], dtype=np.float64)
+        k2 = np.array([r2 - r1, 2.0 * h], dtype=np.float64)
 
         r_edge = np.where(q1 < 0.0, r1, r2)
         ca0 = q0 - np.minimum(q0, r_edge)
-        ca1 = np.abs(q1) - self.height
+        ca1 = np.abs(q1) - h
         ca = np.stack([ca0, ca1], axis=1)
 
         dot_k2 = float(np.dot(k2, k2))
@@ -221,37 +250,10 @@ class SuperFrustum:
         Returns:
             Signed distance (negative inside, positive outside, zero on surface)
         """
-        # Transform point to local coordinate system
-        # 1. Translate to origin
-        p = point - self.position
-
-        # 2. Rotate to align axis with Z
-        axis = self.get_axis_vector()
-        p_local = self._rotate_to_z_axis(p, axis)
-
-        # 3. Apply capped cone SDF (from Inigo Quilez)
-        # Cone is centered at origin, extends from -h/2 to +h/2 along Z
-        r1 = self.radius_bottom
-        r2 = self.radius_top
-        h = self.height / 2.0  # Half-height for centered cone
-
-        # Translate to cone's coordinate system (base at origin, extends upward)
-        p_cone = p_local + np.array([0, 0, h])
-
-        # Capped cone SDF (exact formula from IQ)
-        q = np.array([np.linalg.norm(p_cone[:2]), p_cone[2]])
-        k1 = np.array([r2, self.height])
-        k2 = np.array([r2 - r1, 2.0 * self.height])
-
-        ca = np.array(
-            [q[0] - min(q[0], r1 if q[1] < 0.0 else r2), abs(q[1]) - self.height]
-        )
-
-        cb = q - k1 + k2 * np.clip(np.dot(k1 - q, k2) / np.dot(k2, k2), 0.0, 1.0)
-
-        s = -1.0 if (cb[0] < 0.0 and ca[1] < 0.0) else 1.0
-
-        return s * np.sqrt(min(np.dot(ca, ca), np.dot(cb, cb)))
+        point = np.asarray(point, dtype=np.float64)
+        if point.shape != (3,):
+            raise ValueError("point must have shape (3,)")
+        return float(self.sdf_batch(point[None, :])[0])
 
     def _rotate_to_z_axis(self, point: np.ndarray, axis: np.ndarray) -> np.ndarray:
         """
@@ -381,6 +383,113 @@ class SuperFrustum:
 
         return grads
 
+    def sample_surface(self, n: int) -> np.ndarray:
+        """Return deterministic samples on side and cap surfaces."""
+        if n <= 0:
+            return np.zeros((0, 3), dtype=np.float64)
+
+        side_count = max(1, int(round(n * 0.7)))
+        cap_count = max(0, n - side_count)
+        golden_angle = np.pi * (3.0 - np.sqrt(5.0))
+
+        side_idx = np.arange(side_count, dtype=np.float64)
+        z = -self.height / 2.0 + self.height * ((side_idx + 0.5) / side_count)
+        t = (z + self.height / 2.0) / max(self.height, 1e-12)
+        radius = (1.0 - t) * self.radius_bottom + t * self.radius_top
+        theta = side_idx * golden_angle
+        local = [
+            np.stack([radius * np.cos(theta), radius * np.sin(theta), z], axis=1)
+        ]
+
+        if cap_count > 0:
+            bottom_count = cap_count // 2
+            top_count = cap_count - bottom_count
+            for count, cap_z, cap_radius in (
+                (bottom_count, -self.height / 2.0, self.radius_bottom),
+                (top_count, self.height / 2.0, self.radius_top),
+            ):
+                if count <= 0:
+                    continue
+                idx = np.arange(count, dtype=np.float64)
+                theta = idx * golden_angle
+                disc_radius = cap_radius * np.sqrt((idx + 0.5) / count)
+                local.append(
+                    np.stack(
+                        [
+                            disc_radius * np.cos(theta),
+                            disc_radius * np.sin(theta),
+                            np.full(count, cap_z, dtype=np.float64),
+                        ],
+                        axis=1,
+                    )
+                )
+
+        local_points = np.concatenate(local, axis=0)[:n]
+        axis = self.get_axis_vector()
+        rot = self._rotation_matrix_to_z(axis)
+        return local_points @ rot + self.position[None, :]
+
+    def to_mesh_data(self, resolution: int = 32) -> MeshData:
+        """Return a Blender-free mesh approximation of the frustum."""
+        resolution = max(6, int(resolution))
+        ring_count = max(2, resolution // 4 + 1)
+        theta = np.linspace(0.0, 2.0 * np.pi, resolution, endpoint=False)
+        z_values = np.linspace(-self.height / 2.0, self.height / 2.0, ring_count)
+
+        vertices = []
+        for z in z_values:
+            t = (z + self.height / 2.0) / max(self.height, 1e-12)
+            radius = (1.0 - t) * self.radius_bottom + t * self.radius_top
+            vertices.append(
+                np.stack(
+                    [
+                        radius * np.cos(theta),
+                        radius * np.sin(theta),
+                        np.full(resolution, z, dtype=np.float64),
+                    ],
+                    axis=1,
+                )
+            )
+
+        local_vertices = np.concatenate(vertices, axis=0)
+        bottom_center = len(local_vertices)
+        top_center = bottom_center + 1
+        local_vertices = np.vstack(
+            [
+                local_vertices,
+                np.array(
+                    [
+                        [0.0, 0.0, -self.height / 2.0],
+                        [0.0, 0.0, self.height / 2.0],
+                    ],
+                    dtype=np.float64,
+                ),
+            ]
+        )
+
+        faces = []
+        for ring in range(ring_count - 1):
+            base = ring * resolution
+            next_base = (ring + 1) * resolution
+            for j in range(resolution):
+                nj = (j + 1) % resolution
+                faces.append((base + j, base + nj, next_base + nj, next_base + j))
+
+        top_base = (ring_count - 1) * resolution
+        for j in range(resolution):
+            nj = (j + 1) % resolution
+            faces.append((bottom_center, nj, j))
+            faces.append((top_center, top_base + j, top_base + nj))
+
+        axis = self.get_axis_vector()
+        rot = self._rotation_matrix_to_z(axis)
+        world_vertices = local_vertices @ rot + self.position[None, :]
+        return MeshData(vertices=world_vertices, faces=tuple(faces))
+
+    def to_mesh(self, resolution: int = 32) -> MeshData:
+        """Compatibility alias for protocol consumers."""
+        return self.to_mesh_data(resolution)
+
     def to_dict(self) -> Dict[str, object]:
         """
         Export parameters as dictionary.
@@ -389,6 +498,7 @@ class SuperFrustum:
             Dictionary with all 8 parameters
         """
         return {
+            "type": "superfrustum",
             "position": self.position.tolist(),
             "orientation": self.orientation.tolist(),
             "radius_bottom": self.radius_bottom,

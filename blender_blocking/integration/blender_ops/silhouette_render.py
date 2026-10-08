@@ -5,7 +5,9 @@ from __future__ import annotations
 from contextlib import contextmanager
 from dataclasses import dataclass
 import math
+import os
 from pathlib import Path
+import sys
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 try:
@@ -41,6 +43,7 @@ class SilhouetteRenderSession:
     original_camera: Optional[bpy.types.Object]
     render_settings: RenderSettingsSnapshot
     hidden_objects: Dict[bpy.types.Object, bool]
+    viewport_visibility: Dict[bpy.types.Object, Tuple[bool, bool]]
     original_materials: Dict[bpy.types.Object, List[Optional[bpy.types.Material]]]
     world: Optional[bpy.types.World]
     created_world: bool
@@ -59,6 +62,12 @@ class SilhouetteRenderSession:
         for obj, prev in self.hidden_objects.items():
             if hasattr(obj, "hide_render"):
                 obj.hide_render = prev
+
+        for obj, (hidden, hidden_viewport) in self.viewport_visibility.items():
+            if hasattr(obj, "hide_viewport"):
+                obj.hide_viewport = hidden_viewport
+            if hasattr(obj, "hide_set"):
+                obj.hide_set(hidden)
 
         for obj, mats in self.original_materials.items():
             if getattr(obj, "type", None) != "MESH":
@@ -88,8 +97,10 @@ class SilhouetteRenderSession:
             except Exception:
                 pass
 
-        if self.original_camera is not None:
-            self.scene.camera = self.original_camera
+        # Always clear or restore the scene camera before deleting a temporary
+        # camera. Blender can otherwise leave scene.camera pointing at a removed
+        # object, causing the next headless render to produce an empty frame.
+        self.scene.camera = self.original_camera
 
         if self.created_light and self.light is not None:
             bpy.data.objects.remove(self.light, do_unlink=True)
@@ -113,21 +124,35 @@ class SilhouetteRenderSession:
         self.scene.render.image_settings.color_mode = rs.color_mode
         self.scene.render.engine = rs.engine
         self.scene.render.film_transparent = rs.film_transparent
+        _update_view_layer()
 
 
 def collect_target_objects(
     scene: bpy.types.Scene,
     target_objects: Optional[Iterable[bpy.types.Object]] = None,
 ) -> List[bpy.types.Object]:
-    """Collect renderable mesh targets."""
+    """Collect only meshes belonging to the evaluated output contract."""
+    from reconstruction.output_targets import output_mesh_targets
     if not BLENDER_AVAILABLE:
         return []
     if target_objects is None:
-        mesh_objects = [obj for obj in scene.objects if obj.type == "MESH"]
-        tagged = [obj for obj in mesh_objects if obj.get("blocktool_role") == "final"]
-        return tagged if tagged else mesh_objects
+        meshes = output_mesh_targets(scene.objects)
+        tagged = [obj for obj in meshes if obj.get("blocktool_role") == "final"]
+        return output_mesh_targets(tagged) if tagged else meshes
+    return output_mesh_targets(target_objects)
 
-    return [obj for obj in target_objects if getattr(obj, "type", None) == "MESH"]
+
+def _mesh_objects(scene: bpy.types.Scene) -> List[bpy.types.Object]:
+    """Return all mesh objects in the scene."""
+    return [obj for obj in scene.objects if getattr(obj, "type", None) == "MESH"]
+
+
+def _update_view_layer() -> None:
+    """Flush visibility and material changes before render or after restore."""
+    try:
+        bpy.context.view_layer.update()
+    except Exception:
+        pass
 
 
 def ensure_world_background(
@@ -365,7 +390,41 @@ def render_silhouette_frame(
 ) -> None:
     """Render a single frame using the active scene camera."""
     session.scene.render.filepath = str(output_path)
-    bpy.ops.render.render(write_still=True)
+    with _suppress_blender_render_stdout():
+        bpy.ops.render.render(write_still=True)
+
+
+@contextmanager
+def _suppress_blender_render_stdout() -> Any:
+    """Keep Blender's per-file render log lines out of smoke-run output."""
+    stdout = getattr(sys, "stdout", None)
+    fileno = getattr(stdout, "fileno", None)
+    if not callable(fileno):
+        yield
+        return
+    try:
+        fd = fileno()
+    except (OSError, ValueError):
+        yield
+        return
+
+    try:
+        stdout.flush()
+    except Exception:
+        pass
+    saved_fd = os.dup(fd)
+    try:
+        with open(os.devnull, "w", encoding="utf-8") as devnull:
+            os.dup2(devnull.fileno(), fd)
+            yield
+    finally:
+        try:
+            if stdout is not None:
+                stdout.flush()
+        except Exception:
+            pass
+        os.dup2(saved_fd, fd)
+        os.close(saved_fd)
 
 
 @contextmanager
@@ -418,22 +477,27 @@ def silhouette_session(
 
     silhouette_material = ensure_silhouette_material(color=silhouette_color)
 
+    mesh_objects = _mesh_objects(scene)
     hidden_objects: Dict[bpy.types.Object, bool] = {}
-    for obj in scene.objects:
-        if obj.type != "MESH":
-            continue
+    viewport_visibility = {obj: (obj.hide_get() if hasattr(obj, "hide_get") else False,
+                                getattr(obj, "hide_viewport", False))
+                           for obj in mesh_objects}
+    for obj in mesh_objects:
         hidden_objects[obj] = getattr(obj, "hide_render", False)
         if obj in targets:
             obj.hide_render = False
         elif hide_non_targets:
             obj.hide_render = True
+        else:
+            obj.hide_render = False
 
     original_materials: Dict[bpy.types.Object, List[Optional[bpy.types.Material]]] = {}
     if party_mode and force_material:
         print("Warning: party_mode ignored because force_material is enabled.")
         party_mode = False
+    material_objects = targets if hide_non_targets else mesh_objects
     if force_material or party_mode:
-        for obj in targets:
+        for obj in material_objects:
             if getattr(obj, "type", None) != "MESH":
                 continue
             if hasattr(obj, "hide_set"):
@@ -450,6 +514,7 @@ def silhouette_session(
     extra_lights: List[bpy.types.Object] = []
     if party_mode:
         extra_lights = _apply_party_mode(scene, targets)
+    _update_view_layer()
 
     session = SilhouetteRenderSession(
         scene=scene,
@@ -461,6 +526,7 @@ def silhouette_session(
         original_camera=original_camera,
         render_settings=render_settings,
         hidden_objects=hidden_objects,
+        viewport_visibility=viewport_visibility,
         original_materials=original_materials,
         world=world,
         created_world=created_world,

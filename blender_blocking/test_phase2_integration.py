@@ -320,7 +320,7 @@ def test_phase2_pipeline() -> None:
     print("Target: Boost from ~0.78 IoU to ~0.85-0.88 IoU")
 
     resolution = 128
-    turntable_dir = Path("test_output/phase2_vase")
+    turntable_dir = Path(__file__).resolve().parents[1] / "temp" / "phase2_vase"
 
     # Step 1: Create ground truth vase
     print("\n" + "=" * 70)
