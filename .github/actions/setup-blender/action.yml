@@ -2,7 +2,7 @@ name: Setup Blender for CI
 description: Verify a pinned official Blender archive and use its bundled Python
 inputs:
   version:
-    description: Exact supported Blender release (5.0.0 or 4.2.0)
+    description: Exact supported stable Blender release (5.2.2)
     required: true
 runs:
   using: composite

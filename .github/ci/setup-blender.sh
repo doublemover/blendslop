@@ -3,8 +3,7 @@
 set -euo pipefail
 version="${1:?Blender version required}"
 case "$version" in
-  5.0.0) series=5.0; checksum=9de96e81432afba9c0a715c7233f1eff616705b75226dc5d0fa2708ddfb0e525 ;;
-  4.2.0) series=4.2; checksum=4f4fd7646af01f6fee9d420408318381a6e52571268eb7cf9cd5033bd9e7a359 ;;
+  5.2.2) series=5.2; checksum=84098912789dc450e95697c4184fb8a90acbe5111c2ba4aede3fecb57806a168 ;;
   *) printf 'Unsupported CI Blender version: %s\n' "$version" >&2; exit 1 ;;
 esac
 [[ "$(uname -s)" == Linux && "$(uname -m)" == x86_64 ]]
@@ -31,7 +30,7 @@ blender_python=$(find "$blender_root/$series/python/bin" -maxdepth 1 \
 [[ -x "$blender_root/blender" && -n "$blender_python" && -x "$blender_python" ]]
 BLENDER_CI_EXPECTED_VERSION="$version" "$blender_root/blender" --background \
   --factory-startup --python-exit-code 1 --python-expr \
-  "import bpy, os, sys; expected = tuple(map(int, os.environ['BLENDER_CI_EXPECTED_VERSION'].split('.'))); assert bpy.app.version == expected, (bpy.app.version, expected); print('Blender:', bpy.app.version_string, 'Python:', sys.version)"
+  "import bpy, os, sys; expected = tuple(map(int, os.environ['BLENDER_CI_EXPECTED_VERSION'].split('.'))); assert bpy.app.version == expected and bpy.app.version_cycle == 'release', (bpy.app.version, bpy.app.version_cycle, expected); print('Blender:', bpy.app.version_string, 'Python:', sys.version)"
 printf '%s\n' "$blender_root" >> "$GITHUB_PATH"
 printf 'BLENDER_PYTHON=%s\n' "$blender_python" >> "$GITHUB_ENV"
 "$blender_python" --version

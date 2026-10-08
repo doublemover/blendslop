@@ -477,14 +477,14 @@ class QualityRefinementSmokeTests(unittest.TestCase):
     def test_command_format_quotes_windows_paths(self) -> None:
         formatted = format_command(
             (
-                r"C:\Program Files\Blender Foundation\Blender 5.0\blender.exe",
+                r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe",
                 "--background",
             )
         )
 
         self.assertTrue(formatted.startswith("& "))
         self.assertIn(
-            '"C:\\Program Files\\Blender Foundation\\Blender 5.0\\blender.exe"',
+            '"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe"',
             formatted,
         )
 

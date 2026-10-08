@@ -37,7 +37,7 @@ When referencing `docs/IMPLEMENTATION_SPEC.md`, always include line numbers (e.g
 Use 4-space indentation and standard Python conventions (PEP 8). Favor `snake_case` for functions/variables, `CapWords` for classes, and keep modules focused by feature area (`integration/`, `primitives/`, etc.). Name new tests as `test_<feature>.py` and wire them into `test_runner.py` if they should run in CI.
 
 ## Testing Guidelines
-Tests run through the custom Blender test runner (not pytest). Pure-Python suites can run outside Blender (`python blender_blocking/test_runner.py`), but Blender API tests must run in headless Blender (`--background`). Quick mode skips the slow end-to-end validation. CI runs Blender 5.0 and Blender 4.2 (LTS) in containers; ensure changes are compatible with both versions if you touch Blender APIs.
+Tests run through the custom Blender test runner (not pytest). Pure-Python suites can run outside Blender (`python blender_blocking/test_runner.py`), but Blender API tests must run in headless Blender (`--background`). Quick mode skips the slow end-to-end validation. Support only the latest official stable Blender release: currently 5.2.2 LTS (verified 2026-10-08). CI provisions that exact official archive on a hosted runner; older releases and previews are unsupported. Keep ordinary API correctness tests.
 
 ## Commit & Pull Request Guidelines
 Come up with really funny jokes about blenders for commit subjects. Make the details a comprehensive list of the changes. 

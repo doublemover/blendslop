@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / "blender_blocking")]
 from scripts.run_comparable_pass import run_child, worker, dump
 
-BLENDER = r"C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
+BLENDER = r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
 OUT = ROOT / "temp/bounded-pass-20261006"
 
 def main():

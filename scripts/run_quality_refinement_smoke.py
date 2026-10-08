@@ -38,7 +38,7 @@ RUN_ROOT = TEMP_ROOT / "quality-refinement-runs"
 PHASE_STATE_SCHEMA = "quality_refinement_phase_state_v1"
 DEFAULT_CACHE_ROOT = TEMP_ROOT / "quality-refinement-cache"
 DEFAULT_BLENDER_EXE = (
-    r"C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
+    r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
 )
 DEFAULT_AMBITIOUS_MODES = (
     "visual_hull_voxel",

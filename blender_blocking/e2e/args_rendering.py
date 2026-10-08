@@ -253,7 +253,7 @@ def add_mesh_join_args(parser: argparse.ArgumentParser) -> None:
     )
     join.add_argument(
         "--boolean-solver",
-        choices=("auto", "EXACT", "MANIFOLD", "FLOAT", "FAST"),
+        choices=("auto", "EXACT", "MANIFOLD", "FLOAT"),
         default=None,
     )
     join.add_argument(

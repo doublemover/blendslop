@@ -4,8 +4,8 @@ Get started with the Blender automated blocking tool in minutes.
 
 ## Prerequisites
 
-- Blender 4.2 LTS or 5.0 (tested)
-- Python 3.8+
+- Blender 5.2.2 LTS stable only (current release, verified 2026-10-08)
+- Blender's bundled Python 3.13
 
 ## REQUIRED: Blender Python Setup
 
@@ -23,7 +23,7 @@ The tool requires dependencies (see `requirements.txt`) to be installed **direct
    import sys
    print(sys.executable)
    ```
-   This will print something like: `/Applications/Blender.app/Contents/Resources/4.2/python/bin/python3.11`
+   This will print something like: `/Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13`
 
 2. **Install dependencies:**
    ```bash
@@ -172,7 +172,7 @@ python -m blender_blocking.refinement_lab.cli plan --suite default-vase --track 
 Run one actual Blender refinement smoke:
 
 ```powershell
-& "C:\Program Files\Blender Foundation\Blender 5.0\blender.exe" --background --python blender_blocking\test_e2e_validation.py -- `
+& "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --background --python blender_blocking\test_e2e_validation.py -- `
   --refinement-suite default-vase `
   --refinement-track profile-loft-refinement `
   --refinement-max-runs 1 `

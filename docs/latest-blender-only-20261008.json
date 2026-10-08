@@ -1,0 +1,162 @@
+{
+  "affected_pure_checks": {
+    "errors": 0,
+    "failures": 0,
+    "followup_log": "targeted-quoting.log",
+    "harness_correction": "72 actual checks passed in original invocation; one wrong loader method name corrected and that sole case passed separately",
+    "intended_checks_verified": 73,
+    "modules": [
+      "test_blender_runtime",
+      "test_runner_cli",
+      "test_config_validation",
+      "test_config_defaults",
+      "test_comparable_geometry",
+      "test_reconstruction_backends"
+    ],
+    "passed": true,
+    "run": 73,
+    "skips": 0
+  },
+  "archive_sha256": "84098912789dc450e95697c4184fb8a90acbe5111c2ba4aede3fecb57806a168",
+  "base_main": "8a1de973aeeae3fb22d9940cabf22b4f00e924ce",
+  "branch": "correction/latest-blender-only-20261008",
+  "cadence_tests": {
+    "failed": 0,
+    "passed": 28
+  },
+  "checksum_manifest": "https://download.blender.org/release/Blender5.2/blender-5.2.2.sha256",
+  "checksum_mirror_manifests_identical": [
+    "https://ftp.halifax.rwth-aachen.de/blender/release/Blender5.2/blender-5.2.2.sha256",
+    "https://ftp.nluug.nl/graphics/blender/release/Blender5.2/blender-5.2.2.sha256"
+  ],
+  "existing_runtime": {
+    "boolean_solvers": [
+      "FLOAT",
+      "EXACT",
+      "MANIFOLD"
+    ],
+    "eevee_properties": [
+      "rna_type",
+      "gi_diffuse_bounces",
+      "gi_cubemap_resolution",
+      "gi_visibility_resolution",
+      "gi_glossy_clamp",
+      "gi_irradiance_pool_size",
+      "taa_samples",
+      "taa_render_samples",
+      "use_taa_reprojection",
+      "ray_tracing_method",
+      "use_shadow_jitter_viewport",
+      "clamp_surface_direct",
+      "clamp_surface_indirect",
+      "clamp_volume_direct",
+      "clamp_volume_indirect",
+      "direct_light_intensity",
+      "indirect_light_intensity",
+      "volumetric_start",
+      "volumetric_end",
+      "volumetric_tile_size",
+      "volumetric_samples",
+      "volumetric_sample_distribution",
+      "volumetric_ray_depth",
+      "volumetric_light_clamp",
+      "use_volumetric_shadows",
+      "volumetric_shadow_samples",
+      "use_volume_custom_range",
+      "use_fast_gi",
+      "fast_gi_thickness_near",
+      "fast_gi_quality",
+      "fast_gi_step_count",
+      "fast_gi_ray_count",
+      "fast_gi_method",
+      "fast_gi_distance",
+      "fast_gi_bias",
+      "fast_gi_resolution",
+      "bokeh_max_size",
+      "bokeh_threshold",
+      "bokeh_neighbor_max",
+      "use_bokeh_jittered",
+      "bokeh_overblur",
+      "motion_blur_depth_scale",
+      "motion_blur_max",
+      "motion_blur_steps",
+      "use_shadows",
+      "shadow_pool_size",
+      "shadow_ray_count",
+      "shadow_step_count",
+      "light_threshold",
+      "use_overscan",
+      "overscan_size",
+      "ray_tracing_options",
+      "use_raytracing",
+      "shadow_resolution_scale"
+    ],
+    "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+    "render_engines": [
+      "BLENDER_EEVEE"
+    ],
+    "render_sample_properties": [],
+    "version": [
+      5,
+      2,
+      2
+    ],
+    "version_cycle": "release",
+    "version_string": "5.2.2 LTS"
+  },
+  "historical_packets_changed": false,
+  "hosted_5_2_2_ci": "pending draft PR publication approval; local bounded current-version checks completed",
+  "local_installation_or_packages_changed": false,
+  "logs": {
+    "runtime-probe.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtime-probe.stdout.log": "1508b98de7ed987a665ed85f192458805cb8ff29f49b46d27580a504449fc0b0",
+    "targeted-native.stderr.log": "d60fc10773b93a1c394fa1a47c59aa21ced3af1b86b836e32dfb2b3a76f5a603",
+    "targeted-native.stdout.log": "97d86596ebb4b251766e918c0d9bf06a43700c9dd1a14119b4f72d7659133d0c",
+    "targeted-pure.log": "f53051781c4635b631de5602c2f78e08a0b0672c798b4e238b0580f9dce0b7cb",
+    "targeted-quoting.log": "0560a4491eb84e75d489bbaa8868482125df72a5b8c670c5a611ccb0c1c48ff7"
+  },
+  "native_checks": {
+    "cycle": "release",
+    "errors": 0,
+    "failures": 0,
+    "passed": true,
+    "run": 10,
+    "skips": 0,
+    "version": [
+      5,
+      2,
+      2
+    ],
+    "workflow_constructor_gate": true
+  },
+  "native_process": {
+    "elapsed_s": 6.821,
+    "headless": true,
+    "memory_cap_mib": 2048,
+    "peak_rss_mib": 397.73,
+    "renders": 0,
+    "threads": 2,
+    "time_cap_s": 60
+  },
+  "new_pr_or_main_merge": false,
+  "official_current_sources": [
+    "https://www.blender.org/download/",
+    "https://www.blender.org/releases/5-2/",
+    "https://download.blender.org/release/Blender5.2/"
+  ],
+  "old_full_suite_rerun": false,
+  "preview_builds_excluded": true,
+  "proposed_integration": "Draft PR from correction/latest-blender-only-20261008 to main; run latest-only hosted full/quick/policy checks; obtain parent merge approval and merge normally with matching checked head.",
+  "protocol": "latest-stable-only-correction-v1",
+  "static_ci_contract": {
+    "bash_syntax_passed": true,
+    "exact_source_checkout_guard_preserved": true,
+    "manifest_pin_verified": true,
+    "old_target_rejected_before_provisioning": true,
+    "scheduled_current_job_only": true,
+    "single_stable_full_job": true,
+    "single_stable_quick_job": true
+  },
+  "supported_release": "5.2.2 LTS",
+  "verified_date_utc": "2026-10-08"
+}

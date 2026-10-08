@@ -5,7 +5,7 @@ Run a quick silhouette_intersection build + render in Blender.
 # outputs are no longer boxy/empty for car/star inputs.
 
 Usage (PowerShell):
-  $blender = "C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
+  $blender = "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
   & $blender --background --python scripts/debug_silhouette_intersection.py -- `
     --base car
 

@@ -2,13 +2,12 @@
 """
 Blender-specific integration test for boolean operations.
 
-This test MUST be run inside Blender to verify boolean solver compatibility.
+This test MUST be run inside Blender to verify current boolean API correctness.
 
 Usage:
     blender --background --python test_blender_boolean.py
 
-This test was added to catch boolean solver enum changes (like Blender 5.0
-removing 'FAST' in favor of 'EXACT', 'FLOAT', 'MANIFOLD').
+The supported stable release provides EXACT, FLOAT and MANIFOLD solvers.
 """
 
 from __future__ import annotations
@@ -23,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 def test_boolean_solver_enum() -> bool:
     """Test that boolean modifier uses valid solver enum."""
     print("\n" + "=" * 60)
-    print("TEST: Boolean Solver Enum Compatibility")
+    print("TEST: Current Boolean Solver Enum")
     print("=" * 60)
 
     try:
@@ -55,7 +54,7 @@ def test_boolean_solver_enum() -> bool:
         modifier = cube1.modifiers.new(name="BoolTest", type="BOOLEAN")
         modifier.operation = "UNION"
         modifier.object = cube2
-        modifier.solver = "EXACT"  # Should work in Blender 5.0+
+        modifier.solver = "EXACT"  # Should work in the current stable release
         print("✓ EXACT solver accepted")
     except TypeError as e:
         print(f"❌ FAILED: EXACT solver not valid: {e}")

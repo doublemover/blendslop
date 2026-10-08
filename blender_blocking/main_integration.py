@@ -161,6 +161,9 @@ class BlockingWorkflow:
             side_path: Path to side view reference image
             top_path: Path to top view reference image
         """
+        from utils.blender_version import get_blender_version, require_supported_blender
+        if get_blender_version() is not None:
+            require_supported_blender()
         self.front_path = front_path
         self.side_path = side_path
         self.top_path = top_path

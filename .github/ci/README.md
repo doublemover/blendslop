@@ -52,23 +52,23 @@ recurring cron entries. Scheduled checks do not validate an unmerged PR head.
 
 ## Blender runtime provisioning
 
-PR/push and scheduled full jobs share `.github/actions/setup-blender` on hosted
-Ubuntu 24.04. The existing 5.0 and 4.2 targets use exact official Linux x64
-releases 5.0.0 and 4.2.0. `.github/ci/setup-blender.sh` pins SHA-256 values from
-the release manifests, cross-checked byte-for-byte at Blender-listed RWTH Aachen
-and NLUUG mirrors. It tries the official download host, then the listed Aachen
-mirror for transfer failures. A checksum mismatch fails before extraction or
-execution. Each job uses its own runner temporary directory and the archive's
-bundled Python; no developer-machine runtime changes are needed.
+Only the latest official stable release is supported: **5.2.2 LTS**, verified
+2026-10-08 against the [official download](https://www.blender.org/download/)
+and [release page](https://www.blender.org/releases/5-2/). Older versions and
+previews are unsupported. PR/push full and quick jobs, and the single scheduled
+full job, share `.github/actions/setup-blender` on hosted Ubuntu 24.04.
 
-The shared action installs the repository requirements into bundled Python.
-All test invocations use factory startup, a virtual X display, background mode
-and an explicit Python failure exit code. Full jobs remain full; quick mode
-remains quick. Job names and scheduled immutable source checkout checks remain
-unchanged. Each job is bounded to 45 minutes. Original missing Docker tags caused
-run 37845681445 to fail before checkout, so that run contains no test evidence.
+`.github/ci/setup-blender.sh` pins the official Linux x64 archive SHA-256 from the
+[release manifest](https://download.blender.org/release/Blender5.2/blender-5.2.2.sha256),
+cross-checked byte-for-byte at Blender-listed RWTH Aachen and NLUUG mirrors.
+It tries the official host then Aachen for transfer failures; a checksum mismatch
+fails before extraction or execution. Each job has a private runner temporary
+directory, uses bundled Python and installs repository requirements there.
+The exact Blender version and stable release cycle are checked before tests.
 
-Release manifests:
-- <https://download.blender.org/release/Blender5.0/blender-5.0.0.sha256>
-- <https://download.blender.org/release/Blender4.2/blender-4.2.0.sha256>
-- Listed mirrors: <https://mirror.blender.org/source/blender-3.6.14.tar.xz?mirrorlist=>
+All tests use factory startup, a virtual display, background mode and an explicit
+Python failure exit code. Full remains full; quick retains its two intended slow
+suite skips. Jobs are bounded to 45 minutes. The cadence collector expects only
+`Test with Blender 5.2.2 (stable)` as scheduled full coverage. Cadence, main source
+selection and immutable checkout guards are unchanged. No local installation,
+preview adoption, paid runner or historical cleanup is implied.

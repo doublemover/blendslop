@@ -109,15 +109,11 @@ def _engine_candidates(requested: Optional[str]) -> List[str]:
     aliases = {
         "WORKBENCH": ["BLENDER_WORKBENCH", "WORKBENCH"],
         "BLENDER_WORKBENCH": ["BLENDER_WORKBENCH", "WORKBENCH"],
-        "EEVEE": ["BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"],
-        "BLENDER_EEVEE": ["BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"],
-        "BLENDER_EEVEE_NEXT": ["BLENDER_EEVEE_NEXT", "BLENDER_EEVEE"],
+        "EEVEE": ["BLENDER_EEVEE"],
+        "BLENDER_EEVEE": ["BLENDER_EEVEE"],
     }
     candidates = aliases.get(requested, [requested])
-    if requested.startswith("BLENDER_EEVEE") or requested == "EEVEE":
-        candidates = candidates + ["BLENDER_WORKBENCH", "WORKBENCH"]
-    else:
-        candidates = candidates + ["BLENDER_WORKBENCH", "WORKBENCH"]
+    candidates = candidates + ["BLENDER_WORKBENCH", "WORKBENCH"]
     deduped: List[str] = []
     for candidate in candidates:
         if candidate not in deduped:

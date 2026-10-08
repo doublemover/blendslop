@@ -32,7 +32,7 @@ _VALID_COLOR_MODES = {"BW", "RGBA"}
 
 _VALID_CONTOUR_MODES = {"external", "ccomp", "tree", "hierarchy"}
 
-_VALID_BOOLEAN_SOLVERS = {"auto", "EXACT", "MANIFOLD", "FLOAT", "FAST"}
+_VALID_BOOLEAN_SOLVERS = {"auto", "EXACT", "MANIFOLD", "FLOAT"}
 
 _VALID_INVERT_POLICIES = {"auto", "invert", "no_invert"}
 

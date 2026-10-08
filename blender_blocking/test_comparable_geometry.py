@@ -100,17 +100,17 @@ class ComparableGeometryTests(unittest.TestCase):
             payload = {"backend_result": {"mesh_path": str(proxy)}, "mesh_path": str(rendered)}
             self.assertEqual(_mesh_path_from_payload(payload), rendered)
 
-    def test_validator_resolves_engine_alias_and_guards_removed_sample_property(self):
+    def test_validator_records_current_engine_and_unavailable_sample_property(self):
         from unittest.mock import patch
         from blender_blocking.e2e import validator
         render = SimpleNamespace(engine="BLENDER_WORKBENCH", image_settings=SimpleNamespace(),
-                                 bl_rna=SimpleNamespace(properties={"engine": SimpleNamespace(enum_items=[SimpleNamespace(identifier="BLENDER_EEVEE_NEXT")])}))
+                                 bl_rna=SimpleNamespace(properties={"engine": SimpleNamespace(enum_items=[SimpleNamespace(identifier="BLENDER_EEVEE")])}))
         scene = SimpleNamespace(render=render, eevee=SimpleNamespace())
         instance = object.__new__(validator.E2EValidator)
         instance.render_config = SimpleNamespace(transparent_bg=True, color_mode="RGBA", resolution=(64,64), engine="BLENDER_EEVEE", samples=64)
         with patch.object(validator, "bpy", SimpleNamespace(context=SimpleNamespace(scene=scene))):
             instance.setup_render_settings()
-        self.assertEqual(render.engine, "BLENDER_EEVEE_NEXT")
+        self.assertEqual(render.engine, "BLENDER_EEVEE")
         self.assertIsNone(instance.render_engine_evidence["samples_applied"])
 
 

@@ -76,11 +76,11 @@ class SilhouetteIntersectionBackend(BaseBackend):
             errors.append("contour_mode must be external or tree")
         if str(config.get("boolean_solver", "auto")) not in {
             "auto",
-            "FAST",
+            "FLOAT",
             "EXACT",
             "MANIFOLD",
         }:
-            errors.append("boolean_solver must be auto, FAST, EXACT, or MANIFOLD")
+            errors.append("boolean_solver must be auto, FLOAT, EXACT, or MANIFOLD")
         return errors
 
     def reconstruct(self, request: CandidateRequest) -> CandidateResult:
