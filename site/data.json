@@ -1,0 +1,702 @@
+{
+  "schema": 1,
+  "evidenceDate": "2026-10-08",
+  "sourceSnapshot": "69eb23128a18006501b2a1f89e8df129bfdc048f",
+  "runtime": {
+    "blender": "5.2.2 LTS",
+    "python": "3.13.13",
+    "nativeBoundaryHelper": "Open3D 0.19.0 / Python 3.12.0"
+  },
+  "scope": "Retained synthetic reference preparation and two actual reconstructions; no new renders or benchmark campaign for this site.",
+  "views": [
+    "front",
+    "side",
+    "top",
+    "oblique_35_28",
+    "oblique_145_40"
+  ],
+  "silhouetteLimits": {
+    "area": 0.7,
+    "boundary": 0.8,
+    "distance": 0.05
+  },
+  "referenceSummary": {
+    "required_families": 12,
+    "topology_screens_passed": 12,
+    "edit_responses_passed": 12,
+    "negative_controls_caught": 3
+  },
+  "families": [
+    {
+      "id": "sphere",
+      "label": "Sphere",
+      "parameters": {
+        "primitive": "sphere",
+        "radius": 0.8
+      },
+      "reference": {
+        "front": "assets/sphere-source-front.png",
+        "side": "assets/sphere-source-side.png",
+        "top": "assets/sphere-source-top.png",
+        "oblique_35_28": "assets/sphere-source-oblique_35_28.png",
+        "oblique_145_40": "assets/sphere-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/sphere-source-oblique_35_28.png",
+      "referenceGeometry": "57b817e1ce32d58a55851ed448aad12ad4d2057c48066cd00f11aa41dff86fa9",
+      "referenceObjSha256": "2a8dfaaeff22941d88e63727cae3cfdff6fa8c33783dc38a3fb222a1caa5712e",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": false
+    },
+    {
+      "id": "anisotropic_ellipsoid",
+      "label": "Anisotropic ellipsoid",
+      "parameters": {
+        "primitive": "ellipsoid",
+        "radii": [
+          0.9,
+          0.55,
+          0.7
+        ]
+      },
+      "reference": {
+        "front": "assets/anisotropic_ellipsoid-source-front.png",
+        "side": "assets/anisotropic_ellipsoid-source-side.png",
+        "top": "assets/anisotropic_ellipsoid-source-top.png",
+        "oblique_35_28": "assets/anisotropic_ellipsoid-source-oblique_35_28.png",
+        "oblique_145_40": "assets/anisotropic_ellipsoid-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/anisotropic_ellipsoid-source-oblique_35_28.png",
+      "referenceGeometry": "a0c0d42370a07c99b4386a641be8fab99a43db5bdc11ea8d0741ccf1c71a144e",
+      "referenceObjSha256": "d3e1c4bce3dc34ff264850c6d6a170e77b8ad0680c37b4b28ed29c74a745954f",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": false
+    },
+    {
+      "id": "cylinder",
+      "label": "Cylinder",
+      "parameters": {
+        "primitive": "cylinder",
+        "radius": 0.65,
+        "height": 1.6
+      },
+      "reference": {
+        "front": "assets/cylinder-source-front.png",
+        "side": "assets/cylinder-source-side.png",
+        "top": "assets/cylinder-source-top.png",
+        "oblique_35_28": "assets/cylinder-source-oblique_35_28.png",
+        "oblique_145_40": "assets/cylinder-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/cylinder-source-oblique_35_28.png",
+      "referenceGeometry": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a",
+      "referenceObjSha256": "1431a6f228adc061c25a538803b2247ad4675599d6026994e10b148509c333db",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": false
+    },
+    {
+      "id": "tapered_frustum",
+      "label": "Tapered frustum",
+      "parameters": {
+        "primitive": "frustum",
+        "radius_bottom": 0.8,
+        "radius_top": 0.35,
+        "height": 1.8
+      },
+      "reference": {
+        "front": "assets/tapered_frustum-source-front.png",
+        "side": "assets/tapered_frustum-source-side.png",
+        "top": "assets/tapered_frustum-source-top.png",
+        "oblique_35_28": "assets/tapered_frustum-source-oblique_35_28.png",
+        "oblique_145_40": "assets/tapered_frustum-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/tapered_frustum-source-oblique_35_28.png",
+      "referenceGeometry": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+      "referenceObjSha256": "a3b2ea8d04dc8b85b8fd226e06a8bf05a74e20dba8b6d74afe4b90e785cb689d",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": false
+    },
+    {
+      "id": "smooth_vase",
+      "label": "Smooth vase",
+      "parameters": {
+        "builder": "analytic_vase",
+        "height": 2.6,
+        "radius_mean": 0.6,
+        "radius_amplitude": 0.2
+      },
+      "reference": {
+        "front": "assets/smooth_vase-source-front.png",
+        "side": "assets/smooth_vase-source-side.png",
+        "top": "assets/smooth_vase-source-top.png",
+        "oblique_35_28": "assets/smooth_vase-source-oblique_35_28.png",
+        "oblique_145_40": "assets/smooth_vase-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/smooth_vase-source-oblique_35_28.png",
+      "referenceGeometry": "e61731bc458f5c6bf52a311b10a879ae5a4bd914dd2f7954f0f99a86275273c9",
+      "referenceObjSha256": "0a67540aaaecb9385a80de1d6540a73851ad4a894f50029695f5ed04e96ea57d",
+      "status": "failed",
+      "statusLabel": "Required view failed",
+      "summary": "The surface and boundary pass; the held-out oblique 145 / 40 degree view fails its boundary gate.",
+      "verdicts": {
+        "silhouette": "failed",
+        "surface": "passed",
+        "boundary": "passed",
+        "editability": "passed"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": false,
+      "output": {
+        "front": "assets/smooth_vase-output-front.png",
+        "side": "assets/smooth_vase-output-side.png",
+        "top": "assets/smooth_vase-output-top.png",
+        "oblique_35_28": "assets/smooth_vase-output-oblique_35_28.png",
+        "oblique_145_40": "assets/smooth_vase-output-oblique_145_40.png"
+      },
+      "inspection": {
+        "front": "assets/smooth_vase-inspection-front.png",
+        "oblique_35_28": "assets/smooth_vase-inspection-oblique_35_28.png",
+        "oblique_145_40": "assets/smooth_vase-inspection-oblique_145_40.png"
+      },
+      "geometry": "922a9f0d4391971c256827b070496146b6c82ed2e3d8c565c47d6ffa9ae97b55",
+      "objSha256": "6417db050b8f9be07cfa561603c183e0cac1ac0b2608bab09d3d52b8501c94e7",
+      "metrics": {
+        "front": {
+          "area_iou": 0.9960325910318626,
+          "boundary_iou": 0.9260336588406399,
+          "signed_distance_loss": 0.0006311369264935252,
+          "passed": true
+        },
+        "oblique_145_40": {
+          "area_iou": 0.9907988752132024,
+          "boundary_iou": 0.7890010090817356,
+          "signed_distance_loss": 0.0013789550612983703,
+          "passed": false
+        },
+        "oblique_35_28": {
+          "area_iou": 0.9921522885270377,
+          "boundary_iou": 0.8122782496505752,
+          "signed_distance_loss": 0.0014656429017971817,
+          "passed": true
+        },
+        "side": {
+          "area_iou": 0.9960325910318626,
+          "boundary_iou": 0.9260336588406399,
+          "signed_distance_loss": 0.0006311369264935252,
+          "passed": true
+        },
+        "top": {
+          "area_iou": 0.9914957131451977,
+          "boundary_iou": 0.8294138294138295,
+          "signed_distance_loss": 0.0011696756580956702,
+          "passed": true
+        }
+      },
+      "surface": {
+        "symmetric_mean_distance_world": 0.0028685978900995224,
+        "normal_angle_p95_degrees": 2.320508114573107,
+        "sample_count_per_direction": 4096,
+        "seed": 61007,
+        "limits": {
+          "mean": 0.003,
+          "normalP95": 2.5
+        }
+      },
+      "boundaryQualified": true,
+      "accepted": false,
+      "editScope": "Native source-section recipe regeneration preserves the artist object and edit options.",
+      "borderNote": "Frozen oblique frames touch the image boundary. Scores describe visible frames; reference cameras were preserved.",
+      "referenceInspection": {
+        "front": "assets/smooth_vase-reference-inspection-front.png",
+        "oblique_35_28": "assets/smooth_vase-reference-inspection-oblique_35_28.png",
+        "oblique_145_40": "assets/smooth_vase-reference-inspection-oblique_145_40.png"
+      }
+    },
+    {
+      "id": "torus",
+      "label": "Torus",
+      "parameters": {
+        "primitive": "torus",
+        "major_radius": 0.7,
+        "minor_radius": 0.22
+      },
+      "reference": {
+        "front": "assets/torus-source-front.png",
+        "side": "assets/torus-source-side.png",
+        "top": "assets/torus-source-top.png",
+        "oblique_35_28": "assets/torus-source-oblique_35_28.png",
+        "oblique_145_40": "assets/torus-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/torus-source-oblique_35_28.png",
+      "referenceGeometry": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+      "referenceObjSha256": "749485e2aeac814aeeeb3404d44b8b00c5aa987f8b047a5581da8fc12a7447ce",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": true
+    },
+    {
+      "id": "capsule",
+      "label": "Capsule",
+      "parameters": {
+        "primitive": "capsule",
+        "radius": 0.4,
+        "segment_height": 1.2
+      },
+      "reference": {
+        "front": "assets/capsule-source-front.png",
+        "side": "assets/capsule-source-side.png",
+        "top": "assets/capsule-source-top.png",
+        "oblique_35_28": "assets/capsule-source-oblique_35_28.png",
+        "oblique_145_40": "assets/capsule-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/capsule-source-oblique_35_28.png",
+      "referenceGeometry": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+      "referenceObjSha256": "4d9576241247dd101d87a9944d5ecff9cede9f32a530951be348bde5175b0d13",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": true
+      },
+      "heldOut": false
+    },
+    {
+      "id": "rounded_box",
+      "label": "Rounded box",
+      "parameters": {
+        "primitive": "rounded_box",
+        "dimensions": {
+          "width": 1.6,
+          "depth": 1.1,
+          "height": 1.3
+        },
+        "radius": 0.15
+      },
+      "reference": {
+        "front": "assets/rounded_box-source-front.png",
+        "side": "assets/rounded_box-source-side.png",
+        "top": "assets/rounded_box-source-top.png",
+        "oblique_35_28": "assets/rounded_box-source-oblique_35_28.png",
+        "oblique_145_40": "assets/rounded_box-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/rounded_box-source-oblique_35_28.png",
+      "referenceGeometry": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+      "referenceObjSha256": "3199bc9c887f4263d7af5546aee3e6f07bee0e9ca73f1a377462fe0193923b72",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": false
+    },
+    {
+      "id": "thin_plate",
+      "label": "Thin plate",
+      "parameters": {
+        "primitive": "box",
+        "dimensions": {
+          "width": 1.6,
+          "depth": 0.08,
+          "height": 1.2
+        }
+      },
+      "reference": {
+        "front": "assets/thin_plate-source-front.png",
+        "side": "assets/thin_plate-source-side.png",
+        "top": "assets/thin_plate-source-top.png",
+        "oblique_35_28": "assets/thin_plate-source-oblique_35_28.png",
+        "oblique_145_40": "assets/thin_plate-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/thin_plate-source-oblique_35_28.png",
+      "referenceGeometry": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+      "referenceObjSha256": "9dcebc81006a2134b3a6a955f6e3b4089a235b31fb8e776f5c13c786419ed8b2",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": true
+    },
+    {
+      "id": "concave_arch",
+      "label": "Concave arch",
+      "parameters": {
+        "builder": "compound",
+        "parts": [
+          {
+            "type": "box",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              1.8,
+              0.4,
+              1.8
+            ]
+          },
+          {
+            "type": "box",
+            "center": [
+              0,
+              0,
+              -0.3
+            ],
+            "size": [
+              1.0,
+              0.8,
+              1.4
+            ],
+            "boolean": "subtract"
+          }
+        ]
+      },
+      "reference": {
+        "front": "assets/concave_arch-source-front.png",
+        "side": "assets/concave_arch-source-side.png",
+        "top": "assets/concave_arch-source-top.png",
+        "oblique_35_28": "assets/concave_arch-source-oblique_35_28.png",
+        "oblique_145_40": "assets/concave_arch-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/concave_arch-source-oblique_35_28.png",
+      "referenceGeometry": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+      "referenceObjSha256": "d05a2f4e3c235dbbcb72538f3e9ca310964eb290c2af86540772fb8bbe791b4f",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": true
+    },
+    {
+      "id": "asymmetric_multipart_solid",
+      "label": "Asymmetric multipart solid",
+      "parameters": {
+        "builder": "compound",
+        "parts": [
+          {
+            "type": "box",
+            "center": [
+              0,
+              0,
+              -0.25
+            ],
+            "size": [
+              1.6,
+              0.65,
+              0.5
+            ]
+          },
+          {
+            "type": "box",
+            "center": [
+              -0.4,
+              0.1,
+              0.4
+            ],
+            "size": [
+              0.45,
+              0.45,
+              1.1
+            ]
+          },
+          {
+            "type": "box",
+            "center": [
+              0.45,
+              -0.08,
+              0.12
+            ],
+            "size": [
+              0.35,
+              0.45,
+              0.65
+            ]
+          }
+        ]
+      },
+      "reference": {
+        "front": "assets/asymmetric_multipart_solid-source-front.png",
+        "side": "assets/asymmetric_multipart_solid-source-side.png",
+        "top": "assets/asymmetric_multipart_solid-source-top.png",
+        "oblique_35_28": "assets/asymmetric_multipart_solid-source-oblique_35_28.png",
+        "oblique_145_40": "assets/asymmetric_multipart_solid-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/asymmetric_multipart_solid-source-oblique_35_28.png",
+      "referenceGeometry": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+      "referenceObjSha256": "23f958204b78eca25beb9ef64851540c357f0c305dbf5f79ca3aa855318e1eb3",
+      "status": "reference",
+      "statusLabel": "Reference only",
+      "summary": "Authored reference prepared. Actual reconstruction and complete family qualification remain unavailable.",
+      "verdicts": {
+        "silhouette": "unmeasured",
+        "surface": "unqualified",
+        "boundary": "unqualified",
+        "editability": "unmeasured"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": true
+    },
+    {
+      "id": "rounded_triangle_dot",
+      "label": "Rounded triangular dot",
+      "parameters": {
+        "builder": "rounded_triangle",
+        "vertices_xy": [
+          [
+            0,
+            0.9
+          ],
+          [
+            -0.7794228634059948,
+            -0.45
+          ],
+          [
+            0.7794228634059948,
+            -0.45
+          ]
+        ],
+        "corner_radius": 0.16,
+        "thickness": 0.48,
+        "dome": "z=+-thickness/2*cos(phi), outline_scale=sin(phi)",
+        "corner_segments": 32,
+        "dome_segments": 64
+      },
+      "reference": {
+        "front": "assets/rounded_triangle_dot-source-front.png",
+        "side": "assets/rounded_triangle_dot-source-side.png",
+        "top": "assets/rounded_triangle_dot-source-top.png",
+        "oblique_35_28": "assets/rounded_triangle_dot-source-oblique_35_28.png",
+        "oblique_145_40": "assets/rounded_triangle_dot-source-oblique_145_40.png"
+      },
+      "thumbnail": "assets/rounded_triangle_dot-source-top.png",
+      "referenceGeometry": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+      "referenceObjSha256": "42bfd0466da9141fb5f5c4c788d4dfbb6cf1315e125533159aea00f37c984513",
+      "status": "unqualified",
+      "statusLabel": "Surface unqualified",
+      "summary": "Five visible-frame silhouettes and the boundary pass. Independent reference noise and surface limits are still missing.",
+      "verdicts": {
+        "silhouette": "passed",
+        "surface": "unqualified",
+        "boundary": "passed",
+        "editability": "passed"
+      },
+      "referenceChecks": {
+        "indexTopology": true,
+        "objectScaleEdit": false
+      },
+      "heldOut": true,
+      "output": {
+        "front": "assets/rounded_triangle_dot-output-front.png",
+        "side": "assets/rounded_triangle_dot-output-side.png",
+        "top": "assets/rounded_triangle_dot-output-top.png",
+        "oblique_35_28": "assets/rounded_triangle_dot-output-oblique_35_28.png",
+        "oblique_145_40": "assets/rounded_triangle_dot-output-oblique_145_40.png"
+      },
+      "inspection": {},
+      "geometry": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+      "objSha256": "5fbc257f49843ef3ecbb1274d655eb075f179d88f1cad54f8a19d3c202309876",
+      "metrics": {
+        "front": {
+          "area_iou": 0.996520080424808,
+          "boundary_iou": 0.9529742060010529,
+          "signed_distance_loss": 0.00029279884581612237,
+          "passed": true
+        },
+        "oblique_145_40": {
+          "area_iou": 0.994463054732704,
+          "boundary_iou": 0.885198969367306,
+          "signed_distance_loss": 0.0007135617344804501,
+          "passed": true
+        },
+        "oblique_35_28": {
+          "area_iou": 0.9942851293949061,
+          "boundary_iou": 0.8928685641189639,
+          "signed_distance_loss": 0.0006545060143654524,
+          "passed": true
+        },
+        "side": {
+          "area_iou": 0.995165725864814,
+          "boundary_iou": 0.9360599078341014,
+          "signed_distance_loss": 0.0003681817809404464,
+          "passed": true
+        },
+        "top": {
+          "area_iou": 0.9957906701214637,
+          "boundary_iou": 0.9024717593110391,
+          "signed_distance_loss": 0.0007598607980749961,
+          "passed": true
+        }
+      },
+      "surface": {
+        "symmetric_mean_distance_world": 0.000923875637811559,
+        "normal_angle_p95_degrees": 2.9707811690593298,
+        "sample_count_per_direction": 4096,
+        "seed": 61007
+      },
+      "boundaryQualified": true,
+      "accepted": false,
+      "editScope": "Native width, corner radius, thickness and front/back dome edits pass; exact object-scale restoration is retained.",
+      "borderNote": "Frozen oblique frames touch the image boundary. Scores describe visible frames; reference cameras were preserved.",
+      "referenceInspection": {
+        "front": "assets/rounded_triangle_dot-reference-inspection-front.png",
+        "oblique_35_28": "assets/rounded_triangle_dot-reference-inspection-oblique_35_28.png",
+        "oblique_145_40": "assets/rounded_triangle_dot-reference-inspection-oblique_145_40.png"
+      }
+    }
+  ],
+  "negativeControls": [
+    {
+      "id": "filled_cavity",
+      "caught": true,
+      "views": {
+        "front": 0.5959297520661156,
+        "oblique_145_40": 0.8563036159460131,
+        "oblique_35_28": 0.8599568605622043,
+        "side": 1.0,
+        "top": 1.0
+      },
+      "featureStatus": "failed"
+    },
+    {
+      "id": "incorrect_depth",
+      "caught": true,
+      "views": {
+        "front": 1.0,
+        "oblique_145_40": 0.8700643099767732,
+        "oblique_35_28": 0.8946464597944087,
+        "side": 0.09090909090909091,
+        "top": 0.09090909090909091
+      },
+      "featureStatus": "failed"
+    },
+    {
+      "id": "missing_multipart",
+      "caught": true,
+      "views": {
+        "front": 0.5801754285386688,
+        "oblique_145_40": 0.7852444022303132,
+        "oblique_35_28": 0.6500178768518087,
+        "side": 0.39058052821548395,
+        "top": 1.0
+      },
+      "featureStatus": "failed"
+    }
+  ],
+  "correctness": {
+    "head": "69eb23128a18006501b2a1f89e8df129bfdc048f",
+    "full": {
+      "passed": 137,
+      "failed": 0,
+      "skipped": 0
+    },
+    "quick": {
+      "passed": 135,
+      "failed": 0,
+      "skipped": 2
+    },
+    "run": "https://github.com/doublemover/blendslop/actions/runs/37851341020",
+    "policyRun": "https://github.com/doublemover/blendslop/actions/runs/37851341060"
+  },
+  "evidenceLinks": {
+    "workload": "https://github.com/doublemover/blendslop/blob/main/docs/quality-implementation-20261008/coverage-workload.json",
+    "map": "https://github.com/doublemover/blendslop/blob/main/docs/quality-implementation-20261008/README.md",
+    "vase": "https://github.com/doublemover/blendslop/blob/main/docs/quality-implementation-20261008/profile-repair-evidence.json",
+    "triangle": "https://github.com/doublemover/blendslop/blob/main/docs/quality-implementation-20261008/triangle-support-evidence.json"
+  }
+}
