@@ -74,7 +74,11 @@ def parameter_variants(program, limit=6, fraction=.06, *, start_control=0, relea
                 for kind in ('size','section_exponent','sweep_bend','translation','sweep_taper','rotation')
                 for axis in (range(1) if kind=='section_exponent' else range(2) if kind in {'sweep_bend','sweep_taper'} else range(3))
                 for i,n in eligible for direction in (-1,1)
-                if kind not in {'section_exponent','sweep_bend','sweep_taper'} or n.primitive_type=='generalized_sweep']
+                if (kind not in {'section_exponent','sweep_bend','sweep_taper'} or n.primitive_type=='generalized_sweep')
+                and not (kind == 'size' and axis == 1 and n.primitive_type == 'capsule')]
+    controls += [(i,n,kind,0,direction) for i,n in eligible
+                 if n.primitive_type == 'rounded_triangle'
+                 for kind in ('triangle_corner','triangle_dome_balance') for direction in (-1,1)]
     if release_deformations:
         controls += [(i,n,kind,0,direction) for i,n in eligible
                      if n.primitive_type=='deformed_superquadric'
@@ -88,7 +92,30 @@ def parameter_variants(program, limit=6, fraction=.06, *, start_control=0, relea
         step = direction * fraction
         if kind == "size":
             dimension = DIMENSION_KEYS[axis]
-            params[dimension] = max(1e-6, float(params.get(dimension, 1.)) * np.exp(step))
+            if node.primitive_type == 'rounded_triangle':
+                from blender_blocking.primitives.rounded_triangle import RoundedTrianglePrimitive
+                part = RoundedTrianglePrimitive.from_program_parameters(params, world=False)
+                if axis < 2:
+                    if dimension in params:
+                        params[dimension] *= np.exp(step)
+                    else:
+                        scale = part.scale_xy.copy()
+                        scale[axis] *= np.exp(step)
+                        params['scale_xy'] = scale.tolist()
+                else:
+                    params[dimension] = part.thickness * np.exp(step)
+            elif node.primitive_type == 'capsule':
+                from blender_blocking.primitives.capsule import CapsulePrimitive
+                part = CapsulePrimitive.from_program_parameters(params, world=False)
+                if axis == 0:
+                    params['radius_world'] = part.radius * np.exp(step)
+                    params['segment_height_world'] = part.segment_height
+                elif 'segment_height_world' in params:
+                    params['segment_height_world'] = part.segment_height * np.exp(step)
+                else:
+                    params[dimension] = (part.segment_height + 2 * part.radius) * np.exp(step)
+            else:
+                params[dimension] = max(1e-6, float(params.get(dimension, 1.)) * np.exp(step))
             if "profile_curve" in params:
                 rows = [dict(row) for row in params["profile_curve"]]
                 keys = (("radius_x_world", "center_offset_world"),
@@ -98,6 +125,12 @@ def parameter_variants(program, limit=6, fraction=.06, *, start_control=0, relea
                         if key in row:
                             row[key] *= np.exp(step)
                 params["profile_curve"] = tuple(rows)
+        elif kind == 'triangle_corner':
+            params['corner_radius_world'] = float(params.get('corner_radius_world', params.get('corner_radius', .16))) * np.exp(step)
+        elif kind == 'triangle_dome_balance':
+            balance = float(params.get('front_fraction', .5))
+            odds = balance / (1 - balance) * np.exp(step)
+            params['front_fraction'] = odds / (1 + odds)
         elif kind in {'taper_x','taper_y','bend_angle'}:
             from blender_blocking.primitives.deformed_superquadric import DeformedSuperquadricPrimitive
             part = DeformedSuperquadricPrimitive.from_program_parameters(params)

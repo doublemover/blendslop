@@ -52,6 +52,41 @@ class RoundedTriangleTests(unittest.TestCase):
         node = ShapeNode("dot", "add", "rounded_triangle", {"front_fraction": 2})
         self.assertTrue(validate_compilable_program(ShapeProgram("1", "bad", (node,))))
 
+    def test_program_local_dimensions_and_refinement_controls_change_actual_geometry(self):
+        from reconstruction.backends.shape_program.geometry_search import parameter_variants
+        base = RoundedTrianglePrimitive()
+        absolute = RoundedTrianglePrimitive.from_program_parameters({"width_world":2.3,"depth_world":1.2})
+        vertices = absolute.to_mesh_data().vertices
+        np.testing.assert_allclose(np.ptp(vertices[:,:2],axis=0),[2.3,1.2],atol=.001)
+        program = ShapeProgram("1","dot",(ShapeNode("dot","add","rounded_triangle"),))
+        variants = parameter_variants(program,limit=64)
+        baseline = whole_program_geometry(program,resolution=16).content_hash
+        for variant in variants:
+            with self.subTest(control=variant.metadata["refinement_control"]):
+                self.assertNotEqual(whole_program_geometry(variant,resolution=16).content_hash,baseline)
+        kinds = {variant.metadata["refinement_control"]["kind"] for variant in variants}
+        self.assertTrue({"triangle_corner","triangle_dome_balance"}.issubset(kinds))
+        size = [v for v in variants if v.metadata["refinement_control"]["kind"]=="size" and
+                v.metadata["refinement_control"]["axis"]==0 and v.metadata["refinement_control"]["direction"]==1][0]
+        edited = RoundedTrianglePrimitive.from_program_parameters(size.root_nodes[0].parameters)
+        self.assertAlmostEqual(edited.scale_xy[0],np.exp(.06))
+        self.assertEqual(edited.thickness,base.thickness)
+
+    def test_reflection_preserves_asymmetric_authored_outline_and_front_back_profile(self):
+        from reconstruction.program_transforms import reflect_parameters
+        from scipy.spatial.transform import Rotation
+        parameters={"vertices_xy":[[-.2,.9],[-.7,-.5],[1.,-.4]],"corner_radius_world":.12,
+                    "height_world":.6,"front_fraction":.7,"scale_xy":[1.2,.8],
+                    "x":2.,"y":-.4,"z":.3,"rotation":Rotation.from_rotvec([.3,.2,.4]).as_matrix().tolist()}
+        part=RoundedTrianglePrimitive.from_program_parameters(parameters)
+        directions=Rotation.from_rotvec([.6,-.3,.1]).apply(np.eye(3))
+        original=part.to_mesh_data(32).vertices
+        mirrored=RoundedTrianglePrimitive.from_program_parameters(reflect_parameters(parameters,axis=0,plane=.5)).to_mesh_data(32).vertices
+        expected=original.copy();expected[:,0]=1.-expected[:,0]
+        np.testing.assert_allclose(np.max(mirrored@directions.T,axis=0),np.max(expected@directions.T,axis=0),atol=.002)
+        restored=RoundedTrianglePrimitive.from_program_parameters(reflect_parameters(reflect_parameters(parameters,axis=0,plane=.5),axis=0,plane=.5))
+        np.testing.assert_allclose(restored.to_mesh_data(32).vertices,original,atol=1e-14)
+
     def test_continuity_detects_shoulders_despite_correct_outer_radius(self):
         z = np.linspace(0, 2.6, 65)
         radii = .6 + .2 * np.cos(2 * np.pi * z / 2.6)

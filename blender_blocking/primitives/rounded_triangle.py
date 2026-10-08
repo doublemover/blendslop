@@ -163,12 +163,25 @@ class RoundedTrianglePrimitive:
     @classmethod
     def from_program_parameters(cls, parameters, *, world=True):
         from blender_blocking.reconstruction.program_transforms import position_vector, rotation_matrix
-        return cls(parameters.get("vertices_xy", DEFAULT_VERTICES),
-                   corner_radius=parameters.get("corner_radius_world", parameters.get("corner_radius", .16)),
+        vertices = np.asarray(parameters.get("vertices_xy", DEFAULT_VERTICES), float)
+        radius = parameters.get("corner_radius_world", parameters.get("corner_radius", .16))
+        if not np.isfinite(float(radius)) or float(radius) <= 0:
+            raise ValueError("rounded triangle corner radius must be finite and positive")
+        scale = np.asarray(parameters.get("scale_xy", (1., 1.)), float).copy()
+        if scale.shape != (2,) or vertices.shape != (3,2):
+            raise ValueError("rounded triangle requires three XY vertices and two scale values")
+        # Absolute local width/depth override only their corresponding scale.
+        # Without dimensions, the preserved authored outline is unchanged.
+        for axis, key in enumerate(("width_world", "depth_world")):
+            if key in parameters:
+                span = float(np.ptp(vertices[:,axis]) + 2 * float(radius))
+                scale[axis] = float(parameters[key]) / span
+        return cls(vertices,
+                   corner_radius=radius,
                    thickness=parameters.get("height_world", parameters.get("thickness", .48)),
                    front_fraction=parameters.get("front_fraction", .5),
                    corner_segments=parameters.get("corner_segments", 32),
                    dome_segments=parameters.get("dome_segments", 64),
                    center=position_vector(parameters) if world else (0., 0., 0.),
                    rotation=rotation_matrix(parameters) if world else None,
-                   scale_xy=parameters.get("scale_xy", (1., 1.)))
+                   scale_xy=scale)

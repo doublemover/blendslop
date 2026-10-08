@@ -70,7 +70,7 @@ def main():
     old=np.load(args.reference/"evaluated-exact.npz")
     reference=GeometryArrays.capture(old["vertices"],old["faces"])
     fixed_bounds=(Vector(reference.vertices.min(axis=0)),Vector(reference.vertices.max(axis=0)))
-    paths=_renders(obj,output/"calibrated-vase",fixed_bounds,["front","side","top","oblique_35_28","oblique_145_40"])
+    paths=_renders(obj,output/"calibrated-vase",fixed_bounds,["front","side","top","oblique_35_28","oblique_145_40"],camera_records=cameras)
     surface=compare_surface_arrays(reference,data)
     qualification=qualify_retained_output(data,{"native_qualification_python":str(args.qualification_python),"native_qualification_timeout_s":15.})
     gates=SilhouetteGateConfig(min_area_iou=.7,min_boundary_iou=.8,max_signed_distance_loss=.05)

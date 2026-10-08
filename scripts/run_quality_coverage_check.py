@@ -15,7 +15,7 @@ import test_runner  # expose existing qualified dependency paths after bundled p
 from run_surface_quality_check import _object, _view, _write
 
 
-def render_masks(obj, folder, bounds, views):
+def render_masks(obj, folder, bounds, views, *, camera_records=None):
     import numpy as np
     from PIL import Image
     from integration.blender_ops.silhouette_render import silhouette_session, render_silhouette_frame
@@ -26,7 +26,12 @@ def render_masks(obj, folder, bounds, views):
                             transparent_bg=False, engine="BLENDER_EEVEE",
                             background_color=(1, 1, 1, 1), silhouette_color=(0, 0, 0, 1)) as session:
         for view in views:
-            _view(session.camera, view, *bounds)
+            if camera_records is None:
+                _view(session.camera, view, *bounds)
+            else:
+                from mathutils import Matrix
+                session.camera.matrix_world = Matrix(camera_records[view]["matrix_world"])
+                session.camera.data.ortho_scale = camera_records[view]["ortho_scale"]
             path = folder / (view + "-mask.png")
             render_silhouette_frame(session, path)
             masks[view] = np.asarray(Image.open(path).convert("L")) < 128

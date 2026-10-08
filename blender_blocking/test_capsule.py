@@ -20,6 +20,22 @@ class CapsuleTests(unittest.TestCase):
             expected_volume = np.pi * .4**2 * height + 4 / 3 * np.pi * .4**3
             self.assertAlmostEqual(report["signed_volume"], expected_volume, delta=expected_volume * .015)
 
+    def test_capsule_refinement_uses_radius_and_straight_segment_controls(self):
+        from reconstruction.backends.shape_program.geometry_search import parameter_variants
+        node=ShapeNode("cap","add","capsule",{"radius_world":.4,"segment_height_world":1.2})
+        variants=parameter_variants(ShapeProgram("1","cap",(node,)),limit=64)
+        edits=[v for v in variants if v.metadata["refinement_control"]["kind"]=="size"]
+        self.assertEqual(len(edits),4)
+        for variant in edits:
+            control=variant.metadata["refinement_control"]
+            part=CapsulePrimitive.from_program_parameters(variant.root_nodes[0].parameters)
+            if control["axis"]==0:
+                self.assertAlmostEqual(part.radius,.4*np.exp(control["direction"]*.06))
+                self.assertEqual(part.segment_height,1.2)
+            else:
+                self.assertEqual(part.radius,.4)
+                self.assertAlmostEqual(part.segment_height,1.2*np.exp(control["direction"]*.06))
+
     def test_exact_distance_and_rotated_serialization(self):
         part = CapsulePrimitive(center=(2, 3, 4), rotation=[[0, 0, 1], [0, 1, 0], [-1, 0, 0]])
         restored = CapsulePrimitive.from_dict(part.to_dict())

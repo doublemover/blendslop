@@ -80,6 +80,14 @@ def reflect_parameters(parameters, *, axis=0, plane=0.):
             for loop in loops:
                 values=np.asarray(loop,float).copy();values[:,0]*=-1.;transformed.append(values.tolist())
             result[key]=transformed[0] if key=='outer' else transformed
+    if 'vertices_xy' in result:
+        # Reflection reverses winding. Restore CCW order for the authored
+        # offset-outline builder while keeping the reflected point set.
+        vertices = np.asarray(result['vertices_xy'], float).copy()
+        if vertices.shape != (3,2):
+            raise ValueError('triangle reflection requires three XY vertices')
+        vertices[:,0] *= -1.
+        result['vertices_xy'] = vertices[::-1].tolist()
     if 'profile_curve' in result:
         curve=[dict(row) for row in result['profile_curve']]
         for row in curve:

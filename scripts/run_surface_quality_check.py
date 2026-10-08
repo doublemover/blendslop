@@ -52,20 +52,32 @@ def _view(camera, name, lo, hi):
         direction = Vector((math.cos(az) * math.cos(elevation), math.sin(az) * math.cos(elevation), math.sin(elevation)))
         camera.location = center + direction * scale * 3
         camera.rotation_euler = (center - camera.location).to_track_quat("-Z", "Y").to_euler()
+        local = camera.rotation_euler.to_matrix().transposed()
+        corners = [local @ (Vector((x,y,z)) - center)
+                   for x in (lo.x,hi.x) for y in (lo.y,hi.y) for z in (lo.z,hi.z)]
+        projected = [max(p[axis] for p in corners)-min(p[axis] for p in corners) for axis in (0,1)]
+        scale = max(scale, max(projected)*1.16)
     camera.data.ortho_scale = scale
 
 
-def _renders(obj, directory, bounds, views):
+def _renders(obj, directory, bounds, views, *, camera_records=None):
     import bpy
     from integration.blender_ops.silhouette_render import silhouette_session, render_silhouette_frame
     from reconstruction.native_geometry import evaluated_arrays
     before = evaluated_arrays(obj).content_hash
     paths = {}
+    def frame(camera,view):
+        if camera_records is None:
+            _view(camera,view,*bounds)
+        else:
+            from mathutils import Matrix
+            camera.matrix_world = Matrix(camera_records[view]["matrix_world"])
+            camera.data.ortho_scale = camera_records[view]["ortho_scale"]
     with silhouette_session(target_objects=[obj], resolution=(512, 512), color_mode="BW",
                             transparent_bg=False, engine="BLENDER_EEVEE",
                             background_color=(1, 1, 1, 1), silhouette_color=(0, 0, 0, 1)) as session:
         for view in views:
-            _view(session.camera, view, *bounds)
+            frame(session.camera, view)
             path = directory / (view + "-mask.png")
             render_silhouette_frame(session, path)
             paths[view] = str(path)
@@ -80,7 +92,7 @@ def _renders(obj, directory, bounds, views):
         shading.show_cavity = False
         shading.background_type = "WORLD"
         for view in views:
-            _view(session.camera, view, *bounds)
+            frame(session.camera, view)
             render_silhouette_frame(session, directory / (view + "-neutral.png"))
         # World-space shading normal visualization. Geometric normal-angle
         # metrics below remain independent of interpolated shading normals.
@@ -105,7 +117,7 @@ def _renders(obj, directory, bounds, views):
         obj.data.materials.clear()
         obj.data.materials.append(normal_mat)
         for view in views:
-            _view(session.camera, view, *bounds)
+            frame(session.camera, view)
             render_silhouette_frame(session, directory / (view + "-normals.png"))
     after = evaluated_arrays(obj).content_hash
     if after != before:

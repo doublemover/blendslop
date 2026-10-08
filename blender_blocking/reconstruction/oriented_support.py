@@ -23,7 +23,10 @@ def primitive_support(family, directions, center, dimensions, rotation):
     """World directional support; dimensions are positive local half sizes.
 
     Cylinder dimensions are (radius, half-height), and frustum dimensions are
-    (bottom radius, top radius, half-height). The local Z column is the axis.
+    (bottom radius, top radius, half-height); capsule dimensions are (radius,
+    half straight-segment length). Rounded-triangle dimensions are (scale_x,
+    scale_y, corner_radius, front_depth, back_depth) on its authored template.
+    The local Z column is the axis.
     """
     directions = np.asarray(directions, float)
     local = directions @ np.asarray(rotation, float)
@@ -34,6 +37,14 @@ def primitive_support(family, directions, center, dimensions, rotation):
         radial = np.linalg.norm(local * dimensions, axis=1)
     elif family == "cylinder":
         radial = dimensions[1] * np.abs(local[:, 2]) + dimensions[0] * np.linalg.norm(local[:, :2], axis=1)
+    elif family == "capsule":
+        radial = dimensions[0] * np.linalg.norm(local, axis=1) + dimensions[1] * np.abs(local[:,2])
+    elif family == "rounded_triangle":
+        from primitives.rounded_triangle import DEFAULT_VERTICES
+        q = local[:,:2] * dimensions[:2]
+        planar = np.max(q @ np.asarray(DEFAULT_VERTICES).T, axis=1) + dimensions[2] * np.linalg.norm(q,axis=1)
+        depth = np.where(local[:,2] >= 0., dimensions[3], dimensions[4])
+        radial = np.hypot(planar, local[:,2] * depth)
     elif family == "frustum":
         cross = np.linalg.norm(local[:, :2], axis=1)
         radial = np.maximum(-dimensions[2] * local[:, 2] + dimensions[0] * cross,

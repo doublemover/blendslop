@@ -29,6 +29,31 @@ class OrientedSupportTests(unittest.TestCase):
         np.testing.assert_allclose(evidence.values,primitive_support('frustum',evidence.directions,[.2,-.3,.4],[.4,.4,1.],frame))
         self.assertAlmostEqual(primitive_support('cylinder',np.array([[0.,0.,1.]]),[0.,0.,0.],[.4,1.],np.eye(3))[0],1.)
 
+    def test_capsule_and_triangle_support_match_independent_tessellated_geometry(self):
+        from primitives.capsule import CapsulePrimitive
+        from primitives.rounded_triangle import RoundedTrianglePrimitive
+        frame=Rotation.from_rotvec([.3,-.2,.1]).as_matrix()
+        center=np.array([.2,-.3,.4])
+        parts=(("capsule",[.4,.6],CapsulePrimitive(radius=.4,segment_height=1.2,rotation=frame,center=center).to_mesh_data(128)),
+               ("rounded_triangle",[1.2,.8,.13,.42,.18],RoundedTrianglePrimitive(scale_xy=[1.2,.8],corner_radius=.13,thickness=.6,front_fraction=.7,rotation=frame,center=center).to_mesh_data(64)))
+        for family,dims,mesh in parts:
+            evidence=self.evidence(family,center,dims,frame)
+            sampled=np.max(mesh.vertices@evidence.directions.T,axis=0)
+            self.assertTrue(np.all(evidence.values >= sampled - 1e-12))
+            np.testing.assert_allclose(evidence.values,sampled,atol=.0004,rtol=0.)
+
+    def test_bounded_triangle_support_fit_improves_independent_mesh_observations(self):
+        from primitives.rounded_triangle import RoundedTrianglePrimitive
+        dims=np.array([1.2,.8,.13,.42,.18]);center=np.array([.2,-.3,.4]);frame=Rotation.from_rotvec([.3,-.2,.1]).as_matrix()
+        evidence=self.evidence("rounded_triangle",center,dims,frame)
+        mesh=RoundedTrianglePrimitive(scale_xy=dims[:2],corner_radius=dims[2],thickness=.6,front_fraction=.7,rotation=frame,center=center).to_mesh_data(64)
+        evidence=replace(evidence,values=np.max(mesh.vertices@evidence.directions.T,axis=0),tolerances=np.full(len(evidence.values),.0004))
+        initial=primitive_support("rounded_triangle",evidence.directions,center+[.05,-.03,.02],dims*1.05,frame)
+        before=float(np.sum(support_residual(evidence,initial)**2))
+        result=fit_whole_support("rounded_triangle",evidence,center=center+[.05,-.03,.02],dimensions=dims*1.05,rotation=frame,max_evaluations=160,max_elapsed_s=2.)
+        self.assertLess(result["support_squared_residual"],before*.01)
+        self.assertLessEqual(result["support_evaluations"],160)
+
     def test_coupled_box_fixture_recovers_observed_supports(self):
         frame=Rotation.from_rotvec([.3,-.2,.1]).as_matrix();dims=np.array([.7,.4,1.]);center=np.array([.2,-.3,.4])
         evidence=self.evidence('box',center,dims,frame)

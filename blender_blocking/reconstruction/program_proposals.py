@@ -30,7 +30,7 @@ def whole_primitive_programs(target, seed, *, max_evaluations=96, max_elapsed_s=
     from .oriented_support import support_evidence, fit_whole_support
     import time
     if any(pixels >= 4 for pixels in observed_holes(target).values()):
-        return []  # These four convex families cannot preserve a known hole.
+        return []  # Convex whole families cannot preserve a known hole.
     if points is None:
         points, _ = target_surface_points(target, resolution=24, max_points=1024)
     if len(points) < 8:
@@ -40,9 +40,19 @@ def whole_primitive_programs(target, seed, *, max_evaluations=96, max_elapsed_s=
     # PCA's longest axis seeds cylinder local Z, with a proper handed frame.
     axial_frame = frame[:, [1, 2, 0]]
     circular_radius = float(np.sqrt(radii[1]*radii[2]))
-    hypotheses = (("box", radii, frame), ("ellipsoid", radii, frame),
+    hypotheses = [("box", radii, frame), ("ellipsoid", radii, frame),
                   ("cylinder", [circular_radius, radii[0]], axial_frame),
-                  ("frustum", [circular_radius, circular_radius, radii[0]], axial_frame))
+                  ("frustum", [circular_radius, circular_radius, radii[0]], axial_frame),
+                  ("capsule", [circular_radius, max(radii[0]-circular_radius, .01*radii[0])], axial_frame)]
+    from primitives.rounded_triangle import DEFAULT_VERTICES
+    template_half = (np.ptp(np.asarray(DEFAULT_VERTICES),axis=0)+.32)/2.
+    # A proper PCA frame has arbitrary signs. Four deterministic quarter turns
+    # make the triangular outline reachable without using a reference pose.
+    for angle in (0., np.pi/2., np.pi, 3*np.pi/2.):
+        c,s = np.cos(angle),np.sin(angle)
+        local = np.array([[c,-s,0.],[s,c,0.],[0.,0.,1.]])
+        planar = np.abs(local[:2,:2]).T @ radii[:2]
+        hypotheses.append(("rounded_triangle", [*(planar/template_half), .16, radii[2], radii[2]], frame@local))
     proposals, started = [], time.perf_counter()
     for family, dimensions, rotation in hypotheses:
         remaining = max_elapsed_s - (time.perf_counter()-started) if max_elapsed_s is not None else None
@@ -54,21 +64,40 @@ def whole_primitive_programs(target, seed, *, max_evaluations=96, max_elapsed_s=
         dimensions = fit["dimensions"]
         if family in {"box", "ellipsoid"}:
             sizes = 2.*dimensions
+        elif family == "capsule":
+            sizes = np.array([2.*dimensions[0], 2.*dimensions[0], 2.*(dimensions[0]+dimensions[1])])
+        elif family == "rounded_triangle":
+            sizes = None  # Template scales are serialized explicitly, not approximate bbox dimensions.
         else:
             radius = float(max(dimensions[:1] if family == "cylinder" else dimensions[:2]))
             sizes = np.array([2.*radius, 2.*radius, 2.*dimensions[-1]])
         parameters = {**dict(zip(('x','y','z'), fit["center"].tolist())),
-                      **dict(zip(('width_world','depth_world','height_world'), sizes.tolist())),
+                      **(dict(zip(('width_world','depth_world','height_world'), sizes.tolist())) if sizes is not None else {}),
                       'rotation': fit['rotation'].tolist()}
         if family in {"cylinder", "frustum"}:
             parameters.update(radius_bottom=float(dimensions[0]),
                               radius_top=float(dimensions[0] if family == "cylinder" else dimensions[1]))
+        if family == "capsule":
+            parameters.update(radius_world=float(dimensions[0]), segment_height_world=float(2*dimensions[1]))
+        elif family == "rounded_triangle":
+            parameters.update(scale_xy=dimensions[:2].tolist(), corner_radius_world=float(dimensions[2]),
+                              height_world=float(dimensions[3]+dimensions[4]),
+                              front_fraction=float(dimensions[3]/(dimensions[3]+dimensions[4])))
         node = ShapeNode('whole_'+family, 'add', family, parameters=parameters)
         diagnostics = {key:value for key,value in fit.items() if key not in {'center','dimensions','rotation'}}
         proposals.append(replace(seed, root_nodes=(node,), constraints=(), residual_patches=(),
             metadata={**seed.metadata, 'proposal':'fitted_whole_oriented_'+family,
                       'support_fit':diagnostics, 'parts':1}))
-    return proposals
+    # Keep one best observed-support seed per family; every retained proposal
+    # still requires mask/feature/render admission. Ranking makes new useful
+    # families reachable under the existing small downstream candidate quota.
+    best = {}
+    for proposal in proposals:
+        family = proposal.root_nodes[0].primitive_type
+        score = proposal.metadata['support_fit']['support_squared_residual']
+        if family not in best or score < best[family].metadata['support_fit']['support_squared_residual']:
+            best[family] = proposal
+    return sorted(best.values(),key=lambda p:p.metadata['support_fit']['support_squared_residual'])
 
 
 def structural_programs(target, program, geometry, limit=6):

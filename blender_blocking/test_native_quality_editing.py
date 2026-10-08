@@ -66,17 +66,19 @@ class NativeQualityEditingTests(unittest.TestCase):
     def test_triangle_compiler_preserves_corner_depth_and_dome_edits(self):
         arrays = []
         for i, parameters in enumerate(({}, {"height_world": .6},
-                                         {"corner_radius_world": .24}, {"front_fraction": .7})):
+                                         {"corner_radius_world": .24}, {"front_fraction": .7},
+                                         {"width_world": 2.1,"depth_world":1.0})):
             node = ShapeNode("dot", "add", "rounded_triangle", parameters)
             compiled = compile_shape_program(ShapeProgram("1", "triangle" + str(i), (node,)),
                                              weighted_normals=False)
             arrays.append(evaluated_arrays(compiled.root_object))
             self.assertTrue(compiled.objects[0].get("blendslop_shape_node_editable"))
-        self.assertEqual(len({data.content_hash for data in arrays}), 4)
+        self.assertEqual(len({data.content_hash for data in arrays}), 5)
         self.assertAlmostEqual(np.ptp(arrays[1].vertices[:, 2]), .6, places=6)
         self.assertGreater(np.ptp(arrays[2].vertices[:, 0]), np.ptp(arrays[0].vertices[:, 0]))
         self.assertAlmostEqual(arrays[3].vertices[:, 2].max(), .336, places=6)
         self.assertAlmostEqual(arrays[3].vertices[:, 2].min(), -.144, places=6)
+        np.testing.assert_allclose(np.ptp(arrays[4].vertices[:,:2],axis=0),[2.1,1.0],atol=.001)
 
 
     def test_compound_reference_keeps_authored_world_coordinates_and_live_edits(self):
@@ -97,6 +99,28 @@ class NativeQualityEditingTests(unittest.TestCase):
             bpy.context.view_layer.update()
             self.assertEqual(evaluated_arrays(reference.object).content_hash, before.content_hash)
 
+
+    def test_oblique_quality_camera_keeps_all_bound_corners_inside_frame(self):
+        from mathutils import Vector
+        from bpy_extras.object_utils import world_to_camera_view
+        from scripts.run_surface_quality_check import _view
+        camera=bpy.data.objects.new("ObliqueFit",bpy.data.cameras.new("ObliqueFit"))
+        bpy.context.collection.objects.link(camera)
+        camera.data.type="ORTHO"
+        scene=bpy.context.scene
+        scene.render.resolution_x=scene.render.resolution_y=512
+        lo,hi=Vector((-.94,-.61,-.24)),Vector((.94,1.06,.24))
+        for view in ("oblique_35_28","oblique_145_40"):
+            _view(camera,view,lo,hi)
+            bpy.context.view_layer.update()
+            for x in (lo.x,hi.x):
+                for y in (lo.y,hi.y):
+                    for z in (lo.z,hi.z):
+                        p=world_to_camera_view(scene,camera,Vector((x,y,z)))
+                        self.assertGreater(p.x,0.)
+                        self.assertLess(p.x,1.)
+                        self.assertGreater(p.y,0.)
+                        self.assertLess(p.y,1.)
 
     def test_capsule_compiler_and_synthetic_builder_are_closed(self):
         from synthetic.quality_contracts import quality_workload
