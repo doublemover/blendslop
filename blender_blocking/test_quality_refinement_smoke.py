@@ -203,7 +203,7 @@ class QualityRefinementSmokeTests(unittest.TestCase):
         self.assertFalse(visual_hull.uses_torch_lpips_path)
         self.assertIn("--novel-compute-lpips", lpips.command)
         self.assertNotIn("--novel-compute-lpips", visual_hull.command)
-        self.assertIn("scripts\\run_refinement_lab_blender.py", visual_hull.command)
+        self.assertIn(str(Path("scripts") / "run_refinement_lab_blender.py"), visual_hull.command)
         self.assertIn("--python-exit-code", visual_hull.command)
         self.assertNotIn("--blender-exe", visual_hull.command)
 

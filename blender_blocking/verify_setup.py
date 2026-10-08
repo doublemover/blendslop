@@ -160,6 +160,18 @@ def verify_setup() -> bool:
         errors.append(f"scipy: {e}")
         print("  FAIL: scipy not found")
 
+    # Continuous contours and canonical pixel coverage require Shapely 2.x.
+    print("\nChecking Shapely...")
+    try:
+        import shapely
+        from shapely import contains_xy, union_all
+
+        print(f"  OK: Shapely {shapely.__version__} installed")
+        print(f"    Location: {shapely.__file__}")
+    except ImportError as e:
+        errors.append(f"Shapely 2.x: {e}")
+        print("  FAIL: Shapely 2.x geometry operations not available")
+
     # Check scikit-image for visual hull mesh extraction
     print("\nChecking scikit-image...")
     try:

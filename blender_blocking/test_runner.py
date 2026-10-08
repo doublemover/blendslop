@@ -64,6 +64,7 @@ _add_dependency_path(
 from utils.progress import iter_progress, progress_print
 
 PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
+    ("pure_runner_cli", "test_runner_cli"),
     ("pure_rounded_triangle", "test_rounded_triangle"),
     ("pure_quality_coverage", "test_quality_coverage"),
     ("pure_capsule", "test_capsule"),
@@ -553,6 +554,11 @@ RUNNER_PHASES = (
 def _runner_argv() -> List[str]:
     if "--" in sys.argv:
         return sys.argv[sys.argv.index("--") + 1 :]
+    # Blender retains its own launcher flags in sys.argv. Without a separator,
+    # there are no script arguments, as in the documented full-suite command.
+    blender_ok, _ = check_blender_available()
+    if blender_ok:
+        return []
     return sys.argv[1:]
 
 

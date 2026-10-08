@@ -24,4 +24,4 @@ runs:
       run: |
         "$BLENDER_PYTHON" -m ensurepip
         "$BLENDER_PYTHON" -m pip install --disable-pip-version-check --no-input -r blender_blocking/requirements.txt
-        "$BLENDER_PYTHON" -c "import numpy, cv2, PIL, scipy, skimage, open3d; print('Dependencies installed')"
+        "$BLENDER_PYTHON" -c "import numpy, cv2, PIL, scipy, skimage, open3d, shapely; print('Dependencies installed')"

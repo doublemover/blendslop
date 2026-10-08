@@ -6,6 +6,8 @@ opencv-python>=4.5.0
 Pillow>=8.0.0
 scipy>=1.7.0
 tqdm>=4.66.0
+# Continuous contour union and canonical per-pixel triangle coverage
+Shapely>=2.0.0,<3
 
 # Advanced reconstruction dependencies
 # - scikit-image: marching-cubes mesh extraction for visual hull volumes
