@@ -31,13 +31,13 @@ try{
  await screenshot('desktop.png');
  await click('[data-view="oblique_145_40"]');await assert(`document.querySelector('#frame-note').textContent.includes('image boundary')`,'Clipped frame limitation missing');
  await click('[data-case="rounded_triangle_dot"]');await assert(`document.querySelector('#case-title').textContent==='Rounded triangular dot' && document.querySelectorAll('#view-metrics .badge.passed').length===5 && document.querySelector('#surface-note').textContent.includes('unqualified')`,'Triangle verdict is inaccurate');
- await evaluate(`document.querySelector('#inspection').scrollIntoView()`);await screenshot('triangle-inspection.png');
+ await evaluate(`document.querySelector('#inspection').scrollIntoView({behavior:'instant'})`);await screenshot('triangle-inspection.png');
  await click('[data-mode="neutral"]');await assert(`document.querySelector('#output-image .unavailable')!==null`,'Missing triangular neutral output must be explicit');
  await click('[data-filter="reference"]');await assert(`document.querySelectorAll('.family-card').length===10`,'Reference-only filter incorrect');
  await click('[data-family="sphere"]');await assert(`document.querySelector('#output-image .unavailable')!==null && document.querySelectorAll('#view-metrics .badge.unmeasured').length===5`,'Reference cannot appear as an output');
  await click('[data-filter="actual"]');await assert(`document.querySelectorAll('.family-card').length===2`,'Actual reconstruction filter incorrect');
- await click('[data-filter="all"]');await click('[data-case="smooth_vase"]');
- await send('Emulation.setDeviceMetricsOverride',{width:390,height:1000,deviceScaleFactor:1,mobile:true});await evaluate('window.scrollTo(0,0)');
+ await click('[data-filter="all"]');await evaluate("document.querySelector('#families').scrollIntoView({behavior:'instant'})");await wait("Array.from(document.querySelectorAll('.family-card img')).every(i=>i.complete&&i.naturalWidth>0)");await screenshot('family-library.png');await click('[data-case="smooth_vase"]');
+ await send('Emulation.setDeviceMetricsOverride',{width:390,height:1000,deviceScaleFactor:1,mobile:true});await evaluate("window.scrollTo({top:0,behavior:'instant'})");
  await assert(`document.documentElement.scrollWidth<=window.innerWidth+1`,'Mobile page overflows horizontally');await screenshot('mobile.png');
  await assert(`document.querySelector('#load-error').hidden===true`,'Results failed to load');if(errors.length)throw new Error('Browser runtime exceptions: '+errors.join('; '));
  await fs.writeFile(path.join(evidence,'result.json'),JSON.stringify({passed:true,chrome:version.product,checks:['desktop rendering','five views and explicit vase failure','triangle pass/unqualified separation','missing neutral output','reference and actual filters','unmeasured reference output','mobile overflow and rendering','no browser exceptions']},null,2)+'\n');

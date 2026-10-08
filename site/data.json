@@ -183,7 +183,7 @@
       "referenceObjSha256": "0a67540aaaecb9385a80de1d6540a73851ad4a894f50029695f5ed04e96ea57d",
       "status": "failed",
       "statusLabel": "Required view failed",
-      "summary": "The surface and boundary pass; the held-out 145\u00c3\u201a\u00c2\u00b0 / 40\u00c3\u201a\u00c2\u00b0 view fails its boundary gate.",
+      "summary": "The surface and boundary pass; the held-out oblique 145 / 40 degree view fails its boundary gate.",
       "verdicts": {
         "silhouette": "failed",
         "surface": "passed",

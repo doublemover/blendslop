@@ -18,7 +18,7 @@ node scripts/build-evaluation-site.mjs --out temp/pages-dist
 
 Choose a fresh output directory. The builder checks file allowlists, byte bounds, symlink exclusion, sensitive-path/credential patterns, PNG metadata, asset identities, local links, case counts and metric/verdict consistency. Build provenance is saved as `build.json` with the exact site source commit, evidence source commit and evidence date.
 
-On the hosted Ubuntu runner, `scripts/check-evaluation-browser.mjs` uses its existing sandboxed headless Chrome, a localhost-only server and a 60-second cap. It checks desktop/mobile screenshots, view selection, vase failure, triangle unqualified surface, unavailable neutral output, actual/reference filters and mobile overflow. It installs no local packages. The three public-safe screenshots and a compact result are retained for seven days as a CI artifact.
+On the hosted Ubuntu runner, `scripts/check-evaluation-browser.mjs` uses its existing sandboxed headless Chrome, a localhost-only server and a 60-second cap. It checks desktop/mobile screenshots, view selection, vase failure, triangle unqualified surface, unavailable neutral output, actual/reference filters and mobile overflow. It installs no local packages. The four public-safe screenshots and a compact result are retained for seven days as a CI artifact.
 
 ## Deployment
 
