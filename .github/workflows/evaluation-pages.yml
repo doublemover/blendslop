@@ -1,0 +1,64 @@
+name: Evaluation Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', 'scripts/build-evaluation-site.mjs', 'scripts/check-evaluation-browser.mjs', '.github/workflows/evaluation-pages.yml']
+  pull_request:
+    branches: [main]
+    paths: ['site/**', 'scripts/build-evaluation-site.mjs', 'scripts/check-evaluation-browser.mjs', '.github/workflows/evaluation-pages.yml', 'README.md', 'docs/GETTING_STARTED.md', 'docs/RECONSTRUCTION.md', 'docs/DEVELOPMENT.md', 'docs/EVALUATION.md', 'docs/INDEX.md', 'docs/EVALUATION_SITE.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evaluation-pages-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build public evaluation gallery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check and build only the curated site
+        env:
+          BUILD_SHA: ${{ github.sha }}
+        run: node scripts/build-evaluation-site.mjs --out temp/pages-dist
+      - name: Check desktop/mobile rendering and honest verdict interactions
+        run: node scripts/check-evaluation-browser.mjs
+      - name: Upload bounded browser inspection
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: evaluation-browser-checks
+          path: |
+            temp/pages-browser/*.png
+            temp/pages-browser/result.json
+          retention-days: 7
+      - name: Upload public Pages artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: temp/pages-dist
+  deploy:
+    name: Deploy evaluation gallery
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check enabled Pages configuration
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
