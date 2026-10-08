@@ -171,6 +171,7 @@ def _apply_silhouette_cli_args(cfg: BlockingConfig, args: argparse.Namespace) ->
 
 
 def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
+    _set_if_not_none(cfg.reconstruction, "legacy_profile_geometry", getattr(args, "legacy_profile_geometry", None))
     cfg.reconstruction.reconstruction_mode = args.reconstruction_mode
     cfg.reconstruction.num_slices = int(args.num_slices)
     _set_if_not_none(cfg.reconstruction, "unit_scale", args.unit_scale)
@@ -198,6 +199,8 @@ def _apply_cli_args(cfg: BlockingConfig, args: argparse.Namespace) -> None:
         cfg.profile_sampling, "smoothing_window", args.profile_smoothing_window
     )
 
+    _set_if_not_none(cfg.mesh_from_profile, "regularization_window", getattr(args, "mesh_regularization_window", None))
+    _set_if_not_none(cfg.mesh_from_profile, "regularization_max_deviation_u", getattr(args, "mesh_regularization_max_deviation", None))
     _set_if_not_none(cfg.mesh_from_profile, "surface_mode", args.mesh_surface_mode)
     _set_if_not_none(cfg.mesh_from_profile, "surface_subdivisions", args.mesh_surface_subdivisions)
     _set_if_not_none(

@@ -129,6 +129,8 @@ class ProfileLoftBackend(BaseBackend):
                 shade_smooth=bool(request.config.get("shade_smooth", True)),
                 surface_mode=str(request.config.get("surface_mode", "smooth")),
                 surface_subdivisions=request.config.get("surface_subdivisions", 4),
+                regularization_window=request.config.get("regularization_window", 0),
+                regularization_max_deviation_u=request.config.get("regularization_max_deviation_u", 0.),
                 weld_degenerate_rings=bool(
                     request.config.get("weld_degenerate_rings", True)
                 ),

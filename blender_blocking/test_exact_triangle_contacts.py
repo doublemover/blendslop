@@ -55,6 +55,14 @@ class ExactTriangleContactTests(unittest.TestCase):
         self.assertTrue(within_part_boundary_guard(vertices,faces)['passed'])
         self.assertFalse(within_part_boundary_guard(vertices,faces,timeout_s=0.)['passed'])
 
+    def test_adaptive_sweep_preserves_crossing_rejection_under_axis_permutations(self):
+        vertices=np.array([[0.,0.,0.],[2.,0.,0.],[0.,2.,0.],[.5,.5,-.01],[.5,.5,.01]])
+        faces=np.array([[0,1,2],[0,3,4]])
+        for axes in ((0,1,2),(2,0,1),(1,2,0)):
+            receipt=within_part_boundary_guard(vertices[:,axes],faces)
+            self.assertFalse(receipt['passed'])
+            self.assertEqual(receipt['first_blocking_pair']['relation'],'proper_crossing')
+
     def test_shared_edge_area_overlap_and_extended_shared_vertex_contact_are_rejected(self):
         vertices=np.array([[0.,0.,0.],[2.,0.,0.],[0.,2.,0.],[.5,.5,0.],[.5,0.,0.],[.1,-1.,0.]])
         edge_overlap=within_part_boundary_guard(vertices,np.array([[0,1,2],[0,1,3]]))

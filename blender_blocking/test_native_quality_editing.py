@@ -46,6 +46,23 @@ class NativeQualityEditingTests(unittest.TestCase):
             rebuild_loft_mesh(obj, surface_mode="unknown")
         self.assertEqual(evaluated_arrays(obj).content_hash, current)
 
+    def test_old_loft_recipe_accepts_bounded_regularization_edits(self):
+        sections = [EllipticalSlice(z=float(i), rx=1. + .04 * (-1)**i, ry=.8)
+                    for i in range(9)]
+        obj = create_loft_mesh_from_slices(sections, radial_segments=24)
+        recipe = json.loads(obj["loft_recipe_json"])
+        for key in ("regularization_window", "regularization_max_deviation_u"):
+            recipe["options"].pop(key)
+        obj["loft_recipe_json"] = json.dumps(recipe)
+        before = evaluated_arrays(obj).content_hash
+        rebuild_loft_mesh(obj, regularization_window=5, regularization_max_deviation_u=.02)
+        self.assertNotEqual(evaluated_arrays(obj).content_hash, before)
+        self.assertEqual(json.loads(obj["loft_recipe_json"])["options"]["regularization_window"], 5)
+        current = evaluated_arrays(obj).content_hash
+        with self.assertRaises(ValueError):
+            rebuild_loft_mesh(obj, regularization_window=6)
+        self.assertEqual(evaluated_arrays(obj).content_hash, current)
+
     def test_triangle_compiler_preserves_corner_depth_and_dome_edits(self):
         arrays = []
         for i, parameters in enumerate(({}, {"height_world": .6},

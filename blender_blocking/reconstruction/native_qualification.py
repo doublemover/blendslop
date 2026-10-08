@@ -1,6 +1,6 @@
 """Per-process, content/toolchain-scoped native Boolean admission receipts."""
 from pathlib import Path
-import hashlib, json, os, subprocess, tempfile, time
+import hashlib, json, os, subprocess, time
 import numpy as np
 
 _CACHE = {}
@@ -64,7 +64,7 @@ def toolchain_identity(python, *, force=False):
     return identity
 
 
-def qualify_geometry(data, *, python, timeout_s=15.):
+def qualify_geometry(data, *, python, timeout_s=15., ownership_root=None):
     from .grouped_solids import solid_guard
     started = time.perf_counter()
     guard = solid_guard(data)
@@ -88,34 +88,61 @@ def qualify_geometry(data, *, python, timeout_s=15.):
     if key in _CACHE:
         return {**_CACHE[key], 'cache_hit': True, 'qualification_elapsed_s': time.perf_counter()-started,
                 'qualification_cost_boundary': 'identity verification and cache lookup; no helper execution'}
-    root = ROOT / 'temp/native-qualification'
-    root.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix='owned-', dir=root) as directory:
-        source, destination = Path(directory)/'input.npz', Path(directory)/'receipt.json'
+    from utils.run_ownership import OwnedRun
+    owner = OwnedRun(ownership_root or ROOT / 'temp/native-qualification',
+                     producer="native_boundary_qualification",
+                     shared_inputs={"qualification_interpreter": str(python),
+                                    "toolchain_identity": identity,
+                                    "input_geometry_hash": data.content_hash})
+    with owner:
+        owner.reserve_bytes(data.nbytes + 4096 + 8192 + 65536)
+        source, destination = owner.root / 'input.npz', owner.root / 'receipt.json'
         np.savez(source, vertices=data.vertices, faces=data.faces, content_hash=data.content_hash)
+        owner.register_file("input.npz", "disposable")
         env = dict(os.environ, OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1')
         child = subprocess.Popen([str(python), '-B', str(HELPER), '--input', str(source),
             '--output', str(destination), '--identity', identity], stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, env=env, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+        timed_out = False
         try:
             log, _ = child.communicate(timeout=max(.001, timeout_s))
         except subprocess.TimeoutExpired:
-            child.kill(); child.communicate()
-            return unavailable('helper_timeout', identity=identity)
+            child.kill()
+            log, _ = child.communicate()
+            timed_out = True
         except BaseException:
-            child.kill(); child.communicate()
+            child.kill()
+            child.communicate()
             raise
-        if child.returncode:
-            return unavailable('helper_failed', log.decode(errors='replace')[-2000:], identity)
+        (owner.root / "helper-log-tail.txt").write_bytes(log[-8192:])
+        owner.register_file("helper-log-tail.txt", "diagnostic")
+        if timed_out or child.returncode:
+            reason = 'helper_timeout' if timed_out else 'helper_failed'
+            owner.mark_failed(reason)
+            receipt = {**unavailable(reason, log.decode(errors='replace')[-2000:] or None, identity),
+                       "owned_run_root": str(owner.root)}
+            destination.write_text(json.dumps(receipt, indent=2), encoding='utf-8')
+            owner.register_file("receipt.json", "diagnostic")
+            return receipt
+        if destination.stat().st_size > 65536:
+            raise ValueError('native qualification receipt exceeds bounded size')
         receipt = json.loads(destination.read_text(encoding='utf-8'))
-    if receipt['geometry_content_hash'] != data.content_hash or receipt['toolchain_identity'] != identity:
-        raise ValueError('native qualification receipt identity mismatch')
-    verification = receipt.get('exact_pair_verification', {})
-    incomplete = not verification.get('complete', True) and not verification.get('non_disjoint_pairs', 0)
-    receipt.update(status='qualified' if receipt['manifold_validated'] else 'unavailable' if incomplete else 'rejected',
-                   reason=None if receipt['manifold_validated'] else 'narrow_phase_incomplete' if incomplete else 'boundary_qualification_failed',
-                   single_solid_qualified=bool(receipt['manifold_validated'] and guard['connected_components'] == 1),
-                   solid_guard=guard, cache_hit=False, qualification_elapsed_s=time.perf_counter()-started,
-                   qualification_cost_boundary='identity verification, solid guard, transfer and actual helper execution')
+        # Validate before releasing the owner lease; malformed/stale helper output
+        # is a failed producer run, never a successfully completed ownership receipt.
+        if receipt['geometry_content_hash'] != data.content_hash or receipt['toolchain_identity'] != identity:
+            owner.register_file("receipt.json", "diagnostic")
+            raise ValueError('native qualification receipt identity mismatch')
+        verification = receipt.get('exact_pair_verification', {})
+        incomplete = not verification.get('complete', True) and not verification.get('non_disjoint_pairs', 0)
+        receipt.update(status='qualified' if receipt['manifold_validated'] else 'unavailable' if incomplete else 'rejected',
+                       reason=None if receipt['manifold_validated'] else 'narrow_phase_incomplete' if incomplete else 'boundary_qualification_failed',
+                       single_solid_qualified=bool(receipt['manifold_validated'] and guard['connected_components'] == 1),
+                       solid_guard=guard, cache_hit=False, qualification_elapsed_s=time.perf_counter()-started,
+                       owned_run_root=str(owner.root),
+                       qualification_cost_boundary='identity verification, solid guard, transfer and actual helper execution')
+        if not receipt['manifold_validated']:
+            owner.mark_failed(receipt['reason'])
+        destination.write_text(json.dumps(receipt, indent=2), encoding='utf-8')
+        owner.register_file("receipt.json", "diagnostic")
     _CACHE[key] = receipt
     return receipt

@@ -68,6 +68,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_quality_coverage", "test_quality_coverage"),
     ("pure_capsule", "test_capsule"),
     ("pure_run_ownership", "test_run_ownership"),
+    ("pure_profile_regularization", "test_profile_regularization"),
     ("pure_geometry_consistency", "test_geometry_consistency"),
     ("pure_oriented_support", "test_oriented_support"),
     ("pure_normalized_resfit", "test_normalized_resfit"),

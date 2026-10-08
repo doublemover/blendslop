@@ -201,22 +201,31 @@ def within_part_boundary_guard(vertices, faces, *, timeout_s=None, progress=None
     exact = integer_vertices(vertices)
     triangles = vertices[faces]
     lower, upper = triangles.min(axis=1), triangles.max(axis=1)
-    order = np.argsort(lower[:, 0], kind='stable')
-    min_x = lower[order, 0]
+    # Sweep along the axis with the smallest average box extent relative to
+    # the mesh span. Dense lofts have tiny height slabs but broad x/y boxes;
+    # choosing x unconditionally made broad-phase filtering nearly quadratic.
+    # Every closed AABB overlap remains included; exact predicates are unchanged.
+    span = upper.max(axis=0) - lower.min(axis=0)
+    ratio = np.divide((upper - lower).mean(axis=0), span,
+                      out=np.full(3, np.inf), where=span > 0.)
+    sweep_axis = int(np.argmin(ratio))
+    other_axes = [axis for axis in range(3) if axis != sweep_axis]
+    order = np.argsort(lower[:, sweep_axis], kind='stable')
+    min_axis = lower[order, sweep_axis]
     tested, allowed = 0, 0
     def result(status, passed, **extra):
         return {'status': status, 'passed': passed, 'tested_pairs': tested,
             'indexed_adjacency_contacts': allowed, 'component_count': len(set(labels)),
             'elapsed_s': time.monotonic()-started, 'geometry_scope': 'within indexed parts only; between-part overlap permitted',
-            'predicate_version': 'exact_binary64_triangle_contacts_v1', **extra}
+            'predicate_version': 'exact_binary64_triangle_contacts_v1', 'sweep_axis': sweep_axis, **extra}
     for position, a in enumerate(order):
         if timeout_s is not None and time.monotonic()-started >= max(0., timeout_s):
             return result('unavailable', False, reason='remaining_candidate_allowance_exhausted')
-        end = np.searchsorted(min_x, upper[a, 0], side='right')
+        end = np.searchsorted(min_axis, upper[a, sweep_axis], side='right')
         candidates = order[position+1:end]
         candidates = candidates[(labels[candidates] == labels[a]) &
-            np.all(lower[candidates, 1:] <= upper[a, 1:], axis=1) &
-            np.all(upper[candidates, 1:] >= lower[a, 1:], axis=1)]
+            np.all(lower[candidates][:, other_axes] <= upper[a, other_axes], axis=1) &
+            np.all(upper[candidates][:, other_axes] >= lower[a, other_axes], axis=1)]
         for b in candidates:
             if timeout_s is not None and time.monotonic()-started >= max(0., timeout_s):
                 return result('unavailable', False, reason='remaining_candidate_allowance_exhausted')

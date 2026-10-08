@@ -14,7 +14,8 @@ def qualify_retained_output(data, options):
                 "certificate_scope": "actual retained coordinates and connectivity; edits invalidate receipt"}
     from .native_qualification import qualify_geometry
     receipt = qualify_geometry(data, python=python,
-                               timeout_s=float(options.get("native_qualification_timeout_s", 15.)))
+                               timeout_s=float(options.get("native_qualification_timeout_s", 15.)),
+                               ownership_root=options.get("native_run_ownership_root"))
     return {**receipt, "boundary_qualified": bool(receipt.get("manifold_validated")),
             "material_body_count": None,
             "certificate_scope": "actual retained coordinates and connectivity; edits invalidate receipt",

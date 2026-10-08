@@ -661,6 +661,7 @@ class ReconstructionConfig:
 
     quality_preset: str = "default"
     reconstruction_mode: str = "legacy"
+    legacy_profile_geometry: str = "auto"
     unit_scale: float = 0.01
     num_slices: int = 10
     view_calibration: Dict[str, Any] = field(default_factory=dict)
@@ -686,6 +687,8 @@ class ReconstructionConfig:
             raise ValueError("native feature thickness must be positive when supplied")
         if set(self.valid_evidence_files) - {"front", "side", "top"} or set(self.view_crops) - {"front", "side", "top"}:
             raise ValueError("evidence masks/crops must use canonical view names")
+        if self.legacy_profile_geometry not in {"auto", "connected", "stacked"}:
+            raise ValueError("legacy_profile_geometry must be auto, connected or stacked")
         if self.quality_preset not in {"default", "quality"}:
             raise ValueError("quality_preset must be default or quality")
         if self.reconstruction_mode not in _VALID_RECON_MODES:
@@ -700,6 +703,7 @@ class ReconstructionConfig:
         return {
             "reconstruction_mode": self.reconstruction_mode,
             "quality_preset": self.quality_preset,
+            "legacy_profile_geometry": self.legacy_profile_geometry,
             "unit_scale": self.unit_scale,
             "num_slices": self.num_slices,
             "view_calibration": self.view_calibration,

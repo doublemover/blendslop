@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from utils.run_ownership import plan_run_reclamation
+from utils.run_ownership import OwnedRun, plan_run_reclamation
 
 
 class RunOwnershipTests(unittest.TestCase):
@@ -87,3 +87,78 @@ class RunOwnershipTests(unittest.TestCase):
             (root / "run-ownership.json").write_text(json.dumps(manifest))
             self.assertTrue(plan_run_reclamation(root)["blockers"])
             self.assertFalse(plan_run_reclamation(root)["eligible"])
+
+
+class OwnedProducerTests(unittest.TestCase):
+    def test_new_run_active_then_released_keeps_shared_inputs_external(self):
+        with tempfile.TemporaryDirectory() as folder:
+            parent = Path(folder)
+            shared = parent / "owner-input.bin"
+            shared.write_bytes(b"owner bytes")
+            with OwnedRun(parent / "scratch", producer="fixture", shared_inputs={"image": str(shared)}) as owner:
+                owner.reserve_bytes(3)
+                (owner.root / "generated.bin").write_bytes(b"new")
+                owner.register_file("generated.bin", "disposable")
+                self.assertEqual(plan_run_reclamation(owner.root)["status"],"blocked")
+            receipt = plan_run_reclamation(owner.root)
+            self.assertEqual(receipt["status"],"dry_run_ready")
+            self.assertEqual(receipt["eligible_bytes"],3)
+            self.assertEqual(shared.read_bytes(),b"owner bytes")
+            self.assertEqual((owner.root / "generated.bin").read_bytes(),b"new")
+
+    def test_failure_cancel_and_publication_failure_preserve_original_error(self):
+        for failure in (RuntimeError("primary failure"),KeyboardInterrupt("cancel")):
+            with tempfile.TemporaryDirectory() as folder:
+                owner = OwnedRun(folder,producer="fixture")
+                with self.assertRaises(type(failure)):
+                    with owner:
+                        raise failure
+                manifest = json.loads((owner.root / "run-ownership.json").read_text())
+                self.assertEqual(manifest["state"],"cancelled" if isinstance(failure,KeyboardInterrupt) else "failed")
+                self.assertEqual(json.loads((owner.root / "run-lease.json").read_text())["status"],"released")
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as folder:
+            owner = OwnedRun(folder,producer="fixture")
+            original = RuntimeError("primary failure")
+            with patch.object(owner,"_write_metadata",side_effect=OSError("receipt failure")):
+                with self.assertRaises(RuntimeError) as caught:
+                    with owner:
+                        raise original
+            self.assertIs(caught.exception,original)
+            self.assertIn("receipt failure",original.__notes__[0])
+            self.assertEqual(plan_run_reclamation(owner.root)["status"],"blocked")
+
+    def test_budget_and_external_paths_fail_before_adoption(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with OwnedRun(folder,producer="fixture",max_generated_bytes=4) as owner:
+                with self.assertRaises(ValueError):owner.reserve_bytes(5)
+                (owner.root / "generated.bin").write_bytes(b"1234")
+                owner.register_file("generated.bin","diagnostic")
+                with self.assertRaises(ValueError):owner.reserve_bytes(1)
+                with self.assertRaises(ValueError):owner.register_file("../outside.bin","disposable")
+                with self.assertRaises(ValueError):owner.register_file("./run-lease.json","disposable")
+            self.assertEqual(plan_run_reclamation(owner.root)["retained_bytes"],4)
+
+    def test_native_producer_timeout_joins_child_and_releases_failed_lease(self):
+        from unittest.mock import Mock,patch
+        import subprocess
+        import numpy as np
+        from reconstruction import native_qualification as native
+        from reconstruction.native_geometry import GeometryArrays
+        from primitives.capsule import CapsulePrimitive
+        mesh = CapsulePrimitive().to_mesh_data(8)
+        faces = np.asarray([triangle for face in mesh.faces for triangle in
+                            ((face[0],face[i],face[i+1]) for i in range(1,len(face)-1))])
+        data = GeometryArrays.capture(mesh.vertices,faces)
+        child = Mock(returncode=-1)
+        child.communicate.side_effect = [subprocess.TimeoutExpired("helper",15), (b"bounded log",None)]
+        with tempfile.TemporaryDirectory() as folder, patch.object(native,"toolchain_identity",return_value="fixture-id"), \
+                patch.object(native.subprocess,"Popen",return_value=child),patch.dict(native._CACHE,clear=True):
+            receipt = native.qualify_geometry(data,python="fixture-python",ownership_root=folder)
+            self.assertEqual(receipt["reason"],"helper_timeout")
+            child.kill.assert_called_once()
+            self.assertEqual(child.communicate.call_count,2)
+            root = Path(receipt["owned_run_root"])
+            self.assertEqual(json.loads((root / "run-ownership.json").read_text())["state"],"failed")
+            self.assertEqual(plan_run_reclamation(root)["status"],"dry_run_ready")
+            self.assertTrue((root / "input.npz").exists())

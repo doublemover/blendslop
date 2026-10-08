@@ -32,14 +32,26 @@ def observed_profile_rows(target, constraint, world_heights):
     _, (xmin, xmax, ymin, ymax) = pixel_cell_viewport(target, constraint)
     sx = (xmax - xmin) / w
     records = []
+    foreground_rows = np.flatnonzero(np.any(mask & valid, axis=1))
     for z in world_heights:
         pixel = (ymax - z) / (ymax - ymin) * h - .5
         row = int(np.floor(pixel + .5))
+        # A mask bbox denotes cell edges. At its outer vertical edge, sampling
+        # the adjacent empty cell invents a zero-radius tip. Use the nearest
+        # observed foreground row only within that outer half-cell; interior
+        # empty rows and unknown pixels remain evidence, including cavities.
+        if len(foreground_rows):
+            first, last = int(foreground_rows[0]), int(foreground_rows[-1])
+            epsilon = 8 * np.finfo(float).eps * max(1., abs(pixel))
+            if first - .5 - epsilon <= pixel < first:
+                row = first
+            elif last < pixel <= last + .5 + epsilon:
+                row = last
         if not 0 <= row < h:
             record = measure_profile_row(np.zeros(w, bool), np.zeros(w, bool))
         else:
             record = measure_profile_row(mask[row], valid[row])
-        record.update(z_world=float(z), radius_lower_world=record["width_lower_px"] * sx * .5,
+        record.update(sample_row=row, z_world=float(z), radius_lower_world=record["width_lower_px"] * sx * .5,
                       within_viewport=bool(0<=row<h),
                       exact_radius_world=None if record["exact_width_px"] is None else record["exact_width_px"] * sx * .5,
                       center_world=None if record["center_px"] is None else xmin + record["center_px"] * sx)

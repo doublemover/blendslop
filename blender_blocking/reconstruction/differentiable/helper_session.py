@@ -1,6 +1,6 @@
 """A process-owned numeric helper with bounded file IPC and explicit shutdown."""
 from __future__ import annotations
-import atexit,json,os,pickle,subprocess,tempfile,time,uuid
+import atexit,json,os,pickle,subprocess,time,uuid
 from pathlib import Path
 
 
@@ -12,7 +12,7 @@ def _atomic_packet(path,value):
 
 
 class NumericHelperSession:
-    def __init__(self,executable,script,*,source_paths=(),idle_timeout_s=60.):
+    def __init__(self,executable,script,*,source_paths=(),idle_timeout_s=60.,ownership_root=None):
         # A venv interpreter commonly symlinks the system binary. Resolving it
         # for invocation discards pyvenv.cfg and imports the wrong environment.
         self.executable=Path(os.path.abspath(executable))
@@ -25,9 +25,53 @@ class NumericHelperSession:
             paths.append(configuration)
         self.source_paths=tuple(paths)
         self.idle_timeout_s=float(idle_timeout_s)
-        self.directory=tempfile.TemporaryDirectory(prefix='blendslop-owned-numeric-')
-        self.root=Path(self.directory.name);self.process=None;self.log=None
-        self.identity=None;self.starts=0;self.closed=False
+        self.ownership_parent = Path(ownership_root or Path(__file__).resolve().parents[3] / 'temp/numeric-helpers')
+        self.process = None
+        self.log = None
+        self.identity = None
+        self.starts = 0
+        self.closed = False
+        self._new_owner()
+
+    def _new_owner(self):
+        from utils.run_ownership import OwnedRun
+        self.owner = OwnedRun(self.ownership_parent, producer='warm_numeric_helper',
+                              max_generated_bytes=268435456,
+                              shared_inputs={'interpreter': str(self.executable), 'worker': str(self.script),
+                                             'sources': [str(path) for path in self.source_paths]})
+        self.root = self.owner.root
+        self.jobs = set()
+
+    def _release_owner(self, error=None):
+        # The worker has been joined. Register only producer-known names, never
+        # adopt arbitrary contents or external user/cache paths. Consumed IPC
+        # packets no longer present are not listed as retained artifacts.
+        known = {'ready.json', 'ready.tmp', 'stop', 'heartbeat', 'worker.log', 'jobs.jsonl'}
+        for job in self.jobs:
+            known.update(job + suffix for suffix in
+                         ('.input.pkl', '.input.pkl.tmp', '.output.pkl', '.output.tmp',
+                          '.progress.pkl', '.progress.pkl.tmp'))
+        try:
+            for name in sorted(known):
+                if (self.root / name).is_file():
+                    category = 'disposable' if name.endswith(('.input.pkl', '.input.pkl.tmp')) else 'diagnostic'
+                    self.owner.register_file(name, category)
+            self.owner.close(error=error)
+        except Exception as publication_error:
+            if error is None:
+                raise
+            if hasattr(error, 'add_note'):
+                error.add_note('Numeric helper receipt publication also failed: ' + repr(publication_error))
+
+    def _record_job(self, job, status, reason=None):
+        # Compact diagnostics survive packet consumption and later successful
+        # requests. Receipt publication failure cannot replace the job error.
+        record = {'job': job, 'status': status, 'reason': str(reason)[:4096] if reason is not None else None}
+        try:
+            with (self.root / 'jobs.jsonl').open('a', encoding='utf-8') as stream:
+                stream.write(json.dumps(record, sort_keys=True) + '\n')
+        except OSError as error:
+            self.owner.auxiliary_errors.append('job diagnostic publication: ' + repr(error))
 
     def _signature(self):
         result=[]
@@ -55,9 +99,14 @@ class NumericHelperSession:
         signature=self._signature()
         restarted=self.process is None or self.process.poll() is not None or self.identity!=signature
         if restarted:
+            had_process = self.process is not None
+            crashed = had_process and self.process.poll() not in (None, 0)
             self._stop()
-            for path in (self.root/'ready.json',self.root/'stop'):
-                path.unlink(missing_ok=True)
+            if self.starts:
+                if crashed:
+                    self.owner.mark_failed('numeric helper exited unexpectedly')
+                self._release_owner()
+                self._new_owner()
             (self.root/'heartbeat').touch()
             self.log=(self.root/'worker.log').open('ab')
             # Host image dependencies can contain extension wheels for another
@@ -71,9 +120,9 @@ class NumericHelperSession:
             self.identity=signature;self.starts+=1
         while not (self.root/'ready.json').is_file():
             if time.monotonic()>=deadline:
-                self._stop();raise TimeoutError('numeric helper startup allowance exhausted')
+                self._stop();self.owner.mark_failed('numeric helper startup allowance exhausted');raise TimeoutError('numeric helper startup allowance exhausted')
             if self.process.poll() is not None:
-                self._stop();raise RuntimeError('numeric helper exited before ready')
+                self._stop();self.owner.mark_failed('numeric helper exited before ready');raise RuntimeError('numeric helper exited before ready')
             (self.root/'heartbeat').touch();time.sleep(.01)
         return json.loads((self.root/'ready.json').read_text()),restarted
 
@@ -83,43 +132,69 @@ class NumericHelperSession:
         if payload is None:
             return {**ready,'helper_session':{'pid':self.process.pid,'starts':self.starts,
                 'restarted':restarted,'warm_owned_session':True}}
+        if len(self.jobs) >= 512:
+            self._stop()
+            self._release_owner()
+            self._new_owner()
+            ready,restarted = self._ensure(deadline)
         job=uuid.uuid4().hex
+        self.jobs.add(job)
         output=self.root/(job+'.output.pkl');progress=self.root/(job+'.progress.pkl')
         forwarded=dict(payload)
         forwarded['progress_paths']=[*forwarded.get('progress_paths',()),str(progress)]
         forwarded['timeout_s']=min(float(forwarded.get('timeout_s') or timeout_s),max(.001,deadline-time.monotonic()))
         input_path=self.root/(job+'.input.pkl')
-        _atomic_packet(input_path,forwarded)
+        # Bound the complete transport before writing. Existing producer files
+        # are counted without classifying unrelated paths as owned.
+        packet = pickle.dumps(forwarded, protocol=pickle.HIGHEST_PROTOCOL)
+        generated = sum(path.stat().st_size for path in self.root.iterdir() if path.is_file())
+        if generated + len(packet) > self.owner.max_generated_bytes:
+            self.owner.mark_failed('numeric helper generated byte budget exceeded before write')
+            self._record_job(job,'failed','generated byte budget exceeded before write')
+            raise ValueError('numeric helper generated byte budget exceeded before write')
+        temporary = input_path.with_name(input_path.name + '.tmp')
+        temporary.write_bytes(packet)
+        os.replace(temporary, input_path)
         while not output.is_file():
             (self.root/'heartbeat').touch()
             if time.monotonic()>=deadline or self.process.poll() is not None:
                 self._stop()
-                input_path.unlink(missing_ok=True)
-                output.unlink(missing_ok=True)
+                self.owner.mark_failed('numeric helper interrupted')
+                self._record_job(job,'interrupted','numeric helper interrupted')
                 if progress.is_file():
                     with progress.open('rb') as stream:retained=pickle.load(stream)['value']
-                    progress.unlink(missing_ok=True)
                     return {**retained,'partial':True,'stop_reason':'owned_helper_interrupted',
                             'final_update_evaluated':False,'helper_session':{'starts':self.starts}}
                 raise TimeoutError('numeric helper interrupted without a scored checkpoint')
             time.sleep(.01)
         with output.open('rb') as stream:response=pickle.load(stream)
-        output.unlink();progress.unlink(missing_ok=True)
         if response.get('job')!=job:
+            self.owner.mark_failed('numeric helper response belongs to a different job')
+            self._record_job(job,'failed','response belongs to a different job')
             raise ValueError('numeric helper response belongs to a different job')
         if response.get('status')!='success':
+            self.owner.mark_failed('numeric helper job failed: '+str(response.get('error')))
+            self._record_job(job,'failed',response.get('error'))
             raise RuntimeError('numeric helper job failed: '+str(response.get('error')))
+        self._record_job(job,'succeeded')
+        output.unlink();progress.unlink(missing_ok=True)
         result=response['value']
         result['helper_session']={'pid':self.process.pid,'starts':self.starts,'warm_owned_session':True,
             'restarted':restarted,'request_wall_s':time.monotonic()-started}
         return result
 
-    def close(self):
+    def close(self, error=None):
         if not self.closed:
-            self._stop();self.directory.cleanup();self.closed=True
+            self._stop()
+            self._release_owner(error)
+            self.closed = True
 
-    def __enter__(self):return self
-    def __exit__(self,*_):self.close()
+    def __enter__(self):
+        return self
+
+    def __exit__(self, kind, error, traceback):
+        self.close(error=error)
+        return False
 
 
 _SESSIONS={}

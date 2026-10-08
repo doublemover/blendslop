@@ -128,6 +128,8 @@ class LoftMeshOptions:
 
     surface_mode: str = "smooth"
     surface_subdivisions: int = 4
+    regularization_window: int = 0
+    regularization_max_deviation_u: float = 0.
     radial_segments: int = 24
     cap_mode: str = "fan"
     min_radius_u: float = 0.0
@@ -144,6 +146,12 @@ class LoftMeshOptions:
     def validate(self) -> None:
         """Validate configuration values."""
         from geometry.loft_surface import SURFACE_MODES
+        import math
+        if (isinstance(self.regularization_window, bool) or not isinstance(self.regularization_window, int) or
+                self.regularization_window != 0 and (not 5 <= self.regularization_window <= 129 or self.regularization_window % 2 != 1) or
+                not math.isfinite(self.regularization_max_deviation_u) or self.regularization_max_deviation_u < 0 or
+                self.regularization_window > 0 and self.regularization_max_deviation_u <= 0):
+            raise ValueError("regularization requires an odd 5..129 window and positive section radius budget")
         if self.surface_mode not in SURFACE_MODES:
             raise ValueError(f"surface_mode must be one of {SURFACE_MODES}")
         if isinstance(self.surface_subdivisions, bool) or not isinstance(self.surface_subdivisions, int) or not 1 <= self.surface_subdivisions <= 16:
@@ -167,6 +175,8 @@ class LoftMeshOptions:
         return {
             "surface_mode": self.surface_mode,
             "surface_subdivisions": self.surface_subdivisions,
+            "regularization_window": self.regularization_window,
+            "regularization_max_deviation_u": self.regularization_max_deviation_u,
             "radial_segments": self.radial_segments,
             "cap_mode": self.cap_mode,
             "min_radius_u": self.min_radius_u,

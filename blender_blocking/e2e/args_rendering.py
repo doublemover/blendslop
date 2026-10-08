@@ -58,6 +58,11 @@ def add_render_args(parser: argparse.ArgumentParser) -> None:
 
 def add_profile_args(parser: argparse.ArgumentParser) -> None:
     profile = parser.add_argument_group("profile and loft")
+    profile.add_argument("--legacy-profile-geometry", choices=("auto", "connected", "stacked"), default=None)
+    profile.add_argument("--mesh-regularization-window", type=int, default=None,
+                         help="Odd bounded Savitzky-Golay radius window; zero disables")
+    profile.add_argument("--mesh-regularization-max-deviation", type=float, default=None,
+                         help="Maximum source-section radius displacement in unchanged world units")
     profile.add_argument("--mesh-surface-mode", choices=("smooth", "stepped", "sharp"), default=None,
                          help="Connected loft geometry: smooth curve, stepped shoulders, or sharp section corners")
     profile.add_argument("--mesh-surface-subdivisions", type=int, default=None,

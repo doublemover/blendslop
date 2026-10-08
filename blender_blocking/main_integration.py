@@ -455,6 +455,16 @@ class BlockingWorkflow:
             self.config.reconstruction.reconstruction_mode
         )
 
+        profile_geometry = self.config.reconstruction.legacy_profile_geometry
+        connected = profile_geometry == "connected" or (
+            profile_geometry == "auto" and self.config.reconstruction.quality_preset == "quality")
+        if profile_geometry == "connected" and not any(view in self.views for view in ("front", "side")):
+            raise ValueError("connected legacy profile requires a front or side image")
+        if connected and any(view in self.views for view in ("front", "side")):
+            if num_slices < 2:
+                raise ValueError("connected legacy profile needs at least two sections")
+            return self.create_3d_blockout_loft(num_slices=num_slices)
+
         print("Creating 3D blockout in Blender...")
 
         # Setup clean Blender scene
@@ -699,6 +709,10 @@ class BlockingWorkflow:
             print(
                 "  Warning: No front/side silhouettes available, falling back to legacy."
             )
+            if self.config.reconstruction.legacy_profile_geometry == "connected" or (
+                    self.config.reconstruction.legacy_profile_geometry == "auto" and
+                    self.config.reconstruction.quality_preset == "quality"):
+                raise ValueError("connected legacy profile has no valid front/side silhouette")
             return self.create_3d_blockout(num_slices=num_slices)
 
         if front_mask is None or side_mask is None:
@@ -760,6 +774,8 @@ class BlockingWorkflow:
             shade_smooth=self.config.mesh_from_profile.shade_smooth,
             surface_mode=self.config.mesh_from_profile.surface_mode,
             surface_subdivisions=self.config.mesh_from_profile.surface_subdivisions,
+            regularization_window=self.config.mesh_from_profile.regularization_window,
+            regularization_max_deviation_u=self.config.mesh_from_profile.regularization_max_deviation_u,
             weld_degenerate_rings=self.config.mesh_from_profile.weld_degenerate_rings,
         )
 

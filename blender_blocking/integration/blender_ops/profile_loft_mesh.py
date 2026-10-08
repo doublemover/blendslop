@@ -225,6 +225,8 @@ def create_loft_mesh_from_slices(
     weld_degenerate_rings: bool = True,
     surface_mode: str = "smooth",
     surface_subdivisions: int = 4,
+    regularization_window: int = 0,
+    regularization_max_deviation_u: float = 0.,
 ) -> Optional[object]:
     """Create a Blender mesh object lofted from elliptical slices."""
     if not BLENDER_AVAILABLE:
@@ -240,7 +242,8 @@ def create_loft_mesh_from_slices(
     radial_segments, radial_warnings = _resolve_radial_segments(
         slices, radial_segments, adaptive_radial_segments, target_edge_error_u
     )
-    surface_slices = prepare_loft_surface(slices, surface_mode, surface_subdivisions)
+    surface_slices = prepare_loft_surface(slices, surface_mode, surface_subdivisions,
+                                          regularization_window, regularization_max_deviation_u)
     prepared_slices, degenerate_count = _prepare_slices(
         surface_slices, min_radius_u, weld_degenerate_rings
     )
@@ -296,6 +299,8 @@ def create_loft_mesh_from_slices(
     quality = collect_mesh_quality(obj)
     metadata = {
         "surface_mode": surface_mode,
+        "regularization_window": regularization_window,
+        "regularization_max_deviation_u": regularization_max_deviation_u,
         "surface_subdivisions": surface_subdivisions,
         "radial_segments": radial_segments,
         "adaptive_radial_segments": adaptive_radial_segments,
@@ -321,7 +326,9 @@ def create_loft_mesh_from_slices(
                     "min_radius_u": min_radius_u, "merge_threshold_u": merge_threshold_u,
                     "recalc_normals": recalc_normals, "shade_smooth": shade_smooth,
                     "weld_degenerate_rings": weld_degenerate_rings,
-                    "surface_mode": surface_mode, "surface_subdivisions": surface_subdivisions},
+                    "surface_mode": surface_mode, "surface_subdivisions": surface_subdivisions,
+                    "regularization_window": regularization_window,
+                    "regularization_max_deviation_u": regularization_max_deviation_u},
     }
     obj["loft_recipe_json"] = json.dumps(recipe, sort_keys=True)
     obj["loft_metadata_json"] = json.dumps(metadata, sort_keys=True)
@@ -345,7 +352,7 @@ def rebuild_loft_mesh(obj, *, slices=None, **options):
     recipe = json.loads(obj["loft_recipe_json"])
     if recipe.get("schema_version") != 1:
         raise ValueError("unsupported loft recipe version")
-    original_options = recipe["options"]
+    original_options = {"regularization_window": 0, "regularization_max_deviation_u": 0., **recipe["options"]}
     unknown = set(options) - set(original_options)
     if unknown:
         raise ValueError("unknown loft edit options: " + ", ".join(sorted(unknown)))

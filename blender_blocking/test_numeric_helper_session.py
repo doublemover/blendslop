@@ -38,14 +38,14 @@ class NumericHelperSessionTests(unittest.TestCase):
             subprocess.run([sys.executable,'-m','venv','--without-pip',str(environment)],check=True)
             executable=environment/('Scripts/python.exe' if os.name=='nt' else 'bin/python')
             script=Path(root)/'numeric_fixture.py';script.write_text(SERVICE)
-            with NumericHelperSession(executable,script) as session:
+            with NumericHelperSession(executable,script,ownership_root=Path(root)/'runs') as session:
                 probe=session.call(timeout_s=3.)
                 self.assertEqual(Path(probe['prefix']),environment)
                 self.assertIn(environment/'pyvenv.cfg',session.source_paths)
 
     def create(self,root):
         script=Path(root)/'numeric_fixture.py';script.write_text(SERVICE)
-        return script,NumericHelperSession(sys.executable,script,idle_timeout_s=5.)
+        return script,NumericHelperSession(sys.executable,script,idle_timeout_s=5.,ownership_root=Path(root)/"runs")
 
     def test_alternating_targets_share_the_owner_without_stale_results(self):
         with tempfile.TemporaryDirectory() as root:
@@ -60,7 +60,13 @@ class NumericHelperSessionTests(unittest.TestCase):
                 self.assertEqual(session.starts,1)
                 process=session.process;directory=session.root
             self.assertIsNotNone(process.poll())
-            self.assertFalse(directory.exists())
+            self.assertTrue(directory.exists())
+            import json
+            from utils.run_ownership import plan_run_reclamation
+            manifest=json.loads((directory/'run-ownership.json').read_text())
+            self.assertEqual(manifest['state'],'succeeded')
+            self.assertEqual(plan_run_reclamation(directory)['status'],'dry_run_ready')
+            self.assertTrue((directory/'worker.log').exists())
 
     def test_failed_job_does_not_poison_the_next_target(self):
         with tempfile.TemporaryDirectory() as root:
@@ -71,17 +77,27 @@ class NumericHelperSessionTests(unittest.TestCase):
                 result=session.call({'target':'next','numbers':[7.]},timeout_s=2.)
                 self.assertEqual(result['sum'],7.)
                 self.assertEqual(session.starts,1)
+            import json
+            manifest=json.loads((session.root/'run-ownership.json').read_text())
+            self.assertEqual(manifest['state'],'failed')
+            events=[json.loads(line) for line in (session.root/'jobs.jsonl').read_text().splitlines()]
+            self.assertEqual([event['status'] for event in events],['failed','succeeded'])
+            self.assertTrue(list(session.root.glob('*.output.pkl')))
 
     def test_source_mutation_restarts_before_another_job(self):
         with tempfile.TemporaryDirectory() as root:
             script,session=self.create(root)
             with session:
                 first=session.call({'target':'one','numbers':[1.]},timeout_s=2.)
+                first_root=session.root
                 script.write_text(SERVICE+'\n# changed source identity\n')
                 second=session.call({'target':'two','numbers':[2.]},timeout_s=2.)
                 self.assertEqual(session.starts,2)
                 self.assertTrue(second['helper_session']['restarted'])
                 self.assertNotEqual(first['helper_session']['pid'],second['helper_session']['pid'])
+                self.assertNotEqual(first_root,session.root)
+                import json
+                self.assertEqual(json.loads((first_root/'run-lease.json').read_text())['status'],'released')
 
     def test_crash_and_timeout_clear_old_jobs_before_restart(self):
         with tempfile.TemporaryDirectory() as root:
