@@ -49,3 +49,26 @@ to every source checkout. Source refs are not workflow_dispatch inputs.
 Schedule-only reusable definitions live alongside the dispatcher; existing
 push/PR/manual workflow definitions remain unchanged except retirement of old
 recurring cron entries. Scheduled checks do not validate an unmerged PR head.
+
+## Blender runtime provisioning
+
+PR/push and scheduled full jobs share `.github/actions/setup-blender` on hosted
+Ubuntu 24.04. The existing 5.0 and 4.2 targets use exact official Linux x64
+releases 5.0.0 and 4.2.0. `.github/ci/setup-blender.sh` pins SHA-256 values from
+the release manifests, cross-checked byte-for-byte at Blender-listed RWTH Aachen
+and NLUUG mirrors. It tries the official download host, then the listed Aachen
+mirror for transfer failures. A checksum mismatch fails before extraction or
+execution. Each job uses its own runner temporary directory and the archive's
+bundled Python; no developer-machine runtime changes are needed.
+
+The shared action installs the repository requirements into bundled Python.
+All test invocations use factory startup, a virtual X display, background mode
+and an explicit Python failure exit code. Full jobs remain full; quick mode
+remains quick. Job names and scheduled immutable source checkout checks remain
+unchanged. Each job is bounded to 45 minutes. Original missing Docker tags caused
+run 37845681445 to fail before checkout, so that run contains no test evidence.
+
+Release manifests:
+- <https://download.blender.org/release/Blender5.0/blender-5.0.0.sha256>
+- <https://download.blender.org/release/Blender4.2/blender-4.2.0.sha256>
+- Listed mirrors: <https://mirror.blender.org/source/blender-3.6.14.tar.xz?mirrorlist=>

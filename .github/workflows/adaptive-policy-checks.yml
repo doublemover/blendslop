@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - '.github/ci/**'
+      - '.github/actions/setup-blender/**'
       - '.github/workflows/**'
   push:
     branches: [main]
     paths:
       - '.github/ci/**'
+      - '.github/actions/setup-blender/**'
       - '.github/workflows/**'
 
 permissions:

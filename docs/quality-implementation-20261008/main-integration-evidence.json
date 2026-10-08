@@ -5,9 +5,33 @@
     "run": 28
   },
   "aggregate_visual_acceptance": false,
+  "ci_provisioning_repair": {
+    "adaptive_policy": "28 passed",
+    "local_runtime_changes": false,
+    "manifest_mirrors_identical": [
+      "RWTH Aachen",
+      "NLUUG"
+    ],
+    "scheduled_source_identity_unchanged": true,
+    "sha256": {
+      "4.2.0": "4f4fd7646af01f6fee9d420408318381a6e52571268eb7cf9cd5033bd9e7a359",
+      "5.0.0": "9de96e81432afba9c0a715c7233f1eff616705b75226dc5d0fa2708ddfb0e525"
+    },
+    "static_yaml_bash_source_guard_checks": "passed",
+    "target_releases": [
+      "5.0.0",
+      "4.2.0"
+    ],
+    "test_scope_reduced": false
+  },
   "common_base": "c5780fcb2847fcd43edbeb3ac8de63e3186db389",
   "completed_candidate": "a86090ef57641ef3e3b026dde7d18d1e443f536a",
-  "cross_version_ci": "pending; no Blender 5.0/4.2 result claimed",
+  "cross_version_ci": {
+    "initial_head": "eb504186dfd851987f2b3b507abd255bcf86d3f8",
+    "initial_result": "failed before checkout; nonexistent Docker image tags; no tests ran",
+    "initial_run": 37845681445,
+    "repair_result": "pending hosted CI; no cross-version result claimed"
+  },
   "environment_changes": false,
   "full_candidate_commits_beyond_common_base": 155,
   "integration_branch": "integration/main-completed-20261008",
@@ -18,7 +42,7 @@
     "targeted-pure.log": "bf0bb01bdfb3caccf7e49061bba809b566f45d03f3629d7fb2c32a430c55e5e9"
   },
   "main_before": "5d13125ed26d4b53716578265a70b1269e03ca31",
-  "main_only_maintenance_files": "preserved verbatim",
+  "main_only_maintenance_files": "merge preserved all verbatim; subsequent shared CI provisioning repair retains cadence and immutable source guard",
   "merge_conflicts": [],
   "native_checks": {
     "blender": "5.2.2 LTS",

@@ -1,0 +1,27 @@
+name: Setup Blender for CI
+description: Verify a pinned official Blender archive and use its bundled Python
+inputs:
+  version:
+    description: Exact supported Blender release (5.0.0 or 4.2.0)
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Install headless Linux libraries
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+          libxi6 libxrender1 libxxf86vm1 libxfixes3 libxkbcommon0 libgl1 libegl1 \
+          libsm6 libice6 xvfb xauth
+    - name: Verify and unpack Blender release
+      shell: bash
+      env:
+        BLENDER_CI_VERSION: ${{ inputs.version }}
+      run: bash .github/ci/setup-blender.sh "$BLENDER_CI_VERSION"
+    - name: Install dependencies into bundled Python
+      shell: bash
+      run: |
+        "$BLENDER_PYTHON" -m ensurepip
+        "$BLENDER_PYTHON" -m pip install --disable-pip-version-check --no-input -r blender_blocking/requirements.txt
+        "$BLENDER_PYTHON" -c "import numpy, cv2, PIL, scipy, skimage, open3d; print('Dependencies installed')"
