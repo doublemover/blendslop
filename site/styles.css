@@ -861,3 +861,26 @@ code{
         transition:none
     }
 }
+
+.reason-card { margin: 24px 0; padding: 25px 28px; border: 1px solid var(--line); border-left: 4px solid var(--pine); background: #fff; }
+.reason-heading { display: flex; align-items: start; justify-content: space-between; gap: 22px; }
+.reason-card .eyebrow { margin: 0 0 9px; }
+.reason-card h3 { font-family: var(--serif); font-size: 27px; font-weight: 400; margin: 0 0 16px; }
+.reason-card p { font-size: 14px; line-height: 1.7; max-width: 940px; }
+.reason-card p.quiet { font-size: 12px; }
+.reason-button { padding: 11px 16px; border: 1px solid var(--pine); color: var(--pine); background: var(--paper); font-size: 12px; }
+.measurement-details { border-top: 1px solid var(--line); padding-top: 19px; }
+.measurement-details > summary { font-size: 14px; }
+.measurement-details .metrics-grid { margin-top: 26px; }
+.difference-tools { display: grid; grid-template-columns: 1fr 280px; gap: 36px; border: 1px solid var(--line); background: #fff; padding: 24px; margin-top: 18px; }
+[hidden] { display: none !important; }
+.difference-tools p { font-size: 13px; line-height: 1.65; }
+.difference-tools .eyebrow { margin-top: 0; }
+.difference-tools figure { margin: 0; }
+.difference-tools canvas { display: block; width: 256px; height: 256px; image-rendering: pixelated; border: 1px solid var(--line); }
+.difference-tools figcaption { margin-top: 9px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.difference-legend { display: flex; align-items: center; gap: 9px; }
+.missing-key,.extra-key { width: 12px; height: 12px; display: inline-block; background: #cb4870; }
+.extra-key { background: #167eaa; margin-left: 12px; }
+#difference-canvas { display: block; width: min(100%,370px); height: auto; cursor: crosshair; image-rendering: pixelated; }
+@media (max-width: 720px) { .reason-heading { display: block; } .reason-card { padding: 20px; } .difference-tools { grid-template-columns: 1fr; } }

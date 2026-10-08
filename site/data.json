@@ -7,7 +7,7 @@
     "python": "3.13.13",
     "nativeBoundaryHelper": "Open3D 0.19.0 / Python 3.12.0"
   },
-  "scope": "Retained synthetic reference preparation and two actual reconstructions; no new renders or benchmark campaign for this site.",
+  "scope": "Retained synthetic reference preparation and two actual measured reconstructions; three added shaded previews from exact retained triangle program; no reconstruction or benchmark reruns.",
   "views": [
     "front",
     "side",
@@ -55,7 +55,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": false
     },
@@ -91,7 +91,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": false
     },
@@ -124,7 +124,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": false
     },
@@ -158,7 +158,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": false
     },
@@ -178,12 +178,12 @@
         "oblique_35_28": "assets/smooth_vase-source-oblique_35_28.png",
         "oblique_145_40": "assets/smooth_vase-source-oblique_145_40.png"
       },
-      "thumbnail": "assets/smooth_vase-source-oblique_35_28.png",
+      "thumbnail": "assets/smooth_vase-inspection-oblique_35_28.png",
       "referenceGeometry": "e61731bc458f5c6bf52a311b10a879ae5a4bd914dd2f7954f0f99a86275273c9",
       "referenceObjSha256": "0a67540aaaecb9385a80de1d6540a73851ad4a894f50029695f5ed04e96ea57d",
       "status": "failed",
-      "statusLabel": "Required view failed",
-      "summary": "The surface and boundary pass; the held-out oblique 145 / 40 degree view fails its boundary gate.",
+      "statusLabel": "One outline cutoff missed",
+      "summary": "Four outline tests pass. One held-out boundary score is just below its cutoff.",
       "verdicts": {
         "silhouette": "failed",
         "surface": "passed",
@@ -192,7 +192,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": false,
       "output": {
@@ -259,6 +259,11 @@
         "front": "assets/smooth_vase-reference-inspection-front.png",
         "oblique_35_28": "assets/smooth_vase-reference-inspection-oblique_35_28.png",
         "oblique_145_40": "assets/smooth_vase-reference-inspection-oblique_145_40.png"
+      },
+      "qualification": {
+        "status": "completed_qualified",
+        "elapsedSeconds": 14.250396399998863,
+        "scope": "actual retained coordinates and connectivity; edits invalidate receipt"
       }
     },
     {
@@ -290,7 +295,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": true
     },
@@ -360,7 +365,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": false
     },
@@ -396,7 +401,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": true
     },
@@ -456,7 +461,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": true
     },
@@ -528,7 +533,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": true
     },
@@ -564,12 +569,12 @@
         "oblique_35_28": "assets/rounded_triangle_dot-source-oblique_35_28.png",
         "oblique_145_40": "assets/rounded_triangle_dot-source-oblique_145_40.png"
       },
-      "thumbnail": "assets/rounded_triangle_dot-source-top.png",
+      "thumbnail": "assets/rounded_triangle_dot-inspection-oblique_35_28.png",
       "referenceGeometry": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
       "referenceObjSha256": "42bfd0466da9141fb5f5c4c788d4dfbb6cf1315e125533159aea00f37c984513",
       "status": "unqualified",
-      "statusLabel": "Surface unqualified",
-      "summary": "Five visible-frame silhouettes and the boundary pass. Independent reference noise and surface limits are still missing.",
+      "statusLabel": "Surface qualification pending",
+      "summary": "All five outline tests pass. Surface qualification has not been completed.",
       "verdicts": {
         "silhouette": "passed",
         "surface": "unqualified",
@@ -578,7 +583,7 @@
       },
       "referenceChecks": {
         "indexTopology": true,
-        "objectScaleEdit": false
+        "objectScaleEdit": true
       },
       "heldOut": true,
       "output": {
@@ -588,7 +593,11 @@
         "oblique_35_28": "assets/rounded_triangle_dot-output-oblique_35_28.png",
         "oblique_145_40": "assets/rounded_triangle_dot-output-oblique_145_40.png"
       },
-      "inspection": {},
+      "inspection": {
+        "front": "assets/rounded_triangle_dot-inspection-front.png",
+        "oblique_35_28": "assets/rounded_triangle_dot-inspection-oblique_35_28.png",
+        "oblique_145_40": "assets/rounded_triangle_dot-inspection-oblique_145_40.png"
+      },
       "geometry": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
       "objSha256": "5fbc257f49843ef3ecbb1274d655eb075f179d88f1cad54f8a19d3c202309876",
       "metrics": {
@@ -637,6 +646,18 @@
         "front": "assets/rounded_triangle_dot-reference-inspection-front.png",
         "oblique_35_28": "assets/rounded_triangle_dot-reference-inspection-oblique_35_28.png",
         "oblique_145_40": "assets/rounded_triangle_dot-reference-inspection-oblique_145_40.png"
+      },
+      "qualification": {
+        "status": "completed_qualified",
+        "elapsedSeconds": 11.412895199995546,
+        "scope": "actual retained coordinates and connectivity; edits invalidate receipt"
+      },
+      "preview": {
+        "date": "2026-10-08",
+        "geometryHash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+        "sourceNpZSha256": "02be8b8c1f719d8cc5b01168d5fc8c2ff22fb8beafdb7f396d1dfbea34a6298f",
+        "kind": "three additional shaded inspections; retained program, exact unchanged geometry and frozen cameras",
+        "blender": "5.2.2 LTS"
       }
     }
   ],
