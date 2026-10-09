@@ -1,0 +1,336 @@
+{
+  "protocol": "pending-verification-handoff-v4",
+  "status": "completed_local_checkpoint_pending_parent_publication",
+  "shell": "PowerShell 7.5",
+  "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+  "review_url": "https://github.com/doublemover/blendslop/pull/7",
+  "reviewed_revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+  "followup_branch": "local/quality-followup-20261009",
+  "implementation_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+  "reviewed_ci": {
+    "full": {
+      "status": "passed",
+      "revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37886062612/job/113676227942"
+    },
+    "quick": {
+      "status": "passed",
+      "revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37886062612/job/113676228062"
+    },
+    "gallery": {
+      "status": "passed",
+      "revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37886062682/job/113676228515"
+    },
+    "deployment": {
+      "status": "skipped",
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37886062682/job/113676320939"
+    }
+  },
+  "source_certificates_supported": 11,
+  "completed_actual_source_camera_policies": 11,
+  "triangle_final_qualification": {
+    "status": "passed_required_independent_gates",
+    "new_frames": 27,
+    "retained_alpha_passes": 3,
+    "boundary": "qualified_uncached",
+    "physical_preservation": "passed",
+    "canonical_packet": "complete",
+    "pixel_review": "completed",
+    "artist_surface_passed": null,
+    "aggregate_accepted": false,
+    "evidence": "docs/quality-triangle-final-qualification-continuation-20261009/native-evidence.json",
+    "candidate_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d"
+  },
+  "followup_verification": [
+    {
+      "id": "blender-full-followup",
+      "status": "pending_normal_ci_if_later_batch_published",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking",
+      "command": "& 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe' --background --factory-startup --threads 2 --python-exit-code 1 --python test_runner.py",
+      "reason": "Published42e5fc8 full/quick/gallery CI passed. Later local sourcecamera,11certificates/policies, triangle and arch missing-gate acquisition plus focused pure guards completed. Normal CI if parent publishes; no broad rerun for metadata.",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "blender-quick-followup",
+      "status": "pending_normal_ci_if_later_batch_published",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking",
+      "command": "& 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe' --background --factory-startup --threads 2 --python-exit-code 1 --python test_runner.py -- --quick",
+      "reason": "Published42e5fc8 full/quick/gallery CI passed. Later local sourcecamera,11certificates/policies, triangle and arch missing-gate acquisition plus focused pure guards completed. Normal CI if parent publishes; no broad rerun for metadata.",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "changed-adaptive-five-view-boundary-canonical",
+      "status": "five_positive_changed_families_unrun",
+      "command": null,
+      "reason": "Triangle bfe72738 and exterior arch e2b54f35 completed missing original five-view/native/canonical gates once. Capsule,torus,frustum,cylinder,plate remain changed diagnostics needing bounded coordinator scopes. Artist independent, no universal pass command or aggregate acceptance.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "continuation-desktop",
+      "status": "blocked_no_supported_browser_surface",
+      "command": null,
+      "review_url": "http://127.0.0.1:53743/continuation.html",
+      "prerequisite_command": "& 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe' -m http.server 53743 --bind 127.0.0.1 --directory site",
+      "prerequisite_status": "server not launched",
+      "reason": "Current supported CUA exposes no app/browser. Existing static assets and actual native render pixels inspected. Open this URL through a supported browser at 1440x1100 when available.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c"
+    },
+    {
+      "id": "continuation-mobile",
+      "status": "skipped_explicit_owner_instruction",
+      "command": null,
+      "reason": "Owner explicitly instructed no mobile review.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "non-vase-artist-tolerances",
+      "status": "blocked_independent_authored_input",
+      "command": null,
+      "reason": "Source discretization engineering certificates do not substitute for independent per-family artist acceptance tolerances.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "historical-scalloped-smooth-target",
+      "status": "blocked_independent_authored_input",
+      "command": null,
+      "reason": "The intended smooth target is absent. Do not infer ground truth or tune an aggregate pass.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "remaining-continuous-certificates-source-cameras",
+      "status": "completed_eleven_source_certificates_and_actual_camera_policies",
+      "command": null,
+      "reason": "Rounded-box and rounded-triangle certificates completed. Eleven actual source policies classify21retained observations; all previous ten contracts/nineteen observations unchanged. Artist limits remain separate.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "historical-selected-canonical-supervisor",
+      "status": "failed_unavailable_original_kernel_join",
+      "command": null,
+      "reason": "Original observed descendant creation HANDLE was lost. PID absence-only followup cannot prove a kernel wait or exit status. New successful fresh jobs do not rewrite that history.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "historical-source-owner-drift",
+      "status": "blocked_retained_artifact_digest_mismatch",
+      "command": null,
+      "reason": "Old source receipt was registered before its final update. Historical artifact/lease drift remains explicit; no ownership adoption or lease rewrite.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "sphere-ellipsoid-detail-updates",
+      "status": "rejected_originals_retained",
+      "command": null,
+      "reason": "Sphere alpha worsens 2.2823%; ellipsoid worsens 3.2329% despite lower raw mean. No speculative refit or weakened acceptance.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "global-hidden-surface-uniqueness",
+      "status": "unqualified_requires_additional_independent_observations",
+      "command": null,
+      "reason": "Local rank/full contour observations and observed endpoint repair do not prove global hidden geometry uniqueness.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "recovery-reclamation",
+      "status": "read_only_inspection_implemented_execution_unimplemented",
+      "command": null,
+      "reason": "Fresh producer ownership/recovery inspection and complete-tree supervision exist. No blanket deletion, historical adoption or recovery-execution authorization.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "followup-publication",
+      "status": "published_through42_later_local_batches_pending_parent_decision",
+      "command": null,
+      "reason": "Fresh exact-URL read: PR7 OPEN draft42e5fc8, same headbranch/base main. Later9local commits througha0974fee plus metadata ready for parent review. Approval required for exact nonforce fastforward; no newPR/retarget/merge/Pages authorization.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "arch-fixed-notch-p95",
+      "status": "independent_distance_p95_regression_retained",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7",
+      "command": null,
+      "reason": "Exterior e2b54f35 passed missing five-view/native/canonical gates. Previous3.7967% distanceP95 increase remains an observation; engineering limits mean distance and oriented-normalP95, no distanceP95 cutoff authored. Current12selection preserved, artist null."
+    },
+    {
+      "id": "triangle-final-missing-gates",
+      "status": "completed_independent_gates",
+      "shell": "PowerShell 7.5",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "command": null,
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7",
+      "reason": "Exact bfe72738 five silhouettes,.005world support/thickness, uncached solid boundary and matched30logicalpass packet passed;27newframes/3retainedalpha; actualpixels inspected."
+    },
+    {
+      "id": "arch-final-missing-gates",
+      "status": "completed_independent_gates",
+      "shell": "PowerShell 7.5",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "command": null,
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7",
+      "reason": "Exact e2b54f35 five silhouettes, uncached solid boundary and matched30logicalpass packet passed;28newframes/2retainedalpha; old exact depth proof reused, actualpixels inspected."
+    },
+    {
+      "id": "eleven-policy-first-report",
+      "status": "historical_failure_preserved_reader_repaired",
+      "shell": "PowerShell 7.5",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "command": null,
+      "candidate_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7",
+      "reason": "First11-family pure report failed on reused original triangle lookup; failed owner/history preserved. Narrow original-producer reader repaired;2meaningful guards passed. Later report classifies21retained observations without changing previous10contracts/19observations."
+    }
+  ],
+  "metadata_tests_executed": 0,
+  "publication": "Approved push through42e5fc8 succeeded; later9commits local. Concrete destination if approved: nonforce fastforward to existingPR7 head local/quality-continuation-20261008. No merge/newPR/retarget/Pages authorization.",
+  "aggregate_accepted": false,
+  "artist_surface_passed": null,
+  "historical_evidence_policy": "Older frozen handoffs, input hashes and bundle manifests remain snapshots of their recorded revisions; later file changes do not overwrite history.",
+  "completed_local_batches": [
+    {
+      "revision": "e9ba1c6d9815acd5fc3cf51d84210a78e82edc91",
+      "outcome": "ten source-only torus/arch neutral frames,9camera policies,strict diagnostic raw bindings,exact authored questions"
+    },
+    {
+      "revision": "1100adab1953de031175510585a9decb6af75e3a",
+      "outcome": "rounded-box continuous source certificate and tenth actual sourcecamera policy from retained canonical packet;9proof+2APIchecks"
+    },
+    {
+      "revision": "97c9e05a59ddc1f9c33e8e7137077df350da194d",
+      "outcome": "triangle continuous source certificate and eleventhAPI;9proof+2APIchecks; later7d22 adds actual camera policy"
+    },
+    {
+      "revision": "e96191bc72041ea3414fd5c6df1e98dbcd0bca93",
+      "outcome": "observed gallery malformed character entities repaired; no geometry/metric change"
+    },
+    {
+      "revision": "7d22041eacb339274f2933d942c86e20ef907f34",
+      "outcome": "triangle exact full missing gates plus11sourcepolicies/21observations, preservedfailedreport and strict retainedbaseline repair; currentrowselection/artist unchanged"
+    },
+    {
+      "revision": "e5a62b9b5bc098758b257ddfca887b4c47764bc7",
+      "outcome": "thin exact arch coordinator,4pureguards and frozen plan committed before launch"
+    },
+    {
+      "revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+      "outcome": "arch missing gates completed once;6actualPNGs inspected;5kerneljoins exit0 and3released clear audits;P95/artist/rowhistory preserved"
+    }
+  ],
+  "next_ready_scope": {
+    "status": "five_changed_positive_family_gate_scopes_unrun",
+    "families": [
+      "capsule",
+      "torus",
+      "tapered_frustum",
+      "cylinder",
+      "thin_plate"
+    ],
+    "command": null,
+    "reason": "Each needs a thin exact saved-candidate adapter and separately bounded frozen scope for missing original five-view/native/canonical gates. Existing improvements/raw/edit transactions retained; no refitting or rerunning rejected sphere/ellipsoid updates.",
+    "artist_limits_independent": true,
+    "aggregate_accepted": false
+  },
+  "authored_input_decisions": "docs/quality-authored-input-decisions-continuation-20261009/decisions.json",
+  "implementation_revision_scope": "latest committed implementation/evidence before this metadata-only handoff; final metadata commit identified by incremental bundle manifest",
+  "remote_verified_utc": "2026-10-09T06:47:57.433101+00:00",
+  "remote_lookup": "gh pr view exact GitHub URL; default upstream repository lookup could not resolvePR7",
+  "deliverables": {
+    "source_camera": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-source-camera-coverage-continuation-20261009\\native-evidence.json",
+      "bytes": 102139,
+      "sha256": "c2be03b996e60e3db9f8b1da0bb7e6d7e87a68e8d3ba4b265949cedf9ec745a1"
+    },
+    "rounded_box_certificate": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-rounded-box-reference-continuation-20261009\\evidence.json",
+      "bytes": 10702,
+      "sha256": "64a64785e6f2b0863587d31e77a666a2e0dffc5a6f75b02c0b62c882a378f592"
+    },
+    "rounded_triangle_certificate": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-rounded-triangle-reference-continuation-20261009\\source-certificate-evidence.json",
+      "bytes": 5740,
+      "sha256": "f0aab4027760b69fb302ffe9973f3724865d6f1addacc3555a9017864b22108e"
+    },
+    "eleven_policy_classification": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\eleven-family-evidence.json",
+      "bytes": 17310,
+      "sha256": "d65e292edc938c5fa7bf00ac89e78b63ab24f77699f3d5994d2da01230c76965"
+    },
+    "triangle_final_gates": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-final-qualification-continuation-20261009\\native-evidence.json",
+      "bytes": 112261,
+      "sha256": "25b230d62af0a3bd72755d7e06e4b5a52917e43a9720e8127e9015714955cada"
+    },
+    "arch_final_gates": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-arch-final-qualification-continuation-20261009\\native-evidence.json",
+      "bytes": 132445,
+      "sha256": "f9b09d51d3fb03d2743215236930ff14f38026424c7112720cfb8785b27b5c3e"
+    },
+    "authored_decisions": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-authored-input-decisions-continuation-20261009\\decisions.json",
+      "bytes": 27540,
+      "sha256": "04c32fda9a2a1fa92d6d812cc031864f7674cfbaa2199f3d37fbcc4c12b81ae0"
+    }
+  },
+  "arch_final_qualification": {
+    "status": "passed_required_independent_gates",
+    "candidate_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+    "new_frames": 28,
+    "retained_alpha_passes": 2,
+    "boundary": "qualified_uncached",
+    "existing_depth_edit_restoration": "passed_retained_original_transaction",
+    "canonical_packet": "complete",
+    "pixel_review": "six_actual_PNGs_inspected",
+    "old_distance_p95_increase_percent": 3.7967,
+    "distance_p95_cutoff": null,
+    "artist_surface_passed": null,
+    "aggregate_accepted": false,
+    "evidence": "docs/quality-arch-final-qualification-continuation-20261009/native-evidence.json"
+  },
+  "reuse_and_history": "Old d318 triangle72input snapshot remains true at recorded jobtime; later arch seams legitimately change adapter/test_runner. New e5a62 arch80inputs unchanged after its job. No old receipt/lease rewrite, adoption or rerun."
+}

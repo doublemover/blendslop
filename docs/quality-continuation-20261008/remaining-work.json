@@ -8,7 +8,7 @@
   "tracks": [
     {
       "task": "QUALITY-SURFACE1",
-      "state": "calibrated vase retained; nine source-only engineering certificate APIs and nine actual five-camera policies; artist acceptance independent",
+      "state": "calibrated vase retained; eleven continuous source certificate APIs and eleven actual five-camera engineering policies; artist acceptance independent",
       "completed": [
         "explicit AgX coverage inversion and half-coverage fitting",
         "terminal flat-cap completion with explicit prior",
@@ -19,10 +19,12 @@
         "exact full rectilinear boundary cover for plate, arch and multipart; missing/overlapping facets refused",
         "frozen torus128x24 exact periodic cover, directed interval construction/Hessian distance bound and analytic corresponding-normal cone",
         "seven actual camera-bound source policies frozen; old multipart mean-distance failure retained and final b2c repair passes the same policy",
-        "fresh ten-frame torus/arch source-only capture closes actual camera/clip/neutral/style provenance; all nine frozen policies classify eighteen retained observations without resampling or row selection"
+        "fresh ten-frame torus/arch source-only capture closes actual camera/clip/neutral/style provenance; all nine frozen policies classify eighteen retained observations without resampling or row selection",
+        "exact full26patch rounded-box continuous source certificate,9proof+2API guards, tenth policy reused from retained matched packet",
+        "exact binary64 triangular lens continuous parameter-cell/pole cover,9proof+2API guards, eleventh actual sourcecamera policy",
+        "eleven source policies classify21retained observations with all previous ten contract bodies/nineteen observations unchanged; strict original reused triangle baseline bound to original producer"
       ],
       "remaining": [
-        "rounded-box and triangular-pebble continuous source certificate or independently authored acceptance contract",
         "artist acceptance tolerances for non-vase families",
         "historical scalloped-input repair against an explicitly authored smooth target"
       ],
@@ -30,7 +32,7 @@
     },
     {
       "task": "QUALITY-COVERAGE1",
-      "state": "original12 rows preserved; nine generic adaptive families measured, seven improved families/two rejected updates; separate arch exterior improvement with P95 regression retained",
+      "state": "original12 rows preserved; improved triangle and exterior arch complete missing original five-view/native/canonical gates; five other changed positive checkpoints separate",
       "completed": [
         "frozen12-family reference matrix and intentional depth/cavity/multipart negatives",
         "observed-mask fitting for sphere, ellipsoid, cylinder, frustum, corrected capsule, rounded box and thin plate",
@@ -53,20 +55,22 @@
         "two12-frame genuine axis jobs: cylinder alpha71.2955percent lower/plate87.4998percent lower; allfour physical source edits restore exactly",
         "sphere and ellipsoid updates reject held-out alpha regressions2.2823percent/3.2329percent; originals retained with no aggregate masking",
         "separate three-control arch exterior stage improves held-out alpha87.5421percent/raw mean74.5968percent; fixed-notch distanceP95 increases3.7967percent independently, exact depth restoration/full local rank passes",
-        "strict adaptive producer bindings classify all eight supported diagnostic checkpoints separately; rejected sphere/ellipsoid updates remain rejected even when supplementary raw engineering policy passes"
+        "strict adaptive producer bindings classify all eight supported diagnostic checkpoints separately; rejected sphere/ellipsoid updates remain rejected even when supplementary raw engineering policy passes",
+        "exact bfe72738 triangular replay passes5original silhouettes,.005world support/thickness and one uncached native solid boundary;27newframes+3retainedalpha acquire matched canonical packet; artist/aggregate remain unqualified",
+        "exact e2b54f35 arch replay passes5original silhouettes and uncached solid boundary;28new+2retainedalpha matched30logicalpass packet; olddepth restoration reused; artist/aggregate/selection unchanged"
       ],
       "remaining": [
-        "changed adaptive candidates remain diagnostic until their required full five-view/native boundary/canonical gates run",
-        "source-camera and independent artist surface contracts where absent",
-        "global hidden-surface uniqueness remains unproved",
-        "sphere/ellipsoid failed detail updates retained; current candidates remain selected rather than speculative refits",
-        "arch exterior fixed-notch distanceP95 regression retained; changed diagnostic identity not full-view/native/canonical/artist qualified"
+        "capsule,torus,frustum,cylinder,plate changed positive candidates need missing full five-view/native/canonical gates in separately bounded scopes",
+        "independent artist contracts absent for eleven non-vase families",
+        "global hidden-surface uniqueness unproved",
+        "sphere/ellipsoid failed detail updates retained; original candidates selected",
+        "arch distanceP95 increase3.7967% and triangle sampledmax increase retained independently; no authored tail-distance cutoff"
       ],
       "blocking_input": null
     },
     {
       "task": "QUALITY-TRIANGLE1",
-      "state": "authored reference/editable primitive and six-frame physical-alpha adaptive improvement retained; changed geometry not aggregate qualified",
+      "state": "authored reference/editable primitive and improved bfe72738 exact geometry have source certificate, five silhouettes, physical preservation, native solid boundary and full canonical provenance; artist acceptance unqualified",
       "completed": [
         "corner radius, thickness and asymmetric front/back profile controls",
         "five strict silhouettes and24-direction support/thickness checks",
@@ -75,11 +79,14 @@
         "coupled corner-radius/XY scale contour fit with fixed thickness/front-back profile/pose/tessellation",
         "new bfe72738 checkpoint: held-out boundary.881874->.968171, alpha error73.6218percent lower; raw mean/normalP95 lower",
         "native physical radius support response preserves thickness/source pointer and restores exact indexed geometry",
-        "fresh pre-resume Job ownership completes both process kernel joins; resource and actual pixels retained"
+        "fresh pre-resume Job ownership completes both process kernel joins; resource and actual pixels retained",
+        "continuous source certificate distance<=.00040500062340535856world/corresponding geometric normals<=6.5098278988276554degrees over12,474triangles",
+        "27new512frames and3verified original-owner alpha passes; five original gates, physical support/thickness, exact boundary and paired normal/neutral/mask inventory pass",
+        "six actual PNGs inspected; sourcecamera policy classifies original880bf1 and improvedbfe raw metrics independently; existing body-specific radius edit/restore retained"
       ],
       "remaining": [
-        "independent authored artist reconstruction tolerance / continuous source certificate",
-        "full five-view silhouette/native boundary/matched neutral-normal packet for changed bfe72738 geometry"
+        "independently authored artist mean-distance/oriented-normal limits and any desired tail-distance limits; no sampled-max regression hidden",
+        "current12row selection remains preserved; any later promotion must keep separate artist/engineering verdicts"
       ],
       "blocking_input": "Artist tolerance remains absent; current bounded checkpoint preserves the original selected row and cannot grant aggregate acceptance."
     },
@@ -98,7 +105,9 @@
         "selected final9f6c box and b2c multipart actual five-view masks/neutrals/RGB normals with camera/clip/geometry/style bindings",
         "60nativeframes and148child-owned artifacts retained; child scope released/auditready",
         "source/candidate neutral and normal pixels inspected; original oblique crop censoring disclosed",
-        "torus/arch ten fresh source-only neutral frames reproduce exact indexed/oriented originals and allfive candidate frame/clip bindings; actual oblique pixels inspected; masks/normals remain unrun"
+        "torus/arch ten fresh source-only neutral frames reproduce exact indexed/oriented originals and allfive candidate frame/clip bindings; actual oblique pixels inspected; masks/normals remain unrun",
+        "new exact triangular source/candidate matched30logicalpass packet,27fresh+3retainedalpha; allfive camera/clip/pass/geometry bindings; actual top/oblique neutral and normal pixels inspected",
+        "exact exterior arch matched30logicalpass packet:28new+2retainedalpha, allfive geometry/camera/clip/pass bindings,6actualobliquePNG inspections; originaledgecrop retained"
       ],
       "remaining": [
         "original selected-packet outer descendant kernel join is unavailable; absence-only followup cannot repair it",
@@ -135,7 +144,9 @@
         "eleven focused cache checks (eight new/three existing) pass real NPZ reader compatibility, concurrent collisions, failed serialization and bounded payloads",
         "strict false-by-default cache_owned_writes now propagates through existing VisualHull config/parser/backend and all sparse builders; last fresh receipt only, cache-hit-only unrun; six focused checks passed",
         "all latest native triangle/frustum/arch/axis/exterior jobs use fresh complete-tree ownership; final exterior job proves two kernel joins, released fresh leases and zero active members",
-        "fresh ten-frame source-camera job completes in7.656s with two retained creation HANDLEs kerneljoined exit0, zero active Job members, both leases released and read-only audits clear"
+        "fresh ten-frame source-camera job completes in7.656s with two retained creation HANDLEs kerneljoined exit0, zero active Job members, both leases released and read-only audits clear",
+        "triangle final acquisition completes five observed creation HANDLE kerneljoins exit0, Job activezero, allthree fresh owner audits ready; no historical adoption/deletion",
+        "arch acquisition:5creation HANDLE kerneljoins exit0, Jobzero,3fresh owners released/read-onlyauditready; peakRSS700575744/Jobcommitted2749313024bytes under8GiB; no cleanup/adoption"
       ],
       "remaining": [
         "save_render exact-path overwrite API not changed",
@@ -164,7 +175,10 @@
         "native fresh Job supervisory path proves lifecycle completion separately from geometry improvement",
         "actual frustum/arch12-frame controlled checkpoint completes through fresh reusable CLI",
         "four actual axis acquisitions finish24frames total through fresh process-tree ownership; source and actual held-out frame censoring retained independently",
-        "one six-frame arch exterior acquisition uses candidate-only uncensored expandedob35; original ob145 remains excluded from fitting, actual held-out censoring and P95 regression retained"
+        "one six-frame arch exterior acquisition uses candidate-only uncensored expandedob35; original ob145 remains excluded from fitting, actual held-out censoring and P95 regression retained",
+        "triangle changed exact candidate completes missing required five-view/native/canonical gates without fitting/raw/semantic reruns",
+        "observed malformed HTML numeric entities repaired in local continuation gallery without changing assets/metrics/geometry",
+        "exterior arch exact candidate completes missing five-view/native/canonical gates; actualcavity/panel pixels reviewed; no fitting/raw/newedit reruns"
       ],
       "remaining": [
         "matched lit/canonical inspection for changed diagnostic candidates if selected",
@@ -175,7 +189,7 @@
     },
     {
       "task": "INTEGRATION-PUBLICATION",
-      "state": "PR7 open draft at42e5fc8; full/quick/gallery CI pass; later e9ba1c6 source-camera/policy batch remains local",
+      "state": "PR7 OPEN draft42e5fc8 full/quick/galleryCIpassed; later11sourcepolicies, triangle/arch missing gates and galleryfix local pending parent publication",
       "completed": [
         "owner checkout preserved on endblay_opslay",
         "quality work isolated on local/quality-continuation-20261008",
@@ -190,7 +204,7 @@
         "explicit owner approval fulfilled with exact nonforce fastforward push42e5fc8 to existing PR7 head; full/quick/gallery CI passed; deployment skipped"
       ],
       "remaining": [
-        "later source-camera/policy batch review and normal CI if parent chooses publication",
+        "later11sourcepolicies, triangle/arch qualification and gallery fix review; normal CI if parent approves publication",
         "desktop continuation page inspection when a browser is available; mobile skipped per owner",
         "separate approval before PR merge or Pages deployment"
       ],
@@ -216,10 +230,18 @@
     "a7571fb8ac8b4d2132a3c5c41fd1a9842c4b8c7a",
     "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
     "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
-    "e9ba1c6d9815acd5fc3cf51d84210a78e82edc91"
+    "e9ba1c6d9815acd5fc3cf51d84210a78e82edc91",
+    "5588ef40e7303d05ae50fd1f11129bb782af5ea2",
+    "1100adab1953de031175510585a9decb6af75e3a",
+    "97c9e05a59ddc1f9c33e8e7137077df350da194d",
+    "e96191bc72041ea3414fd5c6df1e98dbcd0bca93",
+    "d3184543f6a654dacdf26c996c7c327bd1a83f86",
+    "7d22041eacb339274f2933d942c86e20ef907f34",
+    "e5a62b9b5bc098758b257ddfca887b4c47764bc7",
+    "a0974fee3697008200f35c700a98bb17140e5a2c"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
-  "completed_unpublished_batch": "ten-frame actual torus/arch source-camera capture, complete nine-family supplementary policy report with strict adaptive bindings, and exact authored-input decisions; artist/silhouette/topology/editability verdicts remain independent",
+  "completed_unpublished_batch": "sourcecamera9policies, roundedbox10th and triangle11th certificates/policies; exact triangle/exteriorarch missing gates; strict original reusedtriangle reader; gallery entity repair; artist/selection/history preserved",
   "reviewed_draft": {
     "url": "https://github.com/doublemover/blendslop/pull/7",
     "state": "OPEN draft",
@@ -229,15 +251,36 @@
     "blender_quick": "passed CI",
     "gallery": "passed CI",
     "merge_pages_approval": "absent",
-    "remote_verified": "OPEN draft at42e5fc8; full/quick/gallery successful; deployment skipped"
+    "remote_verified": "Fresh exact GitHub URL read:OPEN draft42e5fc8, same main/base/headbranch; prior full/quick/gallerypassed and deployskipped. No CI repoll."
   },
-  "followup_implementation_revision": "e9ba1c6d9815acd5fc3cf51d84210a78e82edc91",
+  "followup_implementation_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
   "aggregate_accepted": false,
   "metadata_tests_executed": 0,
   "published_followup_revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
   "prior_parent_verification_handoff": "docs/quality-followup-continuation-20261009/pending-verification.json",
-  "parent_verification_handoff": "docs/quality-source-policy-checkpoint-continuation-20261009/pending-verification.json",
+  "parent_verification_handoff": "docs/quality-triangle-policy-checkpoint-continuation-20261009/pending-verification.json",
   "authored_input_decisions": "docs/quality-authored-input-decisions-continuation-20261009/decisions.json",
   "source_camera_evidence": "docs/quality-source-camera-coverage-continuation-20261009/native-evidence.json",
-  "complete_nine_family_evidence": "docs/quality-family-surface-contracts-continuation-20261009/complete-evidence.json"
+  "complete_nine_family_evidence": "docs/quality-family-surface-contracts-continuation-20261009/complete-evidence.json",
+  "source_certificates_supported": 11,
+  "completed_actual_source_camera_policies": 11,
+  "complete_eleven_family_evidence": "docs/quality-family-surface-contracts-continuation-20261009/eleven-family-evidence.json",
+  "triangle_final_qualification_evidence": "docs/quality-triangle-final-qualification-continuation-20261009/native-evidence.json",
+  "next_ready_arch_scope": {
+    "state": "completed_once_required_independent_gates",
+    "new512_frames": 28,
+    "retained_alpha_passes": 2,
+    "qualifiers": 1,
+    "artist_surface_passed": null,
+    "aggregate_accepted": false,
+    "evidence": "docs/quality-arch-final-qualification-continuation-20261009/native-evidence.json"
+  },
+  "arch_final_qualification_evidence": "docs/quality-arch-final-qualification-continuation-20261009/native-evidence.json",
+  "next_ready_candidate_scopes": [
+    "capsule",
+    "torus",
+    "tapered_frustum",
+    "cylinder",
+    "thin_plate"
+  ]
 }
