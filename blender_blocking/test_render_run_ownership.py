@@ -1,5 +1,5 @@
 """Producer-owned render staging/publication without native Blender or cleanup."""
-from contextlib import contextmanager, ExitStack
+from contextlib import contextmanager, ExitStack, nullcontext
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
@@ -318,6 +318,251 @@ class RenderRunOwnershipTests(unittest.TestCase):
             self.assertIsNone(result.ownership_receipt)
             self.assertTrue(output.is_dir())
             self.assertEqual(list(output.iterdir()), [])
+
+
+class SaveRenderOwnershipTests(unittest.TestCase):
+    owned_receipt = RenderRunOwnershipTests.owned_receipt
+    assert_ready = RenderRunOwnershipTests.assert_ready
+
+    @contextmanager
+    def current_scene(self, folder, action=None, *, file_format="PNG", use_extension=True):
+        scene = SimpleNamespace(
+            render=SimpleNamespace(filepath="previous-current-scene-path", engine="BLENDER_EEVEE_NEXT",
+                                   image_settings=SimpleNamespace(file_format=file_format, color_mode="RGB", color_depth="8"),
+                                   use_file_extension=use_extension, use_multiview=False, is_movie_format=False,
+                                   resolution_x=37, resolution_y=29, resolution_percentage=73,
+                                   use_border=True, use_crop_to_border=True, film_transparent=False),
+            frame_current=75, camera=object(), cycles=SimpleNamespace(samples=17),
+            view_settings=SimpleNamespace(view_transform="AgX", look="Medium High Contrast", exposure=1.25, gamma=1.1),
+        )
+        fixed_settings = {key: value for key, value in vars(scene.render).items() if key != "filepath"}
+        fixed_view = dict(vars(scene.view_settings))
+        fixed_image = dict(vars(scene.render.image_settings))
+        state = SimpleNamespace(scene=scene, calls=[], writes=[])
+
+        def abspath(path):
+            return str(Path(folder) / path[2:]) if path.startswith("//") else path
+
+        def native_render(*, write_still):
+            self.assertIs(write_still, True)
+            path = Path(scene.render.filepath)
+            self.assertEqual(path.parent.name, "stage")
+            self.assertTrue(path.parent.parent.name.startswith("owned-"))
+            self.assertEqual(scene.frame_current, 75)
+            self.assertEqual(scene.render.image_settings.file_format, file_format)
+            self.assertEqual(scene.render.use_file_extension, use_extension)
+            state.calls.append(path)
+            if action is not None:
+                return action(state, path)
+            extension = ".png" if file_format == "PNG" else ".jpeg"
+            actual = path if not use_extension or path.name.endswith(extension) else path.with_name(path.name + extension)
+            Image.new("RGB", (9, 6), (33, 71, 109)).save(actual, format=file_format)
+            state.writes.append(actual)
+            return {"FINISHED"}
+
+        fake = SimpleNamespace(context=SimpleNamespace(scene=scene), path=SimpleNamespace(abspath=abspath),
+                               ops=SimpleNamespace(render=SimpleNamespace(render=native_render)))
+        with patch.object(render, "BLENDER_AVAILABLE", True), patch.object(render, "bpy", fake, create=True), \
+                patch.object(render, "_suppress_blender_render_stdout", side_effect=nullcontext):
+            try:
+                yield state
+            finally:
+                self.assertEqual({key: value for key, value in vars(scene.render).items() if key != "filepath"}, fixed_settings)
+                self.assertEqual(vars(scene.view_settings), fixed_view)
+                self.assertEqual(vars(scene.render.image_settings), fixed_image)
+                self.assertEqual(scene.frame_current, 75)
+                self.assertEqual(scene.cycles.samples, 17)
+
+    def test_success_keeps_current_scene_legacy_none_and_requested_filepath(self):
+        with tempfile.TemporaryDirectory() as folder, self.current_scene(folder) as fake:
+            requested = str(Path(folder) / "still.png")
+            historical = Path(folder) / "history.json"
+            historical.write_bytes(b"old result/config bytes")
+            self.assertIsNone(render.save_render(requested))
+            self.assertEqual(fake.scene.render.filepath, requested)
+            self.assertEqual(len(fake.calls), 1)
+            root, receipt = self.owned_receipt(folder)
+            final = Path(receipt["final_path"])
+            self.assertEqual(final, Path(requested))
+            self.assertEqual(final.read_bytes(), fake.writes[0].read_bytes())
+            self.assertEqual(receipt["stage"]["sha256"], hashlib.sha256(final.read_bytes()).hexdigest())
+            self.assertEqual(receipt["protocol"], "save-render-owned-v1")
+            self.assertTrue(receipt["published"])
+            self.assertEqual(receipt["subprocesses_started"], 0)
+            self.assertEqual(historical.read_bytes(), b"old result/config bytes")
+            self.assert_ready(root)
+
+    def test_native_extension_frame_leaf_and_non_png_format_are_not_rewritten(self):
+        # The fixture declares native filenames; it does not certify Blender's
+        # format writer. The coordinator must transport exactly what was closed.
+        for fmt, append, requested, actual in (
+                ("PNG", True, "still_####", "still_####.png"),
+                ("JPEG", True, "portrait", "portrait.jpeg"),
+                ("JPEG", False, "portrait.data", "portrait.data")):
+            with self.subTest(fmt=fmt, append=append), tempfile.TemporaryDirectory() as folder, \
+                    self.current_scene(folder, file_format=fmt, use_extension=append) as fake:
+                self.assertIsNone(render.save_render("//" + requested))
+                self.assertEqual(fake.calls[0].name, requested)
+                self.assertEqual(fake.scene.render.filepath, "//" + requested)
+                root, receipt = self.owned_receipt(folder)
+                self.assertEqual(Path(receipt["final_path"]), Path(folder) / actual)
+                self.assertEqual(receipt["file_format"], fmt)
+                with Image.open(Path(folder) / actual) as image:
+                    self.assertEqual(image.format, fmt)
+                    self.assertEqual(image.size, (9, 6))
+                self.assert_ready(root)
+
+    def test_existing_exact_final_retains_old_bytes_complete_stage_and_failure(self):
+        with tempfile.TemporaryDirectory() as folder, self.current_scene(folder) as fake:
+            final = Path(folder) / "still.png"
+            final.write_bytes(b"previous published bytes")
+            with self.assertRaises(FileExistsError):
+                render.save_render(str(final))
+            self.assertEqual(final.read_bytes(), b"previous published bytes")
+            self.assertEqual(fake.scene.render.filepath, "previous-current-scene-path")
+            self.assertEqual(len(fake.calls), 1)
+            root, receipt = self.owned_receipt(folder)
+            self.assertFalse(receipt["published"])
+            self.assertEqual(receipt["status"], "failed")
+            self.assertTrue((root / receipt["stage"]["path"]).is_file())
+            self.assertFalse((Path(folder) / "still_2.png").exists())
+            self.assert_ready(root, "failed")
+
+    def test_publication_race_and_unsupported_link_do_not_retry_or_rerender(self):
+        for collide in (True, False):
+            with self.subTest(collide=collide), tempfile.TemporaryDirectory() as folder, self.current_scene(folder) as fake:
+                final = Path(folder) / "still.png"
+                failure = PermissionError("filesystem link refused")
+
+                def publish(source, target):
+                    self.assertEqual(target, final)
+                    if collide:
+                        with target.open("xb") as stream:
+                            stream.write(b"competing owner")
+                        return publication.publish_file_no_clobber(source, target)
+                    raise failure
+
+                with patch.object(render, "publish_file_no_clobber", side_effect=publish) as link:
+                    with self.assertRaises(FileExistsError if collide else PermissionError) as caught:
+                        render.save_render(str(final))
+                    self.assertEqual(link.call_count, 1)
+                if collide:
+                    self.assertEqual(final.read_bytes(), b"competing owner")
+                else:
+                    self.assertIs(caught.exception, failure)
+                    self.assertFalse(final.exists())
+                self.assertEqual(len(fake.calls), 1)
+                self.assertEqual(fake.scene.render.filepath, "previous-current-scene-path")
+                root, _ = self.owned_receipt(folder)
+                self.assert_ready(root, "failed")
+
+
+    def test_native_failure_and_keyboard_cancel_retain_partial_and_primary(self):
+        for original in (RuntimeError("native primary failure"), KeyboardInterrupt("native cancellation")):
+            def action(state, path):
+                path.write_bytes(b"partial owned image")
+                raise original
+
+            with self.subTest(error=type(original).__name__), tempfile.TemporaryDirectory() as folder, \
+                    self.current_scene(folder, action) as fake:
+                with self.assertRaises(type(original)) as caught:
+                    render.save_render(str(Path(folder) / "still.png"))
+                self.assertIs(caught.exception, original)
+                self.assertEqual(fake.scene.render.filepath, "previous-current-scene-path")
+                self.assertFalse((Path(folder) / "still.png").exists())
+                root, receipt = self.owned_receipt(folder)
+                self.assertEqual((root / "stage/still.png").read_bytes(), b"partial owned image")
+                self.assertEqual(receipt["error"], repr(original))
+                state = "cancelled" if isinstance(original, KeyboardInterrupt) else "failed"
+                self.assertEqual(receipt["status"], state)
+                self.assert_ready(root, state)
+
+    def test_cancelled_operator_multiple_files_and_invalid_png_never_publish(self):
+        def cancelled(state, path):
+            Image.new("RGB", (9, 6)).save(path, format="PNG")
+            return {"CANCELLED"}
+
+        def multiple(state, path):
+            for name in ("first.png", "second.png"):
+                Image.new("RGB", (9, 6)).save(path.parent / name)
+            return {"FINISHED"}
+
+        def invalid(state, path):
+            path.write_bytes(b"not a PNG")
+            return {"FINISHED"}
+
+        for action, error in ((cancelled, RuntimeError), (multiple, ValueError), (invalid, OSError)):
+            with self.subTest(action=action.__name__), tempfile.TemporaryDirectory() as folder, \
+                    self.current_scene(folder, action) as fake:
+                with self.assertRaises(error):
+                    render.save_render(str(Path(folder) / "still.png"))
+                self.assertEqual(fake.scene.render.filepath, "previous-current-scene-path")
+                self.assertFalse((Path(folder) / "still.png").exists())
+                root, receipt = self.owned_receipt(folder)
+                self.assertFalse(receipt["published"])
+                self.assertGreater(len(list((root / "stage").iterdir())), 0)
+                self.assert_ready(root, "failed")
+
+    def test_secondary_receipt_failure_keeps_primary_and_restores_filepath(self):
+        primary = RuntimeError("native primary")
+        original_writer = render._write_render_receipt
+
+        def action(state, path):
+            path.write_bytes(b"partial")
+            raise primary
+
+        def write(owner, receipt):
+            if receipt["status"] != "running":
+                raise OSError("secondary receipt failure")
+            return original_writer(owner, receipt)
+
+        with tempfile.TemporaryDirectory() as folder, self.current_scene(folder, action) as fake:
+            with patch.object(render, "_write_render_receipt", side_effect=write):
+                with self.assertRaises(RuntimeError) as caught:
+                    render.save_render(str(Path(folder) / "still.png"))
+            self.assertIs(caught.exception, primary)
+            self.assertTrue(any("secondary receipt failure" in note for note in primary.__notes__))
+            self.assertEqual(fake.scene.render.filepath, "previous-current-scene-path")
+            root, _ = self.owned_receipt(folder)
+            self.assert_ready(root, "failed")
+
+    def test_fresh_attempts_preserve_previous_run_history(self):
+        with tempfile.TemporaryDirectory() as folder, self.current_scene(folder):
+            final = Path(folder) / "still.png"
+            render.save_render(str(final))
+            old_root, _ = self.owned_receipt(folder)
+            old_bytes = {path.relative_to(old_root): path.read_bytes() for path in old_root.rglob("*") if path.is_file()}
+            with self.assertRaises(FileExistsError):
+                render.save_render(str(final))
+            roots = sorted((Path(folder) / ".render-runs").glob("owned-*"))
+            self.assertEqual(len(roots), 2)
+            for relative, value in old_bytes.items():
+                self.assertEqual((old_root / relative).read_bytes(), value)
+            self.assert_ready(old_root)
+            self.assert_ready(next(root for root in roots if root != old_root), "failed")
+
+    def test_unavailable_and_unsupported_preflight_preserve_scene_without_owner(self):
+        with patch.object(render, "BLENDER_AVAILABLE", False), patch.object(render, "OwnedRun") as owner:
+            self.assertIsNone(render.save_render("unavailable.png"))
+            owner.assert_not_called()
+        with tempfile.TemporaryDirectory() as folder, self.current_scene(folder) as fake:
+            for setting in ("is_movie_format", "use_multiview"):
+                setattr(fake.scene.render, setting, True)
+                try:
+                    with patch.object(render, "OwnedRun") as owner:
+                        with self.assertRaises(ValueError):
+                            render.save_render(str(Path(folder) / "still.png"))
+                        owner.assert_not_called()
+                finally:
+                    setattr(fake.scene.render, setting, False)
+            for requested in ("", ".", "..", "//.", "//..", str(Path(folder) / "{scene}" / "still.png")):
+                with patch.object(render, "OwnedRun") as owner:
+                    with self.assertRaises(ValueError):
+                        render.save_render(requested)
+                    owner.assert_not_called()
+            self.assertEqual(fake.calls, [])
+            self.assertEqual(fake.scene.render.filepath, "previous-current-scene-path")
+            self.assertFalse((Path(folder) / ".render-runs").exists())
 
 
 if __name__ == "__main__":

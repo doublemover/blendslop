@@ -695,16 +695,157 @@ def render_orthogonal_views(
 
 
 def save_render(output_path: str) -> None:
-    """
-    Render and save the current scene.
+    """Save one current-scene still through an owned stage, without clobbering.
 
-    Args:
-        output_path: Path to save the render
+    Scene format, extension, frame, camera and presentation settings are kept.
+    Blender supplies the actual still filename; that exact name is published
+    once, without a naming retry. An existing final raises FileExistsError.
+    The legacy return is None. Success leaves the requested filepath; failure
+    restores its previous value and retains the stage and ownership receipt.
+
+    Single-file still outputs are supported. Movie/multiview outputs and path
+    templates in the parent directory require a separate publication contract.
+    Compositor File Output nodes and external engine outputs remain outside
+    this main-image publication contract. The 252 MiB stage bound is accounting,
+    not a native render memory/disk quota; oversized output is never published.
     """
     if not BLENDER_AVAILABLE:
         print("Warning: Blender API not available")
         return
 
-    bpy.context.scene.render.filepath = output_path
-    with _suppress_blender_render_stdout():
-        bpy.ops.render.render(write_still=True)
+    requested = os.fspath(output_path)
+    if not isinstance(requested, str) or not requested or requested.endswith(("/", "\\")):
+        raise ValueError("save_render requires an explicit still filename")
+    leaf = requested.replace("\\", "/").rsplit("/", 1)[-1]
+    if leaf in {"", ".", ".."}:
+        raise ValueError("save_render requires a non-directory filename leaf")
+    scene = bpy.context.scene
+    if getattr(scene.render, "is_movie_format", False) or getattr(scene.render, "use_multiview", False):
+        raise ValueError("save_render supports a single-file still, not movie/multiview output")
+    target = Path(bpy.path.abspath(requested)).absolute()
+    if target.name in {"", ".", ".."}:
+        raise ValueError("save_render requires a non-directory filename leaf")
+    if any(character in str(target.parent) for character in "{}"):
+        raise ValueError("save_render does not publish parent-directory path templates")
+    parent = target.parent.resolve()
+    previous_filepath = scene.render.filepath
+    owner = OwnedRun(parent / ".render-runs", producer="save_render",
+                     max_generated_bytes=256 * 1024 * 1024)
+    stage_dir = owner.root / "stage"
+    staged = None
+    final = None
+    published = False
+    primary = None
+    auxiliary = []
+    started = time.perf_counter()
+    receipt = {
+        "protocol": "save-render-owned-v1", "status": "running",
+        "run_id": owner.run_id, "requested_path": requested,
+        "resolved_parent": str(parent), "previous_filepath": previous_filepath,
+        "file_format": scene.render.image_settings.file_format,
+        "use_file_extension": bool(scene.render.use_file_extension),
+        "frame_current": int(scene.frame_current),
+        "stage_byte_bound": 252 * 1024 * 1024,
+        "subprocesses_started": 0, "native_call": "synchronous current-scene write_still",
+        "publication": "atomic no-clobber; exact native filename; no suffix",
+        "published": False, "stage": None, "final_path": None,
+        "reclamation": "unimplemented; all files retained",
+    }
+
+    def stage_entries():
+        entries = []
+        if stage_dir.is_dir():
+            for entry in stage_dir.iterdir():
+                if len(entries) >= 64:
+                    raise ValueError("single-still stage inventory exceeds 64 entries")
+                entries.append(entry)
+        return entries
+
+    try:
+        stage_dir.mkdir()
+        owner.reserve_bytes(receipt["stage_byte_bound"])
+        _write_render_receipt(owner, receipt)
+        # Keep the original leaf: native write_still performs format-extension
+        # and filename-template handling. frame_path is an animation path API.
+        scene.render.filepath = str(stage_dir / target.name)
+        with _suppress_blender_render_stdout():
+            result = bpy.ops.render.render(write_still=True)
+        receipt["operator_status"] = sorted(result)
+        if "FINISHED" not in result:
+            raise RuntimeError("current-scene still render did not finish")
+        entries = stage_entries()
+        if (len(entries) != 1 or entries[0].is_symlink() or
+                getattr(entries[0], "is_junction", lambda: False)() or not entries[0].is_file()):
+            raise ValueError("single-still render did not produce exactly one regular staged file")
+        staged = entries[0]
+        if staged.stat().st_size == 0 or staged.stat().st_size > receipt["stage_byte_bound"]:
+            raise ValueError("single-still stage is empty or exceeds its byte bound")
+        if receipt["file_format"] == "PNG":
+            from PIL import Image
+            with Image.open(staged) as image:
+                if image.format != "PNG":
+                    raise ValueError("current-scene PNG stage has the wrong image format")
+                image.verify()
+            receipt["stage_validation"] = "closed regular nonempty file; PNG readability"
+        else:
+            receipt["stage_validation"] = "closed regular nonempty native output; no format-specific pixel proof"
+        relative = staged.relative_to(owner.root).as_posix()
+        owner.register_file(relative, "diagnostic")
+        receipt["stage"] = dict(owner.records[relative.casefold() if os.name == "nt" else relative])
+        final = parent / staged.name
+        receipt["final_path"] = str(final)
+        publish_file_no_clobber(staged, final)
+        published = receipt["published"] = True
+    except BaseException as exc:
+        primary = exc
+    finally:
+        # The synchronous operator has returned/raised. No child is started or
+        # adopted here. Partial files are retained even when rendering failed.
+        try:
+            for entry in stage_entries():
+                if entry.is_file() and not entry.is_symlink():
+                    category = "final_output" if published and entry == staged else "diagnostic"
+                    owner.register_file(entry.relative_to(owner.root).as_posix(), category)
+        except BaseException as exc:
+            auxiliary.append(exc)
+        if staged is not None:
+            key = staged.relative_to(owner.root).as_posix()
+            key = key.casefold() if os.name == "nt" else key
+            if key in owner.records:
+                receipt["stage"] = dict(owner.records[key])
+        try:
+            scene.render.filepath = requested if primary is None and not auxiliary else previous_filepath
+        except BaseException as exc:
+            auxiliary.append(exc)
+        receipt.update(
+            status=("cancelled" if isinstance(primary, (KeyboardInterrupt, SystemExit)) else
+                    "failed" if primary is not None or auxiliary else "succeeded"),
+            elapsed_s=time.perf_counter() - started,
+            error=repr(primary)[:4096] if primary is not None else None,
+            auxiliary_errors=[repr(exc)[:4096] for exc in auxiliary],
+        )
+        try:
+            _write_render_receipt(owner, receipt)
+        except BaseException as exc:
+            auxiliary.append(exc)
+        owner.auxiliary_errors.extend(repr(exc)[:4096] for exc in auxiliary)
+        if primary is None and auxiliary:
+            try:
+                scene.render.filepath = previous_filepath
+            except BaseException as exc:
+                auxiliary.append(exc)
+                owner.auxiliary_errors.append(repr(exc)[:4096])
+        try:
+            owner.close(error=primary if primary is not None else auxiliary[0] if auxiliary else None)
+        except BaseException as exc:
+            auxiliary.append(exc)
+    if primary is not None:
+        if hasattr(primary, "add_note"):
+            primary.add_note("save_render stage and receipt retained at " + str(owner.root))
+            for exc in auxiliary:
+                primary.add_note("save_render finalization also failed: " + repr(exc))
+        raise primary.with_traceback(primary.__traceback__)
+    if auxiliary:
+        if hasattr(auxiliary[0], "add_note"):
+            auxiliary[0].add_note("save_render stage and receipt retained at " + str(owner.root))
+        raise auxiliary[0]
