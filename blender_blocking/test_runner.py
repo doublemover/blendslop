@@ -80,6 +80,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_run_recovery", "test_run_recovery"),
     ("pure_owned_process_supervisor", "test_owned_process_supervisor"),
     ("pure_owned_process_executor", "test_owned_process_executor"),
+    ("pure_primary_process_cleanup", "test_primary_process_cleanup"),
     ("pure_bounded_owned_command", "test_bounded_owned_command"),
     ("pure_profile_regularization", "test_profile_regularization"),
     ("pure_coverage_evidence", "test_coverage_evidence"),

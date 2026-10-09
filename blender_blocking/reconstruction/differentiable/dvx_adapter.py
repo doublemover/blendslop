@@ -46,6 +46,7 @@ def helper_call(python_executable, payload=None, *, timeout_s=10., warm=False,
     from pathlib import Path
     from reconstruction.process_executor import read_packet
     from utils.run_ownership import OwnedRun
+    from utils.primary_process_cleanup import finish_primary_process
     repository = Path(__file__).resolve().parents[3]
     script = repository / "scripts" / "dvx_worker.py"
     executable = Path(os.path.abspath(python_executable))
@@ -58,6 +59,8 @@ def helper_call(python_executable, payload=None, *, timeout_s=10., warm=False,
     root = owner.root
     process = None
     stdout = stderr = ""
+    cleanup_receipt = None
+    pipes_drained = False
     error = None
     started = time.monotonic()
     try:
@@ -87,9 +90,11 @@ def helper_call(python_executable, payload=None, *, timeout_s=10., warm=False,
             env=environment, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         try:
             stdout, stderr = process.communicate(timeout=timeout_s)
+            pipes_drained = True
         except subprocess.TimeoutExpired:
-            process.kill()
-            stdout, stderr = process.communicate()
+            stdout, stderr, cleanup_receipt = finish_primary_process(process)
+            stdout = stdout.decode(errors="replace") if isinstance(stdout, bytes) else stdout or ""
+            stderr = stderr.decode(errors="replace") if isinstance(stderr, bytes) else stderr or ""
             owner.mark_failed("helper_timeout")
             if (root / "progress.pkl").exists():
                 retained = read_packet(root / "progress.pkl")["value"]
@@ -108,14 +113,24 @@ def helper_call(python_executable, payload=None, *, timeout_s=10., warm=False,
         child_joined = process is None
         try:
             if process is not None:
-                if process.poll() is None:
-                    process.kill()
-                    stdout, stderr = process.communicate()
-                child_joined = process.poll() is not None
-                if not child_joined:
-                    raise RuntimeError("Cold helper termination could not be confirmed")
+                if cleanup_receipt is None:
+                    drained_out, drained_err, cleanup_receipt = finish_primary_process(
+                        process, drain_pipes=not pipes_drained)
+                    if not pipes_drained:
+                        stdout = drained_out.decode(errors="replace") if isinstance(drained_out, bytes) else drained_out or ""
+                        stderr = drained_err.decode(errors="replace") if isinstance(drained_err, bytes) else drained_err or ""
+                child_joined = cleanup_receipt["primary_joined"]
+                if not cleanup_receipt["transport_closed"] or cleanup_receipt["errors"]:
+                    raise RuntimeError("Cold helper cleanup remains unconfirmed: " +
+                                       "; ".join(cleanup_receipt["errors"]))
         except BaseException as join_error:
-            auxiliary.append(join_error)
+            cleanup_receipt = getattr(join_error, "primary_process_receipt", cleanup_receipt)
+            child_joined = bool(cleanup_receipt and cleanup_receipt["primary_joined"])
+            if cleanup_receipt and cleanup_receipt["errors"]:
+                auxiliary.append(RuntimeError("Cold helper cleanup remains unconfirmed: " +
+                                               "; ".join(cleanup_receipt["errors"])))
+            elif join_error is not error:
+                auxiliary.append(join_error)
         # An unconfirmed child keeps an active lease, even if cancellation or
         # diagnostic publication failed. Recovery requires a separate decision.
         failure = error or (auxiliary[0] if auxiliary else None)
@@ -127,7 +142,7 @@ def helper_call(python_executable, payload=None, *, timeout_s=10., warm=False,
                 owner.register_file(name, "diagnostic")
             summary = {"returncode": None if process is None else process.returncode,
                        "elapsed_s": time.monotonic() - started,
-                       "child_joined": child_joined,
+                       "child_joined": child_joined, "primary_cleanup": cleanup_receipt,
                        "state": "succeeded" if owner.state == "active" else owner.state,
                        "error": owner.error}
             (root / "helper-result.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -138,7 +153,7 @@ def helper_call(python_executable, payload=None, *, timeout_s=10., warm=False,
         except Exception as publication_error:
             auxiliary.append(publication_error)
         owner.auxiliary_errors.extend(repr(exc) for exc in auxiliary)
-        if child_joined:
+        if child_joined and (cleanup_receipt is None or cleanup_receipt["transport_closed"]):
             try:
                 owner.close(error=error or (auxiliary[0] if auxiliary else None))
             except Exception as close_error:

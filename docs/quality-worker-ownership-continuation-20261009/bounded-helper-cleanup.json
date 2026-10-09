@@ -1,0 +1,16 @@
+{
+  "protocol": "bounded-primary-cleanup-continuation-v1",
+  "date": "2026-10-09",
+  "validation": {
+    "distinct_passed": 14,
+    "new_cleanup_guards": 5,
+    "existing_cold_guards": 8,
+    "existing_native_guard": 1,
+    "real_held_pipe_seconds": 0.6,
+    "cleanup_allowance_seconds": 0.05,
+    "native_renders": 0
+  },
+  "scope": "primary Popen and pipe completion only; ordinary tree qualification false",
+  "leases": "incomplete primary or pipes retain active fresh lease",
+  "publication": "local only; beyond d11d1b8"
+}

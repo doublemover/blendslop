@@ -43,6 +43,11 @@ class ColdDvxOwnershipTests(unittest.TestCase):
         child.poll.side_effect = lambda: child.returncode
         child.communicate.return_value = (stdout, stderr)
         child.kill.side_effect = lambda: setattr(child, 'returncode', -9)
+        def wait(timeout):
+            if child.returncode is None:
+                raise subprocess.TimeoutExpired('fixture cleanup wait', timeout)
+            return child.returncode
+        child.wait.side_effect = wait
         return child
 
     def test_probe_and_fit_keep_receipts_and_isolate_parent_environment(self):
