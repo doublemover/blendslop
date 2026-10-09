@@ -5,6 +5,7 @@ is an approximate distance proxy, not a Euclidean SDF or native solid certificat
 Analytic Jacobian bounds apply to the continuous map on the base support; finite
 triangle contacts and native output qualification remain separate.
 """
+from numbers import Integral, Real
 from typing import Mapping
 
 import numpy as np
@@ -119,8 +120,62 @@ class DeformedSuperquadricPrimitive(SuperquadricPrimitive):
         xy = q[:, 0]**(2./e2)+q[:, 1]**(2./e2)
         return (xy**(e2/e1)+q[:, 2]**(2./e1))**(e1*.5)
 
-    def profile_width_at_world_z(self, z_world):
-        raise NotImplementedError('deformed world-z profile requires actual local-frame mesh sections; base width proxy is unsupported')
+    def profile_width_at_world_z(self, z_world, *, resolution=32):
+        """Return the outer world-X span of a generated mesh's Z-plane section.
+
+        Taper, bend and the full world pose are applied by ``to_mesh_data``.
+        Faces use the existing first-vertex fan triangulation. This is a
+        finite-mesh measurement at the chosen resolution, not an analytic
+        superquadric width, filled-interval length or solid qualification.
+        Strict edge crossings and exact in-plane endpoints include coplanar
+        edges/faces and vertex tangencies without widening the section plane.
+        An empty section or a single tangent point has width zero.
+
+        ``z_world`` must be a finite real scalar. ``resolution`` is an integer
+        in [8, 256]; the default remains the existing 32 mesh. No mesh cache or
+        primitive field is modified. Unrepresentable mesh/intersection/width
+        arithmetic is refused rather than replaced with an undeformed proxy.
+        """
+        if isinstance(z_world, (bool, np.bool_)) or not isinstance(z_world, Real):
+            raise ValueError('world-z section height must be a finite real scalar')
+        try:
+            height = float(z_world)
+        except (OverflowError, ValueError) as error:
+            raise ValueError('world-z section height must be finite') from error
+        if not np.isfinite(height):
+            raise ValueError('world-z section height must be finite')
+        if (isinstance(resolution, (bool, np.bool_)) or not isinstance(resolution, Integral)
+                or not 8 <= resolution <= 256):
+            raise ValueError('world-z section resolution must be an integer in [8, 256]')
+        with np.errstate(over='ignore', invalid='ignore'):
+            mesh = self.to_mesh_data(int(resolution))
+        vertices = mesh.vertices
+        if not np.isfinite(vertices).all():
+            raise ValueError('generated world-z section mesh must be finite')
+        if height < np.min(vertices[:, 2]) or height > np.max(vertices[:, 2]):
+            return 0.
+        triangles = np.asarray([(face[0], face[i], face[i+1])
+                                for face in mesh.faces for i in range(1, len(face)-1)], dtype=np.int64)
+        edges = triangles[:, ((0, 1), (1, 2), (2, 0))].reshape((-1, 2))
+        first, second = vertices[edges[:, 0]], vertices[edges[:, 1]]
+        crosses = (((first[:, 2] < height) & (second[:, 2] > height))
+                   | ((second[:, 2] < height) & (first[:, 2] > height)))
+        first, second = first[crosses], second[crosses]
+        with np.errstate(over='ignore', invalid='ignore', divide='ignore'):
+            delta_z = second[:, 2] - first[:, 2]
+            fraction = (height - first[:, 2]) / delta_z
+            crossed_x = (1.-fraction)*first[:, 0] + fraction*second[:, 0]
+        if not np.isfinite(delta_z).all() or not np.isfinite(crossed_x).all():
+            raise ValueError('generated world-z section intersections are numerically unresolved')
+        in_plane_x = vertices[vertices[:, 2] == height, 0]
+        section_x = np.concatenate((in_plane_x, crossed_x))
+        if not len(section_x):
+            return 0.
+        with np.errstate(over='ignore', invalid='ignore'):
+            width = float(np.max(section_x) - np.min(section_x))
+        if not np.isfinite(width):
+            raise ValueError('generated world-z section width is numerically unresolved')
+        return width
 
     def _parametric(self, eta, omega):
         return self.forward_local(super()._parametric(eta, omega))
