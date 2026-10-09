@@ -80,6 +80,16 @@ class NumericHelperSession:
             result.append((str(path),stat.st_dev,stat.st_ino,stat.st_size,stat.st_mtime_ns,stat.st_ctime_ns))
         return tuple(result)
 
+    def _retain_shutdown_failure(self, shutdown_error, primary=None):
+        retained = primary if primary is not None else shutdown_error
+        self.owner.mark_failed(repr(retained))
+        if isinstance(retained, (KeyboardInterrupt, SystemExit)):
+            self.owner.state = 'cancelled'
+        note = 'Numeric helper shutdown also failed: ' + repr(shutdown_error)[:1024]
+        if note not in self.owner.auxiliary_errors:
+            self.owner.auxiliary_errors.append(note)
+        return note
+
     def _stop(self):
         if self.process is not None and self.process.poll() is None:
             (self.root/'stop').touch()
@@ -88,7 +98,14 @@ class NumericHelperSession:
             except subprocess.TimeoutExpired:
                 self.process.terminate()
                 try:self.process.wait(timeout=1.)
-                except subprocess.TimeoutExpired:self.process.kill();self.process.wait()
+                except subprocess.TimeoutExpired:
+                    self.process.kill()
+                    # Confirm only this primary child, with a bounded final
+                    # wait. Failure leaves process/log and the lease active.
+                    try:self.process.wait(timeout=1.)
+                    except BaseException as shutdown_error:
+                        self._retain_shutdown_failure(shutdown_error)
+                        raise
         self.process=None
         if self.log is not None:
             self.log.close();self.log=None
@@ -185,8 +202,18 @@ class NumericHelperSession:
 
     def close(self, error=None):
         if not self.closed:
-            self._stop()
-            self._release_owner(error)
+            try:
+                self._stop()
+                self._release_owner(error)
+                if not self.owner.closed:
+                    raise RuntimeError('numeric helper owner receipt publication did not complete')
+            except BaseException as shutdown_error:
+                note = self._retain_shutdown_failure(shutdown_error, error)
+                if error is None:
+                    raise
+                if hasattr(error, 'add_note'):
+                    error.add_note(note)
+                return
             self.closed = True
 
     def __enter__(self):

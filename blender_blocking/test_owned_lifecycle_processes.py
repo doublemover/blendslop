@@ -3,6 +3,7 @@ from pathlib import Path
 import ctypes
 from ctypes import wintypes
 import hashlib
+import importlib.util
 import json
 import os
 import queue
@@ -11,6 +12,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from unittest.mock import Mock, call, patch
 
 from utils.run_ownership import plan_run_reclamation
 
@@ -111,6 +113,155 @@ class TestOwnedLifecycleProcesses(unittest.TestCase):
             finally:kernel.CloseHandle(handle)
             self.assertEqual(final.read_bytes(),b'published owner bytes')
             self.assertEqual(stage.read_bytes(),b'new completed stage')
+
+
+class TestNumericHelperBoundedShutdown(unittest.TestCase):
+    @staticmethod
+    def helper_class():
+        # Load this stdlib-only file directly; package initialization would
+        # import unrelated reconstruction backends, outside this test scope.
+        spec = importlib.util.spec_from_file_location(
+            'numeric_shutdown_fixture', ROOT / 'reconstruction/differentiable/helper_session.py')
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.NumericHelperSession
+
+    def session(self, parent, waits):
+        from utils.run_ownership import OwnedRun
+        helper = self.helper_class()
+        session = helper.__new__(helper)
+        session.owner = OwnedRun(parent, producer='warm_numeric_helper', max_generated_bytes=4096)
+        session.root = session.owner.root
+        session.jobs = set()
+        session.closed = False
+        session.log = (session.root / 'worker.log').open('ab')
+        session.log.write(b'retained primary-child log\n')
+        session.log.flush()
+        self.addCleanup(session.log.close)
+        session.process = Mock()
+        session.process.poll.return_value = None
+        session.process.wait.side_effect = waits
+        session.fixture_metadata = {name: (session.root / name).read_bytes()
+                                    for name in ('run-ownership.json', 'run-lease.json')}
+        return session
+
+    @staticmethod
+    def timeouts():
+        return [subprocess.TimeoutExpired('numeric-fixture', timeout) for timeout in (.5, 1., 1.)]
+
+    def assert_active(self, session, process, log):
+        self.assertIs(session.process, process)
+        self.assertIs(session.log, log)
+        self.assertFalse(log.closed)
+        self.assertFalse(session.closed)
+        self.assertFalse(session.owner.closed)
+        self.assertEqual(json.loads((session.root / 'run-lease.json').read_text())['status'], 'active')
+        self.assertEqual((session.root / 'worker.log').read_bytes(), b'retained primary-child log\n')
+        self.assertEqual(plan_run_reclamation(session.root)['status'], 'blocked')
+        for name, before in session.fixture_metadata.items():
+            self.assertEqual((session.root / name).read_bytes(), before)
+        self.assertEqual(len(session.owner.auxiliary_errors), 1)
+
+    def test_final_kill_wait_has_one_second_bound_and_confirmed_join_releases(self):
+        with self.subTest():
+            folder = self.enterContext(tempfile.TemporaryDirectory())
+            session = self.session(Path(folder) / 'runs', self.timeouts()[:2] + [0])
+            process, log = session.process, session.log
+            session.close()
+            self.assertEqual(process.wait.call_args_list, [call(timeout=.5), call(timeout=1.), call(timeout=1.)])
+            process.terminate.assert_called_once_with()
+            process.kill.assert_called_once_with()
+            self.assertIsNone(session.process)
+            self.assertIsNone(session.log)
+            self.assertTrue(log.closed)
+            self.assertTrue(session.closed)
+            self.assertEqual(json.loads((session.root / 'run-lease.json').read_text())['status'], 'released')
+            self.assertEqual(plan_run_reclamation(session.root)['status'], 'dry_run_ready')
+
+    def test_unconfirmed_final_join_raises_retains_live_owner_and_can_retry(self):
+        for direct_stop in (False, True):
+            with self.subTest(direct_stop=direct_stop):
+                folder = self.enterContext(tempfile.TemporaryDirectory())
+                failures = self.timeouts()
+                session = self.session(Path(folder) / 'runs', failures)
+                process, log = session.process, session.log
+                with self.assertRaises(subprocess.TimeoutExpired) as caught:
+                    (session._stop if direct_stop else session.close)()
+                self.assertIs(caught.exception, failures[-1])
+                self.assertEqual(process.wait.call_args_list, [call(timeout=.5), call(timeout=1.), call(timeout=1.)])
+                self.assert_active(session, process, log)
+                self.assertEqual(session.owner.state, 'failed')
+                process.wait.side_effect = [0]
+                session.close()
+                self.assertTrue(session.closed)
+                self.assertIsNone(session.process)
+                self.assertTrue(log.closed)
+                self.assertEqual(json.loads((session.root / 'run-lease.json').read_text())['status'], 'released')
+                history = json.loads((session.root / 'run-ownership.json').read_text())
+                self.assertEqual(history['state'], 'failed')
+                self.assertEqual(history['error'], repr(failures[-1]))
+                self.assertEqual(len(history['auxiliary_errors']), 1)
+                self.assertEqual(plan_run_reclamation(session.root)['status'], 'dry_run_ready')
+
+    def test_close_and_context_exit_preserve_primary_on_unconfirmed_join(self):
+        for context_exit in (False, True):
+            for error_type in (ValueError, KeyboardInterrupt):
+                with self.subTest(context_exit=context_exit, error_type=error_type):
+                    folder = self.enterContext(tempfile.TemporaryDirectory())
+                    session = self.session(Path(folder) / 'runs', self.timeouts())
+                    process, log = session.process, session.log
+                    primary = error_type('existing primary numeric failure')
+                    if context_exit:
+                        with self.assertRaises(error_type) as caught:
+                            with session:
+                                raise primary
+                        self.assertIs(caught.exception, primary)
+                    else:
+                        session.close(error=primary)
+                    self.assert_active(session, process, log)
+                    self.assertTrue(any('shutdown also failed' in note and 'TimeoutExpired' in note for note in primary.__notes__))
+                    self.assertEqual(process.wait.call_args_list, [call(timeout=.5), call(timeout=1.), call(timeout=1.)])
+                    process.wait.side_effect = [0]
+                    session.close()
+                    history = json.loads((session.root / 'run-ownership.json').read_text())
+                    self.assertEqual(history['state'], 'cancelled' if error_type is KeyboardInterrupt else 'failed')
+                    self.assertEqual(history['error'], repr(primary))
+                    self.assertEqual(len(history['auxiliary_errors']), 1)
+                    self.assertEqual(json.loads((session.root / 'run-lease.json').read_text())['status'], 'released')
+                    self.assertEqual(plan_run_reclamation(session.root)['status'], 'dry_run_ready')
+
+    def test_existing_primary_survives_post_join_finalization_failure(self):
+        with self.subTest():
+            folder = self.enterContext(tempfile.TemporaryDirectory())
+            session = self.session(Path(folder) / 'runs', [0])
+            process, log = session.process, session.log
+            primary = RuntimeError('existing computation failure')
+            secondary = OSError('owned metadata publication failed')
+            # Exercise real OwnedRun.register_file, with an ordinary I/O error
+            # at its metadata publication seam. _release_owner handles this
+            # internally when a primary error is already supplied.
+            with patch.object(session.owner, '_atomic_json', side_effect=secondary):
+                with self.assertRaises(RuntimeError) as caught:
+                    with session:
+                        raise primary
+            self.assertIs(caught.exception, primary)
+            process.wait.assert_called_once_with(timeout=.5)
+            self.assertIsNone(session.process)
+            self.assertTrue(log.closed)
+            self.assertFalse(session.closed)
+            self.assertFalse(session.owner.closed)
+            self.assertEqual(json.loads((session.root / 'run-lease.json').read_text())['status'], 'active')
+            self.assertTrue(any('owned metadata publication failed' in note for note in primary.__notes__))
+            self.assertTrue(any('owner receipt publication did not complete' in note for note in session.owner.auxiliary_errors))
+            self.assertEqual(plan_run_reclamation(session.root)['status'], 'blocked')
+            for name, before in session.fixture_metadata.items():
+                self.assertEqual((session.root / name).read_bytes(), before)
+            session.close()
+            history = json.loads((session.root / 'run-ownership.json').read_text())
+            self.assertEqual(history['state'], 'failed')
+            self.assertEqual(history['error'], repr(primary))
+            self.assertEqual(len(history['auxiliary_errors']), 1)
+            self.assertEqual(plan_run_reclamation(session.root)['status'], 'dry_run_ready')
 
 
 if __name__=='__main__':unittest.main()
