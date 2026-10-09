@@ -1,0 +1,53 @@
+{
+  "protocol": "approved_f5_publication_receipt_v1",
+  "approved_exact_revision": "f5d7f4122273f8372fd8620bcb9df5b621a88810",
+  "previous_pr_revision": "6256cdb79384fbab9e33b012f0794b8b98771966",
+  "published_commit_count": 21,
+  "authorization": "Owner explicitly approved publishing exactly the completed 21-commit batch through f5d7f41 to the existing PR7 branch.",
+  "origin": "https://github.com/doublemover/blendslop.git",
+  "head_branch": "local/quality-continuation-20261008",
+  "local_branch": "local/quality-followup-20261009",
+  "pull_request": "https://github.com/doublemover/blendslop/pull/7",
+  "base_branch": "main",
+  "main_revision_unchanged": "d5e981659a18c435ccbe7cc072b873e5b1707645",
+  "push": "non-force fast-forward exact f5d7f4122273f8372fd8620bcb9df5b621a88810:refs/heads/local/quality-continuation-20261008",
+  "verification": [
+    "prior PR head is an ancestor of approved head; exactly21 commits",
+    "remote branch ls-remote equals approved head",
+    "fresh PR7 API headRefOid equals approved head; OPEN DRAFT; base main",
+    "main remote remains d5e9816; no merge/retarget"
+  ],
+  "checks": {
+    "full": {
+      "status": "SUCCESS",
+      "passed": 177,
+      "failed": 0,
+      "skipped": 0,
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37955420996/job/113904581062"
+    },
+    "quick": {
+      "status": "SUCCESS",
+      "passed": 175,
+      "failed": 0,
+      "skipped": 2,
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37955420996/job/113904581139"
+    },
+    "gallery": {
+      "status": "SUCCESS",
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37955420998/job/113904581416"
+    },
+    "deployment": {
+      "status": "SKIPPED",
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37955420998/job/113904730232"
+    }
+  },
+  "live_demo_before_current_integration": {
+    "commit": "d5e981659a18c435ccbe7cc072b873e5b1707645",
+    "evidenceSource": "69eb23128a18006501b2a1f89e8df129bfdc048f",
+    "actual_reconstructions": 2,
+    "reference_only": 10,
+    "url": "https://doublemover.github.io/blendslop/build.json"
+  },
+  "new_current_demo_work": "Later current-main presentation/manual dispatch work remains local and is not part of this approved push receipt.",
+  "historical_evidence": "Prior checkpoint manifests, failed outer supervision, source receipt drift and frozen matrix rows remain unchanged."
+}

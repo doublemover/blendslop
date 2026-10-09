@@ -1,37 +1,36 @@
-# Evaluation gallery publishing
+# Evaluation gallery generation and publishing
 
-The static [GitHub Pages gallery](https://doublemover.github.io/blendslop/) publishes only `site/`. It has no external fonts, analytics, account connections, paid services or runtime dependencies. The README points to focused setup, reconstruction/API, evaluation and development guides.
+The static [GitHub Pages demo](https://doublemover.github.io/blendslop/) publishes only the curated `site/` artifact. It has no external fonts, analytics, account connections, paid services or runtime packages.
 
-## Evidence scope
+## Current and historical results
 
-The 2026-10-08 snapshot contains 82 project-authored synthetic PNGs: 79 retained assets and three new shaded triangle inspections and a curated numeric summary. Original evaluated OBJ identities and mask hashes were verified against retained receipts before asset selection. PNG text/EXIF chunks were removed; encoded image pixels were preserved. `site/assets.json` records original and published hashes. Source meshes, machine paths, usernames, caches, personal images, raw logs and external sample datasets are excluded from the public site artifact. The three new 512×512 Workbench passes replay the retained triangle program and frozen cameras; evaluated world-coordinate geometry hashes match exactly before/after rendering. They add no reconstruction, metric or benchmark rerun.
+The main `site/index.html` presents twelve actual retained reconstructions from `site/latest.json`. Each result identifies its exact candidate body, five original silhouette measurements, solid-boundary/topology checks, semantic editability and source-conditioned surface engineering separately. The calibrated smooth vase has an existing authored acceptance contract. Eleven other families have no authored artist acceptance limits; their engineering results do not fabricate those limits or an aggregate pass.
 
-Twelve authored references are prepared; two actual reconstructions have retained evidence. The vase fails one required oblique boundary gate. Triangle surface/noise qualification remains unavailable. Its additional shaded inspections do not change that verdict. The gallery never substitutes an authored reference for a reconstructed output or copies vase surface limits to another family. Frozen oblique framing limitations are shown explicitly. Correctness CI is labeled separately from geometry acceptance.
+The current view uses existing measured packets and retained pixel pairs. It performs no Blender renders, fitting, resampling or qualification jobs. `latest-assets.json` ties each curated image to the depicted reference or candidate mesh and native pass. Original PNG copies remain under documentation; only text/Exif metadata is removed from public copies, preserving the exact encoded pixel payload. When a current pair is unavailable, the UI says so rather than displaying a different candidate.
 
-## Build and checks
+The older two-case display remains at `site/historical.html`, bound to its original `data.json`, `diagnostics.json` and 2026-10-08 source snapshot. It retains the old vase's oblique boundary failure and the original triangle's pending surface verdict. The continuation page retains its earlier improvement comparisons and presentation renders. Historical observations, acceptance limits and failed trial updates remain unchanged.
 
-Use an existing Node.js installation; no npm install is needed:
+## Local build and checks
+
+Use the existing Node.js installation; no npm install is needed:
 
 ```bash
 node scripts/build-evaluation-site.mjs --out temp/pages-dist
+node scripts/check-evaluation-browser.mjs
 ```
 
-Choose a fresh output directory. The builder checks file allowlists, byte bounds, symlink exclusion, sensitive-path/credential patterns, PNG metadata, asset identities, local links, case counts and metric/verdict consistency. `diagnostics.json` stores exact missing/extra foreground and radius-2 elliptical boundary-band row runs, tied to published mask hashes. Counts and overlap ratios reproduce all ten retained case/view metrics; overlays use those original runs without alignment or exaggerated displacement. Build provenance is saved as `build.json` with the exact site source commit, evidence source commit and evidence date.
+Choose a fresh build directory. The browser check accepts `--dir <built-directory>` and `--out <evidence-directory>` for an isolated local preview. `CHROME_BINARY` may name an existing Chrome-compatible browser; the hosted runner uses its existing headless Chrome. No browser is downloaded.
 
-On the hosted Ubuntu runner, `scripts/check-evaluation-browser.mjs` uses its existing sandboxed headless Chrome, a localhost-only server and a 60-second cap. It checks desktop screenshots, actual shaded defaults, exact vase failure explanations, scored boundary/filled difference overlays, triangle unrun qualification, unavailable camera passes and actual/reference filters. It installs no local packages. The four public-safe screenshots and a compact result are retained for seven days as a CI artifact.
+The builder checks the public file allowlist, the existing 15-MiB bound, symlink exclusion, private-path/credential patterns, PNG metadata, exact asset hashes and local links. Current results are checked against normalized retained JSON evidence digests and exact JSON-pointer assertions, unchanged silhouette limits and body/pass image identities. Non-vase artist gaps cannot become aggregate passes. Historical diagnostic overlays continue to reproduce the original counts and metrics.
 
-## Deployment
+`build.json` records both the site source commit and the historical/current evidence source commits. The bounded browser check exercises the main current family selector, independent verdicts, current pixel pairs and unavailable passes, plus the historical exact failure explanations and difference overlays. Its screenshots and compact result are review artifacts, not new geometry measurements.
 
-[Evaluation Pages workflow](../.github/workflows/evaluation-pages.yml) builds and checks pull requests without publishing them. Main pushes affecting the gallery, builder or workflow deploy through official SHA-pinned Pages actions. Manual dispatch also deploys only from `main`. Default permissions are `contents: read`; `pages: write` and `id-token: write` belong only to the deployment job and `github-pages` environment. The repository remains public, with no custom domain, protection bypass or credentials added.
+## Manual workflow
 
-Pages must use the repository's GitHub Actions build mode. Enable that destination only as part of an authorized publication. Verify the deployment run, published URL and live `build.json` before claiming a release is live. Existing historical reports remain unchanged; update only curated observations whose source identities and independent verdicts are known.
+[Evaluation Pages](../.github/workflows/evaluation-pages.yml) has only a `workflow_dispatch` trigger. Pushes and ordinary pull-request updates do not regenerate or deploy the demo. No other repository workflow invokes its builder or calls this workflow.
 
-## Presentation and failure explanation
+In GitHub Actions, select **Evaluation Pages**, choose the ref and run the workflow. The **publish** option defaults to **false**. A build-only run validates the current demo and uploads the generated static site and browser evidence as seven-day review artifacts. It does not publish Pages.
 
-Actual families open on shaded oblique objects. Silhouettes and exact difference overlays remain secondary controls, with a 4× nearest-pixel crop. Reference-only families are labeled not reconstructed. The vase explanation identifies the 145°/40° view, boundary IoU 0.789001 versus ≥0.800000, 99.08% filled overlap, 998 missing / zero extra foreground pixels, and 7819 / 9910 boundary-band overlap. Triangle surface values are raw measurements without an established family threshold; qualification is incomplete rather than failed. Completed solid-boundary checks are distinguished from unrun checks. All original acceptance values, source geometry and reference cameras stay fixed. The separately committed local calibration work is excluded from this publication.
+To publish an authorized result, choose **main** and explicitly enable **publish**. Publication from another ref is refused. Pages artifact upload and deployment are both gated by that option and the main ref, through the existing SHA-pinned official actions. Default permissions remain `contents: read`; `pages: write` and `id-token: write` belong only to the deployment job and `github-pages` environment.
 
-## Quality continuation under review
-
-The separate `site/continuation.html` page retains calibrated linear-alpha, rounded-box detail-crop and multipart endpoint results plus1536-pixel presentation renders. The original gallery/data/diagnostics stay bound to their historical source snapshot. Continuation silhouettes, raw surface observations, native boundary and semantic edits remain separate verdicts; unavailable family surface limits and old provenance gaps remain explicit. The builder validates both manifests under the existing15MiB artifact bound and preserves PR6 exact diagnostic/thumbnail checks. Native PNG originals remain in documentation; only reviewed text/Exif chunks are removed from site copies, with exact IDAT payload hashes retained.
-
-This integration prepares a draft PR. The new continuation has not been deployed; merging or publishing it requires separate owner approval.
+The workflow rebuilds the curated static demo from the chosen checked-out source. It does not run a reconstruction or render campaign. Dispatching a build, merging a PR and publishing Pages are separate actions; changing this configuration does not perform them. Verify the deployment run, published URL and live `build.json` before claiming a release is live.
