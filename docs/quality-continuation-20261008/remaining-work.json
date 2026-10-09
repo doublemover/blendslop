@@ -24,7 +24,7 @@
     },
     {
       "task": "QUALITY-COVERAGE1",
-      "state": "nine additional actual families passed45strict silhouettes and native boundaries; seven semantic edits passed; multipart implementation underway",
+      "state": "all12actual families retained; ten new candidates pass50old strict views and exact boundaries; complementary scalar depth repair passes independently",
       "completed": [
         "frozen12-family reference matrix and intentional depth/cavity/multipart negatives",
         "observed-mask fitting for sphere, ellipsoid, cylinder, frustum, corrected capsule, rounded box and thin plate",
@@ -35,12 +35,16 @@
         "sevenofseven content-scoped native solid boundaries qualified",
         "observed arch extrusion and hole-aware torus proposals; geometry04 retained",
         "arch/torus ten strict view gates and two native boundaries qualified",
-        "seven family-specific source-control transactions with exact indexed restoration"
+        "seven family-specific source-control transactions with exact indexed restoration",
+        "three-box observed-mask multipart proposal with original oblique145 excluded from fit",
+        "alltennew exact native boundaries; allten family-specific edit/restore controls",
+        "candidate-only complementary camera exposes old hidden endpoint at boundaryIoU0.78734 failure",
+        "one-scalar observed endpoint repair lowers held-out/raw surface error; exact boundary and depth restoration pass"
       ],
       "remaining": [
-        "bounded observed-mask multipart proposal",
-        "independent family surface contracts",
-        "arch/torus/multipart semantic source controls and exact restoration"
+        "independent acceptable non-vase family surface contracts",
+        "full matched source/candidate camera/mask/normal provenance where legacy gaps remain",
+        "global hidden-surface uniqueness beyond locally identified one-scalar multipart endpoint"
       ],
       "blocking_input": null
     },
@@ -62,7 +66,7 @@
     },
     {
       "task": "CANONICAL-EVIDENCE",
-      "state": "135 actual passes and35matched authored-neutral frames retained; strict legacy frame/clip gaps preserved",
+      "state": "150original new-candidate inspection images plus35matched authored-neutral frames and separate controlled acquisitions retained; legacy gaps explicit",
       "completed": [
         "all five mask/neutral/normal slots retained independently of presentation curation",
         "geometry/camera/frame/pass hashes and explicit unrun/unavailable states",
@@ -70,11 +74,11 @@
         "candidate-blind sphere and triangle reference-noise observations",
         "seven actual five-view inspection receipts; all105passbindings verified",
         "35 authored source neutral frames exactly match candidate native frames and clips",
-        "actual source/candidate polygon/custom-normal/modifier style captured"
+        "actual source/candidate polygon/custom-normal/modifier style captured",
+        "authored rounded-box normal controls verified by corrected paired pixels without geometric changes"
       ],
       "remaining": [
-        "resolve or retain explicit old mask/clip provenance gaps",
-        "local commit and final integration review"
+        "resolve or retain explicit old mask/clip/source-normal provenance gaps"
       ],
       "blocking_input": null
     },
@@ -98,18 +102,23 @@
     },
     {
       "task": "MEASUREMENT-ADAPTIVE-PRESENTATION",
-      "state": "linear-alpha API and tiny display-independence fixture passed; bounded adaptive experiment authorized",
+      "state": "512global/1024detail/2048detail bounded checkpoints completed; selected2048 box and scalar multipart repair pass independent checks; local1536 preview page ready",
       "completed": [
         "dedicated32-bit linear-alpha occupancy and fixed half-coverage masks",
         "strict matched acquisition camera/sampling/encoding checks; preview state restoration",
-        "three128-square renders show exact display invariance and detect deliberate shape change"
+        "three128-square renders show exact display invariance and detect deliberate shape change",
+        "real1024 top residual crop improves held-out alpha23.886385percent",
+        "one2048 detail crop reinvests budget for11.219656percent further gain,32.426071percent vs512baseline",
+        "selected9f6c8d geometry passes allfive alpha silhouettes, exact native boundary and live radius restoration",
+        "three1536color/lit previews plusonefinal-box frame, exact geometry preserved",
+        "local site/continuation.html with independently scoped metrics and hashed display assets",
+        "candidate-only selected camera and one-scalar multipart update reduce newviewalpha98.636percent and rawmean96.145percent"
       ],
       "remaining": [
-        "representative512global plus genuinely rendered highres crop experiment with frozen independent views",
-        "iterate bounded alternatives when results justify",
-        "attractive highres color/lit display-only renders and reviewed preview-page proposal"
+        "browser layout inspection when a browser surface is available",
+        "parent review/approval before external quality publication"
       ],
-      "blocking_input": null
+      "blocking_input": "Current CUA inventory exposes no browser or native app; static page/image identity checks and actual native render pixel inspection completed."
     },
     {
       "task": "INTEGRATION-PUBLICATION",
@@ -130,7 +139,9 @@
   "validation_policy": "existing full Blender suite/seven-control packet retained; only bounded missing-behavior checks",
   "local_commits": [
     "424759d06585f2bc589fc29bb16c70198a83395a",
-    "723a553"
+    "723a553",
+    "f0a0b3f"
   ],
-  "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark"
+  "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
+  "completed_unpublished_batch": "authorednormals/multipart/controlledadaptive/presentation continuation, locally committing after final evidence review"
 }

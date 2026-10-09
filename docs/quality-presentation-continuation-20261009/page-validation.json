@@ -1,0 +1,24 @@
+{
+  "protocol": "quality_continuation_preview_check_v1",
+  "status": "static_checks_passed",
+  "local_page": "site/continuation.html",
+  "unique_ids": [
+    "gallery",
+    "results",
+    "coverage"
+  ],
+  "checked_image_instances": 5,
+  "bound_unique_beauty_images": 3,
+  "image_dimensions": [
+    1536,
+    1536
+  ],
+  "source_pixel_inspection": "all three first-pass native images and final selected-box native image inspected visually",
+  "browser_visual_inspection": "unavailable; cua inventory returned zero browsers and zero native apps; no alternate UI automation used",
+  "publication": "not performed",
+  "previous_live_showcase": "unchanged PR6/main d5e981659a18c435ccbe7cc072b873e5b1707645",
+  "bound_measurement_illustrations": 1,
+  "latest_box_geometry_hash": "9f6c8d4db73fdccedf0ac346682c33b626830259989f0f0069f60306938f9b9a",
+  "latest_multipart_geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+  "measured_pixel_inspection": "new source/original/refined comparison viewed; excess protrusion removed"
+}

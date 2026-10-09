@@ -31,5 +31,16 @@ class TestReferenceNeutralStyle(unittest.TestCase):
         self.assertFalse(row["custom_normal_state_match"])
 
 
+    def test_weighted_normal_controls_mismatch_blocks_style_equivalence_description(self):
+        source = {"evaluated_mesh": {"polygon_style": "flat", "sharp_edges": 0, "has_custom_normals": True},
+                  "modifiers": [{"type": "WEIGHTED_NORMAL", "keep_sharp": False}]}
+        candidate = deepcopy(source)
+        candidate["modifiers"][0]["keep_sharp"] = True
+        row = style_comparison(source, candidate)
+        self.assertTrue(row["custom_normal_state_match"])
+        self.assertTrue(row["modifier_type_sequence_match"])
+        self.assertFalse(row["weighted_normal_controls_match"])
+
+
 if __name__ == "__main__":
     unittest.main()

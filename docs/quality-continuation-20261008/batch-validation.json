@@ -1,0 +1,63 @@
+{
+  "protocol": "completed-quality-batch-focused-validation_v1",
+  "checks": 41,
+  "failures": 0,
+  "errors": 0,
+  "native_only_skips": [
+    "native Blender geometry required",
+    "native Blender geometry required"
+  ],
+  "modules": [
+    "test_frozen_family",
+    "test_structured_family",
+    "test_multipart_family",
+    "test_adaptive_measurement",
+    "test_shape_program_world_bevel",
+    "test_reference_neutral_style",
+    "test_structured_family_source_edits"
+  ],
+  "ast_files": [
+    "blender_blocking\\primitives\\shape_program_compiler.py",
+    "blender_blocking\\reconstruction\\frozen_family.py",
+    "blender_blocking\\test_frozen_family.py",
+    "blender_blocking\\test_reference_neutral_style.py",
+    "blender_blocking\\test_runner.py",
+    "blender_blocking\\test_shape_program_world_bevel.py",
+    "scripts\\run_reference_neutral_inspection.py",
+    "blender_blocking\\evaluation\\adaptive_measurement.py",
+    "blender_blocking\\reconstruction\\multipart_family.py",
+    "blender_blocking\\test_adaptive_measurement.py",
+    "blender_blocking\\test_multipart_family.py",
+    "blender_blocking\\test_structured_family_source_edits.py",
+    "scripts\\run_adaptive_measurement_check.py",
+    "scripts\\run_admitted_box_followup.py",
+    "scripts\\run_family_presentation.py",
+    "scripts\\run_frozen_multipart_inspection.py",
+    "scripts\\run_frozen_multipart_reconstruction.py",
+    "scripts\\run_multipart_complementary_observation.py",
+    "scripts\\run_rounded_box_style_check.py",
+    "scripts\\run_structured_family_source_edits.py"
+  ],
+  "parsed_json_files": [
+    "docs\\quality-coverage-continuation-20261008\\coverage-evidence.json",
+    "docs\\quality-adaptive-measurement-20261009\\evidence.json",
+    "docs\\quality-coverage-continuation-20261008\\complementary-view-proposal.json",
+    "docs\\quality-coverage-continuation-20261008\\multipart-endpoint-update-proposal.json",
+    "docs\\quality-presentation-continuation-20261009\\evidence.json",
+    "docs\\quality-rounded-style-continuation-20261009\\corrected-evidence.json",
+    "docs\\quality-rounded-style-continuation-20261009\\evidence.json",
+    "docs\\quality-structured-edits-continuation-20261009\\evidence.json",
+    "site\\continuation-assets.json"
+  ],
+  "text_encoding_defects": [],
+  "native_required_checks": "separate bounded exact-geometry receipts retained; no full-suite rerun",
+  "new_endpoint_checks": {
+    "checks": 8,
+    "failures": 0,
+    "errors": 0,
+    "modules": [
+      "test_multipart_endpoint",
+      "test_adaptive_measurement"
+    ]
+  }
+}

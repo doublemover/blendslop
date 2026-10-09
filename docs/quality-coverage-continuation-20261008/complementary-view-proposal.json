@@ -1,0 +1,790 @@
+{
+  "protocol": "multipart_candidate_endpoint_view_proposal_v1",
+  "source_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-multipart-inspection-01\\owned-kug5oowl\\results.json",
+  "source_receipt_sha256": "043608b5bdc827096839067717adc40c2cb5443f35bed33252d2f0c67c713bfe",
+  "saved_geometry_hash": "c367746d102dac33f3ad12b271c2ab00d46bd4da59a4bd8004a4bef7152eb0d1",
+  "source_GT_geometry_read": false,
+  "heldout_mask_read": false,
+  "fitting": false,
+  "native_renders": 0,
+  "scope": "analytic three-box polygon-union visibility; candidate hypotheses only; not an observation or acceptance metric",
+  "original_interval": [
+    -0.29030378158416265,
+    0.3252645386249629
+  ],
+  "source_side_continuity_lower_bound": -0.12498491023031844,
+  "probe_endpoints": [
+    0.10013981419732224,
+    0.3252645386249629
+  ],
+  "existing_fit_views": {
+    "front": {
+      "sampling_resolution": [
+        512,
+        512
+      ],
+      "disagreement_pixels": 0,
+      "disagreement_fraction_canvas": 0.0,
+      "disagreement_fraction_union": 0.0,
+      "union_pixels": 105292
+    },
+    "side": {
+      "sampling_resolution": [
+        512,
+        512
+      ],
+      "disagreement_pixels": 0,
+      "disagreement_fraction_canvas": 0.0,
+      "disagreement_fraction_union": 0.0,
+      "union_pixels": 63478
+    },
+    "top": {
+      "sampling_resolution": [
+        512,
+        512
+      ],
+      "disagreement_pixels": 0,
+      "disagreement_fraction_canvas": 0.0,
+      "disagreement_fraction_union": 0.0,
+      "union_pixels": 79560
+    },
+    "oblique_35_28": {
+      "sampling_resolution": [
+        512,
+        512
+      ],
+      "disagreement_pixels": 78,
+      "disagreement_fraction_canvas": 0.00029754638671875,
+      "disagreement_fraction_union": 0.0006035937040533639,
+      "union_pixels": 129226
+    }
+  },
+  "direction_budget": 12,
+  "ranking_metric": "candidate projected binary disagreement / union area; uncropped shared viewport",
+  "candidate_directions": [
+    {
+      "azimuth_degrees": -15,
+      "elevation_degrees": 20,
+      "camera": {
+        "matrix_world": [
+          [
+            0.25881904510252074,
+            -0.33036608954935215,
+            0.9076733711903687,
+            5.751401415190746
+          ],
+          [
+            0.9659258262890683,
+            0.08852132690137686,
+            -0.24321034680169396,
+            -1.541100373464086
+          ],
+          [
+            0.0,
+            0.9396926207859085,
+            0.3420201433256687,
+            2.3613228522542054
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.19349205744759,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 266,
+      "disagreement_fraction_canvas": 0.0162353515625,
+      "disagreement_fraction_union": 0.056559642781203484,
+      "union_pixels": 4703,
+      "refined512": {
+        "sampling_resolution": [
+          512,
+          512
+        ],
+        "disagreement_pixels": 4190,
+        "disagreement_fraction_canvas": 0.01598358154296875,
+        "disagreement_fraction_union": 0.055251532933342125,
+        "union_pixels": 75835
+      }
+    },
+    {
+      "azimuth_degrees": -45,
+      "elevation_degrees": 45,
+      "camera": {
+        "matrix_world": [
+          [
+            0.7071067811865476,
+            -0.5000000000000001,
+            0.5000000000000001,
+            3.1438260928701713
+          ],
+          [
+            0.7071067811865476,
+            0.5000000000000001,
+            -0.5000000000000001,
+            -3.143843101786681
+          ],
+          [
+            0.0,
+            0.7071067811865477,
+            0.7071067811865476,
+            4.608909061020045
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.3931476022256004,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 254,
+      "disagreement_fraction_canvas": 0.0155029296875,
+      "disagreement_fraction_union": 0.04928211098176174,
+      "union_pixels": 5154
+    },
+    {
+      "azimuth_degrees": -45,
+      "elevation_degrees": 20,
+      "camera": {
+        "matrix_world": [
+          [
+            0.7071067811865476,
+            -0.24184476264797528,
+            0.6644630243886748,
+            4.208437954251968
+          ],
+          [
+            0.7071067811865476,
+            0.24184476264797528,
+            -0.6644630243886748,
+            -4.208454963168478
+          ],
+          [
+            0.0,
+            0.9396926207859085,
+            0.3420201433256687,
+            2.368607054853012
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.162821129641214,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 308,
+      "disagreement_fraction_canvas": 0.018798828125,
+      "disagreement_fraction_union": 0.04770017035775128,
+      "union_pixels": 6457
+    },
+    {
+      "azimuth_degrees": -75,
+      "elevation_degrees": 45,
+      "camera": {
+        "matrix_world": [
+          [
+            0.9659258262890683,
+            -0.18301270189221933,
+            0.18301270189221933,
+            1.1456309288005007
+          ],
+          [
+            0.25881904510252074,
+            0.6830127018922194,
+            -0.6830127018922194,
+            -4.2755698419223025
+          ],
+          [
+            0.0,
+            0.7071067811865476,
+            0.7071067811865476,
+            4.628568150972183
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.0071802147797055,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 286,
+      "disagreement_fraction_canvas": 0.0174560546875,
+      "disagreement_fraction_union": 0.03845119655821457,
+      "union_pixels": 7438
+    },
+    {
+      "azimuth_degrees": -15,
+      "elevation_degrees": 45,
+      "camera": {
+        "matrix_world": [
+          [
+            0.25881904510252074,
+            -0.6830127018922194,
+            0.6830127018922194,
+            4.305499744952229
+          ],
+          [
+            0.9659258262890683,
+            0.18301270189221933,
+            -0.18301270189221933,
+            -1.153672188588864
+          ],
+          [
+            0.0,
+            0.7071067811865476,
+            0.7071067811865476,
+            4.5975768534774035
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.4565579640431525,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 128,
+      "disagreement_fraction_canvas": 0.0078125,
+      "disagreement_fraction_union": 0.03208020050125313,
+      "union_pixels": 3990
+    },
+    {
+      "azimuth_degrees": -75,
+      "elevation_degrees": 20,
+      "camera": {
+        "matrix_world": [
+          [
+            0.9659258262890683,
+            -0.08852132690137686,
+            0.24321034680169396,
+            1.539203661886565
+          ],
+          [
+            0.25881904510252074,
+            0.33036608954935215,
+            -0.9076733711903687,
+            -5.744403278273239
+          ],
+          [
+            0.0,
+            0.9396926207859085,
+            0.3420201433256687,
+            2.3812436742919587
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 1.988870445546941,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 187,
+      "disagreement_fraction_canvas": 0.01141357421875,
+      "disagreement_fraction_union": 0.024547125229719087,
+      "union_pixels": 7618
+    },
+    {
+      "azimuth_degrees": 45,
+      "elevation_degrees": 20,
+      "camera": {
+        "matrix_world": [
+          [
+            -0.7071067811865476,
+            -0.24184476264797528,
+            0.6644630243886748,
+            4.21430509367181
+          ],
+          [
+            0.7071067811865476,
+            -0.24184476264797528,
+            0.6644630243886748,
+            4.2142880847553
+          ],
+          [
+            0.0,
+            0.9396926207859085,
+            0.3420201433256687,
+            2.3458762567806226
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.106682147583071,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 97,
+      "disagreement_fraction_canvas": 0.00592041015625,
+      "disagreement_fraction_union": 0.014376760041499926,
+      "union_pixels": 6747
+    },
+    {
+      "azimuth_degrees": 75,
+      "elevation_degrees": 20,
+      "camera": {
+        "matrix_world": [
+          [
+            -0.9659258262890683,
+            -0.08852132690137686,
+            0.24321034680169396,
+            1.542137231596486
+          ],
+          [
+            0.25881904510252074,
+            -0.33036608954935215,
+            0.9076733711903687,
+            5.75531749164519
+          ],
+          [
+            0.0,
+            0.9396926207859085,
+            0.3420201433256687,
+            2.3501928266767806
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 1.988870445546941,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 44,
+      "disagreement_fraction_canvas": 0.002685546875,
+      "disagreement_fraction_union": 0.005953991880920162,
+      "union_pixels": 7390
+    },
+    {
+      "azimuth_degrees": 15,
+      "elevation_degrees": 20,
+      "camera": {
+        "matrix_world": [
+          [
+            -0.25881904510252074,
+            -0.33036608954935215,
+            0.9076733711903687,
+            5.754334984900668
+          ],
+          [
+            0.9659258262890683,
+            -0.08852132690137686,
+            0.24321034680169396,
+            1.5418524032657805
+          ],
+          [
+            0.0,
+            0.9396926207859085,
+            0.3420201433256687,
+            2.3530028027114165
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.172943763871711,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 0,
+      "disagreement_fraction_canvas": 0.0,
+      "disagreement_fraction_union": 0.0,
+      "union_pixels": 4814
+    },
+    {
+      "azimuth_degrees": 15,
+      "elevation_degrees": 45,
+      "camera": {
+        "matrix_world": [
+          [
+            -0.25881904510252074,
+            -0.6830127018922194,
+            0.6830127018922194,
+            4.318010902865959
+          ],
+          [
+            0.9659258262890683,
+            -0.18301270189221933,
+            0.18301270189221933,
+            1.1569905254152069
+          ],
+          [
+            0.0,
+            0.7071067811865476,
+            0.7071067811865476,
+            4.584633154163028
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.4140755605565216,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 0,
+      "disagreement_fraction_canvas": 0.0,
+      "disagreement_fraction_union": 0.0,
+      "union_pixels": 3998
+    },
+    {
+      "azimuth_degrees": 45,
+      "elevation_degrees": 45,
+      "camera": {
+        "matrix_world": [
+          [
+            -0.7071067811865476,
+            -0.5000000000000001,
+            0.5000000000000001,
+            3.168848408697632
+          ],
+          [
+            0.7071067811865476,
+            -0.5000000000000001,
+            0.5000000000000001,
+            3.1688313997811224
+          ],
+          [
+            0.0,
+            0.7071067811865477,
+            0.7071067811865476,
+            4.573546216855276
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.2770835174724855,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 0,
+      "disagreement_fraction_canvas": 0.0,
+      "disagreement_fraction_union": 0.0,
+      "union_pixels": 5421
+    },
+    {
+      "azimuth_degrees": 75,
+      "elevation_degrees": 45,
+      "camera": {
+        "matrix_world": [
+          [
+            -0.9659258262890683,
+            -0.18301270189221933,
+            0.18301270189221933,
+            1.158142086714231
+          ],
+          [
+            0.25881904510252074,
+            -0.6830127018922194,
+            0.6830127018922194,
+            4.322228101084842
+          ],
+          [
+            0.0,
+            0.7071067811865476,
+            0.7071067811865476,
+            4.580261607493038
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 1.988870445546941,
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.1,
+        "clip_end": 100.0
+      },
+      "sampling_resolution": [
+        128,
+        128
+      ],
+      "disagreement_pixels": 0,
+      "disagreement_fraction_canvas": 0.0,
+      "disagreement_fraction_union": 0.0,
+      "union_pixels": 7149
+    }
+  ],
+  "proposed_one_complementary_uncropped_view": {
+    "azimuth_degrees": -15,
+    "elevation_degrees": 20,
+    "camera": {
+      "matrix_world": [
+        [
+          0.25881904510252074,
+          -0.33036608954935215,
+          0.9076733711903687,
+          5.751401415190746
+        ],
+        [
+          0.9659258262890683,
+          0.08852132690137686,
+          -0.24321034680169396,
+          -1.541100373464086
+        ],
+        [
+          0.0,
+          0.9396926207859085,
+          0.3420201433256687,
+          2.3613228522542054
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "ortho_scale": 2.19349205744759,
+      "projection": "ORTHO",
+      "resolution": [
+        512,
+        512
+      ],
+      "pixel_aspect": [
+        1.0,
+        1.0
+      ],
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "clip_start": 0.1,
+      "clip_end": 100.0
+    },
+    "sampling_resolution": [
+      128,
+      128
+    ],
+    "disagreement_pixels": 266,
+    "disagreement_fraction_canvas": 0.0162353515625,
+    "disagreement_fraction_union": 0.056559642781203484,
+    "union_pixels": 4703,
+    "refined512": {
+      "sampling_resolution": [
+        512,
+        512
+      ],
+      "disagreement_pixels": 4190,
+      "disagreement_fraction_canvas": 0.01598358154296875,
+      "disagreement_fraction_union": 0.055251532933342125,
+      "union_pixels": 75835
+    }
+  },
+  "proposed_next_observation": "one newly declared512 source-geometry controlled coverage view plus same-camera saved candidate view; two measurement renders only if root approves; no fitting/raw rerun implied",
+  "qualification": "endpoint remains underconstrained until actual new observation; heldout145 recipe remains untouched"
+}

@@ -1,0 +1,43 @@
+{
+  "protocol": "quality_continuation_preview_assets_v1",
+  "local_only": true,
+  "images": [
+    {
+      "path": "assets/rounded_box-continuation-beauty.png",
+      "sha256": "a0088a365f866feb6d5dd12c7249c24e5344746f80936e88266a67c1a789e372",
+      "source": "docs/quality-presentation-continuation-20261009/rounded_box-final-beauty.png",
+      "width": 1536,
+      "height": 1536,
+      "scope": "display-only; unchanged geometry; no acceptance metric",
+      "geometry_hash": "9f6c8d4db73fdccedf0ac346682c33b626830259989f0f0069f60306938f9b9a"
+    },
+    {
+      "path": "assets/capsule-continuation-beauty.png",
+      "sha256": "665fdaba7a87d043cffa21e327e7b2b787050c6d7ccac7831bf18e1e10934a07",
+      "source": "docs\\quality-presentation-continuation-20261009\\capsule-beauty.png",
+      "width": 1536,
+      "height": 1536,
+      "scope": "display-only; unchanged geometry; no acceptance metric"
+    },
+    {
+      "path": "assets/rounded_triangle_dot-continuation-beauty.png",
+      "sha256": "19e78226e1b7c16a85c3decceb57ee52cd05c84b77f2ffb877afc43d7a0d1989",
+      "source": "docs\\quality-presentation-continuation-20261009\\rounded_triangle_dot-beauty.png",
+      "width": 1536,
+      "height": 1536,
+      "scope": "display-only; unchanged geometry; no acceptance metric"
+    }
+  ],
+  "measurement_illustrations": [
+    {
+      "path": "assets/multipart-continuation-coverage.png",
+      "sha256": "7863eed99f81b7a4c6e3cf3187a927b986d5c48a775b4582141eb73c3e2e54db",
+      "source": "docs\\quality-coverage-continuation-20261008\\multipart-complementary-pixels.png",
+      "scope": "display mapping of recorded linear-alpha arrays; labels excluded from measurement; actual metrics use original arrays",
+      "dimensions": [
+        1536,
+        562
+      ]
+    }
+  ]
+}

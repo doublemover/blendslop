@@ -230,6 +230,9 @@ def _compile_node(
     node_weighted_normals = params.get("weighted_normals", weighted_normals)
     if "weighted_normals" in params and not isinstance(node_weighted_normals, bool):
         raise ValueError("weighted_normals recipe parameter must be a boolean")
+    keep_sharp = params.get("weighted_normals_keep_sharp", True)
+    if not isinstance(keep_sharp, bool):
+        raise ValueError("weighted_normals_keep_sharp recipe parameter must be a boolean")
     name = node.name or node.node_id
     warnings: list[str] = []
     if primitive == "capsule":
@@ -323,7 +326,7 @@ def _compile_node(
         raise ValueError(f"unsupported compiler primitive {primitive!r}")
 
     if node_weighted_normals and hasattr(obj, "modifiers") and primitive not in {"empty"}:
-        _add_weighted_normals(obj)
+        _add_weighted_normals(obj, keep_sharp=keep_sharp)
     if any(key in params for key in ('rotation','rotation_row_major','rotation_euler')):
         from mathutils import Matrix
         from reconstruction.program_transforms import rotation_matrix
@@ -637,9 +640,9 @@ def _add_bevel(obj: Any, amount: float, *, segments: int = 3) -> None:
         pass
 
 
-def _add_weighted_normals(obj: Any) -> None:
+def _add_weighted_normals(obj: Any, *, keep_sharp: bool = True) -> None:
     modifier = obj.modifiers.new("Blendslop weighted normals", "WEIGHTED_NORMAL")
-    modifier.keep_sharp = True
+    modifier.keep_sharp = keep_sharp
 
 
 def _add_subdivision(obj: Any, *, levels: int) -> None:

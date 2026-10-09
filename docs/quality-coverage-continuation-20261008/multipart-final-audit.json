@@ -1,0 +1,86 @@
+{
+  "protocol": "multipart_endpoint_ownership_pixel_audit_v1",
+  "ownership_audits": [
+    {
+      "root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-complementary-01\\owned-wmvug9fi",
+      "read_only_audit": {
+        "protocol": "run-ownership-dry-run-v1",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-complementary-01\\owned-wmvug9fi",
+        "mode": "read_only",
+        "status": "dry_run_ready",
+        "mutation_supported": false,
+        "eligible": [],
+        "eligible_bytes": 0,
+        "retained_bytes": 2715079,
+        "blockers": [],
+        "unknown_files": []
+      },
+      "manifest_state": "succeeded",
+      "lease_status": "released",
+      "manifest_sha256": "092bd3b0f13fef357339cfaf53bfa35c703cbc92de95eba8952d55ad3f1f9a7e",
+      "lease_sha256": "a7037a72515bf35bd95e314fb3525f8f78581f6cbc4159af6624f3a5d0593add",
+      "scope": "ownership integrity only; no reclamation/deletion requested or performed"
+    },
+    {
+      "root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z",
+      "read_only_audit": {
+        "protocol": "run-ownership-dry-run-v1",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z",
+        "mode": "read_only",
+        "status": "dry_run_ready",
+        "mutation_supported": false,
+        "eligible": [],
+        "eligible_bytes": 0,
+        "retained_bytes": 1508068,
+        "blockers": [],
+        "unknown_files": []
+      },
+      "manifest_state": "succeeded",
+      "lease_status": "released",
+      "manifest_sha256": "6ed7d110bf9d578226a2e79e449b60ff2c35c36049e2e1b5c1d0e0b730f69449",
+      "lease_sha256": "cba0f5d402edbff1ee0504ba8026d42c786dfb1ac9984d9566c428bfd20ed7aa",
+      "scope": "ownership integrity only; no reclamation/deletion requested or performed"
+    },
+    {
+      "root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\qualification-children\\owned-ptu_qv1s",
+      "read_only_audit": {
+        "protocol": "run-ownership-dry-run-v1",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\qualification-children\\owned-ptu_qv1s",
+        "mode": "read_only",
+        "status": "dry_run_ready",
+        "mutation_supported": false,
+        "eligible": [
+          {
+            "path": "input.npz",
+            "bytes": 2656,
+            "sha256": "dc4efa0cae7e1ffe59b4d7cc8297dd9541c7f61633c01ad87025262500c7b66b"
+          }
+        ],
+        "eligible_bytes": 2656,
+        "retained_bytes": 3267,
+        "blockers": [],
+        "unknown_files": []
+      },
+      "manifest_state": "succeeded",
+      "lease_status": "released",
+      "manifest_sha256": "3c15582d0e1ada0e892aef42f943c1a2d77bf00a8b74378a2f8a770c7ccdcb6e",
+      "lease_sha256": "bea847b12a46c90f47058439f1c3acf2919b6219901c29700e23931c07f07df3",
+      "scope": "ownership integrity only; no reclamation/deletion requested or performed"
+    }
+  ],
+  "pixel_plot": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-coverage-continuation-20261008\\multipart-complementary-pixels.png",
+    "sha256": "7863eed99f81b7a4c6e3cf3187a927b986d5c48a775b4582141eb73c3e2e54db",
+    "source_arrays": [
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-complementary-01\\owned-wmvug9fi\\source\\coverage.npy",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-complementary-01\\owned-wmvug9fi\\candidate\\coverage.npy",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\coverage.npy"
+    ],
+    "array_sha256": [
+      "1d40407b2e90640c9e456d66abc73c0e5cf304589d136012f90d7400aaf45f86",
+      "084ab7aacaaa4ef911f2d5e517dc0973d6d3bce4af13f1b35ccae3bc55426e52",
+      "69e00e74299ed0d18b1bb12632395365d258ecfd4e0770eaf0549bf3f3158b82"
+    ],
+    "scope": "static scientific occupancy plot of real512linearalpha arrays; no extra native frames/fit/metric; nearest interpolation"
+  }
+}

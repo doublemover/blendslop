@@ -59,7 +59,11 @@ def shading_state(obj):
 
 def style_comparison(source, candidate):
     a, b = source["evaluated_mesh"], candidate["evaluated_mesh"]
-    return {"status": "observed", "polygon_style_match": a["polygon_style"] == b["polygon_style"],
+    def weighted_controls(state):
+        return [{key: modifier.get(key) for key in ("keep_sharp", "mode", "weight", "thresh", "show_render", "show_viewport")}
+                for modifier in state["modifiers"] if modifier["type"] == "WEIGHTED_NORMAL"]
+    return {"status": "observed", "weighted_normal_controls_match": weighted_controls(source) == weighted_controls(candidate),
+            "polygon_style_match": a["polygon_style"] == b["polygon_style"],
             "sharp_edge_count_match": a["sharp_edges"] == b["sharp_edges"],
             "custom_normal_state_match": a["has_custom_normals"] == b["has_custom_normals"],
             "modifier_type_sequence_match": [m["type"] for m in source["modifiers"]] == [m["type"] for m in candidate["modifiers"]],

@@ -202,7 +202,10 @@ class FrozenFamilyTests(unittest.TestCase):
         self.assertEqual(rows["cylinder"]["status"], "unrun")
         self.assertEqual(rows["torus"]["status"], "unrun")
         self.assertEqual(rows["concave_arch"]["status"], "unrun")
-        self.assertEqual(rows["asymmetric_multipart_solid"]["status"], "unsupported")
+        self.assertEqual(rows["asymmetric_multipart_solid"]["status"], "unrun")
+        self.assertEqual(rows["asymmetric_multipart_solid"]["proposal_runner"], "run_frozen_multipart_reconstruction.py")
+        with self.assertRaisesRegex(ValueError, "outside this runner"):
+            fitted_family_program("asymmetric_multipart_solid", None, {}, {})
         self.assertFalse(any(row["aggregate_accepted"] for row in rows.values()))
         self.assertEqual(len(SUPPORTED_FAMILIES), 9)
         with self.assertRaises(ValueError):

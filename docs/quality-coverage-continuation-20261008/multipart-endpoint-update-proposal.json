@@ -1,0 +1,58 @@
+{
+  "protocol": "multipart_one_endpoint_update_proposal_v1",
+  "source_observation": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-complementary-01\\owned-wmvug9fi\\results.json",
+  "source_observation_sha256": "52f134b60bede9add55879c4e2e071434718303daff503de946051f6e7f1c516",
+  "saved_candidate_geometry_hash": "c367746d102dac33f3ad12b271c2ab00d46bd4da59a4bd8004a4bef7152eb0d1",
+  "fit_view": "complementary_minus15_20",
+  "input": "retained source coverage.npy and matched actual camera; no authored geometry/parameters or heldout pixels in fitting",
+  "free_parameters": [
+    "short_arm_far_y"
+  ],
+  "fixed_parameters": "all other saved recipe values, including short near endpoint; three boxes/two live Exact UNION",
+  "original_interval": [
+    -0.29030378158416265,
+    0.3252645386249629
+  ],
+  "proposal": "one scalar exact projected union boundary residual; fixed contour384 and20x20 confident occupancy grid",
+  "fit_budget": {
+    "residual_calls": 64,
+    "seconds": 1.0
+  },
+  "stage_budget": {
+    "seconds": 60,
+    "rss_bytes": 8589934592,
+    "threads": 2
+  },
+  "suggested_native_stage": {
+    "new_candidate_controlled512_frames": 1,
+    "original512_mask_frames": 5,
+    "total_renders": 6,
+    "raw_samples_per_direction": 4096,
+    "qualification_children": 0,
+    "source_frames_reused": 1
+  },
+  "postfit_order": "save complete recipe before original GT arrays read; compile unchanged live adapter; retain indexed geometry; raw observation and source-control exact restore; oldfive mask gates including ob145 and new matched controlled gate",
+  "admission": "all original silhouette gates, including ob145, and new view gates pass; new-view coverage L1 improves; raw metrics reported with null independent limits",
+  "heldout_view": "oblique_145_40 remains untouched by fitting; do not tune against failure",
+  "scope": "bounded experiment; no automatic acceptance or topology/semantic transfer",
+  "status": "approved and completed",
+  "approved_stage_budget": {
+    "seconds": 120,
+    "rss_bytes": 8589934592,
+    "threads": 2
+  },
+  "completed_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\results.json",
+  "completed_geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+  "exact_completed_counts": {
+    "candidate_old_mask_frames": 5,
+    "candidate_controlled_alpha_frames": 1,
+    "neutral_frames": 0,
+    "source_frames": 0,
+    "new_raw_comparisons": 1,
+    "baseline_raw_observations_reused": 1,
+    "fixed15_second_qualifiers": 1,
+    "short_depth_restore_transactions": 1
+  },
+  "independent_endpoint_admission": true,
+  "family_surface_limits": null
+}

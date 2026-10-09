@@ -1,0 +1,162 @@
+{
+  "exact_restoration_tolerance": null,
+  "family_surface_acceptance": "Independently unqualified; no transferred vase threshold or new acceptance limit.",
+  "frozen_workload": {
+    "path": "temp\\tasks\\quality-continuation-20261008\\structured-source-edits-01\\owned-7_k13149\\frozen-workload.json",
+    "sha256": "4f3d61c9f96ad66c0606ae2f377aef511ed021895b6cceb625731f0e0fdf6754"
+  },
+  "native_process": {
+    "deadline_seconds": 60,
+    "elapsed_seconds": 4.115619,
+    "exit_code": 0,
+    "fits": 0,
+    "memory_limit_bytes": 8589934592,
+    "peak_process_rss_bytes": 217817088,
+    "process_id": 24204,
+    "qualification_children": 0,
+    "raw_comparisons": 0,
+    "renders": 0,
+    "stopped_for_budget": false,
+    "threads": 2
+  },
+  "native_receipt": {
+    "path": "temp\\tasks\\quality-continuation-20261008\\structured-source-edits-01\\owned-7_k13149\\results.json",
+    "sha256": "bff29e68f01869aeb7c41d7adc2bd38c3de8e0d05f6bc7b0bb7078a1c959a6f9"
+  },
+  "native_result": {
+    "aggregate_accepted": false,
+    "cases": {
+      "concave_arch": {
+        "after": {
+          "extents_world": [
+            1.7943750619888306,
+            1.7943749266093718,
+            0.400029656071789
+          ],
+          "inner_roof_local_y": 0.39967238079726186,
+          "opening_width_world": 1.1035406589508057
+        },
+        "baseline_geometry_hash": "a1e2a84a728d7d913f9bf454ac6cbd731e0ddb8dd837271d02bc47efb6308177",
+        "before": {
+          "extents_world": [
+            1.7943750619888306,
+            1.7943749266093718,
+            0.400029656071789
+          ],
+          "inner_roof_local_y": 0.39967238079726186,
+          "opening_width_world": 1.0032187700271606
+        },
+        "control": "inner cavity wall X coordinates x1.10; outer outline, roof and extrusion depth fixed",
+        "edited_geometry_hash": "4221f3f2c2fa24491ddca8a6016fbcc9e3f1907fe0a936162f3c4ab8a97ecabd",
+        "family_surface_acceptance": "independently unqualified",
+        "guards": {
+          "geometry_changed": true,
+          "indexed_restoration": true,
+          "native_pose_restored": true,
+          "original_mesh_pointer_restored": true,
+          "same_root_pointer": true,
+          "same_source_pointer": true
+        },
+        "response": {
+          "checks": {
+            "cavity_roof_fixed": true,
+            "opening_width_x1_10": true,
+            "outer_dimensions_fixed": true
+          },
+          "geometry_identity": "exact indexed binary64; no tolerance",
+          "opening_width_ratio": 1.1000000118826814,
+          "passed": true,
+          "physical_response_absolute_tolerance": 1e-05
+        },
+        "restored_geometry_hash": "a1e2a84a728d7d913f9bf454ac6cbd731e0ddb8dd837271d02bc47efb6308177",
+        "scope": "recipe parameter regeneration applied to same owned source/root, not blanket editability",
+        "status": "passed"
+      },
+      "torus": {
+        "after": {
+          "extents_world": [
+            1.8618805408477783,
+            1.8618805408477783,
+            0.46217721700668335
+          ],
+          "inner_radius_world": 0.46876299627535617,
+          "major_radius_world": 0.699851655606898,
+          "outer_radius_world": 0.9309403149384399,
+          "tube_radius_world": 0.23108865933154185
+        },
+        "baseline_geometry_hash": "7a68da759b8536b864df8e00ca6fe3e322391ea05a6c98a82d2a4132fd89f8be",
+        "before": {
+          "extents_world": [
+            1.8398720026016235,
+            1.8398720026016235,
+            0.4401687681674957
+          ],
+          "inner_radius_world": 0.479767241468117,
+          "major_radius_world": 0.6998516503775266,
+          "outer_radius_world": 0.9199360592869362,
+          "tube_radius_world": 0.2200844089094096
+        },
+        "control": "minor/tube radius x1.05; major radius fixed",
+        "edited_geometry_hash": "7e0f323c12ba71b1801a5c156d40b50d9e7d682fd8ca256394c4a53b79921309",
+        "family_surface_acceptance": "independently unqualified",
+        "guards": {
+          "geometry_changed": true,
+          "indexed_restoration": true,
+          "native_pose_restored": true,
+          "original_mesh_pointer_restored": true,
+          "same_root_pointer": true,
+          "same_source_pointer": true
+        },
+        "response": {
+          "checks": {
+            "axial_tube_height_x1_05": true,
+            "hole_narrows": true,
+            "major_radius_fixed": true,
+            "outer_ring_expands": true,
+            "tube_radius_x1_05": true
+          },
+          "geometry_identity": "exact indexed binary64; no tolerance",
+          "major_radius_delta_world": 5.229371380366388e-09,
+          "passed": true,
+          "physical_response_absolute_tolerance": 1e-05,
+          "tube_radius_ratio": 1.0500001362052946
+        },
+        "restored_geometry_hash": "7a68da759b8536b864df8e00ca6fe3e322391ea05a6c98a82d2a4132fd89f8be",
+        "scope": "recipe parameter regeneration applied to same owned source/root, not blanket editability",
+        "status": "passed"
+      }
+    },
+    "elapsed_seconds": 0.4476928000076441,
+    "protocol": "structured_family_source_edit_v1",
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\structured-source-edits-01\\owned-7_k13149",
+    "status": "passed"
+  },
+  "ownership_audit": {
+    "blockers": [],
+    "eligible": [],
+    "eligible_bytes": 0,
+    "mode": "read_only",
+    "mutation_supported": false,
+    "protocol": "run-ownership-dry-run-v1",
+    "retained_bytes": 230817,
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\structured-source-edits-01\\owned-7_k13149",
+    "status": "dry_run_ready",
+    "unknown_files": []
+  },
+  "physical_response_tolerance": 1e-05,
+  "protocol": "structured_source_edit_documentation_v1",
+  "pure_regressions": {
+    "passed": 3,
+    "suite": "test_structured_family_source_edits"
+  },
+  "saved_receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\results.json",
+    "sha256": "b4582a618a66b7946047af5697bee9dd3a6b537b5be7ecda85033c4e04619e90"
+  },
+  "scope": "Two saved observed recipes, applied by parameter regeneration to the same owned source/root pointers.",
+  "source_sha256": {
+    "blender_blocking\\primitives\\shape_program_compiler.py": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb",
+    "scripts\\run_family_source_edit_check.py": "91440893c490e8915be6ed8789262585c88ddfde90b1536ab8c95409619d33c1",
+    "scripts\\run_structured_family_source_edits.py": "550d0efcd86d5eaf5460029b562a4a674d6c281f0e3478cdccfd9dc31ef4b39c"
+  }
+}

@@ -1,0 +1,53 @@
+# RUN-CLEANUP1: bounded production render and variant adoption
+
+This is a proposed implementation after the current quality batch is committed. No runtime source was changed, no native process was launched, and no historical output was adopted. The proposal creates ownership only for newly generated staging files and diagnostics. All files remain retained; there is no deletion executor, sweep, ACL change or crash recovery.
+
+## Actual call paths and present gaps
+
+- `integration/blender_ops/render_utils.py:245–461` renders synchronously through `render_silhouette_frame`. It selects a currently unused final filename with `_unique_path`, then writes directly to that path. Another invocation can claim it between the check and write. A render failure can leave an incomplete final PNG. Existing scene/material/settings restoration remains in `silhouette_session` and its enclosing `finally` blocks.
+- `e2e/validator.py:393–459` calls the legacy view-to-path renderer, including a separate call per cropped view. Its default output root and filename prefix are public behavior. `reconstruction/measured_selection.py:126` consumes `RenderResult.paths` and `to_dict`. These two callers can acquire adoption through the shared renderer without changing their measurements or image locations.
+- `main_integration.py` reconstructs geometry and records backend manifests; it does not call this renderer directly. No main-integration patch is needed for this chunk.
+- `refinement_lab/runner.py:1050–1228` runs variants in process or via a Blender subprocess. Existing fixed `command.txt`, `config.json`, `stdout.txt`, `stderr.txt` and `result.json` can overwrite prior attempts. `subprocess.run(..., capture_output=True)` joins normally, but an exception can prevent persistent log publication. There is no configured outer timeout. The two outer error-result writers at lines 228–325 also overwrite `result.json`.
+- `save_render` at `render_utils.py:579` is an exported exact-path helper with a `None` return and existing overwrite behavior; no internal caller was found. It stays outside the first adoption rather than silently changing that API.
+
+## Small shared publication primitive
+
+Add one narrowly scoped `utils/artifact_publication.py` function, `publish_file_no_clobber(staged, destination)`. The producer finishes and closes a regular staged file, registers its digest, then uses `os.link` to publish that immutable file. Creating the destination hard link is atomic and refuses an existing name; it never uses `os.replace` for user-visible final output. Staging lives beneath the actual output filesystem, so the source and destination share a volume. The staged file remains retained and is never rewritten after publication.
+
+`FileExistsError` is handled by the caller's existing filename policy. Other failures propagate with the completed staging file and failure receipt retained; there is no partial-copy fallback or deletion. Filesystems that do not support hard-link publication are an explicit limitation: fail safely rather than claim atomic publication. No historical final file is registered or renamed. Owned metadata's existing atomic replace is confined to its fresh run root.
+
+## Renderer: unchanged public paths, new owned staging
+
+Create `OwnedRun(output_root_resolved / '.render-runs', producer='orthographic_render')` after the existing unavailable/no-target early exits. Keep both renderer signatures, the legacy dictionary return, filename prefixes, start indices, long-path compaction, suffix allocation, render settings and view order unchanged. Preserve relative returned strings when the caller supplied a relative output directory; use the resolved directory only for ownership/staging.
+
+Render each view to a short fresh staging name such as `frame-0001.png`. Verify a completed PNG and register it before publication. Publish to the same normal final candidate, using the existing unique-name sequence on a publication collision. `RenderResult.paths` and each view record contain the actual external published path. Optional trailing `ownership_receipt` metadata can be added to the detailed result; the legacy wrapper still returns only its existing view mapping. A receipt records stage/final path, size, digest, view and completion/publication status. Published stage files are retained `final_output`; failed partial files are retained diagnostics, not automatically disposable.
+
+Reserve a conservative byte allowance from requested frame count, dimensions and PNG channel/depth settings before rendering, then verify actual bytes on registration. This is an artifact bound, not an operating-system disk quota or a new quality threshold. Keep explicit registration limited to this invocation's known stage files; do not inventory or classify the existing output directory. A render/progress/publication failure retains earlier successful frames and the original exception. Secondary receipt failures annotate that exception. All renders here are synchronous; this producer starts no subprocess.
+
+Existing per-crop calls each receive a separate small run. The validator's evaluated OBJ and candidate exports are external final artifacts, outside this renderer's ownership. The new controlled-measurement renderer remains unchanged.
+
+## Variant attempts: diagnostics and result transport only
+
+Create a fresh `OwnedRun(variant_dir / '.variant-runs', producer='refinement_variant')` only on an actual attempt, after the existing cache lookup. Shared references, scripts, final render directory `variant_dir/r`, backend artifact directory `variant_dir/a` and caches remain external inputs/outputs. Record reference/script/config identities without registering those existing files. Do not recursively adopt a variant directory.
+
+Write command/config and child or in-process result transport inside the fresh owner root. Pass the staged result path to `test_with_custom_images` or `_variant_command`; leave render and backend output directories unchanged. After completion, validate the staged JSON and publish to `variant_dir/result.json` when free. On collision use `result_2.json`, then subsequent suffixes, preserving prior attempt bytes. `ExperimentResult.result_json` and its `artifacts['result']` carry the actual published path. Existing first-run locations and result structures remain compatible. Candidate state already serializes the returned path, so reuse/resume can follow it without changing cache keys. Fixed command/config/log aliases may be published only when free; the durable fresh-root records are authoritative for every attempt.
+
+Route the two outer error-result writers through the same staged/result publication path so a launch/config/reference failure does not overwrite previous failure history. Add the ownership receipt to `ExperimentResult.artifacts` without replacing computation status, metric namespaces, image paths or cached results. A failed quality verdict marks the attempt failed even when its result JSON was successfully published.
+
+For subprocess attempts use `Popen` and explicit `try/finally`: retain command before launch; join normally; on timeout or cancellation terminate only the directly owned child and join it before releasing the lease. Spawn failure can close a failed run because no child exists. Unconfirmed termination leaves the lease active and annotates the original error, matching the cold-DVX contract. A new optional `RunOptions.variant_timeout_s=None` keeps the present no-outer-timeout default; explicit values must be finite and positive. It is separate from backend fit budgets.
+
+Retain bounded stdout/stderr tails and byte counts in every joined outcome. The first implementation may preserve existing pipe/communicate capture while limiting retained diagnostics; that does **not** bound peak log-capture memory. Continuous draining into bounded buffers would be a separate explicit extension if required. Do not claim child-tree ownership: backend helper descendants remain governed by their own producers. In-process attempts need no child join but retain exceptions and result transport under the same fresh-attempt contract.
+
+## Exact implementation files and focused checks
+
+Runtime scope: new `utils/artifact_publication.py`; edits to `integration/blender_ops/render_utils.py` and `refinement_lab/runner.py`. No `main_integration.py`, validator, measurement API, general JSON serializer, cache or existing `OwnedRun` change is needed. Add `test_render_run_ownership.py` and `test_variant_run_ownership.py`; root registers them in `test_runner.py`.
+
+1. Real standard-library publication fixture: existing final remains byte-identical; two completed stage files competing for one name cannot clobber it; unsupported/locked publication preserves stages and errors; no unlink/replace of final paths. Verify default names, existing suffix behavior, compact names and relative return strings.
+2. Fake-render fixture: staged files are created before external final paths; render failure after one success retains it and failed diagnostics; progress callback failure and secondary receipt failure preserve the primary exception. Existing settings-restoration structure remains covered by `test_silhouette_rendering`.
+3. Real tiny standard-library variant child: successful/failed exit retains logs/result and joins before lease release. Controlled fixtures cover timeout, cancellation, launch failure, publication failure and unconfirmed join; active lease blocks reclamation.
+4. In-process fixtures: fresh attempts preserve previous command/config/result bytes, publish new result suffixes, retain a failed attempt, and keep normal first-run render paths. Existing refinement cache/resume/lineage and prefix/path regressions must pass; a cache hit creates no owner.
+5. Optional later native canary after approval: one 128-square cube/front frame to the production renderer, no fit/raw metrics/qualifiers. First run final path remains the normal `front.png`; a second run produces the next suffix with unchanged pixels and two valid receipts. No broad campaign is required.
+
+## Scope limits and readiness
+
+The design can proceed after root's current native sessions finish and the quality batch is committed. Atomic publication depends on hard-link support in the selected final filesystem; no incompatible fallback is proposed. `save_render` overwrite semantics, backend artifact overwrites under `a`, mutable report/cache files, full child-tree supervision, bounded live log transport, crash recovery and reclamation remain explicit follow-up scope. This chunk preserves render finals and attempt result/log history; it does not claim full ownership of every variant export or a cleanup implementation.

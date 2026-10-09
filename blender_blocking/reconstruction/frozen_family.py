@@ -23,6 +23,8 @@ CONVEX_FAMILIES = (
     "capsule", "rounded_box", "thin_plate",
 )
 SUPPORTED_FAMILIES = CONVEX_FAMILIES + ("torus", "concave_arch")
+FAMILY_PROPOSAL_ROUTES = {name: "run_frozen_family_reconstruction.py" for name in SUPPORTED_FAMILIES}
+FAMILY_PROPOSAL_ROUTES["asymmetric_multipart_solid"] = "run_frozen_multipart_reconstruction.py"
 FROZEN_FAMILIES = (
     "sphere", "anisotropic_ellipsoid", "cylinder", "tapered_frustum",
     "smooth_vase", "torus", "capsule", "rounded_box", "thin_plate",
@@ -266,7 +268,9 @@ def fitted_family_program(family, target, masks, cameras, *, coverage_masks=None
         parameters.update(radius_world=float(dimensions[0]), segment_height_world=float(2*dimensions[1]))
     if family == "rounded_box":
         parameters["corner_radius_world"] = fit["radius"]
+        parameters["bevel_segments"] = 8
         parameters["weighted_normals"] = True
+        parameters["weighted_normals_keep_sharp"] = False
     metadata = {key: value for key, value in fit.items()
                 if key not in {"center", "dimensions", "rotation"}}
     metadata.update(evidence_scope="observed five-view mask supports; full silhouette gates still required",
@@ -286,8 +290,8 @@ def initial_family_rows(selected, reused=()):
     if unknown or set(selected) & set(reused):
         raise ValueError("unknown or overlapping selected/reused families")
     return {name: {"status": "reused" if name in reused else "pending" if name in selected
-                   else "unrun" if name in SUPPORTED_FAMILIES or name in {"smooth_vase", "rounded_triangle_dot"}
-                   else "unsupported", "aggregate_accepted": False}
+                   else "unrun" if name in FAMILY_PROPOSAL_ROUTES or name in {"smooth_vase", "rounded_triangle_dot"}
+                   else "unsupported", "proposal_runner": FAMILY_PROPOSAL_ROUTES.get(name), "aggregate_accepted": False}
             for name in FROZEN_FAMILIES}
 
 

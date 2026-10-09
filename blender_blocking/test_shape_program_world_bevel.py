@@ -56,8 +56,25 @@ class TestShapeProgramWorldBevel(unittest.TestCase):
             with patch.object(compiler, "_cube", return_value=source), patch.object(compiler, "_add_weighted_normals") as add:
                 compiler._compile_node(node, lathe_segments=48, bevel_modifier=True, weighted_normals=global_default)
                 self.assertEqual(add.called, expected)
+                if expected:
+                    self.assertTrue(add.call_args.kwargs["keep_sharp"])
         for invalid in (0, 1, "true", None):
             node = ShapeNode("box", "add", "box", {"weighted_normals": invalid})
+            with patch.object(compiler, "_cube") as cube:
+                with self.assertRaises(ValueError):
+                    compiler._compile_node(node, lathe_segments=48, bevel_modifier=True, weighted_normals=False)
+                cube.assert_not_called()
+
+    def test_authored_keep_sharp_control_is_explicit_and_validated_before_geometry(self):
+        class Source(dict):
+            modifiers = []
+        source = Source()
+        node = ShapeNode("box", "add", "box", {"weighted_normals": True, "weighted_normals_keep_sharp": False})
+        with patch.object(compiler, "_cube", return_value=source), patch.object(compiler, "_add_weighted_normals") as add:
+            compiler._compile_node(node, lathe_segments=48, bevel_modifier=True, weighted_normals=False)
+            add.assert_called_once_with(source, keep_sharp=False)
+        for invalid in (0, 1, "false", None):
+            node = ShapeNode("box", "add", "box", {"weighted_normals_keep_sharp": invalid})
             with patch.object(compiler, "_cube") as cube:
                 with self.assertRaises(ValueError):
                     compiler._compile_node(node, lathe_segments=48, bevel_modifier=True, weighted_normals=False)

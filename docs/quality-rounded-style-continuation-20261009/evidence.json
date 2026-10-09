@@ -1,0 +1,194 @@
+{
+  "actual_clipping_matches": 5,
+  "actual_frame_matches": 5,
+  "aggregate_accepted": false,
+  "baseline_geometry_hash": "aa683c0899ba9b98c077a6164ef87fca69c66ec60fad2cba2aa5e62b8bf14753",
+  "baseline_style": {
+    "evaluated_mesh": {
+      "flat_polygons": 486,
+      "has_custom_normals": false,
+      "polygon_style": "flat",
+      "polygons": 486,
+      "sharp_edge_attribute": "absent",
+      "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sharp_edges": 0,
+      "smooth_flags_sha256": "b2c5e4bd6785442e8deedce0d325629b0818a4c9e7635b3bd8c80e8c03f162fb",
+      "smooth_polygons": 0,
+      "vertices": 488
+    },
+    "modifiers": [
+      {
+        "affect": "EDGES",
+        "name": "Blendslop editable bevel",
+        "segments": 8,
+        "show_render": true,
+        "show_viewport": true,
+        "type": "BEVEL",
+        "width": 0.1515750139951706
+      }
+    ],
+    "scope": "shading/style only; geometric-normal metrics remain separate",
+    "source_mesh": {
+      "flat_polygons": 6,
+      "has_custom_normals": false,
+      "polygon_style": "flat",
+      "polygons": 6,
+      "sharp_edge_attribute": "absent",
+      "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sharp_edges": 0,
+      "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+      "smooth_polygons": 0,
+      "vertices": 8
+    },
+    "status": "native_observed"
+  },
+  "contact_sheet_sha256": {
+    "oblique_35_28-comparison.png": "96b8512d7748f0fec0efa9c8c3f8c34e176a49451fb177adff2ed9e3790c8e6b",
+    "side-comparison.png": "d16efda0d409fc4bf99d649f16717161cbb7a30c57e6b9c8965750bc5434f964"
+  },
+  "geometry_unchanged": true,
+  "mask_frames": 0,
+  "native_process": {
+    "elapsed_seconds": 5.8460987,
+    "exit_code": 0,
+    "expected_neutral_frames": 5,
+    "fits": 0,
+    "joined": true,
+    "mask_frames": 0,
+    "normal_frames": 0,
+    "peak_working_set_bytes": 452407296,
+    "qualification_children": 0,
+    "stopped_by_bound": false,
+    "threads": 2
+  },
+  "neutral_frames": 5,
+  "normal_frames": 0,
+  "ownership_audit": {
+    "blockers": [],
+    "eligible": [],
+    "eligible_bytes": 0,
+    "mode": "read_only",
+    "mutation_supported": false,
+    "protocol": "run-ownership-dry-run-v1",
+    "retained_bytes": 544273,
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\rounded-style-01\\owned-wz8m1bxm",
+    "status": "dry_run_ready",
+    "unknown_files": []
+  },
+  "protocol": "rounded_box_authored_style_v1",
+  "receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\rounded-style-01\\owned-wz8m1bxm\\results.json",
+  "receipt_sha256": "4e3960a0ebf1d89f94138d03d16ab946f3c40aeb8832e7eee6070ad8fcadf06e",
+  "source_inventory_complete": false,
+  "source_style": {
+    "evaluated_mesh": {
+      "flat_polygons": 486,
+      "has_custom_normals": true,
+      "polygon_style": "flat",
+      "polygons": 486,
+      "sharp_edge_attribute": "present",
+      "sharp_edge_flags_sha256": "96c5023576733f88726277165f7fa44936426956bcbcca126d7f1169216e1a4b",
+      "sharp_edges": 0,
+      "smooth_flags_sha256": "b2c5e4bd6785442e8deedce0d325629b0818a4c9e7635b3bd8c80e8c03f162fb",
+      "smooth_polygons": 0,
+      "vertices": 488
+    },
+    "modifiers": [
+      {
+        "affect": "EDGES",
+        "name": "synthetic_rounding",
+        "segments": 8,
+        "show_render": true,
+        "show_viewport": true,
+        "type": "BEVEL",
+        "width": 0.15000000596046448
+      },
+      {
+        "keep_sharp": false,
+        "mode": "FACE_AREA",
+        "name": "synthetic_weighted_normals",
+        "show_render": true,
+        "show_viewport": true,
+        "thresh": 0.009999999776482582,
+        "type": "WEIGHTED_NORMAL",
+        "weight": 50
+      }
+    ],
+    "scope": "shading/style only; geometric-normal metrics remain separate",
+    "source_mesh": {
+      "flat_polygons": 6,
+      "has_custom_normals": false,
+      "polygon_style": "flat",
+      "polygons": 6,
+      "sharp_edge_attribute": "absent",
+      "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sharp_edges": 0,
+      "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+      "smooth_polygons": 0,
+      "vertices": 8
+    },
+    "status": "native_observed"
+  },
+  "status": "styled_neutrals_retained",
+  "style_comparison": {
+    "candidate_polygon_style": "flat",
+    "custom_normal_state_match": true,
+    "modifier_type_sequence_match": true,
+    "polygon_style_match": true,
+    "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+    "sharp_edge_count_match": true,
+    "source_polygon_style": "flat",
+    "status": "observed"
+  },
+  "styled_geometry_hash": "aa683c0899ba9b98c077a6164ef87fca69c66ec60fad2cba2aa5e62b8bf14753",
+  "styled_style": {
+    "evaluated_mesh": {
+      "flat_polygons": 486,
+      "has_custom_normals": true,
+      "polygon_style": "flat",
+      "polygons": 486,
+      "sharp_edge_attribute": "present",
+      "sharp_edge_flags_sha256": "96c5023576733f88726277165f7fa44936426956bcbcca126d7f1169216e1a4b",
+      "sharp_edges": 0,
+      "smooth_flags_sha256": "b2c5e4bd6785442e8deedce0d325629b0818a4c9e7635b3bd8c80e8c03f162fb",
+      "smooth_polygons": 0,
+      "vertices": 488
+    },
+    "modifiers": [
+      {
+        "affect": "EDGES",
+        "name": "Blendslop editable bevel",
+        "segments": 8,
+        "show_render": true,
+        "show_viewport": true,
+        "type": "BEVEL",
+        "width": 0.1515750139951706
+      },
+      {
+        "keep_sharp": true,
+        "mode": "FACE_AREA",
+        "name": "Blendslop weighted normals",
+        "show_render": true,
+        "show_viewport": true,
+        "thresh": 0.009999999776482582,
+        "type": "WEIGHTED_NORMAL",
+        "weight": 50
+      }
+    ],
+    "scope": "shading/style only; geometric-normal metrics remain separate",
+    "source_mesh": {
+      "flat_polygons": 6,
+      "has_custom_normals": false,
+      "polygon_style": "flat",
+      "polygons": 6,
+      "sharp_edge_attribute": "absent",
+      "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sharp_edges": 0,
+      "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+      "smooth_polygons": 0,
+      "vertices": 8
+    },
+    "status": "native_observed"
+  },
+  "visual_mismatch": "authored weighted normal keep_sharp False vs first styled candidate True; banding remains in paired pixels",
+  "visual_style_restored": false
+}
