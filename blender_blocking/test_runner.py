@@ -85,6 +85,8 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_frozen_family", "test_frozen_family"),
     ("pure_reference_noise", "test_reference_noise"),
     ("pure_family_surface_contracts", "test_family_surface_contracts"),
+    ("pure_family_surface_report_bindings", "test_family_surface_report_bindings"),
+    ("pure_source_camera_coverage", "test_source_camera_coverage"),
     ("pure_structured_family", "test_structured_family"),
     ("pure_shape_program_world_bevel", "test_shape_program_world_bevel"),
     ("pure_cold_dvx_ownership", "test_cold_dvx_ownership"),

@@ -1,6 +1,6 @@
 # Source-conditioned family surface contracts
 
-Five existing authored references now have continuous facet certificates and a separately scoped engineering surface policy. Their existing raw observations meet that supplementary policy. Required artist surface acceptance remains unqualified; no existing gate, family row or aggregate verdict changes.
+Nine existing authored references now have continuous facet certificates and complete actual source-camera provenance for separately scoped engineering policies. Required artist surface acceptance remains unqualified; no existing gate, family row or aggregate verdict changes. The sections below retain earlier stages and the completed nine-family expansion.
 
 The pure report took 0.421 seconds. It rendered no images, refit no candidates, resampled no surfaces and started no Blender/qualification children. Ten focused checks passed on the existing bundled Python 3.13.13. All new receipt artifacts pass the read-only released-run ownership audit.
 
@@ -36,10 +36,32 @@ Remaining useful work includes analytic certificates for other family constructi
 
 ## Exact rectilinear expansion
 
-The source-certificate implementation now supports eight families. Thin plate, arch and multipart references use an exact rational face-cover proof over the independently frozen authored box CSG lattice. Every source facet must be assigned completely to an outward analytic boundary plane, every analytic boundary rectangle must have full nonoverlapping coverage, and the actual face normal must retain its outward orientation. Matching vertices, area or signed volume alone is insufficient. Source-to-snapped vertex displacement bounds continuous facet correspondence in both directions. The grid association budget is a numerical construction check; it is not the reconstruction tolerance.
+At this earlier rectilinear expansion, the source-certificate implementation supported eight families. Thin plate, arch and multipart references use an exact rational face-cover proof over the independently frozen authored box CSG lattice. Every source facet must be assigned completely to an outward analytic boundary plane, every analytic boundary rectangle must have full nonoverlapping coverage, and the actual face normal must retain its outward orientation. Matching vertices, area or signed volume alone is insufficient. Source-to-snapped vertex displacement bounds continuous facet correspondence in both directions. The grid association budget is a numerical construction check; it is not the reconstruction tolerance.
 
-The expanded report freezes seven complete actual source camera packets: the original five, thin plate, and the freshly recaptured multipart source. Arch has a valid standalone source certificate, but its missing actual source camera/pass provenance still blocks a complete source-conditioned report. No old provenance is invented.
+That expanded report froze seven complete actual source camera packets: the original five, thin plate, and the freshly recaptured multipart source. At that stage arch had a valid standalone source certificate, but missing actual source camera/pass provenance blocked its complete source-conditioned report. No old provenance is invented.
 
 The retained old multipart baseline fails the new engineering mean-distance policy: 0.004201645 world units exceeds 0.001812551. Its selected endpoint repair passes that exact same source-only limit with mean 0.000161978. Both have oriented normal P95 zero; the distance failure remains explicit. This is useful depth-error diagnosis rather than an aggregate passing over the old required failure. Other six retained observations meet their supplementary policies. Artist surface acceptance remains null and every aggregate remains false.
 
 [source-plan-expanded.json](source-plan-expanded.json), [selected-observation-bindings.json](selected-observation-bindings.json) and [expanded-evidence.json](expanded-evidence.json) bind the real producer receipts and exact source/candidate identities. The expansion took 0.632 seconds, with zero renders, refits, resampling or qualification children. Its own pure ownership audit passes. The source packet's separately failed descendant supervision remains failed; pure classification does not repair that lifecycle gap.
+
+## Complete nine-family source-camera expansion
+
+The fresh ten-frame source-only capture supplies torus and concave arch with all five actual source cameras, exact clip matches, immutable neutral PNGs and unchanged authored geometry/style. Exact indexed/oriented equivalence passed before rendering. The existing seven declarations and engineering allowances remain unchanged in [source-plan-complete.json](source-plan-complete.json). Both fresh capture and complete-tree supervisor have successful manifests, released leases and read-only audits without blockers; [source-camera evidence](../quality-source-camera-coverage-continuation-20261009/native-evidence.json) retains their separate lifecycle receipts. Historical source-owner digest drift and the selected canonical packet's failed outer supervision remain unresolved history.
+
+The pure report now validates known adaptive producer schemas and exact raw/candidate/producer identities. It keeps the selected multipart endpoint repair separate from eight diagnostic checkpoints. Rejected sphere and ellipsoid updates retain `producer_checkpoint_improved=false`, even though their raw surfaces meet the supplementary engineering limits. No diagnostic row is promoted. The legacy multipart producer's `incomplete` artist status remains compatible with its completed raw measurement; other unknown layouts and incomplete adaptive measurements are refused. Six focused binding checks passed.
+
+| Family | Engineering mean limit (world) | Engineering normal P95 limit (degrees) | Retained original | Additional observation |
+| --- | ---: | ---: | --- | --- |
+| anisotropic_ellipsoid | 0.004203715 | 6.837441 | pass | engineering pass; rejected diagnostic |
+| asymmetric_multipart_solid | 0.001812551 | 1.000000 | FAIL | engineering pass; selected repair |
+| capsule | 0.003973017 | 6.295786 | pass | engineering pass; improved diagnostic |
+| concave_arch | 0.002039096 | 1.000000 | pass | engineering pass; improved diagnostic |
+| cylinder | 0.002160558 | 2.875076 | pass | engineering pass; improved diagnostic |
+| sphere | 0.003736817 | 4.974627 | pass | engineering pass; rejected diagnostic |
+| tapered_frustum | 0.002467444 | 2.819126 | pass | engineering pass; improved diagnostic |
+| thin_plate | 0.001812527 | 1.000000 | pass | engineering pass; improved diagnostic |
+| torus | 0.004953723 | 8.639091 | pass | engineering pass; improved diagnostic |
+
+The old multipart mean remains `0.004201645` versus its unchanged `0.001812551` world limit; the selected repair remains `0.000161978`. Arch's exterior diagnostic mean is `0.000229571`, while its observed distance P95 increases to `0.002919286489`; that P95 regression remains explicit and is not a failure of a nonexistent engineering P95-distance cutoff. Torus's engineering mean/normal limits are `0.004953723` world / `8.639090855` degrees, derived from its frozen source lattice and actual source pixel pitch.
+
+[complete-evidence.json](complete-evidence.json) binds all nine frozen contracts, eighteen retained observations, real producer files and the pure report's released-run audit. This classification took 3.244 seconds and performed zero rendering, fitting, surface resampling or qualification. Artist status is null and every aggregate remains false. Rounded box and triangular pebble certificates/independent artist contracts remain separate gaps; their existing raw results are not silently classified by another family's policy.

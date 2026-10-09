@@ -1,0 +1,1575 @@
+{
+  "additional_observation_bindings": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\diagnostic-observation-bindings.json",
+    "sha256": "36ffd99bb7198ba549d53c96551db3b45b27c292084426b18a859f8e909e4a50"
+  },
+  "aggregate_accepted": false,
+  "checks": {
+    "test_family_surface_report_bindings": {
+      "elapsed_seconds": 0.155,
+      "failed": 0,
+      "passed": 6,
+      "scope": "strict legacy and adaptive producer/schema/identity/byte/scope checks; no native measurements",
+      "skipped": 0
+    }
+  },
+  "coverage": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-coverage-continuation-20261008\\coverage-evidence.json",
+    "sha256": "4c85cf4166667887670cdbb555b724d69522226c3b27b8b51999440c0e6d77e6"
+  },
+  "engineering_policy_scope": "Symmetric mean distance and oriented geometric normal P95 only. Distance P95/sampled max retained as observations, not implicit cutoffs. No changed row selection or artist/aggregate acceptance.",
+  "frozen_contract_receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-02\\owned-z9bdillt\\frozen-contracts.json",
+    "sha256": "92eeecaff76a1ecf53e882ac2779a6db62e9be326f082769da1683fa0d261878"
+  },
+  "frozen_contracts": {
+    "anisotropic_ellipsoid": {
+      "contract": {
+        "artist_acceptance_limits": null,
+        "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+        "authored_parameters": {
+          "primitive": "ellipsoid",
+          "radii": [
+            0.9,
+            0.55,
+            0.7
+          ]
+        },
+        "cameras": {
+          "front": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "9c26dba6086968016d4fb41bb4ee679bf8b4956ffd9346c961fcf51233337bb7",
+            "max_pixel_pitch_world": 0.004078124184161425
+          },
+          "oblique_145_40": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "5921b869cb1552a13a16da1e6286f00ede2eca012a211abef63e4672c4cb5b69",
+            "max_pixel_pitch_world": 0.004078124184161425
+          },
+          "oblique_35_28": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "de0f29deeb672575feecd5a8db81f8eacad8e66f8c61c627208d3a86cb88d369",
+            "max_pixel_pitch_world": 0.004078124184161425
+          },
+          "side": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "fdc23d5c8fd0904d75f9e621d8acb33399f238903d0a10ccc9666e7040b66843",
+            "max_pixel_pitch_world": 0.004078124184161425
+          },
+          "top": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "648c9ec89bf98e8ef742354d2b016441b2e2342af18e4e5b9debc5f134536693",
+            "max_pixel_pitch_world": 0.004078124184161425
+          }
+        },
+        "contract_sha256": "9d78ae061a44a52dcf08960d71b6dc0491b538b9b14682019e88fb06f2cc66e9",
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 6.837440586574808,
+          "symmetric_mean_distance_world_max": 0.004203715484051828
+        },
+        "engineering_status": "frozen",
+        "family": "anisotropic_ellipsoid",
+        "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+        "metric": {
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "sample_count_per_direction": 4096,
+          "seed": 61007
+        },
+        "protocol": "source_conditioned_family_surface_v1",
+        "reason": null,
+        "reconstruction_allowance": {
+          "basis": "explicit engineering allowance; not an observed artist tolerance",
+          "normal_degrees": 1.0,
+          "source_pixels": 0.5,
+          "world": 0.0020390620920807123
+        },
+        "reference_certificate": {
+          "candidate_boundary_qualified": false,
+          "distance_bound_world": 0.0021646533919711165,
+          "distance_scope": "continuous source facets to authored ideal; radial covering for convex sphere-topology references",
+          "family": "anisotropic_ellipsoid",
+          "normal_correspondence": "radial/axial analytic correspondence; not nearest-point correspondence",
+          "normal_correspondence_bound_degrees": 5.837440586574808,
+          "protocol": "continuous_authored_facet_bound_v1",
+          "reference_geometry_hash": "a0c0d42370a07c99b4386a641be8fab99a43db5bdc11ea8d0741ccf1c71a144e",
+          "sampled": false,
+          "vertex_construction_error_world": 4.6400948713332116e-07
+        },
+        "reference_geometry_hash": "a0c0d42370a07c99b4386a641be8fab99a43db5bdc11ea8d0741ccf1c71a144e"
+      },
+      "source_provenance": {
+        "indexed_reference_geometry_hash": "a0c0d42370a07c99b4386a641be8fab99a43db5bdc11ea8d0741ccf1c71a144e",
+        "indexed_regenerated_geometry_hash": "981303b1cd1aedc8825c2b77621bd8cca6d8395a1c547c4dabfe972644901512",
+        "original_and_regenerated_oriented_surface_sha256": "b7b8ad2c4b794dfe3fbcc9b466cd15a74661c0818c92baf0a2f3edf59b0f1abf",
+        "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+      }
+    },
+    "asymmetric_multipart_solid": {
+      "contract": {
+        "artist_acceptance_limits": null,
+        "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+        "authored_parameters": {
+          "builder": "compound",
+          "parts": [
+            {
+              "center": [
+                0,
+                0,
+                -0.25
+              ],
+              "size": [
+                1.6,
+                0.65,
+                0.5
+              ],
+              "type": "box"
+            },
+            {
+              "center": [
+                -0.4,
+                0.1,
+                0.4
+              ],
+              "size": [
+                0.45,
+                0.45,
+                1.1
+              ],
+              "type": "box"
+            },
+            {
+              "center": [
+                0.45,
+                -0.08,
+                0.12
+              ],
+              "size": [
+                0.35,
+                0.45,
+                0.65
+              ],
+              "type": "box"
+            }
+          ]
+        },
+        "cameras": {
+          "front": {
+            "clip_end": 1000.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "a685367849862f63a8053c43f99bddcf886411d7c2d8f8c783b3493208750289",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "oblique_145_40": {
+            "clip_end": 1000.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "fd341b5a7031b8c57aa6b3ee15c9b51c05c4388a47350fd0d2e5c354dcb3f537",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "oblique_35_28": {
+            "clip_end": 1000.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "638ca0dbd43086ac6f1d778d9431b963c54283f5aac674a3e36f7cc73d258047",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "side": {
+            "clip_end": 1000.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "a70b8cb10a5c2d0d904aba316bfb45dc5b13358b3b4cf1ecbe1b9ece04e3cce6",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "top": {
+            "clip_end": 1000.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "367a2f93b93be177f2a07e612620e705773090633535a749d4a672b8a9d9873e",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          }
+        },
+        "contract_sha256": "efac34dfb3025b6fe34f6e26c001fb3460413ca40456ebf6deefb01efb106c6c",
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 1.0,
+          "symmetric_mean_distance_world_max": 0.0018125506404794065
+        },
+        "engineering_status": "frozen",
+        "family": "asymmetric_multipart_solid",
+        "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+        "metric": {
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "sample_count_per_direction": 4096,
+          "seed": 61007
+        },
+        "protocol": "source_conditioned_family_surface_v1",
+        "reason": null,
+        "reconstruction_allowance": {
+          "basis": "explicit engineering allowance; not an observed artist tolerance",
+          "normal_degrees": 1.0,
+          "source_pixels": 0.5,
+          "world": 0.0018125000642612576
+        },
+        "reference_certificate": {
+          "candidate_boundary_qualified": false,
+          "distance_bound_world": 5.0576218148960735e-08,
+          "distance_scope": "bidirectional continuous facet/boundary cover via matching barycentric points; max vertex displacement bounds every paired point",
+          "family": "asymmetric_multipart_solid",
+          "normal_correspondence": "each source facet to its proved outward authored plane; edge/corner nearest-normal correspondence is not asserted",
+          "normal_correspondence_bound_degrees": 0.0,
+          "protocol": "continuous_authored_facet_bound_v1",
+          "rectilinear_exact_cover": {
+            "arithmetic": "exact Fraction from frozen binary64 plane declarations and actual binary64 source coordinates; square-root upper endpoints rationally checked",
+            "artist_surface_limits": null,
+            "boundary_patches_proved": 112,
+            "candidate_boundary_qualification": "not supplied",
+            "coverage_proof": "exact rational triangle-to-lattice-cell clipping; every source facet assigned fully; every boundary patch fully covered; all positive-area overlaps forbidden",
+            "distance_correspondence": "bidirectional continuous facet/boundary cover via matching barycentric points; max vertex displacement bounds every paired point",
+            "family": "asymmetric_multipart_solid",
+            "frozen_parameters_sha256": "8b4d014e8638baf5721f36cd925c92dbde2da8390cd8b815fde04c91d95b2b95",
+            "maximum_normal_angle_degrees": 0.0,
+            "maximum_source_facet_distance_world": 5.0576218148960735e-08,
+            "maximum_vertex_rounding_shift_world": 5.0576218148960735e-08,
+            "normal_correspondence": "each source facet to its proved outward authored plane; edge/corner nearest-normal correspondence is not asserted",
+            "normal_tangent_upper_bound": 0.0,
+            "numerical_budget_scope": "fixed4float32eps\u00d7authored coordinate scale; grid association only, not reconstruction allowance or artist tolerance",
+            "numerical_grid_association_budget_world": 4.76837158203125e-07,
+            "orientation_proof": "every snapped facet outward; exact actual cross dot with that plane strictly positive",
+            "positive_area_overlap_checks": 108,
+            "protocol": "exact_rectilinear_source_cover_v1",
+            "reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+            "source_triangles_proved": 48,
+            "status": "certified",
+            "triangle_patch_clips": 243
+          },
+          "reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+          "sampled": false,
+          "vertex_construction_error_world": 5.0576218148960735e-08
+        },
+        "reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca"
+      },
+      "source_provenance": {
+        "indexed_reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+        "indexed_regenerated_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+        "original_and_regenerated_oriented_surface_sha256": "5e5036dba422d4f84ee59fb5e1712b8caccec2a319f30fdfaba3da2577ff2ea8",
+        "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+      }
+    },
+    "capsule": {
+      "contract": {
+        "artist_acceptance_limits": null,
+        "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+        "authored_parameters": {
+          "primitive": "capsule",
+          "radius": 0.4,
+          "segment_height": 1.2
+        },
+        "cameras": {
+          "front": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "2afe1d86df889ae925d37ffdf24b4c525587e466c4ceb1819d8231921b2c21d3",
+            "max_pixel_pitch_world": 0.0045312498696148396
+          },
+          "oblique_145_40": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "41c36075d4aa4ca6187715f91f104d09e6a8b45879961809764abdc44fdbd0dd",
+            "max_pixel_pitch_world": 0.0045312498696148396
+          },
+          "oblique_35_28": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "bef06cc961c40cae7d09a6d7d0b53d385a03f0fb1743985cf244889c4ab186b2",
+            "max_pixel_pitch_world": 0.0045312498696148396
+          },
+          "side": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "3c050d58ab6f194eaf14988dc076ee0c560f8f960c52f9544b72f02895e0e09b",
+            "max_pixel_pitch_world": 0.0045312498696148396
+          },
+          "top": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "d9dfb96214a7ae8a8b2b877cdca685228b7a9b50683ff49c6d5b3ed5458cc364",
+            "max_pixel_pitch_world": 0.0045312498696148396
+          }
+        },
+        "contract_sha256": "d62f4a91ef7f46fa02562cc9a2ef42fcfab2f3a9824928a413f6170284a8cc43",
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 6.295785663020918,
+          "symmetric_mean_distance_world_max": 0.003973016903125392
+        },
+        "engineering_status": "frozen",
+        "family": "capsule",
+        "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+        "metric": {
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "sample_count_per_direction": 4096,
+          "seed": 61007
+        },
+        "protocol": "source_conditioned_family_surface_v1",
+        "reason": null,
+        "reconstruction_allowance": {
+          "basis": "explicit engineering allowance; not an observed artist tolerance",
+          "normal_degrees": 1.0,
+          "source_pixels": 0.5,
+          "world": 0.0022656249348074198
+        },
+        "reference_certificate": {
+          "candidate_boundary_qualified": false,
+          "distance_bound_world": 0.0017073919683179728,
+          "distance_scope": "continuous source facets to authored ideal; radial covering for convex sphere-topology references",
+          "family": "capsule",
+          "normal_correspondence": "radial/axial analytic correspondence; not nearest-point correspondence",
+          "normal_correspondence_bound_degrees": 5.295785663020918,
+          "protocol": "continuous_authored_facet_bound_v1",
+          "reference_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+          "sampled": false,
+          "vertex_construction_error_world": 2.588075820320057e-08
+        },
+        "reference_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e"
+      },
+      "source_provenance": {
+        "indexed_reference_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+        "indexed_regenerated_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+        "original_and_regenerated_oriented_surface_sha256": "19338152ebc4c8cf7833e0e5cf6e24abe4a451d00a93c7fe314cc36e3158a098",
+        "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+      }
+    },
+    "concave_arch": {
+      "contract": {
+        "artist_acceptance_limits": null,
+        "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+        "authored_parameters": {
+          "builder": "compound",
+          "parts": [
+            {
+              "center": [
+                0,
+                0,
+                0
+              ],
+              "size": [
+                1.8,
+                0.4,
+                1.8
+              ],
+              "type": "box"
+            },
+            {
+              "boolean": "subtract",
+              "center": [
+                0,
+                0,
+                -0.3
+              ],
+              "size": [
+                1.0,
+                0.8,
+                1.4
+              ],
+              "type": "box"
+            }
+          ]
+        },
+        "cameras": {
+          "front": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "690d5611826312784b4bf4284205ba83f89cfcbce5dfe568df7d6553207dc9c0",
+            "max_pixel_pitch_world": 0.004078125115483999
+          },
+          "oblique_145_40": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "63ef0731a7340140c7350a214102d8667766fa4d4208f47c6e82b47ac8991124",
+            "max_pixel_pitch_world": 0.004078125115483999
+          },
+          "oblique_35_28": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "eb2b4f067300aac9eef4b6d460ec56039ad5332e150530f2482736c81de497fe",
+            "max_pixel_pitch_world": 0.004078125115483999
+          },
+          "side": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "0efe23cbd5f8ae877f90a9e97ac7c8d1e5efad98561f0b37eb626e2f639a52f0",
+            "max_pixel_pitch_world": 0.004078125115483999
+          },
+          "top": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "c000619f83d488a9f4003c3cde12fe223bda429a0629e26007ab0086595e8c1d",
+            "max_pixel_pitch_world": 0.004078125115483999
+          }
+        },
+        "contract_sha256": "7378b374362113f5f569c4a6af86d682c9446cce246bb75914351655b2cc78d8",
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 1.0,
+          "symmetric_mean_distance_world_max": 0.0020390964066734963
+        },
+        "engineering_status": "frozen",
+        "family": "concave_arch",
+        "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+        "metric": {
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "sample_count_per_direction": 4096,
+          "seed": 61007
+        },
+        "protocol": "source_conditioned_family_surface_v1",
+        "reason": null,
+        "reconstruction_allowance": {
+          "basis": "explicit engineering allowance; not an observed artist tolerance",
+          "normal_degrees": 1.0,
+          "source_pixels": 0.5,
+          "world": 0.0020390625577419996
+        },
+        "reference_certificate": {
+          "candidate_boundary_qualified": false,
+          "distance_bound_world": 3.384893149664506e-08,
+          "distance_scope": "bidirectional continuous facet/boundary cover via matching barycentric points; max vertex displacement bounds every paired point",
+          "family": "concave_arch",
+          "normal_correspondence": "each source facet to its proved outward authored plane; edge/corner nearest-normal correspondence is not asserted",
+          "normal_correspondence_bound_degrees": 0.0,
+          "protocol": "continuous_authored_facet_bound_v1",
+          "rectilinear_exact_cover": {
+            "arithmetic": "exact Fraction from frozen binary64 plane declarations and actual binary64 source coordinates; square-root upper endpoints rationally checked",
+            "artist_surface_limits": null,
+            "boundary_patches_proved": 22,
+            "candidate_boundary_qualification": "not supplied",
+            "coverage_proof": "exact rational triangle-to-lattice-cell clipping; every source facet assigned fully; every boundary patch fully covered; all positive-area overlaps forbidden",
+            "distance_correspondence": "bidirectional continuous facet/boundary cover via matching barycentric points; max vertex displacement bounds every paired point",
+            "family": "concave_arch",
+            "frozen_parameters_sha256": "5c23f6f6c656fcc6e677eb04bcde86d7f491a57a9a2e72d5e607fb5325365fc5",
+            "maximum_normal_angle_degrees": 0.0,
+            "maximum_source_facet_distance_world": 3.384893149664506e-08,
+            "maximum_vertex_rounding_shift_world": 3.384893149664506e-08,
+            "normal_correspondence": "each source facet to its proved outward authored plane; edge/corner nearest-normal correspondence is not asserted",
+            "normal_tangent_upper_bound": 0.0,
+            "numerical_budget_scope": "fixed4float32eps\u00d7authored coordinate scale; grid association only, not reconstruction allowance or artist tolerance",
+            "numerical_grid_association_budget_world": 4.76837158203125e-07,
+            "orientation_proof": "every snapped facet outward; exact actual cross dot with that plane strictly positive",
+            "positive_area_overlap_checks": 34,
+            "protocol": "exact_rectilinear_source_cover_v1",
+            "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+            "source_triangles_proved": 28,
+            "status": "certified",
+            "triangle_patch_clips": 49
+          },
+          "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+          "sampled": false,
+          "vertex_construction_error_world": 3.384893149664506e-08
+        },
+        "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1"
+      },
+      "source_provenance": {
+        "indexed_reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "indexed_regenerated_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "original_and_regenerated_oriented_surface_sha256": "77c40cfb97cf4a9d4a873c9c6337639af65b238e9541b325e5a34a4b1c9272e6",
+        "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+      }
+    },
+    "cylinder": {
+      "contract": {
+        "artist_acceptance_limits": null,
+        "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+        "authored_parameters": {
+          "height": 1.6,
+          "primitive": "cylinder",
+          "radius": 0.65
+        },
+        "cameras": {
+          "front": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "54288f0df4430fb7c8ed32f39c9381299b943dbc58cbe13b3dee252a56883e1e",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "oblique_145_40": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "27f5c536584caa0fd9d23574f98deb516c61c0678b4685c78c7ad16cc372bcd1",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "oblique_35_28": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "7a75b1e6bd82044494c12ea0326038bae13d5ef071dddd54ba04b0555a0e28f1",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "side": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "e9fc6380a1c8dd09198db3f3f71ff84bdce8ca4502e92fd6b8ff848e42e43377",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "top": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "930ec67766ac7687b141ca569299032a6d30e4bfd3feb9fea4e6b915e118a26c",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          }
+        },
+        "contract_sha256": "a65d34f4e64f898e1284ac877b8a74c1e91847d8f19992cea13981a387290ae5",
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 2.875075898138121,
+          "symmetric_mean_distance_world_max": 0.0021605583077911605
+        },
+        "engineering_status": "frozen",
+        "family": "cylinder",
+        "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+        "metric": {
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "sample_count_per_direction": 4096,
+          "seed": 61007
+        },
+        "protocol": "source_conditioned_family_surface_v1",
+        "reason": null,
+        "reconstruction_allowance": {
+          "basis": "explicit engineering allowance; not an observed artist tolerance",
+          "normal_degrees": 1.0,
+          "source_pixels": 0.5,
+          "world": 0.0018125000642612576
+        },
+        "reference_certificate": {
+          "candidate_boundary_qualified": false,
+          "distance_bound_world": 0.0003480582435299029,
+          "distance_scope": "continuous source facets to authored ideal; radial covering for convex sphere-topology references",
+          "family": "cylinder",
+          "normal_correspondence": "radial/axial analytic correspondence; not nearest-point correspondence",
+          "normal_correspondence_bound_degrees": 1.8750758981381208,
+          "protocol": "continuous_authored_facet_bound_v1",
+          "reference_geometry_hash": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a",
+          "sampled": false,
+          "vertex_construction_error_world": 5.342457952695057e-08
+        },
+        "reference_geometry_hash": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a"
+      },
+      "source_provenance": {
+        "indexed_reference_geometry_hash": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a",
+        "indexed_regenerated_geometry_hash": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a",
+        "original_and_regenerated_oriented_surface_sha256": "64a6baae4c1c6d10b7acf9027f2528ce0b352c7eae68d51463320731f2bf432d",
+        "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+      }
+    },
+    "sphere": {
+      "contract": {
+        "artist_acceptance_limits": null,
+        "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+        "authored_parameters": {
+          "primitive": "sphere",
+          "radius": 0.8
+        },
+        "cameras": {
+          "front": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "def52943b2c2a9e81366a8bfa216fa8a673571cdd3835ddee1fa44dbea1a03da",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "oblique_145_40": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "e76efce51b8e0c41350d5d5fd427eed572b121a253b30460a5c1283ce250f3d4",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "oblique_35_28": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "7a75b1e6bd82044494c12ea0326038bae13d5ef071dddd54ba04b0555a0e28f1",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "side": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "2f286298f511bfb24b0bd22bf477503a795f0f6c1793f4ba80dc4d7f2ffbdf6f",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "top": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "8957f0f7508fa101a5537640e17f23e910d99fdf5186cf742e09d4803fcf56b5",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          }
+        },
+        "contract_sha256": "49bd9af264e7a186fee7c37ba65470adee55b080c03e212a6a4c6a2ebbed1400",
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 4.974627294187487,
+          "symmetric_mean_distance_world_max": 0.003736816545418531
+        },
+        "engineering_status": "frozen",
+        "family": "sphere",
+        "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+        "metric": {
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "sample_count_per_direction": 4096,
+          "seed": 61007
+        },
+        "protocol": "source_conditioned_family_surface_v1",
+        "reason": null,
+        "reconstruction_allowance": {
+          "basis": "explicit engineering allowance; not an observed artist tolerance",
+          "normal_degrees": 1.0,
+          "source_pixels": 0.5,
+          "world": 0.0018125000642612576
+        },
+        "reference_certificate": {
+          "candidate_boundary_qualified": false,
+          "distance_bound_world": 0.0019243164811572734,
+          "distance_scope": "continuous source facets to authored ideal; radial covering for convex sphere-topology references",
+          "family": "sphere",
+          "normal_correspondence": "radial/axial analytic correspondence; not nearest-point correspondence",
+          "normal_correspondence_bound_degrees": 3.974627294187487,
+          "protocol": "continuous_authored_facet_bound_v1",
+          "reference_geometry_hash": "57b817e1ce32d58a55851ed448aad12ad4d2057c48066cd00f11aa41dff86fa9",
+          "sampled": false,
+          "vertex_construction_error_world": 6.738559084951135e-07
+        },
+        "reference_geometry_hash": "57b817e1ce32d58a55851ed448aad12ad4d2057c48066cd00f11aa41dff86fa9"
+      },
+      "source_provenance": {
+        "indexed_reference_geometry_hash": "57b817e1ce32d58a55851ed448aad12ad4d2057c48066cd00f11aa41dff86fa9",
+        "indexed_regenerated_geometry_hash": "1b359efb053ea37ea2f73c2cb77807406801cc1060d90fda52b72a3a3b19235a",
+        "original_and_regenerated_oriented_surface_sha256": "035f20b30cb7e2bd8e49cf5384e7cf4e7ea6feb0e1c9431dc3a05e744e56a5b0",
+        "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+      }
+    },
+    "tapered_frustum": {
+      "contract": {
+        "artist_acceptance_limits": null,
+        "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+        "authored_parameters": {
+          "height": 1.8,
+          "primitive": "frustum",
+          "radius_bottom": 0.8,
+          "radius_top": 0.35
+        },
+        "cameras": {
+          "front": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "ac339c644deefbba5a72588d08d67853d90557337c1ddb06d9af858bb6403675",
+            "max_pixel_pitch_world": 0.004078125115483999
+          },
+          "oblique_145_40": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "63ef0731a7340140c7350a214102d8667766fa4d4208f47c6e82b47ac8991124",
+            "max_pixel_pitch_world": 0.004078125115483999
+          },
+          "oblique_35_28": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "eb2b4f067300aac9eef4b6d460ec56039ad5332e150530f2482736c81de497fe",
+            "max_pixel_pitch_world": 0.004078125115483999
+          },
+          "side": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "a304e3740434c67513a4b3a7140659c5e8e18cd9780fbc57695eb8c669fc04f3",
+            "max_pixel_pitch_world": 0.004078125115483999
+          },
+          "top": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "c000619f83d488a9f4003c3cde12fe223bda429a0629e26007ab0086595e8c1d",
+            "max_pixel_pitch_world": 0.004078125115483999
+          }
+        },
+        "contract_sha256": "030f316fe3d7bc1d801d5750e0b95b14b335fb37ce68b1aacad53dd9bbb167be",
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 2.819125591810803,
+          "symmetric_mean_distance_world_max": 0.002467443641287037
+        },
+        "engineering_status": "frozen",
+        "family": "tapered_frustum",
+        "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+        "metric": {
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "sample_count_per_direction": 4096,
+          "seed": 61007
+        },
+        "protocol": "source_conditioned_family_surface_v1",
+        "reason": null,
+        "reconstruction_allowance": {
+          "basis": "explicit engineering allowance; not an observed artist tolerance",
+          "normal_degrees": 1.0,
+          "source_pixels": 0.5,
+          "world": 0.0020390625577419996
+        },
+        "reference_certificate": {
+          "candidate_boundary_qualified": false,
+          "distance_bound_world": 0.00042838108354503746,
+          "distance_scope": "continuous source facets to authored ideal; radial covering for convex sphere-topology references",
+          "family": "tapered_frustum",
+          "normal_correspondence": "radial/axial analytic correspondence; not nearest-point correspondence",
+          "normal_correspondence_bound_degrees": 1.8191255918108031,
+          "protocol": "continuous_authored_facet_bound_v1",
+          "reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+          "sampled": false,
+          "vertex_construction_error_world": 5.729548560040599e-08
+        },
+        "reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d"
+      },
+      "source_provenance": {
+        "indexed_reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+        "indexed_regenerated_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+        "original_and_regenerated_oriented_surface_sha256": "a3ba917aac5d96e6b2c5d80257c81a48b48defba3b2733832c8709215522db6a",
+        "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+      }
+    },
+    "thin_plate": {
+      "contract": {
+        "artist_acceptance_limits": null,
+        "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+        "authored_parameters": {
+          "dimensions": {
+            "depth": 0.08,
+            "height": 1.2,
+            "width": 1.6
+          },
+          "primitive": "box"
+        },
+        "cameras": {
+          "front": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "33eaddbd9a4ac2c1a724fbd13a60719a682991e4bc4064f22b17c7968f38430c",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "oblique_145_40": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "27f5c536584caa0fd9d23574f98deb516c61c0678b4685c78c7ad16cc372bcd1",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "oblique_35_28": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "7a75b1e6bd82044494c12ea0326038bae13d5ef071dddd54ba04b0555a0e28f1",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "side": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "a7bda0709f409fe359d49d13957f6491d809f46b03e495f2b4e0c4ede5026181",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          },
+          "top": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "06af55f1f5eb607f4712342ea882c3471922b02fa74b10e9747705387e24f0f8",
+            "max_pixel_pitch_world": 0.0036250001285225153
+          }
+        },
+        "contract_sha256": "16781453c0e1733a55d21c2c35c93082eb81336705db35e04f18b9aa46988d80",
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 1.0,
+          "symmetric_mean_distance_world_max": 0.0018125267352585457
+        },
+        "engineering_status": "frozen",
+        "family": "thin_plate",
+        "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+        "metric": {
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "sample_count_per_direction": 4096,
+          "seed": 61007
+        },
+        "protocol": "source_conditioned_family_surface_v1",
+        "reason": null,
+        "reconstruction_allowance": {
+          "basis": "explicit engineering allowance; not an observed artist tolerance",
+          "normal_degrees": 1.0,
+          "source_pixels": 0.5,
+          "world": 0.0018125000642612576
+        },
+        "reference_certificate": {
+          "candidate_boundary_qualified": false,
+          "distance_bound_world": 2.667099728805279e-08,
+          "distance_scope": "bidirectional continuous facet/boundary cover via matching barycentric points; max vertex displacement bounds every paired point",
+          "family": "thin_plate",
+          "normal_correspondence": "each source facet to its proved outward authored plane; edge/corner nearest-normal correspondence is not asserted",
+          "normal_correspondence_bound_degrees": 0.0,
+          "protocol": "continuous_authored_facet_bound_v1",
+          "rectilinear_exact_cover": {
+            "arithmetic": "exact Fraction from frozen binary64 plane declarations and actual binary64 source coordinates; square-root upper endpoints rationally checked",
+            "artist_surface_limits": null,
+            "boundary_patches_proved": 6,
+            "candidate_boundary_qualification": "not supplied",
+            "coverage_proof": "exact rational triangle-to-lattice-cell clipping; every source facet assigned fully; every boundary patch fully covered; all positive-area overlaps forbidden",
+            "distance_correspondence": "bidirectional continuous facet/boundary cover via matching barycentric points; max vertex displacement bounds every paired point",
+            "family": "thin_plate",
+            "frozen_parameters_sha256": "237815f5a12a89b8464ddfcd9ebe7e01e413ed5473d16e6def71d8fcff62ad76",
+            "maximum_normal_angle_degrees": 0.0,
+            "maximum_source_facet_distance_world": 2.667099728805279e-08,
+            "maximum_vertex_rounding_shift_world": 2.667099728805279e-08,
+            "normal_correspondence": "each source facet to its proved outward authored plane; edge/corner nearest-normal correspondence is not asserted",
+            "normal_tangent_upper_bound": 0.0,
+            "numerical_budget_scope": "fixed4float32eps\u00d7authored coordinate scale; grid association only, not reconstruction allowance or artist tolerance",
+            "numerical_grid_association_budget_world": 4.76837158203125e-07,
+            "orientation_proof": "every snapped facet outward; exact actual cross dot with that plane strictly positive",
+            "positive_area_overlap_checks": 6,
+            "protocol": "exact_rectilinear_source_cover_v1",
+            "reference_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+            "source_triangles_proved": 12,
+            "status": "certified",
+            "triangle_patch_clips": 12
+          },
+          "reference_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+          "sampled": false,
+          "vertex_construction_error_world": 2.667099728805279e-08
+        },
+        "reference_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50"
+      },
+      "source_provenance": {
+        "indexed_reference_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+        "indexed_regenerated_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+        "original_and_regenerated_oriented_surface_sha256": "0b0ceedbd21c78d8ec506b5b6ea7b272dfbfb163f54c84179b803cb16e9694bc",
+        "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+      }
+    },
+    "torus": {
+      "contract": {
+        "artist_acceptance_limits": null,
+        "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+        "authored_parameters": {
+          "major_radius": 0.7,
+          "minor_radius": 0.22,
+          "primitive": "torus"
+        },
+        "cameras": {
+          "front": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "0566f36bc1f83b81926f970d45d65dc4933458c044aca25b9f210e058a115880",
+            "max_pixel_pitch_world": 0.004168749786913395
+          },
+          "oblique_145_40": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "14e0a41eefd0e119117f0fd05fcbaadcb03ecac3d1ecd7c3e29078c845049b75",
+            "max_pixel_pitch_world": 0.004168749786913395
+          },
+          "oblique_35_28": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "a2fcf4a0b86758148a44cb9905af30a7f790004e76d5231c5457da090c60fad7",
+            "max_pixel_pitch_world": 0.004168749786913395
+          },
+          "side": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "3402b89e0cb22028bd70225974f0a8a12d4b578aecc9f7a7d923d6c3d5feef25",
+            "max_pixel_pitch_world": 0.004168749786913395
+          },
+          "top": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "frame_sha256": "1c624a2cf441bacac2e25e5aaa59335d71fe737907d135fffcba69c9c59542f8",
+            "max_pixel_pitch_world": 0.004168749786913395
+          }
+        },
+        "contract_sha256": "196dcea7f2e359365f3f0521852198a3f16b398a081ebac9a7f566b22896279b",
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 8.639090855364763,
+          "symmetric_mean_distance_world_max": 0.0049537231063801895
+        },
+        "engineering_status": "frozen",
+        "family": "torus",
+        "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+        "metric": {
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "sample_count_per_direction": 4096,
+          "seed": 61007
+        },
+        "protocol": "source_conditioned_family_surface_v1",
+        "reason": null,
+        "reconstruction_allowance": {
+          "basis": "explicit engineering allowance; not an observed artist tolerance",
+          "normal_degrees": 1.0,
+          "source_pixels": 0.5,
+          "world": 0.0020843748934566975
+        },
+        "reference_certificate": {
+          "candidate_boundary_qualified": false,
+          "distance_bound_world": 0.0028693482129234916,
+          "distance_scope": "bidirectional continuous surface/facet cover via identical parameter barycentric coordinates",
+          "family": "torus",
+          "normal_correspondence": "each actual facet to every analytic normal in its corresponding parameter cell; edge nearest-normal uniqueness not asserted",
+          "normal_correspondence_bound_degrees": 7.639090855364763,
+          "protocol": "continuous_authored_facet_bound_v1",
+          "reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+          "sampled": false,
+          "torus_parameter_cover": {
+            "analytic_interpolation_distance_bound_world": 0.002868728601282348,
+            "arithmetic": "exact rational source crosses and bounds; Machin alternating-series pi enclosure; directed Decimal50 Taylor trig enclosures; float square-root/endpoints rationally checked",
+            "artist_surface_limits": null,
+            "authored_parameter_lattice": {
+              "diagonal": "00-to-11",
+              "major_segments": 128,
+              "minor_segments": 24,
+              "periodic_seams_verified": true,
+              "triangles": 6144
+            },
+            "candidate_boundary_qualification": "not supplied",
+            "cell_analytic_normal_radius_radians_upper_bound": 0.1331807895672215,
+            "construction_scope": "actual vertex displacement, no construction acceptance tolerance; public API requires exact original authored source identity",
+            "coverage_proof": "exact once-only inventory of both outward parameter triangles in every frozen periodic cell",
+            "distance_correspondence": "bidirectional continuous surface/facet cover via identical parameter barycentric coordinates",
+            "distance_proof": "Hessian expectation bound with each parameter variance <= span squared/4, plus actual vertex construction shifts",
+            "face_to_cell_center_tangent_upper_bound": 0.00014649771788354232,
+            "family": "torus",
+            "frozen_parameters_sha256": "155df3b8d98c584eb73f1383da40b1d627cdcbbc883954ec13c2dc323e813811",
+            "maximum_normal_angle_degrees": 7.639090855364763,
+            "maximum_source_facet_distance_world": 0.0028693482129234916,
+            "maximum_vertex_construction_shift_world": 6.196116411432303e-07,
+            "normal_correspondence": "each actual facet to every analytic normal in its corresponding parameter cell; edge nearest-normal uniqueness not asserted",
+            "normal_proof": "atan(tangent)<=tangent at cell center; analytic normal parameter metric bounded by identity; spherical triangle inequality over half-cell diagonal",
+            "protocol": "authored_torus_parameter_cover_v1",
+            "reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+            "status": "certified"
+          },
+          "vertex_construction_error_world": 6.196116411432303e-07
+        },
+        "reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a"
+      },
+      "source_provenance": {
+        "indexed_reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+        "indexed_regenerated_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+        "original_and_regenerated_oriented_surface_sha256": "a473f1ecc1e46c0ad4645270261adcff06a0e5f56724fa00ce46019ae546a927",
+        "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+      }
+    }
+  },
+  "implementation_base_revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+  "new_native_capture": {
+    "candidate_renders": 0,
+    "families": [
+      "torus",
+      "concave_arch"
+    ],
+    "fits": 0,
+    "raw_comparisons": 0,
+    "source_capture_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\results.json",
+      "sha256": "9390d8cdf01006cd1c008dda02bc9493c8a3ef7856d2af820a54a5fffbe26e25"
+    },
+    "source_frames": 10
+  },
+  "ownership_audit": {
+    "blockers": [],
+    "eligible": [],
+    "eligible_bytes": 0,
+    "mode": "read_only",
+    "mutation_supported": false,
+    "protocol": "run-ownership-dry-run-v1",
+    "retained_bytes": 109449,
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-02\\owned-z9bdillt",
+    "status": "dry_run_ready",
+    "unknown_files": []
+  },
+  "producer_result": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-02\\owned-z9bdillt\\results.json",
+    "sha256": "6bd50e175cce538c7952558765a7c89801c35abebd6318a1c55065abd8994287"
+  },
+  "protocol": "complete-nine-family-surface-evidence-v1",
+  "rejected_checkpoints_preserved": [
+    "sphere",
+    "anisotropic_ellipsoid"
+  ],
+  "report": {
+    "additional_diagnostic_observations": {
+      "anisotropic_ellipsoid": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "02bab3e39da316e08b49fd870ec01253d00c3bf896c8268126b2458a0f84ccf2",
+        "contract_sha256": "9d78ae061a44a52dcf08960d71b6dc0491b538b9b14682019e88fb06f2cc66e9",
+        "current_row_selection_changed": false,
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 6.837440586574808,
+          "symmetric_mean_distance_world_max": 0.004203715484051828
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "anisotropic_ellipsoid",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "input_observation_scope": "diagnostic_checkpoint",
+        "producer_checkpoint_improved": false,
+        "producer_protocol": "bounded_adaptive_family_checkpoint_v1",
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0007284832448931411,
+          "normal_angle_mean_degrees": 2.1032806624745,
+          "normal_angle_p95_degrees": 3.9283618868413175,
+          "sampled_max_distance_world": 0.0012910638470202684,
+          "symmetric_mean_distance_world": 0.0003137842781814641
+        },
+        "reference_geometry_hash": "a0c0d42370a07c99b4386a641be8fab99a43db5bdc11ea8d0741ccf1c71a144e",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "capsule": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b",
+        "contract_sha256": "d62f4a91ef7f46fa02562cc9a2ef42fcfab2f3a9824928a413f6170284a8cc43",
+        "current_row_selection_changed": false,
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 6.295785663020918,
+          "symmetric_mean_distance_world_max": 0.003973016903125392
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "capsule",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "input_observation_scope": "diagnostic_checkpoint",
+        "producer_checkpoint_improved": true,
+        "producer_protocol": "bounded_adaptive_family_checkpoint_v1",
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0007158456341130658,
+          "normal_angle_mean_degrees": 2.1292526903075353,
+          "normal_angle_p95_degrees": 2.681826943534141,
+          "sampled_max_distance_world": 0.0013478613691404462,
+          "symmetric_mean_distance_world": 0.00028349956966368297
+        },
+        "reference_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "concave_arch": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+        "contract_sha256": "7378b374362113f5f569c4a6af86d682c9446cce246bb75914351655b2cc78d8",
+        "current_row_selection_changed": false,
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 1.0,
+          "symmetric_mean_distance_world_max": 0.0020390964066734963
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "concave_arch",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "input_observation_scope": "diagnostic_checkpoint",
+        "producer_checkpoint_improved": true,
+        "producer_protocol": "bounded_arch_exterior_checkpoint_v1",
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0029192864894866943,
+          "normal_angle_mean_degrees": 0.09887890053201959,
+          "normal_angle_p95_degrees": 8.537736462515945e-06,
+          "sampled_max_distance_world": 0.0029192864894866943,
+          "symmetric_mean_distance_world": 0.00022957110319443697
+        },
+        "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "cylinder": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "ab6343943cb9a35006f1b1659d9b6cbad50520fff000ab9ca781fecf25c5ff88",
+        "contract_sha256": "a65d34f4e64f898e1284ac877b8a74c1e91847d8f19992cea13981a387290ae5",
+        "current_row_selection_changed": false,
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 2.875075898138121,
+          "symmetric_mean_distance_world_max": 0.0021605583077911605
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "cylinder",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "input_observation_scope": "diagnostic_checkpoint",
+        "producer_checkpoint_improved": true,
+        "producer_protocol": "bounded_adaptive_family_checkpoint_v1",
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0004284452399588189,
+          "normal_angle_mean_degrees": 1.3885964574429353,
+          "normal_angle_p95_degrees": 2.0553046738762624,
+          "sampled_max_distance_world": 0.0006991270929574966,
+          "symmetric_mean_distance_world": 0.00018410556820582565
+        },
+        "reference_geometry_hash": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "sphere": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "1a28cafe262f3cd7edabc01c831b46077655528d54af3853ee4c709adc9f80ca",
+        "contract_sha256": "49bd9af264e7a186fee7c37ba65470adee55b080c03e212a6a4c6a2ebbed1400",
+        "current_row_selection_changed": false,
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 4.974627294187487,
+          "symmetric_mean_distance_world_max": 0.003736816545418531
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "sphere",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "input_observation_scope": "diagnostic_checkpoint",
+        "producer_checkpoint_improved": false,
+        "producer_protocol": "bounded_adaptive_family_checkpoint_v1",
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.001032134483102709,
+          "normal_angle_mean_degrees": 2.3063189214610103,
+          "normal_angle_p95_degrees": 4.096600397972613,
+          "sampled_max_distance_world": 0.0014923053095117211,
+          "symmetric_mean_distance_world": 0.00044389291472692657
+        },
+        "reference_geometry_hash": "57b817e1ce32d58a55851ed448aad12ad4d2057c48066cd00f11aa41dff86fa9",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "tapered_frustum": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+        "contract_sha256": "030f316fe3d7bc1d801d5750e0b95b14b335fb37ce68b1aacad53dd9bbb167be",
+        "current_row_selection_changed": false,
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 2.819125591810803,
+          "symmetric_mean_distance_world_max": 0.002467443641287037
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "tapered_frustum",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "input_observation_scope": "diagnostic_checkpoint",
+        "producer_checkpoint_improved": true,
+        "producer_protocol": "bounded_adaptive_family_checkpoint_v1",
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0005877632764168083,
+          "normal_angle_mean_degrees": 1.3468779723738886,
+          "normal_angle_p95_degrees": 2.0571472306208785,
+          "sampled_max_distance_world": 0.0007686835015192628,
+          "symmetric_mean_distance_world": 0.0002059388352186886
+        },
+        "reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "thin_plate": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0",
+        "contract_sha256": "16781453c0e1733a55d21c2c35c93082eb81336705db35e04f18b9aa46988d80",
+        "current_row_selection_changed": false,
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 1.0,
+          "symmetric_mean_distance_world_max": 0.0018125267352585457
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "thin_plate",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "input_observation_scope": "diagnostic_checkpoint",
+        "producer_checkpoint_improved": true,
+        "producer_protocol": "bounded_adaptive_family_checkpoint_v1",
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.00018787556036841123,
+          "normal_angle_mean_degrees": 0.03637423736541776,
+          "normal_angle_p95_degrees": 0.017969898769054107,
+          "sampled_max_distance_world": 0.0003483295440673828,
+          "symmetric_mean_distance_world": 8.615683847124382e-05
+        },
+        "reference_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "torus": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "3afacdc32a140a1099cd304b101d8910a7e6e58701b3608f947039aaf2349417",
+        "contract_sha256": "196dcea7f2e359365f3f0521852198a3f16b398a081ebac9a7f566b22896279b",
+        "current_row_selection_changed": false,
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 8.639090855364763,
+          "symmetric_mean_distance_world_max": 0.0049537231063801895
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "torus",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "input_observation_scope": "diagnostic_checkpoint",
+        "producer_checkpoint_improved": true,
+        "producer_protocol": "bounded_adaptive_family_checkpoint_v1",
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.00022280379926087332,
+          "normal_angle_mean_degrees": 0.7253383690535886,
+          "normal_angle_p95_degrees": 2.1654471028535123,
+          "sampled_max_distance_world": 0.0003837433469016105,
+          "symmetric_mean_distance_world": 7.601588877010007e-05
+        },
+        "reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      }
+    },
+    "additional_selected_observations": {
+      "asymmetric_multipart_solid": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "contract_sha256": "efac34dfb3025b6fe34f6e26c001fb3460413ca40456ebf6deefb01efb106c6c",
+        "current_row_selection_changed": false,
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 1.0,
+          "symmetric_mean_distance_world_max": 0.0018125506404794065
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "asymmetric_multipart_solid",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "input_observation_scope": "selected_repair",
+        "producer_checkpoint_improved": null,
+        "producer_protocol": "multipart_one_endpoint_update_v1",
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.00035315752029418945,
+          "normal_angle_mean_degrees": 0.032958984375,
+          "normal_angle_p95_degrees": 0.0,
+          "sampled_max_distance_world": 0.0005021347315050662,
+          "symmetric_mean_distance_world": 0.00016197755683688975
+        },
+        "reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      }
+    },
+    "aggregate_accepted": false,
+    "coverage": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-coverage-continuation-20261008\\coverage-evidence.json",
+      "sha256": "4c85cf4166667887670cdbb555b724d69522226c3b27b8b51999440c0e6d77e6"
+    },
+    "elapsed_seconds": 3.2440342999907443,
+    "fits": 0,
+    "observations": {
+      "anisotropic_ellipsoid": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "b40ab45f1aa7e00f353fba58b6a500a485cd1ddba73d9e3be2dd74ba5c857699",
+        "contract_sha256": "9d78ae061a44a52dcf08960d71b6dc0491b538b9b14682019e88fb06f2cc66e9",
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 6.837440586574808,
+          "symmetric_mean_distance_world_max": 0.004203715484051828
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "anisotropic_ellipsoid",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0007810156006598845,
+          "normal_angle_mean_degrees": 2.104519510861647,
+          "normal_angle_p95_degrees": 3.927391055140527,
+          "sampled_max_distance_world": 0.0014217239804565907,
+          "symmetric_mean_distance_world": 0.0003251195182191434
+        },
+        "reference_geometry_hash": "a0c0d42370a07c99b4386a641be8fab99a43db5bdc11ea8d0741ccf1c71a144e",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "asymmetric_multipart_solid": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "c367746d102dac33f3ad12b271c2ab00d46bd4da59a4bd8004a4bef7152eb0d1",
+        "contract_sha256": "efac34dfb3025b6fe34f6e26c001fb3460413ca40456ebf6deefb01efb106c6c",
+        "engineering_distance_passed": false,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 1.0,
+          "symmetric_mean_distance_world_max": 0.0018125506404794065
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": false,
+        "family": "asymmetric_multipart_solid",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.00035315752029418945,
+          "normal_angle_mean_degrees": 2.406005859375,
+          "normal_angle_p95_degrees": 0.0,
+          "sampled_max_distance_world": 0.1802392154932022,
+          "symmetric_mean_distance_world": 0.004201645292114198
+        },
+        "reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "capsule": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "bfd4411d02558b91d3ad137e2d6f156446b7a087247483eebc4c61653a36566a",
+        "contract_sha256": "d62f4a91ef7f46fa02562cc9a2ef42fcfab2f3a9824928a413f6170284a8cc43",
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 6.295785663020918,
+          "symmetric_mean_distance_world_max": 0.003973016903125392
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "capsule",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0007625470811035484,
+          "normal_angle_mean_degrees": 2.12570269492613,
+          "normal_angle_p95_degrees": 2.6813463255545305,
+          "sampled_max_distance_world": 0.0013538068160414696,
+          "symmetric_mean_distance_world": 0.00029795552487779566
+        },
+        "reference_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "concave_arch": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "a1e2a84a728d7d913f9bf454ac6cbd731e0ddb8dd837271d02bc47efb6308177",
+        "contract_sha256": "7378b374362113f5f569c4a6af86d682c9446cce246bb75914351655b2cc78d8",
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 1.0,
+          "symmetric_mean_distance_world_max": 0.0020390964066734963
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "concave_arch",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.002812504768371582,
+          "normal_angle_mean_degrees": 0.6481952980763928,
+          "normal_angle_p95_degrees": 8.537736462515945e-06,
+          "sampled_max_distance_world": 0.003228970803320408,
+          "symmetric_mean_distance_world": 0.001124262480532101
+        },
+        "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "cylinder": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "d40c3afafe582554646f0dd42226795a5d3a1896f3df6d92a30ded5c5093adde",
+        "contract_sha256": "a65d34f4e64f898e1284ac877b8a74c1e91847d8f19992cea13981a387290ae5",
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 2.875075898138121,
+          "symmetric_mean_distance_world_max": 0.0021605583077911605
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "cylinder",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0009218610037351027,
+          "normal_angle_mean_degrees": 1.3662993768953442,
+          "normal_angle_p95_degrees": 2.0553188654182115,
+          "sampled_max_distance_world": 0.001197737641632557,
+          "symmetric_mean_distance_world": 0.000580631288876806
+        },
+        "reference_geometry_hash": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "sphere": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "833c2dcc96c1c9229e307e49c5680306158df26a35011ec7981164012d692297",
+        "contract_sha256": "49bd9af264e7a186fee7c37ba65470adee55b080c03e212a6a4c6a2ebbed1400",
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 4.974627294187487,
+          "symmetric_mean_distance_world_max": 0.003736816545418531
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "sphere",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0010015483654569834,
+          "normal_angle_mean_degrees": 2.299148218394051,
+          "normal_angle_p95_degrees": 4.092355280183016,
+          "sampled_max_distance_world": 0.0014687278307974339,
+          "symmetric_mean_distance_world": 0.0004283047368411584
+        },
+        "reference_geometry_hash": "57b817e1ce32d58a55851ed448aad12ad4d2057c48066cd00f11aa41dff86fa9",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "tapered_frustum": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "191bc75bef0fc10d61cb0bd8364274ab42aaa083513b7f39a5be26fa3cc0864e",
+        "contract_sha256": "030f316fe3d7bc1d801d5750e0b95b14b335fb37ce68b1aacad53dd9bbb167be",
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 2.819125591810803,
+          "symmetric_mean_distance_world_max": 0.002467443641287037
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "tapered_frustum",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0009236007928848267,
+          "normal_angle_mean_degrees": 1.3590374068505227,
+          "normal_angle_p95_degrees": 2.0571646692591217,
+          "sampled_max_distance_world": 0.0010797285940498114,
+          "symmetric_mean_distance_world": 0.0005079230022606851
+        },
+        "reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "thin_plate": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "ab4d231f32cf620a2b2e09019025b5fa1a65cad17b4ac9d2a5841e2fdf42a785",
+        "contract_sha256": "16781453c0e1733a55d21c2c35c93082eb81336705db35e04f18b9aa46988d80",
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 1.0,
+          "symmetric_mean_distance_world_max": 0.0018125267352585457
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "thin_plate",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0008195692003937438,
+          "normal_angle_mean_degrees": 0.047351248077104835,
+          "normal_angle_p95_degrees": 0.017960692093136842,
+          "sampled_max_distance_world": 0.0010483970399945974,
+          "symmetric_mean_distance_world": 0.0006644591669413558
+        },
+        "reference_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      },
+      "torus": {
+        "aggregate_passed": false,
+        "artist_surface_passed": null,
+        "candidate_geometry_hash": "7a68da759b8536b864df8e00ca6fe3e322391ea05a6c98a82d2a4132fd89f8be",
+        "contract_sha256": "196dcea7f2e359365f3f0521852198a3f16b398a081ebac9a7f566b22896279b",
+        "engineering_distance_passed": true,
+        "engineering_limits": {
+          "normal_angle_p95_degrees_max": 8.639090855364763,
+          "symmetric_mean_distance_world_max": 0.0049537231063801895
+        },
+        "engineering_normal_passed": true,
+        "engineering_surface_passed": true,
+        "family": "torus",
+        "independent_verdicts": {
+          "editability": "unassessed",
+          "silhouette": "unassessed",
+          "topology": "unassessed"
+        },
+        "protocol": "source_conditioned_surface_observation_v1",
+        "raw_metrics": {
+          "distance_p95_world": 0.0003812965602264739,
+          "normal_angle_mean_degrees": 0.7609440534011798,
+          "normal_angle_p95_degrees": 2.165446727708135,
+          "sampled_max_distance_world": 0.0005535100935958326,
+          "symmetric_mean_distance_world": 0.0001729279734817386
+        },
+        "reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+        "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+      }
+    },
+    "protocol": "family-surface-policy-report-v1",
+    "qualification_children": 0,
+    "remaining": "Artist tolerance and unsupported analytic certificates remain independent required gaps; existing acceptance gates unchanged",
+    "renders": 0,
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-02\\owned-z9bdillt",
+    "source_hashes": {
+      "blender_blocking/evaluation/family_surface_contracts.py": "990739e870a7ca9b4ba2505784cc4b5c1c8fdaf154d70a5ecb0bb01718ac5aeb",
+      "scripts\\run_family_surface_contracts.py": "0335795e837f0e520c2024e523afc224cdb4312d031277aab40767a817f32df3"
+    },
+    "source_plan": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\source-plan-complete.json",
+      "sha256": "ec70d0cc10f04aabd132fc7847937c46462119a87e6432cf1a2b7b11874669a7"
+    },
+    "status": "completed",
+    "surface_comparisons": 0
+  },
+  "source_plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\source-plan-complete.json",
+    "sha256": "ec70d0cc10f04aabd132fc7847937c46462119a87e6432cf1a2b7b11874669a7"
+  }
+}

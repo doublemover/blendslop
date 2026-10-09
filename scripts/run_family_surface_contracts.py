@@ -97,6 +97,53 @@ def freeze_sources(plan):
     return declarations
 
 
+
+def read_additional_observation(family, entry):
+    """Read only known producer layouts; diagnostic updates never select rows."""
+    geometry = entry.get('candidate_geometry_hash')
+    if (not isinstance(geometry, str) or len(geometry) != 64 or
+            any(character not in '0123456789abcdef' for character in geometry)):
+        raise ValueError('additional observation needs an exact candidate SHA256')
+    producer = json.loads(read_bound(entry['source_receipt']))
+    if producer.get('status') != 'measured':
+        raise ValueError('additional producer measurement is not completed')
+    row = producer.get('cases', {}).get(family)
+    if not isinstance(row, dict):
+        raise ValueError('additional producer has no declared family row')
+    selector = entry.get('raw_field')
+    if selector == ['raw_surface', 'refined']:
+        if (family != 'asymmetric_multipart_solid' or
+                producer.get('protocol') != 'multipart_one_endpoint_update_v1' or
+                entry.get('geometry_field', 'geometry_hash') != 'geometry_hash' or
+                entry.get('observation_scope', 'selected_repair') != 'selected_repair' or
+                row.get('status') not in ('measured', 'incomplete')):
+            raise ValueError('selected endpoint receipt layout or scope differs')
+        observation = row.get('raw_surface', {}).get('refined')
+        field, scope, checkpoint = 'geometry_hash', 'selected_repair', None
+    elif selector == ['refined_raw_surface']:
+        if (producer.get('protocol') not in ('bounded_adaptive_family_checkpoint_v1',
+                                            'bounded_arch_exterior_checkpoint_v1') or
+                (producer.get('protocol') == 'bounded_arch_exterior_checkpoint_v1' and
+                 family != 'concave_arch') or
+                entry.get('geometry_field') != 'refined_geometry_hash' or
+                entry.get('observation_scope') != 'diagnostic_checkpoint' or
+                row.get('status') != 'measured' or
+                type(row.get('bounded_checkpoint_improved')) is not bool):
+            raise ValueError('adaptive raw receipt layout or diagnostic scope differs')
+        observation = row.get('refined_raw_surface')
+        field, scope = 'refined_geometry_hash', 'diagnostic_checkpoint'
+        checkpoint = row['bounded_checkpoint_improved']
+    else:
+        raise ValueError('unsupported additional raw observation selector')
+    if (row.get(field) != geometry or not isinstance(observation, dict) or
+            observation.get('candidate_geometry_hash') != geometry):
+        raise ValueError('additional raw receipt geometry differs')
+    return observation, {'input_observation_scope': scope,
+                         'producer_protocol': producer['protocol'],
+                         'producer_checkpoint_improved': checkpoint,
+                         'current_row_selection_changed': False}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source-plan', type=Path, required=True)
@@ -145,22 +192,24 @@ def main():
                        'sha256':args.additional_observations_sha256}
             selected = json.loads(read_bound(binding))
             for family, entry in selected.items():
-                if family not in frozen or entry['raw_field'] != ['raw_surface', 'refined']:
-                    raise ValueError('additional selected observation must use its declared refined raw receipt')
-                producer = json.loads(read_bound(entry['source_receipt']))
-                row = producer['cases'][family]
-                if row['geometry_hash'] != entry['candidate_geometry_hash']:
-                    raise ValueError('selected raw receipt geometry differs')
-                additional[family] = evaluate_family_surface_contract(
-                    frozen[family]['contract'],row['raw_surface']['refined'],
+                if family not in frozen:
+                    raise ValueError('additional observation has no frozen source policy')
+                observation, scope = read_additional_observation(family, entry)
+                evaluated = evaluate_family_surface_contract(
+                    frozen[family]['contract'], observation,
                     candidate_geometry_hash=entry['candidate_geometry_hash'])
+                evaluated.update(scope)
+                additional[family] = evaluated
             publish(owner, 'additional-observation-bindings.json', selected)
         report = {'protocol':'family-surface-policy-report-v1', 'status':'completed',
                   'source_plan':source_binding, 'coverage':coverage_binding,
                   'source_hashes':{str(Path(__file__).relative_to(ROOT)):hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                     'blender_blocking/evaluation/family_surface_contracts.py':hashlib.sha256((ROOT/'blender_blocking/evaluation/family_surface_contracts.py').read_bytes()).hexdigest()},
                   'run_root':str(owner.root), 'observations':observations,
-                  'additional_selected_observations':additional,
+                  'additional_selected_observations':{k:v for k,v in additional.items()
+                      if v['input_observation_scope'] == 'selected_repair'},
+                  'additional_diagnostic_observations':{k:v for k,v in additional.items()
+                      if v['input_observation_scope'] == 'diagnostic_checkpoint'},
                   'aggregate_accepted':False, 'renders':0, 'fits':0,
                   'surface_comparisons':0, 'qualification_children':0,
                   'elapsed_seconds':time.monotonic()-started,
