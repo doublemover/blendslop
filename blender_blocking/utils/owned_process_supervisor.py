@@ -237,18 +237,9 @@ class _WindowsJob:
             self.job = None
 
 
-def run_bounded_process(command, *, log_path, timeout_s, max_memory_bytes,
-                        join_timeout_s=5., max_rss_bytes=None, require_complete_tree=True, cwd=None, env=None):
-    """Launch fresh work and return actual join/job evidence, retaining its log.
-
-    Windows ordinary CreateProcess descendants inherit an unnamed job assigned
-    before the suspended child's user code runs. Broker/WMI-created unrelated
-    processes are outside this API. Portable opt-in proves Popen wait only.
-    This function never releases an artifact lease; callers require lifecycle
-    completion before doing so, independently of the primary program's status.
-    KeyboardInterrupt/SystemExit are re-raised with an owned_process_receipt
-    attribute after bounded cancellation joins; incomplete joins remain explicit.
-    """
+def validate_process_bounds(command, *, timeout_s, max_memory_bytes, join_timeout_s=5.,
+                            max_rss_bytes=None, require_complete_tree=True):
+    """Reject unsupported ownership and invalid resource bounds before launch."""
     if (not isinstance(command, (list, tuple)) or not command or
             any(not isinstance(arg, (str, os.PathLike)) for arg in command) or
             not isinstance(require_complete_tree, bool) or
@@ -263,6 +254,23 @@ def run_bounded_process(command, *, log_path, timeout_s, max_memory_bytes,
         raise ValueError("bounded fresh command/time/memory/join parameters required")
     if os.name != "nt" and (require_complete_tree or max_rss_bytes is not None):
         raise RuntimeError("complete ordinary process-tree ownership requires Windows Job Objects")
+
+
+def run_bounded_process(command, *, log_path, timeout_s, max_memory_bytes,
+                        join_timeout_s=5., max_rss_bytes=None, require_complete_tree=True, cwd=None, env=None):
+    """Launch fresh work and return actual join/job evidence, retaining its log.
+
+    Windows ordinary CreateProcess descendants inherit an unnamed job assigned
+    before the suspended child's user code runs. Broker/WMI-created unrelated
+    processes are outside this API. Portable opt-in proves Popen wait only.
+    This function never releases an artifact lease; callers require lifecycle
+    completion before doing so, independently of the primary program's status.
+    KeyboardInterrupt/SystemExit are re-raised with an owned_process_receipt
+    attribute after bounded cancellation joins; incomplete joins remain explicit.
+    """
+    validate_process_bounds(command, timeout_s=timeout_s, max_memory_bytes=max_memory_bytes,
+                            join_timeout_s=join_timeout_s, max_rss_bytes=max_rss_bytes,
+                            require_complete_tree=require_complete_tree)
     log_path = Path(log_path)
     if log_path.exists() or not log_path.parent.is_dir():
         raise ValueError("supervisor log must be a fresh file in an existing caller-owned directory")
