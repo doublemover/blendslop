@@ -83,13 +83,14 @@ def non_camera(contract):
     return {key: value for key, value in contract.items() if key != 'camera'}
 
 
-def load_reuse(entry, geometry_hash, expected_settings, actual_camera=None, *, family=FAMILY):
+def load_reuse(entry, geometry_hash, expected_settings, actual_camera=None, *,
+               family=FAMILY, producer='bounded_adaptive_family_checkpoint'):
     """Keep original ownership; new hard PNG is explicitly derived, not rendered."""
     import numpy as np
     manifest, lease = read_json(entry['manifest']), read_json(entry['lease'])
     root = Path(entry['owner_root'])
     if (manifest['state'] != 'succeeded' or lease['status'] != 'released'
-            or manifest['producer'] != 'bounded_adaptive_family_checkpoint'
+            or manifest['producer'] != producer
             or manifest['run_root'] != str(root.resolve())
             or manifest['run_id'] != lease['run_id'] or manifest['owner_token'] != lease['owner_token']):
         raise ValueError('retained alpha ownership is not succeeded/released')
@@ -272,7 +273,8 @@ def render_role(obj, folder, role, plan, owner, deadline, receipt, publish):
                 path = folder / (view + '-mask.exr')
                 if view in plan['reuse'][role]:
                     measured, provenance = load_reuse(plan['reuse'][role][view], before,
-                        plan['measurement_settings'], actual_camera=current, family=plan['family'])
+                        plan['measurement_settings'], actual_camera=current, family=plan['family'],
+                        producer=plan.get('retained_measurement_producer', 'bounded_adaptive_family_checkpoint'))
                     path.write_bytes(verify_file(plan['reuse'][role][view]['files']['alpha.exr']).read_bytes())
                     receipt['retained_alpha_passes_verified'] += 1
                 else:
@@ -340,8 +342,9 @@ def render_role(obj, folder, role, plan, owner, deadline, receipt, publish):
 def source_declaration(plan, folder, cameras, equivalence):
     entry = plan['case']
     return {'authored_parameters': deepcopy(entry['source_case']['parameters']),
-        'reference_npz': deepcopy(entry['source_npz']), 'reference_geometry_hash': SOURCE,
-        'regenerated_npz': bind(folder / 'evaluated-exact.npz'), 'regenerated_geometry_hash': SOURCE,
+        'reference_npz': deepcopy(entry['source_npz']), 'reference_geometry_hash': entry['source_geometry_hash'],
+        'regenerated_npz': bind(folder / 'evaluated-exact.npz'),
+        'regenerated_geometry_hash': entry['source_geometry_hash'],
         'oriented_surface_sha256': equivalence['reference_oriented_surface'],
         'camera_records': bind(folder / 'camera-snapshots.json'),
         'neutral_artifacts': {view: bind(folder / (view + '-neutral.png')) for view in CANONICAL_VIEWS}}
