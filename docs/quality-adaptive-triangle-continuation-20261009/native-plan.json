@@ -1,0 +1,313 @@
+{
+  "artist_surface_limits": null,
+  "baseline_raw_observations_reused": 2,
+  "candidate_frames": 3,
+  "cases": [
+    {
+      "baseline_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9",
+      "baseline_geometry_hash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+      "baseline_raw_surface": {
+        "candidate_geometry_hash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+        "distance_p95_world": 0.002281279978342354,
+        "editability_verdict": "independent",
+        "normal_angle_mean_degrees": 0.5603901620479966,
+        "normal_angle_p95_degrees": 2.9707811690593298,
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+        "sample_count_per_direction": 4096,
+        "sampled_max_distance_world": 0.0028801681473851204,
+        "seed": 61007,
+        "silhouette_verdict": "independent",
+        "surface_status": "blocked: independent reference tessellation/noise qualification absent",
+        "symmetric_mean_distance_world": 0.000923875637811559,
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "units": "unchanged Blender world coordinates; no fitting or normalization"
+      },
+      "baseline_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\results.json",
+      "baseline_receipt_layout": "single_case",
+      "cameras": {
+        "front": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -4.371138828673793e-08,
+              -1.0,
+              -3.115000009536743
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "53bf7d1cf2a8e9842fc6a4cb81e4c399f811c30d6f137fa7c8d535f18fd2310e"
+        },
+        "oblique_145_40": {
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265408754348755,
+              -0.6275067329406738,
+              -4.102880001068115
+            ],
+            [
+              -0.8191519975662231,
+              -0.3686879277229309,
+              0.4393850266933441,
+              3.097867727279663
+            ],
+            [
+              1.8614212393686103e-08,
+              0.7660443186759949,
+              0.642787754535675,
+              4.202792167663574
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "ef5d9f70173745884d15de950714e7a8d4e1b3344fb25c9a0710970003644756"
+        },
+        "oblique_35_28": {
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.3845682740211487,
+              0.7232683300971985,
+              4.729005336761475
+            ],
+            [
+              0.8191518783569336,
+              -0.26927781105041504,
+              0.5064381957054138,
+              3.536285400390625
+            ],
+            [
+              6.467210766913922e-08,
+              0.8829477429389954,
+              0.469471275806427,
+              3.069585084915161
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "3417b4fc1365e7736850cdd1ee786d92d0fd88d6f8979efaff72783830f1816d"
+        },
+        "side": {
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.7576913833618164
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.22499996423721313
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "65a8b602b16c0d519522384d344a8c73d1ebcc59c696dd7c362385dd686b1a9d"
+        },
+        "top": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.22499996423721313
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.9599999785423279
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "f678156f80dc39785cac2504b61d9bc6099db51038439e079ad1f7e0ea7f9d75"
+        }
+      },
+      "family": "rounded_triangle_dot",
+      "fit_view": "top",
+      "parameter_bounds": {
+        "corner_radius_world": [
+          0.14899501889754369,
+          0.18210502309699786
+        ],
+        "scale_x": [
+          0.8939385213999401,
+          1.0925915261554824
+        ],
+        "scale_y": [
+          0.8952908790868012,
+          1.094244407772757
+        ]
+      },
+      "prior_view_exposure": {
+        "oblique_145_40": "Original display-managed silhouette inspected for earlier5view admission; original support fit used front/side/top. New controlled oblique excluded current fit/ROI; no historical blind claim."
+      },
+      "program_sha256": "423193c71864e7c6c9908dfd821920255a8ce4d6857a627587f3564f371185e2",
+      "remaining_required_views": "all5views/native boundary/current canonical stay unrun for changed candidate",
+      "semantic_control": "corner_radius_world",
+      "semantic_multiplier": 1.1,
+      "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\evaluated-exact.npz",
+      "source_case": {
+        "name": "rounded_triangle_dot",
+        "parameters": {
+          "builder": "rounded_triangle",
+          "corner_radius": 0.16,
+          "corner_segments": 32,
+          "dome": "z=+-thickness/2*cos(phi), outline_scale=sin(phi)",
+          "dome_segments": 64,
+          "thickness": 0.48,
+          "vertices_xy": [
+            [
+              0,
+              0.9
+            ],
+            [
+              -0.7794228634059948,
+              -0.45
+            ],
+            [
+              0.7794228634059948,
+              -0.45
+            ]
+          ]
+        },
+        "status": "unmeasured"
+      },
+      "source_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64"
+    }
+  ],
+  "checkpoint_admission": "strict held-out gate passes; held-out alpha L1 strictly lower, boundary IoU and raw mean surface no worse; local rank complete/no active bound and exact semantic restoration; diagnostic checkpoint only",
+  "crop_pixel_span": 160,
+  "crop_resolution": [
+    1024,
+    1024
+  ],
+  "current_twelve_row_selection": "preserved; this bounded checkpoint cannot replace it",
+  "deadline_seconds": 90,
+  "filter_size": 1.5,
+  "fit_budget": {
+    "residual_calls": 96,
+    "seconds": 1.0
+  },
+  "fits": 1,
+  "full_required_five_view_admission": "unrun for changed candidates",
+  "gates": {
+    "maximum_signed_distance_loss": 0.05,
+    "minimum_area_iou": 0.7,
+    "minimum_boundary_iou": 0.8
+  },
+  "global_resolution": [
+    512,
+    512
+  ],
+  "heldout_views": [
+    "oblique_145_40"
+  ],
+  "input_sha256": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\rounded_triangle.py": "42dd3eb646dab57cf7603c14a0dbc1f25bbfd9f348a20df2dd37e20364248bbf",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\adaptive_family.py": "7afa34df46629372ffd4056ef1a4a21584ec451b032ea858cd34443c5aabdbcc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\triangle_edit_observation.py": "d7fc07d2663ee75fb04860f493ebb8c5f7ce36b82d627952a5d7fbcfda054e12",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_contracts.py": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_references.py": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_family_detail.py": "8717fd10ad921bb0343a6a95b267a1c11f9106299bca023e03b7d2a8ae538a1e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_family_source_edit_check.py": "91440893c490e8915be6ed8789262585c88ddfde90b1536ab8c95409619d33c1",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_quality_coverage_check.py": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_surface_quality_check.py": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\frozen-workload.json": "3b63f97aa72b6c8ab933bac9825ff97528f753acac285331d673748abb7a32b0",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\results.json": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\evaluated-exact.npz": "f6abc19a7ee7efbc62f3bc403b5e61ce6c426c64950604d0fa5cd7181c698cff",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\front-mask.png": "53bf7d1cf2a8e9842fc6a4cb81e4c399f811c30d6f137fa7c8d535f18fd2310e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\oblique_145_40-mask.png": "ef5d9f70173745884d15de950714e7a8d4e1b3344fb25c9a0710970003644756",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\oblique_35_28-mask.png": "3417b4fc1365e7736850cdd1ee786d92d0fd88d6f8979efaff72783830f1816d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\side-mask.png": "65a8b602b16c0d519522384d344a8c73d1ebcc59c696dd7c362385dd686b1a9d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\top-mask.png": "f678156f80dc39785cac2504b61d9bc6099db51038439e079ad1f7e0ea7f9d75",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\evaluated-exact.npz": "02be8b8c1f719d8cc5b01168d5fc8c2ff22fb8beafdb7f396d1dfbea34a6298f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\evaluated.obj": "5fbc257f49843ef3ecbb1274d655eb075f179d88f1cad54f8a19d3c202309876",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\program.json": "423193c71864e7c6c9908dfd821920255a8ce4d6857a627587f3564f371185e2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\results.json": "a0745537ee5e5694fb558a0103fe59b4bf41e4aefb123f148a72bbe241291831",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\run-lease.json": "a6628bd09b06824446a4c769c4ee160672897fc9560f0e9b84df42ed2cd2e6c8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\run-ownership.json": "5628c42d456f83364e0613effbf3aafb091edd9f2dadc35eb1e771c60a6ae29d"
+  },
+  "memory_limit_bytes": 8589934592,
+  "native_source_scope": "unchanged old triangle support candidate is a baseline, not a selected new result",
+  "new_detail_family": "rounded_triangle_dot",
+  "new_raw_pairs": 2,
+  "parameter_interval_policy": "each declared physical control is 0.9..1.1 times unchanged saved candidate value; frozen before new measurements; no source dimensions or held-out metrics used",
+  "protocol": "bounded_adaptive_family_checkpoint_v1",
+  "qualification_children": 0,
+  "raw_comparisons": 1,
+  "raw_samples_per_direction": 4096,
+  "raw_seed": 61007,
+  "rendered_frames": 6,
+  "samples": 64,
+  "segments": 96,
+  "semantic_transactions": 2,
+  "source_frames": 3,
+  "threads": 2,
+  "triangle_tessellation": {
+    "corner_segments": 32,
+    "dome_segments": 64
+  }
+}

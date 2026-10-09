@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import replace
+from functools import lru_cache
 import hashlib
 import json
 import math
@@ -23,9 +24,11 @@ FAMILY_CONTROLS = {
     'tapered_frustum': ('radius_bottom', 'radius_top', 'height_world'),
     'torus': ('major_radius', 'minor_radius'),
     'concave_arch': ('opening_width_world', 'cavity_roof_height_world'),
+    'rounded_triangle_dot': ('scale_x', 'scale_y', 'corner_radius_world'),
 }
 PRIMITIVES = {'capsule': 'capsule', 'tapered_frustum': 'frustum',
-              'torus': 'torus', 'concave_arch': 'polygon_extrusion'}
+              'torus': 'torus', 'concave_arch': 'polygon_extrusion',
+              'rounded_triangle_dot': 'rounded_triangle'}
 
 
 def _json_hash(value):
@@ -73,7 +76,15 @@ def _arch_outline(params):
 def family_control_values(wire, family):
     """Physical controls in local world units, independent of source parameters."""
     p = _validated_program(wire, family).root_nodes[0].parameters
-    if family == 'concave_arch':
+    if family == 'rounded_triangle_dot':
+        if 'width_world' in p or 'depth_world' in p:
+            raise ValueError('triangle detail controls require scale_xy without absolute-dimension overrides')
+        scales = np.asarray(p.get('scale_xy', (1., 1.)), float)
+        if scales.shape != (2,):
+            raise ValueError('triangle needs two declared scale values')
+        values = {'scale_x': float(scales[0]), 'scale_y': float(scales[1]),
+                  'corner_radius_world': float(p.get('corner_radius_world', p.get('corner_radius', .16)))}
+    elif family == 'concave_arch':
         outline, _ = _arch_outline(p)
         values = {'opening_width_world': float(outline[4, 0] - outline[7, 0]),
                   'cavity_roof_height_world': float(outline[5, 1] - outline[4, 1])}
@@ -104,7 +115,10 @@ def family_program_update(wire, family, values):
         return program
     node = program.root_nodes[0]
     params = deepcopy(dict(node.parameters))
-    if family == 'concave_arch':
+    if family == 'rounded_triangle_dot':
+        params['scale_xy'] = [controls['scale_x'], controls['scale_y']]
+        params['corner_radius_world'] = controls['corner_radius_world']
+    elif family == 'concave_arch':
         outline, scale = _arch_outline(params)
         width, roof = controls['opening_width_world'], controls['cavity_roof_height_world']
         midpoint = .5 * (outline[4, 0] + outline[7, 0])
@@ -149,6 +163,39 @@ def _hull_polygon(vertices, matrix):
     return Polygon(unique[ConvexHull(unique).vertices])
 
 
+@lru_cache(maxsize=8)
+def _triangle_vertex_basis(serialized_fixed_params):
+    """Existing discrete template is affine in radius before its XY scaling.
+
+    The fixed recipe's template, depth, front fraction and corner/dome counts
+    generate both basis meshes through the ordinary primitive implementation.
+    This proposal cache retains all vertices; it does not lower tessellation.
+    """
+    from primitives.rounded_triangle import RoundedTrianglePrimitive
+    params=json.loads(serialized_fixed_params)
+    meshes=[]
+    for radius in (1.,2.):
+        meshes.append(RoundedTrianglePrimitive.from_program_parameters(
+            {**params,'scale_xy':[1.,1.],'corner_radius_world':radius},world=False).to_mesh_data())
+    if meshes[0].faces!=meshes[1].faces:
+        raise ValueError('triangle radius changes the declared template connectivity')
+    radial=meshes[1].vertices-meshes[0].vertices
+    base=meshes[0].vertices-radial
+    base.flags.writeable=False;radial.flags.writeable=False
+    return base,radial
+
+
+def _triangle_local_vertices(serialized_params):
+    params=json.loads(serialized_params)
+    radius=float(params.pop('corner_radius_world',params.get('corner_radius',.16)))
+    params.pop('corner_radius',None)
+    scale=np.asarray(params.pop('scale_xy',[1.,1.]),float)
+    base,radial=_triangle_vertex_basis(json.dumps(params,sort_keys=True,allow_nan=False))
+    vertices=base+radius*radial
+    vertices[:,:2]*=scale
+    return vertices
+
+
 def projected_family_boundary(wire, family, camera, *, segments=96):
     """Projected discrete model boundary; no renderer or reference geometry.
 
@@ -165,9 +212,12 @@ def projected_family_boundary(wire, family, camera, *, segments=96):
     rotation = np.asarray(params.get('rotation', np.eye(3)), float)
     center = np.array([params.get(k, 0.) for k in ('x', 'y', 'z')], float)
     matrix, _ = _model_camera(camera)
-    if family == 'capsule':
-        from primitives.capsule import CapsulePrimitive
-        local = CapsulePrimitive.from_program_parameters(params, world=False).to_mesh_data(int(segments)).vertices
+    if family in ('capsule', 'rounded_triangle_dot'):
+        if family == 'capsule':
+            from primitives.capsule import CapsulePrimitive
+            local = CapsulePrimitive.from_program_parameters(params, world=False).to_mesh_data(int(segments)).vertices
+        else:
+            local = _triangle_local_vertices(json.dumps(dict(params), sort_keys=True, allow_nan=False))
         vertices = local @ rotation.T + center
         polygon = _hull_polygon(vertices, matrix)
     elif family == 'tapered_frustum':
@@ -323,7 +373,7 @@ def refine_family_detail(wire, family, observations, *, parameter_bounds,
     detail = {'protocol': 'bounded_discrete_family_detail_v1', 'family': family,
               'free_controls': list(names), 'original_controls': original,
               'selected_controls': {name: float(value) for name, value in controls.items()},
-              'frozen_intervals': intervals.tolist(), 'fixed_pose': True, 'segments': int(segments),
+              'frozen_intervals': intervals.tolist(), 'fixed_pose': True, 'segments': None if family == 'rounded_triangle_dot' else int(segments),
               'residual_calls': calls, 'elapsed_seconds': time.perf_counter()-started,
               'termination': termination, 'squared_residual': score, 'observations': records,
               'local_sensitivity_singular_values': singular.tolist(), 'local_rank': rank,
@@ -333,4 +383,11 @@ def refine_family_detail(wire, family, observations, *, parameter_bounds,
               'heldout_fit_or_roi_used': False, 'prior_view_exposure': deepcopy(prior_view_exposure),
               'artist_surface_limits': None, 'full_native_silhouette_admission': 'unrun',
               'model_scope': 'discrete projected boundary; actual native geometry and measurement remain independent'}
+    if family == 'rounded_triangle_dot':
+        from primitives.rounded_triangle import RoundedTrianglePrimitive
+        part = RoundedTrianglePrimitive.from_program_parameters(updated.root_nodes[0].parameters, world=False)
+        detail['tessellation'] = {'corner_segments': part.corner_segments, 'dome_segments': part.dome_segments,
+                                  'fixed_from_recipe': True}
+        detail['fixed_triangle_controls'] = ['height_world', 'front_fraction', 'vertices_xy',
+                                            'position', 'rotation', 'corner_segments', 'dome_segments']
     return replace(updated, metadata={**updated.metadata, 'adaptive_detail': detail})

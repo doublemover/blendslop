@@ -735,5 +735,34 @@
     "tapered_frustum": "reusable physical controls/projection pure-tested; native adaptive checkpoint unrun",
     "concave_arch": "reusable physical controls/projection pure-tested; native adaptive checkpoint unrun"
   },
-  "legacy_camera_provenance": "original declarations preserve legacy missing clip/shift provenance; new controlled contracts capture actual matching clips/shifts; no legacy camera-binding gap is retroactively closed"
+  "legacy_camera_provenance": "original declarations preserve legacy missing clip/shift provenance; new controlled contracts capture actual matching clips/shifts; no legacy camera-binding gap is retroactively closed",
+  "post_checkpoint_pure_extension": {
+    "checkpoint_commit": "2f9421f",
+    "family": "rounded_triangle_dot",
+    "scope": "pure model API only; parent owns separate native wrapper/evidence; capsule/torus results remain bound to their tested checkpoint bytes",
+    "free_controls": [
+      "scale_x",
+      "scale_y",
+      "corner_radius_world"
+    ],
+    "fixed_triangle_tessellation": [
+      32,
+      64
+    ],
+    "vertices_retained": 6239,
+    "proposal_model_basis": "bounded eight-entry fixed-recipe affine vertex basis generated via direct primitive meshes; direct comparison maximum delta8.88e-16; native recipe compilation/identity guards remain separate",
+    "tests_passed": 15,
+    "test_seconds": 3.5,
+    "exact_one_second_two_observation_fixture": {
+      "calls": 27,
+      "seconds": 0.3374012,
+      "rank": 3,
+      "global_uniqueness": false
+    },
+    "new_native_runs": 0,
+    "current_runtime_sha256": {
+      "blender_blocking/reconstruction/adaptive_family.py": "7afa34df46629372ffd4056ef1a4a21584ec451b032ea858cd34443c5aabdbcc",
+      "blender_blocking/test_adaptive_family.py": "0116d37196e59e6cc49e845a2a3fdc1229242c126f68adef1bd4a3bad80fdc00"
+    }
+  }
 }

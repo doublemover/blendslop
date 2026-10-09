@@ -60,8 +60,9 @@ def publish(owner, name, value):
 
 def freeze_sources(plan):
     if (plan.get('protocol') != 'family-surface-source-plan-v1' or
-            set(plan['families']) != set(SUPPORTED_FAMILIES)):
-        raise ValueError('explicit five-family source plan required')
+            not 1 <= len(plan['families']) <= len(SUPPORTED_FAMILIES) or
+            not set(plan['families']).issubset(SUPPORTED_FAMILIES)):
+        raise ValueError('explicit supported-family source plan required')
     declarations = {}
     for family, source in plan['families'].items():
         original, regenerated = arrays(source['reference_npz']), arrays(source['regenerated_npz'])
@@ -102,8 +103,12 @@ def main():
     parser.add_argument('--source-plan-sha256', required=True)
     parser.add_argument('--coverage', type=Path, required=True)
     parser.add_argument('--coverage-sha256', required=True)
+    parser.add_argument('--additional-observations', type=Path)
+    parser.add_argument('--additional-observations-sha256')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
+    if bool(args.additional_observations) != bool(args.additional_observations_sha256):
+        parser.error('additional observations require an explicit byte hash')
     started = time.monotonic()
     source_binding = {'path':str(args.source_plan.absolute()), 'sha256':args.source_plan_sha256}
     plan = json.loads(read_bound(source_binding))
@@ -134,11 +139,28 @@ def main():
             observations[family] = evaluate_family_surface_contract(
                 declaration['contract'], candidate['surface_observation'],
                 candidate_geometry_hash=candidate['geometry_hash'])
+        additional = {}
+        if args.additional_observations:
+            binding = {'path':str(args.additional_observations.absolute()),
+                       'sha256':args.additional_observations_sha256}
+            selected = json.loads(read_bound(binding))
+            for family, entry in selected.items():
+                if family not in frozen or entry['raw_field'] != ['raw_surface', 'refined']:
+                    raise ValueError('additional selected observation must use its declared refined raw receipt')
+                producer = json.loads(read_bound(entry['source_receipt']))
+                row = producer['cases'][family]
+                if row['geometry_hash'] != entry['candidate_geometry_hash']:
+                    raise ValueError('selected raw receipt geometry differs')
+                additional[family] = evaluate_family_surface_contract(
+                    frozen[family]['contract'],row['raw_surface']['refined'],
+                    candidate_geometry_hash=entry['candidate_geometry_hash'])
+            publish(owner, 'additional-observation-bindings.json', selected)
         report = {'protocol':'family-surface-policy-report-v1', 'status':'completed',
                   'source_plan':source_binding, 'coverage':coverage_binding,
                   'source_hashes':{str(Path(__file__).relative_to(ROOT)):hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                     'blender_blocking/evaluation/family_surface_contracts.py':hashlib.sha256((ROOT/'blender_blocking/evaluation/family_surface_contracts.py').read_bytes()).hexdigest()},
                   'run_root':str(owner.root), 'observations':observations,
+                  'additional_selected_observations':additional,
                   'aggregate_accepted':False, 'renders':0, 'fits':0,
                   'surface_comparisons':0, 'qualification_children':0,
                   'elapsed_seconds':time.monotonic()-started,

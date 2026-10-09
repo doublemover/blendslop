@@ -1,0 +1,621 @@
+{
+  "aggregate_accepted": false,
+  "cases": {
+    "asymmetric_multipart_solid": {
+      "actual_matched_views": 5,
+      "all_three_passes_verified_each_role": true,
+      "candidate_actual_geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+      "candidate_replay": {
+        "actual_indexed_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "exact": true,
+        "expected_indexed_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1"
+      },
+      "frame_edge_observation": {
+        "candidate": {
+          "front": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "oblique_145_40": {
+            "occupied_hard_mask_touches_frame_edge": true,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "oblique_35_28": {
+            "occupied_hard_mask_touches_frame_edge": true,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "side": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "top": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          }
+        },
+        "source": {
+          "front": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "oblique_145_40": {
+            "occupied_hard_mask_touches_frame_edge": true,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "oblique_35_28": {
+            "occupied_hard_mask_touches_frame_edge": true,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "side": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "top": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          }
+        }
+      },
+      "frames": 30,
+      "legacy_original_declaration": {
+        "front": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": false
+        },
+        "oblique_145_40": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": false
+        },
+        "oblique_35_28": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": false
+        },
+        "side": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": true
+        },
+        "top": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": true
+        }
+      },
+      "png_modes": {
+        "candidate/mask": "L",
+        "candidate/neutral": "L",
+        "candidate/normals": "RGB",
+        "source/mask": "L",
+        "source/neutral": "L",
+        "source/normals": "RGB"
+      },
+      "source_actual_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+      "source_equivalence": {
+        "equivalent": true,
+        "indexed_reference_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+        "indexed_regenerated_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+        "reference_oriented_surface": "5e5036dba422d4f84ee59fb5e1712b8caccec2a319f30fdfaba3da2577ff2ea8",
+        "regenerated_oriented_surface": "5e5036dba422d4f84ee59fb5e1712b8caccec2a319f30fdfaba3da2577ff2ea8",
+        "scope": "exact binary64 vertex and oriented triangle-coordinate multisets; no topology identity qualification"
+      },
+      "styles": {
+        "candidate": {
+          "evaluated_mesh": {
+            "flat_polygons": 18,
+            "has_custom_normals": false,
+            "polygon_style": "flat",
+            "polygons": 18,
+            "sharp_edge_attribute": "absent",
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "sharp_edges": 0,
+            "smooth_flags_sha256": "60daa3a5f7dbfa200f8c82840ecf5b42640b70f3b7218a4c6bbd67db542e75a4",
+            "smooth_polygons": 0,
+            "vertices": 24
+          },
+          "modifiers": [
+            {
+              "name": "ObservedExactUnion1",
+              "show_render": true,
+              "show_viewport": true,
+              "type": "BOOLEAN"
+            },
+            {
+              "name": "ObservedExactUnion2",
+              "show_render": true,
+              "show_viewport": true,
+              "type": "BOOLEAN"
+            }
+          ],
+          "scope": "shading/style only; geometric-normal metrics remain separate",
+          "source_mesh": {
+            "flat_polygons": 6,
+            "has_custom_normals": false,
+            "polygon_style": "flat",
+            "polygons": 6,
+            "sharp_edge_attribute": "absent",
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "sharp_edges": 0,
+            "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+            "smooth_polygons": 0,
+            "vertices": 8
+          },
+          "status": "native_observed"
+        },
+        "comparison": {
+          "candidate_polygon_style": "flat",
+          "custom_normal_state_match": true,
+          "modifier_type_sequence_match": true,
+          "polygon_style_match": true,
+          "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+          "sharp_edge_count_match": true,
+          "source_polygon_style": "flat",
+          "status": "observed",
+          "weighted_normal_controls_match": true
+        },
+        "source": {
+          "evaluated_mesh": {
+            "flat_polygons": 18,
+            "has_custom_normals": false,
+            "polygon_style": "flat",
+            "polygons": 18,
+            "sharp_edge_attribute": "absent",
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "sharp_edges": 0,
+            "smooth_flags_sha256": "60daa3a5f7dbfa200f8c82840ecf5b42640b70f3b7218a4c6bbd67db542e75a4",
+            "smooth_polygons": 0,
+            "vertices": 26
+          },
+          "modifiers": [
+            {
+              "name": "Authored_box.001",
+              "show_render": true,
+              "show_viewport": true,
+              "type": "BOOLEAN"
+            },
+            {
+              "name": "Authored_box.002",
+              "show_render": true,
+              "show_viewport": true,
+              "type": "BOOLEAN"
+            }
+          ],
+          "scope": "shading/style only; geometric-normal metrics remain separate",
+          "source_mesh": {
+            "flat_polygons": 6,
+            "has_custom_normals": false,
+            "polygon_style": "flat",
+            "polygons": 6,
+            "sharp_edge_attribute": "absent",
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "sharp_edges": 0,
+            "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+            "smooth_polygons": 0,
+            "vertices": 8
+          },
+          "status": "native_observed"
+        }
+      }
+    },
+    "rounded_box": {
+      "actual_matched_views": 5,
+      "all_three_passes_verified_each_role": true,
+      "candidate_actual_geometry_hash": "9f6c8d4db73fdccedf0ac346682c33b626830259989f0f0069f60306938f9b9a",
+      "candidate_replay": {
+        "actual_indexed_hash": "9f6c8d4db73fdccedf0ac346682c33b626830259989f0f0069f60306938f9b9a",
+        "exact": true,
+        "expected_indexed_hash": "9f6c8d4db73fdccedf0ac346682c33b626830259989f0f0069f60306938f9b9a"
+      },
+      "frame_edge_observation": {
+        "candidate": {
+          "front": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "oblique_145_40": {
+            "occupied_hard_mask_touches_frame_edge": true,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "oblique_35_28": {
+            "occupied_hard_mask_touches_frame_edge": true,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "side": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "top": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          }
+        },
+        "source": {
+          "front": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "oblique_145_40": {
+            "occupied_hard_mask_touches_frame_edge": true,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "oblique_35_28": {
+            "occupied_hard_mask_touches_frame_edge": true,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "side": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          },
+          "top": {
+            "occupied_hard_mask_touches_frame_edge": false,
+            "scope": "unary retained-alpha border observation only; no new image metric or gate"
+          }
+        }
+      },
+      "frames": 30,
+      "legacy_original_declaration": {
+        "front": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": false
+        },
+        "oblique_145_40": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": false
+        },
+        "oblique_35_28": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": false
+        },
+        "side": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": true
+        },
+        "top": {
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; this fresh packet does not backfill it",
+          "source_actual_frame_matches_declared": true
+        }
+      },
+      "png_modes": {
+        "candidate/mask": "L",
+        "candidate/neutral": "L",
+        "candidate/normals": "RGB",
+        "source/mask": "L",
+        "source/neutral": "L",
+        "source/normals": "RGB"
+      },
+      "source_actual_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+      "source_equivalence": {
+        "equivalent": true,
+        "indexed_reference_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+        "indexed_regenerated_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+        "reference_oriented_surface": "d1ec56bcae5a3538dd07113979b7df50250cec91342a84357f00024f1f9f950c",
+        "regenerated_oriented_surface": "d1ec56bcae5a3538dd07113979b7df50250cec91342a84357f00024f1f9f950c",
+        "scope": "exact binary64 vertex and oriented triangle-coordinate multisets; no topology identity qualification"
+      },
+      "styles": {
+        "candidate": {
+          "evaluated_mesh": {
+            "flat_polygons": 486,
+            "has_custom_normals": true,
+            "polygon_style": "flat",
+            "polygons": 486,
+            "sharp_edge_attribute": "present",
+            "sharp_edge_flags_sha256": "96c5023576733f88726277165f7fa44936426956bcbcca126d7f1169216e1a4b",
+            "sharp_edges": 0,
+            "smooth_flags_sha256": "b2c5e4bd6785442e8deedce0d325629b0818a4c9e7635b3bd8c80e8c03f162fb",
+            "smooth_polygons": 0,
+            "vertices": 488
+          },
+          "modifiers": [
+            {
+              "affect": "EDGES",
+              "name": "Blendslop editable bevel",
+              "segments": 8,
+              "show_render": true,
+              "show_viewport": true,
+              "type": "BEVEL",
+              "width": 0.15037833154201508
+            },
+            {
+              "keep_sharp": false,
+              "mode": "FACE_AREA",
+              "name": "Blendslop weighted normals",
+              "show_render": true,
+              "show_viewport": true,
+              "thresh": 0.009999999776482582,
+              "type": "WEIGHTED_NORMAL",
+              "weight": 50
+            }
+          ],
+          "scope": "shading/style only; geometric-normal metrics remain separate",
+          "source_mesh": {
+            "flat_polygons": 6,
+            "has_custom_normals": false,
+            "polygon_style": "flat",
+            "polygons": 6,
+            "sharp_edge_attribute": "absent",
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "sharp_edges": 0,
+            "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+            "smooth_polygons": 0,
+            "vertices": 8
+          },
+          "status": "native_observed"
+        },
+        "comparison": {
+          "candidate_polygon_style": "flat",
+          "custom_normal_state_match": true,
+          "modifier_type_sequence_match": true,
+          "polygon_style_match": true,
+          "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+          "sharp_edge_count_match": true,
+          "source_polygon_style": "flat",
+          "status": "observed",
+          "weighted_normal_controls_match": true
+        },
+        "source": {
+          "evaluated_mesh": {
+            "flat_polygons": 486,
+            "has_custom_normals": true,
+            "polygon_style": "flat",
+            "polygons": 486,
+            "sharp_edge_attribute": "present",
+            "sharp_edge_flags_sha256": "96c5023576733f88726277165f7fa44936426956bcbcca126d7f1169216e1a4b",
+            "sharp_edges": 0,
+            "smooth_flags_sha256": "b2c5e4bd6785442e8deedce0d325629b0818a4c9e7635b3bd8c80e8c03f162fb",
+            "smooth_polygons": 0,
+            "vertices": 488
+          },
+          "modifiers": [
+            {
+              "affect": "EDGES",
+              "name": "synthetic_rounding",
+              "segments": 8,
+              "show_render": true,
+              "show_viewport": true,
+              "type": "BEVEL",
+              "width": 0.15000000596046448
+            },
+            {
+              "keep_sharp": false,
+              "mode": "FACE_AREA",
+              "name": "synthetic_weighted_normals",
+              "show_render": true,
+              "show_viewport": true,
+              "thresh": 0.009999999776482582,
+              "type": "WEIGHTED_NORMAL",
+              "weight": 50
+            }
+          ],
+          "scope": "shading/style only; geometric-normal metrics remain separate",
+          "source_mesh": {
+            "flat_polygons": 6,
+            "has_custom_normals": false,
+            "polygon_style": "flat",
+            "polygons": 6,
+            "sharp_edge_attribute": "absent",
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "sharp_edges": 0,
+            "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+            "smooth_polygons": 0,
+            "vertices": 8
+          },
+          "status": "native_observed"
+        }
+      }
+    }
+  },
+  "cleanup_executed": false,
+  "descendant_followup": {
+    "receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-descendant-followup\\owned-n58_h8rr\\followup.json",
+    "result": {
+      "new_native_jobs": 0,
+      "new_renders": 0,
+      "original_history_unchanged": true,
+      "original_receipt_sha256": "cc068f3586108db37053eab33875dfb98dd5ca2f5b6661f08a575c5ffee6b7a4",
+      "original_supervisor_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01-supervisor\\owned-tw1k77cx\\resource-receipt.json",
+      "outcomes": [
+        {
+          "create_time": 1791514973.253682,
+          "exit_status": null,
+          "kernel_wait_performed": false,
+          "pid": 24352,
+          "scope": "recorded process absent at followup; no invented kernel join or exit status",
+          "status": "absent_at_followup"
+        }
+      ],
+      "process_termination_sent": false,
+      "protocol": "recorded_native_descendant_followup_v1",
+      "universal_descendant_join_proof": false
+    },
+    "sha256": "d752a2b54c6db5b366cd47790825ef1288b548ca6e9680adcd5ef1dc69078f26"
+  },
+  "fits": 0,
+  "image_metric_comparisons": 0,
+  "input_sha256_unchanged": true,
+  "native_frames": 60,
+  "native_process": {
+    "budget_seconds": 120,
+    "child_joined": true,
+    "command": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_selected_canonical_inspection.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-selected-canonical-continuation-20261009\\native-plan.json",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01"
+    ],
+    "descendant_scope": "polled native process tree only; no universal escaped-descendant proof",
+    "elapsed_seconds": 15.145183100001304,
+    "limit_reason": null,
+    "observed_descendants": [
+      {
+        "create_time": 1791514973.253682,
+        "pid": 24352
+      }
+    ],
+    "observed_descendants_remaining": [
+      24352
+    ],
+    "peak_observed_tree_rss_bytes": 563138560,
+    "pid": 4948,
+    "plan_sha256": "b91fd2b023ab822e7d73bcb8d43d08a888ab4533651dab965b06071bc513924f",
+    "process_create_time": 1791514972.8874037,
+    "protocol": "selected_canonical_native_supervision_v1",
+    "returncode": 0,
+    "rss_limit_bytes": 8589934592,
+    "stdout_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01-supervisor\\owned-tw1k77cx\\native.log",
+    "stdout_sha256": "695f35173df4437fa0cd564155ca2449062d34430fb0fbe78edb48a475a02f8d",
+    "threads": 2
+  },
+  "native_resource_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01-supervisor\\owned-tw1k77cx\\resource-receipt.json",
+  "native_resource_receipt_sha256": "cc068f3586108db37053eab33875dfb98dd5ca2f5b6661f08a575c5ffee6b7a4",
+  "native_slot_release_claim": false,
+  "ownership_audits": {
+    "descendant_followup": {
+      "audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 873,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-descendant-followup\\owned-n58_h8rr",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "lease_sha256": "c824ae5cb98cf98c654b58c485a382e0d632a604cea1aa7530c067481163d51b",
+      "lease_status": "released",
+      "manifest_sha256": "51b9cf5c6970ae3d449210fafe0c19bde93c7511450ffd3a255a021a18156383",
+      "manifest_state": "succeeded",
+      "registered_artifacts": 1,
+      "scope": "artifact hash/inventory audit only; does not establish native descendant join proof or recovery"
+    },
+    "native": {
+      "audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 27359965,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "lease_sha256": "bf308857e3c77c93e9c278d39c6fbbb5f203336b8f4f822f58b1e9db7fa3f22d",
+      "lease_status": "released",
+      "manifest_sha256": "5f12197a0164065f80f4def2dbfac435e55af4d1090a5da4307af98236538b7a",
+      "manifest_state": "succeeded",
+      "registered_artifacts": 148,
+      "scope": "artifact hash/inventory audit only; does not establish native descendant join proof or recovery"
+    },
+    "supervisor": {
+      "audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 3030,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01-supervisor\\owned-tw1k77cx",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "lease_sha256": "8f5a095586a84382a9cf84bace1667c3975e91d878f085502f557fc6f3eb1f38",
+      "lease_status": "released",
+      "manifest_sha256": "64b9aaf01b279a18acf743cbf8ccdc18eb0259da472c9e154520a86a638b51b1",
+      "manifest_state": "failed",
+      "registered_artifacts": 3,
+      "scope": "artifact hash/inventory audit only; does not establish native descendant join proof or recovery"
+    }
+  },
+  "pixel_review": {
+    "multipart": "source/candidate preserve sharp planar normal regions and the three-part stepped form; original oblique35 frame crops lower base; candidate neutral has a faint seam on one side",
+    "reviewed_original_pixels": [
+      {
+        "family": "asymmetric_multipart_solid",
+        "pass": "neutral",
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\oblique_35_28-neutral.png",
+        "role": "source",
+        "sha256": "ca6c80eb94676072309229bc43ba22685da24177109a4b94b2ca6ded5792810b"
+      },
+      {
+        "family": "asymmetric_multipart_solid",
+        "pass": "normals",
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\oblique_35_28-normals.png",
+        "role": "source",
+        "sha256": "a8c9240b1a74837c4589c6fec6ab598322096d15ca116d76f93378d26526e9d6"
+      },
+      {
+        "family": "asymmetric_multipart_solid",
+        "pass": "neutral",
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\candidate\\oblique_35_28-neutral.png",
+        "role": "candidate",
+        "sha256": "8e259b5186edbd0c2ae77caf4e467e184b5d66eccc31fde6f5e1a045841f76cc"
+      },
+      {
+        "family": "asymmetric_multipart_solid",
+        "pass": "normals",
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\candidate\\oblique_35_28-normals.png",
+        "role": "candidate",
+        "sha256": "6023b96f89527760b6686285fbc9656583225e832a8d386ea226caa24418d72c"
+      },
+      {
+        "family": "rounded_box",
+        "pass": "neutral",
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\rounded_box\\source\\oblique_35_28-neutral.png",
+        "role": "source",
+        "sha256": "1bc2b646d961db3810010986f16b150560b31571f7b5b85a7c14abf84f9243b9"
+      },
+      {
+        "family": "rounded_box",
+        "pass": "normals",
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\rounded_box\\source\\oblique_35_28-normals.png",
+        "role": "source",
+        "sha256": "058e14499146a60d0d5a5dbbb97e6f1a074014330fbc1ea040f66a45776bc32c"
+      },
+      {
+        "family": "rounded_box",
+        "pass": "neutral",
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\rounded_box\\candidate\\oblique_35_28-neutral.png",
+        "role": "candidate",
+        "sha256": "b2314dc118ccfaf5750aa39cfc19ebedb10de5b816dc3dc1153cca24bb50cdea"
+      },
+      {
+        "family": "rounded_box",
+        "pass": "normals",
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\rounded_box\\candidate\\oblique_35_28-normals.png",
+        "role": "candidate",
+        "sha256": "ee0c25a2dd7b1cff151c0b9eb885d55bbabe3ad0be7d3115e0d26c1ca5cefea0"
+      }
+    ],
+    "rounded_box": "source/candidate neutral rounded edges and RGB shading-normal gradients visually agree; original oblique35 frame crops upper extent",
+    "scope": "representative manual inspection only; no perceptual/surface acceptance claim or native rerender"
+  },
+  "protocol": "selected_canonical_inspection_evidence_v1",
+  "qualifier_children": 0,
+  "raw_comparisons": 0,
+  "receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\results.json",
+  "receipt_sha256": "8e9ed9c9230ed33dbdd8b2d6ce511bd63c7c565e48efd28c668bd8dda038b43d",
+  "recovery_executed": false,
+  "status": "complete_current_inspection"
+}

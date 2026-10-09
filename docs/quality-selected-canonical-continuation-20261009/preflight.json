@@ -1,0 +1,36 @@
+{
+  "budget_seconds": 120,
+  "command": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_selected_canonical_inspection.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-selected-canonical-continuation-20261009\\native-plan.json",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01"
+  ],
+  "geometry_archives_verified": {
+    "asymmetric_multipart_solid": {
+      "candidate": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+      "source": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca"
+    },
+    "rounded_box": {
+      "candidate": "9f6c8d4db73fdccedf0ac346682c33b626830259989f0f0069f60306938f9b9a",
+      "source": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0"
+    }
+  },
+  "input_count": 44,
+  "native_launched": false,
+  "plan": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-selected-canonical-continuation-20261009\\native-plan.json",
+  "plan_sha256": "b91fd2b023ab822e7d73bcb8d43d08a888ab4533651dab965b06071bc513924f",
+  "protocol": "selected_canonical_preflight_v1",
+  "rss_limit_bytes": 8589934592,
+  "threads": 2
+}

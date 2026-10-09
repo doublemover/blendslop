@@ -1,0 +1,116 @@
+{
+  "protocol": "rectilinear_actual_source_certificates_v1",
+  "status": "three actual authored sources certified",
+  "candidate_inputs": 0,
+  "native_runs": 0,
+  "source_only": true,
+  "rows": {
+    "thin_plate": {
+      "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\thin_plate\\evaluated-exact.npz",
+      "source_archive_sha256": "c17935dd161fb810e56b9ea65339f37ec921924fe4997145edb850462082330e",
+      "certificate": {
+        "protocol": "exact_rectilinear_source_cover_v1",
+        "status": "certified",
+        "family": "thin_plate",
+        "reference_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+        "frozen_parameters_sha256": "237815f5a12a89b8464ddfcd9ebe7e01e413ed5473d16e6def71d8fcff62ad76",
+        "maximum_source_facet_distance_world": 2.667099728805279e-08,
+        "maximum_normal_angle_degrees": 0.0,
+        "normal_tangent_upper_bound": 0.0,
+        "normal_correspondence": "each source facet to its proved outward authored plane; edge/corner nearest-normal correspondence is not asserted",
+        "distance_correspondence": "bidirectional continuous facet/boundary cover via matching barycentric points; max vertex displacement bounds every paired point",
+        "maximum_vertex_rounding_shift_world": 2.667099728805279e-08,
+        "numerical_grid_association_budget_world": 4.76837158203125e-07,
+        "numerical_budget_scope": "fixed4float32eps\u00d7authored coordinate scale; grid association only, not reconstruction allowance or artist tolerance",
+        "source_triangles_proved": 12,
+        "boundary_patches_proved": 6,
+        "triangle_patch_clips": 12,
+        "positive_area_overlap_checks": 6,
+        "coverage_proof": "exact rational triangle-to-lattice-cell clipping; every source facet assigned fully; every boundary patch fully covered; all positive-area overlaps forbidden",
+        "orientation_proof": "every snapped facet outward; exact actual cross dot with that plane strictly positive",
+        "arithmetic": "exact Fraction from frozen binary64 plane declarations and actual binary64 source coordinates; square-root upper endpoints rationally checked",
+        "artist_surface_limits": null,
+        "candidate_boundary_qualification": "not supplied"
+      },
+      "elapsed_seconds": 0.007587100000819191
+    },
+    "concave_arch": {
+      "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\evaluated-exact.npz",
+      "source_archive_sha256": "a8bb29e00cc7bdf47cb154c476ed29b8858a2809a9081403b2b3cae2afb90ce3",
+      "certificate": {
+        "protocol": "exact_rectilinear_source_cover_v1",
+        "status": "certified",
+        "family": "concave_arch",
+        "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "frozen_parameters_sha256": "5c23f6f6c656fcc6e677eb04bcde86d7f491a57a9a2e72d5e607fb5325365fc5",
+        "maximum_source_facet_distance_world": 3.384893149664506e-08,
+        "maximum_normal_angle_degrees": 0.0,
+        "normal_tangent_upper_bound": 0.0,
+        "normal_correspondence": "each source facet to its proved outward authored plane; edge/corner nearest-normal correspondence is not asserted",
+        "distance_correspondence": "bidirectional continuous facet/boundary cover via matching barycentric points; max vertex displacement bounds every paired point",
+        "maximum_vertex_rounding_shift_world": 3.384893149664506e-08,
+        "numerical_grid_association_budget_world": 4.76837158203125e-07,
+        "numerical_budget_scope": "fixed4float32eps\u00d7authored coordinate scale; grid association only, not reconstruction allowance or artist tolerance",
+        "source_triangles_proved": 28,
+        "boundary_patches_proved": 22,
+        "triangle_patch_clips": 49,
+        "positive_area_overlap_checks": 34,
+        "coverage_proof": "exact rational triangle-to-lattice-cell clipping; every source facet assigned fully; every boundary patch fully covered; all positive-area overlaps forbidden",
+        "orientation_proof": "every snapped facet outward; exact actual cross dot with that plane strictly positive",
+        "arithmetic": "exact Fraction from frozen binary64 plane declarations and actual binary64 source coordinates; square-root upper endpoints rationally checked",
+        "artist_surface_limits": null,
+        "candidate_boundary_qualification": "not supplied"
+      },
+      "elapsed_seconds": 0.03978750000533182
+    },
+    "asymmetric_multipart_solid": {
+      "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\evaluated-exact.npz",
+      "source_archive_sha256": "6f2ac20580a3a5fb1f541e056a6c6dc9c5659a2838882f44ca54c5a9dfad2c83",
+      "certificate": {
+        "protocol": "exact_rectilinear_source_cover_v1",
+        "status": "certified",
+        "family": "asymmetric_multipart_solid",
+        "reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+        "frozen_parameters_sha256": "8b4d014e8638baf5721f36cd925c92dbde2da8390cd8b815fde04c91d95b2b95",
+        "maximum_source_facet_distance_world": 5.0576218148960735e-08,
+        "maximum_normal_angle_degrees": 0.0,
+        "normal_tangent_upper_bound": 0.0,
+        "normal_correspondence": "each source facet to its proved outward authored plane; edge/corner nearest-normal correspondence is not asserted",
+        "distance_correspondence": "bidirectional continuous facet/boundary cover via matching barycentric points; max vertex displacement bounds every paired point",
+        "maximum_vertex_rounding_shift_world": 5.0576218148960735e-08,
+        "numerical_grid_association_budget_world": 4.76837158203125e-07,
+        "numerical_budget_scope": "fixed4float32eps\u00d7authored coordinate scale; grid association only, not reconstruction allowance or artist tolerance",
+        "source_triangles_proved": 48,
+        "boundary_patches_proved": 112,
+        "triangle_patch_clips": 243,
+        "positive_area_overlap_checks": 108,
+        "coverage_proof": "exact rational triangle-to-lattice-cell clipping; every source facet assigned fully; every boundary patch fully covered; all positive-area overlaps forbidden",
+        "orientation_proof": "every snapped facet outward; exact actual cross dot with that plane strictly positive",
+        "arithmetic": "exact Fraction from frozen binary64 plane declarations and actual binary64 source coordinates; square-root upper endpoints rationally checked",
+        "artist_surface_limits": null,
+        "candidate_boundary_qualification": "not supplied"
+      },
+      "elapsed_seconds": 0.16144870000425726
+    }
+  },
+  "frozen_workload_sha256": "ec6bfe88bf5547f61cc159b4d3aafe63e7fe11aa700e91d24a4591f4d5ed8262",
+  "runtime_sha256": {
+    "blender_blocking/evaluation/rectilinear_reference.py": "ff056c9ace2d69daad70b052da0531b79590cda6e033caa1be1b9f06efaa3075",
+    "blender_blocking/test_rectilinear_reference.py": "9f8dbac707bb8595e8a4fe283dbb443a3de2b917248f35b0fe195b4cdee6f773"
+  },
+  "tests": {
+    "passed": 7,
+    "runtime": "existing Blender5.2.2 bundled Python3.13.13",
+    "test_time_seconds": 0.089
+  },
+  "artist_surface_limits": null,
+  "candidate_boundary_qualification": "not supplied",
+  "construction_budgets": {
+    "source_vertices": 4096,
+    "source_triangles": 4096,
+    "analytic_lattice_cells": 4096,
+    "boundary_patches": 4096,
+    "triangle_patch_clips": 16384,
+    "exact_overlap_intersections": 65536
+  }
+}

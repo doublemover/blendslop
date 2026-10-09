@@ -150,6 +150,71 @@ class AdaptiveFamilyTests(unittest.TestCase):
             source_geometry_available=True,pixel_span=32)
         self.assertEqual(result['status'],'unneeded')
 
+    def triangle_fixture(self):
+        p={'scale_xy':[.985,.99],'corner_radius_world':.165,
+           'height_world':.48,'front_fraction':.505,'corner_segments':32,'dome_segments':64,
+           'x':.003,'y':-.002,'z':.005,'rotation':np.eye(3).tolist()}
+        wire=ShapeProgram('1','triangle-retained',(ShapeNode('triangle','add','rounded_triangle',parameters=p),),
+                          metadata={'baseline_oblique_history':'previously inspected'}).to_dict()
+        camera={'projection':'ORTHO','matrix_world':np.eye(4).tolist(),'ortho_scale':2.8,
+                'resolution':[128,128],'pixel_aspect':[1.,1.]}
+        return wire,camera
+
+    def test_triangle_three_control_fit_retains_depth_pose_and_declared_tessellation(self):
+        family='rounded_triangle_dot';wire,camera=self.triangle_fixture()
+        truth=family_program_update(wire,family,{'scale_x':1.,'scale_y':1.,'corner_radius_world':.16}).to_dict()
+        controls=family_control_values(wire,family)
+        bounds={key:[value*.9,value*1.1] for key,value in controls.items()}
+        updated=self.fit(wire,family,self.coverage(truth,family,camera),camera,bounds)
+        actual=family_control_values(updated,family)
+        self.assertAlmostEqual(actual['scale_x'],1.,delta=.003)
+        self.assertAlmostEqual(actual['scale_y'],1.,delta=.003)
+        self.assertAlmostEqual(actual['corner_radius_world'],.16,delta=.003)
+        old=wire['root_nodes'][0]['parameters'];new=updated['root_nodes'][0]['parameters']
+        self.assertEqual({k:v for k,v in old.items() if k not in ('scale_xy','corner_radius_world')},
+                         {k:v for k,v in new.items() if k not in ('scale_xy','corner_radius_world')})
+        detail=updated['metadata']['adaptive_detail']
+        self.assertEqual(detail['local_rank'],3)
+        self.assertEqual(detail['identifiability'],'locally_identified')
+        self.assertEqual(detail['tessellation'],{'corner_segments':32,'dome_segments':64,'fixed_from_recipe':True})
+        self.assertIsNone(detail['segments'])
+        self.assertFalse(detail['global_uniqueness_established'])
+        self.assertIs(type(new['corner_radius_world']),float)
+        self.assertTrue(all(type(x) is float for x in new['scale_xy']))
+
+    def test_triangle_scale_aliases_cannot_be_shadowed_and_depth_is_not_a_free_control(self):
+        wire,camera=self.triangle_fixture()
+        with self.assertRaisesRegex(ValueError,'undeclared'):
+            family_program_update(wire,'rounded_triangle_dot',{'height_world':.5})
+        wire['root_nodes'][0]['parameters']['width_world']=2.
+        with self.assertRaisesRegex(ValueError,'overrides'):
+            family_control_values(wire,'rounded_triangle_dot')
+
+    def test_triangle_cached_template_matches_direct_declared_mesh_and_is_bounded(self):
+        from primitives.rounded_triangle import RoundedTrianglePrimitive
+        from reconstruction.adaptive_family import _triangle_local_vertices,_triangle_vertex_basis
+        wire,_=self.triangle_fixture();original=wire['root_nodes'][0]['parameters']
+        for radius,sx,sy in [(.143,.9,1.1),(.19,1.03,.98),(.16,1.,1.)]:
+            params={**original,'corner_radius_world':radius,'scale_xy':[sx,sy]}
+            direct=RoundedTrianglePrimitive.from_program_parameters(params,world=False).to_mesh_data().vertices
+            cached=_triangle_local_vertices(json.dumps(params))
+            np.testing.assert_allclose(cached,direct,rtol=0,atol=5e-14)
+        for front in np.linspace(.4,.6,10):
+            _triangle_local_vertices(json.dumps({**original,'front_fraction':float(front)}))
+        self.assertLessEqual(_triangle_vertex_basis.cache_info().currsize,8)
+
+    def test_triangle_projection_uses_recipe_tessellation_without_raising_resolution(self):
+        from primitives.rounded_triangle import RoundedTrianglePrimitive
+        wire,camera=self.triangle_fixture()
+        before=RoundedTrianglePrimitive.from_program_parameters(wire['root_nodes'][0]['parameters'],world=False).to_mesh_data()
+        updated=family_program_update(wire,'rounded_triangle_dot',{'scale_x':1.01,'corner_radius_world':.17}).to_dict()
+        after=RoundedTrianglePrimitive.from_program_parameters(updated['root_nodes'][0]['parameters'],world=False).to_mesh_data()
+        self.assertEqual((len(before.vertices),len(before.faces)),(len(after.vertices),len(after.faces)))
+        self.assertEqual(len(before.vertices),6239)
+        distance=projected_family_signed_distance(np.array([[0.,0.],[3.,3.]]),updated,'rounded_triangle_dot',camera,segments=48)
+        self.assertLess(distance[0],0.)
+        self.assertGreater(distance[1],0.)
+
     def test_numpy_control_values_have_builtin_json_semantic_response(self):
         wire,_=self.fixture('capsule')
         updated=family_program_update(wire,'capsule',{'segment_height_world':np.float64(.93)})

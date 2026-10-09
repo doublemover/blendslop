@@ -50,6 +50,38 @@ def failure_receipt(primary, protocol, cases, frames):
     return value
 
 
+def verify_baseline_input(item, wire):
+    """Read the real original single-case or grouped receipt without adoption."""
+    directory=Path(item['baseline_directory'])
+    receipt=read_json(item['baseline_receipt'])
+    layout=item.get('baseline_receipt_layout','grouped_cases')
+    if layout=='single_case':
+        if item['family']!='rounded_triangle_dot':
+            raise ValueError('single-case receipt layout is declared only for the retained triangle')
+        bound=receipt;owner_root=directory;prefix=''
+    elif layout=='grouped_cases':
+        bound=receipt['cases'][item['family']];owner_root=directory.parent;prefix=item['family']+'/'
+    else:
+        raise ValueError('unknown retained baseline receipt layout')
+    if (bound['program']!=wire or bound['geometry_hash']!=item['baseline_geometry_hash']
+            or bound['surface_observation']!=item['baseline_raw_surface']):
+        raise ValueError('declared baseline is not bound to its retained receipt')
+    if Path(item['baseline_receipt']).resolve()!=owner_root/'results.json':
+        raise ValueError('baseline receipt must be the original owner result')
+    manifest=read_json(owner_root/'run-ownership.json');lease=read_json(owner_root/'run-lease.json')
+    if (manifest['state']!='succeeded' or lease['status']!='released'
+            or manifest['run_root']!=str(owner_root.resolve())
+            or manifest['run_id']!=lease['run_id'] or manifest['owner_token']!=lease['owner_token']):
+        raise ValueError('retained baseline owner is not completed/released and identity-bound')
+    artifacts={row['path']:row for row in manifest['artifacts']}
+    for relative in ('results.json',prefix+'program.json',prefix+'evaluated-exact.npz',prefix+'evaluated.obj'):
+        if sha(owner_root/relative)!=artifacts[relative]['sha256']:
+            raise ValueError('retained baseline owned byte identity changed')
+    if sha(directory/'program.json')!=item['program_sha256']:
+        raise ValueError('retained recipe changed')
+    return bound
+
+
 def main():
     import bpy
     import numpy as np
@@ -165,21 +197,7 @@ def main():
             for item in plan['cases']:
                 deadline();family=item['family'];print('adaptive family '+family,flush=True)
                 directory=Path(item['baseline_directory']);wire=read_json(directory/'program.json')
-                receipt=read_json(item['baseline_receipt'])
-                bound=receipt['cases'][family]
-                if (bound['program']!=wire or bound['geometry_hash']!=item['baseline_geometry_hash']
-                        or bound['surface_observation']!=item['baseline_raw_surface']):
-                    raise ValueError('declared baseline is not bound to its retained receipt')
-                manifest=read_json(directory.parent/'run-ownership.json')
-                lease=read_json(directory.parent/'run-lease.json')
-                if manifest['state']!='succeeded' or lease['status']!='released':
-                    raise ValueError('retained baseline owner is not completed/released')
-                artifacts={row['path']:row for row in manifest['artifacts']}
-                for relative in ('results.json',family+'/program.json',family+'/evaluated-exact.npz',family+'/evaluated.obj'):
-                    if sha(directory.parent/relative)!=artifacts[relative]['sha256']:
-                        raise ValueError('retained baseline owned byte identity changed')
-                if sha(directory/'program.json')!=item['program_sha256']:
-                    raise ValueError('retained recipe changed')
+                verify_baseline_input(item,wire)
                 baseline_program=retained_family_program(wire)
                 baseline=compile_shape_program(baseline_program,lathe_segments=96,weighted_normals=False)
                 baseline_arrays=evaluated_arrays(baseline.root_object)
@@ -271,6 +289,10 @@ def main():
                     elif family in ('capsule','tapered_frustum'):
                         response=response_contract(family,physical_observation(family,before,sources[0]),
                             physical_observation(family,changed,sources[0]),refined_program.root_nodes[0].parameters)
+                    elif family == 'rounded_triangle_dot':
+                        from reconstruction.triangle_edit_observation import triangle_corner_response
+                        response=triangle_corner_response(before,changed,np.asarray(sources[0].matrix_world),
+                            refined_program.root_nodes[0].parameters,multiplier=item['semantic_multiplier'])
                     else:
                         response={'passed':False,'status':'unsupported physical response in this checkpoint'}
                 finally:

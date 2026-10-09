@@ -28,15 +28,15 @@ Read-only comparison of retained capsule alpha gives boundary IoU0.984654731 to0
 
 The failed-only continuation joined successfully in8.179504 seconds with628,510,720 peak process-tree RSS bytes. It made exactly six new torus acquisitions, reused all six capsule acquisitions, ran one torus update and recorded two raw pairs/two semantic transactions. Both owners remain retained: the first failed/released33-artifact owner and the final succeeded/released42-artifact owner. Their files all match their ownership digests. No current source or selected row was mutated. The first-run script and adapter bytes are retained under `native-source-run01`, with hashes equal to the original frozen plan.
 
-| Independent observation | Capsule baseline → local update | Torus baseline → local update |
+| Independent observation | Capsule baseline â†’ local update | Torus baseline â†’ local update |
 |---|---|---|
-| held-out ob145 boundary IoU |0.984654731 →0.986687148|0.985186574 →0.993036605|
-| held-out controlled alpha L1 |0.000173569919 →0.000148054518|0.000304355024 →0.000148501626|
+| held-out ob145 boundary IoU |0.984654731 â†’0.986687148|0.985186574 â†’0.993036605|
+| held-out controlled alpha L1 |0.000173569919 â†’0.000148054518|0.000304355024 â†’0.000148501626|
 | relative alpha error reduction |14.700359%|51.207763%|
-| raw mean surface distance, world |0.000297955525 →0.000283499570|0.000172927973 →0.000076015889|
+| raw mean surface distance, world |0.000297955525 â†’0.000283499570|0.000172927973 â†’0.000076015889|
 | local calls / solver time |14 /.478501 seconds|14 /.044873 seconds|
 | local sensitivity |rank2, no active interval bound|rank2, no active interval bound|
-| exact semantic restoration |straight segment×1.05 passed|minor tube radius×1.05 passed|
+| exact semantic restoration |straight segmentÃ—1.05 passed|minor tube radiusÃ—1.05 passed|
 | full changed-candidate five-view/boundary/canonical verdicts |unrun|unrun|
 | independent artist surface limits |unavailable|unavailable|
 
@@ -47,3 +47,6 @@ Both held-out strict silhouettes pass and the predeclared local checkpoint impro
 The complete512-square source/baseline/refined pixels were inspected, together with both genuine1024 detail crops. The capsule remains connected and the ring hole remains open. Both crops visibly cross their frame borders, consistent with the recorded censored-contour scope. The fine changes appear as narrow boundary/AA improvements, not a new large visible shape. [pixel-evidence.json](pixel-evidence.json) binds the exact retained arrays and display scaling; the figure performs no acquisition or fitting. [quality-checkpoints.csv](quality-checkpoints.csv) records the numeric comparison.
 
 Frustum and arch share the bounded update implementation and pass pure recovery/fixed-parameter tests; native adaptive experiments remain unrun. The useful next engineering step is the remaining controlled validation cameras and independent geometry/semantic verdicts for any candidate proposed as a current-row replacement. Root owns candidate-blind source engineering contracts and canonical recapture. Original legacy missing clip/shift/camera-binding provenance stays explicit; actual matching clipping/shifts are captured by the new controlled contracts only.
+
+
+After native checkpoint commit2f9421f, a pure `rounded_triangle_dot` adapter extension adds explicit scaleX/scaleY/corner-radius controls. It fixes depth/front fraction/pose/template and the existing32/64 tessellation, retaining6239 vertices. A bounded eight-entry recipe-derived affine vertex basis avoids repeated full mesh validation for the two fitting cameras; direct mesh comparisons differ by at most8.88e-16 world. This is a proposal optimization, independent of native geometry identity/admission. Fifteen focused adaptive checks pass3.500 seconds. The96-call /1-second two-observation cost fixture completes27calls /.337401 seconds with local rank3. Root owns the separate triangle native wrapper and evidence; no triangle native run belongs to this report. Capsule/torus native evidence remains bound to its original checkpoint bytes/hashes.
