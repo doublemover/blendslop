@@ -1,0 +1,328 @@
+{
+  "protocol": "controlled-measurement-validation-v1",
+  "native_result": {
+    "status": "passed",
+    "renders": 3,
+    "resolution": [
+      128,
+      128
+    ],
+    "display_independent_exact_coverage": true,
+    "fractional_edge_pixels": 718,
+    "display_pair": {
+      "view": "top",
+      "area_iou": 1.0,
+      "boundary_iou": 1.0,
+      "soft_iou": null,
+      "signed_distance_loss": 0.0,
+      "intersection": 5030,
+      "union": 5030,
+      "ref_area": 5030,
+      "render_area": 5030,
+      "required": true,
+      "passed": true,
+      "pass": true,
+      "reason": "",
+      "warnings": [],
+      "iou": 1.0,
+      "threshold": 0.7,
+      "precision": 1.0,
+      "recall": 1.0,
+      "area_ratio": 1.0,
+      "centroid_delta_px": [
+        0.0,
+        0.0
+      ],
+      "pixel_difference": 0.0,
+      "thresholds": {
+        "min_area_iou": 0.7,
+        "min_boundary_iou": 0.8,
+        "max_signed_distance_loss": 0.05
+      },
+      "measurement_protocol": "opaque_linear_alpha_v1",
+      "coverage_l1": 0.0,
+      "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+    },
+    "changed_geometry_pair": {
+      "view": "top",
+      "area_iou": 0.8934280639431617,
+      "boundary_iou": 0.5034246575342466,
+      "soft_iou": null,
+      "signed_distance_loss": 0.01402876916858986,
+      "intersection": 5030,
+      "union": 5630,
+      "ref_area": 5030,
+      "render_area": 5630,
+      "required": true,
+      "passed": false,
+      "pass": false,
+      "reason": "boundary_iou 0.5034 below 0.8000",
+      "warnings": [],
+      "iou": 0.8934280639431617,
+      "threshold": 0.7,
+      "precision": 0.8934280639431617,
+      "recall": 1.0,
+      "area_ratio": 1.1192842942345924,
+      "centroid_delta_px": [
+        0.03197158081704998,
+        -0.0063943161634085754
+      ],
+      "pixel_difference": 0.03662109375,
+      "thresholds": {
+        "min_area_iou": 0.7,
+        "min_boundary_iou": 0.8,
+        "max_signed_distance_loss": 0.05
+      },
+      "measurement_protocol": "opaque_linear_alpha_v1",
+      "coverage_l1": 0.036875925958156586,
+      "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+    },
+    "preview_state_restored": true,
+    "records": [
+      {
+        "contract": {
+          "protocol": "opaque_linear_alpha_v1",
+          "hard_mask_threshold": 0.5,
+          "camera": {
+            "projection": "ORTHO",
+            "matrix_world": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                4.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.5,
+            "shift_x": 0.0,
+            "shift_y": 0.0,
+            "clip_start": 0.10000000149011612,
+            "clip_end": 1000.0,
+            "resolution": [
+              128,
+              128
+            ],
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ]
+          },
+          "renderer": {
+            "engine": "BLENDER_EEVEE",
+            "blender_version": [
+              5,
+              2,
+              2
+            ],
+            "build_hash": "d13f752e3b9c"
+          },
+          "sampling": {
+            "taa_render_samples": 64,
+            "filter_size": 1.5,
+            "motion_blur": false,
+            "depth_of_field": false
+          },
+          "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+          "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+          "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+        },
+        "contract_sha256": "c8d806e8c22a72627de4e990cab5e318f9de8f008653f390d0678b6403a44ecb",
+        "geometry_hashes": [
+          "0e1fd5df39515c869d39fd022c6736e3917cc1f2083250d7bbdd64e8da8cdb2c"
+        ],
+        "geometry_unchanged": true,
+        "exr_sha256": "a6e49fc4a77f288ab1c6c03078b9b122d9686833d80dc8d077b93aa17c68770b"
+      },
+      {
+        "contract": {
+          "protocol": "opaque_linear_alpha_v1",
+          "hard_mask_threshold": 0.5,
+          "camera": {
+            "projection": "ORTHO",
+            "matrix_world": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                4.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.5,
+            "shift_x": 0.0,
+            "shift_y": 0.0,
+            "clip_start": 0.10000000149011612,
+            "clip_end": 1000.0,
+            "resolution": [
+              128,
+              128
+            ],
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ]
+          },
+          "renderer": {
+            "engine": "BLENDER_EEVEE",
+            "blender_version": [
+              5,
+              2,
+              2
+            ],
+            "build_hash": "d13f752e3b9c"
+          },
+          "sampling": {
+            "taa_render_samples": 64,
+            "filter_size": 1.5,
+            "motion_blur": false,
+            "depth_of_field": false
+          },
+          "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+          "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+          "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+        },
+        "contract_sha256": "c8d806e8c22a72627de4e990cab5e318f9de8f008653f390d0678b6403a44ecb",
+        "geometry_hashes": [
+          "0e1fd5df39515c869d39fd022c6736e3917cc1f2083250d7bbdd64e8da8cdb2c"
+        ],
+        "geometry_unchanged": true,
+        "exr_sha256": "3958841f6c0c5ce8751237fdd05140b062075339f7da02365de974095e837bc4"
+      },
+      {
+        "contract": {
+          "protocol": "opaque_linear_alpha_v1",
+          "hard_mask_threshold": 0.5,
+          "camera": {
+            "projection": "ORTHO",
+            "matrix_world": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                4.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.5,
+            "shift_x": 0.0,
+            "shift_y": 0.0,
+            "clip_start": 0.10000000149011612,
+            "clip_end": 1000.0,
+            "resolution": [
+              128,
+              128
+            ],
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ]
+          },
+          "renderer": {
+            "engine": "BLENDER_EEVEE",
+            "blender_version": [
+              5,
+              2,
+              2
+            ],
+            "build_hash": "d13f752e3b9c"
+          },
+          "sampling": {
+            "taa_render_samples": 64,
+            "filter_size": 1.5,
+            "motion_blur": false,
+            "depth_of_field": false
+          },
+          "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+          "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+          "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+        },
+        "contract_sha256": "c8d806e8c22a72627de4e990cab5e318f9de8f008653f390d0678b6403a44ecb",
+        "geometry_hashes": [
+          "3dae0308b65f1a705f50ba2f740d33b2bd0882900cdc585b1c305532c32c6945"
+        ],
+        "geometry_unchanged": true,
+        "exr_sha256": "d73baf5b854acecd29f88ae5b40f9bc93b6a4a5b1762788488629b0c0262de0c"
+      }
+    ],
+    "scope": "measurement protocol fixture only; no family acceptance, fitting or surface qualification"
+  },
+  "native_result_path": "temp\\tasks\\quality-continuation-20261008\\controlled-measurement-01\\owned-xpuizccj\\results.json",
+  "native_result_sha256": "10ee9ff5fbf7bf45c6583787525f42468778e72c7e56ff2aee100e9dbf877736",
+  "resource": {
+    "exit_code": 0,
+    "elapsed_seconds": 5.90454370000225,
+    "peak_tree_rss_bytes": 500105216,
+    "budget_seconds": 60,
+    "budget_rss_bytes": 8589934592,
+    "terminated_reason": null,
+    "blender_threads": 2,
+    "scope": "three controlled measurement renders at128 square; zero fits/raw surfaces/qualifier children",
+    "command": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_controlled_measurement_check.py",
+      "--",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\controlled-measurement-01"
+    ]
+  },
+  "family_acceptance": false,
+  "historical_evidence": "unchanged; separate display-PNG protocol, no threshold substitution"
+}

@@ -1,0 +1,291 @@
+{
+  "candidate_accessed": false,
+  "correction": "Native sphere mesh indexing is allocation-dependent. Continuation requires exact binary64 vertex-coordinate multiset and oriented triangle-coordinate multiset equality, preserving winding and diagonal choices. This is reference-surface geometry equivalence, not topology identity qualification.",
+  "error_floor_scope": "observed reference discretization against finer tessellations, with fixed4096area samples/seed61007; not a rigorous analytic upper bound",
+  "families": {
+    "rounded_triangle_dot": {
+      "authored_parameters": {
+        "builder": "rounded_triangle",
+        "corner_radius": 0.16,
+        "corner_segments": 32,
+        "dome": "z=+-thickness/2*cos(phi), outline_scale=sin(phi)",
+        "dome_segments": 64,
+        "thickness": 0.48,
+        "vertices_xy": [
+          [
+            0,
+            0.9
+          ],
+          [
+            -0.7794228634059948,
+            -0.45
+          ],
+          [
+            0.7794228634059948,
+            -0.45
+          ]
+        ]
+      },
+      "baseline_exact_reproduction": true,
+      "baseline_npz_sha256": "f6abc19a7ee7efbc62f3bc403b5e61ce6c426c64950604d0fa5cd7181c698cff",
+      "candidate_accessed": false,
+      "error_floor_scope": "observed reference discretization against finer tessellations; not a rigorous analytic upper bound",
+      "family": "rounded_triangle_dot",
+      "family_acceptance_contract": null,
+      "family_acceptance_status": "unqualified: no independently justified reconstruction tolerance",
+      "noise_floor_measured": true,
+      "noise_qualified": false,
+      "observations": {
+        "baseline_to_dense": {
+          "candidate_geometry_hash": "a6c97887408cbca1c6fa99fcbbf0735bc2e2fb753215c965b955256fd5df463c",
+          "distance_p95_world": 0.00018053550593322143,
+          "editability_verdict": "independent",
+          "metric_status": "measured",
+          "normal_angle_mean_degrees": 0.7661269970484368,
+          "normal_angle_p95_degrees": 1.7441249959469352,
+          "normal_interpretation": "geometric face normals, not shading normals",
+          "normal_orientation": "oriented; opposite normals are 180 degrees",
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "qualified_limits": null,
+          "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+          "sample_count_per_direction": 4096,
+          "sampled_max_distance_world": 0.0012753502232953906,
+          "seed": 61007,
+          "silhouette_verdict": "independent",
+          "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+          "surface_status": "unqualified",
+          "symmetric_mean_distance_world": 7.50104976250162e-05,
+          "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+          "units": "unchanged Blender world coordinates; no fitting or normalization"
+        },
+        "dense_to_finer": {
+          "candidate_geometry_hash": "9779ae43b629958c749810c3990b2fc5cdfc7eeedc4f466bb509685843649e65",
+          "distance_p95_world": 0.00028720647533191356,
+          "editability_verdict": "independent",
+          "metric_status": "measured",
+          "normal_angle_mean_degrees": 0.4001122165895248,
+          "normal_angle_p95_degrees": 0.892333383543617,
+          "normal_interpretation": "geometric face normals, not shading normals",
+          "normal_orientation": "oriented; opposite normals are 180 degrees",
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "qualified_limits": null,
+          "reference_geometry_hash": "a6c97887408cbca1c6fa99fcbbf0735bc2e2fb753215c965b955256fd5df463c",
+          "sample_count_per_direction": 4096,
+          "sampled_max_distance_world": 0.001466197893023491,
+          "seed": 61007,
+          "silhouette_verdict": "independent",
+          "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+          "surface_status": "unqualified",
+          "symmetric_mean_distance_world": 5.736732410433409e-05,
+          "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+          "units": "unchanged Blender world coordinates; no fitting or normalization"
+        }
+      },
+      "reference_geometry_hashes": {
+        "baseline": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+        "dense": "a6c97887408cbca1c6fa99fcbbf0735bc2e2fb753215c965b955256fd5df463c",
+        "finer": "9779ae43b629958c749810c3990b2fc5cdfc7eeedc4f466bb509685843649e65"
+      },
+      "reference_noise_status": "measured",
+      "tessellations": {
+        "baseline": {
+          "corner_segments": 32,
+          "dome_segments": 64
+        },
+        "dense": {
+          "corner_segments": 64,
+          "dome_segments": 128
+        },
+        "finer": {
+          "corner_segments": 128,
+          "dome_segments": 256
+        }
+      }
+    },
+    "sphere": {
+      "authored_parameters": {
+        "primitive": "sphere",
+        "radius": 0.8
+      },
+      "baseline_exact_oriented_surface_reproduction": true,
+      "baseline_identity": {
+        "equivalence_scope": "reference-surface geometric equivalence only: exact vertex multiset and oriented triangles; no numeric tolerance; topology identity remains independent",
+        "indexed_hash_matched": false,
+        "regenerated_geometry_hash": "bf505a0b756a55a67df26335d4d3ae1677d25eec37bf73eec5b67b0b61da5032",
+        "regenerated_oriented_surface_hash": "035f20b30cb7e2bd8e49cf5384e7cf4e7ea6feb0e1c9431dc3a05e744e56a5b0",
+        "retained_geometry_hash": "57b817e1ce32d58a55851ed448aad12ad4d2057c48066cd00f11aa41dff86fa9",
+        "retained_oriented_surface_hash": "035f20b30cb7e2bd8e49cf5384e7cf4e7ea6feb0e1c9431dc3a05e744e56a5b0"
+      },
+      "baseline_npz_sha256": "731414bb95d5ddf7c3806d9ca1903f1917e87d886f4030d97926d70a3d68bf9b",
+      "candidate_accessed": false,
+      "error_floor_scope": "observed reference discretization against finer tessellations; not a rigorous analytic upper bound",
+      "family": "sphere",
+      "family_acceptance_contract": null,
+      "family_acceptance_status": "unqualified: no independently justified reconstruction tolerance",
+      "noise_floor_measured": true,
+      "noise_qualified": false,
+      "observations": {
+        "baseline_to_dense": {
+          "candidate_geometry_hash": "653c34ef641be93f4da7a872fc2626de605d0f9ef810eb4668d9d05da8e86915",
+          "distance_p95_world": 0.0014510671840980648,
+          "editability_verdict": "independent",
+          "metric_status": "measured",
+          "normal_angle_mean_degrees": 1.8130574268647384,
+          "normal_angle_p95_degrees": 1.9884222323486211,
+          "normal_interpretation": "geometric face normals, not shading normals",
+          "normal_orientation": "oriented; opposite normals are 180 degrees",
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "qualified_limits": null,
+          "reference_geometry_hash": "57b817e1ce32d58a55851ed448aad12ad4d2057c48066cd00f11aa41dff86fa9",
+          "sample_count_per_direction": 4096,
+          "sampled_max_distance_world": 0.0019181000534445047,
+          "seed": 61007,
+          "silhouette_verdict": "independent",
+          "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+          "surface_status": "unqualified",
+          "symmetric_mean_distance_world": 0.0007974911469337265,
+          "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+          "units": "unchanged Blender world coordinates; no fitting or normalization"
+        },
+        "dense_to_finer": {
+          "candidate_geometry_hash": "052f4bce2be6a671484b9c2c762feb37f6b8af6edf642158150614c81b6ef857",
+          "distance_p95_world": 0.00036393326154211537,
+          "editability_verdict": "independent",
+          "metric_status": "measured",
+          "normal_angle_mean_degrees": 0.9046615256248958,
+          "normal_angle_p95_degrees": 0.9936388562646626,
+          "normal_interpretation": "geometric face normals, not shading normals",
+          "normal_orientation": "oriented; opposite normals are 180 degrees",
+          "protocol": "shared_world_area_sample_to_triangle_v1",
+          "qualified_limits": null,
+          "reference_geometry_hash": "653c34ef641be93f4da7a872fc2626de605d0f9ef810eb4668d9d05da8e86915",
+          "sample_count_per_direction": 4096,
+          "sampled_max_distance_world": 0.0004721662262454629,
+          "seed": 61007,
+          "silhouette_verdict": "independent",
+          "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+          "surface_status": "unqualified",
+          "symmetric_mean_distance_world": 0.00020122683701115363,
+          "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+          "units": "unchanged Blender world coordinates; no fitting or normalization"
+        }
+      },
+      "reference_geometry_hashes": {
+        "baseline": "57b817e1ce32d58a55851ed448aad12ad4d2057c48066cd00f11aa41dff86fa9",
+        "dense": "653c34ef641be93f4da7a872fc2626de605d0f9ef810eb4668d9d05da8e86915",
+        "finer": "052f4bce2be6a671484b9c2c762feb37f6b8af6edf642158150614c81b6ef857"
+      },
+      "reference_noise_status": "measured",
+      "tessellations": {
+        "baseline": {
+          "ring_count": 32,
+          "segments": 64
+        },
+        "dense": {
+          "ring_count": 64,
+          "segments": 128
+        },
+        "finer": {
+          "ring_count": 128,
+          "segments": 256
+        }
+      }
+    }
+  },
+  "family_acceptance_contract": null,
+  "family_acceptance_status": "unqualified: observed reference error alone does not justify allowable reconstruction error",
+  "preserved_failure": "Initial session measured triangle, then stopped before sphere metrics at strict indexed baseline hash. results.json had not yet been registered in that original manifest. Both old files and unknown-file blocker remain unchanged.",
+  "protocol": "independent_reference_noise_evidence_v1",
+  "runs": {
+    "initial_two_family": {
+      "ownership": {
+        "blockers": [
+          "unknown files present; ownership is not inferred"
+        ],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 1764641,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-native\\owned-jafutp70",
+        "status": "blocked",
+        "unknown_files": [
+          "results.json"
+        ]
+      },
+      "process": {
+        "bound_failure": null,
+        "child_joined": true,
+        "elapsed_seconds": 7.0980886,
+        "exit_code": 1,
+        "rss_limit_bytes": 8589934592,
+        "sampled_peak_rss_bytes": 339668992,
+        "threads": 2,
+        "wall_limit_seconds": 120
+      }
+    },
+    "sphere_only_continuation": {
+      "ownership": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 614832,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-sphere-continuation\\owned-njte6ocu",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "process": {
+        "bound_failure": null,
+        "child_joined": true,
+        "elapsed_seconds": 6.0062819,
+        "exit_code": 0,
+        "rss_limit_bytes": 8589934592,
+        "sampled_peak_rss_bytes": 266629120,
+        "threads": 2,
+        "wall_limit_seconds": 120
+      }
+    }
+  },
+  "sources": {
+    "sphere": {
+      "frozen-workload.json": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-sphere-continuation\\owned-njte6ocu\\frozen-workload.json",
+        "sha256": "d1fac2da7906a3e5e3d4c05670693ac580b624a7e489b9bd7718590d38296c57"
+      },
+      "results.json": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-sphere-continuation\\owned-njte6ocu\\results.json",
+        "sha256": "d8a4dbb167a2c03fa4fb2da0e56501c736a561294347063274be5d8e0db064c9"
+      },
+      "run-lease.json": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-sphere-continuation\\owned-njte6ocu\\run-lease.json",
+        "sha256": "fdb83abe7b2ac1d04642a3f9b402206b33e3154a409663a62f7348eff76c065a"
+      },
+      "run-ownership.json": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-sphere-continuation\\owned-njte6ocu\\run-ownership.json",
+        "sha256": "5d6c75b8793a1637803f857cb492cb774c3b47850305859dea738ce6d6e84c42"
+      }
+    },
+    "triangle": {
+      "frozen-workload.json": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-native\\owned-jafutp70\\frozen-workload.json",
+        "sha256": "a3a901e4a4cb6a1a1580b03cad379ca5c12a4371b21a5b01edb160512b8b225d"
+      },
+      "results.json": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-native\\owned-jafutp70\\results.json",
+        "sha256": "360eeb8ce7bb3ed8c38ade9ac032b092d46182a462fd76f78b7a9be2d28a6430"
+      },
+      "run-lease.json": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-native\\owned-jafutp70\\run-lease.json",
+        "sha256": "c196dc332ff662180c059911df7758807e1ae7992dee434f40bea786feb5791b"
+      },
+      "run-ownership.json": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-noise-native\\owned-jafutp70\\run-ownership.json",
+        "sha256": "a50fdf5ce1ec307825a16071cedc98904d9ee882b32d875c72756156b4e9a201"
+      }
+    }
+  }
+}

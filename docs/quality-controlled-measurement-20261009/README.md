@@ -1,0 +1,15 @@
+# Controlled measurement and human display
+
+Controlled renders now have a separate linear-alpha acquisition API. The targets are opaque geometry with transparent film; compositor, sequencer, world volume, depth of field and motion blur are excluded. The retained 32-bit OpenEXR alpha gives filtered antialiased coverage. A fixed coverage >= 0.5 rule produces the hard measurement mask. Pixel centers, camera matrix/scale/shifts/clips/aspect, Blender build, sample count and filter width are recorded; source/candidate acquisition must match exactly before the existing strict silhouette gates run. Geometry identity is captured before and after rendering.
+
+This keeps subpixel edge information without treating tone-mapped RGB brightness as occupancy. Float coverage can feed the existing coverage constraints directly. Binary masks serve area/boundary/SDF metrics. Exact evaluated geometry remains the surface/topology input; this mask does not replace 3D checks or claim a hidden contour. Preview materials, color management and scene state are restored after measurement. No display-material style is a geometry verdict.
+
+The three-render 128-square fixture passed in 5.905 seconds, peak 500,105,216 RSS, two threads. AgX/exposure 0/gamma 1 and Standard/exposure +3/gamma 2 produced exactly identical float coverage, with 718 fractional pixels. A deliberate 12% width change still failed the unchanged boundary-IoU minimum 0.8 (measured 0.503424658). Its area IoU 0.893428064 and SDF 0.014028769 passed their independent gates. This negative detects geometry change; it is not a failed reconstruction row.
+
+The older five-view family receipts remain display-PNG comparisons with explicit calibrated AgX inversion for fitting. Their original area >= 0.7, boundary >= 0.8 and SDF <= 0.05 verdicts are preserved. External images can still use `coverage_from_grayscale` with an explicit compatible transfer, or segmentation evidence without claiming physical coverage. Unknown lighting/tone mapping/materials cannot be converted into occupancy by guessing. Existing receipts are not retroactively relabeled controlled alpha.
+
+The reusable APIs are `controlled_measurement_session`, `render_controlled_measurement`, and `compare_controlled_measurements`. The last requires matching acquisition and explicit gate configuration. `run_controlled_measurement_check.py` is the small native contract fixture, not a benchmark. Seven focused pure checks cover fractional precision, malformed evidence, mismatched/absent cameras, sampling, resolution and unchanged gate values.
+
+[validation.json](validation.json) retains the exact native result, camera/sampling records, resource receipt and original-result SHA. Remaining integration: controlled source/candidate family acquisition and the bounded adaptive-resolution experiment; full old-packet migration is not required to retain historical conclusions.
+
+Blender documents OpenEXR as scene-linear high-precision intermediate data: https://docs.blender.org/manual/en/latest/render/color_management/color_spaces.html .

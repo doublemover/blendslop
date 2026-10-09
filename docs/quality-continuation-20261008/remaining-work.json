@@ -1,0 +1,136 @@
+{
+  "protocol": "remaining-quality-work-inventory-v1",
+  "created_for_batch": "2026-10-08",
+  "updated_date": "2026-10-09",
+  "scope": "full retained delegated quality and lifecycle backlog; no aggregate pass over required gaps",
+  "source_branch": "local/quality-continuation-20261008",
+  "published_showcase_commit": "d5e981659a18c435ccbe7cc072b873e5b1707645",
+  "tracks": [
+    {
+      "task": "QUALITY-SURFACE1",
+      "state": "local calibrated vase accepted; published predecessor still fails",
+      "completed": [
+        "explicit AgX coverage inversion and half-coverage fitting",
+        "terminal flat-cap completion with explicit prior",
+        "orthographic replay contract",
+        "exact-contact allocation optimization under unchanged15-second allowance",
+        "five strict silhouettes, raw qualified vase surface, source-section edit and fresh native boundary qualification"
+      ],
+      "remaining": [
+        "independent non-vase surface contracts",
+        "historical scalloped-input repair against an explicitly authored smooth target"
+      ],
+      "blocking_input": "Historical smooth target is not authored; shape intent cannot be inferred as a ground-truth acceptance claim."
+    },
+    {
+      "task": "QUALITY-COVERAGE1",
+      "state": "nine additional actual families passed45strict silhouettes and native boundaries; seven semantic edits passed; multipart implementation underway",
+      "completed": [
+        "frozen12-family reference matrix and intentional depth/cavity/multipart negatives",
+        "observed-mask fitting for sphere, ellipsoid, cylinder, frustum, corrected capsule, rounded box and thin plate",
+        "clipped oblique supports represented as one-sided censored evidence",
+        "rounded-box world bevel targets the actual mesh descendant",
+        "seven exact-indexed candidate replays with105mask/neutral/RGBnormal outputs",
+        "35of35 unchanged strict silhouette view gates passed",
+        "sevenofseven content-scoped native solid boundaries qualified",
+        "observed arch extrusion and hole-aware torus proposals; geometry04 retained",
+        "arch/torus ten strict view gates and two native boundaries qualified",
+        "seven family-specific source-control transactions with exact indexed restoration"
+      ],
+      "remaining": [
+        "bounded observed-mask multipart proposal",
+        "independent family surface contracts",
+        "arch/torus/multipart semantic source controls and exact restoration"
+      ],
+      "blocking_input": null
+    },
+    {
+      "task": "QUALITY-TRIANGLE1",
+      "state": "authored rounded reference and editable reconstruction retained; surface remains unqualified",
+      "completed": [
+        "corner radius, thickness and asymmetric front/back profile controls",
+        "five strict silhouettes and24-direction support/thickness checks",
+        "retained native boundary qualification",
+        "candidate-blind baseline/dense/finer reference comparisons"
+      ],
+      "remaining": [
+        "independent acceptable reconstruction error contract",
+        "qualified surface verdict",
+        "complete matched source/candidate five-view neutral and normal retention where missing"
+      ],
+      "blocking_input": "Reference discretization measurements establish a noise observation, not an acceptable artist reconstruction tolerance."
+    },
+    {
+      "task": "CANONICAL-EVIDENCE",
+      "state": "135 actual passes and35matched authored-neutral frames retained; strict legacy frame/clip gaps preserved",
+      "completed": [
+        "all five mask/neutral/normal slots retained independently of presentation curation",
+        "geometry/camera/frame/pass hashes and explicit unrun/unavailable states",
+        "18-row existing evidence audit",
+        "candidate-blind sphere and triangle reference-noise observations",
+        "seven actual five-view inspection receipts; all105passbindings verified",
+        "35 authored source neutral frames exactly match candidate native frames and clips",
+        "actual source/candidate polygon/custom-normal/modifier style captured"
+      ],
+      "remaining": [
+        "resolve or retain explicit old mask/clip provenance gaps",
+        "local commit and final integration review"
+      ],
+      "blocking_input": null
+    },
+    {
+      "task": "RUN-CLEANUP1",
+      "state": "ownership adoption continues; reclamation remains read-only",
+      "completed": [
+        "explicit manifest/lease ownership design and conservative read-only planner",
+        "fresh native helper and warm numeric producer ownership",
+        "cold DVX owned transport with eight focused stdlib/mock lifecycle checks",
+        "child joining before release and active lease when joining is unconfirmed",
+        "original error preservation and retained failed history"
+      ],
+      "remaining": [
+        "production render/variant ownership adoption",
+        "atomic final-output promotion integration",
+        "crash recovery ownership decision",
+        "concurrent lease and locked-file integration fixtures"
+      ],
+      "blocking_input": "No historical adoption, deletion executor or blanket cleanup is authorized."
+    },
+    {
+      "task": "MEASUREMENT-ADAPTIVE-PRESENTATION",
+      "state": "linear-alpha API and tiny display-independence fixture passed; bounded adaptive experiment authorized",
+      "completed": [
+        "dedicated32-bit linear-alpha occupancy and fixed half-coverage masks",
+        "strict matched acquisition camera/sampling/encoding checks; preview state restoration",
+        "three128-square renders show exact display invariance and detect deliberate shape change"
+      ],
+      "remaining": [
+        "representative512global plus genuinely rendered highres crop experiment with frozen independent views",
+        "iterate bounded alternatives when results justify",
+        "attractive highres color/lit display-only renders and reviewed preview-page proposal"
+      ],
+      "blocking_input": null
+    },
+    {
+      "task": "INTEGRATION-PUBLICATION",
+      "state": "local isolated quality branch; approval required before external quality publication",
+      "completed": [
+        "owner checkout preserved on endblay_opslay",
+        "quality work isolated on local/quality-continuation-20261008",
+        "public showcase PR6 already merged and verified separately"
+      ],
+      "remaining": [
+        "integrate and review local completed batches",
+        "refresh main/source lineage and select reviewed destination",
+        "parent approval before quality PR/retarget/merge/publication"
+      ],
+      "blocking_input": "No quality publication approval has been received."
+    }
+  ],
+  "validation_policy": "existing full Blender suite/seven-control packet retained; only bounded missing-behavior checks",
+  "local_commits": [
+    "424759d06585f2bc589fc29bb16c70198a83395a",
+    "723a553"
+  ],
+  "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark"
+}

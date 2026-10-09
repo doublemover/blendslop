@@ -1,0 +1,63 @@
+{
+  "selected_modules": [
+    [
+      "pure_canonical_artifacts",
+      "test_canonical_artifacts"
+    ],
+    [
+      "pure_frozen_family",
+      "test_frozen_family"
+    ],
+    [
+      "pure_reference_noise",
+      "test_reference_noise"
+    ],
+    [
+      "pure_structured_family",
+      "test_structured_family"
+    ],
+    [
+      "pure_shape_program_world_bevel",
+      "test_shape_program_world_bevel"
+    ],
+    [
+      "pure_family_source_edits",
+      "test_family_source_edits"
+    ],
+    [
+      "pure_reference_neutral_style",
+      "test_reference_neutral_style"
+    ],
+    [
+      "pure_controlled_measurement",
+      "test_controlled_measurement"
+    ]
+  ],
+  "results": {
+    "pure_canonical_artifacts": true,
+    "pure_frozen_family": true,
+    "pure_reference_noise": true,
+    "pure_structured_family": true,
+    "pure_shape_program_world_bevel": true,
+    "pure_family_source_edits": true,
+    "pure_reference_neutral_style": true,
+    "pure_controlled_measurement": true
+  },
+  "test_counts": {
+    "test_canonical_artifacts": 17,
+    "test_frozen_family": 11,
+    "test_reference_noise": 6,
+    "test_structured_family": 6,
+    "test_shape_program_world_bevel": 6,
+    "test_family_source_edits": 4,
+    "test_reference_neutral_style": 2,
+    "test_controlled_measurement": 7
+  },
+  "total_checks": 59,
+  "ordinary_native_skips": 2,
+  "changed_python_ast": "passed",
+  "changed_json_parse": "passed",
+  "text_encoding_gaps": [],
+  "retained_native_measurement_contracts": "verified",
+  "scope": "focused integration only; retained full suite not rerun"
+}

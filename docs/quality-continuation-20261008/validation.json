@@ -1,0 +1,26 @@
+{
+  "protocol": "quality-continuation-targeted-checks-v1",
+  "focused_modules": [
+    "test_canonical_artifacts",
+    "test_frozen_family",
+    "test_reference_noise",
+    "test_cold_dvx_ownership"
+  ],
+  "checks_completed_at_integration": 40,
+  "failures": 0,
+  "errors": 0,
+  "runner": "test_runner.run_unittest_modules(selected registered modules)",
+  "later_added_camera_regression": "passed in registered focused second run",
+  "native_stage": "seven saved boundaries passed under existing runtime",
+  "full_suite": "retained, not rerun",
+  "second_focused_modules": [
+    "test_canonical_artifacts",
+    "test_frozen_family",
+    "test_reference_noise",
+    "test_structured_family",
+    "test_shape_program_world_bevel"
+  ],
+  "second_focused_checks_passed": 41,
+  "second_focused_native_skips": 2,
+  "native_world_bevel": "two ordinary checks scheduled within approved source-control session"
+}

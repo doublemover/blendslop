@@ -12,32 +12,18 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "blender_blocking"), str(ROOT), str(ROOT / "scripts")]
 import test_runner  # expose existing qualified dependency paths after bundled packages
-from run_surface_quality_check import _object, _view, _write, _replay_orthographic_camera
+from run_surface_quality_check import _object, _write, _renders
 
 
-def render_masks(obj, folder, bounds, views, *, camera_records=None):
+def render_masks(obj, folder, bounds, views, *, camera_records=None,
+                 inspection_passes=("mask", "neutral")):
+    """Retain matched shaded inspection alongside the existing mask interface."""
     import numpy as np
     from PIL import Image
-    from integration.blender_ops.silhouette_render import silhouette_session, render_silhouette_frame
-    from reconstruction.native_geometry import evaluated_arrays
-    before = evaluated_arrays(obj).content_hash
-    masks, cameras = {}, {}
-    with silhouette_session(target_objects=[obj], resolution=(512, 512), color_mode="BW",
-                            transparent_bg=False, engine="BLENDER_EEVEE",
-                            background_color=(1, 1, 1, 1), silhouette_color=(0, 0, 0, 1)) as session:
-        for view in views:
-            if camera_records is None:
-                _view(session.camera, view, *bounds)
-            else:
-                _replay_orthographic_camera(session.camera, camera_records[view])
-            path = folder / (view + "-mask.png")
-            render_silhouette_frame(session, path)
-            masks[view] = np.asarray(Image.open(path).convert("L")) < 128
-            cameras[view] = {"matrix_world": [list(row) for row in session.camera.matrix_world],
-                             "ortho_scale": session.camera.data.ortho_scale,
-                             "png_sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
-    if evaluated_arrays(obj).content_hash != before:
-        raise ValueError("rendered geometry differs from exported geometry")
+    cameras = {}
+    paths = _renders(obj, folder, bounds, views, camera_records=camera_records,
+                     captured_cameras=cameras, inspection_passes=inspection_passes)
+    masks = {view: np.asarray(Image.open(path).convert("L")) < 128 for view, path in paths.items()}
     return masks, cameras
 
 
@@ -62,7 +48,8 @@ def main():
     from reconstruction.grouped_solids import solid_guard
     from synthetic.quality_references import (build_quality_reference, coverage_fixture_contract,
                                               quality_feature_verdict, coverage_acceptance)
-    from evaluation.surface_quality import compare_surface_arrays, circular_profile_continuity
+    from evaluation.surface_quality import circular_profile_continuity
+    from evaluation.canonical_artifacts import canonical_artifact_inventory, raw_surface_observation
     from evaluation.silhouette_eval import evaluate_silhouette_pair
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
@@ -78,7 +65,8 @@ def main():
     workload["source_head"] = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     workload["source_files_sha256"] = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
         for p in (ROOT / "scripts/run_quality_coverage_check.py", ROOT / "blender_blocking/synthetic/quality_references.py",
-                  ROOT / "blender_blocking/synthetic/quality_contracts.py", ROOT / "blender_blocking/synthetic/blender_builders.py")}
+                  ROOT / "blender_blocking/synthetic/quality_contracts.py", ROOT / "blender_blocking/synthetic/blender_builders.py",
+                  ROOT / "scripts/run_surface_quality_check.py", ROOT / "blender_blocking/evaluation/canonical_artifacts.py")}
     workload["working_tree_diff_sha256"] = hashlib.sha256(subprocess.check_output(["git", "diff", "HEAD"], cwd=ROOT)).hexdigest()
     workload["environment"] = {"blender": bpy.app.version_string, "python": sys.version,
                                "numpy": np.__version__, "numpy_path": np.__file__}
@@ -114,9 +102,15 @@ def main():
                "silhouette": {"status": "blocked", "reason": "reference masks are inputs, not reconstructed acceptance"}}
         if name == "smooth_vase":
             row["profile_continuity"] = circular_profile_continuity(data.vertices)
+        cameras = {}
         if not args.skip_renders:
             reference_masks, cameras = render_masks(obj, folder, bounds, workload["views"])
             row["reference_cameras"] = cameras
+        row["canonical_inspection"] = canonical_artifact_inventory(
+            folder, geometry_hash=data.content_hash, camera_records=cameras,
+            pass_states={"mask": "unrun" if args.skip_renders else "completed",
+                         "neutral": "unrun" if args.skip_renders else "completed", "normals": "unrun"})
+        _write(folder / "canonical-inspection.json", row["canonical_inspection"])
         for control, declaration in workload["negative_controls"].items():
             if declaration["family"] != name:
                 continue
@@ -142,13 +136,20 @@ def main():
             feature = quality_feature_verdict(name, negative)
             control_row = {**negative_hashes, "features": feature,
                            "expected_failure_detected": feature["status"] == "failed",
-                           "surface_observation": compare_surface_arrays(data, negative),
-                           "surface_qualification": "diagnostic thresholds only; family gates remain blocked"}
+                           "surface_observation": raw_surface_observation(data, negative),
+                           "surface_qualification": "raw observations only; independent family gates remain unqualified"}
+            control_cameras = {}
             if not args.skip_renders:
-                masks, cameras = render_masks(control_obj, control_folder, bounds, workload["views"])
+                masks, control_cameras = render_masks(control_obj, control_folder, bounds, workload["views"], camera_records=cameras)
                 control_row["silhouette"] = {v: evaluate_silhouette_pair(reference_masks[v], masks[v], view=v)
                                              for v in workload["views"]}
-                control_row["cameras"] = cameras
+                control_row["cameras"] = control_cameras
+            control_row["canonical_inspection"] = canonical_artifact_inventory(
+                control_folder, geometry_hash=negative.content_hash, camera_records=control_cameras,
+                reference_camera_records=cameras if not args.skip_renders else None,
+                pass_states={"mask": "unrun" if args.skip_renders else "completed",
+                             "neutral": "unrun" if args.skip_renders else "completed", "normals": "unrun"})
+            _write(control_folder / "canonical-inspection.json", control_row["canonical_inspection"])
             receipt["negative_controls"][control] = control_row
             mesh = control_obj.data
             bpy.data.objects.remove(control_obj, do_unlink=True)
