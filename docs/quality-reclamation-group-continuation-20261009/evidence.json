@@ -1,0 +1,137 @@
+{
+  "protocol": "nested-owner-group-checkpoint-v1",
+  "source_evidence": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\evidence.json",
+    "sha256": "bfdb18815fb4c007332a21742159b495f69d00bcc34e9868348d1d2d78f325fc"
+  },
+  "bounded_group_audit_seconds": 0.09456860000136658,
+  "hash_allowance_bytes": 33554432,
+  "actual_group_plan": {
+    "protocol": "explicit-run-group-reclamation-plan-v1",
+    "mode": "read_only",
+    "status": "dry_run_ready",
+    "mutation_supported": false,
+    "lease_release_supported": false,
+    "process_exit_verified": false,
+    "owners": [
+      {
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr",
+        "run_id": "35f4c9cf5b0440d3a07838a9296fe72e",
+        "owner_token_matched": true,
+        "snapshot": {
+          "manifest_sha256": "c5d51b718590dc8820b3eb2592f6ed64288b4af26a411fdc1c48c78dfd304faf",
+          "lease_sha256": "6ccc6af3d15bfcdbbc811dab6c5f22f44b2ebaefa1e66912e77f0346d53fa137"
+        },
+        "flat_plan": {
+          "protocol": "run-ownership-dry-run-v1",
+          "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr",
+          "mode": "read_only",
+          "status": "blocked",
+          "mutation_supported": false,
+          "eligible": [],
+          "eligible_bytes": 0,
+          "retained_bytes": 1025031,
+          "blockers": [
+            "unknown files present; ownership is not inferred"
+          ],
+          "unknown_files": [
+            "qualification-children/owned-pd7o3rkz/helper-cleanup.json",
+            "qualification-children/owned-pd7o3rkz/helper-log-tail.txt",
+            "qualification-children/owned-pd7o3rkz/input.npz",
+            "qualification-children/owned-pd7o3rkz/receipt.json",
+            "qualification-children/owned-pd7o3rkz/run-lease.json",
+            "qualification-children/owned-pd7o3rkz/run-ownership.json"
+          ]
+        },
+        "nested_owned_files": [
+          "qualification-children/owned-pd7o3rkz/helper-cleanup.json",
+          "qualification-children/owned-pd7o3rkz/helper-log-tail.txt",
+          "qualification-children/owned-pd7o3rkz/input.npz",
+          "qualification-children/owned-pd7o3rkz/receipt.json",
+          "qualification-children/owned-pd7o3rkz/run-lease.json",
+          "qualification-children/owned-pd7o3rkz/run-ownership.json"
+        ]
+      },
+      {
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz",
+        "run_id": "a3bd878c16cd4a19bc18327beb598a21",
+        "owner_token_matched": true,
+        "snapshot": {
+          "manifest_sha256": "df784db492cd79c14c20cebf9ba69b9cc4b0cff10bd809c4620483b01062146e",
+          "lease_sha256": "4b5f918a583c5d82b9dbdae03ff51bcf9a98f03807b389fe7b652294764d6b9a"
+        },
+        "flat_plan": {
+          "protocol": "run-ownership-dry-run-v1",
+          "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz",
+          "mode": "read_only",
+          "status": "dry_run_ready",
+          "mutation_supported": false,
+          "eligible": [
+            {
+              "path": "input.npz",
+              "bytes": 2800,
+              "sha256": "9df01f78c6c66e4272e4a64e1ca541c8523615320621864b72463788c406fb86"
+            }
+          ],
+          "eligible_bytes": 2800,
+          "retained_bytes": 3576,
+          "blockers": [],
+          "unknown_files": []
+        },
+        "nested_owned_files": []
+      },
+      {
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222",
+        "run_id": "7efedef6291d48d7a1e22891248fb6cb",
+        "owner_token_matched": true,
+        "snapshot": {
+          "manifest_sha256": "d55bbc02db3865a11cb5724a8c644821a93d08ec8326d02702418450b77c63d0",
+          "lease_sha256": "354ed5c4d1117710ad842b35fd66d6115cf775a67e70e0497392ac834935eebe"
+        },
+        "flat_plan": {
+          "protocol": "run-ownership-dry-run-v1",
+          "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222",
+          "mode": "read_only",
+          "status": "dry_run_ready",
+          "mutation_supported": false,
+          "eligible": [],
+          "eligible_bytes": 0,
+          "retained_bytes": 9976,
+          "blockers": [],
+          "unknown_files": []
+        },
+        "nested_owned_files": []
+      }
+    ],
+    "eligible": [
+      {
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz",
+        "run_id": "a3bd878c16cd4a19bc18327beb598a21",
+        "path": "input.npz",
+        "bytes": 2800,
+        "sha256": "9df01f78c6c66e4272e4a64e1ca541c8523615320621864b72463788c406fb86"
+      }
+    ],
+    "eligible_bytes": 2800,
+    "retained_bytes": 1038583,
+    "verified_registered_bytes": 1041383,
+    "blockers": []
+  },
+  "original_manifest_lease_sha256": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\run-ownership.json": "c5d51b718590dc8820b3eb2592f6ed64288b4af26a411fdc1c48c78dfd304faf",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\run-lease.json": "6ccc6af3d15bfcdbbc811dab6c5f22f44b2ebaefa1e66912e77f0346d53fa137",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz\\run-ownership.json": "df784db492cd79c14c20cebf9ba69b9cc4b0cff10bd809c4620483b01062146e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz\\run-lease.json": "4b5f918a583c5d82b9dbdae03ff51bcf9a98f03807b389fe7b652294764d6b9a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\run-ownership.json": "d55bbc02db3865a11cb5724a8c644821a93d08ec8326d02702418450b77c63d0",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\run-lease.json": "354ed5c4d1117710ad842b35fd66d6115cf775a67e70e0497392ac834935eebe"
+  },
+  "all_original_metadata_unchanged": true,
+  "focused_tests_passed": 9,
+  "focused_test_seconds": 0.942,
+  "native_jobs": 0,
+  "reconstruction_jobs": 0,
+  "deletion_or_lease_adoption": false,
+  "original_parent_flat_plan_preserved_blocked": true,
+  "exact_explicit_nested_owner_files": 6,
+  "process_exit_evidence": "not established by artifact planner; retained supervisor evidence remains independent"
+}

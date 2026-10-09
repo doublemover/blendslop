@@ -78,6 +78,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_owned_volume_chunk_cache", "test_owned_volume_chunk_cache"),
     ("pure_owned_cache_pipeline", "test_owned_cache_pipeline"),
     ("pure_run_recovery", "test_run_recovery"),
+    ("pure_run_reclamation", "test_run_reclamation"),
     ("pure_owned_process_supervisor", "test_owned_process_supervisor"),
     ("pure_owned_process_executor", "test_owned_process_executor"),
     ("pure_primary_process_cleanup", "test_primary_process_cleanup"),
