@@ -57,6 +57,8 @@ try{
   const gaps=current.families.filter(f=>f.verdicts.artistSurface==='unqualified').length;
   await assert(`document.querySelector('#family-total').textContent.trim()==='12' && document.querySelector('#engineering-total').textContent.trim()===${JSON.stringify(engineering.toString())} && document.querySelector('#accepted-total').textContent.trim()===${JSON.stringify(accepted.toString())} && document.querySelector('#artist-gaps').textContent.trim()===${JSON.stringify(gaps.toString())} && document.querySelector('#views-total').textContent.trim()===${JSON.stringify(current.families.reduce((n,f)=>n+f.viewMetrics.filter(m=>m.passed).length,0).toString())}`,'Current counts must match independent retained results');
   await assert(`document.querySelector('#inspection').dataset.family==='smooth_vase' && document.querySelector('#selected-geometry').textContent.includes(${JSON.stringify(current.families.find(f=>f.id==='smooth_vase').geometryHash)})`,'Main demo must default to the accepted calibrated vase');
+  await wait(`document.querySelector('#hero-image img')?.complete===true`);
+  await assert(`(()=>{const image=document.querySelector('#hero-image img'),slot=document.querySelector('#hero-image');if(!image||!image.naturalWidth)return false;const i=image.getBoundingClientRect(),s=slot.getBoundingClientRect();return getComputedStyle(image).objectFit==='contain'&&i.width<=s.width+1&&i.height<=s.height+1&&i.top>=s.top-1&&i.bottom<=s.bottom+1})()`,'Current hero must retain the recorded image without additional CSS cropping');
   await screenshot('current-main.png');
   for(const family of current.families){
    await evaluate(`(()=>{const select=document.querySelector('#family-select');select.value=${JSON.stringify(family.id)};select.dispatchEvent(new Event('change',{bubbles:true}));})()`);
@@ -70,7 +72,8 @@ try{
     await assert(`Array.from(document.querySelectorAll('#'+${JSON.stringify(role==='reference'?'reference-image':'candidate-image')}+' [data-role]')).every(i=>i.dataset.geometryHash===${JSON.stringify(expected)})`,'Current rendered image body mismatch: '+family.id+'/'+role);
    }
   }
-  const pictured=current.families.find(f=>f.images.some(i=>i.role==='reference'&&f.images.some(j=>j.role==='candidate'&&j.view===i.view&&j.style===i.style)));
+  const paired=f=>f.images.some(i=>i.role==='reference'&&f.images.some(j=>j.role==='candidate'&&j.view===i.view&&j.style===i.style));
+  const pictured=current.families.find(f=>paired(f)&&f.images.some(i=>i.style==='normals'))||current.families.find(paired);
   if(pictured){
    await click('#family-grid [data-family="'+pictured.id+'"]');
    await wait(`document.querySelector('#inspection').dataset.family===${JSON.stringify(pictured.id)}`);
