@@ -1,0 +1,220 @@
+{
+  "protocol": "pending-verification-handoff-v2",
+  "shell": "PowerShell 7.5",
+  "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+  "review_url": "https://github.com/doublemover/blendslop/pull/7",
+  "reviewed_revision": "fb2802a685bf57f18b44f7b23e984e875aa21477",
+  "followup_branch": "local/quality-followup-20261009",
+  "reviewed_ci": {
+    "full": {
+      "status": "passed",
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37874507729/job/113639872793"
+    },
+    "quick": {
+      "status": "passed",
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37874507729/job/113639872595"
+    },
+    "gallery": {
+      "status": "passed",
+      "url": "https://github.com/doublemover/blendslop/actions/runs/37874507731/job/113643104204"
+    },
+    "deployment": {
+      "status": "skipped; separate approval absent"
+    }
+  },
+  "followup_verification": [
+    {
+      "id": "blender-full-followup",
+      "status": "pending_normal_pre_merge_ci",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking",
+      "command": "& 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe' --background --factory-startup --threads 2 --python-exit-code 1 --python test_runner.py",
+      "reason": "Focused changed-behavior checks completed; full suite/CI on this separate followup has not run. Reviewed draft CI is already passed and is not pending.",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "blender-quick-followup",
+      "status": "pending_normal_pre_merge_ci",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking",
+      "command": "& 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe' --background --factory-startup --threads 2 --python-exit-code 1 --python test_runner.py -- --quick",
+      "reason": "Names the existing configured quick job for this unpublished followup. No extra campaign performed for handoff metadata.",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "changed-adaptive-five-view-boundary-canonical",
+      "status": "unrun_requires_explicit_candidate_selection_and_frozen_plan",
+      "command": null,
+      "reason": "New candidates are diagnostic. Full five-view silhouettes, native boundaries, matched neutral/RGB normal packets and independent artist verdicts remain separate. No fabricated universal pass command or aggregate acceptance.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "continuation-desktop",
+      "status": "blocked_no_supported_browser_surface",
+      "command": null,
+      "review_url": "http://127.0.0.1:53743/continuation.html",
+      "prerequisite_command": "& 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe' -m http.server 53743 --bind 127.0.0.1 --directory site",
+      "prerequisite_status": "server not launched",
+      "reason": "Current supported CUA exposes no app/browser. Existing static assets and actual native render pixels inspected. Open this URL through a supported browser at 1440x1100 when available.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9"
+    },
+    {
+      "id": "continuation-mobile",
+      "status": "skipped_explicit_owner_instruction",
+      "command": null,
+      "reason": "Owner explicitly instructed no mobile review.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "non-vase-artist-tolerances",
+      "status": "blocked_independent_authored_input",
+      "command": null,
+      "reason": "Source discretization engineering certificates do not substitute for independent per-family artist acceptance tolerances.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "historical-scalloped-smooth-target",
+      "status": "blocked_independent_authored_input",
+      "command": null,
+      "reason": "The intended smooth target is absent. Do not infer ground truth or tune an aggregate pass.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "remaining-continuous-certificates-source-cameras",
+      "status": "missing_bounded_scope",
+      "command": null,
+      "reason": "Nine source certificate APIs and seven actual camera-bound policies are implemented; rounded-box/triangle continuous contracts and arch/torus complete source camera provenance remain absent.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "historical-selected-canonical-supervisor",
+      "status": "failed_unavailable_original_kernel_join",
+      "command": null,
+      "reason": "Original observed descendant creation HANDLE was lost. PID absence-only followup cannot prove a kernel wait or exit status. New successful fresh jobs do not rewrite that history.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "historical-source-owner-drift",
+      "status": "blocked_retained_artifact_digest_mismatch",
+      "command": null,
+      "reason": "Old source receipt was registered before its final update. Historical artifact/lease drift remains explicit; no ownership adoption or lease rewrite.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "sphere-ellipsoid-detail-updates",
+      "status": "rejected_originals_retained",
+      "command": null,
+      "reason": "Sphere alpha worsens 2.2823%; ellipsoid worsens 3.2329% despite lower raw mean. No speculative refit or weakened acceptance.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "global-hidden-surface-uniqueness",
+      "status": "unqualified_requires_additional_independent_observations",
+      "command": null,
+      "reason": "Local rank/full contour observations and observed endpoint repair do not prove global hidden geometry uniqueness.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "recovery-reclamation",
+      "status": "read_only_inspection_implemented_execution_unimplemented",
+      "command": null,
+      "reason": "Fresh producer ownership/recovery inspection and complete-tree supervision exist. No blanket deletion, historical adoption or recovery-execution authorization.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "followup-publication",
+      "status": "pending_parent_review_and_destination_decision",
+      "command": null,
+      "reason": "This branch is separate/unpublished. Parent chooses destination before push/new PR/retarget. No merge or Pages approval.",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7"
+    },
+    {
+      "id": "arch-fixed-notch-p95",
+      "status": "independent_distance_p95_regression_retained",
+      "working_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "shell": "PowerShell 7.5",
+      "candidate_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+      "review_url": "https://github.com/doublemover/blendslop/pull/7",
+      "command": null,
+      "reason": "New exterior stage improves alpha/raw mean but preserves fitted notch height: distanceP95 increases3.7967%. Any later inner/exterior combination needs a separately frozen observation scope, not tuning this result to the held-out view."
+    }
+  ],
+  "evidence_index": [
+    "docs/quality-backend-recovery-continuation-20261009/evidence.json",
+    "docs/quality-family-surface-contracts-continuation-20261009/expanded-evidence.json",
+    "docs/quality-rectilinear-reference-continuation-20261009/evidence.json",
+    "docs/quality-torus-reference-continuation-20261009/evidence.json",
+    "docs/quality-process-supervisor-continuation-20261009/evidence.json",
+    "docs/quality-adaptive-families-continuation-20261009/evidence.json",
+    "docs/quality-adaptive-families-continuation-20261009/evidence-03.json",
+    "docs/quality-adaptive-triangle-continuation-20261009/evidence.json",
+    "docs/quality-adaptive-axis-families-continuation-20261009/native-evidence.json",
+    "docs/quality-selected-canonical-continuation-20261009/evidence.json",
+    "docs/quality-owned-cache-continuation-20261009/evidence.json",
+    "docs/quality-owned-cache-pipeline-continuation-20261009/evidence.json",
+    "docs/quality-adaptive-arch-exterior-continuation-20261009/native-evidence.json"
+  ],
+  "arch_exterior": {
+    "status": "bounded_checkpoint_improved; P95 regressed independently",
+    "geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+    "evidence": "docs/quality-adaptive-arch-exterior-continuation-20261009/native-evidence.json",
+    "frames": 6,
+    "qualification_children": 0,
+    "alpha_reduction": 0.8754206796251266,
+    "raw_mean_reduction": 0.7459680380100504,
+    "distance_p95_increase": 0.03796676980460312,
+    "selected_rows_unchanged": true,
+    "aggregate_accepted": false
+  },
+  "aggregate_accepted": false,
+  "additional_tests_for_handoff": 0,
+  "created_at": "2026-10-09T04:46:12.404697+00:00",
+  "implementation_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+  "revision_scope": "Exact latest code/tests/native-packet commit; the subsequent handoff commit changes documentation only. Final branch HEAD is supplied with the local bundle manifest.",
+  "metadata_only": true,
+  "main_verified": "d5e981659a18c435ccbe7cc072b873e5b1707645",
+  "owner_checkout": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop",
+    "branch": "endblay_opslay",
+    "revision": "88cb2c10d484a08f09d7b25b278df5e3208941df",
+    "dirty": false,
+    "scope": "read-only verified; preserved"
+  }
+}

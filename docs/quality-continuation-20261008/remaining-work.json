@@ -30,7 +30,7 @@
     },
     {
       "task": "QUALITY-COVERAGE1",
-      "state": "original12 rows preserved; nine generic adaptive families implemented/measured, seven improved checkpoints and two rejected updates; separate box/multipart positives retained",
+      "state": "original12 rows preserved; nine generic adaptive families measured, seven improved families/two rejected updates; separate arch exterior improvement with P95 regression retained",
       "completed": [
         "frozen12-family reference matrix and intentional depth/cavity/multipart negatives",
         "observed-mask fitting for sphere, ellipsoid, cylinder, frustum, corrected capsule, rounded box and thin plate",
@@ -51,13 +51,15 @@
         "frustum/arch frozen12-frame generic adaptive checkpoints improve alpha42.8948percent/20.0216percent and raw mean; both exact source-control restoration passes",
         "allfour axis models preserve actual discrete geometry/physical aliases and use candidate-only source-view rank diagnostics",
         "two12-frame genuine axis jobs: cylinder alpha71.2955percent lower/plate87.4998percent lower; allfour physical source edits restore exactly",
-        "sphere and ellipsoid updates reject held-out alpha regressions2.2823percent/3.2329percent; originals retained with no aggregate masking"
+        "sphere and ellipsoid updates reject held-out alpha regressions2.2823percent/3.2329percent; originals retained with no aggregate masking",
+        "separate three-control arch exterior stage improves held-out alpha87.5421percent/raw mean74.5968percent; fixed-notch distanceP95 increases3.7967percent independently, exact depth restoration/full local rank passes"
       ],
       "remaining": [
         "changed adaptive candidates remain diagnostic until their required full five-view/native boundary/canonical gates run",
         "source-camera and independent artist surface contracts where absent",
         "global hidden-surface uniqueness remains unproved",
-        "sphere/ellipsoid failed detail updates retained; current candidates remain selected rather than speculative refits"
+        "sphere/ellipsoid failed detail updates retained; current candidates remain selected rather than speculative refits",
+        "arch exterior fixed-notch distanceP95 regression retained; changed diagnostic identity not full-view/native/canonical/artist qualified"
       ],
       "blocking_input": null
     },
@@ -99,13 +101,14 @@
       "remaining": [
         "original selected-packet outer descendant kernel join is unavailable; absence-only followup cannot repair it",
         "remaining source/candidate canonical provenance for other families / changed checkpoints",
-        "legacy source-owner receipt drift and old clipping/normal gaps remain explicit"
+        "legacy source-owner receipt drift and old clipping/normal gaps remain explicit",
+        "old source-owner final receipt digest drift remains blocked and retained; source/camera provenance acquired independently without lease rewrite"
       ],
       "blocking_input": "Historical descendant HANDLE was not retained; current PID absence cannot prove a kernel join. Fresh supervisor fixes future jobs without adopting historical leases."
     },
     {
       "task": "RUN-CLEANUP1",
-      "state": "render/variant/export producers owned; identity-bound recovery inspection and fresh complete-tree supervisor implemented; reclamation stays read-only",
+      "state": "render/variant/export/cache producers owned; production cache option available; identity-bound read-only recovery and fresh complete-tree supervisor implemented",
       "completed": [
         "explicit manifest/lease ownership design and conservative read-only planner",
         "fresh native helper and warm numeric producer ownership",
@@ -127,19 +130,21 @@
         "reusable bounded owned-command CLI validates argv/resources/provenance before launch, preserves primary failures, releases only true complete-tree scope; nine mock orchestration checks pass",
         "actual12-frame frustum/arch CLI job passes both fresh complete-tree supervision and child ownership audits",
         "opt-in VolumeChunkCache owned_writes creates bounded fresh NPZ owners, verifies header/round-trip, publishes same key without overwrite and retains failed collisions",
-        "eleven focused cache checks (eight new/three existing) pass real NPZ reader compatibility, concurrent collisions, failed serialization and bounded payloads"
+        "eleven focused cache checks (eight new/three existing) pass real NPZ reader compatibility, concurrent collisions, failed serialization and bounded payloads",
+        "strict false-by-default cache_owned_writes now propagates through existing VisualHull config/parser/backend and all sparse builders; last fresh receipt only, cache-hit-only unrun; six focused checks passed",
+        "all latest native triangle/frustum/arch/axis/exterior jobs use fresh complete-tree ownership; final exterior job proves two kernel joins, released fresh leases and zero active members"
       ],
       "remaining": [
         "save_render exact-path overwrite API not changed",
         "production direct-child variant/numeric paths need separately bounded complete-tree adoption where useful",
         "explicit recovery/reclamation execution remains unimplemented and requires separate bounded authorization",
-        "VisualHull cache ownership config/diagnostic propagation under implementation; remaining report producers outside adoption"
+        "other report/save_render producers and production direct-child numeric paths remain separately bounded adoption scope"
       ],
       "blocking_input": "No deletion or historical adoption authorization. Existing unconfirmed active/crashed runs remain retained."
     },
     {
       "task": "MEASUREMENT-ADAPTIVE-PRESENTATION",
-      "state": "nine generic actual adaptive detail families measured; cylinder/plate improve, sphere/ellipsoid reject; source-view sensitivity prevents hidden-depth front fitting",
+      "state": "nine generic families/ten measured stages including arch exterior; eight positive checkpoints and two rejected updates, no current-row promotion",
       "completed": [
         "dedicated32-bit linear-alpha occupancy and fixed half-coverage masks",
         "strict matched acquisition camera/sampling/encoding checks; preview state restoration",
@@ -155,13 +160,13 @@
         "triangle six-frame1024 source-crop update improves actual held-out pixels, with original crop censoring retained",
         "native fresh Job supervisory path proves lifecycle completion separately from geometry improvement",
         "actual frustum/arch12-frame controlled checkpoint completes through fresh reusable CLI",
-        "four actual axis acquisitions finish24frames total through fresh process-tree ownership; source and actual held-out frame censoring retained independently"
+        "four actual axis acquisitions finish24frames total through fresh process-tree ownership; source and actual held-out frame censoring retained independently",
+        "one six-frame arch exterior acquisition uses candidate-only uncensored expandedob35; original ob145 remains excluded from fitting, actual held-out censoring and P95 regression retained"
       ],
       "remaining": [
         "matched lit/canonical inspection for changed diagnostic candidates if selected",
         "desktop continuation browser inspection when a supported surface becomes available; mobile review explicitly skipped",
-        "parent review before external followup publication",
-        "arch fixed outer/depth residual: separate source-only identifiable three-control stage under design"
+        "parent review before external followup publication"
       ],
       "blocking_input": "Current CUA inventory exposes no browser or native app; static page/image identity checks and actual native render pixel inspection completed."
     },
@@ -178,7 +183,7 @@
         "approved draftPR7 targeting main created and attached",
         "Blender full/quick required CI passes on reviewed fb2802a candidate",
         "gallery CI passes after one failed-only browser-start timeout retry; deployment correctly skipped",
-        "followup chunks9c4da6f,8628acc,2f9421f,3f8398b,7be90e1 committed locally; reviewed PR untouched"
+        "ten implementation batches committed locally through df922a9; reviewed draft PR7 remains remotely unchanged at fb2802a"
       ],
       "remaining": [
         "followup branch review and normal CI when parent chooses to publish",
@@ -196,16 +201,19 @@
     "95f752c6c3ecafda3f5e1390ccf86d908edd6622",
     "e6e8a0f684399dfd2f710659c3fc203948498291",
     "fb2802a685bf57f18b44f7b23e984e875aa21477",
-    "9c4da6f",
-    "8628acc",
-    "2f9421f",
-    "3f8398b",
-    "7be90e1",
-    "c9ceb0c",
-    "fa95cdd"
+    "9c4da6f49ebcff1c0724e790705d9dda9848e7be",
+    "8628acc3db2b4f928cbc75e851545df89191ca96",
+    "2f9421fe2fc00433ae86959b622aa1cf22833037",
+    "3f8398b677ad87d6adea930e74a7e44b61909192",
+    "7be90e1b3d43b4e198902e6ba5ef4b6783f28b7c",
+    "c9ceb0cee1d4975bde48f337bc33c8183ec79661",
+    "fa95cddde6ec5f877c2b76b57004bf40823729fb",
+    "75296c4c97b9d10cf8d656f182e9220495392dd9",
+    "a7571fb8ac8b4d2132a3c5c41fd1a9842c4b8c7a",
+    "df922a96ab899ea7dcc552b73eb6c5255b7387f9"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
-  "completed_unpublished_batch": "local followup adds backend/recovery ownership, source-conditioned engineering policies, adaptive capsule/torus/triangle checkpoints, selected canonical packet and fresh complete-tree supervision",
+  "completed_unpublished_batch": "backend/recovery/cache ownership and production opt-in, nine source certificate APIs/seven actual camera-bound policies, nine generic adaptive families measured (seven positive/two rejected), selected canonical packet, and fresh complete-tree supervision; separate arch exterior stage and actual independent P95 regression retained",
   "reviewed_draft": {
     "url": "https://github.com/doublemover/blendslop/pull/7",
     "state": "OPEN draft; unchanged",
@@ -214,8 +222,11 @@
     "blender_full": "passed CI",
     "blender_quick": "passed CI",
     "gallery": "passed CI after failed-only browser-start retry",
-    "merge_pages_approval": "absent"
+    "merge_pages_approval": "absent",
+    "remote_verified": "OPEN draft at fb2802a; all full/quick/gallery checks successful; deployment skipped"
   },
-  "followup_implementation_revision": "fa95cdd plus accompanying actual-axis/cache batch",
-  "aggregate_accepted": false
+  "followup_implementation_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+  "aggregate_accepted": false,
+  "metadata_tests_executed": 0,
+  "parent_verification_handoff": "docs/quality-followup-continuation-20261009/pending-verification.json"
 }
