@@ -1,0 +1,47 @@
+{
+  "protocol": "quality-main-integration-v1",
+  "quality_parent": "e6e8a0f684399dfd2f710659c3fc203948498291",
+  "main_parent": "d5e981659a18c435ccbe7cc072b873e5b1707645",
+  "merge_base": "ed905f6a76f050671ca7a728e9cea1e2f92e30cc",
+  "conflicts": [
+    "scripts/build-evaluation-site.mjs allowed-file list"
+  ],
+  "resolution": "union allowlist with exact main diagnostic block retained; continuation assets remain separately bound",
+  "main_showcase_preserved": [
+    "site/app.js",
+    "site/styles.css",
+    "site/data.json",
+    "site/diagnostics.json",
+    "site/assets.json",
+    "scripts/check-evaluation-browser.mjs",
+    ".github/workflows/evaluation-pages.yml"
+  ],
+  "main_assets_unchanged": 82,
+  "gallery_change": "additive continuation navigation link",
+  "static_build": {
+    "assets": 86,
+    "continuation_assets": 4,
+    "bytes": 12234675,
+    "bound_bytes": 15728640,
+    "output": "temp/tasks/quality-continuation-20261009/main-integration-build-01",
+    "status": "passed",
+    "source_parent": "e6e8a0f684399dfd2f710659c3fc203948498291",
+    "working_tree_main_integration": true
+  },
+  "javascript_syntax": "site/app.js and scripts/build-evaluation-site.mjs passed existing Node --check",
+  "focused_integration": {
+    "modules": [
+      "test_runner_cli",
+      "test_render_run_ownership",
+      "test_variant_run_ownership"
+    ],
+    "passed": 35,
+    "elapsed_seconds": 14.037,
+    "runtime": "qualified Blender5.2 bundledPython3.13.13; no native Blender launches"
+  },
+  "desktop_browser_review": "blocked; refreshed CUA inventory has no apps/browsers",
+  "mobile_review": "skipped at explicit owner request",
+  "full_qualification_campaign": "not rerun; prior full-suite and seven-control evidence retained",
+  "authorization": "current main integration and new main-targeted draftPR approved; PRmerge and Pagesdeployment remain unapproved",
+  "ongoing_work": "continues on a successor local branch to preserve this reviewed checkpoint"
+}

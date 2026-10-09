@@ -11,7 +11,7 @@ const output=path.resolve(root,outIndex<0?'temp/pages-dist':process.argv[outInde
 if(output===root||!output.startsWith(root+path.sep)||output===source||output.startsWith(source+path.sep))throw new Error('Output must be a separate contained workspace directory');
 const data=JSON.parse(await fs.readFile(path.join(source,'data.json'),'utf8'));
 const manifest=JSON.parse(await fs.readFile(path.join(source,'assets.json'),'utf8'));
-const allowed=new Set(['index.html','styles.css','app.js','data.json','assets.json','.nojekyll']);
+const allowed=new Set(['index.html','styles.css','app.js','data.json','diagnostics.json','assets.json','.nojekyll']);
 // Optional local continuation stays additive to the frozen historical gallery.
 let continuation=null;
 try{continuation=JSON.parse(await fs.readFile(path.join(source,'continuation-assets.json'),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
@@ -39,6 +39,18 @@ for(const family of data.families){
   if(pass!==metric.passed)throw new Error('A per-view verdict contradicts its unchanged limits');
  }
  if(family.id==='rounded_triangle_dot'&&(family.surface.limits||family.verdicts.surface!=='unqualified'))throw new Error('Triangle surface qualification is not established');
+}
+const diagnostics=JSON.parse(await fs.readFile(path.join(source,'diagnostics.json'),'utf8'));
+if(diagnostics.schema!==1||Object.keys(diagnostics.cases).length!==2)throw new Error('Missing exact diagnostic evidence');
+function countRuns(runs,width,height){let count=0,lastY=-1,lastEnd=0;for(const run of runs){if(run.length!==3||!run.every(Number.isInteger))throw new Error('Invalid diagnostic run');const[y,x0,x1]=run;if(y<0||y>=height||x0<0||x1>width||x0>=x1||y<lastY||(y===lastY&&x0<lastEnd))throw new Error('Diagnostic runs overlap or leave image');count+=x1-x0;lastY=y;lastEnd=x1;}return count;}
+for(const family of actual){
+ if(!family.inspection?.oblique_35_28||family.thumbnail!==family.inspection.oblique_35_28)throw new Error('Actual families must default to real shaded output');
+ if(family.preview&&family.preview.geometryHash!==family.geometry)throw new Error('Preview changed measured geometry');
+ for(const view of data.views){const row=diagnostics.cases[family.id]?.[view],metric=family.metrics[view];if(!row||row.width!==512||row.height!==512)throw new Error('Missing diagnostic view');
+  for(const role of ['reference','output']){const asset=manifest.assets.find(x=>x.path===row[role]);if(row[role]!==family[role][view]||asset?.sha256!==row[role+'Sha256'])throw new Error('Diagnostic source identity mismatch');}
+  for(const [runs,count] of [['missingRuns','missingPixels'],['extraRuns','extraPixels'],['missingBandRuns','missingBandPixels'],['extraBandRuns','extraBandPixels']])if(countRuns(row[runs],row.width,row.height)!==row[count])throw new Error('Diagnostic count mismatch');
+  if(row.areaUnion-row.areaIntersection!==row.missingPixels+row.extraPixels||row.bandUnion-row.bandIntersection!==row.missingBandPixels+row.extraBandPixels||Math.abs(row.areaIntersection/row.areaUnion-metric.area_iou)>1e-12||Math.abs(row.bandIntersection/row.bandUnion-metric.boundary_iou)>1e-12)throw new Error('Diagnostic overlay contradicts exact metrics');
+ }
 }
 if(data.negativeControls.length!==3||!data.negativeControls.every(x=>x.caught))throw new Error('Missing actual negative-control evidence');
 const listed=new Set(allAssets.map(x=>x.path));

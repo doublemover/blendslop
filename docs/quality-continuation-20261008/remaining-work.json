@@ -130,18 +130,21 @@
     },
     {
       "task": "INTEGRATION-PUBLICATION",
-      "state": "local isolated quality branch; approval required before external quality publication",
+      "state": "current main integrated; draftPR creation approved; merge/Pages still require separate approval",
       "completed": [
         "owner checkout preserved on endblay_opslay",
         "quality work isolated on local/quality-continuation-20261008",
-        "public showcase PR6 already merged and verified separately"
+        "public showcase PR6 already merged and verified separately",
+        "owner approves current main integration and new draftPR",
+        "main d5e9816 merged with82historical assets/diagnostics preserved; only one additive allowlist conflict",
+        "35focused integration checks and86asset/12.23MB static build passed"
       ],
       "remaining": [
-        "integrate and review local completed batches",
-        "refresh main/source lineage and select reviewed destination",
-        "parent approval before quality PR/retarget/merge/publication"
+        "open the approved new draft PR targeting main",
+        "required integrated-candidate CI and desktop review when a browser is available",
+        "separate approval before PRmerge or Pagesdeployment"
       ],
-      "blocking_input": "No quality publication approval has been received."
+      "blocking_input": "No PRmerge/Pagesdeployment approval has been received; useful implementation continues on a successor branch."
     }
   ],
   "validation_policy": "existing full Blender suite/seven-control packet retained; only bounded missing-behavior checks",
