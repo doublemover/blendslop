@@ -1,0 +1,145 @@
+{
+  "artifacts": [
+    {
+      "bytes": 80912,
+      "category": "final_output",
+      "path": "frozen-workload.json",
+      "sha256": "e38527b16063e5c550eb82fef6e75e9eedc4db67128bb261dd4086c86ca361cc"
+    },
+    {
+      "bytes": 26304,
+      "category": "final_output",
+      "path": "results.json",
+      "sha256": "66c1eb8193ab5a6bd6c8fce9e45a46278f0f08d284e960e7738383c9e9125367"
+    },
+    {
+      "bytes": 801,
+      "category": "final_output",
+      "path": "candidate/evaluated-exact.npz",
+      "sha256": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a"
+    },
+    {
+      "bytes": 1650,
+      "category": "final_output",
+      "path": "candidate/evaluated.obj",
+      "sha256": "b088d48ddd6135dbbf25217f3fd317cdc38ef0c8dde042d73d0e2226d98a8a8b"
+    },
+    {
+      "bytes": 5789,
+      "category": "final_output",
+      "path": "candidate/program.json",
+      "sha256": "980ab9dcc1f982eac5a15dcb5a3163471d159cbbea7818cc482185c3a12461ee"
+    },
+    {
+      "bytes": 69902,
+      "category": "final_output",
+      "path": "candidate/front-mask.png",
+      "sha256": "ea4c7d7026a31821cbb9038a02adb9a128cd2cd7798be03eb22d353f098ad04e"
+    },
+    {
+      "bytes": 75797,
+      "category": "final_output",
+      "path": "candidate/front-neutral.png",
+      "sha256": "1386dd46cb3c5cbbeb8b471bc190e4d7ee8761cf79b86e4941932bae509b4139"
+    },
+    {
+      "bytes": 11847,
+      "category": "final_output",
+      "path": "candidate/camera-snapshots.json",
+      "sha256": "fa4a02f88918feb7541e75e1dbf0be3dbec38289400a9248acc077afb08fe895"
+    },
+    {
+      "bytes": 72875,
+      "category": "final_output",
+      "path": "candidate/side-mask.png",
+      "sha256": "e0892003a12adcf1c3fbf5788cdccc3bd809e44d9f125a5558cb99929c1b1bf3"
+    },
+    {
+      "bytes": 75572,
+      "category": "final_output",
+      "path": "candidate/side-neutral.png",
+      "sha256": "0781e46379dcd0c6ac37dec248bc8234540877c85981437d41b4ba1195f1d239"
+    },
+    {
+      "bytes": 70182,
+      "category": "final_output",
+      "path": "candidate/top-mask.png",
+      "sha256": "6c9a432042edbcb1648e54e35e89be69b4535522493299ee6769f8c74615901a"
+    },
+    {
+      "bytes": 75940,
+      "category": "final_output",
+      "path": "candidate/top-neutral.png",
+      "sha256": "fee99a9a392a2b2859866248b3fffd82bc8408ae6f7785f4c14ae672d8a69b5c"
+    },
+    {
+      "bytes": 69358,
+      "category": "final_output",
+      "path": "candidate/oblique_35_28-mask.png",
+      "sha256": "83e3b25cf60ee122b68e42e6e20c62f7fece98160ed110bf99f091640f3d00c7"
+    },
+    {
+      "bytes": 78727,
+      "category": "final_output",
+      "path": "candidate/oblique_35_28-neutral.png",
+      "sha256": "81434765f75a75991ad1e968f3d3e6f51a228260f50796e87d33d2e714bdcec2"
+    },
+    {
+      "bytes": 70371,
+      "category": "final_output",
+      "path": "candidate/oblique_145_40-mask.png",
+      "sha256": "6f8dce0a45555ad909fc43c4a4fa46ac405ff8740dabfdc469ab44d7399a9704"
+    },
+    {
+      "bytes": 79452,
+      "category": "final_output",
+      "path": "candidate/oblique_145_40-neutral.png",
+      "sha256": "51284f360552df179b0065a5f04baf152edc04bf5c3029457812e8259c3c5fdd"
+    },
+    {
+      "bytes": 755,
+      "category": "final_output",
+      "path": "source/evaluated-exact.npz",
+      "sha256": "6f2ac20580a3a5fb1f541e056a6c6dc9c5659a2838882f44ca54c5a9dfad2c83"
+    },
+    {
+      "bytes": 1406,
+      "category": "final_output",
+      "path": "source/evaluated.obj",
+      "sha256": "23f958204b78eca25beb9ef64851540c357f0c305dbf5f79ca3aa855318e1eb3"
+    },
+    {
+      "bytes": 608,
+      "category": "final_output",
+      "path": "display-only-camera.json",
+      "sha256": "1e8389a1dac2efeffb40e049092608e8fa5ac8060203979d0ae14dde118cc41e"
+    },
+    {
+      "bytes": 78340,
+      "category": "final_output",
+      "path": "source/unclipped-oblique_35_28-neutral.png",
+      "sha256": "2d563e98a0f1efc99f6670c5f06e80b27a1d1c3a04cdb7b9e612d128c7a0a764"
+    },
+    {
+      "bytes": 78443,
+      "category": "final_output",
+      "path": "candidate/unclipped-oblique_35_28-neutral.png",
+      "sha256": "13d09c3e60d04c19a2c96f00e179e9d7d83fdd8deda3b7e8b31a2d4346773553"
+    }
+  ],
+  "auxiliary_errors": [],
+  "error": null,
+  "max_generated_bytes": 134217728,
+  "owner_token": "d64f6c23d886486ab07de475402da5f8",
+  "pid": 27588,
+  "producer": "multipart_explicit_shared_plane_check",
+  "reclamation": "unimplemented; all files retained",
+  "run_id": "35f4c9cf5b0440d3a07838a9296fe72e",
+  "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr",
+  "schema_version": 1,
+  "shared_inputs": {
+    "plan": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+    "plan_sha256": "e38527b16063e5c550eb82fef6e75e9eedc4db67128bb261dd4086c86ca361cc"
+  },
+  "state": "succeeded"
+}

@@ -1,0 +1,1512 @@
+{
+  "front": {
+    "clip_end": 1000.0,
+    "clip_start": 0.10000000149011612,
+    "executed_passes": [
+      "mask",
+      "neutral",
+      "normals"
+    ],
+    "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "geometry_unchanged_after_passes": true,
+    "matrix_world": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        7.549790126404332e-08,
+        -1.0,
+        -1.2999999523162842
+      ],
+      [
+        0.0,
+        1.0,
+        7.549790126404332e-08,
+        0.2250000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "pass_artifacts": {
+      "mask": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              7.549790126404332e-08,
+              -1.0,
+              -1.2999999523162842
+            ],
+            [
+              0.0,
+              1.0,
+              7.549790126404332e-08,
+              0.2250000238418579
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "a685367849862f63a8053c43f99bddcf886411d7c2d8f8c783b3493208750289",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "front-mask.png",
+        "sha256": "402650f013713191397d3ab2e82d103d7f62940f8099a5df352d962c9dce3c1a"
+      },
+      "neutral": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              7.549790126404332e-08,
+              -1.0,
+              -1.2999999523162842
+            ],
+            [
+              0.0,
+              1.0,
+              7.549790126404332e-08,
+              0.2250000238418579
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "a685367849862f63a8053c43f99bddcf886411d7c2d8f8c783b3493208750289",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "front-neutral.png",
+        "sha256": "0abfe89a0ccaa0f050a9e30d69ee43ad98a489685fd72e6c95d114fc72598f47"
+      },
+      "normals": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              7.549790126404332e-08,
+              -1.0,
+              -1.2999999523162842
+            ],
+            [
+              0.0,
+              1.0,
+              7.549790126404332e-08,
+              0.2250000238418579
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "a685367849862f63a8053c43f99bddcf886411d7c2d8f8c783b3493208750289",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "front-normals.png",
+        "sha256": "80a5db96c3c310b94402dd27222b48a4a4c9c1fd261ce4a5f4b55ae0c3a889f4"
+      }
+    },
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "402650f013713191397d3ab2e82d103d7f62940f8099a5df352d962c9dce3c1a",
+    "projection": "ORTHO",
+    "render_passes": {
+      "mask": {
+        "camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              7.549790126404332e-08,
+              -1.0,
+              -1.2999999523162842
+            ],
+            [
+              0.0,
+              1.0,
+              7.549790126404332e-08,
+              0.2250000238418579
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "encoding": "float32 OpenEXR linear alpha; display RGB ignored",
+        "hard_mask_threshold": 0.5,
+        "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+        "protocol": "opaque_linear_alpha_v1",
+        "renderer": {
+          "blender_version": [
+            5,
+            2,
+            2
+          ],
+          "build_hash": "d13f752e3b9c",
+          "engine": "BLENDER_EEVEE"
+        },
+        "sampling": {
+          "depth_of_field": false,
+          "filter_size": 1.5,
+          "motion_blur": false,
+          "taa_render_samples": 64
+        },
+        "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume"
+      },
+      "neutral": {
+        "background_type": "WORLD",
+        "cavity": false,
+        "color_depth": "8",
+        "color_mode": "BW",
+        "color_type": "SINGLE",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_WORKBENCH",
+        "format": "PNG",
+        "light": "STUDIO",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "shadows": true,
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ]
+      },
+      "normals": {
+        "color_depth": "8",
+        "color_mode": "RGB",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_EEVEE",
+        "format": "PNG",
+        "material": "world shading normal * .5 + .5 emission",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "samples": 64
+      }
+    },
+    "resolution": [
+      512,
+      512
+    ],
+    "shift_x": 0.0,
+    "shift_y": 0.0
+  },
+  "oblique_145_40": {
+    "clip_end": 1000.0,
+    "clip_start": 0.10000000149011612,
+    "executed_passes": [
+      "mask",
+      "neutral",
+      "normals"
+    ],
+    "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "geometry_unchanged_after_passes": true,
+    "matrix_world": [
+      [
+        -0.5735764503479004,
+        0.5265408158302307,
+        -0.6275067925453186,
+        -3.493957996368408
+      ],
+      [
+        -0.8191519975662231,
+        -0.3686878979206085,
+        0.43938499689102173,
+        2.44649600982666
+      ],
+      [
+        -3.72959663152983e-09,
+        0.7660442590713501,
+        0.642787754535675,
+        3.804041862487793
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "pass_artifacts": {
+      "mask": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265408158302307,
+              -0.6275067925453186,
+              -3.493957996368408
+            ],
+            [
+              -0.8191519975662231,
+              -0.3686878979206085,
+              0.43938499689102173,
+              2.44649600982666
+            ],
+            [
+              -3.72959663152983e-09,
+              0.7660442590713501,
+              0.642787754535675,
+              3.804041862487793
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "fd341b5a7031b8c57aa6b3ee15c9b51c05c4388a47350fd0d2e5c354dcb3f537",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "oblique_145_40-mask.png",
+        "sha256": "0f41ab2c3486f6c398eea22f388e1791639ed5982735efc35fa5c5e3469b1e1d"
+      },
+      "neutral": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265408158302307,
+              -0.6275067925453186,
+              -3.493957996368408
+            ],
+            [
+              -0.8191519975662231,
+              -0.3686878979206085,
+              0.43938499689102173,
+              2.44649600982666
+            ],
+            [
+              -3.72959663152983e-09,
+              0.7660442590713501,
+              0.642787754535675,
+              3.804041862487793
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "fd341b5a7031b8c57aa6b3ee15c9b51c05c4388a47350fd0d2e5c354dcb3f537",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "oblique_145_40-neutral.png",
+        "sha256": "9ac73a01217f3b057ca676d88a7623a04e1fa4597a2887a16455df24dc2241dd"
+      },
+      "normals": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265408158302307,
+              -0.6275067925453186,
+              -3.493957996368408
+            ],
+            [
+              -0.8191519975662231,
+              -0.3686878979206085,
+              0.43938499689102173,
+              2.44649600982666
+            ],
+            [
+              -3.72959663152983e-09,
+              0.7660442590713501,
+              0.642787754535675,
+              3.804041862487793
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "fd341b5a7031b8c57aa6b3ee15c9b51c05c4388a47350fd0d2e5c354dcb3f537",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "oblique_145_40-normals.png",
+        "sha256": "b5a9f51f41f68feaea56dd682c88f11b064c5bf911c48b6a8e346a4b79739649"
+      }
+    },
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "0f41ab2c3486f6c398eea22f388e1791639ed5982735efc35fa5c5e3469b1e1d",
+    "projection": "ORTHO",
+    "render_passes": {
+      "mask": {
+        "camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265408158302307,
+              -0.6275067925453186,
+              -3.493957996368408
+            ],
+            [
+              -0.8191519975662231,
+              -0.3686878979206085,
+              0.43938499689102173,
+              2.44649600982666
+            ],
+            [
+              -3.72959663152983e-09,
+              0.7660442590713501,
+              0.642787754535675,
+              3.804041862487793
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "encoding": "float32 OpenEXR linear alpha; display RGB ignored",
+        "hard_mask_threshold": 0.5,
+        "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+        "protocol": "opaque_linear_alpha_v1",
+        "renderer": {
+          "blender_version": [
+            5,
+            2,
+            2
+          ],
+          "build_hash": "d13f752e3b9c",
+          "engine": "BLENDER_EEVEE"
+        },
+        "sampling": {
+          "depth_of_field": false,
+          "filter_size": 1.5,
+          "motion_blur": false,
+          "taa_render_samples": 64
+        },
+        "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume"
+      },
+      "neutral": {
+        "background_type": "WORLD",
+        "cavity": false,
+        "color_depth": "8",
+        "color_mode": "BW",
+        "color_type": "SINGLE",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_WORKBENCH",
+        "format": "PNG",
+        "light": "STUDIO",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "shadows": true,
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ]
+      },
+      "normals": {
+        "color_depth": "8",
+        "color_mode": "RGB",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_EEVEE",
+        "format": "PNG",
+        "material": "world shading normal * .5 + .5 emission",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "samples": 64
+      }
+    },
+    "resolution": [
+      512,
+      512
+    ],
+    "shift_x": 0.0,
+    "shift_y": 0.0
+  },
+  "oblique_35_28": {
+    "clip_end": 1000.0,
+    "clip_start": 0.10000000149011612,
+    "executed_passes": [
+      "mask",
+      "neutral",
+      "normals"
+    ],
+    "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "geometry_unchanged_after_passes": true,
+    "matrix_world": [
+      [
+        -0.5735766887664795,
+        -0.38456857204437256,
+        0.7232681512832642,
+        4.027158260345459
+      ],
+      [
+        0.8191518783569336,
+        -0.2692779302597046,
+        0.506438136100769,
+        2.8198466300964355
+      ],
+      [
+        -3.967022621509386e-08,
+        0.882947564125061,
+        0.46947160363197327,
+        2.839017868041992
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "pass_artifacts": {
+      "mask": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.38456857204437256,
+              0.7232681512832642,
+              4.027158260345459
+            ],
+            [
+              0.8191518783569336,
+              -0.2692779302597046,
+              0.506438136100769,
+              2.8198466300964355
+            ],
+            [
+              -3.967022621509386e-08,
+              0.882947564125061,
+              0.46947160363197327,
+              2.839017868041992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "638ca0dbd43086ac6f1d778d9431b963c54283f5aac674a3e36f7cc73d258047",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "oblique_35_28-mask.png",
+        "sha256": "3698bf05b441dabd5fc7bc381fbb4fec6b076e28d42707acd98519a22bad243a"
+      },
+      "neutral": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.38456857204437256,
+              0.7232681512832642,
+              4.027158260345459
+            ],
+            [
+              0.8191518783569336,
+              -0.2692779302597046,
+              0.506438136100769,
+              2.8198466300964355
+            ],
+            [
+              -3.967022621509386e-08,
+              0.882947564125061,
+              0.46947160363197327,
+              2.839017868041992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "638ca0dbd43086ac6f1d778d9431b963c54283f5aac674a3e36f7cc73d258047",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "oblique_35_28-neutral.png",
+        "sha256": "8e259b5186edbd0c2ae77caf4e467e184b5d66eccc31fde6f5e1a045841f76cc"
+      },
+      "normals": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.38456857204437256,
+              0.7232681512832642,
+              4.027158260345459
+            ],
+            [
+              0.8191518783569336,
+              -0.2692779302597046,
+              0.506438136100769,
+              2.8198466300964355
+            ],
+            [
+              -3.967022621509386e-08,
+              0.882947564125061,
+              0.46947160363197327,
+              2.839017868041992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "638ca0dbd43086ac6f1d778d9431b963c54283f5aac674a3e36f7cc73d258047",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "oblique_35_28-normals.png",
+        "sha256": "6023b96f89527760b6686285fbc9656583225e832a8d386ea226caa24418d72c"
+      }
+    },
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "3698bf05b441dabd5fc7bc381fbb4fec6b076e28d42707acd98519a22bad243a",
+    "projection": "ORTHO",
+    "render_passes": {
+      "mask": {
+        "camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.38456857204437256,
+              0.7232681512832642,
+              4.027158260345459
+            ],
+            [
+              0.8191518783569336,
+              -0.2692779302597046,
+              0.506438136100769,
+              2.8198466300964355
+            ],
+            [
+              -3.967022621509386e-08,
+              0.882947564125061,
+              0.46947160363197327,
+              2.839017868041992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "encoding": "float32 OpenEXR linear alpha; display RGB ignored",
+        "hard_mask_threshold": 0.5,
+        "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+        "protocol": "opaque_linear_alpha_v1",
+        "renderer": {
+          "blender_version": [
+            5,
+            2,
+            2
+          ],
+          "build_hash": "d13f752e3b9c",
+          "engine": "BLENDER_EEVEE"
+        },
+        "sampling": {
+          "depth_of_field": false,
+          "filter_size": 1.5,
+          "motion_blur": false,
+          "taa_render_samples": 64
+        },
+        "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume"
+      },
+      "neutral": {
+        "background_type": "WORLD",
+        "cavity": false,
+        "color_depth": "8",
+        "color_mode": "BW",
+        "color_type": "SINGLE",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_WORKBENCH",
+        "format": "PNG",
+        "light": "STUDIO",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "shadows": true,
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ]
+      },
+      "normals": {
+        "color_depth": "8",
+        "color_mode": "RGB",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_EEVEE",
+        "format": "PNG",
+        "material": "world shading normal * .5 + .5 emission",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "samples": 64
+      }
+    },
+    "resolution": [
+      512,
+      512
+    ],
+    "shift_x": 0.0,
+    "shift_y": 0.0
+  },
+  "side": {
+    "clip_end": 1000.0,
+    "clip_start": 0.10000000149011612,
+    "executed_passes": [
+      "mask",
+      "neutral",
+      "normals"
+    ],
+    "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "geometry_unchanged_after_passes": true,
+    "matrix_world": [
+      [
+        -4.371138828673793e-08,
+        4.371138828673793e-08,
+        1.0,
+        3.200000047683716
+      ],
+      [
+        1.0,
+        1.910685676922942e-15,
+        4.371138828673793e-08,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        -4.371138828673793e-08,
+        0.2250000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "pass_artifacts": {
+      "mask": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.200000047683716
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.2250000238418579
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "a70b8cb10a5c2d0d904aba316bfb45dc5b13358b3b4cf1ecbe1b9ece04e3cce6",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "side-mask.png",
+        "sha256": "7b67c1bbb13b6bad573aa3718576a2cd23beaa8904886d6367ebaa0b85a8cb12"
+      },
+      "neutral": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.200000047683716
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.2250000238418579
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "a70b8cb10a5c2d0d904aba316bfb45dc5b13358b3b4cf1ecbe1b9ece04e3cce6",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "side-neutral.png",
+        "sha256": "d98855462f961c0e4319a99c9cbcbba86591f7f989c8f9cd12ff27b280c336c0"
+      },
+      "normals": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.200000047683716
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.2250000238418579
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "a70b8cb10a5c2d0d904aba316bfb45dc5b13358b3b4cf1ecbe1b9ece04e3cce6",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "side-normals.png",
+        "sha256": "c2b43e8ed9a656658b4db02894d576a4b84dd182d3a77bae08751d8620f95881"
+      }
+    },
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "7b67c1bbb13b6bad573aa3718576a2cd23beaa8904886d6367ebaa0b85a8cb12",
+    "projection": "ORTHO",
+    "render_passes": {
+      "mask": {
+        "camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.200000047683716
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.2250000238418579
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "encoding": "float32 OpenEXR linear alpha; display RGB ignored",
+        "hard_mask_threshold": 0.5,
+        "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+        "protocol": "opaque_linear_alpha_v1",
+        "renderer": {
+          "blender_version": [
+            5,
+            2,
+            2
+          ],
+          "build_hash": "d13f752e3b9c",
+          "engine": "BLENDER_EEVEE"
+        },
+        "sampling": {
+          "depth_of_field": false,
+          "filter_size": 1.5,
+          "motion_blur": false,
+          "taa_render_samples": 64
+        },
+        "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume"
+      },
+      "neutral": {
+        "background_type": "WORLD",
+        "cavity": false,
+        "color_depth": "8",
+        "color_mode": "BW",
+        "color_type": "SINGLE",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_WORKBENCH",
+        "format": "PNG",
+        "light": "STUDIO",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "shadows": true,
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ]
+      },
+      "normals": {
+        "color_depth": "8",
+        "color_mode": "RGB",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_EEVEE",
+        "format": "PNG",
+        "material": "world shading normal * .5 + .5 emission",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "samples": 64
+      }
+    },
+    "resolution": [
+      512,
+      512
+    ],
+    "shift_x": 0.0,
+    "shift_y": 0.0
+  },
+  "top": {
+    "clip_end": 1000.0,
+    "clip_start": 0.10000000149011612,
+    "executed_passes": [
+      "mask",
+      "neutral",
+      "normals"
+    ],
+    "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "geometry_unchanged_after_passes": true,
+    "matrix_world": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        3.125
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "pass_artifacts": {
+      "mask": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              3.125
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "367a2f93b93be177f2a07e612620e705773090633535a749d4a672b8a9d9873e",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "top-mask.png",
+        "sha256": "57427080ce2ec66f747b2b738129a8be89a83b7b5f1a8b66298ed01bfff62626"
+      },
+      "neutral": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              3.125
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "367a2f93b93be177f2a07e612620e705773090633535a749d4a672b8a9d9873e",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "top-neutral.png",
+        "sha256": "7a64fadad7887d3f5de4f2c7e285a4a9c9c0987ba6acd663aab74533092a8b1f"
+      },
+      "normals": {
+        "actual_camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              3.125
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "camera_sha256": "367a2f93b93be177f2a07e612620e705773090633535a749d4a672b8a9d9873e",
+        "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+        "path": "top-normals.png",
+        "sha256": "99e96f9ed6626411210a1eb938de9e516da483d0c18833cf81911a1e81a5de28"
+      }
+    },
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "57427080ce2ec66f747b2b738129a8be89a83b7b5f1a8b66298ed01bfff62626",
+    "projection": "ORTHO",
+    "render_passes": {
+      "mask": {
+        "camera": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              3.125
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ],
+          "projection": "ORTHO",
+          "resolution": [
+            512,
+            512
+          ],
+          "shift_x": 0.0,
+          "shift_y": 0.0
+        },
+        "encoding": "float32 OpenEXR linear alpha; display RGB ignored",
+        "hard_mask_threshold": 0.5,
+        "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+        "protocol": "opaque_linear_alpha_v1",
+        "renderer": {
+          "blender_version": [
+            5,
+            2,
+            2
+          ],
+          "build_hash": "d13f752e3b9c",
+          "engine": "BLENDER_EEVEE"
+        },
+        "sampling": {
+          "depth_of_field": false,
+          "filter_size": 1.5,
+          "motion_blur": false,
+          "taa_render_samples": 64
+        },
+        "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume"
+      },
+      "neutral": {
+        "background_type": "WORLD",
+        "cavity": false,
+        "color_depth": "8",
+        "color_mode": "BW",
+        "color_type": "SINGLE",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_WORKBENCH",
+        "format": "PNG",
+        "light": "STUDIO",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "shadows": true,
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ]
+      },
+      "normals": {
+        "color_depth": "8",
+        "color_mode": "RGB",
+        "display": {
+          "exposure": 0.0,
+          "gamma": 1.0,
+          "look": "None",
+          "view_transform": "AgX"
+        },
+        "engine": "BLENDER_EEVEE",
+        "format": "PNG",
+        "material": "world shading normal * .5 + .5 emission",
+        "purpose": "human inspection only; no geometric-normal metric",
+        "resolution_percentage": 100,
+        "samples": 64
+      }
+    },
+    "resolution": [
+      512,
+      512
+    ],
+    "shift_x": 0.0,
+    "shift_y": 0.0
+  }
+}

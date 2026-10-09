@@ -1,0 +1,520 @@
+{
+  "all_frozen_inputs_verified": true,
+  "candidate_native_frames": 11,
+  "declared_native_frames": 12,
+  "family": "asymmetric_multipart_solid",
+  "fits": 0,
+  "git_head_at_freeze": "dc41477349a2aa0533d2043373cfbd556869f08a",
+  "historical_scope": "original b2c/reference masks/cameras/recipes/receipts unchanged; old failed selected packet supervisor stays failed",
+  "input_count": 67,
+  "inputs": [
+    {
+      "actual_sha256": "d55736b9f3d6b4ca7985b82db8ce11edfa09994cf93ce31c6b506543b74f32eb",
+      "bytes": 270616,
+      "expected_sha256": "d55736b9f3d6b4ca7985b82db8ce11edfa09994cf93ce31c6b506543b74f32eb",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Scripts\\python.exe"
+    },
+    {
+      "actual_sha256": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097",
+      "bytes": 16497,
+      "expected_sha256": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py"
+    },
+    {
+      "actual_sha256": "4226354476aea7a7785ea31e2860fba0084e2f0a5175e6a866e63deaba2ecb01",
+      "bytes": 5885,
+      "expected_sha256": "4226354476aea7a7785ea31e2860fba0084e2f0a5175e6a866e63deaba2ecb01",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\comparable_geometry.py"
+    },
+    {
+      "actual_sha256": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6",
+      "bytes": 3314,
+      "expected_sha256": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py"
+    },
+    {
+      "actual_sha256": "7818917ccdb39f3d3d053dc25978004cc83b121d4a93c51a05aff814fd91b4ef",
+      "bytes": 4350,
+      "expected_sha256": "7818917ccdb39f3d3d053dc25978004cc83b121d4a93c51a05aff814fd91b4ef",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\inspection_camera.py"
+    },
+    {
+      "actual_sha256": "841d1470fbfa7db2f81cf364455d94705342498b6bc1b304d1445b157a577460",
+      "bytes": 7199,
+      "expected_sha256": "841d1470fbfa7db2f81cf364455d94705342498b6bc1b304d1445b157a577460",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\reference_noise.py"
+    },
+    {
+      "actual_sha256": "621d32ca63daa37b2f8cecdf2b6689b66fade5d919f5958b6e77456953f6594b",
+      "bytes": 13971,
+      "expected_sha256": "621d32ca63daa37b2f8cecdf2b6689b66fade5d919f5958b6e77456953f6594b",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\triangle_contacts.py"
+    },
+    {
+      "actual_sha256": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba",
+      "bytes": 6356,
+      "expected_sha256": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py"
+    },
+    {
+      "actual_sha256": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5",
+      "bytes": 19466,
+      "expected_sha256": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\silhouette_render.py"
+    },
+    {
+      "actual_sha256": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb",
+      "bytes": 31577,
+      "expected_sha256": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py"
+    },
+    {
+      "actual_sha256": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a",
+      "bytes": 17802,
+      "expected_sha256": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py"
+    },
+    {
+      "actual_sha256": "6e8c609855fd757496b886465e229eac8026ee02b644191f80dd7aeeba9d7de5",
+      "bytes": 15619,
+      "expected_sha256": "6e8c609855fd757496b886465e229eac8026ee02b644191f80dd7aeeba9d7de5",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_family.py"
+    },
+    {
+      "actual_sha256": "23b408f67d94034e78f568ba9933804f064db90119ce9c44b3ea72b278d29596",
+      "bytes": 10953,
+      "expected_sha256": "23b408f67d94034e78f568ba9933804f064db90119ce9c44b3ea72b278d29596",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py"
+    },
+    {
+      "actual_sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+      "bytes": 7366,
+      "expected_sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py"
+    },
+    {
+      "actual_sha256": "009295c99a1381bd48383e0dc579c844a4315d79c9471dd6f54b796b62df05a9",
+      "bytes": 10622,
+      "expected_sha256": "009295c99a1381bd48383e0dc579c844a4315d79c9471dd6f54b796b62df05a9",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_qualification.py"
+    },
+    {
+      "actual_sha256": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd",
+      "bytes": 1238,
+      "expected_sha256": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_targets.py"
+    },
+    {
+      "actual_sha256": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2",
+      "bytes": 23095,
+      "expected_sha256": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\blender_builders.py"
+    },
+    {
+      "actual_sha256": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9",
+      "bytes": 6124,
+      "expected_sha256": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_contracts.py"
+    },
+    {
+      "actual_sha256": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef",
+      "bytes": 9233,
+      "expected_sha256": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_references.py"
+    },
+    {
+      "actual_sha256": "b750d075ff5e7d07a388ce541b0defa515b89dfa91462cc9f4f1ec727f0fde4b",
+      "bytes": 8862,
+      "expected_sha256": "b750d075ff5e7d07a388ce541b0defa515b89dfa91462cc9f4f1ec727f0fde4b",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\specs.py"
+    },
+    {
+      "actual_sha256": "2038fc48280d7e16bb3b685599bdbdcecd053ce639d6658bb814813a7f58ed8f",
+      "bytes": 2814,
+      "expected_sha256": "2038fc48280d7e16bb3b685599bdbdcecd053ce639d6658bb814813a7f58ed8f",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_inspection_camera.py"
+    },
+    {
+      "actual_sha256": "cf10c3edcb0c67a6667379f8382b976d7f3dc12ca69c8b7030aca93bbb27e8e8",
+      "bytes": 14525,
+      "expected_sha256": "cf10c3edcb0c67a6667379f8382b976d7f3dc12ca69c8b7030aca93bbb27e8e8",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_multipart_planar_join.py"
+    },
+    {
+      "actual_sha256": "71f4481f54e4994ef5dc668217631203540fdd207e12a545ef71d0584b9962b2",
+      "bytes": 33744,
+      "expected_sha256": "71f4481f54e4994ef5dc668217631203540fdd207e12a545ef71d0584b9962b2",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py"
+    },
+    {
+      "actual_sha256": "8c735c685bd9b15910517fb301766de92b89863a7ede0c831ea27c8bb5c5c45d",
+      "bytes": 9115,
+      "expected_sha256": "8c735c685bd9b15910517fb301766de92b89863a7ede0c831ea27c8bb5c5c45d",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_selected_canonical_inspection.py"
+    },
+    {
+      "actual_sha256": "750b15b3a0be5eaa4906f1c96f15453fb27d53728c592a8b0a39cc16f9800b5a",
+      "bytes": 10394,
+      "expected_sha256": "750b15b3a0be5eaa4906f1c96f15453fb27d53728c592a8b0a39cc16f9800b5a",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process.py"
+    },
+    {
+      "actual_sha256": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b",
+      "bytes": 23620,
+      "expected_sha256": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py"
+    },
+    {
+      "actual_sha256": "ddc0f60642b536f64dda686d7d8e10c62e42916c70351c388564a5732785107f",
+      "bytes": 2383,
+      "expected_sha256": "ddc0f60642b536f64dda686d7d8e10c62e42916c70351c388564a5732785107f",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\primary_process_cleanup.py"
+    },
+    {
+      "actual_sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+      "bytes": 12563,
+      "expected_sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py"
+    },
+    {
+      "actual_sha256": "d65e292edc938c5fa7bf00ac89e78b63ab24f77699f3d5994d2da01230c76965",
+      "bytes": 17310,
+      "expected_sha256": "d65e292edc938c5fa7bf00ac89e78b63ab24f77699f3d5994d2da01230c76965",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\eleven-family-evidence.json"
+    },
+    {
+      "actual_sha256": "b91fd2b023ab822e7d73bcb8d43d08a888ab4533651dab965b06071bc513924f",
+      "bytes": 35875,
+      "expected_sha256": "b91fd2b023ab822e7d73bcb8d43d08a888ab4533651dab965b06071bc513924f",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-selected-canonical-continuation-20261009\\native-plan.json"
+    },
+    {
+      "actual_sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25",
+      "bytes": 4380,
+      "expected_sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\qualify_native_solid.py"
+    },
+    {
+      "actual_sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca",
+      "bytes": 15240,
+      "expected_sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py"
+    },
+    {
+      "actual_sha256": "9136eedd59fca4e6bec4a28a3192ced9260e7107b28835077be5f4f6f90ba0f0",
+      "bytes": 11068,
+      "expected_sha256": "9136eedd59fca4e6bec4a28a3192ced9260e7107b28835077be5f4f6f90ba0f0",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_frozen_multipart_reconstruction.py"
+    },
+    {
+      "actual_sha256": "23290344800e2650c7a6bfec08ed3d5350c426eeafdd32c3a4c29c346a66999a",
+      "bytes": 24650,
+      "expected_sha256": "23290344800e2650c7a6bfec08ed3d5350c426eeafdd32c3a4c29c346a66999a",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py"
+    },
+    {
+      "actual_sha256": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b",
+      "bytes": 10733,
+      "expected_sha256": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_quality_coverage_check.py"
+    },
+    {
+      "actual_sha256": "28501a44fcefc55e2ca09412c82072233885d5ecf4ff83f18f2a9f4b6cae6ec6",
+      "bytes": 20825,
+      "expected_sha256": "28501a44fcefc55e2ca09412c82072233885d5ecf4ff83f18f2a9f4b6cae6ec6",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_reference_neutral_inspection.py"
+    },
+    {
+      "actual_sha256": "c5f00d3a861d5bfa004d04cec912ed391d5ab5cd5f22ae919a36514664d408ce",
+      "bytes": 24797,
+      "expected_sha256": "c5f00d3a861d5bfa004d04cec912ed391d5ab5cd5f22ae919a36514664d408ce",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_selected_canonical_inspection.py"
+    },
+    {
+      "actual_sha256": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961",
+      "bytes": 19907,
+      "expected_sha256": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_surface_quality_check.py"
+    },
+    {
+      "actual_sha256": "5d8fdad82b8a852623f38fa33640c01f3c08e2b9c440760c53a4e354c353c4c7",
+      "bytes": 7829,
+      "expected_sha256": "5d8fdad82b8a852623f38fa33640c01f3c08e2b9c440760c53a4e354c353c4c7",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-measurement-04\\owned-89f4s1lu\\refined\\evaluated-exact.npz"
+    },
+    {
+      "actual_sha256": "bba1f9e0cc871eac56ed46eeb8d970943f1d6acb6e00dae817f4c35e010efb5b",
+      "bytes": 2077,
+      "expected_sha256": "bba1f9e0cc871eac56ed46eeb8d970943f1d6acb6e00dae817f4c35e010efb5b",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-measurement-04\\owned-89f4s1lu\\refined\\program.json"
+    },
+    {
+      "actual_sha256": "2ca8f2643a2072ae899bd15e13dbf95afd7836557a68dec19def07d7afb0f135",
+      "bytes": 23339,
+      "expected_sha256": "2ca8f2643a2072ae899bd15e13dbf95afd7836557a68dec19def07d7afb0f135",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-measurement-04\\owned-89f4s1lu\\results.json"
+    },
+    {
+      "actual_sha256": "dd36b515004e8d7c81899fd960851f3cf60b1524235f897b491164001d8bedc4",
+      "bytes": 768,
+      "expected_sha256": "dd36b515004e8d7c81899fd960851f3cf60b1524235f897b491164001d8bedc4",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\evaluated-exact.npz"
+    },
+    {
+      "actual_sha256": "0231c84fa9625b90f61ca565ed81d4cbd54d91ff4f02a06b893454b673fc7898",
+      "bytes": 9266,
+      "expected_sha256": "0231c84fa9625b90f61ca565ed81d4cbd54d91ff4f02a06b893454b673fc7898",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\frozen-workload.json"
+    },
+    {
+      "actual_sha256": "39f303d5ba564965f8c40027dbb4ca4153669d2436674d466fff9fe34ccd9948",
+      "bytes": 5163,
+      "expected_sha256": "39f303d5ba564965f8c40027dbb4ca4153669d2436674d466fff9fe34ccd9948",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\program.json"
+    },
+    {
+      "actual_sha256": "9dffc1c8cc65c240fefb90c6c2b402b46c246f2720d717e6090b01f0a59fdcb9",
+      "bytes": 55994,
+      "expected_sha256": "9dffc1c8cc65c240fefb90c6c2b402b46c246f2720d717e6090b01f0a59fdcb9",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\results.json"
+    },
+    {
+      "actual_sha256": "843b08a5c5822f0c9bc321c72f561e187ef9db90bbe7a1656a2ceb9fab6b8a99",
+      "bytes": 40351,
+      "expected_sha256": "843b08a5c5822f0c9bc321c72f561e187ef9db90bbe7a1656a2ceb9fab6b8a99",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\camera-snapshots.json"
+    },
+    {
+      "actual_sha256": "cad4ed4cfa87d69886b6db3ce864ba64cf4ca340a18814e4a5345cfd577c95a0",
+      "bytes": 75755,
+      "expected_sha256": "cad4ed4cfa87d69886b6db3ce864ba64cf4ca340a18814e4a5345cfd577c95a0",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\front-neutral.png"
+    },
+    {
+      "actual_sha256": "06042e38800673d5f72ad8d81f788b49083d405f463f9ffa5788dd70c7d07652",
+      "bytes": 79492,
+      "expected_sha256": "06042e38800673d5f72ad8d81f788b49083d405f463f9ffa5788dd70c7d07652",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\oblique_145_40-neutral.png"
+    },
+    {
+      "actual_sha256": "ca6c80eb94676072309229bc43ba22685da24177109a4b94b2ca6ded5792810b",
+      "bytes": 78659,
+      "expected_sha256": "ca6c80eb94676072309229bc43ba22685da24177109a4b94b2ca6ded5792810b",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\oblique_35_28-neutral.png"
+    },
+    {
+      "actual_sha256": "ed48962044630f73560c1a5122b6d23337337673e996cb87f092cef5614eec8d",
+      "bytes": 75541,
+      "expected_sha256": "ed48962044630f73560c1a5122b6d23337337673e996cb87f092cef5614eec8d",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\side-neutral.png"
+    },
+    {
+      "actual_sha256": "5d53ac8eae90e5c6a71f2bf02f85555e688d66bd2999fab79f143594f42d002a",
+      "bytes": 76033,
+      "expected_sha256": "5d53ac8eae90e5c6a71f2bf02f85555e688d66bd2999fab79f143594f42d002a",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\top-neutral.png"
+    },
+    {
+      "actual_sha256": "6f2ac20580a3a5fb1f541e056a6c6dc9c5659a2838882f44ca54c5a9dfad2c83",
+      "bytes": 755,
+      "expected_sha256": "6f2ac20580a3a5fb1f541e056a6c6dc9c5659a2838882f44ca54c5a9dfad2c83",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\evaluated-exact.npz"
+    },
+    {
+      "actual_sha256": "23f958204b78eca25beb9ef64851540c357f0c305dbf5f79ca3aa855318e1eb3",
+      "bytes": 1406,
+      "expected_sha256": "23f958204b78eca25beb9ef64851540c357f0c305dbf5f79ca3aa855318e1eb3",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\evaluated.obj"
+    },
+    {
+      "actual_sha256": "70cfebc1c9ac504fc992c71e13a5aeaca5a49d51155df23c98451cc967e69172",
+      "bytes": 69932,
+      "expected_sha256": "70cfebc1c9ac504fc992c71e13a5aeaca5a49d51155df23c98451cc967e69172",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\front-mask.png"
+    },
+    {
+      "actual_sha256": "0ca1b12e16c770be9ad996a5e692fc6dd283896046f7dacc3b5c0b45ad6afccd",
+      "bytes": 70373,
+      "expected_sha256": "0ca1b12e16c770be9ad996a5e692fc6dd283896046f7dacc3b5c0b45ad6afccd",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\oblique_145_40-mask.png"
+    },
+    {
+      "actual_sha256": "47f4e1873decf7e02ff3b673c52bc7ac4d706044ec79aa3c416782909560dee7",
+      "bytes": 69360,
+      "expected_sha256": "47f4e1873decf7e02ff3b673c52bc7ac4d706044ec79aa3c416782909560dee7",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\oblique_35_28-mask.png"
+    },
+    {
+      "actual_sha256": "2c98cab132c3eb47536599b92f8b6a10c39e6d95a77ed098a10bd92ad571fc17",
+      "bytes": 72920,
+      "expected_sha256": "2c98cab132c3eb47536599b92f8b6a10c39e6d95a77ed098a10bd92ad571fc17",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\side-mask.png"
+    },
+    {
+      "actual_sha256": "39024849d71452c9235116666affaf811cde46ad6d8e8bd8ff486dac75c56dc9",
+      "bytes": 70224,
+      "expected_sha256": "39024849d71452c9235116666affaf811cde46ad6d8e8bd8ff486dac75c56dc9",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\top-mask.png"
+    },
+    {
+      "actual_sha256": "3b63f97aa72b6c8ab933bac9825ff97528f753acac285331d673748abb7a32b0",
+      "bytes": 9258,
+      "expected_sha256": "3b63f97aa72b6c8ab933bac9825ff97528f753acac285331d673748abb7a32b0",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\frozen-workload.json"
+    },
+    {
+      "actual_sha256": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63",
+      "bytes": 113994,
+      "expected_sha256": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\results.json"
+    },
+    {
+      "actual_sha256": "de63007fefa542a9b7a5db3217d9ee5f2109a445a4c0a2caf82104943476b654",
+      "bytes": 6990,
+      "expected_sha256": "de63007fefa542a9b7a5db3217d9ee5f2109a445a4c0a2caf82104943476b654",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\evaluated-exact.npz"
+    },
+    {
+      "actual_sha256": "3199bc9c887f4263d7af5546aee3e6f07bee0e9ca73f1a377462fe0193923b72",
+      "bytes": 33166,
+      "expected_sha256": "3199bc9c887f4263d7af5546aee3e6f07bee0e9ca73f1a377462fe0193923b72",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\evaluated.obj"
+    },
+    {
+      "actual_sha256": "e2e3fcf80234ec1cd826a63623b05cbd25b6b08b4c7211eea4825177017fdd8e",
+      "bytes": 65746,
+      "expected_sha256": "e2e3fcf80234ec1cd826a63623b05cbd25b6b08b4c7211eea4825177017fdd8e",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\front-mask.png"
+    },
+    {
+      "actual_sha256": "efd05692bccc78848357e5edbf0a29fdcaf217fbad6b6e6717d681c2047abced",
+      "bytes": 64824,
+      "expected_sha256": "efd05692bccc78848357e5edbf0a29fdcaf217fbad6b6e6717d681c2047abced",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\oblique_145_40-mask.png"
+    },
+    {
+      "actual_sha256": "7fc6ba8be6c0ef15b3e3675f138cd8c2a6e834615763958fef526ad6b6b1c153",
+      "bytes": 62630,
+      "expected_sha256": "7fc6ba8be6c0ef15b3e3675f138cd8c2a6e834615763958fef526ad6b6b1c153",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\oblique_35_28-mask.png"
+    },
+    {
+      "actual_sha256": "fa02db7c8dff67ab633e1b3d891b2eccf830b67903fca36eb1af2edf10e3f6ca",
+      "bytes": 70287,
+      "expected_sha256": "fa02db7c8dff67ab633e1b3d891b2eccf830b67903fca36eb1af2edf10e3f6ca",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\side-mask.png"
+    },
+    {
+      "actual_sha256": "e1b57a061b763f983dd9c0235a9548e988a98e13b54169a51dbcfe813dc0e5fd",
+      "bytes": 67614,
+      "expected_sha256": "e1b57a061b763f983dd9c0235a9548e988a98e13b54169a51dbcfe813dc0e5fd",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\top-mask.png"
+    }
+  ],
+  "launch_command_sha256": "9233590bb9f48e79cfe7829a5745b7a37967b7c264d0a88a0412a77664ee732a",
+  "native_launched": false,
+  "plan_sha256": "e38527b16063e5c550eb82fef6e75e9eedc4db67128bb261dd4086c86ca361cc",
+  "protocol": "multipart-planar-join-preflight-v1",
+  "qualifier_children": 1,
+  "raw_pairs": 1,
+  "resource_contract": {
+    "committed_bytes": 8589934592,
+    "join_seconds": 5.0,
+    "rss_bytes": 8589934592,
+    "threads": 2,
+    "work_seconds": 85.0
+  },
+  "source_cpu_checks": {
+    "passed": true,
+    "runs": [
+      {
+        "elapsed_seconds": 0.357,
+        "module": "test_multipart_planar_join",
+        "scope": "affected module after production import correction; includes no-scripts guard",
+        "tests": 10
+      },
+      {
+        "elapsed_seconds": 0.168,
+        "module": "test_inspection_camera",
+        "scope": "previously passed unchanged camera module; no redundant rerun",
+        "tests": 3
+      }
+    ],
+    "scope": "focused source/model/camera guards only; no Blender/kernel/render claim",
+    "tests": 13
+  },
+  "source_native_frames": 1,
+  "status": "ready_for_root_review_not_executed",
+  "superseded_prelaunch": {
+    "directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\prelaunch-superseded-01",
+    "native_launched": false
+  },
+  "wrapper_preflight_only": true
+}

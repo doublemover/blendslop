@@ -1,0 +1,442 @@
+{
+  "front": {
+    "projection": "ORTHO",
+    "matrix_world": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        7.549790126404332e-08,
+        -1.0,
+        -1.2999999523162842
+      ],
+      [
+        0.0,
+        1.0,
+        7.549790126404332e-08,
+        0.2250000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "shift_x": 0.0,
+    "shift_y": 0.0,
+    "clip_start": 0.10000000149011612,
+    "clip_end": 1000.0,
+    "resolution": [
+      512,
+      512
+    ],
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "ea4c7d7026a31821cbb9038a02adb9a128cd2cd7798be03eb22d353f098ad04e",
+    "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "pass_artifacts": {
+      "mask": {
+        "path": "front-mask.png",
+        "sha256": "ea4c7d7026a31821cbb9038a02adb9a128cd2cd7798be03eb22d353f098ad04e",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "a685367849862f63a8053c43f99bddcf886411d7c2d8f8c783b3493208750289"
+      },
+      "neutral": {
+        "path": "front-neutral.png",
+        "sha256": "1386dd46cb3c5cbbeb8b471bc190e4d7ee8761cf79b86e4941932bae509b4139",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "a685367849862f63a8053c43f99bddcf886411d7c2d8f8c783b3493208750289"
+      }
+    },
+    "render_passes": {
+      "mask": {
+        "engine": "BLENDER_EEVEE",
+        "material": "black silhouette on white",
+        "color_mode": "BW"
+      },
+      "neutral": {
+        "engine": "BLENDER_WORKBENCH",
+        "light": "STUDIO",
+        "color_type": "SINGLE",
+        "single_color": [
+          0.65,
+          0.65,
+          0.65
+        ],
+        "shadows": true,
+        "cavity": false,
+        "color_mode": "BW"
+      },
+      "normals": {
+        "engine": "BLENDER_EEVEE",
+        "material": "world normal * .5 + .5 emission",
+        "color_mode": "RGB"
+      }
+    },
+    "geometry_unchanged_after_passes": true,
+    "executed_passes": [
+      "mask",
+      "neutral"
+    ]
+  },
+  "side": {
+    "projection": "ORTHO",
+    "matrix_world": [
+      [
+        -4.371138828673793e-08,
+        4.371138828673793e-08,
+        1.0,
+        3.200000047683716
+      ],
+      [
+        1.0,
+        1.910685676922942e-15,
+        4.371138828673793e-08,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        -4.371138828673793e-08,
+        0.2250000238418579
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "shift_x": 0.0,
+    "shift_y": 0.0,
+    "clip_start": 0.10000000149011612,
+    "clip_end": 1000.0,
+    "resolution": [
+      512,
+      512
+    ],
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "e0892003a12adcf1c3fbf5788cdccc3bd809e44d9f125a5558cb99929c1b1bf3",
+    "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "pass_artifacts": {
+      "mask": {
+        "path": "side-mask.png",
+        "sha256": "e0892003a12adcf1c3fbf5788cdccc3bd809e44d9f125a5558cb99929c1b1bf3",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "a70b8cb10a5c2d0d904aba316bfb45dc5b13358b3b4cf1ecbe1b9ece04e3cce6"
+      },
+      "neutral": {
+        "path": "side-neutral.png",
+        "sha256": "0781e46379dcd0c6ac37dec248bc8234540877c85981437d41b4ba1195f1d239",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "a70b8cb10a5c2d0d904aba316bfb45dc5b13358b3b4cf1ecbe1b9ece04e3cce6"
+      }
+    },
+    "render_passes": {
+      "mask": {
+        "engine": "BLENDER_EEVEE",
+        "material": "black silhouette on white",
+        "color_mode": "BW"
+      },
+      "neutral": {
+        "engine": "BLENDER_WORKBENCH",
+        "light": "STUDIO",
+        "color_type": "SINGLE",
+        "single_color": [
+          0.65,
+          0.65,
+          0.65
+        ],
+        "shadows": true,
+        "cavity": false,
+        "color_mode": "BW"
+      },
+      "normals": {
+        "engine": "BLENDER_EEVEE",
+        "material": "world normal * .5 + .5 emission",
+        "color_mode": "RGB"
+      }
+    },
+    "geometry_unchanged_after_passes": true,
+    "executed_passes": [
+      "mask",
+      "neutral"
+    ]
+  },
+  "top": {
+    "projection": "ORTHO",
+    "matrix_world": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        3.125
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "shift_x": 0.0,
+    "shift_y": 0.0,
+    "clip_start": 0.10000000149011612,
+    "clip_end": 1000.0,
+    "resolution": [
+      512,
+      512
+    ],
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "6c9a432042edbcb1648e54e35e89be69b4535522493299ee6769f8c74615901a",
+    "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "pass_artifacts": {
+      "mask": {
+        "path": "top-mask.png",
+        "sha256": "6c9a432042edbcb1648e54e35e89be69b4535522493299ee6769f8c74615901a",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "367a2f93b93be177f2a07e612620e705773090633535a749d4a672b8a9d9873e"
+      },
+      "neutral": {
+        "path": "top-neutral.png",
+        "sha256": "fee99a9a392a2b2859866248b3fffd82bc8408ae6f7785f4c14ae672d8a69b5c",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "367a2f93b93be177f2a07e612620e705773090633535a749d4a672b8a9d9873e"
+      }
+    },
+    "render_passes": {
+      "mask": {
+        "engine": "BLENDER_EEVEE",
+        "material": "black silhouette on white",
+        "color_mode": "BW"
+      },
+      "neutral": {
+        "engine": "BLENDER_WORKBENCH",
+        "light": "STUDIO",
+        "color_type": "SINGLE",
+        "single_color": [
+          0.65,
+          0.65,
+          0.65
+        ],
+        "shadows": true,
+        "cavity": false,
+        "color_mode": "BW"
+      },
+      "normals": {
+        "engine": "BLENDER_EEVEE",
+        "material": "world normal * .5 + .5 emission",
+        "color_mode": "RGB"
+      }
+    },
+    "geometry_unchanged_after_passes": true,
+    "executed_passes": [
+      "mask",
+      "neutral"
+    ]
+  },
+  "oblique_35_28": {
+    "projection": "ORTHO",
+    "matrix_world": [
+      [
+        -0.5735766887664795,
+        -0.38456857204437256,
+        0.7232681512832642,
+        4.027158260345459
+      ],
+      [
+        0.8191518783569336,
+        -0.2692779302597046,
+        0.506438136100769,
+        2.8198466300964355
+      ],
+      [
+        -3.967022621509386e-08,
+        0.882947564125061,
+        0.46947160363197327,
+        2.839017868041992
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "shift_x": 0.0,
+    "shift_y": 0.0,
+    "clip_start": 0.10000000149011612,
+    "clip_end": 1000.0,
+    "resolution": [
+      512,
+      512
+    ],
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "83e3b25cf60ee122b68e42e6e20c62f7fece98160ed110bf99f091640f3d00c7",
+    "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "pass_artifacts": {
+      "mask": {
+        "path": "oblique_35_28-mask.png",
+        "sha256": "83e3b25cf60ee122b68e42e6e20c62f7fece98160ed110bf99f091640f3d00c7",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "638ca0dbd43086ac6f1d778d9431b963c54283f5aac674a3e36f7cc73d258047"
+      },
+      "neutral": {
+        "path": "oblique_35_28-neutral.png",
+        "sha256": "81434765f75a75991ad1e968f3d3e6f51a228260f50796e87d33d2e714bdcec2",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "638ca0dbd43086ac6f1d778d9431b963c54283f5aac674a3e36f7cc73d258047"
+      }
+    },
+    "render_passes": {
+      "mask": {
+        "engine": "BLENDER_EEVEE",
+        "material": "black silhouette on white",
+        "color_mode": "BW"
+      },
+      "neutral": {
+        "engine": "BLENDER_WORKBENCH",
+        "light": "STUDIO",
+        "color_type": "SINGLE",
+        "single_color": [
+          0.65,
+          0.65,
+          0.65
+        ],
+        "shadows": true,
+        "cavity": false,
+        "color_mode": "BW"
+      },
+      "normals": {
+        "engine": "BLENDER_EEVEE",
+        "material": "world normal * .5 + .5 emission",
+        "color_mode": "RGB"
+      }
+    },
+    "geometry_unchanged_after_passes": true,
+    "executed_passes": [
+      "mask",
+      "neutral"
+    ]
+  },
+  "oblique_145_40": {
+    "projection": "ORTHO",
+    "matrix_world": [
+      [
+        -0.5735764503479004,
+        0.5265408158302307,
+        -0.6275067925453186,
+        -3.493957996368408
+      ],
+      [
+        -0.8191519975662231,
+        -0.3686878979206085,
+        0.43938499689102173,
+        2.44649600982666
+      ],
+      [
+        -3.72959663152983e-09,
+        0.7660442590713501,
+        0.642787754535675,
+        3.804041862487793
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 1.8560000658035278,
+    "shift_x": 0.0,
+    "shift_y": 0.0,
+    "clip_start": 0.10000000149011612,
+    "clip_end": 1000.0,
+    "resolution": [
+      512,
+      512
+    ],
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "png_sha256": "6f8dce0a45555ad909fc43c4a4fa46ac405ff8740dabfdc469ab44d7399a9704",
+    "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "pass_artifacts": {
+      "mask": {
+        "path": "oblique_145_40-mask.png",
+        "sha256": "6f8dce0a45555ad909fc43c4a4fa46ac405ff8740dabfdc469ab44d7399a9704",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "fd341b5a7031b8c57aa6b3ee15c9b51c05c4388a47350fd0d2e5c354dcb3f537"
+      },
+      "neutral": {
+        "path": "oblique_145_40-neutral.png",
+        "sha256": "51284f360552df179b0065a5f04baf152edc04bf5c3029457812e8259c3c5fdd",
+        "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+        "camera_sha256": "fd341b5a7031b8c57aa6b3ee15c9b51c05c4388a47350fd0d2e5c354dcb3f537"
+      }
+    },
+    "render_passes": {
+      "mask": {
+        "engine": "BLENDER_EEVEE",
+        "material": "black silhouette on white",
+        "color_mode": "BW"
+      },
+      "neutral": {
+        "engine": "BLENDER_WORKBENCH",
+        "light": "STUDIO",
+        "color_type": "SINGLE",
+        "single_color": [
+          0.65,
+          0.65,
+          0.65
+        ],
+        "shadows": true,
+        "cavity": false,
+        "color_mode": "BW"
+      },
+      "normals": {
+        "engine": "BLENDER_EEVEE",
+        "material": "world normal * .5 + .5 emission",
+        "color_mode": "RGB"
+      }
+    },
+    "geometry_unchanged_after_passes": true,
+    "executed_passes": [
+      "mask",
+      "neutral"
+    ]
+  }
+}
