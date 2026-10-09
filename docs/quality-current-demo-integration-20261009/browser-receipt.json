@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "chrome": "Edg/154.0.4258.62",
+  "checks": [
+    "desktop shaded actual defaults",
+    "exact measured vase failure explanation",
+    "scored boundary-band overlay and magnified pixels",
+    "exact filled-mask differences",
+    "triangle shaded output and unrun qualification distinction",
+    "secondary silhouettes and unavailable camera pass",
+    "unrun reference and actual filters",
+    "no browser exceptions",
+    "main defaults to current calibrated vase",
+    "twelve exact current selector bodies and independent gates",
+    "current count/metric consistency",
+    "current image identity and unavailable-pair handling"
+  ]
+}

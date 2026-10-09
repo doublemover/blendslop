@@ -1,0 +1,310 @@
+{
+  "protocol": "quality_current_main_demo_integration_v1",
+  "source_commit": "85f50757924574cc7153c6791071a2abb88c5793",
+  "retained_native_evidence_revision": "f5d7f4122273f8372fd8620bcb9df5b621a88810",
+  "source_branch": "local/quality-followup-20261009",
+  "publication": "local only after approved f5d7f41; PR7 still OPEN DRAFT at f5; no new push/merge/retarget/dispatch/deployment",
+  "selection": "Separate current presentation selects best retained positive checkpoints; original sphere/ellipsoid retained. Frozen original matrix/history unchanged.",
+  "counts": {
+    "actual_families": 12,
+    "required_view_passes": 60,
+    "silhouette_passes": 12,
+    "native_boundary_passes": 12,
+    "index_topology_passes": 12,
+    "semantic_editability_passes": 12,
+    "surface_engineering_passes": 12,
+    "existing_artist_accepted": 1,
+    "undefined_artist_criteria": 11,
+    "required_current_geometry_gate_failures": 0,
+    "curated_current_pngs": 29,
+    "neutral_pairs": 11,
+    "candidate_only_neutral": 1,
+    "normals_pairs": 3
+  },
+  "families": [
+    {
+      "id": "sphere",
+      "geometry": "833c2dcc96c1c9229e307e49c5680306158df26a35011ec7981164012d692297",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 2
+    },
+    {
+      "id": "anisotropic_ellipsoid",
+      "geometry": "b40ab45f1aa7e00f353fba58b6a500a485cd1ddba73d9e3be2dd74ba5c857699",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 2
+    },
+    {
+      "id": "cylinder",
+      "geometry": "ab6343943cb9a35006f1b1659d9b6cbad50520fff000ab9ca781fecf25c5ff88",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 2
+    },
+    {
+      "id": "tapered_frustum",
+      "geometry": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 2
+    },
+    {
+      "id": "smooth_vase",
+      "geometry": "7447cc402285c2a09daaa2098d4316d9808b5665fcc9f732c165bb7309af9c49",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "passed",
+        "aggregate": "passed"
+      },
+      "images": 1
+    },
+    {
+      "id": "torus",
+      "geometry": "3afacdc32a140a1099cd304b101d8910a7e6e58701b3608f947039aaf2349417",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 4
+    },
+    {
+      "id": "capsule",
+      "geometry": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 2
+    },
+    {
+      "id": "rounded_box",
+      "geometry": "9f6c8d4db73fdccedf0ac346682c33b626830259989f0f0069f60306938f9b9a",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 4
+    },
+    {
+      "id": "thin_plate",
+      "geometry": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 2
+    },
+    {
+      "id": "concave_arch",
+      "geometry": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 2
+    },
+    {
+      "id": "asymmetric_multipart_solid",
+      "geometry": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 4
+    },
+    {
+      "id": "rounded_triangle_dot",
+      "geometry": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+      "verdicts": {
+        "silhouette": "passed",
+        "boundary": "passed",
+        "topology": "passed",
+        "editability": "passed",
+        "surfaceEngineering": "passed",
+        "artistSurface": "unqualified",
+        "aggregate": "unqualified"
+      },
+      "images": 2
+    }
+  ],
+  "actual_observations": [
+    "Repaired multipart retains a faint candidate side seam absent from source.",
+    "Arch distance P95 rises .002812504768371582 -> .0029192864894866943 (+3.7967%) while mean improves.",
+    "Triangle sampled maximum rises .0028801681473851204 -> .0029814052395522594 while mean/normal P95 improve.",
+    "Finite-facet shading appears in source/candidate torus, cylinder and frustum; current sphere also visibly retains finite facet regions.",
+    "Original clipped oblique framing is retained; engineering in-frame passes are not full-contour visibility.",
+    "Vase source-neutral counterpart unavailable; exact accepted candidate7447 preview is shown independently.",
+    "Sphere/ellipsoid refit regressions remain rejected; current original candidates do not inherit those trial failures."
+  ],
+  "validation": {
+    "data": "Retained baseline plus eight adverse exact-value/body/evidence/image/artist-acceptance guards passed.",
+    "workflow": "Existing PyYAML BaseLoader confirms only workflow_dispatch, publish boolean defaultfalse, main-only upload/deploy, one generation caller; Pages API build_type=workflow.",
+    "javascript": "Modified JS module parse and CRLF-aware whitespace checks passed.",
+    "browser": {
+      "passed": true,
+      "chrome": "Edg/154.0.4258.62",
+      "checks": [
+        "desktop shaded actual defaults",
+        "exact measured vase failure explanation",
+        "scored boundary-band overlay and magnified pixels",
+        "exact filled-mask differences",
+        "triangle shaded output and unrun qualification distinction",
+        "secondary silhouettes and unavailable camera pass",
+        "unrun reference and actual filters",
+        "no browser exceptions",
+        "main defaults to current calibrated vase",
+        "twelve exact current selector bodies and independent gates",
+        "current count/metric consistency",
+        "current image identity and unavailable-pair handling"
+      ]
+    },
+    "browser_deadline_seconds": 60,
+    "layout": "Actual screenshot review exposed a grid intrinsic sizing crop; final block slot and direct image-bounds assertion pass.",
+    "final_source_viewed": [
+      "current-main.png",
+      "current-paired-inspection.png"
+    ],
+    "native_renders_or_metrics_rerun": 0,
+    "packages_or_versions_changed": false,
+    "old_full_suite_and_seven_controls_rerun": false
+  },
+  "build": {
+    "commit": "85f50757924574cc7153c6791071a2abb88c5793",
+    "evidenceDate": "2026-10-08",
+    "evidenceSource": "69eb23128a18006501b2a1f89e8df129bfdc048f",
+    "blender": "5.2.2 LTS",
+    "assetCount": 115,
+    "continuationAssetCount": 4,
+    "currentAssetCount": 29,
+    "currentEvidenceSource": "f5d7f4122273f8372fd8620bcb9df5b621a88810",
+    "currentFamilyCount": 12,
+    "bytes": 15539702,
+    "builtAt": "2026-10-09T16:42:07.261Z"
+  },
+  "bindings": {
+    "display_assertions": 339,
+    "evidence_hash_normalization": "UTF8 with CRLF replaced by LF",
+    "pixels": "Exact retained original hashes + producer JSONPointers; published metadata stripped, IDAT preserved; no image resampling"
+  },
+  "files": {
+    "site/latest.json": {
+      "bytes": 220253,
+      "sha256": "167e24e439bd0e36013995eb5bcf5fe9a9a0ff7036bf09ba27baeb82888c4cad"
+    },
+    "site/latest-assets.json": {
+      "bytes": 28383,
+      "sha256": "a4df8102fd84cb27ab20209eb7cc56147a26c612dde9161a4180ec2052137a4f"
+    },
+    ".github/workflows/evaluation-pages.yml": {
+      "bytes": 2643,
+      "sha256": "71f576028fe0dad9b5e37a8ce55032781527e8a6da48eb3c1a77785a96ff7535"
+    },
+    "scripts/validate-current-demo.mjs": {
+      "bytes": 10181,
+      "sha256": "d4a4668f4f59d241d832842f9998014fcf2db979f4d29b7baa0474479a89524a"
+    },
+    "scripts/check-current-demo.mjs": {
+      "bytes": 2324,
+      "sha256": "22729a9c9b5c4b798bac99a8cbae4d8aa9738d495b28e0f5e6297c6c4961927b"
+    },
+    "scripts/check-evaluation-browser.mjs": {
+      "bytes": 16660,
+      "sha256": "ea1fb53a2b60e7fcca9e9cb9573e3825e6cc89d4cfe3f66c6b07e460132c5986"
+    },
+    "docs/quality-current-demo-integration-20261009/build-receipt.json": {
+      "bytes": 421,
+      "sha256": "df5926aad3f5a316785633254de079b2956ff4db003bad16ea80f3221d53f5ca"
+    },
+    "docs/quality-current-demo-integration-20261009/browser-receipt.json": {
+      "bytes": 659,
+      "sha256": "5870f8be43aa81c007ca004cc5fe00189565be4ad316378d77681d4090a5cd84"
+    },
+    "docs/quality-current-demo-integration-20261009/screenshots/current-main.png": {
+      "bytes": 123647,
+      "sha256": "aabe5b5ba9b32b65545424fde64c88ef11bc74ae498f057aa5d527539bffc69e"
+    },
+    "docs/quality-current-demo-integration-20261009/screenshots/current-paired-inspection.png": {
+      "bytes": 203653,
+      "sha256": "bdced373e537a41621ee51b639d78e273e75402cdca7cc1c3615cc1df2b4da14"
+    }
+  },
+  "remaining_functional_implementation": [
+    "Persistent reconstruction workers still need asynchronous complete-tree launch/poll/stop ownership; current direct Popen/taskkill path can miss descendants after primary exit.",
+    "Warm/cold numerical helpers and native qualifier still contain primary-only or unbounded post-kill communicate/cleanup paths; scoped adoption remains real code work.",
+    "Other producer ownership and explicitly authorized recovery/reclamation execution remain separately scoped; no blanket deletion/adoption performed."
+  ],
+  "genuine_owner_design_choices": [
+    "Eleven non-vase artist tolerances or an explicit decision to keep engineering diagnostics unqualified for artist acceptance.",
+    "Historical scalloped-input smooth intent: preserve steps, author a smooth target, or explicitly adopt a separate analytic fixture. Existing authored smooth-vase acceptance does not require this choice."
+  ],
+  "optional_qualification_or_history": [
+    "Global hidden-surface uniqueness, broader studies and optional tail cutoffs are not missing generator features.",
+    "Historical selected-canonical outer HANDLE loss/source receipt drift cannot be retroactively repaired by current PID absence.",
+    "Mobile inspection remains skipped as requested."
+  ],
+  "next_publication_action": "Parent review of new local commits, then explicit approval before updating PR7; merge and manual publish remain separate."
+}
