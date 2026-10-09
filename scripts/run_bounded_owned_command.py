@@ -191,10 +191,18 @@ def run_owned_command(command, **options):
             "portable_primary_only": declaration["portable_primary_only"]})
         if complete:
             owner.close(state="succeeded" if success else "failed")
-    except Exception as exc:
+    except BaseException as exc:
+        cancelled = not isinstance(exc, Exception)
+        attached = getattr(exc, "owned_process_receipt", None)
+        if cancelled and isinstance(attached, dict):
+            resource = attached
+            complete = (not declaration["portable_primary_only"] and
+                        resource.get("lifecycle_complete") is True)
         errors.append(repr(exc))
         owner.mark_failed("orchestration failed: " + repr(exc))
         try:
+            if resource is not None and not (owner.root / "resource-receipt.json").exists():
+                _write_owned_json(owner, "resource-receipt.json", resource)
             if resource is None:
                 _write_owned_json(owner, "resource-receipt.json", {
                     "protocol": "bounded-owned-command-resource-unavailable-v1",
@@ -209,9 +217,13 @@ def run_owned_command(command, **options):
             if (owner.root / "stdout.log").is_file():
                 owner.register_file("stdout.log", "diagnostic")
             if complete:
-                owner.close(state="failed")
-        except Exception as recording_error:
+                owner.close(error=exc)
+        except BaseException as recording_error:
             errors.append(repr(recording_error))
+            if cancelled and hasattr(exc, "add_note"):
+                exc.add_note("Cancellation evidence publication also failed: " + repr(recording_error))
+        if cancelled:
+            raise
     primary_code = resource.get("returncode") if isinstance(resource, dict) else None
     succeeded = owner.closed and owner.state == "succeeded" and not errors
     exit_code = 0 if succeeded else primary_code if type(primary_code) is int and 1 <= primary_code <= 255 else 1

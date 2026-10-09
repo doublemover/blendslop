@@ -107,6 +107,41 @@ class OwnedProcessSupervisorTests(unittest.TestCase):
                     self.assertIsNone(result["peak_observed_tree_rss_bytes"])
                     self.assertTrue(result["rss_unavailable_samples"])
 
+    @unittest.skipUnless(os.name == "nt", "actual Windows cancellation Job/handle contract")
+    def test_cancellation_preserves_exception_after_bounded_complete_tree_join(self):
+        import time
+        for interrupted in (KeyboardInterrupt("owner cancelled"), SystemExit(23)):
+            with self.subTest(kind=type(interrupted).__name__), tempfile.TemporaryDirectory() as folder:
+                marker = Path(folder) / "descendant-started"
+                code = ("import pathlib,subprocess,sys,time;"
+                        "subprocess.Popen([sys.executable,'-c','import time;time.sleep(5.)'],"
+                        "creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0));"
+                        f"pathlib.Path({str(marker)!r}).write_text('ready');time.sleep(5.)")
+                actual_sleep = time.sleep
+                marker_seen = cancelled = False
+
+                def cancel_after_observation(seconds):
+                    nonlocal marker_seen, cancelled
+                    if marker_seen and not cancelled:
+                        cancelled = True
+                        raise interrupted
+                    marker_seen = marker.is_file()
+                    actual_sleep(seconds)
+
+                with patch.object(supervisor.time, "sleep", side_effect=cancel_after_observation):
+                    with self.assertRaises(type(interrupted)) as caught:
+                        self.run_child(folder, code)
+                self.assertIs(caught.exception, interrupted)
+                result = interrupted.owned_process_receipt
+                self.assertEqual(result["status"], "cancelled", result)
+                self.assertEqual(result["limit_reason"], "caller_cancelled")
+                self.assertTrue(result["job_assigned_before_resume"])
+                self.assertTrue(result["lifecycle_complete"], result)
+                self.assertTrue(result["job_active_zero"])
+                self.assertGreaterEqual(result["job_accounting"]["total_processes"], 2)
+                self.assertTrue(all(row["kernel_joined"] for row in result["observed_processes"]))
+                self.assertLess(result["elapsed_seconds"], 10.)
+
     @unittest.skipUnless(os.name == "nt", "actual Windows retained HANDLE failure history")
     def test_read_exception_preserves_observed_identities_without_claiming_tree_join(self):
         with tempfile.TemporaryDirectory() as folder:

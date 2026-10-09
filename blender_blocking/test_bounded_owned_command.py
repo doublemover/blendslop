@@ -112,6 +112,46 @@ class BoundedOwnedCommandTests(unittest.TestCase):
             self.assertFalse(unavailable["lifecycle_complete"])
             self.assertFalse((root / "stdout.log").exists())
 
+    def test_cancellation_rethrows_original_and_releases_only_confirmed_tree(self):
+        for complete in (True, False, "true", None):
+            with self.subTest(complete=complete), tempfile.TemporaryDirectory() as folder:
+                original = KeyboardInterrupt("original owner cancellation")
+                original.owned_process_receipt = {"protocol": "fresh_owned_process_supervision_v1",
+                    "status": "cancelled", "returncode": 124, "lifecycle_complete": complete}
+                with patch.object(wrapper, "_supports_complete_tree", return_value=True), \
+                        patch.object(wrapper, "run_bounded_process", side_effect=original):
+                    with self.assertRaises(KeyboardInterrupt) as caught:
+                        wrapper.run_owned_command(self.command(), **self.options(folder))
+                self.assertIs(caught.exception, original)
+                root = next((Path(folder) / "runs").glob("owned-*"))
+                confirmed = complete is True
+                self.assertEqual(read(root / "run-lease.json")["status"],
+                                 "released" if confirmed else "active")
+                self.assertEqual(read(root / "run-ownership.json")["state"],
+                                 "cancelled" if confirmed else "failed")
+                self.assertEqual(read(root / "resource-receipt.json")["lifecycle_complete"], complete)
+                self.assertEqual(read(root / "orchestration-error.json")["lifecycle_complete"], confirmed)
+
+    def test_cancellation_without_receipt_stays_active_when_recording_also_fails(self):
+        with tempfile.TemporaryDirectory() as folder:
+            original = SystemExit(19)
+            write = wrapper._write_owned_json
+
+            def fail_receipt(owner, name, value):
+                if name == "resource-receipt.json":
+                    raise OSError("fixture recording error")
+                return write(owner, name, value)
+
+            with patch.object(wrapper, "_supports_complete_tree", return_value=True), \
+                    patch.object(wrapper, "run_bounded_process", side_effect=original), \
+                    patch.object(wrapper, "_write_owned_json", side_effect=fail_receipt):
+                with self.assertRaises(SystemExit) as caught:
+                    wrapper.run_owned_command(self.command(), **self.options(folder))
+            self.assertIs(caught.exception, original)
+            root = next((Path(folder) / "runs").glob("owned-*"))
+            self.assertEqual(read(root / "run-lease.json")["status"], "active")
+            self.assertTrue(any("fixture recording error" in note for note in original.__notes__))
+
     def test_invalid_bounds_argv_inputs_and_platform_refuse_before_owner_or_launch(self):
         with tempfile.TemporaryDirectory() as folder, \
                 patch.object(wrapper, "_supports_complete_tree", return_value=True), \

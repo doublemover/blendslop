@@ -246,6 +246,8 @@ def run_bounded_process(command, *, log_path, timeout_s, max_memory_bytes,
     processes are outside this API. Portable opt-in proves Popen wait only.
     This function never releases an artifact lease; callers require lifecycle
     completion before doing so, independently of the primary program's status.
+    KeyboardInterrupt/SystemExit are re-raised with an owned_process_receipt
+    attribute after bounded cancellation joins; incomplete joins remain explicit.
     """
     if (not isinstance(command, (list, tuple)) or not command or
             any(not isinstance(arg, (str, os.PathLike)) for arg in command) or
@@ -279,6 +281,7 @@ def run_bounded_process(command, *, log_path, timeout_s, max_memory_bytes,
                "total_declared_supervision_budget_s": timeout_s + join_timeout_s}
     started = time.monotonic()
     job, child = None, None
+    cancellation = None
     try:
         if os.name == "nt":
             job = _WindowsJob(max_memory_bytes)
@@ -339,18 +342,45 @@ def run_bounded_process(command, *, log_path, timeout_s, max_memory_bytes,
                 receipt["portable_tree_qualification"] = "unavailable; only primary Popen actually waited"
             receipt["status"] = "succeeded" if (receipt["returncode"] == 0 and not receipt["limit_reason"] and
                                                 (receipt["lifecycle_complete"] if job else receipt["primary_joined"])) else "failed"
-    except Exception as exc:
+    except BaseException as exc:
+        # Cancellation keeps its original exception while the fresh Job is
+        # terminated and actually joined within the existing join allowance.
+        # Ordinary observation errors retain their conservative incomplete
+        # history; a later stop cannot repair a failed evidence read.
+        cancellation = exc if not isinstance(exc, Exception) else None
         receipt["error"] = repr(exc)
+        if cancellation is not None:
+            receipt.update(status="cancelled", limit_reason="caller_cancelled")
         if child is not None:
             try:
+                join_deadline = min(time.monotonic() + join_timeout_s,
+                                    started + timeout_s + join_timeout_s)
                 if job:
+                    # Capture current members before termination; completion
+                    # for uncaptured short-lived members remains Job-accounted.
+                    if cancellation is not None:
+                        job.observe()
                     job.terminate()
                 if child.poll() is None:
                     child.kill()
-                receipt["returncode"] = child.wait(timeout=max(0., min(join_timeout_s, started + timeout_s + join_timeout_s - time.monotonic())))
+                receipt["returncode"] = child.wait(timeout=max(0., join_deadline - time.monotonic()))
                 receipt["primary_joined"] = True
-            except Exception as join_error:
+                if cancellation is not None and job:
+                    while time.monotonic() < join_deadline:
+                        job.observe()
+                        receipt["job_accounting"] = job.accounting()
+                        if receipt["job_accounting"]["active_processes"] == 0:
+                            receipt["job_active_zero"] = True
+                            break
+                        time.sleep(.02)
+                    receipt["observed_processes"] = job.records
+                    receipt["observed_handles_joined"] = job.join_observed(join_deadline)
+                    receipt["lifecycle_complete"] = (receipt["primary_joined"] and
+                        receipt["job_active_zero"] and receipt["observed_handles_joined"])
+            except BaseException as join_error:
                 receipt["join_error"] = repr(join_error)
+        if cancellation is not None:
+            raise
     finally:
         if job is not None:
             # Preserve observed identity history even when a read/launch/join
@@ -364,4 +394,12 @@ def run_bounded_process(command, *, log_path, timeout_s, max_memory_bytes,
             # backstop, never retroactively claimed as a verified kernel join.
             job.close()
         receipt["elapsed_seconds"] = time.monotonic() - started
+        if cancellation is not None:
+            # Producer callers may release only from this actual receipt;
+            # they must re-raise cancellation and preserve an incomplete lease.
+            try:
+                cancellation.owned_process_receipt = receipt
+            except Exception as attachment_error:
+                if hasattr(cancellation, "add_note"):
+                    cancellation.add_note("Process cancellation receipt attachment failed: " + repr(attachment_error))
     return receipt
