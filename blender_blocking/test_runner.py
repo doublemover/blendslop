@@ -84,6 +84,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_caller_process_budget", "test_caller_process_budget"),
     ("pure_workflow_worker_budget", "test_workflow_worker_budget"),
     ("pure_fallback_process_budget", "test_fallback_process_budget"),
+    ("pure_shape_program_process_budget", "test_shape_program_process_budget"),
     ("pure_primary_process_cleanup", "test_primary_process_cleanup"),
     ("pure_multipart_planar_join", "test_multipart_planar_join"),
     ("pure_inspection_camera", "test_inspection_camera"),

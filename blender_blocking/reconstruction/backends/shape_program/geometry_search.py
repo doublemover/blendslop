@@ -26,7 +26,8 @@ def evaluate_program_job(payload):
     groups_before = set(bpy.data.node_groups)
     geometry = None
     try:
-        compiled = _compile_program(replace(program,program_id=request.candidate_id), request.config)
+        compiled = _compile_program(replace(program,program_id=request.candidate_id),
+                                    request.config, context=request.context)
         context = SimpleNamespace(blender_available=True,native_resident=True,geometry_cache=GeometryCache())
         target = request.target
         if not target.extras.get("view_calibration"):

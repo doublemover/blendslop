@@ -195,7 +195,7 @@ class ShapeProgramBackend(BaseBackend):
 
         if _should_compile_blender(request):
             try:
-                compiled = _compile_program(program, request.config)
+                compiled = _compile_program(program, request.config, context=request.context)
                 diagnostics["compiled_blender"] = compiled.to_dict()
             except Exception as exc:
                 diagnostics["compile_error"] = str(exc)

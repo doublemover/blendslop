@@ -65,6 +65,8 @@ def compile_shape_program(
     csg_options: Mapping[str, Any] | None = None,
     executor=None,
     timeout_s: float | None = None,
+    context=None,
+    process_budget=None,
 ) -> CompiledShapeProgram:
     """Create editable Blender objects for a ShapeProgram.
 
@@ -121,7 +123,8 @@ def compile_shape_program(
             thickness = min(float(node.parameters.get(key, 1.)) for node in positive_nodes
                             for key in ('width_world', 'depth_world', 'height_world'))
         data, union_report = production_union(positives, csg_options, executor=executor,
-                                             timeout_s=timeout_s, feature_thickness=thickness)
+                                             timeout_s=timeout_s, feature_thickness=thickness,
+                                             context=context, process_budget=process_budget)
         for node,obj in operations:
             if node.operation in {"subtract","intersect","difference","intersection"}:
                 data, _ = boolean_mesh(data,evaluated_arrays(obj),operation="DIFFERENCE" if node.operation in {"subtract", "difference"} else "INTERSECT")

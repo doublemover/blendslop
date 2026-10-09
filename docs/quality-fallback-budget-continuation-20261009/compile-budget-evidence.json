@@ -1,0 +1,28 @@
+{
+  "protocol": "shape-program-compile-budget-forwarding-v1",
+  "source_working_bytes_sha256": {
+    "blender_blocking/reconstruction/backends/shape_program/compiler_bridge.py": "f5cffe6d3d4f7580e0ab2b56cee166e4cc3faf190b623a3e2cfb57c6ded33320",
+    "blender_blocking/reconstruction/backends/shape_program/backend.py": "5c26e1053a1fe52b7b029386bd0ae15945f384b31bfc5b802f66b986401989f8",
+    "blender_blocking/reconstruction/backends/shape_program/geometry_search.py": "a3742b95f12ba90278fe631c6fbdf31b63733d247f248e031d6eca8796ae244f",
+    "blender_blocking/primitives/shape_program_compiler.py": "3ff1cbe204425a4780c06a459fe45aab200891e78f69a25b24ca5f6e2e80d4ed",
+    "blender_blocking/test_shape_program_process_budget.py": "939970c84f63b9140b59e9f46b6ad3b56ac8c1f6e01208be2cb80c6c2ade1aea"
+  },
+  "unique_guard_methods_passed": 3,
+  "unittest_seconds": 0.01,
+  "including_module_loading_seconds": 0.64724,
+  "methods": [
+    "test_actual_bridge_forwards_context_budget_and_preserves_default_options",
+    "test_actual_compiler_union_scope_admits_budget_reuses_pool_and_refuses_mismatch",
+    "test_actual_backend_final_compile_forwards_request_context_before_exports"
+  ],
+  "test_log": {
+    "path": "C:\\Users\\sneak\\Documents\\Codex\\2026-10-08\\task-2\\compile-budget-focused-01.log",
+    "sha256": "97b862a9aa4aa580050bab0098cf41223449f9612a8ae1cd2b1b464c5f829d6e"
+  },
+  "native_jobs": 0,
+  "worker_jobs": 0,
+  "numerical_fit_jobs": 0,
+  "default_options_preserved": true,
+  "owned_shared_pool_reentered_or_reset": false,
+  "scope": "Request context reaches final and geometry-job compiler calls; explicit bridge/compiler process_budget keywords reach production_union. Native union has a per-created-pool allowance; independent direct Blender boolean work and other workflow phases are not implicitly covered."
+}

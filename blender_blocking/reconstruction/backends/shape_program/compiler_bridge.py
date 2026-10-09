@@ -46,7 +46,9 @@ def _should_compile_blender(request: CandidateRequest) -> bool:
         return False
     return True
 
-def _compile_program(program: ShapeProgram, config: Mapping[str, Any]) -> Any:
+def _compile_program(
+    program: ShapeProgram, config: Mapping[str, Any], *, context=None, process_budget=None,
+) -> Any:
     try:
         from blender_blocking.primitives.shape_program_compiler import (
             compile_shape_program,
@@ -61,6 +63,8 @@ def _compile_program(program: ShapeProgram, config: Mapping[str, Any]) -> Any:
         weighted_normals=bool(config.get("weighted_normals", True)),
         csg_options=config,
         timeout_s=float(config.get("program_timeout_s", 45.)),
+        context=context,
+        process_budget=process_budget,
     )
 
 def _run_shape_program_export_qa(
