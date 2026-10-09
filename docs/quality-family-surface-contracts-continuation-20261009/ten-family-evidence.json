@@ -1,0 +1,599 @@
+{
+  "aggregate_accepted": false,
+  "checks": {
+    "API": {
+      "elapsed_seconds": 0.216,
+      "passed": 2,
+      "scope": "new rounded source policy integration and unsupported triangle remains unqualified"
+    },
+    "proof": {
+      "passed": 9,
+      "scope": "portable exact cover/filled-facet/construction/orientation/identity refusals"
+    }
+  },
+  "elapsed_seconds": 3.9150232000101823,
+  "families": 10,
+  "frozen_contract_receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-03\\owned-oflqnkb9\\frozen-contracts.json",
+    "sha256": "325f9afdce0434ac4a50312c248d5b1c1a7830841f3aa8bf2ee5f72740b24dc1"
+  },
+  "implementation_base_revision": "5588ef40e7303d05ae50fd1f11129bb782af5ea2",
+  "new_fits": 0,
+  "new_frames": 0,
+  "new_native_jobs": 0,
+  "new_raw_comparisons": 0,
+  "ownership_audit": {
+    "blockers": [],
+    "eligible": [],
+    "eligible_bytes": 0,
+    "mode": "read_only",
+    "mutation_supported": false,
+    "protocol": "run-ownership-dry-run-v1",
+    "retained_bytes": 131324,
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-03\\owned-oflqnkb9",
+    "status": "dry_run_ready",
+    "unknown_files": []
+  },
+  "previous_nine_contracts_and_eighteen_observations_identical": true,
+  "prior_nine_family_evidence": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\complete-evidence.json",
+    "sha256": "327058e432b3a6915d840a995603efb0353549593f41965c220bf070af473807"
+  },
+  "producer_result": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-03\\owned-oflqnkb9\\results.json",
+    "sha256": "09f0b33bf2e253459fb4ebff7a9e84b4ef4b518ceb898178bfc005142b10346d"
+  },
+  "protocol": "ten-family-rounded-box-expansion-v1",
+  "qualification_children": 0,
+  "retained_observations": 19,
+  "rounded_box_contract": {
+    "contract": {
+      "artist_acceptance_limits": null,
+      "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+      "authored_parameters": {
+        "dimensions": {
+          "depth": 1.1,
+          "height": 1.3,
+          "width": 1.6
+        },
+        "primitive": "rounded_box",
+        "radius": 0.15
+      },
+      "cameras": {
+        "front": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "00b72d4a83b13c1cb7d57f2d5e7d680a23a44bce269970b73e059dc10b3f1080",
+          "max_pixel_pitch_world": 0.0036250001285225153
+        },
+        "oblique_145_40": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "27f5c536584caa0fd9d23574f98deb516c61c0678b4685c78c7ad16cc372bcd1",
+          "max_pixel_pitch_world": 0.0036250001285225153
+        },
+        "oblique_35_28": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "7a75b1e6bd82044494c12ea0326038bae13d5ef071dddd54ba04b0555a0e28f1",
+          "max_pixel_pitch_world": 0.0036250001285225153
+        },
+        "side": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "a7bda0709f409fe359d49d13957f6491d809f46b03e495f2b4e0c4ede5026181",
+          "max_pixel_pitch_world": 0.0036250001285225153
+        },
+        "top": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "cac96bc5d8182d3d39ee262f4790cb6aa774daffdd0f7015cc2bfd12371c470a",
+          "max_pixel_pitch_world": 0.0036250001285225153
+        }
+      },
+      "contract_sha256": "0009565f3a681bec5c7343d91c82606c3972a764dd329ccbc7131690f88d72c9",
+      "engineering_limits": {
+        "normal_angle_p95_degrees_max": 9.587767753658063,
+        "symmetric_mean_distance_world_max": 0.0034584115777214174
+      },
+      "engineering_status": "frozen",
+      "family": "rounded_box",
+      "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+      "metric": {
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "sample_count_per_direction": 4096,
+        "seed": 61007
+      },
+      "protocol": "source_conditioned_family_surface_v1",
+      "reason": null,
+      "reconstruction_allowance": {
+        "basis": "explicit engineering allowance; not an observed artist tolerance",
+        "normal_degrees": 1.0,
+        "source_pixels": 0.5,
+        "world": 0.0018125000642612576
+      },
+      "reference_certificate": {
+        "candidate_boundary_qualified": false,
+        "distance_bound_world": 0.00164591151346016,
+        "distance_scope": "bidirectional continuous facet/analytic patch coverage; filled-triangle radial bounds plus affine construction shifts",
+        "family": "rounded_box",
+        "normal_correspondence": "same patch radial/axial correspondence; actual source cross-product normals, not custom shading normals or nearest-normal theorem",
+        "normal_correspondence_bound_degrees": 8.587767753658063,
+        "protocol": "continuous_authored_facet_bound_v1",
+        "reference_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+        "rounded_box_patch_cover": {
+          "affine_construction_shift_bound_world": 6.843054710869706e-08,
+          "aggregate_accepted": false,
+          "arithmetic": "exact binary64 rational coordinates/cover; rationally checked directed sqrt and Machin pi; atan(t)<=t",
+          "artist_limits": null,
+          "candidate_boundary_qualified": false,
+          "complete_analytic_patches": 26,
+          "construction_distance_bound_world": 1.5038559548974092e-07,
+          "construction_scope": "native vertex radial error plus snapping/core shift, source-only; radial error already included in the facet radial bound, not added twice",
+          "distance_correspondence": "bidirectional continuous facet/analytic patch coverage; filled-triangle radial bounds plus affine construction shifts",
+          "historical_exposure": "source diagnostics were inspected before freeze; no candidate values are proof inputs",
+          "interpretation": {
+            "geometry": "authored BEVEL8; weighted normals separate",
+            "inset_half_extents_exact_decimal": [
+              ".65",
+              ".40",
+              ".50"
+            ],
+            "radius_exact_decimal": ".15"
+          },
+          "maximum_normal_angle_degrees": 8.587767753658063,
+          "maximum_source_facet_distance_world": 0.00164591151346016,
+          "maximum_vertex_radial_construction_error_world": 8.195504838104384e-08,
+          "maximum_vertex_snapping_shift_world": 2.9802322387695312e-08,
+          "native_to_ideal_core_shift_world": 3.862822472100175e-08,
+          "normal_correspondence": "same patch radial/axial correspondence; actual source cross-product normals, not custom shading normals or nearest-normal theorem",
+          "patch_cover": [
+            {
+              "axes": [
+                0
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 5,
+              "kind": "planar_rectangle",
+              "signs": [
+                -1
+              ],
+              "triangles": 2
+            },
+            {
+              "axes": [
+                0
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 5,
+              "kind": "planar_rectangle",
+              "signs": [
+                1
+              ],
+              "triangles": 2
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                0,
+                1
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                -1,
+                -1
+              ],
+              "triangles": 16
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                0,
+                1
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                -1,
+                1
+              ],
+              "triangles": 16
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                0,
+                1
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                1,
+                -1
+              ],
+              "triangles": 16
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                0,
+                1
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                1,
+                1
+              ],
+              "triangles": 16
+            },
+            {
+              "axes": [
+                0,
+                1,
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 156,
+              "kind": "spherical_octant",
+              "signs": [
+                -1,
+                -1,
+                -1
+              ],
+              "triangles": 96
+            },
+            {
+              "axes": [
+                0,
+                1,
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 156,
+              "kind": "spherical_octant",
+              "signs": [
+                -1,
+                -1,
+                1
+              ],
+              "triangles": 96
+            },
+            {
+              "axes": [
+                0,
+                1,
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 156,
+              "kind": "spherical_octant",
+              "signs": [
+                -1,
+                1,
+                -1
+              ],
+              "triangles": 96
+            },
+            {
+              "axes": [
+                0,
+                1,
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 156,
+              "kind": "spherical_octant",
+              "signs": [
+                -1,
+                1,
+                1
+              ],
+              "triangles": 96
+            },
+            {
+              "axes": [
+                0,
+                1,
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 156,
+              "kind": "spherical_octant",
+              "signs": [
+                1,
+                -1,
+                -1
+              ],
+              "triangles": 96
+            },
+            {
+              "axes": [
+                0,
+                1,
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 156,
+              "kind": "spherical_octant",
+              "signs": [
+                1,
+                -1,
+                1
+              ],
+              "triangles": 96
+            },
+            {
+              "axes": [
+                0,
+                1,
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 156,
+              "kind": "spherical_octant",
+              "signs": [
+                1,
+                1,
+                -1
+              ],
+              "triangles": 96
+            },
+            {
+              "axes": [
+                0,
+                1,
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 156,
+              "kind": "spherical_octant",
+              "signs": [
+                1,
+                1,
+                1
+              ],
+              "triangles": 96
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                0,
+                2
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                -1,
+                -1
+              ],
+              "triangles": 16
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                0,
+                2
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                -1,
+                1
+              ],
+              "triangles": 16
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                0,
+                2
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                1,
+                -1
+              ],
+              "triangles": 16
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                0,
+                2
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                1,
+                1
+              ],
+              "triangles": 16
+            },
+            {
+              "axes": [
+                1
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 5,
+              "kind": "planar_rectangle",
+              "signs": [
+                -1
+              ],
+              "triangles": 2
+            },
+            {
+              "axes": [
+                1
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 5,
+              "kind": "planar_rectangle",
+              "signs": [
+                1
+              ],
+              "triangles": 2
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                1,
+                2
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                -1,
+                -1
+              ],
+              "triangles": 16
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                1,
+                2
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                -1,
+                1
+              ],
+              "triangles": 16
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                1,
+                2
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                1,
+                -1
+              ],
+              "triangles": 16
+            },
+            {
+              "angular_intervals": 8,
+              "axes": [
+                1,
+                2
+              ],
+              "axial_rings": 2,
+              "complete_nonoverlapping_cover": true,
+              "kind": "cylindrical_strip",
+              "signs": [
+                1,
+                1
+              ],
+              "triangles": 16
+            },
+            {
+              "axes": [
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 5,
+              "kind": "planar_rectangle",
+              "signs": [
+                -1
+              ],
+              "triangles": 2
+            },
+            {
+              "axes": [
+                2
+              ],
+              "complete_nonoverlapping_cover": true,
+              "exact_edges": 5,
+              "kind": "planar_rectangle",
+              "signs": [
+                1
+              ],
+              "triangles": 2
+            }
+          ],
+          "positive_actual_normal_cones": true,
+          "protocol": "authored_rounded_box_patch_cover_v1",
+          "radial_bound_includes_vertex_construction": true,
+          "radial_facet_distance_bound_world": 0.0016458430829130511,
+          "reference_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+          "sampled": false,
+          "self_intersection_qualification": "not a native boundary qualification; actual source indexing/outward cones and analytic cover only",
+          "source_closed_oriented_indexing": true,
+          "status": "certified"
+        },
+        "sampled": false,
+        "vertex_construction_error_world": 1.5038559548974092e-07
+      },
+      "reference_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0"
+    },
+    "source_provenance": {
+      "indexed_reference_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+      "indexed_regenerated_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+      "original_and_regenerated_oriented_surface_sha256": "d1ec56bcae5a3538dd07113979b7df50250cec91342a84357f00024f1f9f950c",
+      "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+    }
+  },
+  "rounded_box_observation": {
+    "aggregate_passed": false,
+    "artist_surface_passed": null,
+    "candidate_geometry_hash": "aa683c0899ba9b98c077a6164ef87fca69c66ec60fad2cba2aa5e62b8bf14753",
+    "contract_sha256": "0009565f3a681bec5c7343d91c82606c3972a764dd329ccbc7131690f88d72c9",
+    "engineering_distance_passed": true,
+    "engineering_limits": {
+      "normal_angle_p95_degrees_max": 9.587767753658063,
+      "symmetric_mean_distance_world_max": 0.0034584115777214174
+    },
+    "engineering_normal_passed": true,
+    "engineering_surface_passed": true,
+    "family": "rounded_box",
+    "independent_verdicts": {
+      "editability": "unassessed",
+      "silhouette": "unassessed",
+      "topology": "unassessed"
+    },
+    "protocol": "source_conditioned_surface_observation_v1",
+    "raw_metrics": {
+      "distance_p95_world": 0.0005994439125061035,
+      "normal_angle_mean_degrees": 0.08938573974196698,
+      "normal_angle_p95_degrees": 7.104299709239662e-05,
+      "sampled_max_distance_world": 0.0006787999882362783,
+      "symmetric_mean_distance_world": 0.0002453770346039705
+    },
+    "reference_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+    "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+  },
+  "rounded_box_proof_evidence": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-rounded-box-reference-continuation-20261009\\evidence.json",
+    "sha256": "64a64785e6f2b0863587d31e77a666a2e0dffc5a6f75b02c0b62c882a378f592"
+  },
+  "scope": "Source engineering expansion only. Existing selected final9f6c rounded-box improvement stays separately measured/qualified; this new observation is retained aa683c coverage baseline. Artist status null, no row promotion. Existing failed outer selected-packet supervision remains failed.",
+  "source_hashes": {
+    "blender_blocking/evaluation/family_surface_contracts.py": "65cd5e2f402d9a8326fe163c2ca5c2b0018d1a9f5f4aa8fbe37400a52f0e7ff4",
+    "blender_blocking/evaluation/rounded_box_reference.py": "0d6c8389dd4064071616fc2f464184489eeb110978eb4bdc414a21813f7cc63d",
+    "blender_blocking/test_family_surface_contracts.py": "498da6ea8c00e79974393594f2cdd44f2dbdde8fc3e2e6a86a4aec5259a898ac",
+    "blender_blocking/test_rounded_box_reference.py": "4078e9397b6f2c260253ccf29e6cc6d8ece12a65657ac848124826332a92cfb3",
+    "blender_blocking/test_runner.py": "90ca072a4ac7457605591c379fb68a8cf3a7f0a09dd3d64f2286cfc5a8e5c4df"
+  },
+  "source_plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\source-plan-ten-families.json",
+    "sha256": "c7b5fa53339ec70953a588fa301d04e657f2ffa67be892ce37d4f1c317fa41af"
+  }
+}

@@ -1,6 +1,6 @@
 # Source-conditioned family surface contracts
 
-Nine existing authored references now have continuous facet certificates and complete actual source-camera provenance for separately scoped engineering policies. Required artist surface acceptance remains unqualified; no existing gate, family row or aggregate verdict changes. The sections below retain earlier stages and the completed nine-family expansion.
+Ten existing authored references now have continuous facet certificates and complete actual source-camera provenance for separately scoped engineering policies. Required artist surface acceptance remains unqualified; no existing gate, family row or aggregate verdict changes. The sections below retain earlier stages and the completed nine-family expansion.
 
 The pure report took 0.421 seconds. It rendered no images, refit no candidates, resampled no surfaces and started no Blender/qualification children. Ten focused checks passed on the existing bundled Python 3.13.13. All new receipt artifacts pass the read-only released-run ownership audit.
 
@@ -65,3 +65,13 @@ The pure report now validates known adaptive producer schemas and exact raw/cand
 The old multipart mean remains `0.004201645` versus its unchanged `0.001812551` world limit; the selected repair remains `0.000161978`. Arch's exterior diagnostic mean is `0.000229571`, while its observed distance P95 increases to `0.002919286489`; that P95 regression remains explicit and is not a failure of a nonexistent engineering P95-distance cutoff. Torus's engineering mean/normal limits are `0.004953723` world / `8.639090855` degrees, derived from its frozen source lattice and actual source pixel pitch.
 
 [complete-evidence.json](complete-evidence.json) binds all nine frozen contracts, eighteen retained observations, real producer files and the pure report's released-run audit. This classification took 3.244 seconds and performed zero rendering, fitting, surface resampling or qualification. Artist status is null and every aggregate remains false. Rounded box and triangular pebble certificates/independent artist contracts remain separate gaps; their existing raw results are not silently classified by another family's policy.
+
+## Rounded-box expansion to ten families
+
+[The new rounded-box proof](../quality-rounded-box-reference-continuation-20261009/README.md) covers all six planar rectangles, twelve cylindrical edge strips and eight spherical octants. Positive oriented chart boundary chains prove complete once-only coverage; cylindrical cells additionally require their exact paired two-ring inventory. Filled-triangle rational radial minima include interior chord deficit. Checked directed square roots and rational pi enclosure keep numerical construction bounds separate. Weighted/custom shading normals never become geometric normals.
+
+The frozen source distance bound is `0.001645911513` world; the oriented corresponding-normal bound is `8.587767754` degrees. Vertex radial/snapping/core construction errors total at most `1.503855955e-7` world. The existing five-camera selected source packet supplies its pixel pitch without new native acquisition; its historical failed outer supervision remains failed. This gives an engineering mean limit `0.003458411578` world and normal-P95 limit `9.587767754` degrees, using the same half-pixel/one-degree allowances.
+
+The retained original rounded-box coverage geometry `aa683c...` has mean `0.000245377035` world and normal P95 `0.000071043` degrees, and meets the supplementary policy. The selected final `9f6c8d...` improvement remains independently measured/qualified in its original packets; this baseline classification does not replace or relabel it. All previous nine contract bodies and eighteen observations compare identically. [ten-family-evidence.json](ten-family-evidence.json) retains the new contract, nineteenth observation, exact source/producer identities and released-run audit.
+
+Nine portable proof checks and two focused API guards passed. The ten-family pure report took 3.915 seconds with zero new native jobs, frames, fits, raw resampling or qualifier children. Artist acceptance remains null, every aggregate false, the old multipart failure/rejected axis checkpoints/regressions remain explicit, and triangular-pebble certification remains independent.

@@ -152,6 +152,36 @@ class FamilySurfaceContracts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "parameters differ"):
             reference_facet_certificate("torus", {**parameters, "major_radius": .71}, data)
 
+    def test_rounded_box_policy_requires_fixed_source_and_keeps_artist_unqualified(self):
+        from unittest.mock import patch
+        from blender_blocking.synthetic.quality_contracts import quality_workload
+        parameters = next(row["parameters"] for row in quality_workload()["cases"]
+                          if row["name"] == "rounded_box")
+        data = octahedron()
+        proof = {"status": "certified", "reference_geometry_hash": data.content_hash,
+                 "maximum_source_facet_distance_world": .0016,
+                 "maximum_normal_angle_degrees": 8.6,
+                 "construction_distance_bound_world": 1.5e-7,
+                 "normal_correspondence": "same analytic patch radial/axial correspondence",
+                 "distance_correspondence": "bidirectional full26 patch cover"}
+        with patch("blender_blocking.evaluation.rounded_box_reference.rounded_box_reference_certificate",
+                   return_value=proof):
+            contract = freeze_family_surface_contract("rounded_box", parameters, data, cameras())
+        self.assertEqual(contract["reference_certificate"]["rounded_box_patch_cover"], proof)
+        self.assertEqual(contract["reference_certificate"]["vertex_construction_error_world"], 1.5e-7)
+        self.assertAlmostEqual(contract["engineering_limits"]["symmetric_mean_distance_world_max"],
+                               .0016 + .5 * 2 / 512)
+        self.assertAlmostEqual(contract["engineering_limits"]["normal_angle_p95_degrees_max"], 9.6)
+        verdict = evaluate_family_surface_contract(contract, raw(contract), candidate_geometry_hash="a" * 64)
+        self.assertTrue(verdict["engineering_surface_passed"])
+        self.assertIsNone(verdict["artist_surface_passed"])
+        self.assertFalse(verdict["aggregate_passed"])
+        changed = freeze_family_surface_contract("rounded_box", parameters, data, cameras())
+        self.assertIsNone(changed["engineering_limits"])
+        self.assertIn("original frozen indexed rounded-box identity", changed["reason"])
+        with self.assertRaisesRegex(ValueError, "parameters differ"):
+            reference_facet_certificate("rounded_box", {**parameters, "radius": .16}, data)
+
     def test_unsupported_reference_remains_unqualified_instead_of_copying_vase(self):
         contract = freeze_family_surface_contract("rounded_triangle_dot", {"thickness":.48}, octahedron(), cameras())
         self.assertIsNone(contract["engineering_limits"])
