@@ -1,0 +1,92 @@
+{
+  "protocol": "retained-family-preflight-v1",
+  "family": "capsule",
+  "code_revision": "34e0ceb58868d416ab6523a78ff010f180f36fea",
+  "adapter_revision": "755d3a5b17bae1992a7b22b3bd61fa0fd60c2c05",
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-capsule-final-qualification-continuation-20261009\\native-plan.json",
+    "sha256": "fe0f9b393314b006733df5e57df3374ad38ebd1c34fc7164778e20b3dc619740"
+  },
+  "status": "validated_not_executed",
+  "all_runtime_and_authoritative_inputs": 70,
+  "input_bytes": 160905169,
+  "native_frames": 30,
+  "reused_alpha_passes": 0,
+  "qualifiers": 1,
+  "scope": {
+    "protocol": "retained_family_final_qualification_v1",
+    "family": "capsule",
+    "views": [
+      "front",
+      "side",
+      "top",
+      "oblique_35_28",
+      "oblique_145_40"
+    ],
+    "passes": [
+      "mask",
+      "neutral",
+      "normals"
+    ],
+    "resolution": [
+      512,
+      512
+    ],
+    "native_frames": 30,
+    "retained_alpha_passes": 0,
+    "logical_inspection_passes": 30,
+    "fits": 0,
+    "raw_comparisons": 0,
+    "semantic_transactions": 0,
+    "qualifier_children": 1,
+    "qualifier_timeout_seconds": 15,
+    "work_seconds": 85,
+    "join_seconds": 5,
+    "threads": 2,
+    "committed_limit_bytes": 8589934592,
+    "rss_limit_bytes": 8589934592,
+    "artifact_limit_bytes": 268435456,
+    "pass_write_reservation_bytes": 8388608,
+    "artist_surface_limits": null,
+    "aggregate_accepted": false,
+    "retained_measurement_producer": "bounded_adaptive_family_checkpoint",
+    "measurement_settings": {
+      "protocol": "opaque_linear_alpha_v1",
+      "hard_mask_threshold": 0.5,
+      "renderer": {
+        "engine": "BLENDER_EEVEE",
+        "blender_version": [
+          5,
+          2,
+          2
+        ],
+        "build_hash": "d13f752e3b9c"
+      },
+      "sampling": {
+        "taa_render_samples": 64,
+        "filter_size": 1.5,
+        "motion_blur": false,
+        "depth_of_field": false
+      },
+      "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+      "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+      "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+    },
+    "replay_clips": {
+      "clip_start": 0.10000000149011612,
+      "clip_end": 1000.0
+    },
+    "style_policy": "authored source and exact saved candidate recipe; no smoothing/style edits; normal material restored",
+    "current_twelve_row_selection": "preserved",
+    "gates": {
+      "minimum_area_iou": 0.7,
+      "minimum_boundary_iou": 0.8,
+      "maximum_signed_distance_loss": 0.05
+    }
+  },
+  "supervisor_provenance_inputs": 12,
+  "fresh_producer_output": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\capsule-final-qualification-01",
+  "fresh_supervisor_output": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\capsule-final-supervisor-01",
+  "retained_alpha_admission": "No reuse: succeeded recipe continuation has no native alpha captures; earlier failed producer is excluded by strict original-owner admission.",
+  "preparation_history": []
+}
