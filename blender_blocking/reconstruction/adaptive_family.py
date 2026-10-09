@@ -18,6 +18,10 @@ import time
 import numpy as np
 
 from .frozen_family import _camera, coverage_contour_points, retained_family_program
+from .adaptive_axis_family import (
+    AXIS_CONTROLS, AXIS_PRIMITIVES, axis_family_control_values,
+    axis_family_program_update, axis_projected_family_boundary,
+)
 
 FAMILY_CONTROLS = {
     'capsule': ('radius_world', 'segment_height_world'),
@@ -29,6 +33,8 @@ FAMILY_CONTROLS = {
 PRIMITIVES = {'capsule': 'capsule', 'tapered_frustum': 'frustum',
               'torus': 'torus', 'concave_arch': 'polygon_extrusion',
               'rounded_triangle_dot': 'rounded_triangle'}
+FAMILY_CONTROLS.update(AXIS_CONTROLS)
+PRIMITIVES.update(AXIS_PRIMITIVES)
 
 
 def _json_hash(value):
@@ -75,6 +81,8 @@ def _arch_outline(params):
 
 def family_control_values(wire, family):
     """Physical controls in local world units, independent of source parameters."""
+    if family in AXIS_CONTROLS:
+        return axis_family_control_values(wire, family)
     p = _validated_program(wire, family).root_nodes[0].parameters
     if family == 'rounded_triangle_dot':
         if 'width_world' in p or 'depth_world' in p:
@@ -102,6 +110,8 @@ def family_control_values(wire, family):
 
 def family_program_update(wire, family, values):
     """Change only declared controls and their necessary dimension aliases."""
+    if family in AXIS_CONTROLS:
+        return axis_family_program_update(wire, family, values)
     program = _validated_program(wire, family)
     previous = family_control_values(wire, family)
     if not values or not set(values).issubset(previous):
@@ -203,6 +213,8 @@ def projected_family_boundary(wire, family, camera, *, segments=96):
     camera to look along its local axis; the arch requires the extrusion axis.
     A cropped camera may keep either supported basis and move its origin.
     """
+    if family in AXIS_CONTROLS:
+        return axis_projected_family_boundary(wire, family, camera, segments=segments)
     from shapely import Polygon
     if isinstance(segments, bool) or not isinstance(segments, numbers.Integral) or not 12 <= segments <= 128:
         raise ValueError('discrete family segments must be an integer 12..128')
@@ -390,4 +402,21 @@ def refine_family_detail(wire, family, observations, *, parameter_bounds,
                                   'fixed_from_recipe': True}
         detail['fixed_triangle_controls'] = ['height_world', 'front_fraction', 'vertices_xy',
                                             'position', 'rotation', 'corner_segments', 'dome_segments']
+    if family in AXIS_CONTROLS:
+        if family in ('sphere', 'anisotropic_ellipsoid'):
+            detail['tessellation'] = {'radial_segments': int(segments),
+                                      'ring_count': max(6, int(segments)//2),
+                                      'fixed_for_update': True,
+                                      'generator': 'existing EllipsoidPrimitive UV parameter lattice'}
+        elif family == 'cylinder':
+            detail['tessellation'] = {'radial_segments': int(segments), 'native_end_rings': 2,
+                                      'fixed_for_update': True,
+                                      'generator': 'existing SuperFrustum convex support at equal cap radii'}
+        else:
+            detail['segments'] = None
+            detail['tessellation'] = {'primitive': 'box', 'corners': 8, 'fixed_for_update': True}
+        detail['fixed_axis_contract'] = {'coupled_sphere_axis_ratios': family == 'sphere',
+                                         'coupled_cylinder_cap_radii': family == 'cylinder',
+                                         'pose_and_tessellation_fixed': True,
+                                         'native_geometry_identity': 'independent exact guard required'}
     return replace(updated, metadata={**updated.metadata, 'adaptive_detail': detail})

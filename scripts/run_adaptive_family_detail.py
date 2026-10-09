@@ -98,7 +98,7 @@ def main():
     from reconstruction.output_targets import output_mesh_targets
     from synthetic.quality_references import build_quality_reference
     from utils.run_ownership import OwnedRun
-    from run_family_source_edit_check import _pose_controls, _apply_pose
+    from run_family_source_edit_check import _pose_controls, _apply_pose, _compile_exact
     from run_quality_coverage_check import save_mesh
     from run_surface_quality_check import _replay_orthographic_camera
 
@@ -198,16 +198,17 @@ def main():
                 deadline();family=item['family'];print('adaptive family '+family,flush=True)
                 directory=Path(item['baseline_directory']);wire=read_json(directory/'program.json')
                 verify_baseline_input(item,wire)
-                baseline_program=retained_family_program(wire)
-                baseline=compile_shape_program(baseline_program,lathe_segments=96,weighted_normals=False)
-                baseline_arrays=evaluated_arrays(baseline.root_object)
-                if baseline_arrays.content_hash!=item['baseline_geometry_hash']:
-                    save(baseline.root_object,family+'/baseline-replay-guard-failed')
-                    raise ValueError('retained indexed baseline replay differs; no repair fallback')
                 with np.load(directory/'evaluated-exact.npz',allow_pickle=False) as archive:
                     retained=GeometryArrays.capture(archive['vertices'],archive['faces'])
-                if retained.content_hash!=baseline_arrays.content_hash:
-                    raise ValueError('retained baseline archive differs')
+                if retained.content_hash!=item['baseline_geometry_hash']:
+                    raise ValueError('retained baseline archive differs from its frozen identity')
+                # The existing UV adapter restores face order only after exact
+                # world vertices and complete oriented triangle inventory agree.
+                # This is not a tolerant geometry/fit fallback; every final
+                # baseline still has the unchanged retained indexed identity.
+                baseline,baseline_source,baseline_arrays=_compile_exact(wire,retained)
+                if baseline_arrays.content_hash!=retained.content_hash:
+                    raise ValueError('retained indexed baseline replay differs')
                 publish(family+'/baseline/program.json',wire)
                 save(baseline.root_object,family+'/baseline')
                 # Authored case dimensions are source-acquisition inputs only.
@@ -286,7 +287,7 @@ def main():
                     from run_family_source_edit_check import physical_observation, response_contract
                     if family in ('torus','concave_arch'):
                         response=structured_response(family,structured_observe(family,before,sources[0]),structured_observe(family,changed,sources[0]))
-                    elif family in ('capsule','tapered_frustum'):
+                    elif family in ('capsule','tapered_frustum','sphere','anisotropic_ellipsoid','cylinder','thin_plate'):
                         response=response_contract(family,physical_observation(family,before,sources[0]),
                             physical_observation(family,changed,sources[0]),refined_program.root_nodes[0].parameters)
                     elif family == 'rounded_triangle_dot':

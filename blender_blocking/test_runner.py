@@ -91,6 +91,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_controlled_measurement", "test_controlled_measurement"),
     ("pure_adaptive_measurement", "test_adaptive_measurement"),
     ("pure_adaptive_family", "test_adaptive_family"),
+    ("pure_adaptive_axis_family", "test_adaptive_axis_family"),
     ("pure_adaptive_triangle_checkpoint", "test_adaptive_triangle_checkpoint"),
     ("pure_triangle_edit_observation", "test_triangle_edit_observation"),
     ("pure_rectilinear_reference", "test_rectilinear_reference"),
