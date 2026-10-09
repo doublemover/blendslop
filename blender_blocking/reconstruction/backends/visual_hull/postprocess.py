@@ -76,8 +76,13 @@ def _postprocess_mesh(
                 "implementation":"explicit_open3d_cpu_helper","metrics":processed.metrics,
                 "message":"configured external CPU helper completed; Blender ABI kept isolated"}
         except Exception as exc:
-            return mesh_result, {"method":method,"status":"failed" if required else "skipped","required":required,
+            status = {"method":method,"status":"failed" if required else "skipped","required":required,
                 "message":str(exc),"error_type":type(exc).__name__}
+            for key in ("poisson_ownership_receipt", "poisson_process_receipt"):
+                receipt = getattr(exc, key, None)
+                if receipt is not None:
+                    status[key] = str(receipt)
+            return mesh_result, status
     dependency = _optional_dependency_status("open3d")
     if not dependency["available"]:
         status = "failed" if required else "skipped"
