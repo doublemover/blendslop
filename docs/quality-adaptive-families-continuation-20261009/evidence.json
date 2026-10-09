@@ -1,0 +1,739 @@
+{
+  "status": "completed bounded adaptive capsule/torus checkpoint; current rows preserved",
+  "implementation": {
+    "module": "blender_blocking/reconstruction/adaptive_family.py",
+    "script": "scripts/run_adaptive_family_detail.py",
+    "test": "blender_blocking/test_adaptive_family.py",
+    "connected_family_models": [
+      "capsule",
+      "tapered_frustum",
+      "torus",
+      "concave_arch"
+    ]
+  },
+  "validation": {
+    "runtime": "existing Blender5.2.2 bundled Python3.13.13",
+    "focused_tests": 11,
+    "passed": 11,
+    "elapsed_seconds": 1.772,
+    "script_py_compile": "passed",
+    "native_blender_runs": 2
+  },
+  "preflight_sha256": "918135d7e297266f0b18ee711d2d74d7a7f12a0e928df70a094c28f32d5c0334",
+  "native_plan_sha256": "00d685862e88d33f251b679d03c69ec016573c27f485ae57c1b9e69793a4deee",
+  "artist_surface_limits": null,
+  "current_twelve_rows_unchanged": true,
+  "remaining": [
+    "changed candidates full five-view/native boundary/canonical verdicts unrun",
+    "frustum and arch native adaptive checkpoints unrun",
+    "independent artist tolerance unavailable",
+    "no global uniqueness established",
+    "root candidate-blind source engineering contract join is separate; no relabeling",
+    "no fixed-image new-truth claim; acquisition requires authored geometry"
+  ],
+  "retained_native_failure": {
+    "resource": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-01\\resource.json",
+    "resource_sha256": "0cf76b1ce0d6b4ab8d05098067ad385ca30f84ce5b2a9a290a736934289bd12a",
+    "owner": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-01\\owned-ob7ghjvm",
+    "owner_state": "failed",
+    "lease": "released",
+    "verified_owned_artifacts": 33,
+    "rendered_frames": 6,
+    "family": "capsule",
+    "reason": "NumPy control produced nested np.bool semantic response; primary result and failure-result serialization failed; all acquisitions/recipes/arrays retained",
+    "raw_refined_result": "unavailable; was not persisted",
+    "semantic_transaction_verdict": "unavailable; was not persisted",
+    "resource_result": {
+      "exit_code": 1,
+      "elapsed_seconds": 8.074465700003202,
+      "peak_tree_rss_bytes": 600883200,
+      "budget_seconds": 90,
+      "budget_rss_bytes": 8589934592,
+      "terminated_reason": null,
+      "blender_threads": 2,
+      "direct_child_joined": true,
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "--background",
+        "--factory-startup",
+        "--threads",
+        "2",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_family_detail.py",
+        "--",
+        "--plan",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-families-continuation-20261009\\native-plan.json",
+        "--output",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-01"
+      ],
+      "native_plan_sha256": "00d685862e88d33f251b679d03c69ec016573c27f485ae57c1b9e69793a4deee",
+      "scope": "two saved connected families; exactly12planned controlled acquisitions; two96call1s local updates; two raw4096seed61007 pairs; two semantic transactions; no qualifiers"
+    }
+  },
+  "pure_retained_observation": {
+    "path": "capsule-retained-observation.json",
+    "sha256": "daa701278000e0c6318e07143eda6181662b1cfbc00c9b6f28a6ee958e568588",
+    "new_acquisitions": 0
+  },
+  "correction": "normalize physical controls to builtin float; nested NumPy-input semantic JSON regression passed",
+  "completed_checkpoint": {
+    "receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-02\\owned-ipr1val3\\results.json",
+    "receipt_sha256": "3c45d65f3d4cf61fbfe34ae995c8e260137a311930327f3a09b6704635409ef1",
+    "resource_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-02\\resource.json",
+    "resource_sha256": "7711f1f3272bc241fde1da846edd9f3b1d65fd076d5f0dd4cc49a119ecdd550e",
+    "resource": {
+      "exit_code": 0,
+      "elapsed_seconds": 8.179504299987457,
+      "peak_tree_rss_bytes": 628510720,
+      "budget_seconds": 90,
+      "budget_rss_bytes": 8589934592,
+      "terminated_reason": null,
+      "blender_threads": 2,
+      "direct_child_joined": true,
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "--background",
+        "--factory-startup",
+        "--threads",
+        "2",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_family_detail.py",
+        "--",
+        "--plan",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-families-continuation-20261009\\native-plan-02.json",
+        "--output",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-02"
+      ],
+      "native_plan_sha256": "923b87586dec3f196ea4a4b110242a9c44463b9e5bab99cae0e9e93edbf94158",
+      "scope": "failed-only capsule/torus continuation;6newtorusframes+6verifiedcapsulereuses;one96call1sfit;two4096seed61007rawpairs;twosemantictransactions;noqualifiers"
+    },
+    "results": {
+      "protocol": "bounded_adaptive_family_checkpoint_v1",
+      "status": "measured",
+      "cases": {
+        "capsule": {
+          "status": "measured",
+          "baseline_geometry_hash": "bfd4411d02558b91d3ad137e2d6f156446b7a087247483eebc4c61653a36566a",
+          "refined_geometry_hash": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b",
+          "program": {
+            "schema_version": "1",
+            "program_id": "frozen-family-capsule",
+            "root_nodes": [
+              {
+                "node_id": "observed_capsule",
+                "operation": "add",
+                "primitive_type": "capsule",
+                "parameters": {
+                  "depth_world": 0.799327247103156,
+                  "height_world": 1.9990355549059613,
+                  "radius_world": 0.399663623551578,
+                  "rotation": [
+                    [
+                      0.7060687022745655,
+                      0.7081433190645076,
+                      0.00016532578198081996
+                    ],
+                    [
+                      -0.7081433274027494,
+                      0.7060687131800496,
+                      -1.11009549057876e-05
+                    ],
+                    [
+                      -0.00012459242919045285,
+                      -0.00010923631253302143,
+                      0.9999999862720772
+                    ]
+                  ],
+                  "segment_height_world": 1.1997083078028052,
+                  "width_world": 0.799327247103156,
+                  "x": -4.0189005764341604e-06,
+                  "y": -1.642844082727455e-05,
+                  "z": 1.7448074715292e-05
+                },
+                "children": [],
+                "name": "observed_capsule",
+                "editable": true
+              }
+            ],
+            "constraints": [],
+            "residual_patches": [],
+            "metadata": {
+              "camera_sha256": "e613f21698b843ecdca0ef46b69f98196bf8ef356fe07c9cb64d1827817ecc9c",
+              "coverage_views": [
+                "front",
+                "oblique_145_40",
+                "oblique_35_28",
+                "side",
+                "top"
+              ],
+              "evidence_scope": "observed five-view mask supports; full silhouette gates still required",
+              "family": "capsule",
+              "input_bounds": {
+                "max_x": 0.3995305932800197,
+                "max_y": 0.3996065995094037,
+                "max_z": 1.000213884033415,
+                "min_x": -0.3995225770233476,
+                "min_y": -0.39960391100896664,
+                "min_z": -1.0001331685111134
+              },
+              "support_elapsed_s": 0.007460599998012185,
+              "support_evaluations": 63,
+              "support_squared_residual": 1.3202685469886665e-08,
+              "termination": "solver_completed",
+              "adaptive_detail": {
+                "protocol": "bounded_discrete_family_detail_v1",
+                "family": "capsule",
+                "free_controls": [
+                  "radius_world",
+                  "segment_height_world"
+                ],
+                "original_controls": {
+                  "radius_world": 0.39963333877998414,
+                  "segment_height_world": 1.2001526878252702
+                },
+                "selected_controls": {
+                  "radius_world": 0.399663623551578,
+                  "segment_height_world": 1.1997083078028052
+                },
+                "frozen_intervals": [
+                  [
+                    0.35967000490198575,
+                    0.4395966726579826
+                  ],
+                  [
+                    1.0801374190427433,
+                    1.3201679566077973
+                  ]
+                ],
+                "fixed_pose": true,
+                "segments": 96,
+                "residual_calls": 14,
+                "elapsed_seconds": 0.47850119999202434,
+                "termination": "solver_completed",
+                "squared_residual": 1.3712747563489477e-07,
+                "observations": {
+                  "front": {
+                    "camera_sha256": "3b92e4e93943685342e712bce4cc11ed8ed2d9171107fad309c95e5074f69170",
+                    "coverage_sha256": "73fdb634e1a58931bc7c068d3152386b9cdc4b84a8ecdf5cb9dfa2fff499dc4b",
+                    "all_observed_crossings": 1236,
+                    "fitted_crossings": 384,
+                    "frame_censored": false,
+                    "complete_contour_claim": true
+                  },
+                  "front_detail": {
+                    "camera_sha256": "3b50cdb85951ef9eac96ba8c18753b1891f7002b03b4f5e20bad671a4db9d7c5",
+                    "coverage_sha256": "5183b8877dc5881e99b00ce7387da6676e85749a0425ced91ad08510117fe4b0",
+                    "all_observed_crossings": 1453,
+                    "fitted_crossings": 384,
+                    "frame_censored": true,
+                    "complete_contour_claim": false
+                  }
+                },
+                "local_sensitivity_singular_values": [
+                  0.1551312853681625,
+                  0.04827490308905695
+                ],
+                "local_rank": 2,
+                "interval_bound_active": false,
+                "identifiability": "locally_identified",
+                "global_uniqueness_established": false,
+                "heldout_views": [
+                  "oblique_145_40"
+                ],
+                "heldout_fit_or_roi_used": false,
+                "prior_view_exposure": {
+                  "oblique_145_40": "old display-derived oblique supports entered the original baseline fit; old pixels also inspected for earlier admission; new controlled measurement excluded current local fit and crop selection"
+                },
+                "artist_surface_limits": null,
+                "full_native_silhouette_admission": "unrun",
+                "model_scope": "discrete projected boundary; actual native geometry and measurement remain independent"
+              }
+            }
+          },
+          "baseline_heldout": {
+            "oblique_145_40": {
+              "view": "oblique_145_40",
+              "area_iou": 0.9992517085986996,
+              "boundary_iou": 0.9846547314578005,
+              "soft_iou": null,
+              "signed_distance_loss": 0.00011934393423640444,
+              "intersection": 60092,
+              "union": 60137,
+              "ref_area": 60093,
+              "render_area": 60136,
+              "required": true,
+              "passed": true,
+              "pass": true,
+              "reason": "",
+              "warnings": [],
+              "iou": 0.9992517085986996,
+              "threshold": 0.7,
+              "precision": 0.999268325129706,
+              "recall": 0.999983359126687,
+              "area_ratio": 1.0007155575524604,
+              "centroid_delta_px": [
+                0.0002753121469538655,
+                -0.009243933731482912
+              ],
+              "pixel_difference": 0.000171661376953125,
+              "thresholds": {
+                "min_area_iou": 0.7,
+                "min_boundary_iou": 0.8,
+                "max_signed_distance_loss": 0.05
+              },
+              "measurement_protocol": "opaque_linear_alpha_v1",
+              "coverage_l1": 0.00017356991884298623,
+              "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+            }
+          },
+          "refined_heldout": {
+            "oblique_145_40": {
+              "view": "oblique_145_40",
+              "area_iou": 0.9993513729273039,
+              "boundary_iou": 0.9866871479774706,
+              "soft_iou": null,
+              "signed_distance_loss": 7.853919435607537e-05,
+              "intersection": 60088,
+              "union": 60127,
+              "ref_area": 60093,
+              "render_area": 60122,
+              "required": true,
+              "passed": true,
+              "pass": true,
+              "reason": "",
+              "warnings": [],
+              "iou": 0.9993513729273039,
+              "threshold": 0.7,
+              "precision": 0.9994344832174579,
+              "recall": 0.9999167956334348,
+              "area_ratio": 1.000482585326078,
+              "centroid_delta_px": [
+                -0.004149265111777822,
+                0.002199441458401452
+              ],
+              "pixel_difference": 0.000148773193359375,
+              "thresholds": {
+                "min_area_iou": 0.7,
+                "min_boundary_iou": 0.8,
+                "max_signed_distance_loss": 0.05
+              },
+              "measurement_protocol": "opaque_linear_alpha_v1",
+              "coverage_l1": 0.00014805451792199165,
+              "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+            }
+          },
+          "baseline_raw_surface_reused": {
+            "candidate_geometry_hash": "bfd4411d02558b91d3ad137e2d6f156446b7a087247483eebc4c61653a36566a",
+            "distance_p95_world": 0.0007625470811035484,
+            "editability_verdict": "independent",
+            "metric_status": "measured",
+            "normal_angle_mean_degrees": 2.12570269492613,
+            "normal_angle_p95_degrees": 2.6813463255545305,
+            "normal_interpretation": "geometric face normals, not shading normals",
+            "normal_orientation": "oriented; opposite normals are 180 degrees",
+            "protocol": "shared_world_area_sample_to_triangle_v1",
+            "qualified_limits": null,
+            "reference_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+            "sample_count_per_direction": 4096,
+            "sampled_max_distance_world": 0.0013538068160414696,
+            "seed": 61007,
+            "silhouette_verdict": "independent",
+            "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+            "surface_status": "unqualified",
+            "symmetric_mean_distance_world": 0.00029795552487779566,
+            "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+            "units": "unchanged Blender world coordinates; no fitting or normalization"
+          },
+          "refined_raw_surface": {
+            "protocol": "shared_world_area_sample_to_triangle_v1",
+            "sample_count_per_direction": 4096,
+            "seed": 61007,
+            "reference_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+            "candidate_geometry_hash": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b",
+            "normal_orientation": "oriented; opposite normals are 180 degrees",
+            "normal_interpretation": "geometric face normals, not shading normals",
+            "units": "unchanged Blender world coordinates; no fitting or normalization",
+            "symmetric_mean_distance_world": 0.00028349956966368297,
+            "distance_p95_world": 0.0007158456341130658,
+            "sampled_max_distance_world": 0.0013478613691404462,
+            "normal_angle_mean_degrees": 2.1292526903075353,
+            "normal_angle_p95_degrees": 2.681826943534141,
+            "silhouette_verdict": "independent",
+            "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+            "editability_verdict": "independent",
+            "metric_status": "measured",
+            "surface_status": "unqualified",
+            "qualified_limits": null,
+            "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+          },
+          "baseline_mean_heldout_coverage_l1": 0.00017356991884298623,
+          "refined_mean_heldout_coverage_l1": 0.00014805451792199165,
+          "relative_heldout_coverage_l1_reduction": 0.14700358847362352,
+          "semantic_edit_restoration": {
+            "control": "segment_height_world x1.05",
+            "response": {
+              "passed": true,
+              "checks": {
+                "extents_response": true,
+                "axial_segment_response": true
+              },
+              "extents_ratio": [
+                1.0000000000007048,
+                1.0000000000000508,
+                1.0300071691273596
+              ],
+              "physical_observation_absolute_tolerance": 1e-05,
+              "identity_comparison": "exact indexed binary64 arrays, without tolerance",
+              "height_delta_world": 0.059985400893166174,
+              "expected_height_delta_world": 0.05998541539014027
+            },
+            "geometry_changed": true,
+            "same_source_pointer": true,
+            "original_mesh_restored": true,
+            "exact_indexed_restoration": true,
+            "passed": true
+          },
+          "bounded_checkpoint_improved": true,
+          "source_original_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+          "source_replayed_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+          "source_exact_oriented_equivalence": true,
+          "fixed_inputs_geometry_stable": true,
+          "artist_surface_limits": null,
+          "full_required_five_view_admission": "unrun for refined geometry",
+          "native_boundary_qualification": "unrun",
+          "canonical_neutral_normal_passes": "unrun",
+          "selected_current_row_unchanged": true,
+          "aggregate_accepted": false
+        },
+        "torus": {
+          "status": "measured",
+          "baseline_geometry_hash": "7a68da759b8536b864df8e00ca6fe3e322391ea05a6c98a82d2a4132fd89f8be",
+          "refined_geometry_hash": "3afacdc32a140a1099cd304b101d8910a7e6e58701b3608f947039aaf2349417",
+          "program": {
+            "schema_version": "1",
+            "program_id": "frozen-family-torus",
+            "root_nodes": [
+              {
+                "node_id": "observed_torus",
+                "operation": "add",
+                "primitive_type": "torus",
+                "parameters": {
+                  "major_radius": 0.700100808756825,
+                  "minor_radius": 0.22002954279955436,
+                  "rotation": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "x": -6.780480445140768e-06,
+                  "y": -1.2342444035509133e-05,
+                  "z": 9.936649666142383e-06
+                },
+                "children": [],
+                "name": "observed_torus",
+                "editable": true
+              }
+            ],
+            "constraints": [],
+            "residual_patches": [],
+            "metadata": {
+              "camera_sha256": "6c2fdc142b436d48a74a015b1b44cb190919021242566ed8a6e0b302915a234b",
+              "coverage_views": [
+                "front",
+                "side",
+                "top"
+              ],
+              "evidence_scope": "explicit top outer/inner crossings and observed front/side depth bounds",
+              "full_five_view_admission": "unrun; required after actual native geometry",
+              "inner_contour_samples": 920,
+              "input_bounds": {
+                "max_x": 0.9199522414005539,
+                "max_y": 0.9199522414005539,
+                "max_z": 0.2203487798490088,
+                "min_x": -0.9199522414005539,
+                "min_y": -0.9199522414005539,
+                "min_z": -0.22032890654967652
+              },
+              "observed_hole_pixels": 41616,
+              "outer_contour_samples": 1768,
+              "proposal": "observed_annular_circle_fit",
+              "support_elapsed_s": 0.004095199998118915,
+              "support_evaluations": 15,
+              "support_squared_residual": 4.663840480679066e-08,
+              "termination": "solver_completed",
+              "adaptive_detail": {
+                "protocol": "bounded_discrete_family_detail_v1",
+                "family": "torus",
+                "free_controls": [
+                  "major_radius",
+                  "minor_radius"
+                ],
+                "original_controls": {
+                  "major_radius": 0.6998516566928055,
+                  "minor_radius": 0.22008438610327744
+                },
+                "selected_controls": {
+                  "major_radius": 0.700100808756825,
+                  "minor_radius": 0.22002954279955436
+                },
+                "frozen_intervals": [
+                  [
+                    0.629866491023525,
+                    0.7698368223620861
+                  ],
+                  [
+                    0.19807594749294968,
+                    0.2420928247136052
+                  ]
+                ],
+                "fixed_pose": true,
+                "segments": 96,
+                "residual_calls": 14,
+                "elapsed_seconds": 0.044872500002384186,
+                "termination": "solver_completed",
+                "squared_residual": 3.360848247400758e-08,
+                "observations": {
+                  "top": {
+                    "camera_sha256": "c7a4d8b7fe79fcf0bcdafdf918071233f59ef93ca54ef76fc5453bb8e9736e69",
+                    "coverage_sha256": "e664d4423808618d1a934ad9c490c0e5a16142ef13badf92e12e4f4bb30b9d7e",
+                    "all_observed_crossings": 2688,
+                    "fitted_crossings": 384,
+                    "frame_censored": false,
+                    "complete_contour_claim": true
+                  },
+                  "top_detail": {
+                    "camera_sha256": "c37978affa4a29bb4f77a2b4652b4d741d1bfa1130f6630ca864bc17072fc854",
+                    "coverage_sha256": "eb8fa4fa3188b4c721819cd33ab2cb436aaf2673c06ae8d461bbc82879fb26e4",
+                    "all_observed_crossings": 1588,
+                    "fitted_crossings": 384,
+                    "frame_censored": true,
+                    "complete_contour_claim": false
+                  }
+                },
+                "local_sensitivity_singular_values": [
+                  0.22603643105743063,
+                  0.04437038323917917
+                ],
+                "local_rank": 2,
+                "interval_bound_active": false,
+                "identifiability": "locally_identified",
+                "global_uniqueness_established": false,
+                "heldout_views": [
+                  "oblique_145_40"
+                ],
+                "heldout_fit_or_roi_used": false,
+                "prior_view_exposure": {
+                  "oblique_145_40": "old oblique145 display pixels inspected for earlier native admission; original torus fit used canonical front/side/top only; new controlled measurement excluded current local fit and crop selection"
+                },
+                "artist_surface_limits": null,
+                "full_native_silhouette_admission": "unrun",
+                "model_scope": "discrete projected boundary; actual native geometry and measurement remain independent"
+              }
+            }
+          },
+          "baseline_heldout": {
+            "oblique_145_40": {
+              "view": "oblique_145_40",
+              "area_iou": 0.9991551401059324,
+              "boundary_iou": 0.9851865741608851,
+              "soft_iou": null,
+              "signed_distance_loss": 7.502188902819285e-05,
+              "intersection": 92245,
+              "union": 92323,
+              "ref_area": 92281,
+              "render_area": 92287,
+              "required": true,
+              "passed": true,
+              "pass": true,
+              "reason": "",
+              "warnings": [],
+              "iou": 0.9991551401059324,
+              "threshold": 0.7,
+              "precision": 0.9995448979812974,
+              "recall": 0.9996098871923798,
+              "area_ratio": 1.00006501880127,
+              "centroid_delta_px": [
+                0.0010729895234078413,
+                -0.0015178814008720565
+              ],
+              "pixel_difference": 0.00029754638671875,
+              "thresholds": {
+                "min_area_iou": 0.7,
+                "min_boundary_iou": 0.8,
+                "max_signed_distance_loss": 0.05
+              },
+              "measurement_protocol": "opaque_linear_alpha_v1",
+              "coverage_l1": 0.00030435502412728965,
+              "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+            }
+          },
+          "refined_heldout": {
+            "oblique_145_40": {
+              "view": "oblique_145_40",
+              "area_iou": 0.9995991680027734,
+              "boundary_iou": 0.9930366048743766,
+              "soft_iou": null,
+              "signed_distance_loss": 3.5440344671400226e-05,
+              "intersection": 92271,
+              "union": 92308,
+              "ref_area": 92281,
+              "render_area": 92298,
+              "required": true,
+              "passed": true,
+              "pass": true,
+              "reason": "",
+              "warnings": [],
+              "iou": 0.9995991680027734,
+              "threshold": 0.7,
+              "precision": 0.9997074692842749,
+              "recall": 0.9998916353312166,
+              "area_ratio": 1.0001842199369317,
+              "centroid_delta_px": [
+                0.004090718344343713,
+                -0.008816320061669103
+              ],
+              "pixel_difference": 0.000141143798828125,
+              "thresholds": {
+                "min_area_iou": 0.7,
+                "min_boundary_iou": 0.8,
+                "max_signed_distance_loss": 0.05
+              },
+              "measurement_protocol": "opaque_linear_alpha_v1",
+              "coverage_l1": 0.00014850162551738322,
+              "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+            }
+          },
+          "baseline_raw_surface_reused": {
+            "candidate_geometry_hash": "7a68da759b8536b864df8e00ca6fe3e322391ea05a6c98a82d2a4132fd89f8be",
+            "distance_p95_world": 0.0003812965602264739,
+            "editability_verdict": "independent",
+            "metric_status": "measured",
+            "normal_angle_mean_degrees": 0.7609440534011798,
+            "normal_angle_p95_degrees": 2.165446727708135,
+            "normal_interpretation": "geometric face normals, not shading normals",
+            "normal_orientation": "oriented; opposite normals are 180 degrees",
+            "protocol": "shared_world_area_sample_to_triangle_v1",
+            "qualified_limits": null,
+            "reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+            "sample_count_per_direction": 4096,
+            "sampled_max_distance_world": 0.0005535100935958326,
+            "seed": 61007,
+            "silhouette_verdict": "independent",
+            "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+            "surface_status": "unqualified",
+            "symmetric_mean_distance_world": 0.0001729279734817386,
+            "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+            "units": "unchanged Blender world coordinates; no fitting or normalization"
+          },
+          "refined_raw_surface": {
+            "protocol": "shared_world_area_sample_to_triangle_v1",
+            "sample_count_per_direction": 4096,
+            "seed": 61007,
+            "reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+            "candidate_geometry_hash": "3afacdc32a140a1099cd304b101d8910a7e6e58701b3608f947039aaf2349417",
+            "normal_orientation": "oriented; opposite normals are 180 degrees",
+            "normal_interpretation": "geometric face normals, not shading normals",
+            "units": "unchanged Blender world coordinates; no fitting or normalization",
+            "symmetric_mean_distance_world": 7.601588877010007e-05,
+            "distance_p95_world": 0.00022280379926087332,
+            "sampled_max_distance_world": 0.0003837433469016105,
+            "normal_angle_mean_degrees": 0.7253383690535886,
+            "normal_angle_p95_degrees": 2.1654471028535123,
+            "silhouette_verdict": "independent",
+            "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+            "editability_verdict": "independent",
+            "metric_status": "measured",
+            "surface_status": "unqualified",
+            "qualified_limits": null,
+            "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+          },
+          "baseline_mean_heldout_coverage_l1": 0.00030435502412728965,
+          "refined_mean_heldout_coverage_l1": 0.00014850162551738322,
+          "relative_heldout_coverage_l1_reduction": 0.5120776272933292,
+          "semantic_edit_restoration": {
+            "control": "minor_radius x1.05",
+            "response": {
+              "passed": true,
+              "checks": {
+                "tube_radius_x1_05": true,
+                "major_radius_fixed": true,
+                "axial_tube_height_x1_05": true,
+                "outer_ring_expands": true,
+                "hole_narrows": true
+              },
+              "tube_radius_ratio": 1.049999905614269,
+              "major_radius_delta_world": -2.282423139376988e-09,
+              "physical_response_absolute_tolerance": 1e-05,
+              "geometry_identity": "exact indexed binary64; no tolerance"
+            },
+            "geometry_changed": true,
+            "same_source_pointer": true,
+            "original_mesh_restored": true,
+            "exact_indexed_restoration": true,
+            "passed": true
+          },
+          "bounded_checkpoint_improved": true,
+          "source_original_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+          "source_replayed_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+          "source_exact_oriented_equivalence": true,
+          "fixed_inputs_geometry_stable": true,
+          "artist_surface_limits": null,
+          "full_required_five_view_admission": "unrun for refined geometry",
+          "native_boundary_qualification": "unrun",
+          "canonical_neutral_normal_passes": "unrun",
+          "selected_current_row_unchanged": true,
+          "aggregate_accepted": false
+        }
+      },
+      "rendered_frames": 6,
+      "source_frames": 3,
+      "candidate_frames": 3,
+      "reused_completed_measurements": 6,
+      "raw_comparisons": 2,
+      "baseline_raw_observations_reused": 2,
+      "qualification_children": 0,
+      "elapsed_seconds": 2.9363856999989366,
+      "aggregate_accepted": false
+    },
+    "owner_state": "succeeded",
+    "lease": "released",
+    "verified_owned_artifacts": 42,
+    "unknown_owned_files": [],
+    "corrected_native_plan": "native-plan-02.json",
+    "corrected_native_plan_sha256": "923b87586dec3f196ea4a4b110242a9c44463b9e5bab99cae0e9e93edbf94158",
+    "native_tested_runtime_sha256": {
+      "blender_blocking/reconstruction/adaptive_family.py": "0da8c10b91a688d697fea98d0b0a51dc9577980af0469614d0275296163b3992",
+      "scripts/run_adaptive_family_detail.py": "1beeb69e8d8451e927672b2e521745f203d1328f15cc0afc9a69dde871c0afc2"
+    }
+  },
+  "pixels": {
+    "figure": "measured-heldout-pixels.png",
+    "sha256": "56b490420d86f6fa537f82c9df67edc225c41382d7835b63f736bdf0231084e9",
+    "pixel_provenance": "pixel-evidence.json",
+    "inspection": "full original held-out alpha shows connected capsule and preserved torus hole; true1024 source crops visibly censored; internal curves only, no frame closure; AA/subpixel differences match narrow signed-error improvements",
+    "new_native_frames_for_figure": 0
+  },
+  "actual_coverage_map": {
+    "capsule": "new controlled checkpoint measured; selected original row preserved; full changed-candidate admission unrun",
+    "torus": "new controlled checkpoint measured; selected original row preserved; full changed-candidate admission unrun",
+    "tapered_frustum": "reusable physical controls/projection pure-tested; native adaptive checkpoint unrun",
+    "concave_arch": "reusable physical controls/projection pure-tested; native adaptive checkpoint unrun"
+  },
+  "legacy_camera_provenance": "original declarations preserve legacy missing clip/shift provenance; new controlled contracts capture actual matching clips/shifts; no legacy camera-binding gap is retroactively closed"
+}
