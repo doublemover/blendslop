@@ -328,8 +328,7 @@ def run_candidate(request):
         return CandidateResult(request.candidate_id, request.backend_name, 'skipped',
             warnings=('DVX requires approved CPython3.13 CPU dependency qualification; nothing installed or executed',),
             metric_result=CandidateMetrics(extras={'dvx': state, 'qualification': 'not_run'}))
-    from contextlib import nullcontext
-    from reconstruction.process_executor import current_worker_client, PersistentProcessExecutor
+    from blender_blocking.reconstruction.process_executor import executor_scope
     from reconstruction.mesh_io import combine_primitive_meshes
     from placement.resfit_initialization import initialize_ellipsoids_from_points, PrimitiveInitializationConfig
     from reconstruction.point_cloud import target_surface_points
@@ -429,7 +428,6 @@ def run_candidate(request):
     checkpoint = progress_path()
     if checkpoint is not None:
         payload['progress_paths'] = [str(checkpoint)]
-    shared = current_worker_client() or getattr(request.context, 'process_executor', None)
     if remaining() is not None and remaining() <= .01:
         return CandidateResult(request.candidate_id, request.backend_name, 'failed', errors=('DVX allowance exhausted during setup',))
     if helper and request.config.get('dvx_warm_helper',False):
@@ -443,7 +441,7 @@ def run_candidate(request):
         outcome=JobOutcome('success',fitted,elapsed_s=elapsed,
             partial=bool(fitted.get('partial')),total_wall_s=elapsed,stop_reason=fitted.get('stop_reason'))
     else:
-        manager = nullcontext(shared) if shared is not None else PersistentProcessExecutor(1)
+        manager = executor_scope(1, context=request.context)
         with manager as executor:
             outcome = executor.map([('dvx_fit', payload, remaining())], timeout_s=remaining())[0]
     if outcome.status != 'success' and not outcome.partial:

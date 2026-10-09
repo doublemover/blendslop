@@ -194,23 +194,22 @@ def balanced_union(parts, *, executor=None, timeout_s=None, **options):
         'editable_input_hashes': [p.content_hash for p in parts], 'disconnected_groups_preserved': True}
 
 
-def production_union(parts, config, *, executor=None, timeout_s=None, feature_thickness=None):
-    """Consume the workflow's explicit native options in real assembly callers."""
-    from .process_executor import current_worker_client
-    queue = executor or current_worker_client()
+def production_union(parts, config, *, executor=None, timeout_s=None, feature_thickness=None,
+                     process_budget=None, context=None):
+    """Consume explicit native options and an optional whole-pool caller allowance."""
+    from contextlib import nullcontext
+    from blender_blocking.reconstruction.process_executor import executor_scope
     enabled = bool(config.get('native_union_execution', False))
-    if enabled and queue is None:
-        from .process_executor import PersistentProcessExecutor
-        with PersistentProcessExecutor(2) as owned:
-            return production_union(parts, config, executor=owned, timeout_s=timeout_s,
-                                    feature_thickness=feature_thickness)
-    result, report = balanced_union(parts, executor=queue if enabled else None, timeout_s=timeout_s,
-        solver=config.get('native_union_solver', 'EXACT'),
-        qualification_python=config.get('native_qualification_python'),
-        qualification_timeout_s=min(float(config.get('native_qualification_timeout_s', 15.)), timeout_s or 15.),
-        sdf_fallback=bool(config.get('native_sdf_fallback', False)),
-        feature_thickness=feature_thickness or config.get('native_feature_thickness'))
-    report['native_queue_used'] = bool(enabled and queue is not None)
-    report['requested_options'] = {key: config.get(key) for key in ('native_union_execution',
-        'native_union_solver', 'native_sdf_fallback', 'native_qualification_python')}
-    return result, report
+    manager = (executor_scope(2, context=context, executor=executor, process_budget=process_budget)
+               if enabled else nullcontext(None))
+    with manager as queue:
+        result, report = balanced_union(parts, executor=queue, timeout_s=timeout_s,
+            solver=config.get('native_union_solver', 'EXACT'),
+            qualification_python=config.get('native_qualification_python'),
+            qualification_timeout_s=min(float(config.get('native_qualification_timeout_s', 15.)), timeout_s or 15.),
+            sdf_fallback=bool(config.get('native_sdf_fallback', False)),
+            feature_thickness=feature_thickness or config.get('native_feature_thickness'))
+        report['native_queue_used'] = bool(enabled and queue is not None)
+        report['requested_options'] = {key: config.get(key) for key in ('native_union_execution',
+            'native_union_solver', 'native_sdf_fallback', 'native_qualification_python')}
+        return result, report
