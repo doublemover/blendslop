@@ -1,8 +1,10 @@
 """Compile-chain caller-budget propagation, stopped before any native work."""
 from dataclasses import replace
 from types import SimpleNamespace
+import os
 import unittest
 from unittest.mock import patch
+from blender_blocking.utils import owned_process_supervisor as supervisor
 import numpy as np
 
 from blender_blocking.primitives import shape_program_compiler as compiler
@@ -37,6 +39,12 @@ class ScopePool:
 
 class TestShapeProgramProcessBudget(unittest.TestCase):
     def setUp(self):
+        # These fixtures never launch workers; model only the supported
+        # capability gate while keeping real numeric resource validation.
+        capability = patch.object(supervisor, 'os',
+            SimpleNamespace(name='nt', PathLike=os.PathLike))
+        capability.start()
+        self.addCleanup(capability.stop)
         self.program = ShapeProgram('1', 'compile-budget', (
             ShapeNode('base', 'add', 'box', {'width_world': 1., 'depth_world': .5,
                 'height_world': 2.}),

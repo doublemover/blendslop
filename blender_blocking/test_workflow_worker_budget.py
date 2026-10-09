@@ -4,14 +4,24 @@ import math
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
+import os
 import unittest
 from unittest.mock import patch
+from blender_blocking.utils import owned_process_supervisor as supervisor
 
 from config import BlockingConfig, EnsembleConfig
 from blender_blocking.reconstruction.process_executor import WorkerProcessBudget
 
 
 class WorkflowWorkerBudgetTests(unittest.TestCase):
+    def setUp(self):
+        # These fixtures never launch workers; model only the supported
+        # capability gate while keeping real numeric resource validation.
+        capability = patch.object(supervisor, 'os',
+            SimpleNamespace(name='nt', PathLike=os.PathLike))
+        capability.start()
+        self.addCleanup(capability.stop)
+
     @staticmethod
     def declaration():
         return {'wall_s': 25., 'max_memory_bytes': 1073741824,

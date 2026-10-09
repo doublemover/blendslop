@@ -3,8 +3,10 @@ from dataclasses import asdict, replace
 from pathlib import Path
 import pickle
 from types import SimpleNamespace
+import os
 import unittest
 from unittest.mock import patch
+from blender_blocking.utils import owned_process_supervisor as supervisor
 
 from blender_blocking.reconstruction import process_executor as module
 from blender_blocking.reconstruction.ensemble import CandidateConfig, EnsembleRunner, EnsembleRunResult
@@ -44,6 +46,12 @@ class RecordingPool:
 
 class TestCallerProcessBudget(unittest.TestCase):
     def setUp(self):
+        # These fixtures never launch workers; model only the supported
+        # capability gate while keeping real numeric resource validation.
+        capability = patch.object(supervisor, 'os',
+            SimpleNamespace(name='nt', PathLike=os.PathLike))
+        capability.start()
+        self.addCleanup(capability.stop)
         self.budget = module.WorkerProcessBudget(25., 1073741824,
             max_rss_bytes=536870912, join_timeout_s=2., max_restarts=1)
         self.worker = patch.object(module, '_WORKER_CLIENT', None)
@@ -233,6 +241,20 @@ class TestCallerProcessBudget(unittest.TestCase):
             self.assertIn('cannot replace', packet.call_args.args[1].error)
             self.assertEqual(client.stack, [])
             self.assertEqual(client.process_budget, self.budget)
+
+
+class TestUnsupportedWorkerBudgetPlatform(unittest.TestCase):
+    def test_unsupported_platform_refuses_before_pool_allocation(self):
+        budget = module.WorkerProcessBudget(25., 1073741824,
+            max_rss_bytes=536870912, join_timeout_s=2., max_restarts=1)
+        with patch.object(supervisor, 'os',
+                SimpleNamespace(name='posix', PathLike=os.PathLike)), \
+             patch.object(module, 'PersistentProcessExecutor') as factory:
+            with self.assertRaisesRegex(RuntimeError, 'Windows Job Objects'):
+                module.executor_scope(process_budget=budget)
+            with self.assertRaisesRegex(RuntimeError, 'Windows Job Objects'):
+                module.WorkerClient('unused-unsupported-platform-fixture', 0).bind_process_budget(budget)
+            factory.assert_not_called()
 
 
 if __name__ == '__main__':

@@ -3,8 +3,10 @@ from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 import sys
+import os
 import unittest
 from unittest.mock import MagicMock, patch
+from blender_blocking.utils import owned_process_supervisor as supervisor
 import numpy as np
 
 from blender_blocking.reconstruction import process_executor as executor
@@ -40,6 +42,12 @@ class MapPool:
 
 class TestFallbackProcessBudget(unittest.TestCase):
     def setUp(self):
+        # These fixtures never launch workers; model only the supported
+        # capability gate while keeping real numeric resource validation.
+        capability = patch.object(supervisor, 'os',
+            SimpleNamespace(name='nt', PathLike=os.PathLike))
+        capability.start()
+        self.addCleanup(capability.stop)
         self.budget = executor.WorkerProcessBudget(25., 1073741824,
             max_rss_bytes=536870912, join_timeout_s=2., max_restarts=1)
         self.context = SimpleNamespace(worker_process_budget=self.budget)
