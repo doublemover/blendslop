@@ -1,0 +1,58 @@
+{
+  "protocol": "arch_triangle_tail_camera_failure_v1",
+  "status": "failed",
+  "producer_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-02\\owned-s5vv80kc",
+  "supervisor_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-02\\owned-h_bg_kof",
+  "producer_manifest": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-02\\owned-s5vv80kc\\run-ownership.json",
+    "sha256": "81e7ce9ee3704c8f19ba9b9970da16fb1a4063a96b584ea173914d13681425dc"
+  },
+  "producer_lease": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-02\\owned-s5vv80kc\\run-lease.json",
+    "sha256": "4db07c9cec522d5951f7c33fa8be99c10b514ce2e61c19634fc19f22e014fff8"
+  },
+  "producer_results": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-02\\owned-s5vv80kc\\results.json",
+    "sha256": "ab3dff916b04b9a55a2f122a564ca2caba1152f704ea98b0df51a6d56dac29c2"
+  },
+  "supervisor_manifest": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-02\\owned-h_bg_kof\\run-ownership.json",
+    "sha256": "bff397c10689d94cd4fdea77dea6eed9b4be7220d37ad54ed4a53d82f1153a8b"
+  },
+  "supervisor_lease": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-02\\owned-h_bg_kof\\run-lease.json",
+    "sha256": "5a8a6e32286443ca0679f99604683cf32a1d56dae8b160dd0e9bbe5776f5fa03"
+  },
+  "resource_receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-02\\owned-h_bg_kof\\resource-receipt.json",
+    "sha256": "b621f12200fdc78403ccf340e1e70f933b9b4750684ab29d525627d3ce6f40bd"
+  },
+  "stdout": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-02\\owned-h_bg_kof\\stdout.log",
+    "sha256": "8e6e0a0ee668111e3def5096af254daf917f32cbdc727cf0a9f02711e98bb48a"
+  },
+  "historical_plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-camera-02\\native-plan.json",
+    "sha256": "63fcf5835f7cee4f00369c4376c9182c45d15f8cabc1365b925182ef7ad7c777"
+  },
+  "historical_launch": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-camera-02\\launch-command.json",
+    "sha256": "6704db1bd0045f125b54e58113e91baa5f5a5801a568b314ff1bcf3fb24b1efe"
+  },
+  "historical_preflight": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-camera-02\\preflight.json",
+    "sha256": "8dd8a61c581ce7fe5e34630d9458a599a02c8af0bdaa1851b8d4fa27f12e15b8"
+  },
+  "historical_checker": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-camera-02\\run_arch_triangle_tail_check.py",
+    "sha256": "92f3d1f346cf827649a6f9266badb93c2fd4651ec13d8efa3d06b9c31d7d8a8d"
+  },
+  "completed_alpha_frames": 5,
+  "completed_neutral_frames": 0,
+  "raw_comparisons": 0,
+  "semantic_transactions": 0,
+  "qualifiers": 0,
+  "geometry_hash": "4910fa0f6defa8b476aa95a82b80d5d41f2d820f01afccc613e8b7d18d3e8470",
+  "reason": "ValueError: actual projection/frame mismatch",
+  "no_score_or_owner_history_rewrite": true
+}

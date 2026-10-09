@@ -1,0 +1,430 @@
+{
+  "protocol": "frozen_arch_triangle_tail_preflight_v1",
+  "status": "ready_for_root_review_not_executed",
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\native-plan.json",
+    "sha256": "c41366df0e5b45cba910b960387cd881ee485d484548240dfa93be1f4d406e3e"
+  },
+  "launch_command": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\launch-command.json",
+    "sha256": "1ab062e76cb67c992698218556352fd9919c40d123b91361e11ee694c53c9624"
+  },
+  "adapter": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py",
+    "sha256": "34c0f5525cb3f7dd7ade0a598d87bb19ec6fcc152c66af82f9dc9d7b0e435bba"
+  },
+  "models": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\arch_tail_refinement.py",
+      "sha256": "1c692fb9277bf46e4200ff006177943b9c3752266a6ed34658dfb7cad28f0e24"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\triangle_tail_refinement.py",
+      "sha256": "6e2208f29864470b07d9cd1011a4a4a99c5b983e791af9d87ee4d4411fdfa6a4"
+    }
+  ],
+  "tests": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_arch_tail_refinement.py",
+      "sha256": "d4ba2a2af385f0daf87205d146a0ef40e815847bd7229459ae6cff39a1c20076"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_triangle_tail_refinement.py",
+      "sha256": "f3710652b3e5e926ff6a50917bcc6c02d8b757f69d86cf23a1b0a481d2c2d253"
+    }
+  ],
+  "input_count": 126,
+  "input_bytes": 21243997,
+  "toolchain_count": 3,
+  "toolchain_bytes": 339276760,
+  "retained_input_count": 24,
+  "retained_input_bytes": 5386838,
+  "supervisor_explicit_input_count": 16,
+  "supervisor_explicit_input_bytes": 316566,
+  "real_input_binding_validation": {
+    "passed": true,
+    "elapsed_seconds": 4.858064499998363,
+    "native_jobs": 0,
+    "refits": 0
+  },
+  "focused_tests": {
+    "model_checks": 8,
+    "model_elapsed_seconds": 2.6281118,
+    "wrapper_guards": 2,
+    "wrapper_elapsed_seconds": 0.004976599999281461,
+    "scope": "actual finite mesh projections, physical controls, exact restore, censored/rank refusal, observed tail admission, heldout isolation and frozen checker scope"
+  },
+  "cases": [
+    {
+      "family": "concave_arch",
+      "baseline_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+      "source_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+      "proposed_program": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\arch-program.json",
+        "sha256": "76dc835cd7d73e67426e2cedbdaa32ac8ec4bf9cf684a38008cb88f751af5d3d",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u",
+        "producer": "bounded_arch_triangle_tail_cpu"
+      },
+      "baseline_raw_surface": {
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "sample_count_per_direction": 4096,
+        "seed": 61007,
+        "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "candidate_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "units": "unchanged Blender world coordinates; no fitting or normalization",
+        "symmetric_mean_distance_world": 0.00022957110319443697,
+        "distance_p95_world": 0.0029192864894866943,
+        "sampled_max_distance_world": 0.0029192864894866943,
+        "normal_angle_mean_degrees": 0.09887890053201959,
+        "normal_angle_p95_degrees": 8.537736462515945e-06,
+        "silhouette_verdict": "independent",
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "surface_status": "unqualified",
+        "qualified_limits": null,
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+      },
+      "observed_tail": {
+        "protocol": "bounded_arch_roof_tail_v1",
+        "free_controls": [
+          "notch_height_from_bottom_world"
+        ],
+        "original_controls": {
+          "notch_height_from_bottom_world": 1.2970628981122982
+        },
+        "proposed_controls": {
+          "notch_height_from_bottom_world": 1.29960368904062
+        },
+        "selected_controls": {
+          "notch_height_from_bottom_world": 1.29960368904062
+        },
+        "frozen_intervals": [
+          [
+            1.2711216401500522,
+            1.3230041560745442
+          ]
+        ],
+        "objective": "equal-view observed contour L4 in source-pixel units",
+        "retention": "mean absolute, P95 and maximum observed contour errors all nonworse; full local rank and no active bound",
+        "baseline_observed_tail": {
+          "mean_absolute_source_pixels": 0.04699804577403952,
+          "p95_absolute_source_pixels": 0.09257564558706026,
+          "maximum_absolute_source_pixels": 0.44935432515010754
+        },
+        "selected_observed_tail": {
+          "mean_absolute_source_pixels": 0.029674513188027385,
+          "p95_absolute_source_pixels": 0.06310920157712287,
+          "maximum_absolute_source_pixels": 0.10837394866791744
+        },
+        "observed_tail_admitted": true,
+        "residual_calls": 33,
+        "elapsed_seconds": 0.241350300000704,
+        "termination": "solver_completed",
+        "observations": {
+          "oblique_35_28_expanded": {
+            "camera_sha256": "bbe1add06ce51c3756acc1a5c5cb16eeef257a90719ba7baa75c59b79418081b",
+            "coverage_sha256": "20a3cb7a022162625c6b6868096c0202254ab0352585f094e6f31652062970f0",
+            "observed_crossings": 1792,
+            "fitted_crossings": 384,
+            "frame_censored": false,
+            "complete_contour_claim": true,
+            "frame_border_closure_added": false
+          }
+        },
+        "local_rank": 1,
+        "local_sensitivity_singular_values": [
+          31.82779616805809
+        ],
+        "interval_bound_active": false,
+        "heldout_views": [
+          "oblique_145_40"
+        ],
+        "prior_view_exposure": {
+          "oblique_145_40": "prior selected silhouette/raw/canonical review exposed; excluded from this fit and bounds"
+        },
+        "heldout_fit_or_roi_used": false,
+        "global_uniqueness_established": false,
+        "identifiability": "locally_identified",
+        "baseline_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+        "baseline_program_file_sha256": "4f1c6df58ca7405ab6500ded28bfdea886d06fb5c3a640f6403fce32a589697a",
+        "native_silhouette": "unrun",
+        "surface_tail": "unrun",
+        "native_boundary": "unrun",
+        "artist_limits": null,
+        "aggregate_accepted": false
+      },
+      "native_gates": "unrun; no result labels changed"
+    },
+    {
+      "family": "rounded_triangle_dot",
+      "baseline_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+      "source_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+      "proposed_program": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\triangle-program.json",
+        "sha256": "9150d659097fdaf33b6aa006541b7599ebaa536ed4db15cb6f4ac9544907a626",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u",
+        "producer": "bounded_arch_triangle_tail_cpu"
+      },
+      "baseline_raw_surface": {
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "sample_count_per_direction": 4096,
+        "seed": 61007,
+        "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+        "candidate_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "units": "unchanged Blender world coordinates; no fitting or normalization",
+        "symmetric_mean_distance_world": 0.0006732319122740825,
+        "distance_p95_world": 0.0022511934163048863,
+        "sampled_max_distance_world": 0.0029814052395522594,
+        "normal_angle_mean_degrees": 0.4440156891061259,
+        "normal_angle_p95_degrees": 1.4659143045971141,
+        "silhouette_verdict": "independent",
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "surface_status": "unqualified",
+        "qualified_limits": null,
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+      },
+      "observed_tail": {
+        "protocol": "bounded_triangle_pose_tail_v1",
+        "free_controls": [
+          "center_y_world",
+          "center_z_world",
+          "front_fraction"
+        ],
+        "original_controls": {
+          "center_y_world": 0.0011442513795320297,
+          "center_z_world": 0.0019401367792599173,
+          "front_fraction": 0.5054832174920212
+        },
+        "proposed_controls": {
+          "center_y_world": 2.2228765581030867e-05,
+          "center_z_world": -0.0005205612606806178,
+          "front_fraction": 0.49975207897565155
+        },
+        "selected_controls": {
+          "center_y_world": 2.2228765581030867e-05,
+          "center_z_world": -0.0005205612606806178,
+          "front_fraction": 0.49975207897565155
+        },
+        "frozen_intervals": [
+          [
+            -0.007369268160897086,
+            0.009657770919961145
+          ],
+          [
+            -0.006573382761169198,
+            0.010453656319689033
+          ],
+          [
+            0.48548321749202117,
+            0.5254832174920212
+          ]
+        ],
+        "objective": "equal-view observed contour L4 in source-pixel units",
+        "retention": "mean absolute, P95 and maximum observed contour errors all nonworse; full local rank and no active bound",
+        "baseline_observed_tail": {
+          "mean_absolute_source_pixels": 0.15073718959282126,
+          "p95_absolute_source_pixels": 0.42151694614255875,
+          "maximum_absolute_source_pixels": 0.5246441091145131
+        },
+        "selected_observed_tail": {
+          "mean_absolute_source_pixels": 0.11429350677696619,
+          "p95_absolute_source_pixels": 0.21194525497076983,
+          "maximum_absolute_source_pixels": 0.3226468936135689
+        },
+        "observed_tail_admitted": true,
+        "residual_calls": 65,
+        "elapsed_seconds": 0.6523627000005945,
+        "termination": "solver_completed",
+        "fit_time_share": 0.8,
+        "rank_time_reserved_share": 0.2,
+        "observations": {
+          "front": {
+            "camera_sha256": "efa06b6cc969bf8bc63e3bd2c4469f687affdc51a047cddfd8f84eb6c58b20a6",
+            "coverage_sha256": "0dd84a74cad7b78f7d18335a2f3975a32239745c90487917eac4736f22d2b65d",
+            "observed_crossings": 1108,
+            "fitted_crossings": 384,
+            "frame_censored": false,
+            "complete_contour_claim": true,
+            "frame_border_closure_added": false
+          },
+          "top": {
+            "camera_sha256": "f3899f43127f4d170dbf479b61fe3d70c0b7e7f1b570745c540359f8db226bdb",
+            "coverage_sha256": "e7b382dce491e360356f879fdab87018a71fdbe50d2ce3b91db904e2305f6db5",
+            "observed_crossings": 1668,
+            "fitted_crossings": 384,
+            "frame_censored": false,
+            "complete_contour_claim": true,
+            "frame_border_closure_added": false
+          }
+        },
+        "local_rank": 3,
+        "local_sensitivity_singular_values": [
+          98.54179490180114,
+          53.20379366957907,
+          13.156546317169957
+        ],
+        "interval_bound_active": false,
+        "heldout_views": [
+          "oblique_145_40"
+        ],
+        "prior_view_exposure": {
+          "oblique_145_40": "prior selected silhouette/raw/canonical review exposed; excluded from this fit and bounds"
+        },
+        "heldout_fit_or_roi_used": false,
+        "global_uniqueness_established": false,
+        "identifiability": "locally_identified",
+        "baseline_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+        "baseline_program_file_sha256": "5e6f69fff82aad0c7e7ffbe720547010c6691907dcce795b45a4a08b688e599b",
+        "native_silhouette": "unrun",
+        "surface_tail": "unrun",
+        "native_boundary": "unrun",
+        "artist_limits": null,
+        "aggregate_accepted": false
+      },
+      "native_gates": "unrun; no result labels changed"
+    }
+  ],
+  "scope": {
+    "work_seconds": 85,
+    "join_seconds": 5,
+    "threads": 2,
+    "memory_limit_bytes": 8589934592,
+    "native_frames": 7,
+    "source_acquisitions": 0,
+    "candidate_alpha_frames": 5,
+    "candidate_neutral_frames": 2,
+    "native_fits": 0,
+    "retained_alpha_frames": 5,
+    "logical_frames": 12,
+    "raw_comparisons": 2,
+    "raw_count_per_direction": 4096,
+    "raw_seed": 61007,
+    "semantic_transactions": 2,
+    "qualification_children": 2,
+    "qualification_timeout_seconds": 15,
+    "resolution": [
+      512,
+      512
+    ],
+    "heldout_views": [
+      "oblique_145_40"
+    ]
+  },
+  "output_budget": {
+    "frame_reservations_bytes": 58720256,
+    "geometry_and_metadata_allowance_bytes": 16777216,
+    "planned_total_bytes": 75497472,
+    "limit_bytes": 268435456
+  },
+  "history": [
+    {
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-j51vn8ro",
+      "producer": "bounded_arch_triangle_tail_cpu",
+      "state": "failed",
+      "lease_status": "released",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-j51vn8ro\\run-ownership.json",
+        "sha256": "f97432d6fd6887b78ddccd2f3934a8bd32aeffcd79e16690ae265f18acb754e8"
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-j51vn8ro\\run-lease.json",
+        "sha256": "095dfa008b8f581e8358bb05dad169208a5bdfd7a59c46069bd5037a3e3b6ef0"
+      },
+      "historical_adoption": false
+    },
+    {
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy",
+      "producer": "bounded_arch_triangle_tail_cpu",
+      "state": "succeeded",
+      "lease_status": "released",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy\\run-ownership.json",
+        "sha256": "2113bb1040a24d232b5c9ee51424abadf1e61f84748aed7964a66941c43fe3f8"
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy\\run-lease.json",
+        "sha256": "c7a72840b1a35f9717d675fcbc4ce1bbfbb573aaad71137396e425dc0b070e38"
+      },
+      "historical_adoption": false,
+      "results": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy\\results.json",
+        "sha256": "201dc1eb7025d0c3418acf6f330b029e605207c8c267067c43ce4964380d058c"
+      }
+    },
+    {
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u",
+      "producer": "bounded_arch_triangle_tail_cpu",
+      "state": "succeeded",
+      "lease_status": "released",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\run-ownership.json",
+        "sha256": "acafcc3d675697b088697a5752a839dfbc0a32e30289531abceeb2d8c9c473e7"
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\run-lease.json",
+        "sha256": "0222f07d8fabbe72b5cbbcb6a271d5aace54c2bf8f748946e4a019ac3c493b7a"
+      },
+      "historical_adoption": false,
+      "results": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\results.json",
+        "sha256": "268dbd6536f6f63d4d0f7e37c822142b5bf57864b231dc8122d490859bada4b6"
+      }
+    }
+  ],
+  "blockers": [],
+  "preserved_bootstrap_failure": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-bootstrap-01\\failure-evidence.json",
+    "sha256": "ed63824ec5fae4f6b7b8c14e0247e58034e632e9bc8f00b74fbaf30c2b23bd2e"
+  },
+  "preserved_camera_failure": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-camera-02\\failure-evidence.json",
+    "sha256": "6cb5180e6eb6068d969ccba04530ac92d574bfd82c1b780ac7c446c1d4ecfad0"
+  },
+  "native_execution": "root bootstrap0-frame and camera5-alpha attempts failed/released; missing-only7-frame continuation unrun by this helper",
+  "disabled_user_site_validate_only": {
+    "protocol": "actual_tail_cli_validate_only_v1",
+    "status": "succeeded",
+    "argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+      "-s",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\native-plan.json",
+      "--plan-sha256",
+      "c41366df0e5b45cba910b960387cd881ee485d484548240dfa93be1f4d406e3e",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03",
+      "--validate-only"
+    ],
+    "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-validate-only-03\\owned-olyzibcx",
+    "producer_owner_created": false,
+    "native_jobs": 0,
+    "renders": 0,
+    "fits": 0,
+    "resource_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-validate-only-03\\owned-olyzibcx\\resource-receipt.json",
+      "sha256": "5971c32c5d727ba5fc8f3c43e443a9222675b26f9fedc63394225ff10eb5a605"
+    },
+    "stdout": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-validate-only-03\\owned-olyzibcx\\stdout.log",
+      "sha256": "85c8dc0b2c16f258d96d8eeb997772aff32d1b04f03157d82b0e1e8b138acaa7"
+    },
+    "manifest": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-validate-only-03\\owned-olyzibcx\\run-ownership.json",
+      "sha256": "bbeeaf298124978cdb425702ab2561deffde7433f98ef31b9a9dfb1202451275"
+    },
+    "lease": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-validate-only-03\\owned-olyzibcx\\run-lease.json",
+      "sha256": "55a2d31f483b147d4e684f8472582e0f86c3696891e7f5345f92e5dc984e8269"
+    },
+    "lifecycle_complete": true
+  }
+}
