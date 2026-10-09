@@ -1,0 +1,24 @@
+{
+  "protocol": "workflow-and-all-job-budget-declaration-v1",
+  "all_job_envelope_guards_passed": 2,
+  "all_job_guard_seconds": 0.044,
+  "workflow_config_guards_passed": 4,
+  "workflow_guard_seconds": 1.379,
+  "legacy_actual_worker_reuse_after_envelope_change": "passed; one directly affected stdlib compatibility method only",
+  "source_sha256": {
+    "blender_blocking/reconstruction/process_executor.py": "8459ee23326020c4c0951924f54d1973eb5c97aa3ae32f568c6fd9d76c78bac7",
+    "blender_blocking/config_models/backends.py": "7a2569c5845db0b55b00c559b6ae3e2aaf2bef3ecf40cc551d8114ac40df9fb1",
+    "blender_blocking/main_integration.py": "079c8bc3d94772ea5ae166b7b334f29a0a30cf0f75355864c9ad6f7bca06c686",
+    "blender_blocking/test_caller_process_budget.py": "96601ce9d66c1aadf7649711978393def9ac38e7bf1ba2c7f649b91fa7e0e77c",
+    "blender_blocking/test_workflow_worker_budget.py": "4c5c4fd780efc7d92c9c7417def7a78cecd096c26ac8c417a3fd61a21046066f"
+  },
+  "native_jobs": 0,
+  "whole_pool_deadline_reset": false,
+  "default_behavior_changed": false,
+  "capabilities": [
+    "Strict optional JSON resource dictionary on EnsembleConfig validated before worker allocation.",
+    "Main workflow forwards explicit declaration through actual request context.",
+    "Every coordinator job envelope carries the owning declaration, including standalone fit and native union.",
+    "WorkerClient binds before job execution and rejects replacement; legacy envelopes without field remain supported."
+  ]
+}

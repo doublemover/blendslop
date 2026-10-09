@@ -172,6 +172,9 @@ class WorkerClient:
         self.stack.append(envelope["id"])
         started = time.monotonic()
         try:
+            if "worker_process_budget" in envelope:
+                declaration = envelope["worker_process_budget"]
+                self.bind_process_budget(None if declaration is None else WorkerProcessBudget(**declaration))
             if envelope["deadline"] is not None and time.time() >= envelope["deadline"]:
                 outcome = JobOutcome("timeout", error="job deadline exhausted before execution")
             else:
@@ -682,7 +685,10 @@ class PersistentProcessExecutor:
                 limit = time.time() + max(0.0, float(job["timeout_s"]))
                 job["deadline"] = limit if job["deadline"] is None else min(job["deadline"], limit)
             state["stack"].append(job_id)
-            write_packet(inbox, {k: job[k] for k in ("id", "kind", "payload", "deadline")})
+            from dataclasses import asdict
+            envelope = {k: job[k] for k in ("id", "kind", "payload", "deadline")}
+            envelope["worker_process_budget"] = None if self.process_budget is None else asdict(self.process_budget)
+            write_packet(inbox, envelope)
         if not self.workers:
             for job_id in list(self.pending):
                 self._finish(job_id, JobOutcome("failed", error="no worker could start"))

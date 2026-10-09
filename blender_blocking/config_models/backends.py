@@ -179,6 +179,7 @@ class EnsembleConfig:
     max_parallel_candidates: int = 2
     per_candidate_timeout_s: Optional[float] = None
     total_timeout_s: Optional[float] = None
+    worker_process_budget: Optional[Dict[str, object]] = None
     keep_all_artifacts: bool = True
     fail_if_no_candidate_passes_required_views: bool = True
 
@@ -195,8 +196,23 @@ class EnsembleConfig:
             raise ValueError("per_candidate_timeout_s must be > 0 when provided")
         if self.total_timeout_s is not None and self.total_timeout_s <= 0:
             raise ValueError("total_timeout_s must be > 0 when provided")
+        self.make_worker_process_budget()
         for candidate in self.candidates:
             candidate.validate()
+
+    def make_worker_process_budget(self):
+        """Build an explicit per-pool declaration; None keeps historical defaults."""
+        if self.worker_process_budget is None:
+            return None
+        if not isinstance(self.worker_process_budget, dict):
+            raise ValueError("worker_process_budget must be an explicit resource dictionary")
+        from blender_blocking.reconstruction.process_executor import WorkerProcessBudget
+        try:
+            budget = WorkerProcessBudget(**self.worker_process_budget)
+            budget.validate(max(1, min(4, int(self.max_parallel_candidates))))
+        except (TypeError, ValueError) as error:
+            raise ValueError("invalid worker_process_budget: " + str(error)) from error
+        return budget
 
     def to_dict(self) -> Dict[str, object]:
         return {
@@ -210,6 +226,7 @@ class EnsembleConfig:
             "max_parallel_candidates": self.max_parallel_candidates,
             "per_candidate_timeout_s": self.per_candidate_timeout_s,
             "total_timeout_s": self.total_timeout_s,
+            "worker_process_budget": None if self.worker_process_budget is None else dict(self.worker_process_budget),
             "keep_all_artifacts": self.keep_all_artifacts,
             "fail_if_no_candidate_passes_required_views": self.fail_if_no_candidate_passes_required_views,
         }

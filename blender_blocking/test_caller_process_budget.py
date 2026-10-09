@@ -186,5 +186,54 @@ class TestCallerProcessBudget(unittest.TestCase):
             module.candidate_payload(request, RecordingPool())
 
 
+    def test_standalone_job_dispatch_carries_pool_declaration_before_execution(self):
+        import tempfile
+        import time
+        with tempfile.TemporaryDirectory() as folder:
+            pool = module.PersistentProcessExecutor(1, root=folder, process_budget=self.budget)
+            try:
+                with patch.object(pool, 'start'):
+                    job = pool.submit('fit_multistart', {'fixture': 'noncandidate'})
+                (pool.root / 'workers' / '0').mkdir()
+                pool.workers['0'] = {'ready': True, 'ownership_stopping': False,
+                    'stack': [], 'waiting': set(), 'scope': None,
+                    'process': SimpleNamespace(poll=lambda: None), 'started': time.monotonic()}
+                pool.poll()
+                envelope = module.read_packet(pool.root / 'workers' / '0' / 'inbox.pkl')
+                self.assertEqual(envelope['worker_process_budget'], asdict(self.budget))
+                client = module.WorkerClient(pool.root, 0)
+                def run(kind, payload, **kwargs):
+                    self.assertEqual(kind, 'fit_multistart')
+                    self.assertEqual(client.process_budget, self.budget)
+                    return 'same-owned-client'
+                with patch.object(module, 'execute_job', side_effect=run):
+                    client.execute(envelope)
+                result = module.read_packet(pool.root / 'results' / (job + '.pkl'))
+                self.assertEqual((result.status, result.value), ('success', 'same-owned-client'))
+            finally:
+                pool.workers.clear()
+                pool.jobs.clear()
+                pool.close()
+
+    def test_envelope_budget_mismatch_refuses_job_and_legacy_envelope_stays_compatible(self):
+        client = module.WorkerClient('unused-envelope-fixture', 0)
+        envelope = {'id': 'fixture', 'kind': 'native_union', 'payload': (), 'deadline': None}
+        with patch.object(module, 'execute_job', return_value='legacy') as execute, \
+             patch.object(module, 'write_packet') as packet:
+            client.execute(envelope)
+            self.assertEqual(packet.call_args.args[1].status, 'success')
+            self.assertIsNone(client.process_budget)
+            client.execute({**envelope, 'worker_process_budget': asdict(self.budget)})
+            self.assertEqual(client.process_budget, self.budget)
+            execute.reset_mock()
+            changed = asdict(replace(self.budget, wall_s=20.))
+            client.execute({**envelope, 'worker_process_budget': changed})
+            execute.assert_not_called()
+            self.assertEqual(packet.call_args.args[1].status, 'failed')
+            self.assertIn('cannot replace', packet.call_args.args[1].error)
+            self.assertEqual(client.stack, [])
+            self.assertEqual(client.process_budget, self.budget)
+
+
 if __name__ == '__main__':
     unittest.main()
