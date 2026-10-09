@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import numpy as np
 from primitives import shape_program_compiler as compiler
-from primitives.shape_program import ShapeNode, ShapeProgram
+from primitives.shape_program import ShapeNode, ShapeProgram, validate_compilable_program
 
 
 class TestShapeProgramWorldBevel(unittest.TestCase):
@@ -79,6 +79,44 @@ class TestShapeProgramWorldBevel(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     compiler._compile_node(node, lathe_segments=48, bevel_modifier=True, weighted_normals=False)
                 cube.assert_not_called()
+
+    def test_invalid_later_style_rejects_program_before_any_blender_allocation(self):
+        for parameter in ("weighted_normals", "weighted_normals_keep_sharp"):
+            for invalid in (0, 1, "true", None):
+                with self.subTest(parameter=parameter, invalid=invalid):
+                    program = ShapeProgram("1", "style-preflight", (
+                        ShapeNode("first", "add", "box", {}),
+                        ShapeNode("later", "add", "box", {parameter: invalid}),
+                    ))
+                    with patch.object(compiler, "BLENDER_AVAILABLE", True), \
+                            patch.object(compiler, "_ensure_collection") as collection, \
+                            patch.object(compiler, "_compile_node") as compile_node:
+                        with self.assertRaisesRegex(ValueError, parameter + ".*later"):
+                            compiler.compile_shape_program(program)
+                        collection.assert_not_called()
+                        compile_node.assert_not_called()
+
+    def test_authored_boolean_styles_and_absence_pass_program_preflight(self):
+        for parameters in ({}, {"weighted_normals": False}, {"weighted_normals": True},
+                           {"weighted_normals_keep_sharp": False},
+                           {"weighted_normals_keep_sharp": True},
+                           {"weighted_normals": False, "weighted_normals_keep_sharp": False}):
+            with self.subTest(parameters=parameters):
+                program = ShapeProgram("1", "valid-style", (
+                    ShapeNode("first", "add", "box", {}),
+                    ShapeNode("later", "add", "box", parameters),
+                ))
+                self.assertEqual(validate_compilable_program(program), ())
+
+    def test_preflight_reports_invalid_styles_on_each_authored_node(self):
+        program = ShapeProgram("1", "style-errors", (
+            ShapeNode("first", "add", "box", {"weighted_normals": "true"}),
+            ShapeNode("later", "add", "box", {"weighted_normals_keep_sharp": None}),
+        ))
+        errors = validate_compilable_program(program)
+        self.assertEqual(len(errors), 2)
+        self.assertTrue(any("weighted_normals recipe" in error and "first" in error for error in errors))
+        self.assertTrue(any("weighted_normals_keep_sharp recipe" in error and "later" in error for error in errors))
 
     def test_invalid_world_radius_fails_before_applying_source_scale(self):
         with patch.object(compiler, "bpy", SimpleNamespace()):
