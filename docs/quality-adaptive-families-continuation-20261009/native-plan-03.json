@@ -1,0 +1,568 @@
+{
+  "protocol": "bounded_adaptive_family_checkpoint_v1",
+  "cases": [
+    {
+      "family": "tapered_frustum",
+      "baseline_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\tapered_frustum",
+      "baseline_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\results.json",
+      "baseline_geometry_hash": "191bc75bef0fc10d61cb0bd8364274ab42aaa083513b7f39a5be26fa3cc0864e",
+      "program_sha256": "91949ed47f7bc27c526bb37efdd6133f4e581afbd88860fd4e4670e2ed43382b",
+      "baseline_raw_surface": {
+        "candidate_geometry_hash": "191bc75bef0fc10d61cb0bd8364274ab42aaa083513b7f39a5be26fa3cc0864e",
+        "distance_p95_world": 0.0009236007928848267,
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "normal_angle_mean_degrees": 1.3590374068505227,
+        "normal_angle_p95_degrees": 2.0571646692591217,
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "qualified_limits": null,
+        "reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+        "sample_count_per_direction": 4096,
+        "sampled_max_distance_world": 0.0010797285940498114,
+        "seed": 61007,
+        "silhouette_verdict": "independent",
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+        "surface_status": "unqualified",
+        "symmetric_mean_distance_world": 0.0005079230022606851,
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "units": "unchanged Blender world coordinates; no fitting or normalization"
+      },
+      "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\evaluated-exact.npz",
+      "source_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+      "source_case": {
+        "name": "tapered_frustum",
+        "parameters": {
+          "primitive": "frustum",
+          "radius_bottom": 0.8,
+          "radius_top": 0.35,
+          "height": 1.8
+        },
+        "status": "unmeasured"
+      },
+      "cameras": {
+        "front": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -4.371138828673793e-08,
+              -1.0,
+              -3.200000047683716
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "e1fea3fbb98e114d1072819dac72aa4a2a3c83378d8db6b57fcf3b3b9ec7fb47"
+        },
+        "oblique_145_40": {
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265407562255859,
+              -0.6275068521499634,
+              -3.9307029247283936
+            ],
+            [
+              -0.8191519975662231,
+              -0.36868783831596375,
+              0.4393850862979889,
+              2.752307891845703
+            ],
+            [
+              1.8970785831129433e-08,
+              0.7660444378852844,
+              0.6427876353263855,
+              4.026422023773193
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "d96d3b4e55653b4241e0cb428d419eb3948c8fe285d89b66e0883a804005d1a5"
+        },
+        "oblique_35_28": {
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.3845685124397278,
+              0.7232682108879089,
+              4.530552864074707
+            ],
+            [
+              0.8191518783569336,
+              -0.26927801966667175,
+              0.5064380764961243,
+              3.1723272800445557
+            ],
+            [
+              9.926917954317105e-08,
+              0.882947564125061,
+              0.46947160363197327,
+              2.940770149230957
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "e9a85e6408650435e4f7103418d18b8019d2e37330cc34abbecf13c094e7e158"
+        },
+        "side": {
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.200000047683716
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "e1fea3fbb98e114d1072819dac72aa4a2a3c83378d8db6b57fcf3b3b9ec7fb47"
+        },
+        "top": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              3.5999999046325684
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "bd0f57588df78e9dd4bd09721d9156df611bb87d86bc6618d6e4838f595ce5c3"
+        }
+      },
+      "fit_view": "front",
+      "parameter_bounds": {
+        "radius_bottom": [
+          0.7195113124455705,
+          0.879402715211253
+        ],
+        "radius_top": [
+          0.31456289744971616,
+          0.3844657635496531
+        ],
+        "height_world": [
+          1.6189926566605042,
+          1.978768802585061
+        ]
+      },
+      "semantic_control": "radius_top",
+      "semantic_multiplier": 1.1,
+      "prior_view_exposure": {
+        "oblique_145_40": "old display-derived ob145 supports entered the original five-view baseline fit (7 censored supports); old view masks/metrics and paired neutral pixels were inspected for prior admission; this new controlled ob145 is excluded current fit/ROI selection"
+      },
+      "remaining_required_views": [
+        "front",
+        "side",
+        "top",
+        "oblique_35_28"
+      ],
+      "fixed_parameter_scope": "pose, all96 tessellation sectors and all non-selected recipe fields",
+      "owned_baseline_files_verified": {
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\tapered_frustum\\program.json": "91949ed47f7bc27c526bb37efdd6133f4e581afbd88860fd4e4670e2ed43382b",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\tapered_frustum\\evaluated-exact.npz": "88c077b91efca7187132cca27faa1316d0aeea69ce715ae6d1b6d2ac460162fe",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\tapered_frustum\\evaluated.obj": "0f83fec6ca80242e3a50607cb2236a7240a161d1d7ae7b7d53a24051d97075ee",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\tapered_frustum\\camera-snapshots.json": "2529477c10a85f6fd867b862db65bfac7e960ebe3f55de7fc733298a69cd7193"
+      }
+    },
+    {
+      "family": "concave_arch",
+      "baseline_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch",
+      "baseline_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\results.json",
+      "baseline_geometry_hash": "a1e2a84a728d7d913f9bf454ac6cbd731e0ddb8dd837271d02bc47efb6308177",
+      "program_sha256": "c6b941cbcb96950a9861332a0e032280b89b40d2048e1a0fea2f4181ba8c3d79",
+      "baseline_raw_surface": {
+        "candidate_geometry_hash": "a1e2a84a728d7d913f9bf454ac6cbd731e0ddb8dd837271d02bc47efb6308177",
+        "distance_p95_world": 0.002812504768371582,
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "normal_angle_mean_degrees": 0.6481952980763928,
+        "normal_angle_p95_degrees": 8.537736462515945e-06,
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "qualified_limits": null,
+        "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "sample_count_per_direction": 4096,
+        "sampled_max_distance_world": 0.003228970803320408,
+        "seed": 61007,
+        "silhouette_verdict": "independent",
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+        "surface_status": "unqualified",
+        "symmetric_mean_distance_world": 0.001124262480532101,
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "units": "unchanged Blender world coordinates; no fitting or normalization"
+      },
+      "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\evaluated-exact.npz",
+      "source_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+      "source_case": {
+        "name": "concave_arch",
+        "parameters": {
+          "builder": "compound",
+          "parts": [
+            {
+              "type": "box",
+              "center": [
+                0,
+                0,
+                0
+              ],
+              "size": [
+                1.8,
+                0.4,
+                1.8
+              ]
+            },
+            {
+              "type": "box",
+              "center": [
+                0,
+                0,
+                -0.3
+              ],
+              "size": [
+                1.0,
+                0.8,
+                1.4
+              ],
+              "boolean": "subtract"
+            }
+          ]
+        },
+        "status": "unmeasured"
+      },
+      "cameras": {
+        "front": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -4.371138828673793e-08,
+              -1.0,
+              -0.800000011920929
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "2f1582d53f3ea360874293232df855bd49f2a9c5d229cdcbee3d75b1a2f783b8"
+        },
+        "oblique_145_40": {
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265407562255859,
+              -0.6275068521499634,
+              -3.9307029247283936
+            ],
+            [
+              -0.8191519975662231,
+              -0.36868783831596375,
+              0.4393850862979889,
+              2.752307891845703
+            ],
+            [
+              1.8970785831129433e-08,
+              0.7660444378852844,
+              0.6427876353263855,
+              4.026422023773193
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "3d89c06a7bbfbf024b4704ced0f5f82228abcd4ba3450388d17636fe0e7f19f9"
+        },
+        "oblique_35_28": {
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.3845685124397278,
+              0.7232682108879089,
+              4.530552864074707
+            ],
+            [
+              0.8191518783569336,
+              -0.26927801966667175,
+              0.5064380764961243,
+              3.1723272800445557
+            ],
+            [
+              9.926917954317105e-08,
+              0.882947564125061,
+              0.46947160363197327,
+              2.940770149230957
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "01ae4d4fe9d7b709d6e2297166df71f79af2b42eb08014625b54262d53a16133"
+        },
+        "side": {
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.5999999046325684
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "9a9c6f7323955e2bdbdc2def605f3cb12b35acc5cbce1df5a9167a188c5e2c0b"
+        },
+        "top": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              3.5999999046325684
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "4eb7bf9c461212eee3708e361d328acfe338b90e75401d0877d87126e58ecc24"
+        }
+      },
+      "fit_view": "front",
+      "parameter_bounds": {
+        "opening_width_world": [
+          0.9028969005681574,
+          1.1035406562499703
+        ],
+        "cavity_roof_height_world": [
+          1.1671594080515206,
+          1.4265281653963031
+        ]
+      },
+      "semantic_control": "opening_width_world",
+      "semantic_multiplier": 1.1,
+      "prior_view_exposure": {
+        "oblique_145_40": "baseline exterior came from old front mask; extrusion thickness came from independently observed five-view axis bounds, so historical ob145 influence is not excluded; old ob145 mask/metrics were inspected for admission; this new controlled ob145 is excluded current fit/ROI selection"
+      },
+      "remaining_required_views": [
+        "front",
+        "side",
+        "top",
+        "oblique_35_28"
+      ],
+      "fixed_parameter_scope": "outer eight-point arch dimensions, extrusion thickness, pose and topology; only notch opening width and roof height vary",
+      "owned_baseline_files_verified": {
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\program.json": "c6b941cbcb96950a9861332a0e032280b89b40d2048e1a0fea2f4181ba8c3d79",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\evaluated-exact.npz": "43d3449769340cddf2a1419deb68dcaba0d09b35ce3ec6454ce18b4c474060b1",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\evaluated.obj": "5cb8bd5e1ed2c2d180294b1b3c1b68da9adcd5c70a9d9b4d53be97ddaad6dbd8",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\camera-snapshots.json": "ab13bdf09e1c7996b819ce67a45579f4706b0976f80c89516c784916b4d20479"
+      }
+    }
+  ],
+  "heldout_views": [
+    "oblique_145_40"
+  ],
+  "segments": 96,
+  "fit_budget": {
+    "residual_calls": 96,
+    "seconds": 1.0
+  },
+  "global_resolution": [
+    512,
+    512
+  ],
+  "crop_resolution": [
+    1024,
+    1024
+  ],
+  "crop_pixel_span": 160,
+  "samples": 64,
+  "filter_size": 1.5,
+  "rendered_frames": 12,
+  "source_frames": 6,
+  "candidate_frames": 6,
+  "new_raw_pairs": 2,
+  "baseline_raw_observations_reused": 2,
+  "raw_samples_per_direction": 4096,
+  "raw_seed": 61007,
+  "semantic_transactions": 2,
+  "qualification_children": 0,
+  "deadline_seconds": 90,
+  "threads": 2,
+  "memory_limit_bytes": 8589934592,
+  "parameter_interval_policy": "prior retained physical control x[.9,1.1], frozen before new acquisition; no authored source dimensions consumed by fitter/ROI selection",
+  "checkpoint_admission": "strict held-out gate passes; held-out alpha L1 strictly lower, boundary IoU and raw mean surface no worse; local rank complete/no active bound and exact semantic restoration; diagnostic checkpoint only",
+  "gates": {
+    "minimum_area_iou": 0.7,
+    "minimum_boundary_iou": 0.8,
+    "maximum_signed_distance_loss": 0.05
+  },
+  "artist_surface_limits": null,
+  "full_required_five_view_admission": "unrun for changed candidates",
+  "current_twelve_row_selection": "preserved; this bounded checkpoint cannot replace it",
+  "input_sha256": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_family_detail.py": "8717fd10ad921bb0343a6a95b267a1c11f9106299bca023e03b7d2a8ae538a1e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\adaptive_family.py": "7afa34df46629372ffd4056ef1a4a21584ec451b032ea858cd34443c5aabdbcc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\capsule.py": "a30ae9883fbfc31d261570f15e7d4fe31ad40d78cd4ee757e7f4e9832bf42c9c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\adaptive_measurement.py": "a19e2f788b403a1dbec6f74caaeecc47d6b6bba5100555bdbc7c0f1d0ceb8278",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\comparable_geometry.py": "4226354476aea7a7785ea31e2860fba0084e2f0a5175e6a866e63deaba2ecb01",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_references.py": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\blender_builders.py": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_surface_quality_check.py": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_quality_coverage_check.py": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_family_source_edit_check.py": "91440893c490e8915be6ed8789262585c88ddfde90b1536ab8c95409619d33c1",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_structured_family_source_edits.py": "550d0efcd86d5eaf5460029b562a4a674d6c281f0e3478cdccfd9dc31ef4b39c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\results.json": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\tapered_frustum\\program.json": "91949ed47f7bc27c526bb37efdd6133f4e581afbd88860fd4e4670e2ed43382b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\tapered_frustum\\evaluated-exact.npz": "88c077b91efca7187132cca27faa1316d0aeea69ce715ae6d1b6d2ac460162fe",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\tapered_frustum\\evaluated.obj": "0f83fec6ca80242e3a50607cb2236a7240a161d1d7ae7b7d53a24051d97075ee",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\tapered_frustum\\camera-snapshots.json": "2529477c10a85f6fd867b862db65bfac7e960ebe3f55de7fc733298a69cd7193",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\evaluated-exact.npz": "b977567ef96650b8b7398441d553dff7a421758905b25044d268683e3cf6ce4c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\evaluated.obj": "a3b2ea8d04dc8b85b8fd226e06a8bf05a74e20dba8b6d74afe4b90e785cb689d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\front-mask.png": "e1fea3fbb98e114d1072819dac72aa4a2a3c83378d8db6b57fcf3b3b9ec7fb47",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\oblique_145_40-mask.png": "d96d3b4e55653b4241e0cb428d419eb3948c8fe285d89b66e0883a804005d1a5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\oblique_35_28-mask.png": "e9a85e6408650435e4f7103418d18b8019d2e37330cc34abbecf13c094e7e158",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\side-mask.png": "e1fea3fbb98e114d1072819dac72aa4a2a3c83378d8db6b57fcf3b3b9ec7fb47",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\top-mask.png": "bd0f57588df78e9dd4bd09721d9156df611bb87d86bc6618d6e4838f595ce5c3",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\program.json": "c6b941cbcb96950a9861332a0e032280b89b40d2048e1a0fea2f4181ba8c3d79",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\evaluated-exact.npz": "43d3449769340cddf2a1419deb68dcaba0d09b35ce3ec6454ce18b4c474060b1",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\evaluated.obj": "5cb8bd5e1ed2c2d180294b1b3c1b68da9adcd5c70a9d9b4d53be97ddaad6dbd8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\camera-snapshots.json": "ab13bdf09e1c7996b819ce67a45579f4706b0976f80c89516c784916b4d20479",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\evaluated-exact.npz": "a8bb29e00cc7bdf47cb154c476ed29b8858a2809a9081403b2b3cae2afb90ce3",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\evaluated.obj": "d05a2f4e3c235dbbcb72538f3e9ca310964eb290c2af86540772fb8bbe791b4f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\front-mask.png": "2f1582d53f3ea360874293232df855bd49f2a9c5d229cdcbee3d75b1a2f783b8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\oblique_145_40-mask.png": "3d89c06a7bbfbf024b4704ced0f5f82228abcd4ba3450388d17636fe0e7f19f9",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\oblique_35_28-mask.png": "01ae4d4fe9d7b709d6e2297166df71f79af2b42eb08014625b54262d53a16133",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\side-mask.png": "9a9c6f7323955e2bdbdc2def605f3cb12b35acc5cbce1df5a9167a188c5e2c0b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\top-mask.png": "4eb7bf9c461212eee3708e361d328acfe338b90e75401d0877d87126e58ecc24"
+  },
+  "scope": "proposed next two-family checkpoint only; not executed; all current12 selected rows remain unchanged",
+  "case_order": [
+    "tapered_frustum",
+    "concave_arch"
+  ],
+  "legacy_camera_scope": "original matrix_world/ortho_scale/PNG bindings frozen unchanged; old clips/shifts absent, historical clipping match unavailable; new controlled actual camera settings captured separately",
+  "proposal_approval": "pending root serial native approval after triangle checkpoint; no native process launched"
+}

@@ -1,0 +1,25 @@
+# Bounded owned-command CLI
+
+`scripts/run_bounded_owned_command.py` replaces repeated command-supervision wrappers while keeping the reviewed `utils/owned_process_supervisor.py` unchanged. It runs only explicitly supplied argv. It creates a fresh `OwnedRun` and retains `command.json`, `provenance.json`, merged `stdout.log`, the actual `resource-receipt.json`, and a lease-release decision in `run-result.json`. Child-produced geometry/images remain with their own producer; the wrapper substitutes no paths, adopts no outputs and deletes nothing.
+
+An explicit Windows native call has this shape:
+
+```text
+python scripts/run_bounded_owned_command.py --output-parent temp/tasks/owned-command --timeout-s 85 --join-timeout-s 5 --max-memory-bytes 8589934592 --max-rss-bytes 8589934592 --threads 2 --input frozen_script.py -- blender --background --threads 2 --python frozen_script.py
+```
+
+This is an API example, not an additional approved experiment. The caller supplies the real frozen script/inputs and serial native authorization. Work plus final joins must fit 90 seconds; the join allowance is at most five seconds. Committed memory and sampled RSS each have an explicit positive bound at most 8 GiB. The thread control is one or two: Blender must declare matching `--threads` or `-t` before its script-argument separator and run in background mode. The wrapper also caps common numerical-library thread environment variables. These are declared command/library controls, not a kernel thread-count quota. Other inherited environment values are neither serialized nor changed.
+
+Argument, platform, executable, cwd, plain output-parent and input validation occurs before ownership creation or launch. Executables are resolved and byte-hashed; original and actual argv are retained separately, with no shell invocation. The wrapper snapshots its own/supervisor/ownership source bytes and optional explicit input files. There are at most 64 inputs, each at most 64 MiB, with a shrinking total 256 MiB read budget; the executable hash has a separate 512 MiB bound. Streaming reads stop at the allowed bound plus one byte. File descriptor/path identity, size and modification time must match after hashing, otherwise launch is refused. These are current read-only provenance snapshots, not locked inputs or invented historical bindings. Native/script option validity beyond the documented wrapper controls remains the child's responsibility.
+
+A fresh lease is released only when the supervisor's `lifecycle_complete` is the real boolean `True` and complete-tree scope was requested. Successful exit zero plus that proof closes a succeeded run. A joined primary failure remains failed, closes failed, and retains its raw return code. Ordinary positive exit codes 1..255 are also returned by the CLI; other raw failure codes remain in the receipt while the CLI returns one. An unconfirmed join or truthy non-boolean claim leaves a failed manifest with an active lease and returns failure. The code uses no unconditional ownership context manager.
+
+`--portable-primary-only` requires omission of `--max-rss-bytes`, requests primary-only scope, and always retains a failed active lease even if a supplied receipt claims a completed tree. It supplies no portable descendant proof. The supervisor remains responsible for actual process handles/Job Object observations; the wrapper does not infer joins from PID absence. Supervisor exceptions retain explicit unavailable resource observations, error history and an active failed lease. Missing stdout is recorded as unavailable rather than synthesized as native output. Receipt I/O failures retain whatever was produced, record failure where possible, and may conservatively keep an active lease.
+
+The supervisor's 4 MiB log check is a sampled threshold. A writer can exceed it between checks; this is not a strict never-exceeded byte quota. The wrapper's owned artifact registration budget is 8 MiB, and exceeding it remains a retained failure with explicit receipt/ownership limitations. RSS is also independently sampled, separate from Job Object committed memory; the reviewed supervisor documentation describes unobserved/inter-poll peaks and broker-created process exclusions.
+
+## Validation and adoption
+
+Nine focused mock-only tests prove successful release, preserved joined failure, unconfirmed/portable retention, exact argv and thread controls, supervisor exception history, pre-launch invalid-bound refusal, and bounded growth/replacement provenance checks. The growth fixture mutates a tiny file in-process; the replacement identity fixture is explicitly simulated. No native or stdlib child was launched, and no process-tree crash campaign was repeated. [evidence.json](evidence.json) records the final tested hashes and results. Root owns `test_bounded_owned_command` registration and subsequent production launch evidence.
+
+The CLI is ready to replace duplication for future frozen commands. Existing selected-canonical, triangle, supervisor and historical lease receipts stay unchanged. This wrapper creates no recovery authority for a previous run.

@@ -28,15 +28,15 @@ Read-only comparison of retained capsule alpha gives boundary IoU0.984654731 to0
 
 The failed-only continuation joined successfully in8.179504 seconds with628,510,720 peak process-tree RSS bytes. It made exactly six new torus acquisitions, reused all six capsule acquisitions, ran one torus update and recorded two raw pairs/two semantic transactions. Both owners remain retained: the first failed/released33-artifact owner and the final succeeded/released42-artifact owner. Their files all match their ownership digests. No current source or selected row was mutated. The first-run script and adapter bytes are retained under `native-source-run01`, with hashes equal to the original frozen plan.
 
-| Independent observation | Capsule baseline â†’ local update | Torus baseline â†’ local update |
+| Independent observation | Capsule baseline Ã¢â€ â€™ local update | Torus baseline Ã¢â€ â€™ local update |
 |---|---|---|
-| held-out ob145 boundary IoU |0.984654731 â†’0.986687148|0.985186574 â†’0.993036605|
-| held-out controlled alpha L1 |0.000173569919 â†’0.000148054518|0.000304355024 â†’0.000148501626|
+| held-out ob145 boundary IoU |0.984654731 Ã¢â€ â€™0.986687148|0.985186574 Ã¢â€ â€™0.993036605|
+| held-out controlled alpha L1 |0.000173569919 Ã¢â€ â€™0.000148054518|0.000304355024 Ã¢â€ â€™0.000148501626|
 | relative alpha error reduction |14.700359%|51.207763%|
-| raw mean surface distance, world |0.000297955525 â†’0.000283499570|0.000172927973 â†’0.000076015889|
+| raw mean surface distance, world |0.000297955525 Ã¢â€ â€™0.000283499570|0.000172927973 Ã¢â€ â€™0.000076015889|
 | local calls / solver time |14 /.478501 seconds|14 /.044873 seconds|
 | local sensitivity |rank2, no active interval bound|rank2, no active interval bound|
-| exact semantic restoration |straight segmentÃ—1.05 passed|minor tube radiusÃ—1.05 passed|
+| exact semantic restoration |straight segmentÃƒâ€”1.05 passed|minor tube radiusÃƒâ€”1.05 passed|
 | full changed-candidate five-view/boundary/canonical verdicts |unrun|unrun|
 | independent artist surface limits |unavailable|unavailable|
 
@@ -50,3 +50,19 @@ Frustum and arch share the bounded update implementation and pass pure recovery/
 
 
 After native checkpoint commit2f9421f, a pure `rounded_triangle_dot` adapter extension adds explicit scaleX/scaleY/corner-radius controls. It fixes depth/front fraction/pose/template and the existing32/64 tessellation, retaining6239 vertices. A bounded eight-entry recipe-derived affine vertex basis avoids repeated full mesh validation for the two fitting cameras; direct mesh comparisons differ by at most8.88e-16 world. This is a proposal optimization, independent of native geometry identity/admission. Fifteen focused adaptive checks pass3.500 seconds. The96-call /1-second two-observation cost fixture completes27calls /.337401 seconds with local rank3. Root owns the separate triangle native wrapper and evidence; no triangle native run belongs to this report. Capsule/torus native evidence remains bound to its original checkpoint bytes/hashes.
+
+## Prepared frustum and arch follow-up (not executed)
+
+[native-plan-03.json](native-plan-03.json) and [preflight-03.json](preflight-03.json) freeze a next12-frame checkpoint. Each family gets source/baseline front512, one genuine source residual crop1024 and source/baseline/refined at the unchanged original ob145512. Frustum controls are retained bottom radius, top radius and height; arch controls are retained notch opening width and roof height. Bounds are prior values x[0.9,1.1], with pose/tessellation and every other recipe field fixed. Arch exterior/thickness remain fixed even where they contribute residual error. The existing runner already supports both meaningful native edit transactions: frustum top radius x1.10 and arch opening width x1.10.
+
+Pure preflight verified both completed/released baseline owners, exact recipe/NPZ/OBJ/camera digests, original reference camera identities, hash-bound4096/seed61007 baseline raw receipts and front-model compatibility. Actual new controlled settings still require acquisition receipts. The source directories predate modern ownership and remain hash-frozen read-only without historical adoption; their old clipping declaration gaps remain explicit. Frustum's old ob145 supports entered its original fit, and arch's thickness used the prior five-view axis-bound target. Both old held-out views were inspected for earlier admission. The newly acquired ob145 is excluded from this update's fit and ROI selection; prior exposure is disclosed rather than erased.
+
+The plan requests two96-call/one-second bounded fits, two new4096/seed61007 raw comparisons, two semantic edit/restore transactions, zero qualifiers/neutral/normal passes and one serial child capped at90 seconds/8GiB/two threads. Rank deficiency, active bounds, exact replay failure or any quality regression stays retained and unqualified. Current12 selected rows remain unchanged. Native approval is pending root after the separate triangle checkpoint; no process has launched for this plan.
+
+## Completed frustum and arch checkpoint
+
+The frozen12-frame job completed through the reusable fresh owned-command CLI. Both checkpoints improve held-out alpha and raw mean without using the held-out view in fit/ROI selection. Frustum alphaL1 falls42.8947800% and raw mean falls59.454714%; arch alphaL1 falls20.0216157% and raw mean falls19.617568%. Both physical source-control edits restore exact indexed geometry. Arch P95 and maximum distance are unchanged because outer dimensions and extrusion thickness remained fixed; this is a retained limitation.
+
+[evidence-03.json](evidence-03.json) retains actual producer/raw metrics, source/runtime hashes, complete process joins, separate sampledRSS/committed peaks and fresh ownership audits. No additional full qualification, row replacement or artist approval is implied. The source plan/preflight remain their original prepared-before-measurement declarations.
+
+Actual source/refined held-out PNGs were inspected. The frozen frustum view touches the bottom frame and the arch view touches top/bottom. Frame-edge occupied pixels are retained in evidence-03.json. These measurements compare visible censored contours; complete shape and hidden-surface acceptance are not implied.

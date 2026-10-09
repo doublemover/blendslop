@@ -1,0 +1,58 @@
+{
+  "bounds": {
+    "executable_hash_bytes": 536870912,
+    "fresh_owned_artifact_registration_bytes": 8388608,
+    "input_each_bytes": 67108864,
+    "input_total_bytes": 268435456,
+    "log_scope": "supervisor 4 MiB sampled threshold; may be exceeded between checks",
+    "maximum_committed_bytes": 8589934592,
+    "maximum_join_s": 5,
+    "maximum_sampled_rss_bytes": 8589934592,
+    "maximum_total_work_and_join_s": 90,
+    "provenance_inputs": 64,
+    "thread_control_values": [
+      1,
+      2
+    ]
+  },
+  "focused_tests": {
+    "passed": 9,
+    "seconds": 0.527,
+    "skipped": 0,
+    "successful": true,
+    "suite": "test_bounded_owned_command",
+    "tests": 9
+  },
+  "interpreter": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+  "lease_contract": {
+    "close_only_if": "complete-tree scope requested and resource.lifecycle_complete is True",
+    "portable": "failed manifest / active lease, regardless of claimed complete tree",
+    "primary_failure": "raw resource code retained; joined run closes failed",
+    "unconfirmed": "failed manifest / active lease"
+  },
+  "protocol": "bounded-owned-command-mocked-evidence-v1",
+  "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+  "runtime_crlf_preserved": true,
+  "scope": {
+    "deletion_executed_by_cli": false,
+    "fits": 0,
+    "fixture_growth": "real tiny in-process append",
+    "fixture_replacement": "simulated pathname identity replacement",
+    "historical_adoption": false,
+    "historical_lease_release": false,
+    "new_blender_sessions": 0,
+    "new_stdlib_children": 0,
+    "qualifiers": 0,
+    "raw_metrics": 0,
+    "renders": 0,
+    "shared_runtime_changes": false,
+    "supervisor_receipts_in_orchestration_tests": "mocked outcomes; not actual process or memory evidence"
+  },
+  "source_base_commit": "7be90e1b3d43b4e198902e6ba5ef4b6783f28b7c",
+  "source_sha256": {
+    "blender_blocking/test_bounded_owned_command.py": "0956189ac8f72636d642e0400e5e488c4d0b6cc54b5947396bf9fa279b18e6c8",
+    "blender_blocking/utils/owned_process_supervisor.py": "9fc904a81aa357171fb3032f66684246c72546d281109b6d6c3e30fe9805904c",
+    "blender_blocking/utils/run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+    "scripts/run_bounded_owned_command.py": "4beda91b51a9e88d75a484e92501c9d9366612cbc3ff63e6d93d7a5b0a34c5f3"
+  }
+}

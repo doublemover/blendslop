@@ -3,28 +3,34 @@
   "created_for_batch": "2026-10-08",
   "updated_date": "2026-10-09",
   "scope": "full retained delegated quality and lifecycle backlog; no aggregate pass over required gaps",
-  "source_branch": "local/quality-continuation-20261008",
+  "source_branch": "local/quality-followup-20261009",
   "published_showcase_commit": "d5e981659a18c435ccbe7cc072b873e5b1707645",
   "tracks": [
     {
       "task": "QUALITY-SURFACE1",
-      "state": "local calibrated vase accepted; published predecessor still fails",
+      "state": "calibrated vase retained; nine source-only engineering certificate APIs; seven frozen camera-bound family policies; artist acceptance independent",
       "completed": [
         "explicit AgX coverage inversion and half-coverage fitting",
         "terminal flat-cap completion with explicit prior",
         "orthographic replay contract",
         "exact-contact allocation optimization under unchanged15-second allowance",
-        "five strict silhouettes, raw qualified vase surface, source-section edit and fresh native boundary qualification"
+        "five strict silhouettes, raw qualified vase surface, source-section edit and fresh native boundary qualification",
+        "continuous source-only facet certificates for sphere, ellipsoid, cylinder, frustum and capsule",
+        "exact full rectilinear boundary cover for plate, arch and multipart; missing/overlapping facets refused",
+        "frozen torus128x24 exact periodic cover, directed interval construction/Hessian distance bound and analytic corresponding-normal cone",
+        "seven actual camera-bound source policies frozen; old multipart mean-distance failure retained and final b2c repair passes the same policy"
       ],
       "remaining": [
-        "independent non-vase surface contracts",
+        "rounded-box and triangular-pebble continuous source certificate or independently authored acceptance contract",
+        "actual full source-camera provenance for arch/torus policies where still missing",
+        "artist acceptance tolerances for non-vase families",
         "historical scalloped-input repair against an explicitly authored smooth target"
       ],
-      "blocking_input": "Historical smooth target is not authored; shape intent cannot be inferred as a ground-truth acceptance claim."
+      "blocking_input": "Non-vase artist tolerances and historical smooth target are not authored. Source engineering policies cannot substitute for required artist gates."
     },
     {
       "task": "QUALITY-COVERAGE1",
-      "state": "all12actual families retained; ten new candidates pass50old strict views and exact boundaries; complementary scalar depth repair passes independently",
+      "state": "original12 families retained; five generic adaptive checkpoints plus separately qualified box/multipart updates; no aggregate acceptance",
       "completed": [
         "frozen12-family reference matrix and intentional depth/cavity/multipart negatives",
         "observed-mask fitting for sphere, ellipsoid, cylinder, frustum, corrected capsule, rounded box and thin plate",
@@ -39,34 +45,40 @@
         "three-box observed-mask multipart proposal with original oblique145 excluded from fit",
         "alltennew exact native boundaries; allten family-specific edit/restore controls",
         "candidate-only complementary camera exposes old hidden endpoint at boundaryIoU0.78734 failure",
-        "one-scalar observed endpoint repair lowers held-out/raw surface error; exact boundary and depth restoration pass"
+        "one-scalar observed endpoint repair lowers held-out/raw surface error; exact boundary and depth restoration pass",
+        "capsule/torus genuine1024 residual crops improve held-out alpha and raw mean with full local rank/exact edit restoration",
+        "triangular pebble three physical adaptive controls improve held-out alpha73.6218percent, raw mean27.1296percent and normalP95; sampled max increase preserved independently",
+        "frustum/arch frozen12-frame generic adaptive checkpoints improve alpha42.8948percent/20.0216percent and raw mean; both exact source-control restoration passes"
       ],
       "remaining": [
-        "independent acceptable non-vase family surface contracts",
-        "full matched source/candidate camera/mask/normal provenance where legacy gaps remain",
-        "global hidden-surface uniqueness beyond locally identified one-scalar multipart endpoint"
+        "changed adaptive candidates remain diagnostic until their required full five-view/native boundary/canonical gates run",
+        "source-camera and independent artist surface contracts where absent",
+        "global hidden-surface uniqueness remains unproved"
       ],
       "blocking_input": null
     },
     {
       "task": "QUALITY-TRIANGLE1",
-      "state": "authored rounded reference and editable reconstruction retained; surface remains unqualified",
+      "state": "authored reference/editable primitive and six-frame physical-alpha adaptive improvement retained; changed geometry not aggregate qualified",
       "completed": [
         "corner radius, thickness and asymmetric front/back profile controls",
         "five strict silhouettes and24-direction support/thickness checks",
         "retained native boundary qualification",
-        "candidate-blind baseline/dense/finer reference comparisons"
+        "candidate-blind baseline/dense/finer reference comparisons",
+        "coupled corner-radius/XY scale contour fit with fixed thickness/front-back profile/pose/tessellation",
+        "new bfe72738 checkpoint: held-out boundary.881874->.968171, alpha error73.6218percent lower; raw mean/normalP95 lower",
+        "native physical radius support response preserves thickness/source pointer and restores exact indexed geometry",
+        "fresh pre-resume Job ownership completes both process kernel joins; resource and actual pixels retained"
       ],
       "remaining": [
-        "independent acceptable reconstruction error contract",
-        "qualified surface verdict",
-        "complete matched source/candidate five-view neutral and normal retention where missing"
+        "independent authored artist reconstruction tolerance / continuous source certificate",
+        "full five-view silhouette/native boundary/matched neutral-normal packet for changed bfe72738 geometry"
       ],
-      "blocking_input": "Reference discretization measurements establish a noise observation, not an acceptable artist reconstruction tolerance."
+      "blocking_input": "Artist tolerance remains absent; current bounded checkpoint preserves the original selected row and cannot grant aggregate acceptance."
     },
     {
       "task": "CANONICAL-EVIDENCE",
-      "state": "150original new-candidate inspection images plus35matched authored-neutral frames and separate controlled acquisitions retained; legacy gaps explicit",
+      "state": "selected final box/multipart60-frame source/candidate canonical packet complete; original outer supervision failed; provenance acquired independently",
       "completed": [
         "all five mask/neutral/normal slots retained independently of presentation curation",
         "geometry/camera/frame/pass hashes and explicit unrun/unavailable states",
@@ -75,16 +87,21 @@
         "seven actual five-view inspection receipts; all105passbindings verified",
         "35 authored source neutral frames exactly match candidate native frames and clips",
         "actual source/candidate polygon/custom-normal/modifier style captured",
-        "authored rounded-box normal controls verified by corrected paired pixels without geometric changes"
+        "authored rounded-box normal controls verified by corrected paired pixels without geometric changes",
+        "selected final9f6c box and b2c multipart actual five-view masks/neutrals/RGB normals with camera/clip/geometry/style bindings",
+        "60nativeframes and148child-owned artifacts retained; child scope released/auditready",
+        "source/candidate neutral and normal pixels inspected; original oblique crop censoring disclosed"
       ],
       "remaining": [
-        "resolve or retain explicit old mask/clip/source-normal provenance gaps"
+        "original selected-packet outer descendant kernel join is unavailable; absence-only followup cannot repair it",
+        "remaining source/candidate canonical provenance for other families / changed checkpoints",
+        "legacy source-owner receipt drift and old clipping/normal gaps remain explicit"
       ],
-      "blocking_input": null
+      "blocking_input": "Historical descendant HANDLE was not retained; current PID absence cannot prove a kernel join. Fresh supervisor fixes future jobs without adopting historical leases."
     },
     {
       "task": "RUN-CLEANUP1",
-      "state": "production render and variant result/diagnostic ownership implemented; reclamation remains read-only",
+      "state": "render/variant/export producers owned; identity-bound recovery inspection and fresh complete-tree supervisor implemented; reclamation stays read-only",
       "completed": [
         "explicit manifest/lease ownership design and conservative read-only planner",
         "fresh native helper and warm numeric producer ownership",
@@ -97,19 +114,26 @@
         "two real concurrent producers preserve separate active leases and shared inputs",
         "joined crashed producer remains active and requires explicit recovery; no inferred adoption",
         "actual Windows locked-existing-final publication preserves both original and completed stage",
-        "two128-square native production renders preserve identical pixels, indexed geometry, settings and released receipts"
+        "two128-square native production renders preserve identical pixels, indexed geometry, settings and released receipts",
+        "visual-hull and backend OBJ exports use fresh synchronous owners, immutable stages, no-clobber final suffixes and verified receipts",
+        "read-only recovery inspection requires exact original run/token and snapshot identity; crashed active leases retained",
+        "Windows fresh no-breakaway Job assigned before primary resume; retained creation HANDLEs kernel-waited, ordinary job empty before lifecycle pass",
+        "sampled RSS independently monitored from Job committed-memory guard; observed exception history retained incomplete",
+        "seven real process-supervision checks and13backend/recovery checks pass; native triangle validates fresh supervisor",
+        "reusable bounded owned-command CLI validates argv/resources/provenance before launch, preserves primary failures, releases only true complete-tree scope; nine mock orchestration checks pass",
+        "actual12-frame frustum/arch CLI job passes both fresh complete-tree supervision and child ownership audits"
       ],
       "remaining": [
-        "backend export/cache/report ownership outside this bounded adoption",
-        "save_render exact-path overwrite API has not been changed",
-        "explicit crashed-run recovery execution and full child-tree supervision",
-        "a separately scoped reclamation executor, if later authorized; no historical adoption or blanket deletion"
+        "other backend cache/report producers outside export adoption",
+        "save_render exact-path overwrite API not changed",
+        "production direct-child variant/numeric paths need separately bounded complete-tree adoption where useful",
+        "explicit recovery/reclamation execution remains unimplemented and requires separate bounded authorization"
       ],
-      "blocking_input": "Deletion/historical adoption remain outside authorization; recovery execution and other producers require an explicit bounded design."
+      "blocking_input": "No deletion or historical adoption authorization. Existing unconfirmed active/crashed runs remain retained."
     },
     {
       "task": "MEASUREMENT-ADAPTIVE-PRESENTATION",
-      "state": "512global/1024detail/2048detail bounded checkpoints completed; selected2048 box and scalar multipart repair pass independent checks; local1536 preview page ready",
+      "state": "actual controlled box/multipart/capsule/torus/triangle improvements retained; other family models continue; local lit preview remains unpublished",
       "completed": [
         "dedicated32-bit linear-alpha occupancy and fixed half-coverage masks",
         "strict matched acquisition camera/sampling/encoding checks; preview state restoration",
@@ -120,40 +144,70 @@
         "three1536color/lit previews plusonefinal-box frame, exact geometry preserved",
         "local site/continuation.html with independently scoped metrics and hashed display assets",
         "candidate-only selected camera and one-scalar multipart update reduce newviewalpha98.636percent and rawmean96.145percent",
-        "strict site builder admits four continuation assets with unchanged IDAT payloads; native originals retained;83total assets and11.58MB local build"
+        "strict site builder admits four continuation assets with unchanged IDAT payloads; native originals retained;83total assets and11.58MB local build",
+        "capsule and torus six-frame controlled detail checkpoints lower held-out alpha14.7004percent/51.2078percent with independent normal observations",
+        "triangle six-frame1024 source-crop update improves actual held-out pixels, with original crop censoring retained",
+        "native fresh Job supervisory path proves lifecycle completion separately from geometry improvement",
+        "actual frustum/arch12-frame controlled checkpoint completes through fresh reusable CLI"
       ],
       "remaining": [
-        "browser layout inspection when a browser surface is available",
-        "parent review/approval before external quality publication"
+        "adaptive sphere/ellipsoid/cylinder/plate physical models and source-view identifiability under implementation",
+        "matched lit/canonical inspection for changed diagnostic candidates if selected",
+        "desktop continuation browser inspection when a supported surface becomes available; mobile review explicitly skipped",
+        "parent review before external followup publication",
+        "arch fixed outer/depth residual: separate source-only identifiable three-control stage under design"
       ],
       "blocking_input": "Current CUA inventory exposes no browser or native app; static page/image identity checks and actual native render pixel inspection completed."
     },
     {
       "task": "INTEGRATION-PUBLICATION",
-      "state": "current main integrated; draftPR creation approved; merge/Pages still require separate approval",
+      "state": "PR7 draft atfb2802a passes full/quick/gallery CI; current local followup separate and unpublished",
       "completed": [
         "owner checkout preserved on endblay_opslay",
         "quality work isolated on local/quality-continuation-20261008",
         "public showcase PR6 already merged and verified separately",
         "owner approves current main integration and new draftPR",
         "main d5e9816 merged with82historical assets/diagnostics preserved; only one additive allowlist conflict",
-        "35focused integration checks and86asset/12.23MB static build passed"
+        "35focused integration checks and86asset/12.23MB static build passed",
+        "approved draftPR7 targeting main created and attached",
+        "Blender full/quick required CI passes on reviewed fb2802a candidate",
+        "gallery CI passes after one failed-only browser-start timeout retry; deployment correctly skipped",
+        "followup chunks9c4da6f,8628acc,2f9421f,3f8398b,7be90e1 committed locally; reviewed PR untouched"
       ],
       "remaining": [
-        "open the approved new draft PR targeting main",
-        "required integrated-candidate CI and desktop review when a browser is available",
-        "separate approval before PRmerge or Pagesdeployment"
+        "followup branch review and normal CI when parent chooses to publish",
+        "desktop continuation page inspection when a browser is available; mobile skipped per owner",
+        "separate approval before PR merge or Pages deployment"
       ],
-      "blocking_input": "No PRmerge/Pagesdeployment approval has been received; useful implementation continues on a successor branch."
+      "blocking_input": "No PR merge/Pages approval; followup publication/retarget requires parent decision. Implementation continues separately."
     }
   ],
-  "validation_policy": "existing full Blender suite/seven-control packet retained; only bounded missing-behavior checks",
+  "validation_policy": "existing full Blender and seven-control qualification retained; reviewed draft CI passed; bounded missing behavior only in local followup, no broad rerun or aggregate pass",
   "local_commits": [
     "424759d06585f2bc589fc29bb16c70198a83395a",
     "723a553",
     "f0a0b3f",
-    "95f752c6c3ecafda3f5e1390ccf86d908edd6622"
+    "95f752c6c3ecafda3f5e1390ccf86d908edd6622",
+    "e6e8a0f684399dfd2f710659c3fc203948498291",
+    "fb2802a685bf57f18b44f7b23e984e875aa21477",
+    "9c4da6f",
+    "8628acc",
+    "2f9421f",
+    "3f8398b",
+    "7be90e1"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
-  "completed_unpublished_batch": "quality95f752c committed; render/variant lifecycle and additive preview publication readiness completed in accompanying local batch"
+  "completed_unpublished_batch": "local followup adds backend/recovery ownership, source-conditioned engineering policies, adaptive capsule/torus/triangle checkpoints, selected canonical packet and fresh complete-tree supervision",
+  "reviewed_draft": {
+    "url": "https://github.com/doublemover/blendslop/pull/7",
+    "state": "OPEN draft; unchanged",
+    "revision": "fb2802a685bf57f18b44f7b23e984e875aa21477",
+    "base": "main",
+    "blender_full": "passed CI",
+    "blender_quick": "passed CI",
+    "gallery": "passed CI after failed-only browser-start retry",
+    "merge_pages_approval": "absent"
+  },
+  "followup_implementation_revision": "7be90e1 plus accompanying completed launcher/frustum-arch batch",
+  "aggregate_accepted": false
 }

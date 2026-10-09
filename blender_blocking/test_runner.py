@@ -76,6 +76,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_backend_artifact_ownership", "test_backend_artifact_ownership"),
     ("pure_run_recovery", "test_run_recovery"),
     ("pure_owned_process_supervisor", "test_owned_process_supervisor"),
+    ("pure_bounded_owned_command", "test_bounded_owned_command"),
     ("pure_profile_regularization", "test_profile_regularization"),
     ("pure_coverage_evidence", "test_coverage_evidence"),
     ("pure_canonical_artifacts", "test_canonical_artifacts"),
