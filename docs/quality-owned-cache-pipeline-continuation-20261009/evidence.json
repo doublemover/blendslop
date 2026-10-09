@@ -1,0 +1,79 @@
+{
+  "changed_files": [
+    {
+      "bytes": 36121,
+      "crlf": 723,
+      "lone_lf": 0,
+      "path": "blender_blocking/config_models/backends.py",
+      "sha256": "958a21bf5cd322752bbb5dba7b2953e96a15983c01fa6aa192ad24129ec3d2f2"
+    },
+    {
+      "bytes": 1931,
+      "crlf": 52,
+      "lone_lf": 0,
+      "path": "blender_blocking/reconstruction/backends/visual_hull/config.py",
+      "sha256": "83ac3c22e73959bbe004cecd3c600250a8be0392070e0299cbcdfcdd98a08fb1"
+    },
+    {
+      "bytes": 26704,
+      "crlf": 601,
+      "lone_lf": 0,
+      "path": "blender_blocking/reconstruction/backends/visual_hull/backend.py",
+      "sha256": "a02877334c0dfae7a19e21fac343fb739442e922499775993c7c2e133ad8eb9b"
+    },
+    {
+      "bytes": 19129,
+      "crlf": 527,
+      "lone_lf": 0,
+      "path": "blender_blocking/reconstruction/point_cloud/hull.py",
+      "sha256": "a2c0fa800816f8b798446c11e4756e74c232cb01d470091e2d636a27d066230a"
+    },
+    {
+      "bytes": 6243,
+      "crlf": 116,
+      "lone_lf": 0,
+      "path": "blender_blocking/test_owned_cache_pipeline.py",
+      "sha256": "7a6163e868dbc746d2c6bb28b9ca4968d1a5377df842b4b986cac9790a2c4b11"
+    }
+  ],
+  "checks": {
+    "bootstrap": "sys.path[:0] = ['blender_blocking', '.']; import test_runner",
+    "elapsed_s": 1.426,
+    "failed": 0,
+    "interpreter": "C:/Program Files/Blender Foundation/Blender 5.2/5.2/python/bin/python.exe",
+    "passed": 6,
+    "skipped": 0,
+    "syntax": "all changed Python files parsed with ast.parse",
+    "tests": [
+      "test_owned_cache_pipeline",
+      "test_config_defaults",
+      "test_modularization_contracts.ModularizationContractTests.test_reconstruction_backend_helpers_import"
+    ],
+    "whitespace": "git -c core.whitespace=cr-at-eol diff --check passed"
+  },
+  "default": false,
+  "deletion": false,
+  "historical_adoption": false,
+  "native_launches": 0,
+  "option": "cache_owned_writes",
+  "ownership_scope": "last constructor-local fresh store attempt only; cache-hit-only builds report unrun and null path",
+  "protocol": "owned-cache-pipeline-option-v1",
+  "receipt_retained_does_not_imply_success": true,
+  "registration_owner": "root",
+  "unchanged_cache_dependencies": [
+    {
+      "bytes": 7206,
+      "crlf": 220,
+      "lone_lf": 0,
+      "path": "blender_blocking/volume/chunk_cache.py",
+      "sha256": "53c6b7e07169ae5aa764aa940080a3094b75cf40eff5e43c9e06d3b9632e44c4"
+    },
+    {
+      "bytes": 9134,
+      "crlf": 187,
+      "lone_lf": 0,
+      "path": "blender_blocking/volume/owned_chunk_cache.py",
+      "sha256": "81b358b3cb066b7047f8bfbd525397348c8b0678c47bd4e595bbdf50645460ec"
+    }
+  ]
+}

@@ -35,6 +35,7 @@ class VisualHullConfig:
     cache_namespace: str = "visual_hull"
     cache_read: bool = True
     cache_write: bool = True
+    cache_owned_writes: bool = False
 
     def validate(self) -> None:
         if not 1 <= self.poisson_depth <= 10 or not 0 < self.poisson_timeout_s <= 90:
@@ -61,6 +62,8 @@ class VisualHullConfig:
             raise ValueError("occupancy_threshold must be in [0, 1]")
         if self.uncertainty_aggregation not in {"min", "product", "logit_sum"}:
             raise ValueError("uncertainty_aggregation must be min/product/logit_sum")
+        if not isinstance(self.cache_owned_writes, bool):
+            raise ValueError("cache_owned_writes must be a boolean")
         if not self.cache_namespace:
             raise ValueError("cache_namespace must not be empty")
         if self.cache_directory is not None and not str(self.cache_directory).strip():
@@ -92,6 +95,7 @@ class VisualHullConfig:
             "cache_namespace": self.cache_namespace,
             "cache_read": self.cache_read,
             "cache_write": self.cache_write,
+            "cache_owned_writes": self.cache_owned_writes,
         }
 
 @dataclass
