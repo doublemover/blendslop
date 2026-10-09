@@ -5,7 +5,8 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+import subprocess
 import zipfile
 import numpy as np
 from config_models.backends import VisualHullConfig
@@ -50,6 +51,35 @@ def result_files(command, log_path, *, bad_identity=False, bad_faces=False):
 
 
 class OwnedPoissonBridgeTests(unittest.TestCase):
+    def test_legacy_timeout_uses_bounded_final_wait_and_retains_primary_cause(self):
+        original = subprocess.TimeoutExpired('legacy Open3D fixture', .01)
+        child = Mock()
+        child.wait.side_effect = [original, subprocess.TimeoutExpired('final join fixture', 5.)]
+        with tempfile.TemporaryDirectory() as directory, patch.object(bridge.subprocess, 'Popen', return_value=child):
+            settings = {'external_open3d_python': str(fixture_python()),
+                        'postprocess_artifact_root': directory, 'poisson_timeout_s': .01}
+            with self.assertRaisesRegex(RuntimeError, 'exceeded explicit timeout') as caught:
+                bridge.run_external_poisson(mesh(), 'poisson', settings)
+            self.assertIs(caught.exception.__cause__, original)
+            self.assertTrue(any('cleanup remains unconfirmed' in note for note in original.__notes__))
+            self.assertEqual([call.kwargs['timeout'] for call in child.wait.call_args_list], [.01, 5.])
+            child.kill.assert_called_once()
+            self.assertEqual(len(list(Path(directory).glob('cpu-*/input.npz'))), 1)
+
+    def test_legacy_cancellation_keeps_original_after_bounded_cleanup_failure(self):
+        original = KeyboardInterrupt('legacy owner cancelled')
+        child = Mock()
+        child.wait.side_effect = [original, subprocess.TimeoutExpired('final join fixture', 5.)]
+        with tempfile.TemporaryDirectory() as directory, patch.object(bridge.subprocess, 'Popen', return_value=child):
+            settings = {'external_open3d_python': str(fixture_python()),
+                        'postprocess_artifact_root': directory, 'poisson_timeout_s': .01}
+            with self.assertRaises(KeyboardInterrupt) as caught:
+                bridge.run_external_poisson(mesh(), 'poisson', settings)
+            self.assertIs(caught.exception, original)
+            self.assertTrue(any('cleanup remains unconfirmed' in note for note in original.__notes__))
+            self.assertEqual(child.wait.call_args.kwargs['timeout'], 5.)
+            child.kill.assert_called_once()
+
     def test_config_default_and_explicit_limits_without_volume_inference(self):
         default=VisualHullConfig();default.validate()
         self.assertFalse(default.to_dict()['poisson_owned_supervision'])

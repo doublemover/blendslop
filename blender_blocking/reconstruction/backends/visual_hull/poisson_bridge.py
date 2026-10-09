@@ -188,8 +188,15 @@ def run_external_poisson(mesh_result,method,config):
         child=subprocess.Popen([str(python),str(script),'--root',str(root),'--method',method],stdout=log,stderr=subprocess.STDOUT,
             env=env,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
         try: code=child.wait(timeout=min(90.,float(config.get('poisson_timeout_s',90.))))
-        except subprocess.TimeoutExpired:
-            child.kill();child.wait();raise RuntimeError('owned Open3D child exceeded explicit timeout; log retained')
+        except BaseException as original:
+            try:
+                child.kill()
+                child.wait(timeout=5.)
+            except BaseException as cleanup_error:
+                original.add_note('Open3D primary cleanup remains unconfirmed: ' + repr(cleanup_error))
+            if isinstance(original, subprocess.TimeoutExpired):
+                raise RuntimeError('Open3D child exceeded explicit timeout; log retained') from original
+            raise
     if code!=0: raise RuntimeError(f'Open3D helper failed ({code}); log: {root / "worker.log"}')
     arrays=np.load(root/'output.npz',allow_pickle=False)
     metadata=json.loads((root/'result.json').read_text())
