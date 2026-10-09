@@ -119,7 +119,7 @@
     },
     {
       "task": "RUN-CLEANUP1",
-      "state": "render/variant/export/cache producers owned; production cache option available; identity-bound read-only recovery and fresh complete-tree supervisor implemented",
+      "state": "fresh complete-tree cancellation, exact current-scene still ownership and opt-in bounded external Poisson implemented; persistent/direct-child legacy gaps and reclamation retained",
       "completed": [
         "explicit manifest/lease ownership design and conservative read-only planner",
         "fresh native helper and warm numeric producer ownership",
@@ -146,13 +146,18 @@
         "all latest native triangle/frustum/arch/axis/exterior jobs use fresh complete-tree ownership; final exterior job proves two kernel joins, released fresh leases and zero active members",
         "fresh ten-frame source-camera job completes in7.656s with two retained creation HANDLEs kerneljoined exit0, zero active Job members, both leases released and read-only audits clear",
         "triangle final acquisition completes five observed creation HANDLE kerneljoins exit0, Job activezero, allthree fresh owner audits ready; no historical adoption/deletion",
-        "arch acquisition:5creation HANDLE kerneljoins exit0, Jobzero,3fresh owners released/read-onlyauditready; peakRSS700575744/Jobcommitted2749313024bytes under8GiB; no cleanup/adoption"
+        "arch acquisition:5creation HANDLE kerneljoins exit0, Jobzero,3fresh owners released/read-onlyauditready; peakRSS700575744/Jobcommitted2749313024bytes under8GiB; no cleanup/adoption",
+        "fresh supervisor cancellation observes, terminates and kerneljoins the owned tree before attaching receipt/rethrowing original; four focused guards passed",
+        "production save_render exact native filename now stages under fresh ownership and publishes atomically without clobber or suffix; nine new guards/legacy compatibility passed",
+        "two128-square current-scene PNGcollision/OPEN_EXR calls preserve old bytes/scene and prove native extension transport;6.3393s fresh Job/2HANDLEjoins/zeroactive/4read-onlyaudits clear",
+        "false-by-default owned Poisson uses explicit process and transport bounds, bounded NPZ header/serialization and input/config/worker/output identities; ten focused guards including tiny real NumPy child",
+        "Poisson secondary finalization cancellation cannot replace original error; exactTrue lifecycle/intzero admission and required/optional fallback preserved"
       ],
       "remaining": [
-        "save_render exact-path overwrite API not changed",
-        "production direct-child variant/numeric paths need separately bounded complete-tree adoption where useful",
-        "explicit recovery/reclamation execution remains unimplemented and requires separate bounded authorization",
-        "other report/save_render producers and production direct-child numeric paths remain separately bounded adoption scope"
+        "persistent reconstruction workers, warm/cold numeric helpers, variant and native qualifier paths need separately scoped complete-tree adoption with explicit budgets",
+        "legacy default Poisson direct-child path retained; owned mode requires explicit enablement and limits",
+        "other report producers remain separately scoped ownership work",
+        "explicit recovery/reclamation execution remains unimplemented and requires separate bounded authorization"
       ],
       "blocking_input": "No deletion or historical adoption authorization. Existing unconfirmed active/crashed runs remain retained."
     },
@@ -189,7 +194,7 @@
     },
     {
       "task": "INTEGRATION-PUBLICATION",
-      "state": "PR7 OPEN draft42e5fc8 full/quick/galleryCIpassed; later11sourcepolicies, triangle/arch missing gates and galleryfix local pending parent publication",
+      "state": "existing draftPR7 contains approved6256cdb; full/quick/galleryCIpass; cancellation/render/Poisson followup local through236fe39",
       "completed": [
         "owner checkout preserved on endblay_opslay",
         "quality work isolated on local/quality-continuation-20261008",
@@ -201,17 +206,18 @@
         "Blender full/quick required CI passes on reviewed fb2802a candidate",
         "gallery CI passes after one failed-only browser-start timeout retry; deployment correctly skipped",
         "before later approval, ten implementation batches committed locally through df922a9 while draft PR7 remained atfb2802a",
-        "explicit owner approval fulfilled with exact nonforce fastforward push42e5fc8 to existing PR7 head; full/quick/gallery CI passed; deployment skipped"
+        "explicit owner approval fulfilled with exact nonforce fastforward push42e5fc8 to existing PR7 head; full/quick/gallery CI passed; deployment skipped",
+        "fresh exact lineage check and explicit owner approval fulfilled by nonforce push6256cdb to same PR7; full/quick/galleryCI succeeded and deployment skipped"
       ],
       "remaining": [
-        "later11sourcepolicies, triangle/arch qualification and gallery fix review; normal CI if parent approves publication",
-        "desktop continuation page inspection when a browser is available; mobile skipped per owner",
+        "review later local lifecycle commits fa1ca87/7a89338/236fe39; no additional push authorized",
+        "desktop continuation inspection when supported browser available; mobile skipped per owner",
         "separate approval before PR merge or Pages deployment"
       ],
-      "blocking_input": "No merge/Pages approval. Later commits after42e5fc8 require parent publication decision."
+      "blocking_input": "No publication approval for local commits after6256cdb; no merge/Pages approval."
     }
   ],
-  "validation_policy": "existing full Blender and seven-control qualification retained; PR7 full/quick/gallery CI passed at42e5fc8; bounded missing behavior only in later local batch, no broad rerun or aggregate pass",
+  "validation_policy": "existing full Blender/seven-control results retained; PR7 full/quick/galleryCIpassed at6256cdb; local lifecycle uses focused checks plus two128-square frames, no broad rerun/aggregate pass",
   "local_commits": [
     "424759d06585f2bc589fc29bb16c70198a83395a",
     "723a553",
@@ -238,7 +244,10 @@
     "d3184543f6a654dacdf26c996c7c327bd1a83f86",
     "7d22041eacb339274f2933d942c86e20ef907f34",
     "e5a62b9b5bc098758b257ddfca887b4c47764bc7",
-    "a0974fee3697008200f35c700a98bb17140e5a2c"
+    "a0974fee3697008200f35c700a98bb17140e5a2c",
+    "fa1ca873f5029b8c86ab7bcf2c2e8a1622e4e071",
+    "236fe39879553a6e6a26ecaaa7914c07cb0dd815",
+    "7a893383b5d9a59dabcd1af12ccc907dc2871b30"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
   "completed_unpublished_batch": "sourcecamera9policies, roundedbox10th and triangle11th certificates/policies; exact triangle/exteriorarch missing gates; strict original reusedtriangle reader; gallery entity repair; artist/selection/history preserved",
@@ -282,5 +291,12 @@
     "tapered_frustum",
     "cylinder",
     "thin_plate"
-  ]
+  ],
+  "current_lifecycle_checkpoint": {
+    "code_revision": "236fe39879553a6e6a26ecaaa7914c07cb0dd815",
+    "evidence": "docs/quality-lifecycle-followup-continuation-20261009/evidence.json",
+    "evidence_sha256": "4664424f97a7feb9935edae1fb3d821210c1099711f77294a30c1c2089530a1f",
+    "owner_decisions": "docs/quality-lifecycle-followup-continuation-20261009/owner-decisions.json",
+    "owner_decisions_sha256": "16b8da31ac5d116ab3eea15d3c2d49fff15527d529c1a28cca873c471c08e212"
+  }
 }
