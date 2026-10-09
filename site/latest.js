@@ -128,18 +128,25 @@ function renderImage(slot, image, alt) {
 function renderComparison(family) {
     const source=imageFor(family,'reference'), candidate=imageFor(family,'candidate');
     $('#reference-pass').textContent = $('#candidate-pass').textContent = `${viewLabels[view]} / ${styleLabels[style]||style}`;
-    if (source && candidate) {
+    if (source) {
         renderImage('#reference-image',source,`${family.label}: authored reference, ${viewLabels[view]}, ${styleLabels[style]||style}`);
-        renderImage('#candidate-image',candidate,`${family.label}: exact selected reconstruction, ${viewLabels[view]}, ${styleLabels[style]||style}`);
         $('#reference-caption').textContent = `Reference geometry ${source.geometryHash}`;
+    } else {
+        unavailable('#reference-image','The authored reference pass for this exact view, style and source geometry was not retained.');
+        $('#reference-caption').textContent = 'Reference pass unavailable.';
+    }
+    if (candidate) {
+        renderImage('#candidate-image',candidate,`${family.label}: exact selected reconstruction, ${viewLabels[view]}, ${styleLabels[style]||style}`);
         $('#candidate-caption').textContent = `Selected geometry ${candidate.geometryHash}`;
+    } else {
+        unavailable('#candidate-image','The candidate pass for this exact view, style and selected geometry was not retained.');
+        $('#candidate-caption').textContent = 'Selected candidate pass unavailable.';
+    }
+    if (source && candidate) {
         $('#pair-status').textContent = 'Shared view and pass retained; each image is bound to its declared geometry.';
     } else {
-        const detail = 'A reference/candidate pair for this exact view, pass and selected geometry was not retained. No other camera or older body is substituted.';
-        unavailable('#reference-image',detail);unavailable('#candidate-image',detail);
-        $('#reference-caption').textContent = source?`Reference geometry retained: ${source.geometryHash}`:'Reference pass unavailable.';
-        $('#candidate-caption').textContent = candidate?`Selected geometry retained: ${candidate.geometryHash}`:'Selected candidate pass unavailable.';
-        $('#pair-status').textContent = 'Matched comparison unavailable. View metrics and independent verdicts remain visible.';
+        const missing = source?'candidate':candidate?'reference':'reference and candidate';
+        $('#pair-status').textContent = `No matched comparison: ${missing} pass unavailable. Each retained role is shown independently; view metrics and verdicts remain visible.`;
     }
 }
 function renderSelection() {
