@@ -1,0 +1,221 @@
+{
+  "crash": {
+    "child_joined_by_fixture": true,
+    "decision": {
+      "blockers": [
+        "active lease: original process start identity and complete descendant join evidence unavailable"
+      ],
+      "decision": "retain_active_lease",
+      "descendant_joins_verified": false,
+      "lease_release_supported": false,
+      "lease_status": "active",
+      "mode": "read_only",
+      "owner_token_matched": true,
+      "process_identity_verified": false,
+      "producer": "fresh_recovery_crash_fixture",
+      "producer_state": "active",
+      "protocol": "owned-recovery-inspection-v1",
+      "recovery_execution_supported": false,
+      "registered_artifacts_verified": false,
+      "reported_pid": 30064,
+      "required_recovery_evidence": [
+        "original supervisor-bound process identity and actual join",
+        "complete ownership-bound descendant inventory and joins",
+        "separate explicit recovery decision preserving failure history"
+      ],
+      "run_id": "8d81e6235a074ad9aba542b77f439760",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\crash-runs\\owned-f4nzem8g",
+      "snapshot": {
+        "lease_sha256": "1f64bf52ef71cbeb13a03c58d2832da91c2019fa23b1a069cd950fee1bd38b7b",
+        "manifest_sha256": "7484758c32444dcbb112872320a2a5e11e6e3b9359b9e3f28d2ad85615782238",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\crash-runs\\owned-f4nzem8g"
+      },
+      "status": "blocked"
+    },
+    "fixture_child_seconds": 2.2088027999998303,
+    "history_sha256": {
+      "history.txt": "c14859bae14f13983f6d64270039228a4c43b9bc6e58ef0a528993af88daddbb",
+      "run-lease.json": "1f64bf52ef71cbeb13a03c58d2832da91c2019fa23b1a069cd950fee1bd38b7b",
+      "run-ownership.json": "7484758c32444dcbb112872320a2a5e11e6e3b9359b9e3f28d2ad85615782238"
+    },
+    "inspection_unchanged_history": true,
+    "lease_release_executed": false,
+    "repeat_snapshot_equal": true,
+    "returncode": 17
+  },
+  "exports": [
+    {
+      "actual_path": "temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\vh.obj",
+      "owned_files": [
+        "export-result.json",
+        "mesh.obj"
+      ],
+      "ownership_receipt": "temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\.export-runs\\owned-jieckf8p\\export-result.json",
+      "recovery_inspection": {
+        "blockers": [],
+        "decision": "no_recovery_needed",
+        "descendant_joins_verified": false,
+        "lease_release_supported": false,
+        "lease_status": "released",
+        "mode": "read_only",
+        "owner_token_matched": true,
+        "ownership_audit": {
+          "blockers": [],
+          "eligible": [],
+          "eligible_bytes": 0,
+          "mode": "read_only",
+          "mutation_supported": false,
+          "protocol": "run-ownership-dry-run-v1",
+          "retained_bytes": 1034,
+          "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\.export-runs\\owned-jieckf8p",
+          "status": "dry_run_ready",
+          "unknown_files": []
+        },
+        "process_identity_verified": false,
+        "producer": "visual_hull_mesh_export",
+        "producer_state": "succeeded",
+        "protocol": "owned-recovery-inspection-v1",
+        "recovery_execution_supported": false,
+        "registered_artifacts_verified": true,
+        "reported_pid": 25924,
+        "run_id": "22ea522570e145dabb126494025cfe72",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\.export-runs\\owned-jieckf8p",
+        "snapshot": {
+          "lease_sha256": "ba0a5510645f94782c3e84a0aa445e060e2f959f909cae88bd5c8f501106ad5f",
+          "manifest_sha256": "72d61eab8adfec294f797fd91722ac054c73b8babc6fb1674bd63d3dc85bd55b",
+          "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\.export-runs\\owned-jieckf8p"
+        },
+        "status": "complete"
+      },
+      "sha256": "022c9d20b6cfa4e5992d0ebc2c429c8aff0a568e873d5f3fd091561de2f1b682"
+    },
+    {
+      "actual_path": "temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\vh_2.obj",
+      "owned_files": [
+        "export-result.json",
+        "mesh.obj"
+      ],
+      "ownership_receipt": "temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\.export-runs\\owned-o51jj_hp\\export-result.json",
+      "recovery_inspection": {
+        "blockers": [],
+        "decision": "no_recovery_needed",
+        "descendant_joins_verified": false,
+        "lease_release_supported": false,
+        "lease_status": "released",
+        "mode": "read_only",
+        "owner_token_matched": true,
+        "ownership_audit": {
+          "blockers": [],
+          "eligible": [],
+          "eligible_bytes": 0,
+          "mode": "read_only",
+          "mutation_supported": false,
+          "protocol": "run-ownership-dry-run-v1",
+          "retained_bytes": 1038,
+          "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\.export-runs\\owned-o51jj_hp",
+          "status": "dry_run_ready",
+          "unknown_files": []
+        },
+        "process_identity_verified": false,
+        "producer": "visual_hull_mesh_export",
+        "producer_state": "succeeded",
+        "protocol": "owned-recovery-inspection-v1",
+        "recovery_execution_supported": false,
+        "registered_artifacts_verified": true,
+        "reported_pid": 25924,
+        "run_id": "c6b85287c4844cdd939ca883cd3d8e94",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\.export-runs\\owned-o51jj_hp",
+        "snapshot": {
+          "lease_sha256": "ce73357aa306bd37be16ec1c1ad475d5529921be2e6ef38a092f6dbffcb4133a",
+          "manifest_sha256": "30fc235e87bac295e4b3564d4fd591c94d92fe676d764dd32da5f65cc60d5690",
+          "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w\\candidate\\m\\.export-runs\\owned-o51jj_hp"
+        },
+        "status": "complete"
+      },
+      "sha256": "4091e86e1b5f30be503ec457a7f128d06ed623cf89da7166a8ff513293c36c5a"
+    }
+  ],
+  "external_shared_input_unchanged": true,
+  "first_final_unchanged": true,
+  "focused_tests": {
+    "passed": 13,
+    "seconds": 7.418,
+    "suites": [
+      "test_backend_artifact_ownership",
+      "test_run_recovery"
+    ],
+    "tests": 13
+  },
+  "interpreter": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+  "protocol": "backend-ownership-pure-evidence-v1",
+  "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+  "retained_output_root": "temp\\tasks\\quality-continuation-20261009\\backend-ownership-pure-01\\evidence-grxfzl4w",
+  "scope": {
+    "backend_children_owned_by_obj_export": 0,
+    "blender_sessions": 0,
+    "cleanup_executed": false,
+    "fits": 0,
+    "qualifier_children": 0,
+    "raw_surface_metrics": 0,
+    "recovery_executed": false,
+    "renders": 0
+  },
+  "source_base_commit": "fb2802a685bf57f18b44f7b23e984e875aa21477",
+  "source_sha256": {
+    "blender_blocking/reconstruction/backend_artifact_ownership.py": "f6e72d2cc8ea573976714018f6b7c25bfe4f6232a03ac8534b9cc10f4cf71982",
+    "blender_blocking/reconstruction/backends/visual_hull/artifacts.py": "77b4497403a30306aea853591d8b75df0fef0882b7ac026cbd254c1516ca5f8b",
+    "blender_blocking/reconstruction/mesh_io.py": "2d3d6bb40a66232614940f4fd75ddbd7624075b5b839dc284161d24deca0f9b8",
+    "blender_blocking/test_backend_artifact_ownership.py": "af72266839d80bfb051d30fb89891461b640fc56fdb7c97e983483e04029aa75",
+    "blender_blocking/test_owned_lifecycle_processes.py": "38a1b32ef63a60bff405069b8479971db964d318440f630df72121634837dfc1",
+    "blender_blocking/test_run_recovery.py": "eb779c63077d2ab7f92f3d1838e5d1b1b1fed58fba696832e54f397ff2d2b5bb",
+    "blender_blocking/utils/artifact_publication.py": "3a2d8d76defe2522df6ed4b4560eb521592031f963ddf2b9bdf73d55c544f631",
+    "blender_blocking/utils/run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+    "blender_blocking/utils/run_recovery.py": "aab090cb13ac8874b9bb211333bea9496df575966ba730791b6a8e40e1389e5c"
+  },
+  "unit_mesh_fixture": {
+    "faces": [
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        1,
+        2,
+        3
+      ]
+    ],
+    "vertices": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  }
+}

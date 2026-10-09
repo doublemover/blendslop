@@ -112,12 +112,15 @@ def write_visual_hull_mesh_artifact(
     faces: Any,
     artifacts: dict[str, Path],
 ) -> Path:
-    from reconstruction.mesh_io import write_obj
+    from reconstruction.backend_artifact_ownership import write_owned_backend_obj
 
-    mesh_path = write_obj(
+    mesh_path = write_owned_backend_obj(
         artifact_paths(root)["mesh_obj"],
         {"vertices": vertices, "faces": faces},
+        producer="visual_hull_mesh_export",
         header=(f"candidate {candidate_id}", backend_name),
+        metadata={"candidate_id": candidate_id, "backend_name": backend_name},
+        receipt_artifacts=artifacts,
     )
     artifacts["mesh_obj"] = mesh_path
     return mesh_path
