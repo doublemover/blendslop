@@ -30,7 +30,7 @@
     },
     {
       "task": "QUALITY-COVERAGE1",
-      "state": "original12 families retained; five generic adaptive checkpoints plus separately qualified box/multipart updates; no aggregate acceptance",
+      "state": "original12 rows preserved; nine generic adaptive families implemented/measured, seven improved checkpoints and two rejected updates; separate box/multipart positives retained",
       "completed": [
         "frozen12-family reference matrix and intentional depth/cavity/multipart negatives",
         "observed-mask fitting for sphere, ellipsoid, cylinder, frustum, corrected capsule, rounded box and thin plate",
@@ -48,12 +48,16 @@
         "one-scalar observed endpoint repair lowers held-out/raw surface error; exact boundary and depth restoration pass",
         "capsule/torus genuine1024 residual crops improve held-out alpha and raw mean with full local rank/exact edit restoration",
         "triangular pebble three physical adaptive controls improve held-out alpha73.6218percent, raw mean27.1296percent and normalP95; sampled max increase preserved independently",
-        "frustum/arch frozen12-frame generic adaptive checkpoints improve alpha42.8948percent/20.0216percent and raw mean; both exact source-control restoration passes"
+        "frustum/arch frozen12-frame generic adaptive checkpoints improve alpha42.8948percent/20.0216percent and raw mean; both exact source-control restoration passes",
+        "allfour axis models preserve actual discrete geometry/physical aliases and use candidate-only source-view rank diagnostics",
+        "two12-frame genuine axis jobs: cylinder alpha71.2955percent lower/plate87.4998percent lower; allfour physical source edits restore exactly",
+        "sphere and ellipsoid updates reject held-out alpha regressions2.2823percent/3.2329percent; originals retained with no aggregate masking"
       ],
       "remaining": [
         "changed adaptive candidates remain diagnostic until their required full five-view/native boundary/canonical gates run",
         "source-camera and independent artist surface contracts where absent",
-        "global hidden-surface uniqueness remains unproved"
+        "global hidden-surface uniqueness remains unproved",
+        "sphere/ellipsoid failed detail updates retained; current candidates remain selected rather than speculative refits"
       ],
       "blocking_input": null
     },
@@ -121,19 +125,21 @@
         "sampled RSS independently monitored from Job committed-memory guard; observed exception history retained incomplete",
         "seven real process-supervision checks and13backend/recovery checks pass; native triangle validates fresh supervisor",
         "reusable bounded owned-command CLI validates argv/resources/provenance before launch, preserves primary failures, releases only true complete-tree scope; nine mock orchestration checks pass",
-        "actual12-frame frustum/arch CLI job passes both fresh complete-tree supervision and child ownership audits"
+        "actual12-frame frustum/arch CLI job passes both fresh complete-tree supervision and child ownership audits",
+        "opt-in VolumeChunkCache owned_writes creates bounded fresh NPZ owners, verifies header/round-trip, publishes same key without overwrite and retains failed collisions",
+        "eleven focused cache checks (eight new/three existing) pass real NPZ reader compatibility, concurrent collisions, failed serialization and bounded payloads"
       ],
       "remaining": [
-        "other backend cache/report producers outside export adoption",
         "save_render exact-path overwrite API not changed",
         "production direct-child variant/numeric paths need separately bounded complete-tree adoption where useful",
-        "explicit recovery/reclamation execution remains unimplemented and requires separate bounded authorization"
+        "explicit recovery/reclamation execution remains unimplemented and requires separate bounded authorization",
+        "VisualHull cache ownership config/diagnostic propagation under implementation; remaining report producers outside adoption"
       ],
       "blocking_input": "No deletion or historical adoption authorization. Existing unconfirmed active/crashed runs remain retained."
     },
     {
       "task": "MEASUREMENT-ADAPTIVE-PRESENTATION",
-      "state": "actual controlled box/multipart/capsule/torus/triangle improvements retained; other family models continue; local lit preview remains unpublished",
+      "state": "nine generic actual adaptive detail families measured; cylinder/plate improve, sphere/ellipsoid reject; source-view sensitivity prevents hidden-depth front fitting",
       "completed": [
         "dedicated32-bit linear-alpha occupancy and fixed half-coverage masks",
         "strict matched acquisition camera/sampling/encoding checks; preview state restoration",
@@ -148,10 +154,10 @@
         "capsule and torus six-frame controlled detail checkpoints lower held-out alpha14.7004percent/51.2078percent with independent normal observations",
         "triangle six-frame1024 source-crop update improves actual held-out pixels, with original crop censoring retained",
         "native fresh Job supervisory path proves lifecycle completion separately from geometry improvement",
-        "actual frustum/arch12-frame controlled checkpoint completes through fresh reusable CLI"
+        "actual frustum/arch12-frame controlled checkpoint completes through fresh reusable CLI",
+        "four actual axis acquisitions finish24frames total through fresh process-tree ownership; source and actual held-out frame censoring retained independently"
       ],
       "remaining": [
-        "adaptive sphere/ellipsoid/cylinder/plate physical models and source-view identifiability under implementation",
         "matched lit/canonical inspection for changed diagnostic candidates if selected",
         "desktop continuation browser inspection when a supported surface becomes available; mobile review explicitly skipped",
         "parent review before external followup publication",
@@ -194,7 +200,9 @@
     "8628acc",
     "2f9421f",
     "3f8398b",
-    "7be90e1"
+    "7be90e1",
+    "c9ceb0c",
+    "fa95cdd"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
   "completed_unpublished_batch": "local followup adds backend/recovery ownership, source-conditioned engineering policies, adaptive capsule/torus/triangle checkpoints, selected canonical packet and fresh complete-tree supervision",
@@ -208,6 +216,6 @@
     "gallery": "passed CI after failed-only browser-start retry",
     "merge_pages_approval": "absent"
   },
-  "followup_implementation_revision": "7be90e1 plus accompanying completed launcher/frustum-arch batch",
+  "followup_implementation_revision": "fa95cdd plus accompanying actual-axis/cache batch",
   "aggregate_accepted": false
 }

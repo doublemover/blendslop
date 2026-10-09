@@ -22,3 +22,11 @@ Existing prior canonical supports and old admission pixels were exposed during t
 ## Prepared native checkpoints (not launched by helper)
 
 [native-plan-04.json](native-plan-04.json) / [preflight-04.json](preflight-04.json) freeze sphere+cylinder front updates. [native-plan-05.json](native-plan-05.json) / [preflight-05.json](preflight-05.json) freeze ellipsoid+plate ob35 updates. Both use the unchanged original ob145 for independent source/baseline/refined validation. Each case gets source+baseline global512, one genuine source crop1024 and the three held-out512 frames: six frames per case. Each two-case job is capped at90 seconds/8GiB/two threads, with96 calls/one-second per fit, one new4096/seed61007 raw pair per case, one exact edit/restore transaction and zero qualifiers or neutral/normal frames. Root's final runner86fd8abb... uses the previously qualified strict saved UV ordering adapter: exact world vertices/oriented triangle inventory first, final indexed identity second, no tolerant fallback. Old source clipping/ownership gaps and prior view exposure remain explicit. Actual source censoring will be captured on acquisition. No new family native process has launched from this helper.
+
+## Actual bounded acquisition
+
+Two serial12-frame native jobs completed with fresh pre-resume Job ownership and actual kernel joins; child/supervisor audits are dry_run_ready. Both jobs preserve each original indexed baseline (including the strict UV reorder adapter), source geometry, candidate-derived bounds and held-out exclusion.
+
+Cylinder alpha error improves71.2955% and plate87.4998%; both raw mean distances improve and exact physical edit/restoration passes. Sphere update is rejected: alpha error rises2.2823% and raw mean rises. Ellipsoid update is rejected: alpha error rises3.2329% despite a lower raw mean. NormalP95 changes are independently retained, including small increases. These failures are not hidden by a batch pass; original rows remain unchanged.
+
+[native-evidence.json](native-evidence.json) retains complete producer/resources, each independent metric and frame-edge censoring. [measured-axis-heldout-pixels.png](measured-axis-heldout-pixels.png) displays actual source alpha and equalx16 baseline/refined errors. Native changed candidates remain diagnostic, with full five-view/boundary/canonical/artist qualification unrun.
