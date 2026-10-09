@@ -102,6 +102,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_rectilinear_reference", "test_rectilinear_reference"),
     ("pure_torus_reference", "test_torus_reference"),
     ("pure_rounded_box_reference", "test_rounded_box_reference"),
+    ("pure_rounded_triangle_reference", "test_rounded_triangle_reference"),
     ("pure_selected_canonical_inspection", "test_selected_canonical_inspection"),
     ("pure_multipart_family", "test_multipart_family"),
     ("pure_multipart_endpoint", "test_multipart_endpoint"),

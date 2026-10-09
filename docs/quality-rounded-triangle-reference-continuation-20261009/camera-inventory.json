@@ -1,0 +1,536 @@
+{
+  "scope": "read-only existing triangle camera/pass inventories; no acquisition or retroactive provenance adoption",
+  "views": [
+    "front",
+    "side",
+    "top",
+    "oblique_35_28",
+    "oblique_145_40"
+  ],
+  "original_source": {
+    "receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\results.json",
+      "bytes": 113994,
+      "sha256": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63"
+    },
+    "masks": [
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\front-mask.png",
+        "bytes": 74019,
+        "sha256": "53bf7d1cf2a8e9842fc6a4cb81e4c399f811c30d6f137fa7c8d535f18fd2310e",
+        "view": "front",
+        "matches_declared_png_sha256": true,
+        "camera_declaration": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -4.371138828673793e-08,
+              -1.0,
+              -3.115000009536743
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "53bf7d1cf2a8e9842fc6a4cb81e4c399f811c30d6f137fa7c8d535f18fd2310e"
+        }
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\side-mask.png",
+        "bytes": 74383,
+        "sha256": "65a8b602b16c0d519522384d344a8c73d1ebcc59c696dd7c362385dd686b1a9d",
+        "view": "side",
+        "matches_declared_png_sha256": true,
+        "camera_declaration": {
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.7576913833618164
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.22499996423721313
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "65a8b602b16c0d519522384d344a8c73d1ebcc59c696dd7c362385dd686b1a9d"
+        }
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\top-mask.png",
+        "bytes": 73258,
+        "sha256": "f678156f80dc39785cac2504b61d9bc6099db51038439e079ad1f7e0ea7f9d75",
+        "view": "top",
+        "matches_declared_png_sha256": true,
+        "camera_declaration": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.22499996423721313
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.9599999785423279
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "f678156f80dc39785cac2504b61d9bc6099db51038439e079ad1f7e0ea7f9d75"
+        }
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\oblique_35_28-mask.png",
+        "bytes": 72310,
+        "sha256": "3417b4fc1365e7736850cdd1ee786d92d0fd88d6f8979efaff72783830f1816d",
+        "view": "oblique_35_28",
+        "matches_declared_png_sha256": true,
+        "camera_declaration": {
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.3845682740211487,
+              0.7232683300971985,
+              4.729005336761475
+            ],
+            [
+              0.8191518783569336,
+              -0.26927781105041504,
+              0.5064381957054138,
+              3.536285400390625
+            ],
+            [
+              6.467210766913922e-08,
+              0.8829477429389954,
+              0.469471275806427,
+              3.069585084915161
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "3417b4fc1365e7736850cdd1ee786d92d0fd88d6f8979efaff72783830f1816d"
+        }
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\oblique_145_40-mask.png",
+        "bytes": 74300,
+        "sha256": "ef5d9f70173745884d15de950714e7a8d4e1b3344fb25c9a0710970003644756",
+        "view": "oblique_145_40",
+        "matches_declared_png_sha256": true,
+        "camera_declaration": {
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265408754348755,
+              -0.6275067329406738,
+              -4.102880001068115
+            ],
+            [
+              -0.8191519975662231,
+              -0.3686879277229309,
+              0.4393850266933441,
+              3.097867727279663
+            ],
+            [
+              1.8614212393686103e-08,
+              0.7660443186759949,
+              0.642787754535675,
+              4.202792167663574
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "ef5d9f70173745884d15de950714e7a8d4e1b3344fb25c9a0710970003644756"
+        }
+      }
+    ],
+    "geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+    "gaps": [
+      "legacy declarations lack actual clipping planes, shift/raster/pass settings and verified producer image-to-geometry bindings",
+      "no five-view native neutral or RGB shading-normal inventory located"
+    ]
+  },
+  "original_candidate": {
+    "directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9",
+    "receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\results.json",
+      "bytes": 11931,
+      "sha256": "a0745537ee5e5694fb558a0103fe59b4bf41e4aefb123f148a72bbe241291831"
+    },
+    "masks": [
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\front-mask.png",
+        "bytes": 73963,
+        "sha256": "ec56062af693147c7bd296f67255986bb5b410b4ee00f1fa9cb85931c5969078",
+        "view": "front"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\side-mask.png",
+        "bytes": 74334,
+        "sha256": "2d646eecf4d9b54867a64c30c1ef67f90a0d3741ff3ac2bd11b895a1f57f04f8",
+        "view": "side"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\top-mask.png",
+        "bytes": 73280,
+        "sha256": "f3fe260a91e3a8fb11bf0f1be3822933deb40f7edcc608794c7c0e13e53d8c12",
+        "view": "top"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\oblique_35_28-mask.png",
+        "bytes": 72358,
+        "sha256": "3ea7c33c8a23f1986870806b96454c6ae4b3b7dc6397f2eb9115d61daa6159e9",
+        "view": "oblique_35_28"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\oblique_145_40-mask.png",
+        "bytes": 74140,
+        "sha256": "85c7dbf0eab97bda6c0790548b3cbee438306c5ee5cbf9b6237b58ec85931e35",
+        "view": "oblique_145_40"
+      }
+    ],
+    "gaps": [
+      "five candidate masks exist, but native results contain no camera snapshot or canonical inventory; current source code must not be retroactively assigned to old outputs",
+      "original candidate is distinct from changed adaptive result; no historical owner adoption"
+    ]
+  },
+  "legacy_gallery_previews": {
+    "records": [
+      {
+        "path": "assets/rounded_triangle_dot-reference-inspection-front.png",
+        "bytes": 77295,
+        "sha256": "894b80225302185111962cddef2481d878b266504735bd5f164bbdf1f8cefa8f",
+        "source": "retained project-authored synthetic fixture"
+      },
+      {
+        "path": "assets/rounded_triangle_dot-reference-inspection-oblique_35_28.png",
+        "bytes": 78782,
+        "sha256": "927770182ef74375ae8ac5dd328fffa0417532678cc590b2850ca4ca3e9da58b",
+        "source": "retained project-authored synthetic fixture"
+      },
+      {
+        "path": "assets/rounded_triangle_dot-reference-inspection-oblique_145_40.png",
+        "bytes": 78567,
+        "sha256": "a6ba8775141c4c907b580d900cc14fb3abe4d2d0ee2f47630b1f04d5c50f856b",
+        "source": "retained project-authored synthetic fixture"
+      },
+      {
+        "path": "assets/rounded_triangle_dot-inspection-front.png",
+        "bytes": 154416,
+        "sha256": "f019984dd4d8017fbb177d91b5e4f2fa7fade316edea12ac92ba8c42edb4dcb9",
+        "source": "new shaded inspection of exact retained actual triangular reconstruction"
+      },
+      {
+        "path": "assets/rounded_triangle_dot-inspection-oblique_35_28.png",
+        "bytes": 165271,
+        "sha256": "6443c88e83209f93005e6bc9ab3a736d89827efe528ae55cdc424e00ae160bdc",
+        "source": "new shaded inspection of exact retained actual triangular reconstruction"
+      },
+      {
+        "path": "assets/rounded_triangle_dot-inspection-oblique_145_40.png",
+        "bytes": 170668,
+        "sha256": "304ce92bbe855db5bc99d9aa7f73e49bee33072923bdfda103c92847a2f78927",
+        "source": "new shaded inspection of exact retained actual triangular reconstruction"
+      }
+    ],
+    "views": [
+      "front",
+      "oblique_35_28",
+      "oblique_145_40"
+    ],
+    "scope": "retained gallery pass bytes and declared exact old candidate880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6; native three-preview camera receipt not located",
+    "gaps": [
+      "side and top shaded passes absent",
+      "RGB shading normals absent",
+      "public assets alone do not establish full clipping, actual frame and producer geometry binding"
+    ]
+  },
+  "adaptive_source_controlled_acquisitions": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\source-fit\\measurement.json",
+      "bytes": 1722,
+      "sha256": "47f86b06217a6ded5b9f3f46f002b49a388234c4170fa9d7d2e2684cd8a802a1",
+      "view": "top",
+      "contract": {
+        "protocol": "opaque_linear_alpha_v1",
+        "hard_mask_threshold": 0.5,
+        "camera": {
+          "projection": "ORTHO",
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.22499996423721313
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.9599999785423279
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "shift_x": 0.0,
+          "shift_y": 0.0,
+          "clip_start": 0.10000000149011612,
+          "clip_end": 1000.0,
+          "resolution": [
+            512,
+            512
+          ],
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ]
+        },
+        "renderer": {
+          "engine": "BLENDER_EEVEE",
+          "blender_version": [
+            5,
+            2,
+            2
+          ],
+          "build_hash": "d13f752e3b9c"
+        },
+        "sampling": {
+          "taa_render_samples": 64,
+          "filter_size": 1.5,
+          "motion_blur": false,
+          "depth_of_field": false
+        },
+        "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+        "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+        "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+      },
+      "contract_sha256": "4bb5fb2fcf975fcae23ae43313565ce8cd4a3e8776b82dddfeacff616ec73284",
+      "geometry_hashes": [
+        "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64"
+      ],
+      "geometry_unchanged": true,
+      "exr_sha256": "8dbcef8c3e716ab95d4045e37640184d2a1e67ed482ce9bebba012d76606d017"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\source-heldout\\oblique_145_40\\measurement.json",
+      "bytes": 1876,
+      "sha256": "d34c832ed04841dab68c26133040658b9e00f3a131e9e024ccacc6130a7e9ba5",
+      "view": "oblique_145_40",
+      "contract": {
+        "protocol": "opaque_linear_alpha_v1",
+        "hard_mask_threshold": 0.5,
+        "camera": {
+          "projection": "ORTHO",
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265408158302307,
+              -0.6275067925453186,
+              -4.102880001068115
+            ],
+            [
+              -0.8191519975662231,
+              -0.3686878979206085,
+              0.43938499689102173,
+              3.097867727279663
+            ],
+            [
+              -3.72959663152983e-09,
+              0.7660442590713501,
+              0.642787754535675,
+              4.202792167663574
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "shift_x": 0.0,
+          "shift_y": 0.0,
+          "clip_start": 0.10000000149011612,
+          "clip_end": 1000.0,
+          "resolution": [
+            512,
+            512
+          ],
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ]
+        },
+        "renderer": {
+          "engine": "BLENDER_EEVEE",
+          "blender_version": [
+            5,
+            2,
+            2
+          ],
+          "build_hash": "d13f752e3b9c"
+        },
+        "sampling": {
+          "taa_render_samples": 64,
+          "filter_size": 1.5,
+          "motion_blur": false,
+          "depth_of_field": false
+        },
+        "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+        "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+        "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+      },
+      "contract_sha256": "7ecd9bffafc753e799ad5929d4ab559aa472ca06c11fd0ad811d2785dfe57cbd",
+      "geometry_hashes": [
+        "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64"
+      ],
+      "geometry_unchanged": true,
+      "exr_sha256": "2f55f75e4ce12f5d5a30def2d95a894584c76fe1c919fa4a3e20379188c22595"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\source-detail\\measurement.json",
+      "bytes": 1740,
+      "sha256": "ef05eb0e35c44d1636883761dbaa626edd5d7e95dcbea86ebc483a0e59fe0ffc",
+      "view": "top_modified_crop",
+      "contract": {
+        "protocol": "opaque_linear_alpha_v1",
+        "hard_mask_threshold": 0.5,
+        "camera": {
+          "projection": "ORTHO",
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.21709474921226501
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.8507436513900757
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.9599999785423279
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 0.6810815334320068,
+          "shift_x": 0.0,
+          "shift_y": 0.0,
+          "clip_start": 0.10000000149011612,
+          "clip_end": 1000.0,
+          "resolution": [
+            1024,
+            1024
+          ],
+          "pixel_aspect": [
+            1.0,
+            1.0
+          ]
+        },
+        "renderer": {
+          "engine": "BLENDER_EEVEE",
+          "blender_version": [
+            5,
+            2,
+            2
+          ],
+          "build_hash": "d13f752e3b9c"
+        },
+        "sampling": {
+          "taa_render_samples": 64,
+          "filter_size": 1.5,
+          "motion_blur": false,
+          "depth_of_field": false
+        },
+        "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+        "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+        "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+      },
+      "contract_sha256": "0a5a2b34808058c3888facb6ed9cab9579996c0bd35f75526a7e3b33dd72aa72",
+      "geometry_hashes": [
+        "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64"
+      ],
+      "geometry_unchanged": true,
+      "exr_sha256": "2ca88f244d915c98a96957f8dababa82f9038247a3d836464b50bb4a415d51c3"
+    }
+  ],
+  "adaptive_changed_candidate_gap": "authoritative adaptive README/results explicitly mark full five-view admission and canonical neutral/normal passes unrun; only top and oblique145 physical acquisitions plus a modified top crop are retained",
+  "incidental_exposure": "Broad inventory matching printed older candidate normal metric lines after declaration/module/test preparation; no values were used in the certificate. No candidate arrays were read."
+}

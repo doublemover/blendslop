@@ -21,7 +21,8 @@ from blender_blocking.evaluation.canonical_artifacts import (
 PROTOCOL = "source_conditioned_family_surface_v1"
 SUPPORTED_FAMILIES = ("sphere", "anisotropic_ellipsoid", "cylinder",
                       "tapered_frustum", "capsule", "thin_plate", "concave_arch",
-                      "asymmetric_multipart_solid", "torus", "rounded_box")
+                      "asymmetric_multipart_solid", "torus", "rounded_box",
+                      "rounded_triangle_dot")
 _MAX_ELEMENTS = 65536
 
 
@@ -208,6 +209,24 @@ or any candidate's native boundary.
                 "distance_scope": proof["distance_correspondence"],
                 "candidate_boundary_qualified": False, "sampled": False,
                 "rounded_box_patch_cover": proof}
+    if family == "rounded_triangle_dot":
+        from blender_blocking.synthetic.quality_contracts import quality_workload
+        from blender_blocking.evaluation.rounded_triangle_reference import rounded_triangle_reference_certificate
+        authored = next(row["parameters"] for row in quality_workload()["cases"] if row["name"] == family)
+        if parameters != authored:
+            raise ValueError("rounded-triangle parameters differ from the independently frozen authored case")
+        proof = rounded_triangle_reference_certificate(reference)
+        if proof["status"] != "certified":
+            raise ValueError(proof["reason"])
+        return {"protocol": "continuous_authored_facet_bound_v1", "family": family,
+                "reference_geometry_hash": reference.content_hash,
+                "distance_bound_world": proof["maximum_source_facet_distance_world"],
+                "normal_correspondence_bound_degrees": proof["maximum_normal_angle_degrees"],
+                "vertex_construction_error_world": proof["maximum_vertex_construction_shift_world"],
+                "normal_correspondence": proof["normal_correspondence"],
+                "distance_scope": proof["distance_correspondence"],
+                "candidate_boundary_qualified": False, "sampled": False,
+                "rounded_triangle_parameter_cover": proof}
     triangles, normals = _closed_oriented_sphere(reference)
     distances, angles, errors = [], [], []
     if family in ("sphere", "anisotropic_ellipsoid"):

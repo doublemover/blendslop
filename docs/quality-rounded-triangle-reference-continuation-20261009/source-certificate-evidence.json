@@ -1,0 +1,96 @@
+{
+  "certificate": {
+    "protocol": "authored_rounded_triangle_parameter_cover_v1",
+    "status": "certified",
+    "family": "rounded_triangle_dot",
+    "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+    "frozen_parameters_sha256": "290223da6b6b0d1b6b658cf8b8c8e7b31fcf32b3f0ea476de87af9e154525df1",
+    "authored_parameter_cover": {
+      "outline_points": 99,
+      "corner_segments": 32,
+      "dome_segments": 64,
+      "vertices": 6239,
+      "triangles": 12474,
+      "circular_cells": 6144,
+      "straight_cells": 192,
+      "collapsed_pole_fans": 2,
+      "pole_fan_triangles": 198,
+      "oriented_once_only": true,
+      "outline_seams_verified": true,
+      "diagonal": "00-to-11"
+    },
+    "maximum_source_facet_distance_world": 0.00040500062340535856,
+    "meridian_interpolation_distance_bound_world": 0.0003192682087754737,
+    "circular_outline_interpolation_distance_bound_world": 8.567364931501181e-05,
+    "straight_outline_interpolation_distance_bound_world": 0.0,
+    "maximum_vertex_construction_shift_world": 5.876531487310826e-08,
+    "maximum_normal_angle_degrees": 6.5098278988276554,
+    "facet_to_endpoint_cone_tangent_upper_bound": 0.11326067008740726,
+    "circular_support_correction_world_upper_bound": 8.571189500350621e-05,
+    "circular_support_correction_angle_radians_upper_bound": 0.00035726048531963683,
+    "analytic_normal_length_lower_bound": 0.24,
+    "construction_scope": "actual exact binary64 source coordinates versus analytic interval vertices; no libm rounding assumption or construction acceptance tolerance",
+    "distance_correspondence": "bidirectional continuous analytic-cell to ideal planar chord-quad to actual-facet cover; poles collapse to complete triangular fans",
+    "normal_correspondence": "each actual facet to every outward analytic normal in its corresponding parameter cell; edge nearest-normal uniqueness not asserted",
+    "coverage_proof": "exact once-only oriented triangles for every cell and both collapsed pole fans, including cyclic outline seams",
+    "distance_proof": "sequential meridian and circular-outline interpolation remainder <= maximum second derivative times span squared/8; all ideal chord quads planar; barycentric actual construction displacement",
+    "normal_proof": "exact facet cross and interval dot/cross endpoint cones; positive phi and theta endpoint coefficients; circular vertical support correction r*(sec(theta_span/2)-1); atan(t)<=t and angle triangle inequality",
+    "arithmetic": "exact rational binary64 author/source data and outward 100-bit interval grid; rational Machin pi and alternating atan; existing directed Decimal50 Taylor trig; rationally checked upper float endpoints and square roots",
+    "artist_surface_limits": null,
+    "candidate_boundary_qualification": "not supplied"
+  },
+  "elapsed_seconds": 10.370148400004837,
+  "calculation_count": 1,
+  "scope": "one actual frozen authored source certificate, pure CPU, no native/render/sampling/candidate geometry or metric calculation",
+  "runtime": {
+    "executable": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+    "version": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "frozen_declaration_sha256": "4e1027ce3c176e5854afde0dd39bb2c459e1bc61c5ad54d17df3baba2c805488",
+  "implementation": [
+    {
+      "path": "blender_blocking\\evaluation\\rounded_triangle_reference.py",
+      "bytes": 16113,
+      "sha256": "ef99bf4f9227686e55630d6835931b8f231509c099cc6045d696e8e386e97b1d"
+    },
+    {
+      "path": "blender_blocking\\test_rounded_triangle_reference.py",
+      "bytes": 8053,
+      "sha256": "cf9e415127858b4637e747e85bb0d44690d5a6aa5d539df3b5539f9ab98d5b81"
+    }
+  ],
+  "inputs_after": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\evaluated-exact.npz",
+      "sha256": "f6abc19a7ee7efbc62f3bc403b5e61ce6c426c64950604d0fa5cd7181c698cff",
+      "unchanged": true
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\rounded_triangle.py",
+      "sha256": "42dd3eb646dab57cf7603c14a0dbc1f25bbfd9f348a20df2dd37e20364248bbf",
+      "unchanged": true
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_contracts.py",
+      "sha256": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9",
+      "unchanged": true
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\torus_reference.py",
+      "sha256": "6dceb4040d97baf65ac1e393af0d4ad5adc375268b7143ca387b93ef125a4e15",
+      "unchanged": true
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py",
+      "sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+      "unchanged": true
+    }
+  ],
+  "focused_checks": {
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 12.157
+  },
+  "incidental_exposure": "After declaration freeze and implementation/test writing, a broad metadata inventory search printed older candidate normal metric lines; they were not used in the proof, thresholds, code choices or retained-source calculation. No candidate arrays were read."
+}

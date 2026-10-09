@@ -182,7 +182,37 @@ class FamilySurfaceContracts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "parameters differ"):
             reference_facet_certificate("rounded_box", {**parameters, "radius": .16}, data)
 
-    def test_unsupported_reference_remains_unqualified_instead_of_copying_vase(self):
+    def test_rounded_triangle_policy_requires_authored_source_and_independent_artist_limits(self):
+        from unittest.mock import patch
+        from blender_blocking.synthetic.quality_contracts import quality_workload
+        parameters = next(row["parameters"] for row in quality_workload()["cases"]
+                          if row["name"] == "rounded_triangle_dot")
+        data = octahedron()
+        proof = {"status": "certified", "reference_geometry_hash": data.content_hash,
+                 "maximum_source_facet_distance_world": .000405,
+                 "maximum_normal_angle_degrees": 6.51,
+                 "maximum_vertex_construction_shift_world": 5.9e-8,
+                 "normal_correspondence": "complete corresponding oriented parameter-cell cone",
+                 "distance_correspondence": "bidirectional complete cell and pole-fan cover"}
+        with patch("blender_blocking.evaluation.rounded_triangle_reference.rounded_triangle_reference_certificate",
+                   return_value=proof):
+            contract = freeze_family_surface_contract("rounded_triangle_dot", parameters, data, cameras())
+        self.assertEqual(contract["reference_certificate"]["rounded_triangle_parameter_cover"], proof)
+        self.assertEqual(contract["reference_certificate"]["vertex_construction_error_world"], 5.9e-8)
+        self.assertAlmostEqual(contract["engineering_limits"]["symmetric_mean_distance_world_max"],
+                               .000405 + .5 * 2 / 512)
+        self.assertAlmostEqual(contract["engineering_limits"]["normal_angle_p95_degrees_max"], 7.51)
+        verdict = evaluate_family_surface_contract(contract, raw(contract), candidate_geometry_hash="a" * 64)
+        self.assertTrue(verdict["engineering_surface_passed"])
+        self.assertIsNone(verdict["artist_surface_passed"])
+        self.assertFalse(verdict["aggregate_passed"])
+        changed = freeze_family_surface_contract("rounded_triangle_dot", parameters, data, cameras())
+        self.assertIsNone(changed["engineering_limits"])
+        self.assertIn("frozen original authored triangle identity", changed["reason"])
+        with self.assertRaisesRegex(ValueError, "parameters differ"):
+            reference_facet_certificate("rounded_triangle_dot", {**parameters, "thickness": .49}, data)
+
+    def test_incomplete_triangle_declaration_remains_unqualified_instead_of_copying_vase(self):
         contract = freeze_family_surface_contract("rounded_triangle_dot", {"thickness":.48}, octahedron(), cameras())
         self.assertIsNone(contract["engineering_limits"])
         verdict = evaluate_family_surface_contract(contract, raw(contract), candidate_geometry_hash="a"*64)
