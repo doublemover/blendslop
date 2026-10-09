@@ -95,18 +95,21 @@ class EnsembleRunner:
         *,
         total_timeout_s: float | None = None,
         max_parallel_candidates: int = 1,
+        process_budget=None,
     ) -> EnsembleRunResult:
-        from .process_executor import PersistentProcessExecutor, candidate_payload, candidate_outcome
-        from contextlib import nullcontext
+        from .process_executor import (executor_scope, request_process_budget,
+                                       candidate_payload, candidate_outcome)
+        process_budget = request_process_budget(requests, process_budget=process_budget)
         if not requests:
             return self._result_from_candidates([], requests)
-        shared = getattr(requests[0].context, "process_executor", None)
-        manager = nullcontext(shared) if shared is not None else PersistentProcessExecutor(max_parallel_candidates)
+        manager = executor_scope(max_parallel_candidates, context=requests[0].context,
+                                 process_budget=process_budget, require_submit_result=True)
         with manager as executor:
             if self.evidence_routing:
                 from .measured_selection import routing_run
                 results, selected, ledger = routing_run(
-                    requests, total_timeout_s, self.max_render_candidates, executor=executor)
+                    requests, total_timeout_s, self.max_render_candidates,
+                    executor=executor, process_budget=process_budget)
                 run = self._result_from_candidates(results, requests, selected_override=selected, use_override=True)
                 return replace(run, pareto_report={**run.pareto_report, "routing_ledger": ledger})
             deadline = None if total_timeout_s is None else time.time() + float(total_timeout_s)
@@ -137,9 +140,11 @@ class EnsembleRunner:
         *,
         max_parallel_candidates: int,
         total_timeout_s: float | None = None,
+        process_budget=None,
     ) -> EnsembleRunResult:
         return self.run_requests(requests, total_timeout_s=total_timeout_s,
-                                 max_parallel_candidates=max_parallel_candidates)
+                                 max_parallel_candidates=max_parallel_candidates,
+                                 process_budget=process_budget)
 
     def _result_from_candidates(
         self,
@@ -198,6 +203,7 @@ class EnsembleRunner:
         budget: CandidateBudget = CandidateBudget(),
         total_timeout_s: float | None = None,
         max_parallel_candidates: int = 1,
+        process_budget=None,
     ) -> EnsembleRunResult:
         requests = self.build_requests(
             target=target,
@@ -210,6 +216,7 @@ class EnsembleRunner:
             requests,
             total_timeout_s=total_timeout_s,
             max_parallel_candidates=max_parallel_candidates,
+            process_budget=process_budget,
         )
 
 

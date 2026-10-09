@@ -156,12 +156,14 @@ def quality_key(result):
     return (m.area_iou_min,m.area_iou_mean,m.boundary_iou_mean,-(m.elapsed_s if m.elapsed_s is not None else float("inf")))
 
 
-def routing_run(requests, total_timeout_s=45., max_render_candidates=3, *, executor=None):
+def routing_run(requests, total_timeout_s=45., max_render_candidates=3, *, executor=None,
+                process_budget=None):
     """Admit bounded waves on the same isolated queue used by normal ensembles."""
     from .projection_contract import observed_holes
-    from .process_executor import PersistentProcessExecutor, candidate_payload, candidate_outcome
+    from .process_executor import (executor_scope, request_process_budget,
+                                   candidate_payload, candidate_outcome)
     from .types import CandidateResult
-    from contextlib import nullcontext
+    process_budget = request_process_budget(requests, process_budget=process_budget)
     started = time.perf_counter()
     deadline = None if total_timeout_s is None else time.time() + float(total_timeout_s)
     holes = observed_holes(requests[0].target) if requests else {}
@@ -213,7 +215,9 @@ def routing_run(requests, total_timeout_s=45., max_render_candidates=3, *, execu
     submitted = 0
     stop_reason = "candidate_pool_exhausted"
     candidate_wall = {}
-    manager = nullcontext(executor) if executor is not None else PersistentProcessExecutor(2)
+    manager = executor_scope(2, context=requests[0].context if requests else None,
+                             executor=executor, process_budget=process_budget,
+                             require_submit_result=True)
     with manager as pool:
         pending = []
         index = 0

@@ -58,6 +58,60 @@ class WorkerProcessBudget:
             raise ValueError("worker budget requires nonempty per-worker caps and 0..32 restarts")
 
 
+def caller_process_budget(*, context=None, process_budget=None):
+    """Resolve an explicit pool allowance; context is a caller option, not a cap guess."""
+    contextual = getattr(context, "worker_process_budget", None)
+    for value in (process_budget, contextual):
+        if value is not None:
+            if not isinstance(value, WorkerProcessBudget):
+                raise TypeError("worker process budget must be an explicit WorkerProcessBudget")
+            value.validate(1)
+    if process_budget is not None and contextual is not None and process_budget != contextual:
+        raise ValueError("explicit and contextual worker process budgets disagree")
+    return process_budget if process_budget is not None else contextual
+
+
+def request_process_budget(requests, *, process_budget=None):
+    """One caller allowance covers every request in a shared ensemble/routing pool."""
+    effective = caller_process_budget(process_budget=process_budget)
+    for request in requests:
+        value = caller_process_budget(context=request.context)
+        if value is not None:
+            if effective is not None and effective != value:
+                raise ValueError("candidate contexts require different whole-pool budgets")
+            effective = value
+    return effective
+
+
+def executor_scope(max_workers=2, *, context=None, executor=None, process_budget=None,
+                   require_submit_result=False):
+    """Reuse the actual client/pool; never adopt or reset an existing allowance.
+
+    WorkerClient remains a map-only coordinated subjob client. Candidate callers
+    require submit/result and refuse recursive ensemble use before pool allocation.
+    A null budget preserves the ordinary unowned constructor path.
+    """
+    from contextlib import nullcontext
+    budget = caller_process_budget(context=context, process_budget=process_budget)
+    worker = current_worker_client()
+    contextual = getattr(context, "process_executor", None)
+    supplied = executor if executor is not None else contextual
+    if worker is not None and supplied is not None and supplied is not worker:
+        raise ValueError("an active worker cannot substitute a different process executor")
+    shared = worker if worker is not None else supplied
+    if shared is not None:
+        if budget is not None and getattr(shared, "process_budget", None) != budget:
+            raise ValueError("shared executor must already own the requested whole-pool budget")
+        if require_submit_result and not all(callable(getattr(shared, name, None))
+                                             for name in ("submit", "result")):
+            raise TypeError("candidate execution requires submit/result; WorkerClient supports scoped map subjobs only")
+        return nullcontext(shared)
+    if budget is None:
+        return PersistentProcessExecutor(max_workers)
+    budget.validate(max(1, min(4, int(max_workers))))
+    return PersistentProcessExecutor(max_workers, process_budget=budget)
+
+
 def write_packet(path, value):
     path = Path(path)
     temporary = path.with_name(path.name + "." + uuid.uuid4().hex + ".tmp")
@@ -100,6 +154,19 @@ class WorkerClient:
         self.root = Path(root)
         self.worker = str(worker)
         self.stack = []
+        self.process_budget = None
+        self._process_budget_bound = False
+
+    def bind_process_budget(self, budget):
+        """Carry the coordinator declaration, without creating a new deadline/owner."""
+        if budget is not None:
+            if not isinstance(budget, WorkerProcessBudget):
+                raise TypeError("worker transport requires an explicit pool budget")
+            budget.validate(1)
+        if self._process_budget_bound and self.process_budget != budget:
+            raise ValueError("a worker client cannot replace its owning pool budget")
+        self.process_budget = budget
+        self._process_budget_bound = True
 
     def execute(self, envelope):
         self.stack.append(envelope["id"])
@@ -194,6 +261,14 @@ def execute_job(kind, payload, *, deadline=None):
     from blender_blocking.reconstruction.native_geometry import GeometryArrays, GeometryCache
     from blender_blocking.evaluation.cost_model import CostRecorder
     request, settings, measured, backend = payload
+    declaration = settings.get("worker_process_budget")
+    pool_budget = None if declaration is None else WorkerProcessBudget(**declaration)
+    client = current_worker_client()
+    if client is not None:
+        client.bind_process_budget(pool_budget)
+    elif pool_budget is not None:
+        pool_budget.validate(1)
+    settings = {**settings, "worker_process_budget": pool_budget}
     if deadline is not None:
         remaining = max(0.001, deadline - time.time())
         limit = request.budget.timeout_s
@@ -208,6 +283,8 @@ def execute_job(kind, payload, *, deadline=None):
         pass
     recorder = CostRecorder(track_memory=bool(settings.get("diagnostic_allocations", False)))
     context = SimpleNamespace(**settings)
+    if client is not None:
+        context.process_executor = client
     context.blender_available = available
     context.geometry_cache = GeometryCache()
     context.cost_recorder = recorder
@@ -648,6 +725,12 @@ def candidate_payload(request, executor, *, measured=False):
         ("native_resident", True), ("projection_diagnostics", False),
         ("diagnostic_allocations", False), ("requested_mode", "ensemble"),
     )}
+    from dataclasses import asdict
+    owning_budget = getattr(executor, "process_budget", None)
+    requested_budget = caller_process_budget(context=request.context)
+    if requested_budget is not None and owning_budget != requested_budget:
+        raise ValueError("candidate transport cannot adopt or change its owning pool budget")
+    settings["worker_process_budget"] = None if owning_budget is None else asdict(owning_budget)
     root = request.artifact_root or executor.root / "artifacts"
     from .registry import get_backend
     try:

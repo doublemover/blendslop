@@ -81,6 +81,7 @@ PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
     ("pure_run_reclamation", "test_run_reclamation"),
     ("pure_owned_process_supervisor", "test_owned_process_supervisor"),
     ("pure_owned_process_executor", "test_owned_process_executor"),
+    ("pure_caller_process_budget", "test_caller_process_budget"),
     ("pure_primary_process_cleanup", "test_primary_process_cleanup"),
     ("pure_multipart_planar_join", "test_multipart_planar_join"),
     ("pure_inspection_camera", "test_inspection_camera"),
