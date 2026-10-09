@@ -89,13 +89,14 @@
         "27new512frames and3verified original-owner alpha passes; five original gates, physical support/thickness, exact boundary and paired normal/neutral/mask inventory pass",
         "six actual PNGs inspected; sourcecamera policy classifies original880bf1 and improvedbfe raw metrics independently; existing body-specific radius edit/restore retained",
         "First three-control pose/profileddbf proposal independently lowers mean12.06%,P9533.80%,maximum21.61%,normalP9593.08%; exact profile edit/restore and uncached solid boundary pass. Held-out alpha regression36.11% rejects overall checkpoint, unchanged bfe retained.",
-        "One saved three-view correction 4c677f lowers raw mean19.42%,P9542.47%,max35.81%; five strict silhouettes, uncached solid boundary and exact profile restoration pass, but held-out alpha+0.97796266% violates required nonworse. Both ddbf and4c proposals remain rejected; bfe selection unchanged."
+        "One saved three-view correction 4c677f lowers raw mean19.42%,P9542.47%,max35.81%; five strict silhouettes, uncached solid boundary and exact profile restoration pass, but held-out alpha+0.97796266% violates required nonworse. Both ddbf and4c proposals remain rejected; bfe selection unchanged.",
+        "Read-only retained-source assessment finds no missing curvature model: frozen rounded-triangle reference and editable primitive use the same sin(phi)/cos(phi) front/back law; physical front_fraction already exists. No new model, fit, render, comparison or copied packet was created."
       ],
       "remaining": [
         "independently authored artist mean-distance/oriented-normal limits and any desired tail-distance limits; no sampled-max regression hidden",
         "current12row selection remains preserved; any later promotion must keep separate artist/engineering verdicts"
       ],
-      "blocking_input": "Authored reference, physical controls and editable primitive are complete; qualified bfe is retained. Latest optional tail correction fails its frozen held-out nonworse rule. A concrete different model/target would be needed for another meaningful improvement; artist verdict remains independently unqualified."
+      "blocking_input": "Reference and editable controls are complete; both optional pose/profile proposals retain required held-out failures. A power/Bezier/3D-fillet model would add an unsupported target rather than address missing retained-source capability. Further fitting or changed authored intent is a new concrete scope; artist verdict remains independently unqualified."
     },
     {
       "task": "CANONICAL-EVIDENCE",
@@ -128,7 +129,7 @@
     },
     {
       "task": "RUN-CLEANUP1",
-      "state": "Fresh asynchronous persistent complete-tree ownership implemented with explicit opt-in budget; cold/native/legacy Poisson post-kill waits bounded. Historical owners and default direct-child/tree-adoption scope stay explicit.",
+      "state": "Explicit whole-pool ownership reaches ensemble/routing, workflow configuration, every job envelope, six standalone fallbacks and the final generic shape-program compile chain. Explicit-owner grouped reclamation planning accounts for nested scopes read-only. Historical lost HANDLEs, independent helper lifecycles and actual reclamation remain separate.",
       "completed": [
         "explicit manifest/lease ownership design and conservative read-only planner",
         "fresh native helper and warm numeric producer ownership",
@@ -166,12 +167,16 @@
         "Fifteen distinct persistent/supervisor/compatibility methods pass on existing bundled Python, including actual crashed-primary/live-descendant join and same-owner incomplete-join retry.",
         "Cold DVX and native qualifier share one bounded kill/drain/wait allowance; exact original error preserved, unconfirmed transport retains active lease; fourteen focused checks pass.",
         "Legacy Poisson timeout and caller cancellation use bounded final primary waits and preserve original exception; two focused mock checks pass.",
-        "Multipart generic integration and final six-frame triangle run prove fresh complete-tree supervision, exact retained HANDLE joins and zero active Job members. Final triangle producer, supervisor and sibling qualifier inventories are audited separately; no cleanup executed."
+        "Multipart generic integration and final six-frame triangle run prove fresh complete-tree supervision, exact retained HANDLE joins and zero active Job members. Final triangle producer, supervisor and sibling qualifier inventories are audited separately; no cleanup executed.",
+        "Read-only group planner composes 1..16 explicitly bound owner/manifest/lease snapshots under one byte cap; active/unknown/drift/co-ownership blockers preserved. Nine guards pass; exact retained multipart three-owner inspection resolves six separately owned nested files, leaving original flat parent blocked; no metadata mutation or deletion.",
+        "Caller budget APIs reuse the actual ensemble/routing pool or map-only WorkerClient without reset/adoption; recursive candidate use refused. Nine guards and three affected actual stdlib compatibility methods pass.",
+        "Strict optional EnsembleConfig resource dictionary reaches actual workflow request context; every job-kind envelope binds the owning declaration before execution. Six targeted guards plus one affected actual worker reuse pass.",
+        "Primitive-family search, direct multistart, hybrid native residual union, geometric program search, DVX non-warm fallback and direct production_union use canonical executor_scope. Nine unique admission guards pass; no native/child/numerical fitting launches.",
+        "Backend final compile and geometric evaluation preserve request context through the bridge and editable compiler into production_union; direct compile callers may declare process_budget. Three guards pass with real scope admission stopped before native work, including default options/shared reuse/mismatch refusal."
       ],
       "remaining": [
-        "Other direct-child entry points can opt into explicit complete-tree budgets; current default warm/cold/variant/native paths do not claim universal tree ownership.",
-        "Other report producers remain separately scoped ownership work.",
-        "Explicit recovery/reclamation execution requires separate bounded authorization; no deletion or historical adoption."
+        "Independent warm helpers/probes and ordinary direct-child producer paths retain their existing lifecycle contracts; no universal broker or inferred whole-workflow budget.",
+        "Actual recovery/reclamation execution requires a separately bounded owner-specific action; historical owners and lost HANDLEs cannot be adopted retroactively."
       ],
       "blocking_input": "No blocker for implemented ownership/cleanup APIs. Historical adoption or artifact reclamation remains separately authorized scope, not a missing pass from current process checks."
     },
@@ -210,7 +215,7 @@
     },
     {
       "task": "INTEGRATION-PUBLICATION",
-      "state": "Approved six-commit current-main demo/manual-only workflow batch through d11 published to existing draft PR7; exact-head policy and Blender Tests workflows passed. Subsequent implementation remains local.",
+      "state": "Owner-approved exact eight-commit d11-to-7d followup published to existing draft PR7; exact7d policy and Blender Tests workflows succeeded, description refreshed. Newer ownership implementation remains local.",
       "completed": [
         "owner checkout preserved on endblay_opslay",
         "quality work isolated on local/quality-continuation-20261008",
@@ -226,16 +231,17 @@
         "fresh exact lineage check and explicit owner approval fulfilled by nonforce push6256cdb to same PR7; full/quick/galleryCI succeeded and deployment skipped",
         "Explicit exact f5d7f41 nonforce push verified at remote+PR7; full177/0/0 quick175/0/2 and gallery passed; main unchanged, no deployment.",
         "Owner-directed current-main twelve-family presentation and manual-only generation implemented; eight adverse data guards and actual headless desktop/current/historical interactions/layout pass; no native rerenders.",
-        "Owner exact approval fulfilled: nonforce f5-to-d11 six-commit push, remote and fresh PR7 head confirmed, successful exact-head Adaptive CI policy checks and Blender Tests; no evaluation Pages run, merge or deployment."
+        "Owner exact approval fulfilled: nonforce f5-to-d11 six-commit push, remote and fresh PR7 head confirmed, successful exact-head Adaptive CI policy checks and Blender Tests; no evaluation Pages run, merge or deployment.",
+        "Exact owner-approved eight-commit nonforce push through7d64b0cd verified at remote and PR7; base main unchanged, exact7d policy/Blender Tests success confirmed by connector; PR description refreshed without merge/retarget/dispatch/deploy."
       ],
       "remaining": [
-        "Parent review/approval before publishing subsequent implementation after d11.",
+        "Parent review/approval before publishing subsequent implementation after7d.",
         "Separate merge and manual Pages publication approval; no dispatch/deployment performed."
       ],
-      "blocking_input": "Publication approval covers through d11 only; subsequent local implementation is independently reviewable. No local functional implementation is blocked by publication."
+      "blocking_input": "Publication authorization is fulfilled through7d only; newer local commits are reviewable independently. No local implementation is blocked by publication."
     }
   ],
-  "validation_policy": "existing full Blender/seven-control/approved6256CI retained;23rootfocused methods passed and allfive previouslyunfinishedchangedpositive scopes acquired exactlyonce underindependent85+5s budgets;138new+12reusedpasses,25silhouettegates/5uncachedboundaries passed,22actualPNGinspections; artist/aggregate remain unqualified; no broad rerun; focused actual process and bounded cleanup checks plus one12-frame multipart Job passed; no full-suite rerun; one tail bootstrap failure occurred before any frames and is retained.; tail logical12frames acquired once across5+7missing-only scopes,10strictviews/2uncachedboundaries/2editrestorations pass,8finalHANDLEjoins; arch improves,triangle held-out rejects; no required-failure aggregate override.; final single triangle proposal: six frames, five strict gates/one uncached boundary/one exact profile restore, raw tails better but held-out nonworse rejects;24.8375s,5kerneljoins,Jobzero; no additional fit/native campaign.",
+  "validation_policy": "existing full Blender/seven-control/approved6256CI retained;23rootfocused methods passed and allfive previouslyunfinishedchangedpositive scopes acquired exactlyonce underindependent85+5s budgets;138new+12reusedpasses,25silhouettegates/5uncachedboundaries passed,22actualPNGinspections; artist/aggregate remain unqualified; no broad rerun; focused actual process and bounded cleanup checks plus one12-frame multipart Job passed; no full-suite rerun; one tail bootstrap failure occurred before any frames and is retained.; tail logical12frames acquired once across5+7missing-only scopes,10strictviews/2uncachedboundaries/2editrestorations pass,8finalHANDLEjoins; arch improves,triangle held-out rejects; no required-failure aggregate override.; final single triangle proposal: six frames, five strict gates/one uncached boundary/one exact profile restore, raw tails better but held-out nonworse rejects;24.8375s,5kerneljoins,Jobzero; no additional fit/native campaign. New local ownership continuation uses affected focused stdlib/mock admission checks, three existing compatibility methods and one directly affected worker reuse after envelope change; one retained three-owner read-only inventory. Zero new native/reconstruction jobs, no full campaign or cleanup.",
   "local_commits": [
     "424759d06585f2bc589fc29bb16c70198a83395a",
     "723a553",
@@ -288,25 +294,30 @@
     "a3ec5e0de0ce6ba78dd95645bde02aba30226f93",
     "2f62901f1717004daa4ea774dda26676ecf9a8e5",
     "1cf6ce7d4fcfb75f6d891200a85803e6707991f6",
-    "a8962c45436c32f8038dd8c8eb506651884c8a37"
+    "a8962c45436c32f8038dd8c8eb506651884c8a37",
+    "7d64b0cd9f549a2e4e7cc51ab548662e3c8c0136",
+    "96f2b1b497b619e3b93c093f8325a93b2dc05484",
+    "c203e87fb6fc60d0459572190b84e65861397555",
+    "00e28d7aa1947c93fd5d7c8133764d0f2ea70da9",
+    "45594259cf25f8428332976fb323fe81f2c04ad2",
+    "7060c8199361294043e44c0b4608aa2b607738bc"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
-  "completed_unpublished_batch": "Persistent complete-tree worker budget API; bounded primary helper and legacy Poisson cleanup; multipart shared-plane repair, full display framing and exact generic compiler replay; arch roof-tail repair; triangle pose/profile APIs plus one saved three-view correction, both honestly rejected by held-out alpha. No additional native proposals remain in the authorized saved scope. All implementation and evidence are committed through a8962c45436c32f8038dd8c8eb506651884c8a37; metadata publication receipt/task map are finalized separately.",
   "reviewed_draft": {
     "url": "https://github.com/doublemover/blendslop/pull/7",
     "state": "OPEN draft",
-    "revision": "d11d1b84bd90d6265e59c0389c2b487fa90bcbcd",
+    "revision": "7d64b0cd9f549a2e4e7cc51ab548662e3c8c0136",
     "base": "main",
-    "blender_full": "Blender Tests workflow succeeded at d11; detailed counts not fetched",
-    "blender_quick": "Same successful d11 Blender Tests workflow; old f5 counts not attributed to d11",
-    "gallery": "No evaluation Pages workflow run at d11; manual-only source",
+    "blender_full": "Blender Tests workflow 37979136306 succeeded at exact7d; detailed counts not fetched",
+    "blender_quick": "Same successful exact7d Blender Tests workflow; old f5 detailed counts not attributed to7d",
+    "gallery": "No evaluation Pages dispatch or deployment; manual-only source",
     "merge_pages_approval": "absent",
-    "remote_verified": "Exact nonforce six-commit publication through d11 verified by ls-remote and fresh PR7 API. Adaptive CI policy checks and Blender Tests succeeded at exact d11. Optional later run-URL lookup hit HTTP403 API rate limit and was not retried. Main remains d5e9816; no merge, dispatch or deployment."
+    "remote_verified": "Exact nonforce eight-commit d11-to-7d publication verified by ls-remote and fresh PR7 API; Adaptive CI policy checks 37979136302 and Blender Tests 37979136306 succeeded at exact7d. PR description refreshed for the published implementation and required rejections. Main remains d5e9816; newer worker-adoption commits remain local."
   },
-  "followup_implementation_revision": "a8962c45436c32f8038dd8c8eb506651884c8a37",
+  "followup_implementation_revision": "7060c8199361294043e44c0b4608aa2b607738bc",
   "aggregate_accepted": false,
   "metadata_tests_executed": 0,
-  "published_followup_revision": "d11d1b84bd90d6265e59c0389c2b487fa90bcbcd",
+  "published_followup_revision": "7d64b0cd9f549a2e4e7cc51ab548662e3c8c0136",
   "prior_parent_verification_handoff": "docs/quality-followup-continuation-20261009/pending-verification.json",
   "parent_verification_handoff": "docs/quality-triangle-three-view-tail-continuation-20261009/native-evidence.json",
   "authored_input_decisions": "docs/quality-authored-input-decisions-continuation-20261009/decisions.json",
@@ -380,11 +391,11 @@
     "artist_unqualified": 11,
     "native_renders": 0,
     "manual_workflow_only": true,
-    "publication": "Published through approved d11 to existing OPEN DRAFT PR7; no merge, dispatch or Pages deployment.",
-    "publication_receipt": "docs/quality-current-demo-integration-20261009/publication-d11-receipt.json"
+    "publication": "Approved eight-commit followup through7d published to existing OPEN DRAFT PR7; updated description and exact7d policy/Blender Tests success. No merge, dispatch or Pages deployment.",
+    "publication_receipt": "docs/quality-current-demo-integration-20261009/publication-7d-receipt.json"
   },
   "remaining_functional_implementation": [
-    "Optional complete-tree budget adoption by remaining producer entry points and explicit recovery/reclamation execution remain separately scoped. Default direct-child paths and historical lost HANDLEs are not retroactively tree-qualified; no blanket deletion or adoption."
+    "No concrete missing implementation remains in the authorized worker-pool adoption and grouped read-only planning scope. Independent warm helpers/probes, direct Blender booleans and other ordinary direct-child lifecycles remain separately bounded designs; a whole-workflow broker or actual reclamation execution is not inferred or claimed."
   ],
   "genuine_owner_design_choices": [
     "Eleven non-vase artist tolerances or an explicit decision to keep engineering diagnostics unqualified for artist acceptance.",
@@ -514,8 +525,99 @@
     "Historical sphere/ellipsoid detail updates remain rejected, with original candidates retained. Multipart shared-plane mean-distance tradeoff and old historical tail increases remain separately recorded."
   ],
   "next_concrete_parent_review": [
-    "Review the local worker/cleanup/shared-plane/arch implementation bundle before any later push; approved PR7 publication ends at d11.",
-    "Choose a concrete different triangle profile/model only if more improvement is useful; both saved attempts and their required failures are retained. Existing authored reference and editable primitive are complete.",
-    "Select an explicit producer/caller with declared pool resources before broader opt-in complete-tree budget adoption. Recovery and reclamation need a bounded owner-specific plan."
-  ]
+    "Review the five newer functional local commits and final metadata through the exact packaged head before a later publication; approved PR7 publication ends at7d.",
+    "Keep the two rejected triangle proposals and retained bfe selection. No evidence-supported new curvature model was found; choose a changed authored target or distinctly scoped optimization only if useful.",
+    "If actual reclamation is desired, approve a concrete bounded action for explicitly snapshot-bound owners; current planner performs no mutation or process join."
+  ],
+  "completed_approved_eight_commit_batch": "Persistent complete-tree worker budget API; bounded primary helper and legacy Poisson cleanup; multipart shared-plane repair, full display framing and exact generic compiler replay; arch roof-tail repair; triangle pose/profile APIs plus one saved three-view correction, both honestly rejected by held-out alpha. No additional native proposals remain in the authorized saved scope. All implementation and evidence are committed through a8962c45436c32f8038dd8c8eb506651884c8a37; metadata publication receipt/task map are finalized separately. Owner approved and published the exact eight commits through 7d64b0cd; prior review bundle and rejected quality packets remain immutable.",
+  "completed_unpublished_batch": "Five functional local commits complete grouped explicit-owner read-only reclamation planning, caller-owned ensemble/routing budget reuse, workflow resource JSON opt-in, all-kind worker declaration admission, six standalone fallbacks and final generic shape-program compiler forwarding. No native/reconstruction jobs, cleanup, lease adoption or unsupported curvature model in this continuation. Final receipt/task-map metadata is committed separately.",
+  "grouped_reclamation_checkpoint": {
+    "revision": "96f2b1b497b619e3b93c093f8325a93b2dc05484",
+    "evidence": "docs/quality-reclamation-group-continuation-20261009/evidence.json",
+    "group_state": "dry_run_ready",
+    "original_parent_flat_state": "blocked",
+    "explicit_owners": 3,
+    "nested_files_resolved": 6,
+    "eligible_bytes": 2800,
+    "original_metadata_unchanged": true,
+    "mutation_supported": false,
+    "lease_release_supported": false,
+    "process_exit_verified_by_planner": false
+  },
+  "caller_budget_adoption_checkpoint": {
+    "revision": "c203e87fb6fc60d0459572190b84e65861397555",
+    "evidence": "docs/quality-caller-budget-continuation-20261009/evidence.json",
+    "new_guards": 9,
+    "existing_compatibility_methods": 3,
+    "whole_pool_reset": false,
+    "native_jobs": 0
+  },
+  "workflow_budget_adoption_checkpoint": {
+    "revision": "00e28d7aa1947c93fd5d7c8133764d0f2ea70da9",
+    "evidence": "docs/quality-caller-budget-continuation-20261009/workflow-budget-evidence.json",
+    "all_job_guard_methods": 2,
+    "workflow_config_guard_methods": 4,
+    "actual_worker_reuse_methods": 1,
+    "native_jobs": 0,
+    "default_opt_in": false
+  },
+  "standalone_fallback_adoption_checkpoint": {
+    "revision": "45594259cf25f8428332976fb323fe81f2c04ad2",
+    "evidence": "docs/quality-fallback-budget-continuation-20261009/evidence.json",
+    "unique_guard_methods_passed": 9,
+    "native_jobs": 0,
+    "child_jobs": 0,
+    "pool_phase_only": true
+  },
+  "triangle_model_assessment": {
+    "mode": "read_only_retained_source",
+    "source_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+    "same_reference_and_primitive_curve_law": true,
+    "independent_front_back_control_already_present": true,
+    "new_model_justified": false,
+    "unsupported_alternatives": [
+      "power law",
+      "Bezier law",
+      "3D fillet"
+    ],
+    "native_jobs": 0,
+    "fits": 0,
+    "new_packets": 0,
+    "source_locations": [
+      "blender_blocking/synthetic/quality_contracts.py:32",
+      "blender_blocking/synthetic/quality_contracts.py:61",
+      "blender_blocking/synthetic/quality_references.py:45",
+      "blender_blocking/primitives/rounded_triangle.py:49",
+      "blender_blocking/primitives/rounded_triangle.py:102"
+    ]
+  },
+  "shape_program_budget_forwarding_checkpoint": {
+    "revision": "7060c8199361294043e44c0b4608aa2b607738bc",
+    "evidence": "docs/quality-fallback-budget-continuation-20261009/compile-budget-evidence.json",
+    "guard_methods_passed": 3,
+    "test_seconds": 0.01,
+    "native_jobs": 0,
+    "worker_jobs": 0,
+    "owned_pool_reset": false,
+    "direct_blender_boolean_implicitly_covered": false
+  },
+  "local_ownership_validation_checkpoint": {
+    "unique_new_guard_methods_passed": 36,
+    "groups": {
+      "grouped_reclamation": 9,
+      "caller_scope_and_job_envelopes": 11,
+      "workflow_configuration": 4,
+      "standalone_fallbacks": 9,
+      "compiler_forwarding": 3
+    },
+    "existing_compatibility_unique_methods": 3,
+    "existing_compatibility_method_invocations": 4,
+    "fixture_only_errors_preserved": 2,
+    "native_jobs": 0,
+    "reconstruction_jobs": 0,
+    "full_suite_reruns": 0,
+    "group_inspections_on_retained_outputs": 1,
+    "deletion_or_lease_adoption": false,
+    "count_scope": "Only these newer local ownership changes; no previous Blender/canonical counts reattributed."
+  }
 }

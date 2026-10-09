@@ -17,7 +17,7 @@
     "passed": 7,
     "fixture_errors": 2,
     "runtime_failures": 0,
-    "seconds": null
+    "seconds": 1.209
   },
   "failed_only_fixture_continuation": {
     "methods": 2,
@@ -47,5 +47,6 @@
     "Native-disabled union and DVX warm-helper/probe lifecycles remain independent.",
     "Generic compiler request-context forwarding is reviewed as the next concrete gap; this packet does not claim that path is complete.",
     "No artifact deletion, lease adoption, ownership transfer or historical HANDLE recovery."
-  ]
+  ],
+  "test_output_retention": "Original tool outputs; no persisted log file was found and no replacement log is presented as original."
 }
