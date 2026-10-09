@@ -8,7 +8,7 @@
   "tracks": [
     {
       "task": "QUALITY-SURFACE1",
-      "state": "calibrated vase retained; nine source-only engineering certificate APIs; seven frozen camera-bound family policies; artist acceptance independent",
+      "state": "calibrated vase retained; nine source-only engineering certificate APIs and nine actual five-camera policies; artist acceptance independent",
       "completed": [
         "explicit AgX coverage inversion and half-coverage fitting",
         "terminal flat-cap completion with explicit prior",
@@ -18,11 +18,11 @@
         "continuous source-only facet certificates for sphere, ellipsoid, cylinder, frustum and capsule",
         "exact full rectilinear boundary cover for plate, arch and multipart; missing/overlapping facets refused",
         "frozen torus128x24 exact periodic cover, directed interval construction/Hessian distance bound and analytic corresponding-normal cone",
-        "seven actual camera-bound source policies frozen; old multipart mean-distance failure retained and final b2c repair passes the same policy"
+        "seven actual camera-bound source policies frozen; old multipart mean-distance failure retained and final b2c repair passes the same policy",
+        "fresh ten-frame torus/arch source-only capture closes actual camera/clip/neutral/style provenance; all nine frozen policies classify eighteen retained observations without resampling or row selection"
       ],
       "remaining": [
         "rounded-box and triangular-pebble continuous source certificate or independently authored acceptance contract",
-        "actual full source-camera provenance for arch/torus policies where still missing",
         "artist acceptance tolerances for non-vase families",
         "historical scalloped-input repair against an explicitly authored smooth target"
       ],
@@ -52,7 +52,8 @@
         "allfour axis models preserve actual discrete geometry/physical aliases and use candidate-only source-view rank diagnostics",
         "two12-frame genuine axis jobs: cylinder alpha71.2955percent lower/plate87.4998percent lower; allfour physical source edits restore exactly",
         "sphere and ellipsoid updates reject held-out alpha regressions2.2823percent/3.2329percent; originals retained with no aggregate masking",
-        "separate three-control arch exterior stage improves held-out alpha87.5421percent/raw mean74.5968percent; fixed-notch distanceP95 increases3.7967percent independently, exact depth restoration/full local rank passes"
+        "separate three-control arch exterior stage improves held-out alpha87.5421percent/raw mean74.5968percent; fixed-notch distanceP95 increases3.7967percent independently, exact depth restoration/full local rank passes",
+        "strict adaptive producer bindings classify all eight supported diagnostic checkpoints separately; rejected sphere/ellipsoid updates remain rejected even when supplementary raw engineering policy passes"
       ],
       "remaining": [
         "changed adaptive candidates remain diagnostic until their required full five-view/native boundary/canonical gates run",
@@ -96,7 +97,8 @@
         "authored rounded-box normal controls verified by corrected paired pixels without geometric changes",
         "selected final9f6c box and b2c multipart actual five-view masks/neutrals/RGB normals with camera/clip/geometry/style bindings",
         "60nativeframes and148child-owned artifacts retained; child scope released/auditready",
-        "source/candidate neutral and normal pixels inspected; original oblique crop censoring disclosed"
+        "source/candidate neutral and normal pixels inspected; original oblique crop censoring disclosed",
+        "torus/arch ten fresh source-only neutral frames reproduce exact indexed/oriented originals and allfive candidate frame/clip bindings; actual oblique pixels inspected; masks/normals remain unrun"
       ],
       "remaining": [
         "original selected-packet outer descendant kernel join is unavailable; absence-only followup cannot repair it",
@@ -132,7 +134,8 @@
         "opt-in VolumeChunkCache owned_writes creates bounded fresh NPZ owners, verifies header/round-trip, publishes same key without overwrite and retains failed collisions",
         "eleven focused cache checks (eight new/three existing) pass real NPZ reader compatibility, concurrent collisions, failed serialization and bounded payloads",
         "strict false-by-default cache_owned_writes now propagates through existing VisualHull config/parser/backend and all sparse builders; last fresh receipt only, cache-hit-only unrun; six focused checks passed",
-        "all latest native triangle/frustum/arch/axis/exterior jobs use fresh complete-tree ownership; final exterior job proves two kernel joins, released fresh leases and zero active members"
+        "all latest native triangle/frustum/arch/axis/exterior jobs use fresh complete-tree ownership; final exterior job proves two kernel joins, released fresh leases and zero active members",
+        "fresh ten-frame source-camera job completes in7.656s with two retained creation HANDLEs kerneljoined exit0, zero active Job members, both leases released and read-only audits clear"
       ],
       "remaining": [
         "save_render exact-path overwrite API not changed",
@@ -172,7 +175,7 @@
     },
     {
       "task": "INTEGRATION-PUBLICATION",
-      "state": "PR7 draft atfb2802a passes full/quick/gallery CI; current local followup separate and unpublished",
+      "state": "PR7 open draft at42e5fc8; full/quick/gallery CI pass; later e9ba1c6 source-camera/policy batch remains local",
       "completed": [
         "owner checkout preserved on endblay_opslay",
         "quality work isolated on local/quality-continuation-20261008",
@@ -183,17 +186,18 @@
         "approved draftPR7 targeting main created and attached",
         "Blender full/quick required CI passes on reviewed fb2802a candidate",
         "gallery CI passes after one failed-only browser-start timeout retry; deployment correctly skipped",
-        "ten implementation batches committed locally through df922a9; reviewed draft PR7 remains remotely unchanged at fb2802a"
+        "before later approval, ten implementation batches committed locally through df922a9 while draft PR7 remained atfb2802a",
+        "explicit owner approval fulfilled with exact nonforce fastforward push42e5fc8 to existing PR7 head; full/quick/gallery CI passed; deployment skipped"
       ],
       "remaining": [
-        "followup branch review and normal CI when parent chooses to publish",
+        "later source-camera/policy batch review and normal CI if parent chooses publication",
         "desktop continuation page inspection when a browser is available; mobile skipped per owner",
         "separate approval before PR merge or Pages deployment"
       ],
-      "blocking_input": "No PR merge/Pages approval; followup publication/retarget requires parent decision. Implementation continues separately."
+      "blocking_input": "No merge/Pages approval. Later commits after42e5fc8 require parent publication decision."
     }
   ],
-  "validation_policy": "existing full Blender and seven-control qualification retained; reviewed draft CI passed; bounded missing behavior only in local followup, no broad rerun or aggregate pass",
+  "validation_policy": "existing full Blender and seven-control qualification retained; PR7 full/quick/gallery CI passed at42e5fc8; bounded missing behavior only in later local batch, no broad rerun or aggregate pass",
   "local_commits": [
     "424759d06585f2bc589fc29bb16c70198a83395a",
     "723a553",
@@ -210,23 +214,30 @@
     "fa95cddde6ec5f877c2b76b57004bf40823729fb",
     "75296c4c97b9d10cf8d656f182e9220495392dd9",
     "a7571fb8ac8b4d2132a3c5c41fd1a9842c4b8c7a",
-    "df922a96ab899ea7dcc552b73eb6c5255b7387f9"
+    "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+    "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+    "e9ba1c6d9815acd5fc3cf51d84210a78e82edc91"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
-  "completed_unpublished_batch": "backend/recovery/cache ownership and production opt-in, nine source certificate APIs/seven actual camera-bound policies, nine generic adaptive families measured (seven positive/two rejected), selected canonical packet, and fresh complete-tree supervision; separate arch exterior stage and actual independent P95 regression retained",
+  "completed_unpublished_batch": "ten-frame actual torus/arch source-camera capture, complete nine-family supplementary policy report with strict adaptive bindings, and exact authored-input decisions; artist/silhouette/topology/editability verdicts remain independent",
   "reviewed_draft": {
     "url": "https://github.com/doublemover/blendslop/pull/7",
-    "state": "OPEN draft; unchanged",
-    "revision": "fb2802a685bf57f18b44f7b23e984e875aa21477",
+    "state": "OPEN draft",
+    "revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
     "base": "main",
     "blender_full": "passed CI",
     "blender_quick": "passed CI",
-    "gallery": "passed CI after failed-only browser-start retry",
+    "gallery": "passed CI",
     "merge_pages_approval": "absent",
-    "remote_verified": "OPEN draft at fb2802a; all full/quick/gallery checks successful; deployment skipped"
+    "remote_verified": "OPEN draft at42e5fc8; full/quick/gallery successful; deployment skipped"
   },
-  "followup_implementation_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+  "followup_implementation_revision": "e9ba1c6d9815acd5fc3cf51d84210a78e82edc91",
   "aggregate_accepted": false,
   "metadata_tests_executed": 0,
-  "parent_verification_handoff": "docs/quality-followup-continuation-20261009/pending-verification.json"
+  "published_followup_revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+  "prior_parent_verification_handoff": "docs/quality-followup-continuation-20261009/pending-verification.json",
+  "parent_verification_handoff": "docs/quality-source-policy-checkpoint-continuation-20261009/pending-verification.json",
+  "authored_input_decisions": "docs/quality-authored-input-decisions-continuation-20261009/decisions.json",
+  "source_camera_evidence": "docs/quality-source-camera-coverage-continuation-20261009/native-evidence.json",
+  "complete_nine_family_evidence": "docs/quality-family-surface-contracts-continuation-20261009/complete-evidence.json"
 }

@@ -1,0 +1,11 @@
+# Completed source-camera and policy checkpoint
+
+Implementation is committed locally at `e9ba1c6d9815acd5fc3cf51d84210a78e82edc91` on `local/quality-followup-20261009`. The exact approved publication through `42e5fc8` succeeded on existing [draft PR7](https://github.com/doublemover/blendslop/pull/7), targeting main. Full Blender, quick smoke and gallery CI all passed; deployment was skipped. This later source-camera/policy batch remains local pending parent publication review.
+
+The ten-frame torus/arch source-only capture closes the missing camera/clip/neutral/style provenance and yields nine complete supplementary source policies. Eleven focused checks passed. The actual native job took 7.656 seconds with two kernel joins at exit0, zero active Job members and both fresh owners released/audit ready. Root inspected actual oblique pixels. One 3.244-second pure report classifies 18 already retained observations with no renders, fits, resampling or qualification children.
+
+The old multipart distance failure and the selected repair's pass remain separate. Eight diagnostic raw surfaces meet engineering policy, including the rejected sphere/ellipsoid silhouette updates; those remain rejected and no selected row changes. Artist status stays null, every aggregate false, arch P95/triangle sampled-max regressions and historical lifecycle failures retained.
+
+[pending-verification.json](pending-verification.json) names current passed/pending/blocked/rejected/skipped statuses with exact revision, shell, working directory, commands/provenance and review URL for the parent's central page. Older handoffs/bundle manifests remain historical. No extra tests ran for status metadata.
+
+[Authored decisions](../quality-authored-input-decisions-continuation-20261009/README.md) contain the exact remaining owner choices: independent non-vase surface limits and units; intended target behind the historical scalloped vase; conditional shading-versus-geometry intent for a new smooth design. Existing fixture fidelity needs no new intent. Rounded-box/triangle source certificates and missing gates for diagnostically changed candidates remain independent technical scopes. Recovery/deletion, PR merge and Pages publication remain unapproved.
