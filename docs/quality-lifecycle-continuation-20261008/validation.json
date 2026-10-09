@@ -1,0 +1,19 @@
+{
+  "protocol": "cold-dvx-owned-transport-focused-validation-v1",
+  "status": "passed",
+  "checks": 8,
+  "failures": 0,
+  "errors": 0,
+  "interpreter": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+  "python": "3.13.13",
+  "test_module": "test_cold_dvx_ownership",
+  "runtime_scope": "stdlib fixture subprocesses and controlled failure mocks; no DVX or Torch",
+  "full_blender_suite": "prior passed receipt retained; not repeated",
+  "cleanup_mutation": "unimplemented",
+  "remaining": [
+    "render/variant producer adoption",
+    "promotion lifecycle",
+    "crash recovery decision",
+    "concurrent/locked-file lifecycle integration"
+  ]
+}

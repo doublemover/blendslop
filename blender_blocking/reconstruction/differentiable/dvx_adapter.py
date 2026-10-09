@@ -33,23 +33,34 @@ def dependency_state():
         'api_source': 'https://github.com/mworchel/differentiable-voxelization'}
 
 
-def helper_call(python_executable, payload=None, *, timeout_s=10.,warm=False):
-    """Approved project-local interpreter; one bounded full-loop IPC transfer."""
+def helper_call(python_executable, payload=None, *, timeout_s=10., warm=False,
+                ownership_root=None):
+    """Approved interpreter; cold transport retains owned diagnostics."""
     if warm:
         from blender_blocking.reconstruction.differentiable.helper_session import dvx_session
-        return dvx_session(python_executable).call(payload,timeout_s=timeout_s)
+        return dvx_session(python_executable).call(payload, timeout_s=timeout_s)
     import json
-    import subprocess
-    import tempfile
-    from pathlib import Path
-    from reconstruction.process_executor import write_packet, read_packet
-    script = Path(__file__).resolve().parents[3]/"scripts"/"dvx_worker.py"
     import os
+    import pickle
+    import subprocess
+    from pathlib import Path
+    from reconstruction.process_executor import read_packet
+    from utils.run_ownership import OwnedRun
+    repository = Path(__file__).resolve().parents[3]
+    script = repository / "scripts" / "dvx_worker.py"
     executable = Path(os.path.abspath(python_executable))
     if not executable.is_file():
         raise FileNotFoundError(executable)
-    with tempfile.TemporaryDirectory(prefix="blendslop-dvx-") as directory:
-        root = Path(directory)
+    owner = OwnedRun(ownership_root or repository / "temp/cold-dvx",
+                     producer="cold_dvx_helper", max_generated_bytes=268435456,
+                     shared_inputs={"helper_interpreter": str(executable),
+                                    "helper_script": str(script)})
+    root = owner.root
+    process = None
+    stdout = stderr = ""
+    error = None
+    started = time.monotonic()
+    try:
         args = [str(executable), "-B", str(script)]
         if payload is None:
             args.append("--probe")
@@ -58,23 +69,86 @@ def helper_call(python_executable, payload=None, *, timeout_s=10.,warm=False):
             paths = list(payload.get("progress_paths", ()))
             paths.append(str(root / "progress.pkl"))
             payload["progress_paths"] = paths
-            write_packet(root/"input.pkl", payload)
-            args += ["--input", str(root/"input.pkl"), "--output", str(root/"output.pkl")]
-        process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            packet = pickle.dumps(payload, protocol=pickle.HIGHEST_PROTOCOL)
+            owner.reserve_bytes(len(packet) + 32768)
+            (root / "input.pkl").write_bytes(packet)
+            owner.register_file("input.pkl", "disposable")
+            args += ["--input", str(root / "input.pkl"),
+                     "--output", str(root / "output.pkl")]
+        command = json.dumps({"args": args, "timeout_s": timeout_s}, indent=2)
+        owner.reserve_bytes(len(command.encode()) + 32768)
+        (root / "command.json").write_text(command, encoding="utf-8")
+        owner.register_file("command.json", "diagnostic")
+        environment = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
+        environment.pop("PYTHONPATH", None)
+        environment.pop("PYTHONHOME", None)
+        process = subprocess.Popen(
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            env=environment, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         try:
             stdout, stderr = process.communicate(timeout=timeout_s)
         except subprocess.TimeoutExpired:
             process.kill()
-            process.communicate()
+            stdout, stderr = process.communicate()
+            owner.mark_failed("helper_timeout")
             if (root / "progress.pkl").exists():
                 retained = read_packet(root / "progress.pkl")["value"]
                 return {**retained, "partial": True, "stop_reason": "helper_timeout",
                         "final_update_evaluated": False}
             raise TimeoutError("DVX helper exceeded its shared time allowance; no scored checkpoint")
         if process.returncode:
-            raise RuntimeError("DVX helper failed: "+stderr[-3000:])
-        return json.loads(stdout) if payload is None else read_packet(root/"output.pkl")
+            owner.mark_failed("helper_failed")
+            raise RuntimeError("DVX helper failed: " + stderr[-3000:])
+        return json.loads(stdout) if payload is None else read_packet(root / "output.pkl")
+    except BaseException as exc:
+        error = exc
+        raise
+    finally:
+        auxiliary = []
+        child_joined = process is None
+        try:
+            if process is not None:
+                if process.poll() is None:
+                    process.kill()
+                    stdout, stderr = process.communicate()
+                child_joined = process.poll() is not None
+                if not child_joined:
+                    raise RuntimeError("Cold helper termination could not be confirmed")
+        except BaseException as join_error:
+            auxiliary.append(join_error)
+        # An unconfirmed child keeps an active lease, even if cancellation or
+        # diagnostic publication failed. Recovery requires a separate decision.
+        failure = error or (auxiliary[0] if auxiliary else None)
+        if failure is not None:
+            owner.mark_failed(repr(failure))
+        try:
+            for name, log in (("stdout-tail.txt", stdout), ("stderr-tail.txt", stderr)):
+                (root / name).write_bytes(log.encode(errors="replace")[-8192:])
+                owner.register_file(name, "diagnostic")
+            summary = {"returncode": None if process is None else process.returncode,
+                       "elapsed_s": time.monotonic() - started,
+                       "child_joined": child_joined,
+                       "state": "succeeded" if owner.state == "active" else owner.state,
+                       "error": owner.error}
+            (root / "helper-result.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+            owner.register_file("helper-result.json", "diagnostic")
+            for name in ("output.pkl", "progress.pkl"):
+                if (root / name).exists():
+                    owner.register_file(name, "diagnostic")
+        except Exception as publication_error:
+            auxiliary.append(publication_error)
+        owner.auxiliary_errors.extend(repr(exc) for exc in auxiliary)
+        if child_joined:
+            try:
+                owner.close(error=error or (auxiliary[0] if auxiliary else None))
+            except Exception as close_error:
+                auxiliary.append(close_error)
+        if error is not None:
+            for secondary in auxiliary:
+                if hasattr(error, "add_note"):
+                    error.add_note("Cold helper lifecycle also failed: " + repr(secondary))
+        elif auxiliary:
+            raise auxiliary[0]
 
 
 def tiny_gradient_check(*, approved=False):
