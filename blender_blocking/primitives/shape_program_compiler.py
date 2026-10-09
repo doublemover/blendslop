@@ -75,6 +75,13 @@ def compile_shape_program(
     errors = validate_compilable_program(program)
     if errors:
         raise ValueError("shape program cannot compile: " + "; ".join(errors))
+    shared_plane = None
+    if "shared_far_plane" in program.metadata:
+        # Support both the application top-level and ordinary package imports.
+        from importlib import import_module
+        prefix = __package__.rsplit(".", 1)[0] + "." if "." in __package__ else ""
+        shared_plane = import_module(prefix + "reconstruction.multipart_planar_join")
+        shared_plane._relation(program)  # Validate before Blender allocation.
     if not BLENDER_AVAILABLE:
         raise RuntimeError("shape program compilation requires Blender")
     collection = _ensure_collection(collection_name or f"ShapeProgram_{program.program_id}")
@@ -94,6 +101,9 @@ def compile_shape_program(
         _link_to_collection(obj, collection)
         _tag_object(obj, program=program, node=node)
         objects.append(obj)
+
+    if shared_plane is not None:
+        shared_plane.embed_shared_plane_sources(program, objects)
 
     operations = [(node,obj) for node,obj in zip(program.root_nodes,objects) if obj.type == "MESH"]
     if csg_options.get("native_union_execution", False) or any(node.operation in {"subtract","intersect","difference","intersection"} for node,obj in operations):

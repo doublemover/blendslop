@@ -1,0 +1,291 @@
+{
+  "protocol": "multipart_shared_plane_generic_integration_v1",
+  "status": "integration_passed",
+  "frames": 0,
+  "fits": 0,
+  "raw_pairs": 0,
+  "qualifier_children": 0,
+  "expected_indexed_geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+  "artist_limits": null,
+  "aggregate_accepted": false,
+  "runtime": {
+    "blender": "5.2.2 LTS",
+    "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+    "python_executable": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe"
+  },
+  "generic_replay": {
+    "actual_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "matches_expected_indexed": true,
+    "relation": {
+      "protocol": "multipart_shared_far_y_plane_v1",
+      "base_node_id": "observed_base",
+      "arm_node_id": "observed_tall_arm",
+      "exact_common_y_frame": true,
+      "far_local": 0.5,
+      "shared_far_world": 0.3252679191664356,
+      "near_world": -0.12498490777466831,
+      "declared_near_world": -0.12498491023031844,
+      "native_near_rounding_world": 2.4556501276862264e-09,
+      "flat_shading_preserved": true,
+      "edit_scope": "arm near-side depth from mesh Y coordinates; far plane fixed; other X/Z source controls remain live",
+      "scope": "construction observation only; final shape, surface, boundary and edit gates remain independent"
+    },
+    "collection_names": [
+      "SharedPlaneIntegration_50b07fd03bd642e387ddf1da3542976b"
+    ],
+    "same_caller_collection": true,
+    "live_exact_unions": true
+  },
+  "standalone_replay": {
+    "actual_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "matches_expected_indexed": true,
+    "relation": {
+      "protocol": "multipart_shared_far_y_plane_v1",
+      "base_node_id": "observed_base",
+      "arm_node_id": "observed_tall_arm",
+      "exact_common_y_frame": true,
+      "far_local": 0.5,
+      "shared_far_world": 0.3252679191664356,
+      "near_world": -0.12498490777466831,
+      "declared_near_world": -0.12498491023031844,
+      "native_near_rounding_world": 2.4556501276862264e-09,
+      "flat_shading_preserved": true,
+      "edit_scope": "arm near-side depth from mesh Y coordinates; far plane fixed; other X/Z source controls remain live",
+      "scope": "construction observation only; final shape, surface, boundary and edit gates remain independent"
+    }
+  },
+  "depth_edit": {
+    "depth_ratio": 1.0499999924642645,
+    "fixed_far_plane": true,
+    "geometry_changed": true,
+    "restored_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "exact_indexed_restoration": true,
+    "source_controls_restored": true,
+    "original_controls": {
+      "compiled_root_pointer": 3027184990472,
+      "output_pointer": 3027191891976,
+      "sources": [
+        [
+          3027191891976,
+          3027184771208,
+          [
+            [
+              1.6007063388824463,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.5000196099281311,
+              -0.24997878074645996
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ],
+        [
+          3027191897352,
+          3027184735752,
+          [
+            [
+              0.45005661249160767,
+              0.0,
+              0.0,
+              -0.3997710645198822
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.9999759793281555,
+              0.4500170648097992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ],
+        [
+          3027184977928,
+          3027184555528,
+          [
+            [
+              0.349599152803421,
+              0.0,
+              0.0,
+              0.4499990940093994
+            ],
+            [
+              0.0,
+              0.44980481266975403,
+              0.0,
+              -0.08005412667989731
+            ],
+            [
+              0.0,
+              0.0,
+              0.4952014982700348,
+              0.19762982428073883
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ]
+      ],
+      "modifiers": [
+        [
+          "ObservedExactUnion1",
+          "BOOLEAN",
+          "UNION",
+          "EXACT",
+          3027191897352
+        ],
+        [
+          "ObservedExactUnion2",
+          "BOOLEAN",
+          "UNION",
+          "EXACT",
+          3027184977928
+        ]
+      ]
+    },
+    "restored_controls": {
+      "compiled_root_pointer": 3027184990472,
+      "output_pointer": 3027191891976,
+      "sources": [
+        [
+          3027191891976,
+          3027184771208,
+          [
+            [
+              1.6007063388824463,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.5000196099281311,
+              -0.24997878074645996
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ],
+        [
+          3027191897352,
+          3027184735752,
+          [
+            [
+              0.45005661249160767,
+              0.0,
+              0.0,
+              -0.3997710645198822
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.9999759793281555,
+              0.4500170648097992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ],
+        [
+          3027184977928,
+          3027184555528,
+          [
+            [
+              0.349599152803421,
+              0.0,
+              0.0,
+              0.4499990940093994
+            ],
+            [
+              0.0,
+              0.44980481266975403,
+              0.0,
+              -0.08005412667989731
+            ],
+            [
+              0.0,
+              0.0,
+              0.4952014982700348,
+              0.19762982428073883
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ]
+      ],
+      "modifiers": [
+        [
+          "ObservedExactUnion1",
+          "BOOLEAN",
+          "UNION",
+          "EXACT",
+          3027191897352
+        ],
+        [
+          "ObservedExactUnion2",
+          "BOOLEAN",
+          "UNION",
+          "EXACT",
+          3027184977928
+        ]
+      ]
+    },
+    "passed": true
+  },
+  "elapsed_seconds": 0.11042040000029374
+}

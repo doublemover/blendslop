@@ -141,7 +141,10 @@ class MultipartPlanarJoinTests(unittest.TestCase):
         parts = [_Part(node) for node in program.root_nodes]
         pointers = [(id(part), id(part.data)) for part in parts]
         fake_bpy = SimpleNamespace(context=SimpleNamespace(view_layer=SimpleNamespace(update=lambda: None)))
-        with patch.dict(sys.modules, {'bpy':fake_bpy}), patch.object(original, '_compile_live_union', return_value=(parts[0],parts)):
+        def compiled_relation(unused):
+            original.embed_shared_plane_sources(program, parts)
+            return parts[0], parts
+        with patch.dict(sys.modules, {'bpy':fake_bpy}), patch.object(original, '_compile_live_union', side_effect=compiled_relation):
             output, sources, receipt = compile_shared_plane_multipart(program)
         self.assertIs(output,parts[0]);self.assertIs(sources,parts)
         self.assertEqual(pointers,[(id(part),id(part.data)) for part in parts])
@@ -170,8 +173,12 @@ class MultipartPlanarJoinTests(unittest.TestCase):
             if name.startswith('run_') or name == 'scripts' or name.startswith('scripts.'):
                 raise AssertionError('production compilation depended on a validation script: ' + name)
             return native_import(name, *args, **kwargs)
+        def compiled_relation(*args, **kwargs):
+            from reconstruction.multipart_planar_join import embed_shared_plane_sources
+            embed_shared_plane_sources(program, parts)
+            return SimpleNamespace(objects=list(reversed(parts)))
         with patch.dict(sys.modules, {'bpy': fake_bpy}), patch.object(production, 'compile_shape_program',
-                return_value=SimpleNamespace(objects=list(reversed(parts)))) as compile_program, \
+                side_effect=compiled_relation) as compile_program, \
                 patch('builtins.__import__', side_effect=no_scripts):
             obj, sources, receipt = compile_shared_plane_multipart(program)
         compile_program.assert_called_once_with(program, bevel_modifier=False, weighted_normals=False)
@@ -184,6 +191,8 @@ class MultipartPlanarJoinTests(unittest.TestCase):
         self.assertTrue(receipt['exact_common_y_frame'])
 
     def test_checker_refuses_changed_scope_or_model_before_native_allocation(self):
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
         import run_multipart_planar_join_check as checker
         wire = recipe()
         plan = {"protocol": checker.PROTOCOL, "family": checker.FAMILY,

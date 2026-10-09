@@ -1,0 +1,37 @@
+{
+  "artifacts": [
+    {
+      "bytes": 5973,
+      "category": "final_output",
+      "path": "frozen-workload.json",
+      "sha256": "6a45591fa13d9f9774542b92174a2eeafcb19795b31d2ded7ad80a54de37c1b3"
+    },
+    {
+      "bytes": 7560,
+      "category": "final_output",
+      "path": "results.json",
+      "sha256": "0a9586d259901753c665ef569afb84e8a5df10a14b8c04a536cb22a4e77d97b3"
+    },
+    {
+      "bytes": 801,
+      "category": "final_output",
+      "path": "generic-exact.npz",
+      "sha256": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a"
+    }
+  ],
+  "auxiliary_errors": [],
+  "error": null,
+  "max_generated_bytes": 8388608,
+  "owner_token": "50c0db5b7273418d855172c82b364216",
+  "pid": 11916,
+  "producer": "multipart_shared_plane_generic_integration",
+  "reclamation": "unimplemented; all files retained",
+  "run_id": "50b07fd03bd642e387ddf1da3542976b",
+  "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01\\owned-4iy88imi",
+  "schema_version": 1,
+  "shared_inputs": {
+    "plan": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-shared-plane-integration-continuation-20261009\\native-plan.json",
+    "plan_sha256": "6a45591fa13d9f9774542b92174a2eeafcb19795b31d2ded7ad80a54de37c1b3"
+  },
+  "state": "succeeded"
+}
