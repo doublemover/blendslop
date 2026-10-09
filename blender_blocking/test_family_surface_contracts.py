@@ -130,6 +130,28 @@ class FamilySurfaceContracts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "digest"):
             evaluate_family_surface_contract(contract, raw(contract), candidate_geometry_hash="a"*64)
 
+    def test_torus_policy_uses_only_certified_frozen_source_and_refuses_other_geometry(self):
+        from unittest.mock import patch
+        data = octahedron()
+        parameters = {"primitive": "torus", "major_radius": .7, "minor_radius": .22}
+        proof = {"status": "certified", "reference_geometry_hash": data.content_hash,
+                 "maximum_source_facet_distance_world": .003,
+                 "maximum_normal_angle_degrees": 8.,
+                 "maximum_vertex_construction_shift_world": 1e-6,
+                 "normal_correspondence": "analytic parameter cell correspondence",
+                 "distance_correspondence": "continuous bidirectional parameter cover"}
+        with patch("blender_blocking.evaluation.torus_reference.torus_reference_certificate", return_value=proof):
+            contract = freeze_family_surface_contract("torus", parameters, data, cameras())
+        self.assertEqual(contract["reference_certificate"]["torus_parameter_cover"], proof)
+        self.assertAlmostEqual(contract["engineering_limits"]["symmetric_mean_distance_world_max"], .003 + .5*2/512)
+        self.assertEqual(contract["engineering_limits"]["normal_angle_p95_degrees_max"], 9.)
+        self.assertIsNone(contract["artist_acceptance_limits"])
+        changed = freeze_family_surface_contract("torus", parameters, data, cameras())
+        self.assertIsNone(changed["engineering_limits"])
+        self.assertIn("frozen original authored torus identity", changed["reason"])
+        with self.assertRaisesRegex(ValueError, "parameters differ"):
+            reference_facet_certificate("torus", {**parameters, "major_radius": .71}, data)
+
     def test_unsupported_reference_remains_unqualified_instead_of_copying_vase(self):
         contract = freeze_family_surface_contract("rounded_triangle_dot", {"thickness":.48}, octahedron(), cameras())
         self.assertIsNone(contract["engineering_limits"])

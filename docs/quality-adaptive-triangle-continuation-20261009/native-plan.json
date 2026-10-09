@@ -1,6 +1,6 @@
 {
   "artist_surface_limits": null,
-  "baseline_raw_observations_reused": 2,
+  "baseline_raw_observations_reused": 1,
   "candidate_frames": 3,
   "cases": [
     {
@@ -293,7 +293,7 @@
   "memory_limit_bytes": 8589934592,
   "native_source_scope": "unchanged old triangle support candidate is a baseline, not a selected new result",
   "new_detail_family": "rounded_triangle_dot",
-  "new_raw_pairs": 2,
+  "new_raw_pairs": 1,
   "parameter_interval_policy": "each declared physical control is 0.9..1.1 times unchanged saved candidate value; frozen before new measurements; no source dimensions or held-out metrics used",
   "protocol": "bounded_adaptive_family_checkpoint_v1",
   "qualification_children": 0,
@@ -303,7 +303,7 @@
   "rendered_frames": 6,
   "samples": 64,
   "segments": 96,
-  "semantic_transactions": 2,
+  "semantic_transactions": 1,
   "source_frames": 3,
   "threads": 2,
   "triangle_tessellation": {
