@@ -151,7 +151,8 @@
         "production save_render exact native filename now stages under fresh ownership and publishes atomically without clobber or suffix; nine new guards/legacy compatibility passed",
         "two128-square current-scene PNGcollision/OPEN_EXR calls preserve old bytes/scene and prove native extension transport;6.3393s fresh Job/2HANDLEjoins/zeroactive/4read-onlyaudits clear",
         "false-by-default owned Poisson uses explicit process and transport bounds, bounded NPZ header/serialization and input/config/worker/output identities; ten focused guards including tiny real NumPy child",
-        "Poisson secondary finalization cancellation cannot replace original error; exactTrue lifecycle/intzero admission and required/optional fallback preserved"
+        "Poisson secondary finalization cancellation cannot replace original error; exactTrue lifecycle/intzero admission and required/optional fallback preserved",
+        "warm numeric final kill wait now uses existing1-second phase; unconfirmed join and incomplete owner publication stay retryable with failed/cancelled history; four focused stdlib/mock guards pass, primary-only gap retained"
       ],
       "remaining": [
         "persistent reconstruction workers, warm/cold numeric helpers, variant and native qualifier paths need separately scoped complete-tree adoption with explicit budgets",
@@ -194,7 +195,7 @@
     },
     {
       "task": "INTEGRATION-PUBLICATION",
-      "state": "existing draftPR7 contains approved6256cdb; full/quick/galleryCIpass; cancellation/render/Poisson followup local through236fe39",
+      "state": "existing draftPR7 contains approved6256cdb; full/quick/galleryCIpass; later cancellation/render/Poisson/warmshutdown production commits local through1896d78",
       "completed": [
         "owner checkout preserved on endblay_opslay",
         "quality work isolated on local/quality-continuation-20261008",
@@ -210,7 +211,7 @@
         "fresh exact lineage check and explicit owner approval fulfilled by nonforce push6256cdb to same PR7; full/quick/galleryCI succeeded and deployment skipped"
       ],
       "remaining": [
-        "review later local lifecycle commits fa1ca87/7a89338/236fe39; no additional push authorized",
+        "review later local lifecycle commits fa1ca87/7a89338/236fe39/1896d78 and checkpoint metadata; no additional push authorized",
         "desktop continuation inspection when supported browser available; mobile skipped per owner",
         "separate approval before PR merge or Pages deployment"
       ],
@@ -247,7 +248,8 @@
     "a0974fee3697008200f35c700a98bb17140e5a2c",
     "fa1ca873f5029b8c86ab7bcf2c2e8a1622e4e071",
     "236fe39879553a6e6a26ecaaa7914c07cb0dd815",
-    "7a893383b5d9a59dabcd1af12ccc907dc2871b30"
+    "7a893383b5d9a59dabcd1af12ccc907dc2871b30",
+    "1896d783caa3037575d97f20039a785ffa729d04"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
   "completed_unpublished_batch": "sourcecamera9policies, roundedbox10th and triangle11th certificates/policies; exact triangle/exteriorarch missing gates; strict original reusedtriangle reader; gallery entity repair; artist/selection/history preserved",
@@ -297,6 +299,11 @@
     "evidence": "docs/quality-lifecycle-followup-continuation-20261009/evidence.json",
     "evidence_sha256": "4664424f97a7feb9935edae1fb3d821210c1099711f77294a30c1c2089530a1f",
     "owner_decisions": "docs/quality-lifecycle-followup-continuation-20261009/owner-decisions.json",
-    "owner_decisions_sha256": "16b8da31ac5d116ab3eea15d3c2d49fff15527d529c1a28cca873c471c08e212"
+    "owner_decisions_sha256": "16b8da31ac5d116ab3eea15d3c2d49fff15527d529c1a28cca873c471c08e212",
+    "warm_shutdown_followup": {
+      "code_revision": "1896d783caa3037575d97f20039a785ffa729d04",
+      "evidence": "docs/quality-lifecycle-followup-continuation-20261009/warm-shutdown-evidence.json",
+      "evidence_sha256": "6ea758c5044cdcc0bcf0ca01d9f6449488194d32cb695cfd17afb7d2c5d40e78"
+    }
   }
 }
