@@ -1,0 +1,64 @@
+{
+  "protocol": "numeric-cone-screening-fix-evidence-v1",
+  "code_revision": "631e56ab2ea68adc24ee6cd1eadc52956a0db13b",
+  "working_files": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\proposal_screening.py",
+      "bytes": 6982,
+      "sha256": "4d83b0f4fc16c2ab951ca5a0af67cbdeb24ca4d113f0406eb35aa300b9f8c152"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_program_pose_aliases.py",
+      "bytes": 12449,
+      "sha256": "07c5de4a35a933fcb3fc9da96129593d0b1726c2b84d5b3ad0ca51ad3b17d8e8"
+    }
+  ],
+  "before_after": {
+    "recipe": {
+      "primitive": "cylinder",
+      "width_world": 2.0,
+      "depth_world": 1.0,
+      "height_world": 3.0
+    },
+    "old_local_extents": [
+      2.0,
+      2.0,
+      3.0
+    ],
+    "corrected_local_extents": [
+      2.0,
+      1.0,
+      3.0
+    ],
+    "artist_full_rigid_frame": "preserved including roll about tilted axis",
+    "numeric_parameter_aliases": "same explicit-key precedence and fallback convention as unchanged editable compiler"
+  },
+  "default_identity_axis_mesh": {
+    "unchanged": true,
+    "vertices": 82,
+    "triangles": 160,
+    "geometry_content_hash": "209fef2be433d02c56bad5cec466bf48fc985051f561c454babaca2f1526c39c"
+  },
+  "validation": [
+    {
+      "owner": "root",
+      "tests": 4,
+      "elapsed_seconds": 0.091,
+      "passed": true
+    },
+    {
+      "owner": "family_rows",
+      "tests": 6,
+      "elapsed_seconds": 0.092,
+      "passed": true,
+      "includes": "four new plus two existing adjacent pose guards"
+    }
+  ],
+  "runtime": "existing Blender-bundled Python3.13.13; no native launch or package change",
+  "scope": "numeric coarse proposal scoring; actual final native render/admission still required",
+  "compiler_output_changed": false,
+  "frozen_references_or_selected_assets_changed": false,
+  "artist_surface_passed": null,
+  "aggregate_accepted": false,
+  "publication": "local only"
+}
