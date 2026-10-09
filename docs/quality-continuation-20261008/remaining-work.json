@@ -32,7 +32,7 @@
     },
     {
       "task": "QUALITY-COVERAGE1",
-      "state": "original12 rows preserved; improved triangle and exterior arch complete missing original five-view/native/canonical gates; five other changed positive checkpoints separate",
+      "state": "original12 rows preserved; improved triangle, exterior arch and thin plate complete missing original five-view/native/canonical gates; four changed positives remain separate",
       "completed": [
         "frozen12-family reference matrix and intentional depth/cavity/multipart negatives",
         "observed-mask fitting for sphere, ellipsoid, cylinder, frustum, corrected capsule, rounded box and thin plate",
@@ -57,10 +57,11 @@
         "separate three-control arch exterior stage improves held-out alpha87.5421percent/raw mean74.5968percent; fixed-notch distanceP95 increases3.7967percent independently, exact depth restoration/full local rank passes",
         "strict adaptive producer bindings classify all eight supported diagnostic checkpoints separately; rejected sphere/ellipsoid updates remain rejected even when supplementary raw engineering policy passes",
         "exact bfe72738 triangular replay passes5original silhouettes,.005world support/thickness and one uncached native solid boundary;27newframes+3retainedalpha acquire matched canonical packet; artist/aggregate remain unqualified",
-        "exact e2b54f35 arch replay passes5original silhouettes and uncached solid boundary;28new+2retainedalpha matched30logicalpass packet; olddepth restoration reused; artist/aggregate/selection unchanged"
+        "exact e2b54f35 arch replay passes5original silhouettes and uncached solid boundary;28new+2retainedalpha matched30logicalpass packet; olddepth restoration reused; artist/aggregate/selection unchanged",
+        "exact0b2cb766 thin-plate replay passes5original silhouettes and uncached12triangle solid boundary;27new512+3retainedalpha matched30logicalpass packet;6actualpixels inspected, all3owner audits clear, no row/artist/aggregate promotion"
       ],
       "remaining": [
-        "capsule,torus,frustum,cylinder,plate changed positive candidates need missing full five-view/native/canonical gates in separately bounded scopes",
+        "capsule,torus,frustum,cylinder changed positive candidates need missing full five-view/native/canonical gates in separately bounded scopes",
         "independent artist contracts absent for eleven non-vase families",
         "global hidden-surface uniqueness unproved",
         "sphere/ellipsoid failed detail updates retained; original candidates selected",
@@ -107,7 +108,8 @@
         "source/candidate neutral and normal pixels inspected; original oblique crop censoring disclosed",
         "torus/arch ten fresh source-only neutral frames reproduce exact indexed/oriented originals and allfive candidate frame/clip bindings; actual oblique pixels inspected; masks/normals remain unrun",
         "new exact triangular source/candidate matched30logicalpass packet,27fresh+3retainedalpha; allfive camera/clip/pass/geometry bindings; actual top/oblique neutral and normal pixels inspected",
-        "exact exterior arch matched30logicalpass packet:28new+2retainedalpha, allfive geometry/camera/clip/pass bindings,6actualobliquePNG inspections; originaledgecrop retained"
+        "exact exterior arch matched30logicalpass packet:28new+2retainedalpha, allfive geometry/camera/clip/pass bindings,6actualobliquePNG inspections; originaledgecrop retained",
+        "exactthin-plate matched30logicalpass packet:27new+3original-owneralpha, exactsource/candidate/camera/style/pass bindings, sixnativePNG inspections and complete5HANDLEtree joins"
       ],
       "remaining": [
         "original selected-packet outer descendant kernel join is unavailable; absence-only followup cannot repair it",
@@ -195,7 +197,7 @@
     },
     {
       "task": "INTEGRATION-PUBLICATION",
-      "state": "existing draftPR7 contains approved6256cdb; full/quick/galleryCIpass; later cancellation/render/Poisson/warmshutdown production commits local through1896d78",
+      "state": "existing draftPR7 remains at approved6256cdb; later lifecycle and generator/retained-adapter continuation local only",
       "completed": [
         "owner checkout preserved on endblay_opslay",
         "quality work isolated on local/quality-continuation-20261008",
@@ -213,12 +215,13 @@
       "remaining": [
         "review later local lifecycle commits fa1ca87/7a89338/236fe39/1896d78 and checkpoint metadata; no additional push authorized",
         "desktop continuation inspection when supported browser available; mobile skipped per owner",
-        "separate approval before PR merge or Pages deployment"
+        "separate approval before PR merge or Pages deployment",
+        "review restarted generator/style commits ecf52ff/135f411 and retained adapter755d3a5 plus plate packet; no additional publication authorized"
       ],
       "blocking_input": "No publication approval for local commits after6256cdb; no merge/Pages approval."
     }
   ],
-  "validation_policy": "existing full Blender/seven-control results retained; PR7 full/quick/galleryCIpassed at6256cdb; local lifecycle uses focused checks plus two128-square frames, no broad rerun/aggregate pass",
+  "validation_policy": "existing full Blender/seven-control results retained; PR7 full/quick/galleryCIpassed at6256cdb; focused generator/style/adapter checks plus one exactthin-plate missing27frame+1boundary scope; no broad rerun or aggregate pass",
   "local_commits": [
     "424759d06585f2bc589fc29bb16c70198a83395a",
     "723a553",
@@ -249,25 +252,28 @@
     "fa1ca873f5029b8c86ab7bcf2c2e8a1622e4e071",
     "236fe39879553a6e6a26ecaaa7914c07cb0dd815",
     "7a893383b5d9a59dabcd1af12ccc907dc2871b30",
-    "1896d783caa3037575d97f20039a785ffa729d04"
+    "1896d783caa3037575d97f20039a785ffa729d04",
+    "ecf52ffabe69030c6431af0f4b90dba2ca06e84b",
+    "135f411",
+    "755d3a5b17bae1992a7b22b3bd61fa0fd60c2c05"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
   "completed_unpublished_batch": "sourcecamera9policies, roundedbox10th and triangle11th certificates/policies; exact triangle/exteriorarch missing gates; strict original reusedtriangle reader; gallery entity repair; artist/selection/history preserved",
   "reviewed_draft": {
     "url": "https://github.com/doublemover/blendslop/pull/7",
     "state": "OPEN draft",
-    "revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+    "revision": "6256cdb79384fbab9e33b012f0794b8b98771966",
     "base": "main",
     "blender_full": "passed CI",
     "blender_quick": "passed CI",
     "gallery": "passed CI",
     "merge_pages_approval": "absent",
-    "remote_verified": "Fresh exact GitHub URL read:OPEN draft42e5fc8, same main/base/headbranch; prior full/quick/gallerypassed and deployskipped. No CI repoll."
+    "remote_verified": "Fresh restart exact URL and ls-remote checks: PR7 OPEN DRAFT at6256cdb, same main/base/headbranch. Existing required full/quick/gallery CI passed; deployment skipped. No later push or CI rerun."
   },
-  "followup_implementation_revision": "a0974fee3697008200f35c700a98bb17140e5a2c",
+  "followup_implementation_revision": "755d3a5b17bae1992a7b22b3bd61fa0fd60c2c05",
   "aggregate_accepted": false,
   "metadata_tests_executed": 0,
-  "published_followup_revision": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+  "published_followup_revision": "6256cdb79384fbab9e33b012f0794b8b98771966",
   "prior_parent_verification_handoff": "docs/quality-followup-continuation-20261009/pending-verification.json",
   "parent_verification_handoff": "docs/quality-triangle-policy-checkpoint-continuation-20261009/pending-verification.json",
   "authored_input_decisions": "docs/quality-authored-input-decisions-continuation-20261009/decisions.json",
@@ -291,8 +297,7 @@
     "capsule",
     "torus",
     "tapered_frustum",
-    "cylinder",
-    "thin_plate"
+    "cylinder"
   ],
   "current_lifecycle_checkpoint": {
     "code_revision": "236fe39879553a6e6a26ecaaa7914c07cb0dd815",
@@ -305,5 +310,18 @@
       "evidence": "docs/quality-lifecycle-followup-continuation-20261009/warm-shutdown-evidence.json",
       "evidence_sha256": "6ea758c5044cdcc0bcf0ca01d9f6449488194d32cb695cfd17afb7d2c5d40e78"
     }
+  },
+  "thin_plate_final_qualification_evidence": "docs/quality-thin-plate-final-qualification-continuation-20261009/native-evidence.json",
+  "current_generator_checkpoint": {
+    "code_revision": "755d3a5b17bae1992a7b22b3bd61fa0fd60c2c05",
+    "code_evidence": "docs/quality-generator-restart-continuation-20261009/code-evidence.json",
+    "completed": [
+      "whole-program authored style preflight before Blender allocation",
+      "actual finite world-Z sections for posed/tapered/bent deformed superquadrics",
+      "strict retained adapter for the five unfinished changed positive families"
+    ],
+    "bounded_gate_completed": "thin_plate",
+    "artist_surface_passed": null,
+    "aggregate_accepted": false
   }
 }
