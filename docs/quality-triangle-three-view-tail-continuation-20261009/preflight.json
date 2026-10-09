@@ -1,0 +1,153 @@
+{
+  "protocol": "frozen_triangle_three_view_tail_preflight_v1",
+  "status": "ready_for_root_review_not_executed",
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\native-plan.json",
+    "sha256": "608ff529c1ebf108309cf07bbf9764d3f543d6845c2b39e5af02c60ec12c5523"
+  },
+  "launch_command": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\launch-command.json",
+    "sha256": "811a7e6962a0ccc1b70db2348b9ee2606b22a847e233f8f5aba8697ba258d047"
+  },
+  "adapter": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py",
+    "sha256": "5b14abefcd28848f1e13b47bfeb8146ba8f73705fea1693d69542c16fc1a816e"
+  },
+  "models": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\triangle_tail_refinement.py",
+      "sha256": "6e2208f29864470b07d9cd1011a4a4a99c5b983e791af9d87ee4d4411fdfa6a4"
+    }
+  ],
+  "tests": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_arch_tail_refinement.py",
+      "sha256": "bc82b599954d2e879da961a8e64da7c3581316bf579c33821438682b7192ffbf"
+    }
+  ],
+  "input_count": 105,
+  "input_bytes": 14951510,
+  "toolchain_count": 3,
+  "toolchain_bytes": 339276760,
+  "retained_input_count": 0,
+  "retained_input_bytes": 0,
+  "supervisor_explicit_input_count": 18,
+  "supervisor_explicit_input_bytes": 364268,
+  "real_input_binding_validation": {
+    "passed": true,
+    "elapsed_seconds": 4.2564528999992035,
+    "native_jobs": 0,
+    "refits": 0
+  },
+  "focused_tests": {
+    "wrapper_guards": 4,
+    "wrapper_elapsed_seconds": 0.06750250000004598,
+    "scope": "unchanged original schema, exact single-family counts/types, empty-retained admission, exact physical body update"
+  },
+  "cpu_attempts": 1,
+  "cpu_calls": 67,
+  "cpu_elapsed_seconds": 0.6663107999993372,
+  "cpu_observed_admission": true,
+  "native_gates": "unrun; current selection unchanged",
+  "scope": {
+    "work_seconds": 85,
+    "join_seconds": 5,
+    "threads": 2,
+    "memory_limit_bytes": 8589934592,
+    "native_frames": 6,
+    "source_acquisitions": 0,
+    "candidate_alpha_frames": 5,
+    "candidate_neutral_frames": 1,
+    "native_fits": 0,
+    "retained_alpha_frames": 0,
+    "logical_frames": 6,
+    "raw_comparisons": 1,
+    "raw_count_per_direction": 4096,
+    "raw_seed": 61007,
+    "semantic_transactions": 1,
+    "qualification_children": 1,
+    "qualification_timeout_seconds": 15,
+    "resolution": [
+      512,
+      512
+    ],
+    "heldout_views": [
+      "oblique_145_40"
+    ]
+  },
+  "output_budget": {
+    "frame_reservations_bytes": 50331648,
+    "geometry_and_metadata_allowance_bytes": 16777216,
+    "planned_total_bytes": 67108864,
+    "limit_bytes": 268435456
+  },
+  "previous_rejected_checkpoint": {
+    "geometry_hash": "ddbf0ecf63d78353bbb79b92b8152228c0760979c93bf980084a6184b3ed03ab",
+    "recipe": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\rounded_triangle_dot\\program.json",
+      "sha256": "9150d659097fdaf33b6aa006541b7599ebaa536ed4db15cb6f4ac9544907a626",
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s",
+      "producer": "saved_arch_triangle_tail_checkpoint"
+    },
+    "receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\results.json",
+      "sha256": "6860bdb20d9b8d537283454439dfe100325ac3167ade16f2e67eb9d6d2afca0b",
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s",
+      "producer": "saved_arch_triangle_tail_checkpoint"
+    },
+    "evidence": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\native-evidence.json",
+      "sha256": "a6f4ddf8ab5159303c1502780afb4c7e2ea28361bf664ea9cc4a5a718c7f1a60"
+    },
+    "bounded_checkpoint_improved": false,
+    "heldout_alpha_nonworse": false,
+    "heldout_alpha_before": 0.0004130245069973171,
+    "heldout_alpha_after": 0.0005621673772111535,
+    "historical_selection": "rejected and unchanged; raw tail improvement did not override heldout alpha regression"
+  },
+  "previous_executed_checker": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\previous-executed-checker.py",
+    "sha256": "34c0f5525cb3f7dd7ade0a598d87bb19ec6fcc152c66af82f9dc9d7b0e435bba"
+  },
+  "blockers": [],
+  "native_execution": "not launched by helper",
+  "disabled_user_site_validate_only": {
+    "protocol": "actual_tail_cli_validate_only_v1",
+    "status": "succeeded",
+    "argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+      "-s",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\native-plan.json",
+      "--plan-sha256",
+      "608ff529c1ebf108309cf07bbf9764d3f543d6845c2b39e5af02c60ec12c5523",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-checkpoint-01",
+      "--validate-only"
+    ],
+    "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-validate-only-01\\owned-twdf72g1",
+    "producer_owner_created": false,
+    "native_jobs": 0,
+    "renders": 0,
+    "fits": 0,
+    "resource_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-validate-only-01\\owned-twdf72g1\\resource-receipt.json",
+      "sha256": "9f6146f597c2d3570b54398e302ec16483508c3eecb6cdb70e54311313ddf5de"
+    },
+    "stdout": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-validate-only-01\\owned-twdf72g1\\stdout.log",
+      "sha256": "7403cbc5aee91732a40bb6ed387fc46128b01baf412ae1021d2abef732984e60"
+    },
+    "manifest": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-validate-only-01\\owned-twdf72g1\\run-ownership.json",
+      "sha256": "ec68d63fc22e2e71590d5e156e4d413f9076eb87b4d1bfe10d95d74e7088a62d"
+    },
+    "lease": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-validate-only-01\\owned-twdf72g1\\run-lease.json",
+      "sha256": "e2bb0c3c504842f83544cd0fbc9b3a766a61e7722bd5c4f6138de02e2c47c901"
+    },
+    "lifecycle_complete": true
+  }
+}

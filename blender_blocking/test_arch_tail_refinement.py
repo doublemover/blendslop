@@ -131,4 +131,42 @@ class ArchRoofTailTests(unittest.TestCase):
         bad=deepcopy(proposed);bad['root_nodes'][0]['parameters']['height_world']=.41
         with self.assertRaisesRegex(ValueError,'unobserved'):runner.require_recipe_update(wire,bad,'concave_arch')
 
+    def test_three_view_single_family_schema_rejects_count_family_and_type_expansion(self):
+        import importlib.util
+        from pathlib import Path
+        spec=importlib.util.spec_from_file_location('single_triangle_tail_scope',Path(__file__).resolve().parents[1]/'scripts/run_arch_triangle_tail_check.py')
+        runner=importlib.util.module_from_spec(spec);spec.loader.exec_module(runner)
+        scope={'work_seconds':85,'join_seconds':5,'threads':2,'memory_limit_bytes':8*1024**3,
+            'native_frames':6,'source_acquisitions':0,'candidate_alpha_frames':5,
+            'candidate_neutral_frames':2,'native_fits':0,'retained_alpha_frames':0,'logical_frames':6,
+            'raw_comparisons':1,'raw_count_per_direction':4096,'raw_seed':61007,'semantic_transactions':1,
+            'qualification_children':1,'qualification_timeout_seconds':15,'resolution':[512,512],
+            'heldout_views':['oblique_145_40']}
+        # One family has one neutral; the two-family unchanged scope has two.
+        scope['candidate_neutral_frames']=1
+        plan={'protocol':runner.THREE_VIEW_PROTOCOL,'scope':scope,'cases':[{'family':'rounded_triangle_dot'}]}
+        runner.validate_scope(plan)
+        for key,value in [('native_frames',7),('retained_alpha_frames',1),('qualification_children',2),
+                          ('qualification_timeout_seconds',16),('raw_comparisons',True)]:
+            changed=deepcopy(plan);changed['scope'][key]=value
+            with self.assertRaises(ValueError):runner.validate_scope(changed)
+        changed=deepcopy(plan);changed['cases'][0]['family']='concave_arch'
+        with self.assertRaises(ValueError):runner.validate_scope(changed)
+
+    def test_empty_retained_inventory_only_for_known_single_family_protocol(self):
+        import importlib.util
+        import tempfile
+        from pathlib import Path
+        spec=importlib.util.spec_from_file_location('single_triangle_tail_inventory',Path(__file__).resolve().parents[1]/'scripts/run_arch_triangle_tail_check.py')
+        runner=importlib.util.module_from_spec(spec);spec.loader.exec_module(runner)
+        with tempfile.TemporaryDirectory() as folder:
+            p=Path(folder)/'fixed.bin';p.write_bytes(b'original frozen identity')
+            plan={'protocol':runner.THREE_VIEW_PROTOCOL,'input_sha256':{str(p):runner.sha(p)},
+                  'toolchain_sha256':{str(p):runner.sha(p)},'retained_input_sha256':{}}
+            runner.verify_inputs(plan)
+            changed=deepcopy(plan);changed['protocol']=runner.PROTOCOL
+            with self.assertRaisesRegex(ValueError,'retained input'):runner.verify_inputs(changed)
+            changed=deepcopy(plan);changed['retained_input_sha256']={str(p):runner.sha(p)}
+            with self.assertRaisesRegex(ValueError,'retained inputs forbidden'):runner.verify_inputs(changed)
+
 if __name__ == '__main__': unittest.main()

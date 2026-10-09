@@ -15,6 +15,7 @@ sys.path[:0] = [str(ROOT/'blender_blocking'), str(ROOT/'scripts'), str(ROOT)]
 # Blender disables user site; expose the already-installed packages before validation.
 import test_runner
 PROTOCOL = 'saved_arch_triangle_tail_checkpoint_v1'
+THREE_VIEW_PROTOCOL = 'saved_triangle_three_view_tail_checkpoint_v1'
 FAMILIES = ('concave_arch', 'rounded_triangle_dot')
 
 
@@ -65,9 +66,16 @@ def validate_scope(plan):
         'raw_comparisons':2, 'raw_count_per_direction':4096, 'raw_seed':61007,
         'semantic_transactions':2, 'qualification_children':2, 'qualification_timeout_seconds':15,
         'resolution':[512,512], 'heldout_views':['oblique_145_40']}
-    if (plan.get('protocol') != PROTOCOL or plan.get('scope') != expected
-            or tuple(c['family'] for c in plan.get('cases', [])) != FAMILIES):
-        raise ValueError('only the frozen two-case12-frame saved-proposal checkpoint is supported')
+    families = FAMILIES
+    if plan.get('protocol') == THREE_VIEW_PROTOCOL:
+        expected.update(native_frames=6,candidate_alpha_frames=5,candidate_neutral_frames=1,retained_alpha_frames=0,
+            logical_frames=6,raw_comparisons=1,semantic_transactions=1,qualification_children=1)
+        families = ('rounded_triangle_dot',)
+    if (plan.get('protocol') not in (PROTOCOL,THREE_VIEW_PROTOCOL) or plan.get('scope') != expected
+            or any(type(value) in (int,bool) and type(plan.get('scope',{}).get(key)) is not type(value)
+                   for key,value in expected.items())
+            or tuple(c['family'] for c in plan.get('cases', [])) != families):
+        raise ValueError('only the frozen two-family12-frame or triangle-only6-frame saved-proposal scopes are supported')
 
 
 def require_recipe_update(old, proposed, family):
@@ -118,7 +126,9 @@ def verify_inputs(plan):
     for path, digest in plan['input_sha256'].items():
         verify_file({'path':path,'sha256':digest})
     retained = plan.get('retained_input_sha256', {})
-    if not 1 <= len(retained) <= 32:
+    if plan.get('protocol') == THREE_VIEW_PROTOCOL:
+        if retained:raise ValueError('triangle three-view checkpoint renders all six frames; retained inputs forbidden')
+    elif not 1 <= len(retained) <= 32:
         raise ValueError('bounded explicit retained input inventory required')
     retained_bytes = 0
     for path, digest in retained.items():
@@ -231,7 +241,7 @@ def execute(plan, output, plan_binding):
         raise ValueError('frozen Blender5.2.2 build required')
     validate_plan(plan)
     started=time.monotonic(); deadline=started+85.
-    receipt={'protocol':PROTOCOL,'status':'running','cases':{},'completed_native_frames':0,
+    receipt={'protocol':plan['protocol'],'status':'running','cases':{},'completed_native_frames':0,
              'attempted_native_frames':0,'qualification_children_invoked':0,'raw_comparisons':0,
              'semantic_transactions':0,'native_fits':0,'source_acquisitions':0,'retained_alpha_frames_verified':0,'aggregate_accepted':False}
     owner=OwnedRun(output,producer='saved_arch_triangle_tail_checkpoint',max_generated_bytes=268435456,
@@ -381,8 +391,12 @@ def execute(plan, output, plan_binding):
                     raise ValueError('validation mutated frozen baseline/proposal')
                 row['status']='measured';publish('results.json',receipt)
             verify_inputs(plan)
-            if receipt['completed_native_frames']!=7 or receipt['retained_alpha_frames_verified']!=5:
-                raise ValueError('unexpected final missing/reused frame count')
+            if (receipt['completed_native_frames']!=plan['scope']['native_frames']
+                    or receipt['retained_alpha_frames_verified']!=plan['scope']['retained_alpha_frames']
+                    or receipt['raw_comparisons']!=plan['scope']['raw_comparisons']
+                    or receipt['semantic_transactions']!=plan['scope']['semantic_transactions']
+                    or receipt['qualification_children_invoked']!=plan['scope']['qualification_children']):
+                raise ValueError('unexpected final exact frozen scope counts')
             receipt.update(status='measured',elapsed_seconds=time.monotonic()-started)
             publish('results.json',receipt)
         except BaseException as primary:

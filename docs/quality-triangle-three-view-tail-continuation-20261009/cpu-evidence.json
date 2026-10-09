@@ -1,0 +1,241 @@
+{
+  "protocol": "triangle_three_view_tail_cpu_evidence_v1",
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\cpu-plan.json",
+    "sha256": "67ce97893736069f82e2fc1fd877a7b6d9658572c2aac73fe1dc31b8a91de88d"
+  },
+  "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo",
+  "receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo\\results.json",
+    "sha256": "df28032c461f71c0e9767a831e1dcf422268d958d0519b3c4ab0d434abca3628"
+  },
+  "manifest": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo\\run-ownership.json",
+    "sha256": "8975f9eb79f5f7a0b6227a857a3b174779cd6c3caf246204e529a8b8abe4d43e"
+  },
+  "lease": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo\\run-lease.json",
+    "sha256": "e6b63c99fb78745da5dfb1f6217ef9feb43e43184a956d8acf2252de0f181a48"
+  },
+  "result": {
+    "protocol": "triangle_three_view_tail_cpu_v1",
+    "status": "measured",
+    "plan_binding": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\cpu-plan.json",
+      "sha256": "67ce97893736069f82e2fc1fd877a7b6d9658572c2aac73fe1dc31b8a91de88d"
+    },
+    "fixed_recipe_diagnosis": {
+      "baseline_bfe": {
+        "front": {
+          "mean_absolute_source_pixels": 0.16030297112279404,
+          "p95_absolute_source_pixels": 0.450686624122372,
+          "maximum_absolute_source_pixels": 0.5038061264261774,
+          "frame_censored": false,
+          "frame_border_closure_added": false
+        },
+        "top": {
+          "mean_absolute_source_pixels": 0.1411714080628485,
+          "p95_absolute_source_pixels": 0.39443760542602896,
+          "maximum_absolute_source_pixels": 0.5246441091145131,
+          "frame_censored": false,
+          "frame_border_closure_added": false
+        },
+        "oblique_35_28": {
+          "mean_absolute_source_pixels": 0.10581765683288184,
+          "p95_absolute_source_pixels": 0.25243614810176696,
+          "maximum_absolute_source_pixels": 0.5678934288694956,
+          "frame_censored": true,
+          "frame_border_closure_added": false
+        }
+      },
+      "rejected_ddbf": {
+        "front": {
+          "mean_absolute_source_pixels": 0.08891028668942264,
+          "p95_absolute_source_pixels": 0.18707030759463653,
+          "maximum_absolute_source_pixels": 0.28175175893536103,
+          "frame_censored": false,
+          "frame_border_closure_added": false
+        },
+        "top": {
+          "mean_absolute_source_pixels": 0.13967672686450974,
+          "p95_absolute_source_pixels": 0.23986717342763503,
+          "maximum_absolute_source_pixels": 0.3226468936135689,
+          "frame_censored": false,
+          "frame_border_closure_added": false
+        },
+        "oblique_35_28": {
+          "mean_absolute_source_pixels": 0.13901881185354162,
+          "p95_absolute_source_pixels": 0.35580501602063475,
+          "maximum_absolute_source_pixels": 0.40795267136506275,
+          "frame_censored": true,
+          "frame_border_closure_added": false
+        }
+      },
+      "model_evaluations": 6,
+      "scope": "fixed two recipes in only three fitting views; separate diagnostic, no heldout observations or optimizer search"
+    },
+    "attempts": 1,
+    "native_jobs": 0,
+    "source_arrays_consumed_by_optimizer": false,
+    "detail": {
+      "protocol": "bounded_triangle_pose_tail_v1",
+      "free_controls": [
+        "center_y_world",
+        "center_z_world",
+        "front_fraction"
+      ],
+      "original_controls": {
+        "center_y_world": 0.0011442513795320297,
+        "center_z_world": 0.0019401367792599173,
+        "front_fraction": 0.5054832174920212
+      },
+      "proposed_controls": {
+        "center_y_world": 0.00014163080915741404,
+        "center_z_world": 0.00011953928769246457,
+        "front_fraction": 0.5010835587660483
+      },
+      "selected_controls": {
+        "center_y_world": 0.00014163080915741404,
+        "center_z_world": 0.00011953928769246457,
+        "front_fraction": 0.5010835587660483
+      },
+      "frozen_intervals": [
+        [
+          -0.007369268160897086,
+          0.009657770919961145
+        ],
+        [
+          -0.006573382761169198,
+          0.010453656319689033
+        ],
+        [
+          0.48548321749202117,
+          0.5254832174920212
+        ]
+      ],
+      "objective": "equal-view observed contour L4 in source-pixel units",
+      "retention": "mean absolute, P95 and maximum observed contour errors all nonworse; full local rank and no active bound",
+      "baseline_observed_tail": {
+        "mean_absolute_source_pixels": 0.13576401200617483,
+        "p95_absolute_source_pixels": 0.40336492921648825,
+        "maximum_absolute_source_pixels": 0.5678934288694956
+      },
+      "selected_observed_tail": {
+        "mean_absolute_source_pixels": 0.11167037730424435,
+        "p95_absolute_source_pixels": 0.2658342724456791,
+        "maximum_absolute_source_pixels": 0.33750648588225535
+      },
+      "observed_tail_admitted": true,
+      "residual_calls": 67,
+      "elapsed_seconds": 0.6663107999993372,
+      "termination": "solver_completed",
+      "fit_time_share": 0.8,
+      "rank_time_reserved_share": 0.2,
+      "observations": {
+        "front": {
+          "camera_sha256": "efa06b6cc969bf8bc63e3bd2c4469f687affdc51a047cddfd8f84eb6c58b20a6",
+          "coverage_sha256": "0dd84a74cad7b78f7d18335a2f3975a32239745c90487917eac4736f22d2b65d",
+          "observed_crossings": 1108,
+          "fitted_crossings": 384,
+          "frame_censored": false,
+          "complete_contour_claim": true,
+          "frame_border_closure_added": false
+        },
+        "oblique_35_28": {
+          "camera_sha256": "23c8dca8a337b3a3591e8ff780fc2f8304c9443d63983df9b888641795ab06b3",
+          "coverage_sha256": "476bd35bf1c51b8a2a36c3232982ad83b68c1e88f78fce8e105e12a219d0b050",
+          "observed_crossings": 1228,
+          "fitted_crossings": 384,
+          "frame_censored": true,
+          "complete_contour_claim": false,
+          "frame_border_closure_added": false
+        },
+        "top": {
+          "camera_sha256": "f3899f43127f4d170dbf479b61fe3d70c0b7e7f1b570745c540359f8db226bdb",
+          "coverage_sha256": "e7b382dce491e360356f879fdab87018a71fdbe50d2ce3b91db904e2305f6db5",
+          "observed_crossings": 1668,
+          "fitted_crossings": 384,
+          "frame_censored": false,
+          "complete_contour_claim": true,
+          "frame_border_closure_added": false
+        }
+      },
+      "local_rank": 3,
+      "local_sensitivity_singular_values": [
+        118.50154958339981,
+        63.87861807819985,
+        20.92597253804513
+      ],
+      "interval_bound_active": false,
+      "heldout_views": [
+        "oblique_145_40"
+      ],
+      "prior_view_exposure": {
+        "oblique_145_40": "prior selected and ddbf rejected native alpha/raw/inspection exposed; excluded from this fit, bounds, ROI and diagnosis"
+      },
+      "heldout_fit_or_roi_used": false,
+      "global_uniqueness_established": false,
+      "identifiability": "locally_identified",
+      "baseline_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+      "baseline_program_file_sha256": "5e6f69fff82aad0c7e7ffbe720547010c6691907dcce795b45a4a08b688e599b",
+      "native_silhouette": "unrun",
+      "surface_tail": "unrun",
+      "native_boundary": "unrun",
+      "artist_limits": null,
+      "aggregate_accepted": false
+    },
+    "proposed_program": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo\\program.json",
+      "sha256": "40c498d1598f01e03307881daea53ebd67520c0b1153c4f0199cb63b45c68792"
+    },
+    "baseline_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+    "rejected_predecessor": {
+      "geometry_hash": "ddbf0ecf63d78353bbb79b92b8152228c0760979c93bf980084a6184b3ed03ab",
+      "recipe": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\rounded_triangle_dot\\program.json",
+        "sha256": "9150d659097fdaf33b6aa006541b7599ebaa536ed4db15cb6f4ac9544907a626",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s",
+        "producer": "saved_arch_triangle_tail_checkpoint",
+        "manifest": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\run-ownership.json",
+          "sha256": "619963a6dc3e8b6311abe6b927f3663a64ae9b9b81ba71ed0720c0db238f6e7d"
+        },
+        "lease": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\run-lease.json",
+          "sha256": "aec0f8d4a43101111cba5b74d2893af308d371a1162f6f3199ebf954449bdc34"
+        }
+      },
+      "receipt": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\results.json",
+        "sha256": "6860bdb20d9b8d537283454439dfe100325ac3167ade16f2e67eb9d6d2afca0b",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s",
+        "producer": "saved_arch_triangle_tail_checkpoint",
+        "manifest": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\run-ownership.json",
+          "sha256": "619963a6dc3e8b6311abe6b927f3663a64ae9b9b81ba71ed0720c0db238f6e7d"
+        },
+        "lease": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\run-lease.json",
+          "sha256": "aec0f8d4a43101111cba5b74d2893af308d371a1162f6f3199ebf954449bdc34"
+        }
+      },
+      "bounded_checkpoint_improved": false,
+      "reason": "heldout alpha regression; retained unchanged"
+    },
+    "heldout_native": "unrun; no selection promotion",
+    "artist_limits": null,
+    "aggregate_accepted": false
+  },
+  "audit": {
+    "protocol": "run-ownership-dry-run-v1",
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo",
+    "mode": "read_only",
+    "status": "dry_run_ready",
+    "mutation_supported": false,
+    "eligible": [],
+    "eligible_bytes": 0,
+    "retained_bytes": 18959,
+    "blockers": [],
+    "unknown_files": []
+  }
+}
