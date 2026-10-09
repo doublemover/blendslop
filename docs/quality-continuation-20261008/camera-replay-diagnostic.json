@@ -1,0 +1,200 @@
+{
+  "protocol": "retained_native_frame_delta_diagnostic_v1",
+  "fits": 0,
+  "renders": 0,
+  "cases": {
+    "sphere": {
+      "front": {
+        "max_matrix_component_delta": 1.1920928955078125e-07,
+        "max_vertex_projected_pixel_displacement": 0.00013152625277257357,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_145_40": {
+        "max_matrix_component_delta": 3.070607945687698e-08,
+        "max_vertex_projected_pixel_displacement": 6.6388106842627285e-06,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_35_28": {
+        "max_matrix_component_delta": 4.7370534161927935e-08,
+        "max_vertex_projected_pixel_displacement": 9.58012363177934e-06,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "side": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "top": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      }
+    },
+    "anisotropic_ellipsoid": {
+      "front": {
+        "max_matrix_component_delta": 1.1920928955078125e-07,
+        "max_vertex_projected_pixel_displacement": 8.037828166607142e-05,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_145_40": {
+        "max_matrix_component_delta": 1.4901161193847656e-07,
+        "max_vertex_projected_pixel_displacement": 0.00020315070465979843,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_35_28": {
+        "max_matrix_component_delta": 9.412133294972591e-09,
+        "max_vertex_projected_pixel_displacement": 1.3957683222543124e-06,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "side": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "top": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      }
+    },
+    "cylinder": {
+      "front": {
+        "max_matrix_component_delta": 1.1920928955078125e-07,
+        "max_vertex_projected_pixel_displacement": 0.00010685745832006432,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_145_40": {
+        "max_matrix_component_delta": 3.070607945687698e-08,
+        "max_vertex_projected_pixel_displacement": 8.37858387471501e-06,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_35_28": {
+        "max_matrix_component_delta": 4.7370534161927935e-08,
+        "max_vertex_projected_pixel_displacement": 1.2259527082687454e-05,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "side": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "top": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      }
+    },
+    "tapered_frustum": {
+      "front": {
+        "max_matrix_component_delta": 1.1920928955078125e-07,
+        "max_vertex_projected_pixel_displacement": 0.00011690260646446404,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_145_40": {
+        "max_matrix_component_delta": 8.940696716308594e-08,
+        "max_vertex_projected_pixel_displacement": 0.00011978449964752461,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_35_28": {
+        "max_matrix_component_delta": 6.3601781619127e-08,
+        "max_vertex_projected_pixel_displacement": 1.9346872598912578e-05,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "side": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "top": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      }
+    },
+    "rounded_box": {
+      "front": {
+        "max_matrix_component_delta": 1.1920928955078125e-07,
+        "max_vertex_projected_pixel_displacement": 9.043943254027909e-05,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_145_40": {
+        "max_matrix_component_delta": 3.070607945687698e-08,
+        "max_vertex_projected_pixel_displacement": 8.632501876274547e-06,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_35_28": {
+        "max_matrix_component_delta": 4.7370534161927935e-08,
+        "max_vertex_projected_pixel_displacement": 1.171641090095273e-05,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "side": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "top": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      }
+    },
+    "thin_plate": {
+      "front": {
+        "max_matrix_component_delta": 1.1920928955078125e-07,
+        "max_vertex_projected_pixel_displacement": 6.561058398801833e-06,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_145_40": {
+        "max_matrix_component_delta": 3.070607945687698e-08,
+        "max_vertex_projected_pixel_displacement": 8.22844389914558e-06,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "oblique_35_28": {
+        "max_matrix_component_delta": 4.7370534161927935e-08,
+        "max_vertex_projected_pixel_displacement": 1.0642541764784978e-05,
+        "reference_match": "mismatch",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "side": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      },
+      "top": {
+        "max_matrix_component_delta": 0.0,
+        "max_vertex_projected_pixel_displacement": 0.0,
+        "reference_match": "matched",
+        "scope": "diagnostic only; strict frame hashes/gates not changed"
+      }
+    }
+  },
+  "scope": "same saved geometry projected through frozen legacy and actual native camera matrices; no tolerance or gate change"
+}

@@ -2,7 +2,6 @@
 from __future__ import annotations
 from copy import deepcopy
 from dataclasses import replace
-from contextlib import nullcontext
 import time
 import numpy as np
 
@@ -27,7 +26,8 @@ def evaluate_program_job(payload):
     groups_before = set(bpy.data.node_groups)
     geometry = None
     try:
-        compiled = _compile_program(replace(program,program_id=request.candidate_id), request.config)
+        compiled = _compile_program(replace(program,program_id=request.candidate_id),
+                                    request.config, context=request.context)
         context = SimpleNamespace(blender_available=True,native_resident=True,geometry_cache=GeometryCache())
         target = request.target
         if not target.extras.get("view_calibration"):
@@ -170,7 +170,7 @@ def parameter_variants(program, limit=6, fraction=.06, *, start_control=0, relea
 
 def geometric_program_search(request, seed):
     from blender_blocking.primitives.program_search import search_shape_program_candidates, _program_signature
-    from ...process_executor import current_worker_client, PersistentProcessExecutor
+    from blender_blocking.reconstruction.process_executor import executor_scope
     started = time.perf_counter()
     construction_failures = []
     candidates = search_shape_program_candidates(seed,max_candidates=min(16,int(request.config.get("program_search_candidates",4))))
@@ -222,8 +222,7 @@ def geometric_program_search(request, seed):
             if family_entries.get(family):
                 interleaved.append(family_entries[family].pop(0))
     entries = interleaved[:max(1,min(24,int(request.config.get("program_search_candidates",4))))]
-    shared = current_worker_client() or getattr(request.context,"process_executor",None)
-    manager = nullcontext(shared) if shared is not None else PersistentProcessExecutor(int(request.config.get("program_workers",2)))
+    manager = executor_scope(int(request.config.get("program_workers", 2)), context=request.context)
     summaries, best, best_program, best_structural = [], None, seed, 0.
     seen = set()
     timeout = request.budget.timeout_s or float(request.config.get("program_timeout_s", 45.))

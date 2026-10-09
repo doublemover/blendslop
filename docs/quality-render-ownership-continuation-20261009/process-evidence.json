@@ -1,0 +1,16 @@
+{
+  "protocol": "owned-lifecycle-process-fixtures-v1",
+  "quality_foundation_commit": "95f752c6c3ecafda3f5e1390ccf86d908edd6622",
+  "status": "passed",
+  "native_blender_used": false,
+  "new_fixtures": 3,
+  "concurrent_and_crash_elapsed_seconds": 4.235,
+  "windows_locked_elapsed_seconds": 0.016,
+  "fixtures": [
+    "actual two concurrent producers; separate active/released leases and unchanged shared input",
+    "actual joined os._exit17 crash; active lease and read-only recovery blocker retained",
+    "actual Windows share-zero lock; completed stage and published original byte-identical"
+  ],
+  "reclamation": "read-only; no production deletion/adoption",
+  "source_sha256": "38a1b32ef63a60bff405069b8479971db964d318440f630df72121634837dfc1"
+}

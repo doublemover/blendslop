@@ -76,7 +76,7 @@ def pixel_cell_viewport(target,constraint):
     return axes,(u0,u1,v0,v1)
 
 
-def bounds_from_calibrated_masks(masks, bboxes, records):
+def bounds_from_calibrated_masks(masks, bboxes, records, *, coverage_masks=None):
     """Infer only observed axis extents; camera bounds contain no hidden mesh dimensions."""
     from reconstruction.types import Bounds3D
     validate_view_calibration(records)
@@ -87,6 +87,13 @@ def bounds_from_calibrated_masks(masks, bboxes, records):
         height, width = mask.shape
         xmin,xmax,ymin,ymax = records[view]["world_bounds"]
         box = bboxes[view]
+        if coverage_masks is not None and view in coverage_masks:
+            from .coverage_evidence import coverage_bbox
+            from .types import Bounds2D
+            coverage = np.asarray(coverage_masks[view], float)
+            if coverage.shape != mask.shape:
+                raise ValueError(f"{view}: coverage and mask dimensions differ")
+            box = Bounds2D(*coverage_bbox(coverage))
         sx, sy = (xmax-xmin)/max(1,width), (ymax-ymin)/max(1,height)
         axes = AXES[view]
         observed[axes[0]].append((xmin+box.x0*sx, xmin+box.x1*sx, view, sx))
@@ -151,10 +158,10 @@ def calibrated_profile(request):
     return EllipticalProfileU(heights_t=t, rx=radii["front"], ry=radii["side"],
         world_height=bounds.max_z-bounds.min_z, z0=bounds.min_z,
         cx=centers["front"], cy=centers["side"], meta={"source": "known_calibrated_mask_rows",
-        "row_evidence": evidence, "censored_completion": "interpolated_exact_sections_with_known_foreground_lower_bounds"})
+        "row_evidence": evidence, "coverage_views": sorted(c.view for c in request.target.constraints if c.coverage_mask is not None), "censored_completion": "interpolated_exact_sections_with_known_foreground_lower_bounds"})
 
 
-def visible_search_bounds(masks, bboxes, records, valid_masks):
+def visible_search_bounds(masks, bboxes, records, valid_masks, *, coverage_masks=None):
     """Use full observations for tight extents; partial viewports bound search only."""
     from reconstruction.types import Bounds3D
     validate_view_calibration(records)
@@ -169,6 +176,13 @@ def visible_search_bounds(masks, bboxes, records, valid_masks):
         if valid.shape != mask.shape: raise ValueError('visibility mask dimensions differ')
         if valid.all() and view in bboxes:
             box = bboxes[view]
+            if coverage_masks is not None and view in coverage_masks:
+                from .coverage_evidence import coverage_bbox
+                from .types import Bounds2D
+                coverage = np.asarray(coverage_masks[view], float)
+                if coverage.shape != mask.shape:
+                    raise ValueError(f"{view}: coverage and mask dimensions differ")
+                box = Bounds2D(*coverage_bbox(coverage))
             observed[a].append((u0+box.x0/w*(u1-u0), u0+box.x1/w*(u1-u0)))
             observed[b].append((v1-box.y1/h*(v1-v0), v1-box.y0/h*(v1-v0)))
     lows, highs = [], []

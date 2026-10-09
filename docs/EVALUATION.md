@@ -2,7 +2,19 @@
 
 [Open the evaluation gallery](https://doublemover.github.io/blendslop/) for retained synthetic references, actual reconstructed outputs, per-view metrics and explicit missing verdicts.
 
-## Current snapshot: 2026-10-08
+## Current retained results: 2026-10-09
+
+The main demo selects one current retained body for each of the twelve frozen reference families: sphere, anisotropic ellipsoid, cylinder, tapered frustum, smooth vase, torus, capsule, rounded box, thin plate, concave arch, asymmetric multipart solid and rounded triangular dot. `site/latest.json` binds their identities, five original view measurements and independent verdicts to retained evidence. The original frozen matrix rows remain unchanged; the current presentation uses separately measured improvement checkpoints where available.
+
+The calibrated vase `7447cc40` passes all five original silhouettes, uncached exact solid-boundary qualification and its existing semantic edit/restore and surface contract. Mean distance is 0.000377356538 world units and oriented normal P95 is 1.102395852 degrees, below its unchanged 0.003 / 2.5 limits. Its already-recorded acceptance is scoped to that calibrated body and frozen framing.
+
+The eleven non-vase families have source-conditioned engineering policies and actual reconstruction evidence. Artist limits remain undefined, independently of the engineering passes. Sphere and ellipsoid retain their original candidates: later trial updates worsened held-out alpha and were rejected. Arch distance P95 and triangle sampled maximum increased despite improvements in their mean errors; those observations remain explicit. Multipart has a faint visible side seam. Torus, cylinder and frustum retain finite-facet shading in both source and candidate. Original clipped oblique framing and historical ownership gaps are not rewritten as new passes.
+
+The current UI displays identity-bound retained pairs where available and explains any missing pass. It never substitutes an older beauty body. Deliberate wrong-depth, filled-cavity and missing-part failures remain successful negative-control detections, separate from the twelve actual candidates.
+
+Published implementation `f5d7f4122273f8372fd8620bcb9df5b621a88810` passed Blender 5.2.2 CI: full 177 passed / 0 failed / 0 skipped and quick 175 passed / 0 failed / 2 intentional skips. [Completed full/quick run](https://github.com/doublemover/blendslop/actions/runs/37955420996). Correctness CI does not grant artist acceptance. The current demo integration and manual-only generation configuration must be reviewed and published separately; see [generation and publishing](EVALUATION_SITE.md).
+
+## Historical snapshot: 2026-10-08
 
 The frozen suite has twelve prepared reference families, twelve index/volume topology screens and twelve live object-scale edit responses. Three wrong-depth, filled-cavity and missing-part controls are caught. Reference preparation is not reconstructed-family acceptance. Two families have actual reconstruction evidence:
 
@@ -16,7 +28,7 @@ Blender 5.2.2 correctness CI on merged main `69eb23128a18006501b2a1f89e8df129bfd
 
 ## Independent metric contracts
 
-Area IoU measures foreground overlap. Boundary IoU measures overlap of the configured boundary bands; signed-distance loss compares silhouette distance fields under the original evaluation normalization. Each required view must meet area >= 0.7, boundary >= 0.8 and signed-distance loss <= 0.05 for the two actual reconstructions. The preparation controls use their own recorded observation protocol.
+Area IoU measures foreground overlap. Boundary IoU measures overlap of the configured boundary bands; signed-distance loss compares silhouette distance fields under the original evaluation normalization. Each required view must meet area >= 0.7, boundary >= 0.8 and signed-distance loss <= 0.05 for each current actual reconstruction. The preparation controls use their own recorded observation protocol.
 
 Surface distance uses 4,096 deterministic area-weighted samples in each direction, seed 61007, and nearest native triangles in unchanged world coordinates. Normal angles use oriented geometric face normals; opposite normals are 180 degrees. Caps and authored corners are retained. Index topology, actual solid-boundary qualification and edit response are separate verdicts. Any required failure or unavailable metric blocks acceptance. [Gate implementation](../blender_blocking/evaluation/silhouette_eval.py), [surface protocol](../blender_blocking/evaluation/surface_quality.py), [quality/performance guidance](QUALITY_PERF_GATES.md).
 

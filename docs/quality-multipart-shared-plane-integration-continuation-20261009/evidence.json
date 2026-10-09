@@ -1,0 +1,689 @@
+{
+  "actual_blender_build_hash": "d13f752e3b9c",
+  "aggregate_accepted": false,
+  "artist_limits": null,
+  "copy_scope": "exact byte retention only; copied manifests retain original roots and do not adopt ownership of copies",
+  "counts": {
+    "fits": 0,
+    "frames": 0,
+    "qualifier_children": 0,
+    "raw_pairs": 0
+  },
+  "depth_edit": {
+    "depth_ratio": 1.0499999924642645,
+    "exact_indexed_restoration": true,
+    "fixed_far_plane": true,
+    "geometry_changed": true,
+    "original_controls": {
+      "compiled_root_pointer": 3027184990472,
+      "modifiers": [
+        [
+          "ObservedExactUnion1",
+          "BOOLEAN",
+          "UNION",
+          "EXACT",
+          3027191897352
+        ],
+        [
+          "ObservedExactUnion2",
+          "BOOLEAN",
+          "UNION",
+          "EXACT",
+          3027184977928
+        ]
+      ],
+      "output_pointer": 3027191891976,
+      "sources": [
+        [
+          3027191891976,
+          3027184771208,
+          [
+            [
+              1.6007063388824463,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.5000196099281311,
+              -0.24997878074645996
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ],
+        [
+          3027191897352,
+          3027184735752,
+          [
+            [
+              0.45005661249160767,
+              0.0,
+              0.0,
+              -0.3997710645198822
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.9999759793281555,
+              0.4500170648097992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ],
+        [
+          3027184977928,
+          3027184555528,
+          [
+            [
+              0.349599152803421,
+              0.0,
+              0.0,
+              0.4499990940093994
+            ],
+            [
+              0.0,
+              0.44980481266975403,
+              0.0,
+              -0.08005412667989731
+            ],
+            [
+              0.0,
+              0.0,
+              0.4952014982700348,
+              0.19762982428073883
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ]
+      ]
+    },
+    "passed": true,
+    "restored_controls": {
+      "compiled_root_pointer": 3027184990472,
+      "modifiers": [
+        [
+          "ObservedExactUnion1",
+          "BOOLEAN",
+          "UNION",
+          "EXACT",
+          3027191897352
+        ],
+        [
+          "ObservedExactUnion2",
+          "BOOLEAN",
+          "UNION",
+          "EXACT",
+          3027184977928
+        ]
+      ],
+      "output_pointer": 3027191891976,
+      "sources": [
+        [
+          3027191891976,
+          3027184771208,
+          [
+            [
+              1.6007063388824463,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.5000196099281311,
+              -0.24997878074645996
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ],
+        [
+          3027191897352,
+          3027184735752,
+          [
+            [
+              0.45005661249160767,
+              0.0,
+              0.0,
+              -0.3997710645198822
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.9999759793281555,
+              0.4500170648097992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ],
+        [
+          3027184977928,
+          3027184555528,
+          [
+            [
+              0.349599152803421,
+              0.0,
+              0.0,
+              0.4499990940093994
+            ],
+            [
+              0.0,
+              0.44980481266975403,
+              0.0,
+              -0.08005412667989731
+            ],
+            [
+              0.0,
+              0.0,
+              0.4952014982700348,
+              0.19762982428073883
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        ]
+      ]
+    },
+    "restored_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "source_controls_restored": true
+  },
+  "expected_indexed_geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+  "generic_replay": {
+    "actual_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "collection_names": [
+      "SharedPlaneIntegration_50b07fd03bd642e387ddf1da3542976b"
+    ],
+    "live_exact_unions": true,
+    "matches_expected_indexed": true,
+    "relation": {
+      "arm_node_id": "observed_tall_arm",
+      "base_node_id": "observed_base",
+      "declared_near_world": -0.12498491023031844,
+      "edit_scope": "arm near-side depth from mesh Y coordinates; far plane fixed; other X/Z source controls remain live",
+      "exact_common_y_frame": true,
+      "far_local": 0.5,
+      "flat_shading_preserved": true,
+      "native_near_rounding_world": 2.4556501276862264e-09,
+      "near_world": -0.12498490777466831,
+      "protocol": "multipart_shared_far_y_plane_v1",
+      "scope": "construction observation only; final shape, surface, boundary and edit gates remain independent",
+      "shared_far_world": 0.3252679191664356
+    },
+    "same_caller_collection": true
+  },
+  "launch_command_sha256": "39e59082a953abc2fed189e0770b862566a5934d0c05de52d6b1a70023b5c8d0",
+  "owners": {
+    "producer": {
+      "lease_sha256": "125983571347a4fc359beb1322636cc6e9726f71d8102e20038eae8268b03457",
+      "lease_status": "released",
+      "manifest_sha256": "6153dd01a79e7c6162bdd54737b4a63ac0caef8f61d41e5fd79a63141819c004",
+      "read_only_audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 14334,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01\\owned-4iy88imi",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01\\owned-4iy88imi",
+      "state": "succeeded"
+    },
+    "supervisor": {
+      "lease_sha256": "a581a56b16bc4eb68bc3bf13bd6e023593a180fec59863b5dc4bac7f1b65dbde",
+      "lease_status": "released",
+      "manifest_sha256": "32eb822e7b496dc16bfa1be015132df0dd6ae956adc7fb25b6901da147c2e92d",
+      "read_only_audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 13793,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl",
+      "state": "succeeded"
+    }
+  },
+  "plan_sha256": "6a45591fa13d9f9774542b92174a2eeafcb19795b31d2ded7ad80a54de37c1b3",
+  "post_run_input_verification": {
+    "all_verified": true,
+    "count": 21,
+    "inputs": [
+      {
+        "actual_sha256": "3e97bc30c728c171cce2dcacc9ed249effcf374b4757e34a3dda9c502cfcfe9e",
+        "bytes": 15619,
+        "expected_sha256": "3e97bc30c728c171cce2dcacc9ed249effcf374b4757e34a3dda9c502cfcfe9e",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology.py"
+      },
+      {
+        "actual_sha256": "a72f08ac2ea97dbeaa25ff059727dc9c87664f7274a1c57b4854f173ae403655",
+        "bytes": 2058,
+        "expected_sha256": "a72f08ac2ea97dbeaa25ff059727dc9c87664f7274a1c57b4854f173ae403655",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology_receipt.py"
+      },
+      {
+        "actual_sha256": "3226433f881a72446baca12a01181f9d2015e232a4f48cd2fbee726ea647b741",
+        "bytes": 7229,
+        "expected_sha256": "3226433f881a72446baca12a01181f9d2015e232a4f48cd2fbee726ea647b741",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program.py"
+      },
+      {
+        "actual_sha256": "385d2cd95b67259821faed893073a494013d37e659aaf18c5e22b5546bd75b35",
+        "bytes": 32129,
+        "expected_sha256": "385d2cd95b67259821faed893073a494013d37e659aaf18c5e22b5546bd75b35",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py"
+      },
+      {
+        "actual_sha256": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a",
+        "bytes": 17802,
+        "expected_sha256": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py"
+      },
+      {
+        "actual_sha256": "6e8c609855fd757496b886465e229eac8026ee02b644191f80dd7aeeba9d7de5",
+        "bytes": 15619,
+        "expected_sha256": "6e8c609855fd757496b886465e229eac8026ee02b644191f80dd7aeeba9d7de5",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_family.py"
+      },
+      {
+        "actual_sha256": "38a3bd79c8f54e27006a884d1589e0de900a1e9fdf2c8d6003a5a419aebcee14",
+        "bytes": 14016,
+        "expected_sha256": "38a3bd79c8f54e27006a884d1589e0de900a1e9fdf2c8d6003a5a419aebcee14",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py"
+      },
+      {
+        "actual_sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+        "bytes": 7366,
+        "expected_sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py"
+      },
+      {
+        "actual_sha256": "806234e3e5d5adf6774ba471613f8381fb59652e34fc1175ed5f3e2044916d4c",
+        "bytes": 7556,
+        "expected_sha256": "806234e3e5d5adf6774ba471613f8381fb59652e34fc1175ed5f3e2044916d4c",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\oriented_support.py"
+      },
+      {
+        "actual_sha256": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd",
+        "bytes": 1238,
+        "expected_sha256": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_targets.py"
+      },
+      {
+        "actual_sha256": "c462f8ba7ac156aae37c7a48734405c6536ca5d89282a4823f314493c688428c",
+        "bytes": 10347,
+        "expected_sha256": "c462f8ba7ac156aae37c7a48734405c6536ca5d89282a4823f314493c688428c",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\projection_contract.py"
+      },
+      {
+        "actual_sha256": "af95365b79715c94ff728f39084ebdcffd5c2eb0b221fcbfa1e8a0e3e51f0595",
+        "bytes": 26868,
+        "expected_sha256": "af95365b79715c94ff728f39084ebdcffd5c2eb0b221fcbfa1e8a0e3e51f0595",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\types.py"
+      },
+      {
+        "actual_sha256": "5ec73b3c97eb53395d65cc0ff422afc8f0463935f105e76c956044aa78ac8ad5",
+        "bytes": 15013,
+        "expected_sha256": "5ec73b3c97eb53395d65cc0ff422afc8f0463935f105e76c956044aa78ac8ad5",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_multipart_planar_join.py"
+      },
+      {
+        "actual_sha256": "78a483d2d2e8ed10592dffb889aff72106ec350acc170fec81f0571524562456",
+        "bytes": 33821,
+        "expected_sha256": "78a483d2d2e8ed10592dffb889aff72106ec350acc170fec81f0571524562456",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py"
+      },
+      {
+        "actual_sha256": "3f3b666025733059fc46f2d803d929a25075fce7ad0170921aafe8dbf0eb6bb7",
+        "bytes": 7370,
+        "expected_sha256": "3f3b666025733059fc46f2d803d929a25075fce7ad0170921aafe8dbf0eb6bb7",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_shape_program_shared_plane.py"
+      },
+      {
+        "actual_sha256": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b",
+        "bytes": 23620,
+        "expected_sha256": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py"
+      },
+      {
+        "actual_sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+        "bytes": 12563,
+        "expected_sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py"
+      },
+      {
+        "actual_sha256": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a",
+        "bytes": 801,
+        "expected_sha256": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-evidence\\candidate-evaluated-exact.npz"
+      },
+      {
+        "actual_sha256": "980ab9dcc1f982eac5a15dcb5a3163471d159cbbea7818cc482185c3a12461ee",
+        "bytes": 5789,
+        "expected_sha256": "980ab9dcc1f982eac5a15dcb5a3163471d159cbbea7818cc482185c3a12461ee",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-evidence\\candidate-program.json"
+      },
+      {
+        "actual_sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca",
+        "bytes": 15240,
+        "expected_sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py"
+      },
+      {
+        "actual_sha256": "a3dc5a15b49be587b2788052faa5fee2831c83f114928761c476211ff7b90430",
+        "bytes": 11543,
+        "expected_sha256": "a3dc5a15b49be587b2788052faa5fee2831c83f114928761c476211ff7b90430",
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_shared_plane_integration_check.py"
+      }
+    ]
+  },
+  "preflight_sha256": "66800e584870a2904b7d5eed4ffe0f28022c4f8036959f291f0655d68a0e502d",
+  "previous_packet_guards": [
+    {
+      "actual_sha256": "acce182c6920932a6573119c11ce877b62ec67a6f1bf5d71599705ea27be55c4",
+      "expected_sha256": "acce182c6920932a6573119c11ce877b62ec67a6f1bf5d71599705ea27be55c4",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\README.md"
+    },
+    {
+      "actual_sha256": "bfdb18815fb4c007332a21742159b495f69d00bcc34e9868348d1d2d78f325fc",
+      "expected_sha256": "bfdb18815fb4c007332a21742159b495f69d00bcc34e9868348d1d2d78f325fc",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\evidence.json"
+    },
+    {
+      "actual_sha256": "e38527b16063e5c550eb82fef6e75e9eedc4db67128bb261dd4086c86ca361cc",
+      "expected_sha256": "e38527b16063e5c550eb82fef6e75e9eedc4db67128bb261dd4086c86ca361cc",
+      "matches": true,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json"
+    }
+  ],
+  "producer_elapsed_seconds": 0.11042040000029374,
+  "protocol": "multipart-shared-plane-generic-integration-evidence-v1",
+  "recorded_at_utc": "2026-10-09T18:41:38.613295+00:00",
+  "resource": {
+    "broker_process_ownership": "unsupported",
+    "command": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_shared_plane_integration_check.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-shared-plane-integration-continuation-20261009\\native-plan.json",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01"
+    ],
+    "elapsed_seconds": 3.212372799998775,
+    "job_accounting": {
+      "active_processes": 0,
+      "peak_job_committed_bytes": 295399424,
+      "terminated_processes": 0,
+      "total_processes": 2
+    },
+    "job_active_zero": true,
+    "job_assigned_before_resume": true,
+    "job_memory_limit_enforced": true,
+    "join_timeout_s": 5.0,
+    "lifecycle_complete": true,
+    "limit_reason": null,
+    "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl\\stdout.log",
+    "max_job_committed_bytes": 8589934592,
+    "max_rss_bytes": 8589934592,
+    "memory_scope": "job-accounted committed memory; not an RSS quota",
+    "observed_handles_joined": true,
+    "observed_processes": [
+      {
+        "creation_filetime": 134360447250595978,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 11916
+      },
+      {
+        "creation_filetime": 134360447251159865,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 15424
+      }
+    ],
+    "ordinary_createprocess_tree_owned": true,
+    "ownership_scope": "Windows no-breakaway job",
+    "peak_observed_tree_rss_bytes": 230268928,
+    "pid": 11916,
+    "primary_identity": {
+      "creation_filetime": 134360447250595978,
+      "pid": 11916
+    },
+    "primary_joined": true,
+    "protocol": "fresh_owned_process_supervision_v1",
+    "returncode": 0,
+    "rss_sample_count": 155,
+    "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+    "rss_unavailable_samples": [],
+    "status": "succeeded",
+    "timeout_s": 30.0,
+    "total_declared_supervision_budget_s": 35.0
+  },
+  "retained_bindings": [
+    {
+      "bytes": 7560,
+      "copied_sha256": "0a9586d259901753c665ef569afb84e8a5df10a14b8c04a536cb22a4e77d97b3",
+      "retained_path": "native-evidence/producer/results.json",
+      "role": "producer",
+      "sha256": "0a9586d259901753c665ef569afb84e8a5df10a14b8c04a536cb22a4e77d97b3",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01\\owned-4iy88imi\\results.json"
+    },
+    {
+      "bytes": 5973,
+      "copied_sha256": "6a45591fa13d9f9774542b92174a2eeafcb19795b31d2ded7ad80a54de37c1b3",
+      "retained_path": "native-evidence/producer/frozen-workload.json",
+      "role": "producer",
+      "sha256": "6a45591fa13d9f9774542b92174a2eeafcb19795b31d2ded7ad80a54de37c1b3",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01\\owned-4iy88imi\\frozen-workload.json"
+    },
+    {
+      "bytes": 801,
+      "copied_sha256": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a",
+      "retained_path": "native-evidence/producer/generic-exact.npz",
+      "role": "producer",
+      "sha256": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01\\owned-4iy88imi\\generic-exact.npz"
+    },
+    {
+      "bytes": 1501,
+      "copied_sha256": "6153dd01a79e7c6162bdd54737b4a63ac0caef8f61d41e5fd79a63141819c004",
+      "retained_path": "native-evidence/producer/run-ownership.json",
+      "role": "producer",
+      "sha256": "6153dd01a79e7c6162bdd54737b4a63ac0caef8f61d41e5fd79a63141819c004",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01\\owned-4iy88imi\\run-ownership.json"
+    },
+    {
+      "bytes": 150,
+      "copied_sha256": "125983571347a4fc359beb1322636cc6e9726f71d8102e20038eae8268b03457",
+      "retained_path": "native-evidence/producer/run-lease.json",
+      "role": "producer",
+      "sha256": "125983571347a4fc359beb1322636cc6e9726f71d8102e20038eae8268b03457",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01\\owned-4iy88imi\\run-lease.json"
+    },
+    {
+      "bytes": 2358,
+      "copied_sha256": "411f502155304aad852bb682af6711844240a721b683b27205103021cdac5a89",
+      "retained_path": "native-evidence/supervisor/command.json",
+      "role": "supervisor",
+      "sha256": "411f502155304aad852bb682af6711844240a721b683b27205103021cdac5a89",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl\\command.json"
+    },
+    {
+      "bytes": 8470,
+      "copied_sha256": "fd414a5b6c94455e7fc2f58fa52627f22df6425f40d34d9388d55d198b147315",
+      "retained_path": "native-evidence/supervisor/provenance.json",
+      "role": "supervisor",
+      "sha256": "fd414a5b6c94455e7fc2f58fa52627f22df6425f40d34d9388d55d198b147315",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl\\provenance.json"
+    },
+    {
+      "bytes": 2560,
+      "copied_sha256": "9899308c07637c06c5821e4aa76021a46ed66269520d14c91e5fa831dec95155",
+      "retained_path": "native-evidence/supervisor/resource-receipt.json",
+      "role": "supervisor",
+      "sha256": "9899308c07637c06c5821e4aa76021a46ed66269520d14c91e5fa831dec95155",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl\\resource-receipt.json"
+    },
+    {
+      "bytes": 341,
+      "copied_sha256": "43d74f6a74752fc7237da804577ce2bfe66d9c1837b8f91550a3c89eee03af1b",
+      "retained_path": "native-evidence/supervisor/run-result.json",
+      "role": "supervisor",
+      "sha256": "43d74f6a74752fc7237da804577ce2bfe66d9c1837b8f91550a3c89eee03af1b",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl\\run-result.json"
+    },
+    {
+      "bytes": 64,
+      "copied_sha256": "1d6c49ba2bfb782409a31bc131c6505a67a533129b5bd039c9ecdb7d27f2c134",
+      "retained_path": "native-evidence/supervisor/stdout.log",
+      "role": "supervisor",
+      "sha256": "1d6c49ba2bfb782409a31bc131c6505a67a533129b5bd039c9ecdb7d27f2c134",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl\\stdout.log"
+    },
+    {
+      "bytes": 6505,
+      "copied_sha256": "32eb822e7b496dc16bfa1be015132df0dd6ae956adc7fb25b6901da147c2e92d",
+      "retained_path": "native-evidence/supervisor/run-ownership.json",
+      "role": "supervisor",
+      "sha256": "32eb822e7b496dc16bfa1be015132df0dd6ae956adc7fb25b6901da147c2e92d",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl\\run-ownership.json"
+    },
+    {
+      "bytes": 149,
+      "copied_sha256": "a581a56b16bc4eb68bc3bf13bd6e023593a180fec59863b5dc4bac7f1b65dbde",
+      "retained_path": "native-evidence/supervisor/run-lease.json",
+      "role": "supervisor",
+      "sha256": "a581a56b16bc4eb68bc3bf13bd6e023593a180fec59863b5dc4bac7f1b65dbde",
+      "source": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl\\run-lease.json"
+    }
+  ],
+  "retained_native_bytes": 36432,
+  "retained_native_file_count": 12,
+  "runtime": {
+    "blender": "5.2.2 LTS",
+    "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+    "python_executable": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe"
+  },
+  "runtime_build_evidence": "supervisor/stdout.log and child fixed-build guard",
+  "scope": "production generic dispatch/native geometry and live control restoration only; no new camera/style/surface/boundary/artist/aggregate qualification or historical lifecycle rewrite",
+  "selection_modified": false,
+  "source_cpu_checks": {
+    "elapsed_seconds": 0.35,
+    "passed": true,
+    "scope": "affected pure/mock checks; no rerun after native pass",
+    "tests": 15
+  },
+  "standalone_replay": {
+    "actual_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "matches_expected_indexed": true,
+    "relation": {
+      "arm_node_id": "observed_tall_arm",
+      "base_node_id": "observed_base",
+      "declared_near_world": -0.12498491023031844,
+      "edit_scope": "arm near-side depth from mesh Y coordinates; far plane fixed; other X/Z source controls remain live",
+      "exact_common_y_frame": true,
+      "far_local": 0.5,
+      "flat_shading_preserved": true,
+      "native_near_rounding_world": 2.4556501276862264e-09,
+      "near_world": -0.12498490777466831,
+      "protocol": "multipart_shared_far_y_plane_v1",
+      "scope": "construction observation only; final shape, surface, boundary and edit gates remain independent",
+      "shared_far_world": 0.3252679191664356
+    }
+  },
+  "status": "passed"
+}

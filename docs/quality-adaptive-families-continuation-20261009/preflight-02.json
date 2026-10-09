@@ -1,0 +1,45 @@
+{
+  "status": "approved failed-only continuation; frozen before launch",
+  "plan": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-families-continuation-20261009\\native-plan-02.json",
+  "plan_sha256": "923b87586dec3f196ea4a4b110242a9c44463b9e5bab99cae0e9e93edbf94158",
+  "command": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_family_detail.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-families-continuation-20261009\\native-plan-02.json",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-02"
+  ],
+  "resource_budget": {
+    "seconds": 90,
+    "rss_bytes": 8589934592,
+    "threads": 2
+  },
+  "exact_counts": {
+    "source_frames": 3,
+    "candidate_frames": 3,
+    "fits": 1,
+    "max_fit_calls_each": 96,
+    "max_fit_seconds_each": 1.0,
+    "new_raw_pairs": 2,
+    "reused_baseline_raw": 2,
+    "semantic_transactions": 2,
+    "qualification_children": 0,
+    "reused_capsule_measurements": 6,
+    "capsule_refits": 0,
+    "capsule_renders": 0
+  },
+  "runtime_sha256": {
+    "scripts/run_adaptive_family_detail.py": "1beeb69e8d8451e927672b2e521745f203d1328f15cc0afc9a69dde871c0afc2",
+    "blender_blocking/reconstruction/adaptive_family.py": "0da8c10b91a688d697fea98d0b0a51dc9577980af0469614d0275296163b3992",
+    "blender_blocking/test_adaptive_family.py": "84dcd39820f75c1d3cc214f0fada135dbc6411aee698e377d3824dc2da2e2c32"
+  }
+}

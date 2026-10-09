@@ -168,6 +168,11 @@ def validate_compilable_program(program: ShapeProgram) -> tuple[str, ...]:
             errors.append(f"unsupported compiler primitive {node.primitive_type!r} on {node.node_id}")
         if node.children:
             errors.append(f"unsupported compiler child references on {node.node_id}: {node.children!r}")
+        # Reject authored styles across the whole program before Blender allocates
+        # the collection or any earlier node's geometry.
+        for parameter in ("weighted_normals", "weighted_normals_keep_sharp"):
+            if parameter in node.parameters and not isinstance(node.parameters[parameter], bool):
+                errors.append(f"{parameter} recipe parameter must be a boolean on {node.node_id}")
         if node.primitive_type == "capsule":
             try:
                 from .capsule import CapsulePrimitive

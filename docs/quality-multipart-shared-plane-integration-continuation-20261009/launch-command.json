@@ -1,0 +1,321 @@
+{
+  "argv": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+    "--output-parent",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01",
+    "--timeout-s",
+    "30",
+    "--join-timeout-s",
+    "5",
+    "--max-memory-bytes",
+    "8589934592",
+    "--max-rss-bytes",
+    "8589934592",
+    "--threads",
+    "2",
+    "--cwd",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-shared-plane-integration-continuation-20261009\\native-plan.json",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-evidence\\candidate-evaluated-exact.npz",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-evidence\\candidate-program.json",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_shared_plane_integration_check.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_family.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology_receipt.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_multipart_planar_join.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_shape_program_shared_plane.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_targets.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\oriented_support.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\projection_contract.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\types.py",
+    "--",
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_shared_plane_integration_check.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-shared-plane-integration-continuation-20261009\\native-plan.json",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01"
+  ],
+  "cwd": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+  "native_argv": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_shared_plane_integration_check.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-shared-plane-integration-continuation-20261009\\native-plan.json",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01"
+  ],
+  "output_parent": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01",
+  "plan_sha256": "6a45591fa13d9f9774542b92174a2eeafcb19795b31d2ded7ad80a54de37c1b3",
+  "producer_output_parent": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01",
+  "protocol": "multipart-shared-plane-integration-launch-v1",
+  "status": "prepared_not_executed",
+  "supervision_preflight": {
+    "actual_argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_shared_plane_integration_check.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-shared-plane-integration-continuation-20261009\\native-plan.json",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01"
+    ],
+    "child_output_scope": "child artifacts remain with their own producer; no path substitution or adoption",
+    "cwd": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+    "join_timeout_s": 5.0,
+    "max_job_committed_bytes": 8589934592,
+    "max_rss_bytes": 8589934592,
+    "portable_primary_only": false,
+    "protocol": "bounded-owned-command-v1",
+    "requested_argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_shared_plane_integration_check.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-shared-plane-integration-continuation-20261009\\native-plan.json",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\producer-01"
+    ],
+    "thread_environment": {
+      "MKL_NUM_THREADS": "2",
+      "NUMEXPR_NUM_THREADS": "2",
+      "OMP_NUM_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "2",
+      "VECLIB_MAXIMUM_THREADS": "2"
+    },
+    "thread_scope": "explicit Blender option and numerical-library environment controls; no kernel thread quota",
+    "threads": 2,
+    "timeout_s": 30.0,
+    "total_supervision_budget_s": 35.0
+  },
+  "supervisor_provenance": {
+    "executable": {
+      "bytes": 113022936,
+      "mtime_ns": 1789458008000000000,
+      "path": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "sha256": "f141a3c5754500e6f84361099a4cd53f0bb7662b6a0d2cfaaa8fbb63e92234a0"
+    },
+    "explicit_shared_inputs": [
+      {
+        "bytes": 5973,
+        "mtime_ns": 1791571096535777300,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-shared-plane-integration-continuation-20261009\\native-plan.json",
+        "sha256": "6a45591fa13d9f9774542b92174a2eeafcb19795b31d2ded7ad80a54de37c1b3"
+      },
+      {
+        "bytes": 801,
+        "mtime_ns": 1791569400268147700,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-evidence\\candidate-evaluated-exact.npz",
+        "sha256": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a"
+      },
+      {
+        "bytes": 5789,
+        "mtime_ns": 1791569400270145400,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-evidence\\candidate-program.json",
+        "sha256": "980ab9dcc1f982eac5a15dcb5a3163471d159cbbea7818cc482185c3a12461ee"
+      },
+      {
+        "bytes": 11543,
+        "mtime_ns": 1791570823270540300,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_shared_plane_integration_check.py",
+        "sha256": "a3dc5a15b49be587b2788052faa5fee2831c83f114928761c476211ff7b90430"
+      },
+      {
+        "bytes": 7229,
+        "mtime_ns": 1791558364216530000,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program.py",
+        "sha256": "3226433f881a72446baca12a01181f9d2015e232a4f48cd2fbee726ea647b741"
+      },
+      {
+        "bytes": 32129,
+        "mtime_ns": 1791570689050360500,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py",
+        "sha256": "385d2cd95b67259821faed893073a494013d37e659aaf18c5e22b5546bd75b35"
+      },
+      {
+        "bytes": 14016,
+        "mtime_ns": 1791570823269542100,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py",
+        "sha256": "38a3bd79c8f54e27006a884d1589e0de900a1e9fdf2c8d6003a5a419aebcee14"
+      },
+      {
+        "bytes": 15619,
+        "mtime_ns": 1791507933233773000,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_family.py",
+        "sha256": "6e8c609855fd757496b886465e229eac8026ee02b644191f80dd7aeeba9d7de5"
+      },
+      {
+        "bytes": 17802,
+        "mtime_ns": 1791508057389811900,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py",
+        "sha256": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a"
+      },
+      {
+        "bytes": 7366,
+        "mtime_ns": 1791495758855093500,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py",
+        "sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f"
+      },
+      {
+        "bytes": 2058,
+        "mtime_ns": 1791495758931027100,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology_receipt.py",
+        "sha256": "a72f08ac2ea97dbeaa25ff059727dc9c87664f7274a1c57b4854f173ae403655"
+      },
+      {
+        "bytes": 15013,
+        "mtime_ns": 1791570689058578100,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_multipart_planar_join.py",
+        "sha256": "5ec73b3c97eb53395d65cc0ff422afc8f0463935f105e76c956044aa78ac8ad5"
+      },
+      {
+        "bytes": 7370,
+        "mtime_ns": 1791570689060574400,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_shape_program_shared_plane.py",
+        "sha256": "3f3b666025733059fc46f2d803d929a25075fce7ad0170921aafe8dbf0eb6bb7"
+      },
+      {
+        "bytes": 33821,
+        "mtime_ns": 1791570688802270100,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+        "sha256": "78a483d2d2e8ed10592dffb889aff72106ec350acc170fec81f0571524562456"
+      },
+      {
+        "bytes": 15240,
+        "mtime_ns": 1791529507046412600,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+        "sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca"
+      },
+      {
+        "bytes": 23620,
+        "mtime_ns": 1791565532104309500,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+        "sha256": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b"
+      },
+      {
+        "bytes": 12563,
+        "mtime_ns": 1791495758958145800,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py",
+        "sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+      },
+      {
+        "bytes": 1238,
+        "mtime_ns": 1791495758867655800,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_targets.py",
+        "sha256": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd"
+      },
+      {
+        "bytes": 15619,
+        "mtime_ns": 1791495758928026100,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology.py",
+        "sha256": "3e97bc30c728c171cce2dcacc9ed249effcf374b4757e34a3dda9c502cfcfe9e"
+      },
+      {
+        "bytes": 7556,
+        "mtime_ns": 1791495758863608400,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\oriented_support.py",
+        "sha256": "806234e3e5d5adf6774ba471613f8381fb59652e34fc1175ed5f3e2044916d4c"
+      },
+      {
+        "bytes": 10347,
+        "mtime_ns": 1791500913532801100,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\projection_contract.py",
+        "sha256": "c462f8ba7ac156aae37c7a48734405c6536ca5d89282a4823f314493c688428c"
+      },
+      {
+        "bytes": 26868,
+        "mtime_ns": 1791500913716784800,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\types.py",
+        "sha256": "af95365b79715c94ff728f39084ebdcffd5c2eb0b221fcbfa1e8a0e3e51f0595"
+      }
+    ],
+    "protocol": "bounded-owned-command-provenance-v1",
+    "scope": "read-only current byte snapshots; no historical ownership or input locking",
+    "sources": [
+      {
+        "bytes": 15240,
+        "mtime_ns": 1791529507046412600,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+        "sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca"
+      },
+      {
+        "bytes": 23620,
+        "mtime_ns": 1791565532104309500,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+        "sha256": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b"
+      },
+      {
+        "bytes": 12563,
+        "mtime_ns": 1791495758958145800,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py",
+        "sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+      }
+    ]
+  },
+  "wrapper_interpreter": {
+    "path": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+    "sha256": "972eacf8de4f86a005084d8a687a81c0242f19bfeecb3169eba836d9bd2a654b"
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "protocol": "generator-restart-code-checkpoint-v1",
+  "continuation_base": "10729013ada456d85c9134bd5699ef59a5a83e14",
+  "branch": "local/quality-followup-20261009",
+  "compiler_preflight_revision": "ecf52ffabe69030c6431af0f4b90dba2ca06e84b",
+  "deformed_width_revision": "135f411eedfef6d3801242362bbb226c500a71ef",
+  "working_files": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program.py",
+      "bytes": 7229,
+      "sha256": "3226433f881a72446baca12a01181f9d2015e232a4f48cd2fbee726ea647b741"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_shape_program_world_bevel.py",
+      "bytes": 10886,
+      "sha256": "c13c95cbd6e053077d46af915d0bb22e9c73d885411305ce531c7ce5bab3747d"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\deformed_superquadric.py",
+      "bytes": 12984,
+      "sha256": "14aadc23a28b52aaa8914d676eeeac6cfa0808aff9dbe61cf67cc14bdc05e39f"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_deformed_superquadric.py",
+      "bytes": 20840,
+      "sha256": "742cb58d8f30986768951fa02107dba30ed8ed313bf501694535f0ddd370611a"
+    }
+  ],
+  "runtime": {
+    "python": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+    "version": "3.13.13",
+    "packages": "existing qualified local packages; no installs or version changes"
+  },
+  "validation": [
+    {
+      "owner": "root",
+      "suite": "test_shape_program_world_bevel.TestShapeProgramWorldBevel",
+      "tests": 8,
+      "elapsed_seconds": 0.24,
+      "passed": true,
+      "native": false
+    },
+    {
+      "owner": "root",
+      "suite": "six DeformedSuperquadricTests.test_world_z_width_* methods",
+      "tests": 6,
+      "elapsed_seconds": 0.146,
+      "passed": true,
+      "native": false
+    },
+    {
+      "owner": "family_rows",
+      "suite": "same six methods plus existing rigid-limit and invalid-shape guards",
+      "tests": 8,
+      "elapsed_seconds": 0.171,
+      "passed": true,
+      "native": false
+    }
+  ],
+  "deformed_width_contract": {
+    "output": "outer world-X span of actual finite generated mesh at horizontal world-Z plane",
+    "resolution_default": 32,
+    "resolution_bounds": [
+      8,
+      256
+    ],
+    "triangulation": "existing first-vertex fan",
+    "primitive_mutation": false,
+    "default_mesh_changed": false,
+    "helper_default_mesh_before_after_sha256": "f7086dab29030dddd6e14ed18469074624fdf329275f1c082cc2fc07fa1b8a13",
+    "helper_mesh_hash_encoding": "little-endian float64 vertex bytes followed by each face [length,*indices] little-endian int64 bytes",
+    "helper_default_mesh_inventory": {
+      "vertices": 482,
+      "faces": 512
+    },
+    "analytic_dimension_certificate": false,
+    "filled_interval_length": false,
+    "solid_qualification": false,
+    "deformation_fit_enabled": false
+  },
+  "compiler_preflight_contract": {
+    "invalid_later_node_style_allocations": 0,
+    "valid_program_geometry_changed": false,
+    "global_style_defaults_changed": false,
+    "direct_node_defensive_checks_preserved": true
+  },
+  "unchanged": {
+    "frozen_references": true,
+    "current_twelve_row_selection": true,
+    "artist_limits": null,
+    "aggregate_accepted": false,
+    "historical_receipts_and_failures": true,
+    "owner_checkout_preserved": true
+  },
+  "publication": {
+    "url": "https://github.com/doublemover/blendslop/pull/7",
+    "state": "OPEN DRAFT",
+    "approved_remote_head": "6256cdb79384fbab9e33b012f0794b8b98771966",
+    "later_commits": "local only; no later publication approval"
+  }
+}

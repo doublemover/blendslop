@@ -1,0 +1,77 @@
+{
+  "baseline": {
+    "view": "oblique_145_40",
+    "area_iou": 0.9992517085986996,
+    "boundary_iou": 0.9846547314578005,
+    "soft_iou": null,
+    "signed_distance_loss": 0.00011934393423640444,
+    "intersection": 60092,
+    "union": 60137,
+    "ref_area": 60093,
+    "render_area": 60136,
+    "required": true,
+    "passed": true,
+    "pass": true,
+    "reason": "",
+    "warnings": [],
+    "iou": 0.9992517085986996,
+    "threshold": 0.7,
+    "precision": 0.999268325129706,
+    "recall": 0.999983359126687,
+    "area_ratio": 1.0007155575524604,
+    "centroid_delta_px": [
+      0.0002753121469538655,
+      -0.009243933731482912
+    ],
+    "pixel_difference": 0.000171661376953125,
+    "thresholds": {
+      "min_area_iou": 0.7,
+      "min_boundary_iou": 0.8,
+      "max_signed_distance_loss": 0.05
+    },
+    "measurement_protocol": "opaque_linear_alpha_v1",
+    "coverage_l1": 0.00017356991884298623,
+    "coverage_l1_scope": "diagnostic only; no new acceptance cutoff",
+    "geometry_hash": "bfd4411d02558b91d3ad137e2d6f156446b7a087247483eebc4c61653a36566a"
+  },
+  "refined": {
+    "view": "oblique_145_40",
+    "area_iou": 0.9993513729273039,
+    "boundary_iou": 0.9866871479774706,
+    "soft_iou": null,
+    "signed_distance_loss": 7.853919435607537e-05,
+    "intersection": 60088,
+    "union": 60127,
+    "ref_area": 60093,
+    "render_area": 60122,
+    "required": true,
+    "passed": true,
+    "pass": true,
+    "reason": "",
+    "warnings": [],
+    "iou": 0.9993513729273039,
+    "threshold": 0.7,
+    "precision": 0.9994344832174579,
+    "recall": 0.9999167956334348,
+    "area_ratio": 1.000482585326078,
+    "centroid_delta_px": [
+      -0.004149265111777822,
+      0.002199441458401452
+    ],
+    "pixel_difference": 0.000148773193359375,
+    "thresholds": {
+      "min_area_iou": 0.7,
+      "min_boundary_iou": 0.8,
+      "max_signed_distance_loss": 0.05
+    },
+    "measurement_protocol": "opaque_linear_alpha_v1",
+    "coverage_l1": 0.00014805450337007642,
+    "coverage_l1_scope": "diagnostic only; no new acceptance cutoff",
+    "geometry_hash": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b"
+  },
+  "retained_owner": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-01\\owned-ob7ghjvm",
+  "status": "six retained acquisitions; native case receipt transport failed",
+  "raw_refined_observation": "computed natively but not persisted; unavailable, no fabricated metric",
+  "semantic_transaction": "executed natively but result transport failed; verdict unavailable",
+  "source": "read-only comparison of retained controlled measurements; zero new acquisitions"
+}

@@ -122,6 +122,35 @@ class NativeQualityEditingTests(unittest.TestCase):
                         self.assertGreater(p.y,0.)
                         self.assertLess(p.y,1.)
 
+    def test_saved_ortho_replay_resets_existing_perspective_camera(self):
+        from mathutils import Matrix, Vector
+        from bpy_extras.object_utils import world_to_camera_view
+        from scripts.run_surface_quality_check import _replay_orthographic_camera
+        from integration.blender_ops.camera_framing import configure_ortho_camera_for_view
+        camera = bpy.data.objects.new("ReplayCamera", bpy.data.cameras.new("ReplayCamera"))
+        bpy.context.collection.objects.link(camera)
+        scene = bpy.context.scene
+        scene.render.resolution_x = scene.render.resolution_y = 512
+        configure_ortho_camera_for_view(camera, 'front', (-.8, -.8, 0.), (.8, .8, 2.6))
+        bpy.context.view_layer.update()
+        record = {'matrix_world': [list(row) for row in camera.matrix_world],
+                  'ortho_scale': camera.data.ortho_scale}
+        point = Vector((.4, 0., 1.9))
+        expected = world_to_camera_view(scene, camera, point)
+        camera.data.type = 'PERSP'
+        camera.data.shift_x = .25
+        camera.data.shift_y = -.3
+        camera.data.ortho_scale = 100.
+        _replay_orthographic_camera(camera, record)
+        bpy.context.view_layer.update()
+        self.assertEqual(camera.data.type, 'ORTHO')
+        self.assertEqual(camera.data.shift_x, 0.)
+        self.assertEqual(camera.data.shift_y, 0.)
+        np.testing.assert_allclose(world_to_camera_view(scene, camera, point), expected, atol=1e-7)
+        # Matrix assignment decomposes/recomposes native float32 Euler rotation.
+        np.testing.assert_allclose(camera.matrix_world, record['matrix_world'],
+                                   rtol=0., atol=2*np.finfo(np.float32).eps)
+
     def test_capsule_compiler_and_synthetic_builder_are_closed(self):
         from synthetic.quality_contracts import quality_workload
         from synthetic.quality_references import build_quality_reference

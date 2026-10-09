@@ -1,0 +1,222 @@
+{
+  "argv": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+    "--output-parent",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01",
+    "--timeout-s",
+    "85",
+    "--join-timeout-s",
+    "5",
+    "--max-memory-bytes",
+    "8589934592",
+    "--max-rss-bytes",
+    "8589934592",
+    "--threads",
+    "2",
+    "--cwd",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\inspection_camera.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\primary_process_cleanup.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\evaluated-exact.npz",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\evaluated-exact.npz",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\program.json",
+    "--",
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01"
+  ],
+  "family": "asymmetric_multipart_solid",
+  "git_head_at_freeze": "44120b5b15e751762b96f4eaa8a4bf66b83883b3",
+  "native_argv": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01"
+  ],
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+    "sha256": "436ef7233e7beaf29243616a98650423fb6e0852e5405ca750c1e97d755e4cf7"
+  },
+  "prepared_command": {
+    "actual_argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01"
+    ],
+    "child_output_scope": "child artifacts remain with their own producer; no path substitution or adoption",
+    "cwd": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+    "join_timeout_s": 5.0,
+    "max_job_committed_bytes": 8589934592,
+    "max_rss_bytes": 8589934592,
+    "portable_primary_only": false,
+    "protocol": "bounded-owned-command-v1",
+    "requested_argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01"
+    ],
+    "thread_environment": {
+      "MKL_NUM_THREADS": "2",
+      "NUMEXPR_NUM_THREADS": "2",
+      "OMP_NUM_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "2",
+      "VECLIB_MAXIMUM_THREADS": "2"
+    },
+    "thread_scope": "explicit Blender option and numerical-library environment controls; no kernel thread quota",
+    "threads": 2,
+    "timeout_s": 85.0,
+    "total_supervision_budget_s": 90.0
+  },
+  "producer_output_parent": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01",
+  "protocol": "frozen-multipart-planar-join-launch-v1",
+  "scope": "one proposed bounded job only; no process launch, acceptance promotion or historical lifecycle adoption",
+  "status": "prepared_not_executed",
+  "supervisor_output_parent": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01",
+  "supervisor_provenance": {
+    "executable": {
+      "bytes": 113022936,
+      "mtime_ns": 1789458008000000000,
+      "path": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "sha256": "f141a3c5754500e6f84361099a4cd53f0bb7662b6a0d2cfaaa8fbb63e92234a0"
+    },
+    "explicit_shared_inputs": [
+      {
+        "bytes": 80912,
+        "mtime_ns": 1791566892309591400,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+        "sha256": "436ef7233e7beaf29243616a98650423fb6e0852e5405ca750c1e97d755e4cf7"
+      },
+      {
+        "bytes": 24650,
+        "mtime_ns": 1791566891316158100,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py",
+        "sha256": "23290344800e2650c7a6bfec08ed3d5350c426eeafdd32c3a4c29c346a66999a"
+      },
+      {
+        "bytes": 9881,
+        "mtime_ns": 1791565561621451300,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py",
+        "sha256": "70ce44eb485ccf55cf1f77386fdaf583e51563e1044e8fb226a157966e28554c"
+      },
+      {
+        "bytes": 4350,
+        "mtime_ns": 1791565955459868700,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\inspection_camera.py",
+        "sha256": "7818917ccdb39f3d3d053dc25978004cc83b121d4a93c51a05aff814fd91b4ef"
+      },
+      {
+        "bytes": 33744,
+        "mtime_ns": 1791566751970212200,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+        "sha256": "71f4481f54e4994ef5dc668217631203540fdd207e12a545ef71d0584b9962b2"
+      },
+      {
+        "bytes": 2383,
+        "mtime_ns": 1791566543240068500,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\primary_process_cleanup.py",
+        "sha256": "ddc0f60642b536f64dda686d7d8e10c62e42916c70351c388564a5732785107f"
+      },
+      {
+        "bytes": 768,
+        "mtime_ns": 1791510077005152000,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\evaluated-exact.npz",
+        "sha256": "dd36b515004e8d7c81899fd960851f3cf60b1524235f897b491164001d8bedc4"
+      },
+      {
+        "bytes": 755,
+        "mtime_ns": 1791442596756176400,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\evaluated-exact.npz",
+        "sha256": "6f2ac20580a3a5fb1f541e056a6c6dc9c5659a2838882f44ca54c5a9dfad2c83"
+      },
+      {
+        "bytes": 5163,
+        "mtime_ns": 1791510076877768600,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\program.json",
+        "sha256": "39f303d5ba564965f8c40027dbb4ca4153669d2436674d466fff9fe34ccd9948"
+      }
+    ],
+    "protocol": "bounded-owned-command-provenance-v1",
+    "scope": "read-only current byte snapshots; no historical ownership or input locking",
+    "sources": [
+      {
+        "bytes": 15240,
+        "mtime_ns": 1791529507046412600,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+        "sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca"
+      },
+      {
+        "bytes": 23620,
+        "mtime_ns": 1791565532104309500,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+        "sha256": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b"
+      },
+      {
+        "bytes": 12563,
+        "mtime_ns": 1791495758958145800,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py",
+        "sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+      }
+    ]
+  },
+  "wrapper_interpreter": {
+    "path": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+    "sha256": "972eacf8de4f86a005084d8a687a81c0242f19bfeecb3169eba836d9bd2a654b"
+  }
+}

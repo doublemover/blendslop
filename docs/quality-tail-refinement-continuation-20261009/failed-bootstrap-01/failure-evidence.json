@@ -1,0 +1,55 @@
+{
+  "protocol": "arch_triangle_tail_bootstrap_failure_v1",
+  "status": "failed",
+  "supervisor_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-01\\owned-hp9d5zk9",
+  "supervisor_manifest": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-01\\owned-hp9d5zk9\\run-ownership.json",
+    "sha256": "13e66be0083e26e52eece1ac56ba22aa34b6e01b4d9a2267f993ff051065d2e0"
+  },
+  "supervisor_lease": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-01\\owned-hp9d5zk9\\run-lease.json",
+    "sha256": "bf3c2eea8da528d73dd2e47b8e7fb30cb1e3ad42b37dd53f99f9a4413e0c63f0"
+  },
+  "resource_receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-01\\owned-hp9d5zk9\\resource-receipt.json",
+    "sha256": "3434b9f38544a59afe4dec4fa486935c3fd7922ecd8b7aad1c72ac9f866eeda0"
+  },
+  "stdout": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-supervisor-01\\owned-hp9d5zk9\\stdout.log",
+    "sha256": "ec98f31e201009b2e97b2e7d8cb45c40af92dfa2da0289c44b9835abfa01975a"
+  },
+  "run_result": {
+    "lease_release_decision": "permitted_complete_tree",
+    "lease_status_at_receipt": "active",
+    "lifecycle_complete": true,
+    "portable_primary_only": false,
+    "primary_returncode": 1,
+    "protocol": "bounded-owned-command-result-v1",
+    "run_id": "2fdfba4398a04028832b91928a58e064",
+    "status": "failed",
+    "stdout_status": "retained"
+  },
+  "historical_plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-bootstrap-01\\native-plan.json",
+    "sha256": "e2781e6b82bc6b1c7aaaec7f6f48447c36380502d9e52ae4763772f3b4eaea68"
+  },
+  "historical_launch": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-bootstrap-01\\launch-command.json",
+    "sha256": "abfa6ca09135630d3688e9dfe380be273c6558ed33e1e47d406b6ccc65c785b8"
+  },
+  "historical_preflight": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-bootstrap-01\\preflight.json",
+    "sha256": "75de36772a7d149ee053ab55a7488742a6e4f2519415ddb81890b612b92a7556"
+  },
+  "historical_checker": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-bootstrap-01\\run_arch_triangle_tail_check.py",
+    "sha256": "b63ea52217324a70e6ca84c41f736a3cb4663c5ae8c6a29045f28377a6ab2d72"
+  },
+  "producer_created": false,
+  "native_frames": 0,
+  "raw_comparisons": 0,
+  "semantic_transactions": 0,
+  "qualification_children": 0,
+  "reason": "ModuleNotFoundError cv2 during validate_plan evaluation import before existing package bootstrap",
+  "history_policy": "retain exact old source/packet and actual released failure; no score rewrite or lease adoption"
+}

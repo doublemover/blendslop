@@ -1,0 +1,57 @@
+{
+  "protocol": "rounded_box_source_calculation_inputs_v1",
+  "plan": {
+    "path": "docs\\quality-rounded-box-reference-continuation-20261009\\frozen-source-plan.json",
+    "sha256": "0d2573cf2fea98ceb9978921835fe354ef22e89c639ea22de88c2dbafbc7ec26",
+    "bytes": 2198
+  },
+  "source_archive": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\evaluated-exact.npz",
+    "sha256": "de63007fefa542a9b7a5db3217d9ee5f2109a445a4c0a2caf82104943476b654",
+    "bytes": 6990
+  },
+  "implementation_inputs": [
+    {
+      "path": "blender_blocking\\evaluation\\rounded_box_reference.py",
+      "sha256": "0d6c8389dd4064071616fc2f464184489eeb110978eb4bdc414a21813f7cc63d",
+      "bytes": 16066
+    },
+    {
+      "path": "blender_blocking\\test_rounded_box_reference.py",
+      "sha256": "4078e9397b6f2c260253ccf29e6cc6d8ece12a65657ac848124826332a92cfb3",
+      "bytes": 6637
+    },
+    {
+      "path": "blender_blocking\\evaluation\\torus_reference.py",
+      "sha256": "6dceb4040d97baf65ac1e393af0d4ad5adc375268b7143ca387b93ef125a4e15",
+      "bytes": 11184
+    },
+    {
+      "path": "blender_blocking\\reconstruction\\native_geometry.py",
+      "sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+      "bytes": 7366
+    },
+    {
+      "path": "blender_blocking\\metrics\\topology_receipt.py",
+      "sha256": "a72f08ac2ea97dbeaa25ff059727dc9c87664f7274a1c57b4854f173ae403655",
+      "bytes": 2058
+    },
+    {
+      "path": "blender_blocking\\synthetic\\quality_contracts.py",
+      "sha256": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9",
+      "bytes": 6124
+    },
+    {
+      "path": "blender_blocking\\synthetic\\blender_builders.py",
+      "sha256": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2",
+      "bytes": 23095
+    },
+    {
+      "path": "blender_blocking\\test_runner.py",
+      "sha256": "e4ee0175607f4e2e76a37103913649520211407361cbf8f32cbbf32bcd919664",
+      "bytes": 32882
+    }
+  ],
+  "planned_actual_source_certificate_calls": 1,
+  "native_processes": 0
+}

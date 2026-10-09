@@ -33,23 +33,37 @@ def dependency_state():
         'api_source': 'https://github.com/mworchel/differentiable-voxelization'}
 
 
-def helper_call(python_executable, payload=None, *, timeout_s=10.,warm=False):
-    """Approved project-local interpreter; one bounded full-loop IPC transfer."""
+def helper_call(python_executable, payload=None, *, timeout_s=10., warm=False,
+                ownership_root=None):
+    """Approved interpreter; cold transport retains owned diagnostics."""
     if warm:
         from blender_blocking.reconstruction.differentiable.helper_session import dvx_session
-        return dvx_session(python_executable).call(payload,timeout_s=timeout_s)
+        return dvx_session(python_executable).call(payload, timeout_s=timeout_s)
     import json
-    import subprocess
-    import tempfile
-    from pathlib import Path
-    from reconstruction.process_executor import write_packet, read_packet
-    script = Path(__file__).resolve().parents[3]/"scripts"/"dvx_worker.py"
     import os
+    import pickle
+    import subprocess
+    from pathlib import Path
+    from reconstruction.process_executor import read_packet
+    from utils.run_ownership import OwnedRun
+    from utils.primary_process_cleanup import finish_primary_process
+    repository = Path(__file__).resolve().parents[3]
+    script = repository / "scripts" / "dvx_worker.py"
     executable = Path(os.path.abspath(python_executable))
     if not executable.is_file():
         raise FileNotFoundError(executable)
-    with tempfile.TemporaryDirectory(prefix="blendslop-dvx-") as directory:
-        root = Path(directory)
+    owner = OwnedRun(ownership_root or repository / "temp/cold-dvx",
+                     producer="cold_dvx_helper", max_generated_bytes=268435456,
+                     shared_inputs={"helper_interpreter": str(executable),
+                                    "helper_script": str(script)})
+    root = owner.root
+    process = None
+    stdout = stderr = ""
+    cleanup_receipt = None
+    pipes_drained = False
+    error = None
+    started = time.monotonic()
+    try:
         args = [str(executable), "-B", str(script)]
         if payload is None:
             args.append("--probe")
@@ -58,23 +72,98 @@ def helper_call(python_executable, payload=None, *, timeout_s=10.,warm=False):
             paths = list(payload.get("progress_paths", ()))
             paths.append(str(root / "progress.pkl"))
             payload["progress_paths"] = paths
-            write_packet(root/"input.pkl", payload)
-            args += ["--input", str(root/"input.pkl"), "--output", str(root/"output.pkl")]
-        process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            packet = pickle.dumps(payload, protocol=pickle.HIGHEST_PROTOCOL)
+            owner.reserve_bytes(len(packet) + 32768)
+            (root / "input.pkl").write_bytes(packet)
+            owner.register_file("input.pkl", "disposable")
+            args += ["--input", str(root / "input.pkl"),
+                     "--output", str(root / "output.pkl")]
+        command = json.dumps({"args": args, "timeout_s": timeout_s}, indent=2)
+        owner.reserve_bytes(len(command.encode()) + 32768)
+        (root / "command.json").write_text(command, encoding="utf-8")
+        owner.register_file("command.json", "diagnostic")
+        environment = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
+        environment.pop("PYTHONPATH", None)
+        environment.pop("PYTHONHOME", None)
+        process = subprocess.Popen(
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            env=environment, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         try:
             stdout, stderr = process.communicate(timeout=timeout_s)
+            pipes_drained = True
         except subprocess.TimeoutExpired:
-            process.kill()
-            process.communicate()
+            stdout, stderr, cleanup_receipt = finish_primary_process(process)
+            stdout = stdout.decode(errors="replace") if isinstance(stdout, bytes) else stdout or ""
+            stderr = stderr.decode(errors="replace") if isinstance(stderr, bytes) else stderr or ""
+            owner.mark_failed("helper_timeout")
             if (root / "progress.pkl").exists():
                 retained = read_packet(root / "progress.pkl")["value"]
                 return {**retained, "partial": True, "stop_reason": "helper_timeout",
                         "final_update_evaluated": False}
             raise TimeoutError("DVX helper exceeded its shared time allowance; no scored checkpoint")
         if process.returncode:
-            raise RuntimeError("DVX helper failed: "+stderr[-3000:])
-        return json.loads(stdout) if payload is None else read_packet(root/"output.pkl")
+            owner.mark_failed("helper_failed")
+            raise RuntimeError("DVX helper failed: " + stderr[-3000:])
+        return json.loads(stdout) if payload is None else read_packet(root / "output.pkl")
+    except BaseException as exc:
+        error = exc
+        raise
+    finally:
+        auxiliary = []
+        child_joined = process is None
+        try:
+            if process is not None:
+                if cleanup_receipt is None:
+                    drained_out, drained_err, cleanup_receipt = finish_primary_process(
+                        process, drain_pipes=not pipes_drained)
+                    if not pipes_drained:
+                        stdout = drained_out.decode(errors="replace") if isinstance(drained_out, bytes) else drained_out or ""
+                        stderr = drained_err.decode(errors="replace") if isinstance(drained_err, bytes) else drained_err or ""
+                child_joined = cleanup_receipt["primary_joined"]
+                if not cleanup_receipt["transport_closed"] or cleanup_receipt["errors"]:
+                    raise RuntimeError("Cold helper cleanup remains unconfirmed: " +
+                                       "; ".join(cleanup_receipt["errors"]))
+        except BaseException as join_error:
+            cleanup_receipt = getattr(join_error, "primary_process_receipt", cleanup_receipt)
+            child_joined = bool(cleanup_receipt and cleanup_receipt["primary_joined"])
+            if cleanup_receipt and cleanup_receipt["errors"]:
+                auxiliary.append(RuntimeError("Cold helper cleanup remains unconfirmed: " +
+                                               "; ".join(cleanup_receipt["errors"])))
+            elif join_error is not error:
+                auxiliary.append(join_error)
+        # An unconfirmed child keeps an active lease, even if cancellation or
+        # diagnostic publication failed. Recovery requires a separate decision.
+        failure = error or (auxiliary[0] if auxiliary else None)
+        if failure is not None:
+            owner.mark_failed(repr(failure))
+        try:
+            for name, log in (("stdout-tail.txt", stdout), ("stderr-tail.txt", stderr)):
+                (root / name).write_bytes(log.encode(errors="replace")[-8192:])
+                owner.register_file(name, "diagnostic")
+            summary = {"returncode": None if process is None else process.returncode,
+                       "elapsed_s": time.monotonic() - started,
+                       "child_joined": child_joined, "primary_cleanup": cleanup_receipt,
+                       "state": "succeeded" if owner.state == "active" else owner.state,
+                       "error": owner.error}
+            (root / "helper-result.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+            owner.register_file("helper-result.json", "diagnostic")
+            for name in ("output.pkl", "progress.pkl"):
+                if (root / name).exists():
+                    owner.register_file(name, "diagnostic")
+        except Exception as publication_error:
+            auxiliary.append(publication_error)
+        owner.auxiliary_errors.extend(repr(exc) for exc in auxiliary)
+        if child_joined and (cleanup_receipt is None or cleanup_receipt["transport_closed"]):
+            try:
+                owner.close(error=error or (auxiliary[0] if auxiliary else None))
+            except Exception as close_error:
+                auxiliary.append(close_error)
+        if error is not None:
+            for secondary in auxiliary:
+                if hasattr(error, "add_note"):
+                    error.add_note("Cold helper lifecycle also failed: " + repr(secondary))
+        elif auxiliary:
+            raise auxiliary[0]
 
 
 def tiny_gradient_check(*, approved=False):
@@ -239,8 +328,7 @@ def run_candidate(request):
         return CandidateResult(request.candidate_id, request.backend_name, 'skipped',
             warnings=('DVX requires approved CPython3.13 CPU dependency qualification; nothing installed or executed',),
             metric_result=CandidateMetrics(extras={'dvx': state, 'qualification': 'not_run'}))
-    from contextlib import nullcontext
-    from reconstruction.process_executor import current_worker_client, PersistentProcessExecutor
+    from blender_blocking.reconstruction.process_executor import executor_scope
     from reconstruction.mesh_io import combine_primitive_meshes
     from placement.resfit_initialization import initialize_ellipsoids_from_points, PrimitiveInitializationConfig
     from reconstruction.point_cloud import target_surface_points
@@ -340,7 +428,6 @@ def run_candidate(request):
     checkpoint = progress_path()
     if checkpoint is not None:
         payload['progress_paths'] = [str(checkpoint)]
-    shared = current_worker_client() or getattr(request.context, 'process_executor', None)
     if remaining() is not None and remaining() <= .01:
         return CandidateResult(request.candidate_id, request.backend_name, 'failed', errors=('DVX allowance exhausted during setup',))
     if helper and request.config.get('dvx_warm_helper',False):
@@ -354,7 +441,7 @@ def run_candidate(request):
         outcome=JobOutcome('success',fitted,elapsed_s=elapsed,
             partial=bool(fitted.get('partial')),total_wall_s=elapsed,stop_reason=fitted.get('stop_reason'))
     else:
-        manager = nullcontext(shared) if shared is not None else PersistentProcessExecutor(1)
+        manager = executor_scope(1, context=request.context)
         with manager as executor:
             outcome = executor.map([('dvx_fit', payload, remaining())], timeout_s=remaining())[0]
     if outcome.status != 'success' and not outcome.partial:

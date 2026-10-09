@@ -21,7 +21,7 @@ def main():
     from reconstruction.output_qualification import qualify_retained_output
     from primitives.shape_program import ShapeProgram
     from primitives.shape_program_compiler import compile_shape_program
-    from evaluation.surface_quality import compare_surface_arrays
+    from evaluation.canonical_artifacts import canonical_artifact_inventory, raw_surface_observation
     from evaluation.silhouette_eval import SilhouetteGateConfig,evaluate_silhouette_pair
     from synthetic.quality_contracts import triangle_preservation
     from utils.run_ownership import OwnedRun
@@ -68,22 +68,24 @@ def main():
         old=np.load(args.reference/"evaluated-exact.npz",allow_pickle=False)
         reference=GeometryArrays.capture(old["vertices"],old["faces"])
         views=["front","side","top","oblique_35_28","oblique_145_40"]
+        reference_cameras=cameras
         paths,cameras=render_masks(obj,output,(Vector(reference.vertices.min(axis=0)),Vector(reference.vertices.max(axis=0))),views,camera_records=cameras)
         gates=SilhouetteGateConfig(min_area_iou=.7,min_boundary_iou=.8,max_signed_distance_loss=.05)
         silhouettes={v:evaluate_silhouette_pair(np.asarray(Image.open(args.reference/(v+"-mask.png")).convert("L"))<128,paths[v],view=v,config=gates) for v in views}
-        observation=compare_surface_arrays(reference,data)
-        observation.pop("surface_passed");observation.pop("frozen_limits")
-        observation["surface_status"]="blocked: independent reference tessellation/noise qualification absent"
+        observation=raw_surface_observation(reference,data)
+        inspection=canonical_artifact_inventory(output,geometry_hash=data.content_hash,camera_records=cameras,
+            reference_camera_records=reference_cameras,pass_states={"mask":"completed","neutral":"completed","normals":"unrun"})
+        _write(output/"canonical-inspection.json",inspection)
         boundary=qualify_retained_output(data,{"native_qualification_python":str(args.qualification_python),"native_qualification_timeout_s":15.})
         artist=obj.scale.copy();obj.scale.x*=1.05;bpy.context.view_layer.update()
         changed=evaluated_arrays(obj);obj.scale=artist;bpy.context.view_layer.update()
         edit={"object_scale_changed":changed.content_hash!=data.content_hash,"exact_restoration":evaluated_arrays(obj).content_hash==data.content_hash,
               "scope":"live object edit; semantic corner/depth controls covered separately by native compiler tests"}
-        receipt={**hashes,"elapsed_seconds":time.monotonic()-started,"program":program.to_dict(),"surface_observation":observation,
+        receipt={**hashes,"elapsed_seconds":time.monotonic()-started,"program":program.to_dict(),"surface_observation":observation,"canonical_inspection":inspection,
                  "silhouette":silhouettes,"boundary":boundary,"triangle_preservation":triangle_preservation(data.vertices),"editability":edit,
                  "aggregate_accepted":False,"blocker":"surface reference qualification remains independent of support/mask/topology success"}
         _write(output/"results.json",receipt)
-        for name in ("frozen-workload.json","program.json","evaluated.obj","evaluated-exact.npz","results.json",*(v+"-mask.png" for v in views)):
+        for name in ("frozen-workload.json","program.json","evaluated.obj","evaluated-exact.npz","results.json","canonical-inspection.json",*inspection["retained_paths"]):
             owner.register_file(name,"final_output" if name in {"program.json","evaluated.obj","evaluated-exact.npz","results.json"} else "diagnostic")
         print("TRIANGLE_RESULT="+str(output/"results.json"),flush=True)
     return 0

@@ -1,0 +1,233 @@
+{
+  "protocol": "frozen-retained-family-launch-v1",
+  "status": "prepared_not_executed",
+  "family": "capsule",
+  "code_revision": "34e0ceb58868d416ab6523a78ff010f180f36fea",
+  "adapter_revision": "755d3a5b17bae1992a7b22b3bd61fa0fd60c2c05",
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-capsule-final-qualification-continuation-20261009\\native-plan.json",
+    "sha256": "fe0f9b393314b006733df5e57df3374ad38ebd1c34fc7164778e20b3dc619740"
+  },
+  "argv": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+    "--output-parent",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\capsule-final-supervisor-01",
+    "--timeout-s",
+    "85",
+    "--join-timeout-s",
+    "5",
+    "--max-memory-bytes",
+    "8589934592",
+    "--max-rss-bytes",
+    "8589934592",
+    "--threads",
+    "2",
+    "--cwd",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-capsule-final-qualification-continuation-20261009\\native-plan.json",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_retained_family_final_qualification.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_triangle_final_qualification.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\qualify_native_solid.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_qualification.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_qualification.py",
+    "--",
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_retained_family_final_qualification.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-capsule-final-qualification-continuation-20261009\\native-plan.json",
+    "--plan-sha256",
+    "fe0f9b393314b006733df5e57df3374ad38ebd1c34fc7164778e20b3dc619740",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\capsule-final-qualification-01"
+  ],
+  "prepared_command": [
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\capsule-final-supervisor-01",
+    {
+      "protocol": "bounded-owned-command-v1",
+      "requested_argv": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "--background",
+        "--factory-startup",
+        "--threads",
+        "2",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_retained_family_final_qualification.py",
+        "--",
+        "--plan",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-capsule-final-qualification-continuation-20261009\\native-plan.json",
+        "--plan-sha256",
+        "fe0f9b393314b006733df5e57df3374ad38ebd1c34fc7164778e20b3dc619740",
+        "--output",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\capsule-final-qualification-01"
+      ],
+      "actual_argv": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "--background",
+        "--factory-startup",
+        "--threads",
+        "2",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_retained_family_final_qualification.py",
+        "--",
+        "--plan",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-capsule-final-qualification-continuation-20261009\\native-plan.json",
+        "--plan-sha256",
+        "fe0f9b393314b006733df5e57df3374ad38ebd1c34fc7164778e20b3dc619740",
+        "--output",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\capsule-final-qualification-01"
+      ],
+      "cwd": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+      "timeout_s": 85.0,
+      "join_timeout_s": 5.0,
+      "total_supervision_budget_s": 90.0,
+      "max_job_committed_bytes": 8589934592,
+      "max_rss_bytes": 8589934592,
+      "threads": 2,
+      "thread_environment": {
+        "OMP_NUM_THREADS": "2",
+        "OPENBLAS_NUM_THREADS": "2",
+        "MKL_NUM_THREADS": "2",
+        "NUMEXPR_NUM_THREADS": "2",
+        "VECLIB_MAXIMUM_THREADS": "2"
+      },
+      "thread_scope": "explicit Blender option and numerical-library environment controls; no kernel thread quota",
+      "portable_primary_only": false,
+      "child_output_scope": "child artifacts remain with their own producer; no path substitution or adoption"
+    },
+    {
+      "protocol": "bounded-owned-command-provenance-v1",
+      "executable": {
+        "path": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "bytes": 113022936,
+        "mtime_ns": 1789458008000000000,
+        "sha256": "f141a3c5754500e6f84361099a4cd53f0bb7662b6a0d2cfaaa8fbb63e92234a0"
+      },
+      "sources": [
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+          "bytes": 15240,
+          "mtime_ns": 1791529507046412600,
+          "sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+          "bytes": 23522,
+          "mtime_ns": 1791529407840880000,
+          "sha256": "162c7e2282ae930419382ed2fc6fae63aa947ca7b7b000c46158dd2cd15dafb8"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py",
+          "bytes": 12563,
+          "mtime_ns": 1791495758958145800,
+          "sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+        }
+      ],
+      "explicit_shared_inputs": [
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-capsule-final-qualification-continuation-20261009\\native-plan.json",
+          "bytes": 29598,
+          "mtime_ns": 1791560176943389500,
+          "sha256": "fe0f9b393314b006733df5e57df3374ad38ebd1c34fc7164778e20b3dc619740"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_retained_family_final_qualification.py",
+          "bytes": 32934,
+          "mtime_ns": 1791558688167490600,
+          "sha256": "96a17494b2db91b1e589902fe49c58e9b85177352113074503a27b31364b5c23"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+          "bytes": 33340,
+          "mtime_ns": 1791558837312057900,
+          "sha256": "8175488c23e79ce96a06d6b0e12843935a16faafc94d0d55a781ab3cf74e3d95"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_triangle_final_qualification.py",
+          "bytes": 32953,
+          "mtime_ns": 1791527308250283100,
+          "sha256": "e3c2656b02ead2fd22b802ddc55a3dddd435ccba85050efc3d0f066e43d79a47"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\qualify_native_solid.py",
+          "bytes": 4380,
+          "mtime_ns": 1791495758892970500,
+          "sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program.py",
+          "bytes": 7229,
+          "mtime_ns": 1791558364216530000,
+          "sha256": "3226433f881a72446baca12a01181f9d2015e232a4f48cd2fbee726ea647b741"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py",
+          "bytes": 31577,
+          "mtime_ns": 1791507846308148900,
+          "sha256": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py",
+          "bytes": 16497,
+          "mtime_ns": 1791504454804604800,
+          "sha256": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py",
+          "bytes": 3314,
+          "mtime_ns": 1791507068847092300,
+          "sha256": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py",
+          "bytes": 6356,
+          "mtime_ns": 1791506647545265600,
+          "sha256": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_qualification.py",
+          "bytes": 1427,
+          "mtime_ns": 1791495758864607500,
+          "sha256": "d09a5a8d165d57c74d2abea02f9208a9f2ee642c588cb7ad7638ade0cb49f3d2"
+        },
+        {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_qualification.py",
+          "bytes": 8285,
+          "mtime_ns": 1791495758856599900,
+          "sha256": "36793d9aa2f79d7573e955d42ce14d8f40822b46f7e9ad7910b829985bea367e"
+        }
+      ],
+      "scope": "read-only current byte snapshots; no historical ownership or input locking"
+    }
+  ]
+}

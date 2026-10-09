@@ -1,0 +1,423 @@
+{
+  "protocol": "triangle_final_qualification_preflight_v1",
+  "status": "pure_preflight_passed_native_unrun",
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-final-qualification-continuation-20261009\\native-plan.json",
+    "sha256": "0a1b781aeac7900cc5f7e5aeb66cdc9149e50fabb2c52f2cfea7902c24553c65"
+  },
+  "adapter": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_triangle_final_qualification.py",
+    "sha256": "435f9860638102d01f269a85dacd204d601b3444da02c574a33fb44bd7854619"
+  },
+  "focused_test": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_triangle_final_qualification.py",
+    "sha256": "54bf842f7a17614f1a52843b301682a0f8838f5a21817a55d037c7d18606f760"
+  },
+  "registered_test_runner": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+    "sha256": "f82fb657f472d55b9ebb209bf6aa8468ac942d6c99f4f3c0c7f32aebb4b40cd8"
+  },
+  "input_count": 72,
+  "input_bytes": 273529813,
+  "input_cap": {
+    "count": 72,
+    "bytes": 536870912
+  },
+  "explicit_cli_input_count": 12,
+  "explicit_cli_input_bytes": 208474,
+  "cli_input_cap": {
+    "count": 64,
+    "total_bytes": 268435456,
+    "per_file_bytes": 67108864
+  },
+  "ownership_audit": {
+    "protocol": "run-ownership-dry-run-v1",
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+    "mode": "read_only",
+    "status": "dry_run_ready",
+    "mutation_supported": false,
+    "eligible": [],
+    "eligible_bytes": 0,
+    "retained_bytes": 10984161,
+    "blockers": [],
+    "unknown_files": []
+  },
+  "checkpoint_body_bindings": {
+    "source_npz": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\evaluated-exact.npz",
+      "sha256": "f6abc19a7ee7efbc62f3bc403b5e61ce6c426c64950604d0fa5cd7181c698cff"
+    },
+    "source_case": {
+      "name": "rounded_triangle_dot",
+      "parameters": {
+        "builder": "rounded_triangle",
+        "corner_radius": 0.16,
+        "corner_segments": 32,
+        "dome": "z=+-thickness/2*cos(phi), outline_scale=sin(phi)",
+        "dome_segments": 64,
+        "thickness": 0.48,
+        "vertices_xy": [
+          [
+            0,
+            0.9
+          ],
+          [
+            -0.7794228634059948,
+            -0.45
+          ],
+          [
+            0.7794228634059948,
+            -0.45
+          ]
+        ]
+      },
+      "status": "unmeasured"
+    },
+    "source_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+    "candidate_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+    "candidate_program": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined\\program.json",
+      "sha256": "5e6f69fff82aad0c7e7ffbe720547010c6691907dcce795b45a4a08b688e599b"
+    },
+    "candidate_npz": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined\\evaluated-exact.npz",
+      "sha256": "327571fa13131bc11ee9e082a13ceffc2d166272be15502be815da6c9c30f805"
+    },
+    "candidate_obj": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined\\evaluated.obj",
+      "sha256": "1336ba8b1a3e9d4de2eac776d8b96ae989b0138d7d721aa0ef3b721bf62b31fd"
+    },
+    "original_cameras": {
+      "front": {
+        "matrix_world": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -4.371138828673793e-08,
+            -1.0,
+            -3.115000009536743
+          ],
+          [
+            0.0,
+            1.0,
+            -4.371138828673793e-08,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.1794610023498535,
+        "png_sha256": "53bf7d1cf2a8e9842fc6a4cb81e4c399f811c30d6f137fa7c8d535f18fd2310e"
+      },
+      "oblique_145_40": {
+        "matrix_world": [
+          [
+            -0.5735764503479004,
+            0.5265408754348755,
+            -0.6275067329406738,
+            -4.102880001068115
+          ],
+          [
+            -0.8191519975662231,
+            -0.3686879277229309,
+            0.4393850266933441,
+            3.097867727279663
+          ],
+          [
+            1.8614212393686103e-08,
+            0.7660443186759949,
+            0.642787754535675,
+            4.202792167663574
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.1794610023498535,
+        "png_sha256": "ef5d9f70173745884d15de950714e7a8d4e1b3344fb25c9a0710970003644756"
+      },
+      "oblique_35_28": {
+        "matrix_world": [
+          [
+            -0.5735766887664795,
+            -0.3845682740211487,
+            0.7232683300971985,
+            4.729005336761475
+          ],
+          [
+            0.8191518783569336,
+            -0.26927781105041504,
+            0.5064381957054138,
+            3.536285400390625
+          ],
+          [
+            6.467210766913922e-08,
+            0.8829477429389954,
+            0.469471275806427,
+            3.069585084915161
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.1794610023498535,
+        "png_sha256": "3417b4fc1365e7736850cdd1ee786d92d0fd88d6f8979efaff72783830f1816d"
+      },
+      "side": {
+        "matrix_world": [
+          [
+            -4.371138828673793e-08,
+            4.371138828673793e-08,
+            1.0,
+            3.7576913833618164
+          ],
+          [
+            1.0,
+            1.910685676922942e-15,
+            4.371138828673793e-08,
+            0.22499996423721313
+          ],
+          [
+            0.0,
+            1.0,
+            -4.371138828673793e-08,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.1794610023498535,
+        "png_sha256": "65a8b602b16c0d519522384d344a8c73d1ebcc59c696dd7c362385dd686b1a9d"
+      },
+      "top": {
+        "matrix_world": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.22499996423721313
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.9599999785423279
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.1794610023498535,
+        "png_sha256": "f678156f80dc39785cac2504b61d9bc6099db51038439e079ad1f7e0ea7f9d75"
+      }
+    },
+    "original_masks": {
+      "front": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\front-mask.png",
+        "sha256": "53bf7d1cf2a8e9842fc6a4cb81e4c399f811c30d6f137fa7c8d535f18fd2310e"
+      },
+      "side": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\side-mask.png",
+        "sha256": "65a8b602b16c0d519522384d344a8c73d1ebcc59c696dd7c362385dd686b1a9d"
+      },
+      "top": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\top-mask.png",
+        "sha256": "f678156f80dc39785cac2504b61d9bc6099db51038439e079ad1f7e0ea7f9d75"
+      },
+      "oblique_35_28": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\oblique_35_28-mask.png",
+        "sha256": "3417b4fc1365e7736850cdd1ee786d92d0fd88d6f8979efaff72783830f1816d"
+      },
+      "oblique_145_40": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\oblique_145_40-mask.png",
+        "sha256": "ef5d9f70173745884d15de950714e7a8d4e1b3344fb25c9a0710970003644756"
+      }
+    }
+  },
+  "reused_alpha_slots": [
+    {
+      "role": "source",
+      "view": "top",
+      "geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+      "label": "source-fit",
+      "original_owned_files": {
+        "measurement.json": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\source-fit\\measurement.json",
+          "sha256": "47f86b06217a6ded5b9f3f46f002b49a388234c4170fa9d7d2e2684cd8a802a1"
+        },
+        "coverage.npy": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\source-fit\\coverage.npy",
+          "sha256": "ccb9f55a44fa1b5d13432334df98e26c0441bbfd3007127d6fe1a0b0d6d3dba4"
+        },
+        "alpha.exr": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\source-fit\\alpha.exr",
+          "sha256": "8dbcef8c3e716ab95d4045e37640184d2a1e67ed482ce9bebba012d76606d017"
+        }
+      },
+      "contract_sha256": "4bb5fb2fcf975fcae23ae43313565ce8cd4a3e8776b82dddfeacff616ec73284",
+      "actual_camera_sha256": "d7efd72d731bc9b5d954ea06a173b3cf2d210a919029b72c4f09b07e1dbb4903",
+      "original_declaration_frame_sha256": "d7efd72d731bc9b5d954ea06a173b3cf2d210a919029b72c4f09b07e1dbb4903",
+      "actual_frame_matches_original_declaration": true,
+      "clip_start": 0.10000000149011612,
+      "clip_end": 1000.0,
+      "noncamera_acquisition_settings_match": true,
+      "coverage_sha256_field_present": false,
+      "coverage_digest_source": "original manifest and frozen NPY bytes; metadata digest additionally checked if present"
+    },
+    {
+      "role": "source",
+      "view": "oblique_145_40",
+      "geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+      "label": "source-heldout/oblique_145_40",
+      "original_owned_files": {
+        "measurement.json": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\source-heldout\\oblique_145_40\\measurement.json",
+          "sha256": "d34c832ed04841dab68c26133040658b9e00f3a131e9e024ccacc6130a7e9ba5"
+        },
+        "coverage.npy": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\source-heldout\\oblique_145_40\\coverage.npy",
+          "sha256": "bf09fc0658db248a52ab7cdc70e033a61dcd1ddd51ed186e263222977182ea70"
+        },
+        "alpha.exr": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\source-heldout\\oblique_145_40\\alpha.exr",
+          "sha256": "2f55f75e4ce12f5d5a30def2d95a894584c76fe1c919fa4a3e20379188c22595"
+        }
+      },
+      "contract_sha256": "7ecd9bffafc753e799ad5929d4ab559aa472ca06c11fd0ad811d2785dfe57cbd",
+      "actual_camera_sha256": "0ba0b2c243bd8d36c17e408b722bc6644bb44b734ce26da886c3775451c4b741",
+      "original_declaration_frame_sha256": "7ef148295ba09d7adb402bd063dcbe28081032a278f70f37b3b58ed0a8e11726",
+      "actual_frame_matches_original_declaration": false,
+      "clip_start": 0.10000000149011612,
+      "clip_end": 1000.0,
+      "noncamera_acquisition_settings_match": true,
+      "coverage_sha256_field_present": false,
+      "coverage_digest_source": "original manifest and frozen NPY bytes; metadata digest additionally checked if present"
+    },
+    {
+      "role": "candidate",
+      "view": "oblique_145_40",
+      "geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+      "label": "refined-heldout/oblique_145_40",
+      "original_owned_files": {
+        "measurement.json": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined-heldout\\oblique_145_40\\measurement.json",
+          "sha256": "dad455df5ed9d34ee67e00b10a0c0180b68ab07381e08dfbeb465f8a80c46038"
+        },
+        "coverage.npy": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined-heldout\\oblique_145_40\\coverage.npy",
+          "sha256": "716cb53539f13c8f2dc01f18be62333fb2644c92ca92d88f07ca98909b6dc7fa"
+        },
+        "alpha.exr": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined-heldout\\oblique_145_40\\alpha.exr",
+          "sha256": "5df2967f5700dc629169a873d23e379fdb208a00e74d75d22e017070535f5e96"
+        }
+      },
+      "contract_sha256": "7ecd9bffafc753e799ad5929d4ab559aa472ca06c11fd0ad811d2785dfe57cbd",
+      "actual_camera_sha256": "0ba0b2c243bd8d36c17e408b722bc6644bb44b734ce26da886c3775451c4b741",
+      "original_declaration_frame_sha256": "7ef148295ba09d7adb402bd063dcbe28081032a278f70f37b3b58ed0a8e11726",
+      "actual_frame_matches_original_declaration": false,
+      "clip_start": 0.10000000149011612,
+      "clip_end": 1000.0,
+      "noncamera_acquisition_settings_match": true,
+      "coverage_sha256_field_present": false,
+      "coverage_digest_source": "original manifest and frozen NPY bytes; metadata digest additionally checked if present"
+    }
+  ],
+  "qualification_python": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Scripts\\python.exe",
+    "sha256": "d55736b9f3d6b4ca7985b82db8ce11edfa09994cf93ce31c6b506543b74f32eb"
+  },
+  "qualification_package_files": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\open3d-0.19.0.dist-info\\METADATA",
+      "sha256": "7020e4ea25bf1195edece73e72120cd2b86ead8ef3e8f9db10bafb05c9c2e572"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\open3d\\cpu\\pybind.cp312-win_amd64.pyd",
+      "sha256": "ab1b2f4a1126a11886a2a9f3eeab5ceaeac0bab1b53ee319eb363df7ef629d88"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\numpy-2.4.4.dist-info\\METADATA",
+      "sha256": "8f9e04338ffa930868a2d157ce44f6e4cb7ac524b968fb13d04187a6ac575282"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\numpy\\_core\\_multiarray_umath.cp312-win_amd64.pyd",
+      "sha256": "f4523c2dfe641a904605029ce4a5046388bd61b18afc0594d34018b5e6d848f8"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\pyvenv.cfg",
+      "sha256": "7629eb68ddb84edf4972de38284488d9c6e37a4badef61cecb67b945efe17d74"
+    }
+  ],
+  "focused_tests": {
+    "passed": 6,
+    "elapsed_seconds": 0.89,
+    "native_tests": 0,
+    "scope": "real fresh ownership/files, bounded coverage arrays; altered geometry/settings/lease/hash/frame/clip and scope refusal; finite NumPy scalar transport"
+  },
+  "native_frames": {
+    "new_mask": 7,
+    "new_neutral": 10,
+    "new_RGB_normals": 10,
+    "retained_completed_alpha": 3,
+    "total_new": 27,
+    "total_logical": 30
+  },
+  "geometry_guard": "exact source and selected candidate indexed content identities before first frame and after all passes; no tolerant fallback",
+  "verdicts": {
+    "original_five_silhouette_gates": "unrun pending root launch",
+    "support_thickness_005": "unrun pending actual exact replay",
+    "solid_boundary": "one existing known-package helper unrun, fixed15s, no fallback",
+    "raw_surface": "existing body-specific raw receipt reused; sampled max regression preserved",
+    "editability": "existing body-specific exact corner response/restoration reused; no rerun",
+    "presentation": "paired real pixels still require post-run inspection",
+    "artist_limits": null,
+    "aggregate_accepted": false
+  },
+  "blockers": [],
+  "output_budget": {
+    "logical_frame_reservations_bytes": 251658240,
+    "geometry_exports_allowance_bytes": 8388608,
+    "metadata_transport_allowance_bytes": 4194304,
+    "planned_total_bytes": 264241152,
+    "limit_bytes": 268435456,
+    "slack_bytes": 4194304
+  },
+  "launch_command": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-final-qualification-continuation-20261009\\launch-command.json",
+    "sha256": "c8d1a5587c13c35f9827531ae0ddaff217507a908c5b428e4d654875ec9ae5d2"
+  },
+  "source_camera_scope": "new exact replay records supplement source policy; missing legacy clipping remains unavailable",
+  "execution_status": "no native work launched by this helper"
+}

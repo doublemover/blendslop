@@ -26,6 +26,10 @@ class VisualHullConfig:
     poisson_depth: int = 8
     poisson_density_quantile: Optional[float] = None
     poisson_timeout_s: float = 90.0
+    poisson_owned_supervision: bool = False
+    poisson_committed_limit_bytes: Optional[int] = None
+    poisson_rss_limit_bytes: Optional[int] = None
+    poisson_transport_limit_bytes: Optional[int] = None
     poisson_crop_to_input_bounds: bool = True
     memory_budget_mb: Optional[int] = None
     occupancy_threshold: float = 0.5
@@ -35,8 +39,22 @@ class VisualHullConfig:
     cache_namespace: str = "visual_hull"
     cache_read: bool = True
     cache_write: bool = True
+    cache_owned_writes: bool = False
 
     def validate(self) -> None:
+        if not isinstance(self.poisson_owned_supervision, bool):
+            raise ValueError("poisson_owned_supervision must be a boolean")
+        for name, maximum in (("poisson_committed_limit_bytes", 8 * 1024 ** 3),
+                              ("poisson_rss_limit_bytes", 8 * 1024 ** 3),
+                              ("poisson_transport_limit_bytes", 256 * 1024 ** 2)):
+            value = getattr(self, name)
+            if (value is None and self.poisson_owned_supervision) or (value is not None and
+                    (type(value) is not int or not 0 < value <= maximum)):
+                raise ValueError(name + " must be an explicit bounded positive integer for owned Poisson")
+        if self.poisson_owned_supervision and (isinstance(self.poisson_timeout_s, bool)
+                or not isinstance(self.poisson_timeout_s, (int, float))
+                or not math.isfinite(self.poisson_timeout_s)):
+            raise ValueError("owned Poisson timeout must be finite and positive")
         if not 1 <= self.poisson_depth <= 10 or not 0 < self.poisson_timeout_s <= 90:
             raise ValueError("Poisson depth must be 1..10 and helper timeout >0..90 seconds")
         if self.poisson_density_quantile is not None and not 0.0 <= self.poisson_density_quantile < 1.0:
@@ -61,6 +79,8 @@ class VisualHullConfig:
             raise ValueError("occupancy_threshold must be in [0, 1]")
         if self.uncertainty_aggregation not in {"min", "product", "logit_sum"}:
             raise ValueError("uncertainty_aggregation must be min/product/logit_sum")
+        if not isinstance(self.cache_owned_writes, bool):
+            raise ValueError("cache_owned_writes must be a boolean")
         if not self.cache_namespace:
             raise ValueError("cache_namespace must not be empty")
         if self.cache_directory is not None and not str(self.cache_directory).strip():
@@ -83,6 +103,10 @@ class VisualHullConfig:
             "poisson_depth": self.poisson_depth,
             "poisson_density_quantile": self.poisson_density_quantile,
             "poisson_timeout_s": self.poisson_timeout_s,
+            "poisson_owned_supervision": self.poisson_owned_supervision,
+            "poisson_committed_limit_bytes": self.poisson_committed_limit_bytes,
+            "poisson_rss_limit_bytes": self.poisson_rss_limit_bytes,
+            "poisson_transport_limit_bytes": self.poisson_transport_limit_bytes,
             "poisson_crop_to_input_bounds": self.poisson_crop_to_input_bounds,
             "memory_budget_mb": self.memory_budget_mb,
             "occupancy_threshold": self.occupancy_threshold,
@@ -92,6 +116,7 @@ class VisualHullConfig:
             "cache_namespace": self.cache_namespace,
             "cache_read": self.cache_read,
             "cache_write": self.cache_write,
+            "cache_owned_writes": self.cache_owned_writes,
         }
 
 @dataclass
@@ -154,6 +179,7 @@ class EnsembleConfig:
     max_parallel_candidates: int = 2
     per_candidate_timeout_s: Optional[float] = None
     total_timeout_s: Optional[float] = None
+    worker_process_budget: Optional[Dict[str, object]] = None
     keep_all_artifacts: bool = True
     fail_if_no_candidate_passes_required_views: bool = True
 
@@ -170,8 +196,23 @@ class EnsembleConfig:
             raise ValueError("per_candidate_timeout_s must be > 0 when provided")
         if self.total_timeout_s is not None and self.total_timeout_s <= 0:
             raise ValueError("total_timeout_s must be > 0 when provided")
+        self.make_worker_process_budget()
         for candidate in self.candidates:
             candidate.validate()
+
+    def make_worker_process_budget(self):
+        """Build an explicit per-pool declaration; None keeps historical defaults."""
+        if self.worker_process_budget is None:
+            return None
+        if not isinstance(self.worker_process_budget, dict):
+            raise ValueError("worker_process_budget must be an explicit resource dictionary")
+        from blender_blocking.reconstruction.process_executor import WorkerProcessBudget
+        try:
+            budget = WorkerProcessBudget(**self.worker_process_budget)
+            budget.validate(max(1, min(4, int(self.max_parallel_candidates))))
+        except (TypeError, ValueError) as error:
+            raise ValueError("invalid worker_process_budget: " + str(error)) from error
+        return budget
 
     def to_dict(self) -> Dict[str, object]:
         return {
@@ -185,6 +226,7 @@ class EnsembleConfig:
             "max_parallel_candidates": self.max_parallel_candidates,
             "per_candidate_timeout_s": self.per_candidate_timeout_s,
             "total_timeout_s": self.total_timeout_s,
+            "worker_process_budget": None if self.worker_process_budget is None else dict(self.worker_process_budget),
             "keep_all_artifacts": self.keep_all_artifacts,
             "fail_if_no_candidate_passes_required_views": self.fail_if_no_candidate_passes_required_views,
         }

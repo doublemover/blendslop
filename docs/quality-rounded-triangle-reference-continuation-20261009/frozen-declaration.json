@@ -1,0 +1,86 @@
+{
+  "protocol": "authored_rounded_triangle_parameter_cover_v1",
+  "freeze_scope": "declaration frozen before certificate implementation, arithmetic bounds, focused tests or retained-source certificate calculation",
+  "exposure": "prior source-only feasibility inspection was disclosed; no candidate geometry or metric was read for this certificate",
+  "source_indexed_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+  "vertices": 6239,
+  "triangles": 12474,
+  "parameters": {
+    "builder": "rounded_triangle",
+    "vertices_xy": [
+      [
+        0.0,
+        0.9
+      ],
+      [
+        -0.7794228634059948,
+        -0.45
+      ],
+      [
+        0.7794228634059948,
+        -0.45
+      ]
+    ],
+    "corner_radius": 0.16,
+    "thickness": 0.48,
+    "dome": "z=+-thickness/2*cos(phi), outline_scale=sin(phi)",
+    "corner_segments": 32,
+    "dome_segments": 64
+  },
+  "exact_author_coordinates_hex": [
+    [
+      "0x0.0p+0",
+      "0x1.ccccccccccccdp-1"
+    ],
+    [
+      "-0x1.8f1083782ab66p-1",
+      "-0x1.ccccccccccccdp-2"
+    ],
+    [
+      "0x1.8f1083782ab66p-1",
+      "-0x1.ccccccccccccdp-2"
+    ]
+  ],
+  "interpretation": "exact binary64 authored XY points and radius; exact rational centroid; symmetric height thickness/2; offset straight edges and circular vertex arcs; F=(centroid+sin(phi)*(outline-centroid),height*cos(phi)); full phi range [0,pi] includes both collapsed pole fans",
+  "arithmetic_plan": {
+    "pi": "existing rational Machin alternating-series enclosure",
+    "beta": "atan(exact authored horizontal/vertical edge ratio) via pi/4 + alternating atan((ratio-1)/(ratio+1)),40 terms",
+    "trig": "existing directed Decimal50 angle-turn trig; interval angle enclosure via 1-Lipschitz extension",
+    "rational_outward_grid_bits": 100,
+    "distance": "sequential meridian and outline interpolation plus actual vertex shifts; all ideal chord quads planar",
+    "normals": "four endpoint positive cone plus circular support correction r*(sec(delta_theta/2)-1); exact facet cross/dot intervals and conservative atan upper bound"
+  },
+  "acceptance_scope": {
+    "artist_limits": null,
+    "candidate_qualification": "not supplied",
+    "no_native": true,
+    "no_sampling": true
+  },
+  "inputs": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_triangle_dot\\evaluated-exact.npz",
+      "bytes": 80654,
+      "sha256": "f6abc19a7ee7efbc62f3bc403b5e61ce6c426c64950604d0fa5cd7181c698cff"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\rounded_triangle.py",
+      "bytes": 10250,
+      "sha256": "42dd3eb646dab57cf7603c14a0dbc1f25bbfd9f348a20df2dd37e20364248bbf"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_contracts.py",
+      "bytes": 6124,
+      "sha256": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\torus_reference.py",
+      "bytes": 11184,
+      "sha256": "6dceb4040d97baf65ac1e393af0d4ad5adc375268b7143ca387b93ef125a4e15"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py",
+      "bytes": 7366,
+      "sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f"
+    }
+  ]
+}

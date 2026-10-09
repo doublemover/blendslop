@@ -1,0 +1,1801 @@
+{
+  "actual_frame_and_clip_bindings": {
+    "front": {
+      "actual_clips_match_retained_source": true,
+      "actual_projection_frame_matches_retained_source": true,
+      "camera_sha256": "a685367849862f63a8053c43f99bddcf886411d7c2d8f8c783b3493208750289",
+      "clips": [
+        0.10000000149011612,
+        1000.0
+      ],
+      "new_candidate_passes": {
+        "mask": {
+          "actual_camera_sha256": "a685367849862f63a8053c43f99bddcf886411d7c2d8f8c783b3493208750289",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\front-mask.png",
+          "sha256": "ea4c7d7026a31821cbb9038a02adb9a128cd2cd7798be03eb22d353f098ad04e"
+        },
+        "neutral": {
+          "actual_camera_sha256": "a685367849862f63a8053c43f99bddcf886411d7c2d8f8c783b3493208750289",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\front-neutral.png",
+          "sha256": "1386dd46cb3c5cbbeb8b471bc190e4d7ee8761cf79b86e4941932bae509b4139"
+        }
+      },
+      "reference_legacy_mask_clip_provenance": "unavailable; not backfilled",
+      "retained_source_lifecycle": "previous failed supervisor unchanged; comparison binds bytes/frame only"
+    },
+    "oblique_145_40": {
+      "actual_clips_match_retained_source": true,
+      "actual_projection_frame_matches_retained_source": true,
+      "camera_sha256": "fd341b5a7031b8c57aa6b3ee15c9b51c05c4388a47350fd0d2e5c354dcb3f537",
+      "clips": [
+        0.10000000149011612,
+        1000.0
+      ],
+      "new_candidate_passes": {
+        "mask": {
+          "actual_camera_sha256": "fd341b5a7031b8c57aa6b3ee15c9b51c05c4388a47350fd0d2e5c354dcb3f537",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\oblique_145_40-mask.png",
+          "sha256": "6f8dce0a45555ad909fc43c4a4fa46ac405ff8740dabfdc469ab44d7399a9704"
+        },
+        "neutral": {
+          "actual_camera_sha256": "fd341b5a7031b8c57aa6b3ee15c9b51c05c4388a47350fd0d2e5c354dcb3f537",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\oblique_145_40-neutral.png",
+          "sha256": "51284f360552df179b0065a5f04baf152edc04bf5c3029457812e8259c3c5fdd"
+        }
+      },
+      "reference_legacy_mask_clip_provenance": "unavailable; not backfilled",
+      "retained_source_lifecycle": "previous failed supervisor unchanged; comparison binds bytes/frame only"
+    },
+    "oblique_35_28": {
+      "actual_clips_match_retained_source": true,
+      "actual_projection_frame_matches_retained_source": true,
+      "camera_sha256": "638ca0dbd43086ac6f1d778d9431b963c54283f5aac674a3e36f7cc73d258047",
+      "clips": [
+        0.10000000149011612,
+        1000.0
+      ],
+      "new_candidate_passes": {
+        "mask": {
+          "actual_camera_sha256": "638ca0dbd43086ac6f1d778d9431b963c54283f5aac674a3e36f7cc73d258047",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\oblique_35_28-mask.png",
+          "sha256": "83e3b25cf60ee122b68e42e6e20c62f7fece98160ed110bf99f091640f3d00c7"
+        },
+        "neutral": {
+          "actual_camera_sha256": "638ca0dbd43086ac6f1d778d9431b963c54283f5aac674a3e36f7cc73d258047",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\oblique_35_28-neutral.png",
+          "sha256": "81434765f75a75991ad1e968f3d3e6f51a228260f50796e87d33d2e714bdcec2"
+        }
+      },
+      "reference_legacy_mask_clip_provenance": "unavailable; not backfilled",
+      "retained_source_lifecycle": "previous failed supervisor unchanged; comparison binds bytes/frame only"
+    },
+    "side": {
+      "actual_clips_match_retained_source": true,
+      "actual_projection_frame_matches_retained_source": true,
+      "camera_sha256": "a70b8cb10a5c2d0d904aba316bfb45dc5b13358b3b4cf1ecbe1b9ece04e3cce6",
+      "clips": [
+        0.10000000149011612,
+        1000.0
+      ],
+      "new_candidate_passes": {
+        "mask": {
+          "actual_camera_sha256": "a70b8cb10a5c2d0d904aba316bfb45dc5b13358b3b4cf1ecbe1b9ece04e3cce6",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\side-mask.png",
+          "sha256": "e0892003a12adcf1c3fbf5788cdccc3bd809e44d9f125a5558cb99929c1b1bf3"
+        },
+        "neutral": {
+          "actual_camera_sha256": "a70b8cb10a5c2d0d904aba316bfb45dc5b13358b3b4cf1ecbe1b9ece04e3cce6",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\side-neutral.png",
+          "sha256": "0781e46379dcd0c6ac37dec248bc8234540877c85981437d41b4ba1195f1d239"
+        }
+      },
+      "reference_legacy_mask_clip_provenance": "unavailable; not backfilled",
+      "retained_source_lifecycle": "previous failed supervisor unchanged; comparison binds bytes/frame only"
+    },
+    "top": {
+      "actual_clips_match_retained_source": true,
+      "actual_projection_frame_matches_retained_source": true,
+      "camera_sha256": "367a2f93b93be177f2a07e612620e705773090633535a749d4a672b8a9d9873e",
+      "clips": [
+        0.10000000149011612,
+        1000.0
+      ],
+      "new_candidate_passes": {
+        "mask": {
+          "actual_camera_sha256": "367a2f93b93be177f2a07e612620e705773090633535a749d4a672b8a9d9873e",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\top-mask.png",
+          "sha256": "6c9a432042edbcb1648e54e35e89be69b4535522493299ee6769f8c74615901a"
+        },
+        "neutral": {
+          "actual_camera_sha256": "367a2f93b93be177f2a07e612620e705773090633535a749d4a672b8a9d9873e",
+          "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\top-neutral.png",
+          "sha256": "fee99a9a392a2b2859866248b3fffd82bc8408ae6f7785f4c14ae672d8a69b5c"
+        }
+      },
+      "reference_legacy_mask_clip_provenance": "unavailable; not backfilled",
+      "retained_source_lifecycle": "previous failed supervisor unchanged; comparison binds bytes/frame only"
+    }
+  },
+  "aggregate_accepted": false,
+  "all_five_original_silhouettes_passed": true,
+  "artist_limits": null,
+  "baseline_b2c_geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+  "baseline_replay": {
+    "actual_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "exact": true,
+    "expected_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1"
+  },
+  "bound_exact_copies": [
+    {
+      "bytes": 26304,
+      "exact_copy": true,
+      "label": "producer-results.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\results.json",
+      "retained_path": "native-evidence/producer-results.json",
+      "sha256": "66c1eb8193ab5a6bd6c8fce9e45a46278f0f08d284e960e7738383c9e9125367"
+    },
+    {
+      "bytes": 5163,
+      "exact_copy": true,
+      "label": "producer-ownership.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\run-ownership.json",
+      "retained_path": "native-evidence/producer-ownership.json",
+      "sha256": "c5d51b718590dc8820b3eb2592f6ed64288b4af26a411fdc1c48c78dfd304faf"
+    },
+    {
+      "bytes": 150,
+      "exact_copy": true,
+      "label": "producer-lease.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\run-lease.json",
+      "retained_path": "native-evidence/producer-lease.json",
+      "sha256": "6ccc6af3d15bfcdbbc811dab6c5f22f44b2ebaefa1e66912e77f0346d53fa137"
+    },
+    {
+      "bytes": 11847,
+      "exact_copy": true,
+      "label": "candidate-camera-snapshots.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\camera-snapshots.json",
+      "retained_path": "native-evidence/candidate-camera-snapshots.json",
+      "sha256": "fa4a02f88918feb7541e75e1dbf0be3dbec38289400a9248acc077afb08fe895"
+    },
+    {
+      "bytes": 608,
+      "exact_copy": true,
+      "label": "display-only-camera.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\display-only-camera.json",
+      "retained_path": "native-evidence/display-only-camera.json",
+      "sha256": "1e8389a1dac2efeffb40e049092608e8fa5ac8060203979d0ae14dde118cc41e"
+    },
+    {
+      "bytes": 801,
+      "exact_copy": true,
+      "label": "candidate-evaluated-exact.npz",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\evaluated-exact.npz",
+      "retained_path": "native-evidence/candidate-evaluated-exact.npz",
+      "sha256": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a"
+    },
+    {
+      "bytes": 5789,
+      "exact_copy": true,
+      "label": "candidate-program.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\program.json",
+      "retained_path": "native-evidence/candidate-program.json",
+      "sha256": "980ab9dcc1f982eac5a15dcb5a3163471d159cbbea7818cc482185c3a12461ee"
+    },
+    {
+      "bytes": 755,
+      "exact_copy": true,
+      "label": "source-evaluated-exact.npz",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\source\\evaluated-exact.npz",
+      "retained_path": "native-evidence/source-evaluated-exact.npz",
+      "sha256": "6f2ac20580a3a5fb1f541e056a6c6dc9c5659a2838882f44ca54c5a9dfad2c83"
+    },
+    {
+      "bytes": 2906,
+      "exact_copy": true,
+      "label": "supervisor-resource.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\resource-receipt.json",
+      "retained_path": "native-evidence/supervisor-resource.json",
+      "sha256": "3a69ad1c4cd81f076b18471b61bb9e8d1b1f65d37cab9017b368dbc25273295a"
+    },
+    {
+      "bytes": 341,
+      "exact_copy": true,
+      "label": "supervisor-result.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\run-result.json",
+      "retained_path": "native-evidence/supervisor-result.json",
+      "sha256": "67d02010e03a46ccbbee60d5df5d8f9d7fd714ae41eedc615815e5af8d4e3c12"
+    },
+    {
+      "bytes": 3679,
+      "exact_copy": true,
+      "label": "supervisor-ownership.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\run-ownership.json",
+      "retained_path": "native-evidence/supervisor-ownership.json",
+      "sha256": "d55bbc02db3865a11cb5724a8c644821a93d08ec8326d02702418450b77c63d0"
+    },
+    {
+      "bytes": 150,
+      "exact_copy": true,
+      "label": "supervisor-lease.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\run-lease.json",
+      "retained_path": "native-evidence/supervisor-lease.json",
+      "sha256": "354ed5c4d1117710ad842b35fd66d6115cf775a67e70e0497392ac834935eebe"
+    },
+    {
+      "bytes": 2280,
+      "exact_copy": true,
+      "label": "supervisor-command.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\command.json",
+      "retained_path": "native-evidence/supervisor-command.json",
+      "sha256": "7471de34813a78c4072e9a94ebfb280dc299b7af390b7fe10cc582d6b4449994"
+    },
+    {
+      "bytes": 4385,
+      "exact_copy": true,
+      "label": "supervisor-provenance.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\provenance.json",
+      "retained_path": "native-evidence/supervisor-provenance.json",
+      "sha256": "7dd432d948939830fd2796b7aebbf6d2b04b1b50b8e08af6448865e4e8ab7630"
+    },
+    {
+      "bytes": 64,
+      "exact_copy": true,
+      "label": "native-stdout.log",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\stdout.log",
+      "retained_path": "native-evidence/native-stdout.log",
+      "sha256": "1d6c49ba2bfb782409a31bc131c6505a67a533129b5bd039c9ecdb7d27f2c134"
+    },
+    {
+      "bytes": 3300,
+      "exact_copy": true,
+      "label": "qualifier-receipt.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz\\receipt.json",
+      "retained_path": "native-evidence/qualifier-receipt.json",
+      "sha256": "5be62d35b56baf066f29ec3dacb4294f7f1a8d3efe04d7a451b7fcd6960b4097"
+    },
+    {
+      "bytes": 276,
+      "exact_copy": true,
+      "label": "qualifier-primary-cleanup.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz\\helper-cleanup.json",
+      "retained_path": "native-evidence/qualifier-primary-cleanup.json",
+      "sha256": "302574afd225053929db6ea42b742cb647e50496c2eebfcd3230eaed7cccc214"
+    },
+    {
+      "bytes": 1704,
+      "exact_copy": true,
+      "label": "qualifier-ownership.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz\\run-ownership.json",
+      "retained_path": "native-evidence/qualifier-ownership.json",
+      "sha256": "df784db492cd79c14c20cebf9ba69b9cc4b0cff10bd809c4620483b01062146e"
+    },
+    {
+      "bytes": 150,
+      "exact_copy": true,
+      "label": "qualifier-lease.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz\\run-lease.json",
+      "retained_path": "native-evidence/qualifier-lease.json",
+      "sha256": "4b5f918a583c5d82b9dbdae03ff51bcf9a98f03807b389fe7b652294764d6b9a"
+    },
+    {
+      "bytes": 0,
+      "exact_copy": true,
+      "label": "qualifier-log-tail.txt",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz\\helper-log-tail.txt",
+      "retained_path": "native-evidence/qualifier-log-tail.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 55994,
+      "exact_copy": true,
+      "label": "baseline-b2c-results.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\results.json",
+      "retained_path": "native-evidence/baseline-b2c-results.json",
+      "sha256": "9dffc1c8cc65c240fefb90c6c2b402b46c246f2720d717e6090b01f0a59fdcb9"
+    },
+    {
+      "bytes": 40351,
+      "exact_copy": true,
+      "label": "historical-source-camera-snapshots.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\camera-snapshots.json",
+      "retained_path": "native-evidence/historical-source-camera-snapshots.json",
+      "sha256": "843b08a5c5822f0c9bc321c72f561e187ef9db90bbe7a1656a2ceb9fab6b8a99"
+    },
+    {
+      "bytes": 78727,
+      "exact_copy": true,
+      "fresh_native": true,
+      "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+      "label": "candidate-original-oblique_35_28-neutral.png",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\oblique_35_28-neutral.png",
+      "receipt_json_pointer": "/oblique_35_28/pass_artifacts/neutral/sha256",
+      "retained_path": "pixels/candidate-original-oblique_35_28-neutral.png",
+      "role": "candidate",
+      "sha256": "81434765f75a75991ad1e968f3d3e6f51a228260f50796e87d33d2e714bdcec2",
+      "style": "original_neutral",
+      "view": "oblique_35_28"
+    },
+    {
+      "bytes": 78443,
+      "exact_copy": true,
+      "fresh_native": true,
+      "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+      "label": "candidate-unclipped-oblique_35_28-neutral.png",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\unclipped-oblique_35_28-neutral.png",
+      "receipt_json_pointer": "/display_only/candidate/png_sha256",
+      "retained_path": "pixels/candidate-unclipped-oblique_35_28-neutral.png",
+      "role": "candidate",
+      "sha256": "13d09c3e60d04c19a2c96f00e179e9d7d83fdd8deda3b7e8b31a2d4346773553",
+      "style": "unclipped_neutral",
+      "view": "oblique_35_28"
+    },
+    {
+      "bytes": 78340,
+      "exact_copy": true,
+      "fresh_native": true,
+      "geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+      "label": "source-unclipped-oblique_35_28-neutral.png",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\source\\unclipped-oblique_35_28-neutral.png",
+      "receipt_json_pointer": "/display_only/source/png_sha256",
+      "retained_path": "pixels/source-unclipped-oblique_35_28-neutral.png",
+      "role": "source",
+      "sha256": "2d563e98a0f1efc99f6670c5f06e80b27a1d1c3a04cdb7b9e612d128c7a0a764",
+      "style": "unclipped_neutral",
+      "view": "oblique_35_28"
+    },
+    {
+      "bytes": 78780,
+      "exact_copy": true,
+      "fresh_native": false,
+      "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+      "label": "baseline-original-oblique_35_28-neutral.png",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-current-demo-integration-20261009\\pixels\\asymmetric_multipart_solid-candidate-neutral.png",
+      "retained_path": "pixels/baseline-original-oblique_35_28-neutral.png",
+      "role": "baseline",
+      "sha256": "8e259b5186edbd0c2ae77caf4e467e184b5d66eccc31fde6f5e1a045841f76cc",
+      "style": "historical_original_neutral",
+      "view": "oblique_35_28"
+    },
+    {
+      "bytes": 40351,
+      "exact_copy": true,
+      "label": "historical-b2c-camera-snapshots.json",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\candidate\\camera-snapshots.json",
+      "retained_path": "native-evidence/historical-b2c-camera-snapshots.json",
+      "sha256": "6b29466f346056fc5ec66621c9728dc9574ca1ce96958fb0916b1aad1c6502cf"
+    }
+  ],
+  "boundary": {
+    "backend": "Open3D 0.19.0",
+    "between_component_pairs": 0,
+    "cache_hit": false,
+    "exact_pair_verification": {
+      "complete": true,
+      "component_count": 1,
+      "counts": {},
+      "non_disjoint_pairs": 0,
+      "predicate_version": "exact_binary64_triangle_contacts_v1",
+      "qualification_policy": "only exactly disjoint native reports are removed; contact/degenerate/unverified reports remain blocking",
+      "relations": {},
+      "reported_pairs": 0,
+      "samples": [],
+      "unverified_pairs": 0,
+      "verified_pairs": 0
+    },
+    "geometry_content_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "helper_python": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+    "helper_source_sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25",
+    "intersection_pair_provenance": [],
+    "intersection_sample": [],
+    "manifold_validated": true,
+    "owned_run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz",
+    "qualification": "Open3D edge/vertex/orientability screen plus exact verification of reported triangle pairs",
+    "qualification_cost_boundary": "identity verification, solid guard, transfer and actual helper execution",
+    "qualification_elapsed_s": 3.4690166000000318,
+    "reason": null,
+    "reported_self_intersections": 0,
+    "self_intersections": 0,
+    "self_intersections_scope": "exact non-disjoint reported triangle pairs; null when incomplete",
+    "single_solid_qualified": true,
+    "solid_guard": {
+      "boundary_edges": 0,
+      "connected_components": 1,
+      "degenerate_faces": 0,
+      "edge_count": 72,
+      "euler_characteristic": 2,
+      "face_count": 48,
+      "geometric_degenerate_faces": 0,
+      "loose_vertices": 0,
+      "non_manifold_edges": 0,
+      "orientation_errors": 0,
+      "pass": true,
+      "passed": true,
+      "penalty": 0.0,
+      "reason": "",
+      "required": true,
+      "self_intersection_qualification": "not_established_by_index_topology",
+      "signed_volume": 0.7832163089755896,
+      "single_solid_qualified": false,
+      "topology_and_volume_valid": true,
+      "topology_score": 1.0,
+      "valid_solid": true,
+      "valid_solid_scope": "legacy topology/volume screen; boundary intersections untested",
+      "vertex_count": 26,
+      "watertight": true
+    },
+    "status": "qualified",
+    "toolchain_identity": "967d79852f4572c41c399e3eb4c96832be59ae1c5e9a49c8deee0a230d59068a",
+    "triangle_count": 48,
+    "triangle_predicate_sha256": "621d32ca63daa37b2f8cecdf2b6689b66fade5d919f5958b6e77456953f6594b",
+    "within_component_pairs": 0,
+    "within_part_boundary_guard": {
+      "component_count": 1,
+      "elapsed_s": 0.01600000000144064,
+      "geometry_scope": "within indexed parts only; between-part overlap permitted",
+      "indexed_adjacency_contacts": 287,
+      "limitation": "surface guard; closed topology/volume and external single-solid qualification are separate",
+      "passed": true,
+      "predicate_version": "exact_binary64_triangle_contacts_v1",
+      "reason": null,
+      "status": "checked",
+      "sweep_axis": 2,
+      "tested_pairs": 376
+    }
+  },
+  "candidate_frames": 11,
+  "candidate_geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+  "completed_native_frames": 12,
+  "display_only": {
+    "candidate": {
+      "actual_camera": {
+        "clip_end": 1000.0,
+        "clip_start": 0.10000000149011612,
+        "matrix_world": [
+          [
+            -0.5735766887664795,
+            -0.38456857204437256,
+            0.7232681512832642,
+            4.050499439239502
+          ],
+          [
+            0.8191518783569336,
+            -0.2692779302597046,
+            0.506438136100769,
+            2.8361752033233643
+          ],
+          [
+            -3.967022621509386e-08,
+            0.882947564125061,
+            0.46947160363197327,
+            2.7854440212249756
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.2616024017333984,
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0
+      },
+      "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+      "png_sha256": "13d09c3e60d04c19a2c96f00e179e9d7d83fdd8deda3b7e8b31a2d4346773553",
+      "projected_bounds": {
+        "clipping_enclosed": true,
+        "depth_max": 6.651977160395032,
+        "depth_min": 4.930018845933356,
+        "projected_max": [
+          0.725521557040496,
+          0.9747515296799676
+        ],
+        "projected_min": [
+          -0.7255217776358552,
+          -0.974828719962012
+        ],
+        "projection_enclosed": true,
+        "scope": "projected/clipping observation of these points only; no silhouette or family acceptance"
+      },
+      "render_settings": {
+        "background_type": "WORLD",
+        "cavity": false,
+        "color_mode": "BW",
+        "color_type": "SINGLE",
+        "engine": "BLENDER_WORKBENCH",
+        "exposure": 0.0,
+        "gamma": 1.0,
+        "light": "STUDIO",
+        "resolution": [
+          512,
+          512
+        ],
+        "resolution_percentage": 100,
+        "shadows": true,
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ],
+        "studio_light": "Default",
+        "view_transform": "AgX"
+      },
+      "scope": "fresh human inspection only; excluded from original gates and raw surface"
+    },
+    "source": {
+      "actual_camera": {
+        "clip_end": 1000.0,
+        "clip_start": 0.10000000149011612,
+        "matrix_world": [
+          [
+            -0.5735766887664795,
+            -0.38456857204437256,
+            0.7232681512832642,
+            4.050499439239502
+          ],
+          [
+            0.8191518783569336,
+            -0.2692779302597046,
+            0.506438136100769,
+            2.8361752033233643
+          ],
+          [
+            -3.967022621509386e-08,
+            0.882947564125061,
+            0.46947160363197327,
+            2.7854440212249756
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.2616024017333984,
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ],
+        "projection": "ORTHO",
+        "resolution": [
+          512,
+          512
+        ],
+        "shift_x": 0.0,
+        "shift_y": 0.0
+      },
+      "geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+      "png_sha256": "2d563e98a0f1efc99f6670c5f06e80b27a1d1c3a04cdb7b9e612d128c7a0a764",
+      "projected_bounds": {
+        "clipping_enclosed": true,
+        "depth_max": 6.65157417304057,
+        "depth_min": 4.930424529033049,
+        "projected_max": [
+          0.7250995178768561,
+          0.9748284658158657
+        ],
+        "projected_min": [
+          -0.7250718726979831,
+          -0.9746308369689953
+        ],
+        "projection_enclosed": true,
+        "scope": "projected/clipping observation of these points only; no silhouette or family acceptance"
+      },
+      "render_settings": {
+        "background_type": "WORLD",
+        "cavity": false,
+        "color_mode": "BW",
+        "color_type": "SINGLE",
+        "engine": "BLENDER_WORKBENCH",
+        "exposure": 0.0,
+        "gamma": 1.0,
+        "light": "STUDIO",
+        "resolution": [
+          512,
+          512
+        ],
+        "resolution_percentage": 100,
+        "shadows": true,
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ],
+        "studio_light": "Default",
+        "view_transform": "AgX"
+      },
+      "scope": "fresh human inspection only; excluded from original gates and raw surface"
+    }
+  },
+  "family": "asymmetric_multipart_solid",
+  "frozen_plan": {
+    "all_67_inputs_verified_after": true,
+    "input_count": 67,
+    "inputs": [
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Scripts\\python.exe",
+        "sha256": "d55736b9f3d6b4ca7985b82db8ce11edfa09994cf93ce31c6b506543b74f32eb"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py",
+        "sha256": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\comparable_geometry.py",
+        "sha256": "4226354476aea7a7785ea31e2860fba0084e2f0a5175e6a866e63deaba2ecb01"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py",
+        "sha256": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\inspection_camera.py",
+        "sha256": "7818917ccdb39f3d3d053dc25978004cc83b121d4a93c51a05aff814fd91b4ef"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\reference_noise.py",
+        "sha256": "841d1470fbfa7db2f81cf364455d94705342498b6bc1b304d1445b157a577460"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\triangle_contacts.py",
+        "sha256": "621d32ca63daa37b2f8cecdf2b6689b66fade5d919f5958b6e77456953f6594b"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py",
+        "sha256": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\silhouette_render.py",
+        "sha256": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py",
+        "sha256": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py",
+        "sha256": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_family.py",
+        "sha256": "6e8c609855fd757496b886465e229eac8026ee02b644191f80dd7aeeba9d7de5"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py",
+        "sha256": "23b408f67d94034e78f568ba9933804f064db90119ce9c44b3ea72b278d29596"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py",
+        "sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_qualification.py",
+        "sha256": "009295c99a1381bd48383e0dc579c844a4315d79c9471dd6f54b796b62df05a9"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_targets.py",
+        "sha256": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\blender_builders.py",
+        "sha256": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_contracts.py",
+        "sha256": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_references.py",
+        "sha256": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\specs.py",
+        "sha256": "b750d075ff5e7d07a388ce541b0defa515b89dfa91462cc9f4f1ec727f0fde4b"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_inspection_camera.py",
+        "sha256": "2038fc48280d7e16bb3b685599bdbdcecd053ce639d6658bb814813a7f58ed8f"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_multipart_planar_join.py",
+        "sha256": "cf10c3edcb0c67a6667379f8382b976d7f3dc12ca69c8b7030aca93bbb27e8e8"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+        "sha256": "71f4481f54e4994ef5dc668217631203540fdd207e12a545ef71d0584b9962b2"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_selected_canonical_inspection.py",
+        "sha256": "8c735c685bd9b15910517fb301766de92b89863a7ede0c831ea27c8bb5c5c45d"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process.py",
+        "sha256": "750b15b3a0be5eaa4906f1c96f15453fb27d53728c592a8b0a39cc16f9800b5a"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+        "sha256": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\primary_process_cleanup.py",
+        "sha256": "ddc0f60642b536f64dda686d7d8e10c62e42916c70351c388564a5732785107f"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py",
+        "sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\eleven-family-evidence.json",
+        "sha256": "d65e292edc938c5fa7bf00ac89e78b63ab24f77699f3d5994d2da01230c76965"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-selected-canonical-continuation-20261009\\native-plan.json",
+        "sha256": "b91fd2b023ab822e7d73bcb8d43d08a888ab4533651dab965b06071bc513924f"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\qualify_native_solid.py",
+        "sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+        "sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_frozen_multipart_reconstruction.py",
+        "sha256": "9136eedd59fca4e6bec4a28a3192ced9260e7107b28835077be5f4f6f90ba0f0"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py",
+        "sha256": "23290344800e2650c7a6bfec08ed3d5350c426eeafdd32c3a4c29c346a66999a"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_quality_coverage_check.py",
+        "sha256": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_reference_neutral_inspection.py",
+        "sha256": "28501a44fcefc55e2ca09412c82072233885d5ecf4ff83f18f2a9f4b6cae6ec6"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_selected_canonical_inspection.py",
+        "sha256": "c5f00d3a861d5bfa004d04cec912ed391d5ab5cd5f22ae919a36514664d408ce"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_surface_quality_check.py",
+        "sha256": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-measurement-04\\owned-89f4s1lu\\refined\\evaluated-exact.npz",
+        "sha256": "5d8fdad82b8a852623f38fa33640c01f3c08e2b9c440760c53a4e354c353c4c7"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-measurement-04\\owned-89f4s1lu\\refined\\program.json",
+        "sha256": "bba1f9e0cc871eac56ed46eeb8d970943f1d6acb6e00dae817f4c35e010efb5b"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-measurement-04\\owned-89f4s1lu\\results.json",
+        "sha256": "2ca8f2643a2072ae899bd15e13dbf95afd7836557a68dec19def07d7afb0f135"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\evaluated-exact.npz",
+        "sha256": "dd36b515004e8d7c81899fd960851f3cf60b1524235f897b491164001d8bedc4"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\frozen-workload.json",
+        "sha256": "0231c84fa9625b90f61ca565ed81d4cbd54d91ff4f02a06b893454b673fc7898"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\program.json",
+        "sha256": "39f303d5ba564965f8c40027dbb4ca4153669d2436674d466fff9fe34ccd9948"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\results.json",
+        "sha256": "9dffc1c8cc65c240fefb90c6c2b402b46c246f2720d717e6090b01f0a59fdcb9"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\camera-snapshots.json",
+        "sha256": "843b08a5c5822f0c9bc321c72f561e187ef9db90bbe7a1656a2ceb9fab6b8a99"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\front-neutral.png",
+        "sha256": "cad4ed4cfa87d69886b6db3ce864ba64cf4ca340a18814e4a5345cfd577c95a0"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\oblique_145_40-neutral.png",
+        "sha256": "06042e38800673d5f72ad8d81f788b49083d405f463f9ffa5788dd70c7d07652"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\oblique_35_28-neutral.png",
+        "sha256": "ca6c80eb94676072309229bc43ba22685da24177109a4b94b2ca6ded5792810b"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\side-neutral.png",
+        "sha256": "ed48962044630f73560c1a5122b6d23337337673e996cb87f092cef5614eec8d"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\selected-canonical-01\\owned-lnxl2keh\\asymmetric_multipart_solid\\source\\top-neutral.png",
+        "sha256": "5d53ac8eae90e5c6a71f2bf02f85555e688d66bd2999fab79f143594f42d002a"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\evaluated-exact.npz",
+        "sha256": "6f2ac20580a3a5fb1f541e056a6c6dc9c5659a2838882f44ca54c5a9dfad2c83"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\evaluated.obj",
+        "sha256": "23f958204b78eca25beb9ef64851540c357f0c305dbf5f79ca3aa855318e1eb3"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\front-mask.png",
+        "sha256": "70cfebc1c9ac504fc992c71e13a5aeaca5a49d51155df23c98451cc967e69172"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\oblique_145_40-mask.png",
+        "sha256": "0ca1b12e16c770be9ad996a5e692fc6dd283896046f7dacc3b5c0b45ad6afccd"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\oblique_35_28-mask.png",
+        "sha256": "47f4e1873decf7e02ff3b673c52bc7ac4d706044ec79aa3c416782909560dee7"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\side-mask.png",
+        "sha256": "2c98cab132c3eb47536599b92f8b6a10c39e6d95a77ed098a10bd92ad571fc17"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\top-mask.png",
+        "sha256": "39024849d71452c9235116666affaf811cde46ad6d8e8bd8ff486dac75c56dc9"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\frozen-workload.json",
+        "sha256": "3b63f97aa72b6c8ab933bac9825ff97528f753acac285331d673748abb7a32b0"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\results.json",
+        "sha256": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\evaluated-exact.npz",
+        "sha256": "de63007fefa542a9b7a5db3217d9ee5f2109a445a4c0a2caf82104943476b654"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\evaluated.obj",
+        "sha256": "3199bc9c887f4263d7af5546aee3e6f07bee0e9ca73f1a377462fe0193923b72"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\front-mask.png",
+        "sha256": "e2e3fcf80234ec1cd826a63623b05cbd25b6b08b4c7211eea4825177017fdd8e"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\oblique_145_40-mask.png",
+        "sha256": "efd05692bccc78848357e5edbf0a29fdcaf217fbad6b6e6717d681c2047abced"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\oblique_35_28-mask.png",
+        "sha256": "7fc6ba8be6c0ef15b3e3675f138cd8c2a6e834615763958fef526ad6b6b1c153"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\side-mask.png",
+        "sha256": "fa02db7c8dff67ab633e1b3d891b2eccf830b67903fca36eb1af2edf10e3f6ca"
+      },
+      {
+        "matches": true,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\top-mask.png",
+        "sha256": "e1b57a061b763f983dd9c0235a9548e988a98e13b54169a51dbcfe813dc0e5fd"
+      }
+    ],
+    "path": "native-plan.json",
+    "sha256": "e38527b16063e5c550eb82fef6e75e9eedc4db67128bb261dd4086c86ca361cc"
+  },
+  "historical_scope": "original selected b2c/reference/program/masks/cameras/source-neutral packet and failed-supervisor history preserved unchanged; no adoption/release of old owners",
+  "independent_checks_passed": true,
+  "native_near_rounding_world": 2.4556501276862264e-09,
+  "original_gate_scope": "original display-calibrated mask gates unchanged; no controlled-alpha relabeling",
+  "ownership_audits": {
+    "producer": {
+      "blockers": [
+        "unknown files present; ownership is not inferred"
+      ],
+      "eligible": [],
+      "eligible_bytes": 0,
+      "mode": "read_only",
+      "mutation_supported": false,
+      "protocol": "run-ownership-dry-run-v1",
+      "retained_bytes": 1025031,
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr",
+      "status": "blocked",
+      "unknown_files": [
+        "qualification-children/owned-pd7o3rkz/helper-cleanup.json",
+        "qualification-children/owned-pd7o3rkz/helper-log-tail.txt",
+        "qualification-children/owned-pd7o3rkz/input.npz",
+        "qualification-children/owned-pd7o3rkz/receipt.json",
+        "qualification-children/owned-pd7o3rkz/run-lease.json",
+        "qualification-children/owned-pd7o3rkz/run-ownership.json"
+      ]
+    },
+    "qualifier": {
+      "blockers": [],
+      "eligible": [
+        {
+          "bytes": 2800,
+          "path": "input.npz",
+          "sha256": "9df01f78c6c66e4272e4a64e1ca541c8523615320621864b72463788c406fb86"
+        }
+      ],
+      "eligible_bytes": 2800,
+      "mode": "read_only",
+      "mutation_supported": false,
+      "protocol": "run-ownership-dry-run-v1",
+      "retained_bytes": 3576,
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz",
+      "status": "dry_run_ready",
+      "unknown_files": []
+    },
+    "supervisor": {
+      "blockers": [],
+      "eligible": [],
+      "eligible_bytes": 0,
+      "mode": "read_only",
+      "mutation_supported": false,
+      "protocol": "run-ownership-dry-run-v1",
+      "retained_bytes": 9976,
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222",
+      "status": "dry_run_ready",
+      "unknown_files": []
+    }
+  },
+  "ownership_summary": "supervisor and nested qualifier dry_run_ready; producer blocked by six separately owned qualifier files; no ownership inferred and no cleanup performed",
+  "pixel_review": {
+    "actual_files_viewed": [
+      "pixels/candidate-original-oblique_35_28-neutral.png",
+      "pixels/candidate-unclipped-oblique_35_28-neutral.png",
+      "pixels/source-unclipped-oblique_35_28-neutral.png",
+      "pixels/baseline-original-oblique_35_28-neutral.png"
+    ],
+    "observations": [
+      "Old b2c original-ob35 preview has faint dotted tall-arm/base side line.",
+      "New85dc original-ob35 preview has a continuous planar side and the original bottom crop.",
+      "Fresh source/candidate unclipped previews show the whole object with padding and the same actual camera/clips.",
+      "Authored sharp edges/flat shading remain; shadows were not disabled to hide the seam."
+    ],
+    "observer": "canonical_evidence read-only view_image",
+    "root_independent_review": "root inspected the three fresh PNGs and reported the same seam/framing observation"
+  },
+  "pixels": [
+    {
+      "bytes": 78727,
+      "exact_copy": true,
+      "fresh_native": true,
+      "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+      "label": "candidate-original-oblique_35_28-neutral.png",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\oblique_35_28-neutral.png",
+      "receipt_json_pointer": "/oblique_35_28/pass_artifacts/neutral/sha256",
+      "receipt_retained_path": "native-evidence/candidate-camera-snapshots.json",
+      "receipt_sha256": "fa4a02f88918feb7541e75e1dbf0be3dbec38289400a9248acc077afb08fe895",
+      "retained_path": "pixels/candidate-original-oblique_35_28-neutral.png",
+      "role": "candidate",
+      "sha256": "81434765f75a75991ad1e968f3d3e6f51a228260f50796e87d33d2e714bdcec2",
+      "style": "original_neutral",
+      "view": "oblique_35_28"
+    },
+    {
+      "bytes": 78443,
+      "exact_copy": true,
+      "fresh_native": true,
+      "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+      "label": "candidate-unclipped-oblique_35_28-neutral.png",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\candidate\\unclipped-oblique_35_28-neutral.png",
+      "receipt_json_pointer": "/display_only/candidate/png_sha256",
+      "receipt_retained_path": "native-evidence/producer-results.json",
+      "receipt_sha256": "66c1eb8193ab5a6bd6c8fce9e45a46278f0f08d284e960e7738383c9e9125367",
+      "retained_path": "pixels/candidate-unclipped-oblique_35_28-neutral.png",
+      "role": "candidate",
+      "sha256": "13d09c3e60d04c19a2c96f00e179e9d7d83fdd8deda3b7e8b31a2d4346773553",
+      "style": "unclipped_neutral",
+      "view": "oblique_35_28"
+    },
+    {
+      "bytes": 78340,
+      "exact_copy": true,
+      "fresh_native": true,
+      "geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+      "label": "source-unclipped-oblique_35_28-neutral.png",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\source\\unclipped-oblique_35_28-neutral.png",
+      "receipt_json_pointer": "/display_only/source/png_sha256",
+      "receipt_retained_path": "native-evidence/producer-results.json",
+      "receipt_sha256": "66c1eb8193ab5a6bd6c8fce9e45a46278f0f08d284e960e7738383c9e9125367",
+      "retained_path": "pixels/source-unclipped-oblique_35_28-neutral.png",
+      "role": "source",
+      "sha256": "2d563e98a0f1efc99f6670c5f06e80b27a1d1c3a04cdb7b9e612d128c7a0a764",
+      "style": "unclipped_neutral",
+      "view": "oblique_35_28"
+    },
+    {
+      "bytes": 78780,
+      "exact_copy": true,
+      "fresh_native": false,
+      "geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+      "historical_lifecycle_scope": "old selected packet supervisor failed; byte/frame provenance only, no release adoption",
+      "label": "baseline-original-oblique_35_28-neutral.png",
+      "original_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-current-demo-integration-20261009\\pixels\\asymmetric_multipart_solid-candidate-neutral.png",
+      "receipt_json_pointer": "/oblique_35_28/pass_artifacts/neutral/sha256",
+      "receipt_retained_path": "native-evidence/historical-b2c-camera-snapshots.json",
+      "receipt_sha256": "6b29466f346056fc5ec66621c9728dc9574ca1ce96958fb0916b1aad1c6502cf",
+      "retained_path": "pixels/baseline-original-oblique_35_28-neutral.png",
+      "role": "baseline",
+      "sha256": "8e259b5186edbd0c2ae77caf4e467e184b5d66eccc31fde6f5e1a045841f76cc",
+      "style": "historical_original_neutral",
+      "view": "oblique_35_28"
+    }
+  ],
+  "producer_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr",
+  "protocol": "multipart_shared_plane_native_evidence_v1",
+  "qualifier_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz",
+  "raw_default_surface_status": "unqualified",
+  "raw_qualified_limits": null,
+  "raw_tradeoff": {
+    "metrics": {
+      "distance_p95_world": {
+        "baseline_b2c": 0.00035315752029418945,
+        "difference": 0.0,
+        "new_shared_plane": 0.00035315752029418945,
+        "relative_change_percent": 0.0
+      },
+      "normal_angle_mean_degrees": {
+        "baseline_b2c": 0.032958984375,
+        "difference": 0.010986328125,
+        "new_shared_plane": 0.0439453125,
+        "relative_change_percent": 33.33333333333333
+      },
+      "normal_angle_p95_degrees": {
+        "baseline_b2c": 0.0,
+        "difference": 0.0,
+        "new_shared_plane": 0.0,
+        "relative_change_percent": null
+      },
+      "sampled_max_distance_world": {
+        "baseline_b2c": 0.0005021347315050662,
+        "difference": -0.00014897718210704625,
+        "new_shared_plane": 0.0003531575493980199,
+        "relative_change_percent": -29.668766719344763
+      },
+      "symmetric_mean_distance_world": {
+        "baseline_b2c": 0.00016197755683688975,
+        "difference": 1.417442485435183e-05,
+        "new_shared_plane": 0.00017615198169124158,
+        "relative_change_percent": 8.750857298474624
+      }
+    },
+    "protocol": "shared_world_area_sample_to_triangle_v1",
+    "same_count_seed_reference_units": true,
+    "samples_per_direction": 4096,
+    "seed": 61007,
+    "source_json_pointer": "/cases/asymmetric_multipart_solid/raw_surface/refined",
+    "source_original_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\results.json",
+    "summary": "mean distance and mean normal angle rose; distance P95 and normal P95 unchanged; sampled maximum distance fell; no all-metrics improvement claim"
+  },
+  "runtime": {
+    "blender_stdout": "Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)",
+    "outer_resource": {
+      "broker_process_ownership": "unsupported",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "--background",
+        "--factory-startup",
+        "--threads",
+        "2",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py",
+        "--",
+        "--plan",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+        "--output",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01"
+      ],
+      "elapsed_seconds": 11.526352599999882,
+      "job_accounting": {
+        "active_processes": 0,
+        "peak_job_committed_bytes": 2710781952,
+        "terminated_processes": 0,
+        "total_processes": 5
+      },
+      "job_active_zero": true,
+      "job_assigned_before_resume": true,
+      "job_memory_limit_enforced": true,
+      "join_timeout_s": 5.0,
+      "lifecycle_complete": true,
+      "limit_reason": null,
+      "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\stdout.log",
+      "max_job_committed_bytes": 8589934592,
+      "max_rss_bytes": 8589934592,
+      "memory_scope": "job-accounted committed memory; not an RSS quota",
+      "observed_handles_joined": true,
+      "observed_processes": [
+        {
+          "creation_filetime": 134360425284393786,
+          "exit_status": 0,
+          "kernel_joined": true,
+          "pid": 27588
+        },
+        {
+          "creation_filetime": 134360425286016657,
+          "exit_status": 0,
+          "kernel_joined": true,
+          "pid": 27736
+        },
+        {
+          "creation_filetime": 134360425377734310,
+          "exit_status": 0,
+          "kernel_joined": true,
+          "pid": 20372
+        },
+        {
+          "creation_filetime": 134360425377868673,
+          "exit_status": 0,
+          "kernel_joined": true,
+          "pid": 23892
+        },
+        {
+          "creation_filetime": 134360425378038819,
+          "exit_status": 0,
+          "kernel_joined": true,
+          "pid": 20848
+        }
+      ],
+      "ordinary_createprocess_tree_owned": true,
+      "ownership_scope": "Windows no-breakaway job",
+      "peak_observed_tree_rss_bytes": 667033600,
+      "pid": 27588,
+      "primary_identity": {
+        "creation_filetime": 134360425284393786,
+        "pid": 27588
+      },
+      "primary_joined": true,
+      "protocol": "fresh_owned_process_supervision_v1",
+      "returncode": 0,
+      "rss_sample_count": 553,
+      "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+      "rss_unavailable_samples": [],
+      "status": "succeeded",
+      "timeout_s": 85.0,
+      "total_declared_supervision_budget_s": 90.0
+    },
+    "primary_cleanup": {
+      "errors": [],
+      "ordinary_tree_qualified": false,
+      "pipes_drained": true,
+      "primary_joined": true,
+      "protocol": "bounded_primary_cleanup_v1",
+      "returncode": 0,
+      "scope": "primary Popen and output pipes only",
+      "timeout_s": 5.0,
+      "transport_closed": true
+    },
+    "producer_elapsed_seconds": 6.750283800000034,
+    "qualifier_backend": "Open3D 0.19.0",
+    "qualifier_python": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+    "scope": "outer Windows no-breakaway Job owns fresh ordinary CreateProcess tree; nested cleanup itself proves primary/pipes only; broker processes unsupported"
+  },
+  "selection_scope": {
+    "artist_or_aggregate_promoted": false,
+    "normal_preview_frames_for_new_body": "unrun; old-body normal passes not substituted",
+    "selected_ui_modified": false,
+    "site_latest_geometry_hash_at_documentation": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "site_latest_still_baseline_b2c": true
+  },
+  "shading_state_restored": true,
+  "shared_plane": {
+    "arm": 0.3252679191664356,
+    "base": 0.3252679191664356,
+    "equal": true
+  },
+  "source_edit": {
+    "baseline_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "control": "tall-arm near-side depth x1.05; shared far plane fixed",
+    "depth_ratio": 1.0499999924642645,
+    "edited_hash": "970b5d848f486db8539f7b25d78c0ee312cb3d813e0f1bb38836eef42d1aa648",
+    "exact_indexed_restoration": true,
+    "fixed_far_plane": true,
+    "original_controls": {
+      "modifiers": [
+        {
+          "name": "ObservedExactUnion1",
+          "operand_pointer": 1730053365000,
+          "operation": "UNION",
+          "show_render": true,
+          "show_viewport": true,
+          "solver": "EXACT",
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "ObservedExactUnion2",
+          "operand_pointer": 1730053359624,
+          "operation": "UNION",
+          "show_render": true,
+          "show_viewport": true,
+          "solver": "EXACT",
+          "type": "BOOLEAN"
+        }
+      ],
+      "root_pointer": 1730053370376,
+      "sources": [
+        {
+          "matrix_world": [
+            [
+              1.6007063388824463,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.5000196099281311,
+              -0.24997878074645996
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "mesh_pointer": 1730053447816,
+          "node": "observed_base",
+          "pointer": 1730053370376
+        },
+        {
+          "matrix_world": [
+            [
+              0.45005661249160767,
+              0.0,
+              0.0,
+              -0.3997710645198822
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.9999759793281555,
+              0.4500170648097992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "mesh_pointer": 1730053442440,
+          "node": "observed_tall_arm",
+          "pointer": 1730053365000
+        },
+        {
+          "matrix_world": [
+            [
+              0.349599152803421,
+              0.0,
+              0.0,
+              0.4499990940093994
+            ],
+            [
+              0.0,
+              0.44980481266975403,
+              0.0,
+              -0.08005412667989731
+            ],
+            [
+              0.0,
+              0.0,
+              0.4952014982700348,
+              0.19762982428073883
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "mesh_pointer": 1730053204744,
+          "node": "observed_short_arm",
+          "pointer": 1730053359624
+        }
+      ]
+    },
+    "passed": true,
+    "restored_controls": {
+      "modifiers": [
+        {
+          "name": "ObservedExactUnion1",
+          "operand_pointer": 1730053365000,
+          "operation": "UNION",
+          "show_render": true,
+          "show_viewport": true,
+          "solver": "EXACT",
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "ObservedExactUnion2",
+          "operand_pointer": 1730053359624,
+          "operation": "UNION",
+          "show_render": true,
+          "show_viewport": true,
+          "solver": "EXACT",
+          "type": "BOOLEAN"
+        }
+      ],
+      "root_pointer": 1730053370376,
+      "sources": [
+        {
+          "matrix_world": [
+            [
+              1.6007063388824463,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.5000196099281311,
+              -0.24997878074645996
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "mesh_pointer": 1730053447816,
+          "node": "observed_base",
+          "pointer": 1730053370376
+        },
+        {
+          "matrix_world": [
+            [
+              0.45005661249160767,
+              0.0,
+              0.0,
+              -0.3997710645198822
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.9999759793281555,
+              0.4500170648097992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "mesh_pointer": 1730053442440,
+          "node": "observed_tall_arm",
+          "pointer": 1730053365000
+        },
+        {
+          "matrix_world": [
+            [
+              0.349599152803421,
+              0.0,
+              0.0,
+              0.4499990940093994
+            ],
+            [
+              0.0,
+              0.44980481266975403,
+              0.0,
+              -0.08005412667989731
+            ],
+            [
+              0.0,
+              0.0,
+              0.4952014982700348,
+              0.19762982428073883
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "mesh_pointer": 1730053204744,
+          "node": "observed_short_arm",
+          "pointer": 1730053359624
+        }
+      ]
+    },
+    "restored_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "same_source_and_mesh_pointers": true,
+    "union_geometry_changed": true
+  },
+  "source_equivalence": {
+    "equivalent": true,
+    "indexed_reference_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+    "indexed_regenerated_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+    "reference_oriented_surface": "5e5036dba422d4f84ee59fb5e1712b8caccec2a319f30fdfaba3da2577ff2ea8",
+    "regenerated_oriented_surface": "5e5036dba422d4f84ee59fb5e1712b8caccec2a319f30fdfaba3da2577ff2ea8",
+    "scope": "exact binary64 vertex and oriented triangle-coordinate multisets; no topology identity qualification"
+  },
+  "source_frames": 1,
+  "source_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+  "status": "native_independent_checks_passed",
+  "styles": {
+    "candidate": {
+      "evaluated_mesh": {
+        "flat_polygons": 18,
+        "has_custom_normals": false,
+        "polygon_style": "flat",
+        "polygons": 18,
+        "sharp_edge_attribute": "absent",
+        "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sharp_edges": 0,
+        "smooth_flags_sha256": "60daa3a5f7dbfa200f8c82840ecf5b42640b70f3b7218a4c6bbd67db542e75a4",
+        "smooth_polygons": 0,
+        "vertices": 26
+      },
+      "modifiers": [
+        {
+          "name": "ObservedExactUnion1",
+          "show_render": true,
+          "show_viewport": true,
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "ObservedExactUnion2",
+          "show_render": true,
+          "show_viewport": true,
+          "type": "BOOLEAN"
+        }
+      ],
+      "scope": "shading/style only; geometric-normal metrics remain separate",
+      "source_mesh": {
+        "flat_polygons": 6,
+        "has_custom_normals": false,
+        "polygon_style": "flat",
+        "polygons": 6,
+        "sharp_edge_attribute": "absent",
+        "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sharp_edges": 0,
+        "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+        "smooth_polygons": 0,
+        "vertices": 8
+      },
+      "status": "native_observed"
+    },
+    "comparison": {
+      "candidate_polygon_style": "flat",
+      "custom_normal_state_match": true,
+      "modifier_type_sequence_match": true,
+      "polygon_style_match": true,
+      "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+      "sharp_edge_count_match": true,
+      "source_polygon_style": "flat",
+      "status": "observed",
+      "weighted_normal_controls_match": true
+    },
+    "source": {
+      "evaluated_mesh": {
+        "flat_polygons": 18,
+        "has_custom_normals": false,
+        "polygon_style": "flat",
+        "polygons": 18,
+        "sharp_edge_attribute": "absent",
+        "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sharp_edges": 0,
+        "smooth_flags_sha256": "60daa3a5f7dbfa200f8c82840ecf5b42640b70f3b7218a4c6bbd67db542e75a4",
+        "smooth_polygons": 0,
+        "vertices": 26
+      },
+      "modifiers": [
+        {
+          "name": "Authored_box.001",
+          "show_render": true,
+          "show_viewport": true,
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "Authored_box.002",
+          "show_render": true,
+          "show_viewport": true,
+          "type": "BOOLEAN"
+        }
+      ],
+      "scope": "shading/style only; geometric-normal metrics remain separate",
+      "source_mesh": {
+        "flat_polygons": 6,
+        "has_custom_normals": false,
+        "polygon_style": "flat",
+        "polygons": 6,
+        "sharp_edge_attribute": "absent",
+        "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sharp_edges": 0,
+        "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+        "smooth_polygons": 0,
+        "vertices": 8
+      },
+      "status": "native_observed"
+    }
+  },
+  "supervisor_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222",
+  "surface_engineering": {
+    "artist_limits": null,
+    "limits": {
+      "normal_angle_p95_degrees_max": 1.0,
+      "symmetric_mean_distance_world_max": 0.0018125506404794065
+    },
+    "passed": true
+  },
+  "view_metrics": {
+    "front": {
+      "area_iou": 1.0,
+      "area_ratio": 1.0,
+      "boundary_iou": 1.0,
+      "centroid_delta_px": [
+        0.0,
+        0.0
+      ],
+      "intersection": 104658,
+      "iou": 1.0,
+      "pass": true,
+      "passed": true,
+      "pixel_difference": 0.0,
+      "precision": 1.0,
+      "reason": "",
+      "recall": 1.0,
+      "ref_area": 104658,
+      "render_area": 104658,
+      "required": true,
+      "signed_distance_loss": 0.0,
+      "soft_iou": null,
+      "threshold": 0.7,
+      "thresholds": {
+        "max_signed_distance_loss": 0.05,
+        "min_area_iou": 0.7,
+        "min_boundary_iou": 0.8
+      },
+      "union": 104658,
+      "view": "front",
+      "warnings": []
+    },
+    "oblique_145_40": {
+      "area_iou": 0.9997274413779157,
+      "area_ratio": 1.0002726329305403,
+      "boundary_iou": 0.9915091755683374,
+      "centroid_delta_px": [
+        -0.003792001021508895,
+        0.009916804514148225
+      ],
+      "intersection": 113706,
+      "iou": 0.9997274413779157,
+      "pass": true,
+      "passed": true,
+      "pixel_difference": 0.000118255615234375,
+      "precision": 0.9997274413779157,
+      "reason": "",
+      "recall": 1.0,
+      "ref_area": 113706,
+      "render_area": 113737,
+      "required": true,
+      "signed_distance_loss": 5.8100147394490875e-05,
+      "soft_iou": null,
+      "threshold": 0.7,
+      "thresholds": {
+        "max_signed_distance_loss": 0.05,
+        "min_area_iou": 0.7,
+        "min_boundary_iou": 0.8
+      },
+      "union": 113737,
+      "view": "oblique_145_40",
+      "warnings": []
+    },
+    "oblique_35_28": {
+      "area_iou": 0.9997513327013039,
+      "area_ratio": 1.0001865410623514,
+      "boundary_iou": 0.9928490351872872,
+      "centroid_delta_px": [
+        -0.008987384199201642,
+        0.01773071261044379
+      ],
+      "intersection": 128654,
+      "iou": 0.9997513327013039,
+      "pass": true,
+      "passed": true,
+      "pixel_difference": 0.0001220703125,
+      "precision": 0.999782409350181,
+      "reason": "",
+      "recall": 0.9999689098229414,
+      "ref_area": 128658,
+      "render_area": 128682,
+      "required": true,
+      "signed_distance_loss": 4.862235748959165e-05,
+      "soft_iou": null,
+      "threshold": 0.7,
+      "thresholds": {
+        "max_signed_distance_loss": 0.05,
+        "min_area_iou": 0.7,
+        "min_boundary_iou": 0.8
+      },
+      "union": 128686,
+      "view": "oblique_35_28",
+      "warnings": []
+    },
+    "side": {
+      "area_iou": 1.0,
+      "area_ratio": 1.0,
+      "boundary_iou": 1.0,
+      "centroid_delta_px": [
+        0.0,
+        0.0
+      ],
+      "intersection": 62891,
+      "iou": 1.0,
+      "pass": true,
+      "passed": true,
+      "pixel_difference": 0.0,
+      "precision": 1.0,
+      "reason": "",
+      "recall": 1.0,
+      "ref_area": 62891,
+      "render_area": 62891,
+      "required": true,
+      "signed_distance_loss": 0.0,
+      "soft_iou": null,
+      "threshold": 0.7,
+      "thresholds": {
+        "max_signed_distance_loss": 0.05,
+        "min_area_iou": 0.7,
+        "min_boundary_iou": 0.8
+      },
+      "union": 62891,
+      "view": "side",
+      "warnings": []
+    },
+    "top": {
+      "area_iou": 1.0,
+      "area_ratio": 1.0,
+      "boundary_iou": 1.0,
+      "centroid_delta_px": [
+        0.0,
+        0.0
+      ],
+      "intersection": 78320,
+      "iou": 1.0,
+      "pass": true,
+      "passed": true,
+      "pixel_difference": 0.0,
+      "precision": 1.0,
+      "reason": "",
+      "recall": 1.0,
+      "ref_area": 78320,
+      "render_area": 78320,
+      "required": true,
+      "signed_distance_loss": 0.0,
+      "soft_iou": null,
+      "threshold": 0.7,
+      "thresholds": {
+        "max_signed_distance_loss": 0.05,
+        "min_area_iou": 0.7,
+        "min_boundary_iou": 0.8
+      },
+      "union": 78320,
+      "view": "top",
+      "warnings": []
+    }
+  }
+}

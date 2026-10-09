@@ -1,0 +1,243 @@
+{
+  "deletion_implemented": false,
+  "filesystem_requirement": "Atomic hard-link support; no partial-copy fallback.",
+  "historical_adoption_implemented": false,
+  "later_external_mutation": "Final/stage share bytes; drift blocks audits without ACL changes.",
+  "native_canary_script": {
+    "path": "temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\canary.py",
+    "sha256": "ead4469a30b2274e9f35d0712aa4defb21da844411c3f38ffc20334f47583a93"
+  },
+  "native_frozen_workload": {
+    "path": "temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\frozen-workload.json",
+    "sha256": "bfe848e914b170ccbe129b3c2d388a475dff871871c11f13adb1f185b3135fd6"
+  },
+  "native_process": {
+    "deadline_seconds": 60,
+    "elapsed_seconds": 6.6742659,
+    "exit_code": 0,
+    "fits": 0,
+    "frames": 2,
+    "memory_limit_bytes": 8589934592,
+    "peak_process_rss_bytes": 500396032,
+    "process_id": 29168,
+    "qualification_children": 0,
+    "raw_comparisons": 0,
+    "stopped_for_budget": false,
+    "threads": 2
+  },
+  "native_receipt": {
+    "path": "temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\results.json",
+    "sha256": "ca57a161bdbd84d5bffdfbba91313d5779e5fdbb688b55389b4b8264c27f2866"
+  },
+  "native_result": {
+    "detailed_result": {
+      "applied_engine": "BLENDER_EEVEE",
+      "applied_samples": null,
+      "color_mode": "RGBA",
+      "engine_fallback": null,
+      "ownership_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\.render-runs\\owned-d3wnjbpx\\render-result.json",
+      "paths": {
+        "front": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front.png"
+      },
+      "requested_engine": null,
+      "requested_samples": null,
+      "resolution": [
+        128,
+        128
+      ],
+      "transparent_bg": true,
+      "views": [
+        {
+          "camera_location": [
+            0.0,
+            -2.0,
+            0.0
+          ],
+          "camera_rotation": [
+            1.5707963705062866,
+            0.0,
+            0.0
+          ],
+          "elapsed_s": 1.0406469000008656,
+          "ortho_scale": 1.159999966621399,
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front.png",
+          "view": "front"
+        }
+      ],
+      "warnings": []
+    },
+    "final_scene_filepath": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front_2.png",
+    "first_final_bytes_preserved": true,
+    "fits": 0,
+    "frames": 2,
+    "frozen_workload_sha256": "bfe848e914b170ccbe129b3c2d388a475dff871871c11f13adb1f185b3135fd6",
+    "geometry_hash_after": "f81a66bb82dd1c0e2c999a97b466225612291ab9bd826b8e8642ad7cc91b7d61",
+    "geometry_hash_before": "f81a66bb82dd1c0e2c999a97b466225612291ab9bd826b8e8642ad7cc91b7d61",
+    "image_sha256": {
+      "first": "79300e26b331931bf4c9e27573e1363ba1ed66d834736b9fbb55e6895785b0b9",
+      "second": "6e9bdbb7b9a2735c769787a570284edb21e6b6dc5f44a7737d352aaa17128ff5"
+    },
+    "ownership_receipts": [
+      {
+        "lease_sha256": "f44a3febf9717a17e2250e9d9e265cbfe243b1778fbb007a1d37d15b5c2a4a0d",
+        "manifest_sha256": "49cf8794f8bd157dcc9fb8d39ea3dec71b21536277f6d154be66e0d0ded3be41",
+        "ownership_audit": {
+          "blockers": [],
+          "eligible": [],
+          "eligible_bytes": 0,
+          "mode": "read_only",
+          "mutation_supported": false,
+          "protocol": "run-ownership-dry-run-v1",
+          "retained_bytes": 13883,
+          "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\.render-runs\\owned-0_mn1a6h",
+          "status": "dry_run_ready",
+          "unknown_files": []
+        },
+        "receipt": {
+          "error": null,
+          "frames": [
+            {
+              "bytes": 12596,
+              "final_candidate": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front_2.png",
+              "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front_2.png",
+              "publication_collisions": 0,
+              "sha256": "6e9bdbb7b9a2735c769787a570284edb21e6b6dc5f44a7737d352aaa17128ff5",
+              "stage": "frame-0001.png",
+              "status": "published",
+              "view": "front"
+            }
+          ],
+          "output_dir": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders",
+          "paths": {
+            "front": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front_2.png"
+          },
+          "protocol": "orthographic-render-owned-v1",
+          "publication": "atomic hard link; immutable staging retained",
+          "status": "succeeded",
+          "subprocesses_started": 0,
+          "warnings": []
+        },
+        "receipt_sha256": "441072a70742417608de28d22cc87028915fff3a374af5061e9bfe0b25e32854",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\.render-runs\\owned-0_mn1a6h"
+      },
+      {
+        "lease_sha256": "fda6eedb9c6f05185657ce73e498c0de9559db88d8142011f7be94b7546c7bd5",
+        "manifest_sha256": "1f8be1a944d87bf4ab1de58098d33f213b18682074e110fa02e0d5a667caeb03",
+        "ownership_audit": {
+          "blockers": [],
+          "eligible": [],
+          "eligible_bytes": 0,
+          "mode": "read_only",
+          "mutation_supported": false,
+          "protocol": "run-ownership-dry-run-v1",
+          "retained_bytes": 13877,
+          "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\.render-runs\\owned-d3wnjbpx",
+          "status": "dry_run_ready",
+          "unknown_files": []
+        },
+        "receipt": {
+          "error": null,
+          "frames": [
+            {
+              "bytes": 12596,
+              "final_candidate": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front.png",
+              "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front.png",
+              "publication_collisions": 0,
+              "sha256": "79300e26b331931bf4c9e27573e1363ba1ed66d834736b9fbb55e6895785b0b9",
+              "stage": "frame-0001.png",
+              "status": "published",
+              "view": "front"
+            }
+          ],
+          "output_dir": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders",
+          "paths": {
+            "front": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front.png"
+          },
+          "protocol": "orthographic-render-owned-v1",
+          "publication": "atomic hard link; immutable staging retained",
+          "status": "succeeded",
+          "subprocesses_started": 0,
+          "warnings": []
+        },
+        "receipt_sha256": "c2d9a31fde272b3a380b2b5e7abf5633a0e055a4a0c9d444d0b70bea81ad32ad",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\.render-runs\\owned-d3wnjbpx"
+      }
+    ],
+    "paths": {
+      "first": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front.png",
+      "second": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\render-ownership-canary-01\\renders\\front_2.png"
+    },
+    "pixels_equal": true,
+    "protocol": "production-render-ownership-canary-v1",
+    "qualification_children": 0,
+    "raw_comparisons": 0,
+    "scene_settings_restored": true,
+    "settings": {
+      "image": {
+        "color_mode": "RGBA",
+        "file_format": "PNG"
+      },
+      "render": {
+        "engine": "BLENDER_EEVEE",
+        "film_transparent": false,
+        "resolution_percentage": 100,
+        "resolution_x": 1920,
+        "resolution_y": 1080
+      },
+      "samples": [
+        {
+          "name": "taa_render_samples",
+          "owner_type": "SceneEEVEE",
+          "value": 64
+        },
+        {
+          "name": "taa_samples",
+          "owner_type": "SceneEEVEE",
+          "value": 16
+        },
+        {
+          "name": "samples",
+          "owner_type": "CyclesRenderSettings",
+          "value": 4096
+        },
+        {
+          "name": "render_aa",
+          "owner_type": "SceneDisplay",
+          "value": "8"
+        }
+      ],
+      "view": {
+        "exposure": 0.0,
+        "gamma": 1.0,
+        "look": "None",
+        "view_transform": "AgX"
+      }
+    },
+    "source_sha256": {
+      "blender_blocking/integration/blender_ops/camera_framing.py": "2d99b7d4d07a402a0c7955fd0f89bc4cd3b1492433b057ae1fe729f8983e724f",
+      "blender_blocking/integration/blender_ops/render_utils.py": "c1193bc59a0866f363c246bb88e3742c0c0bc11c73ba89daa47a1c0e5f4a8aee",
+      "blender_blocking/integration/blender_ops/silhouette_render.py": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5",
+      "blender_blocking/utils/artifact_publication.py": "3a2d8d76defe2522df6ed4b4560eb521592031f963ddf2b9bdf73d55c544f631",
+      "blender_blocking/utils/run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+    },
+    "status": "passed",
+    "sys_executable": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+    "sys_prefix": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python"
+  },
+  "production_subprocesses_started": 0,
+  "protocol": "production-render-ownership-documentation-v1",
+  "pure_fixtures": {
+    "native_blender_used": false,
+    "passed": 15,
+    "suite": "test_render_run_ownership"
+  },
+  "quality_foundation_commit": "95f752c6c3ecafda3f5e1390ccf86d908edd6622",
+  "save_render_adopted": false,
+  "source_sha256": {
+    "blender_blocking/integration/blender_ops/camera_framing.py": "2d99b7d4d07a402a0c7955fd0f89bc4cd3b1492433b057ae1fe729f8983e724f",
+    "blender_blocking/integration/blender_ops/render_utils.py": "c1193bc59a0866f363c246bb88e3742c0c0bc11c73ba89daa47a1c0e5f4a8aee",
+    "blender_blocking/integration/blender_ops/silhouette_render.py": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5",
+    "blender_blocking/utils/artifact_publication.py": "3a2d8d76defe2522df6ed4b4560eb521592031f963ddf2b9bdf73d55c544f631",
+    "blender_blocking/utils/run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+  }
+}

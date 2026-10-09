@@ -1,0 +1,11 @@
+{
+  "protocol": "bounded_primary_cleanup_v1",
+  "primary_joined": true,
+  "pipes_drained": true,
+  "returncode": 0,
+  "errors": [],
+  "timeout_s": 5.0,
+  "ordinary_tree_qualified": false,
+  "scope": "primary Popen and output pipes only",
+  "transport_closed": true
+}

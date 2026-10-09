@@ -1,0 +1,44 @@
+{
+  "protocol": "rounded_box_source_proof_freeze_v1",
+  "scope": "one original authored reference only; no candidates/metrics/artist limits",
+  "interpretation": {
+    "ideal": "Minkowski offset of inset axis-aligned box by a Euclidean ball",
+    "radius_exact_decimal": ".15",
+    "inset_half_extents_exact_decimal": [
+      ".65",
+      ".40",
+      ".50"
+    ],
+    "geometry": "authored BEVEL8; weighted/custom normals remain presentation-only"
+  },
+  "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\rounded_box\\evaluated-exact.npz",
+  "source_archive_sha256": "de63007fefa542a9b7a5db3217d9ee5f2109a445a4c0a2caf82104943476b654",
+  "source_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+  "expected_vertices": 488,
+  "expected_triangles": 972,
+  "native_core_planes_float_hex": [
+    "0x1.4ccccc0000000p-1",
+    "0x1.99999a0000000p-2",
+    "0x1.fffffe0000000p-2"
+  ],
+  "construction_snap_world_max_exact_decimal": ".0000001",
+  "snapping_scope": "only coordinate association to the frozen native inset planes; actual max displacement measured/enclosed separately. Strict source hash prevents association being enlarged for changed sources. No candidate acceptance tolerance.",
+  "patches": {
+    "planar_rectangles": 6,
+    "cylindrical_strips": 12,
+    "spherical_octants": 8,
+    "edge_intervals_each": 8
+  },
+  "cover_proof": "exact oriented boundary cancellation and complete once-only boundary interval cover in planar/gnomonic charts; strict paired two-ring edge-cell triangle inventory; positive oriented normals required",
+  "arithmetic": "exact rational binary64 coordinates; checked outward sqrt bounds and rational Machin pi enclosure",
+  "prior_exposure": "source diagnostic geometry/chord/normal values already inspected before this freeze; not historically blind. No candidate metrics are proof inputs.",
+  "proof_budget": {
+    "max_vertices": 512,
+    "max_faces": 1024,
+    "max_cover_edges": 3072,
+    "max_snap_per_coordinate_world": 1e-07
+  },
+  "artist_limits": null,
+  "aggregate_accepted": false,
+  "native_runs": 0
+}

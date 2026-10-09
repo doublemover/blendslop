@@ -42,6 +42,7 @@ def _object(vertices, faces, name):
 def _view(camera, name, lo, hi):
     from mathutils import Vector
     from integration.blender_ops.camera_framing import configure_ortho_camera_for_view
+    camera.data.type = "ORTHO"
     center = (lo + hi) / 2
     scale = max(hi - lo) * 1.16
     if name in {"front", "side", "top"}:
@@ -60,19 +61,64 @@ def _view(camera, name, lo, hi):
     camera.data.ortho_scale = scale
 
 
-def _renders(obj, directory, bounds, views, *, camera_records=None):
+def _replay_orthographic_camera(camera, record):
+    """Validate and replay a frozen frame, honoring declared shifts and clips."""
+    from mathutils import Matrix
+    scale = float(record["ortho_scale"])
+    shifts = [float(record.get(name, 0.)) for name in ("shift_x", "shift_y")]
+    matrix = record["matrix_world"]
+    if (not isinstance(matrix, (list, tuple)) or len(matrix) != 4 or
+            any(not isinstance(row, (list, tuple)) or len(row) != 4 for row in matrix) or
+            not all(math.isfinite(float(value)) for row in matrix for value in row)):
+        raise ValueError("saved orthographic camera matrix must be finite (4, 4)")
+    clipping = {name: float(record.get(name, getattr(camera.data, name)))
+                for name in ("clip_start", "clip_end")}
+    if (not math.isfinite(scale) or scale <= 0 or not all(math.isfinite(value) for value in shifts) or
+            not all(math.isfinite(value) for value in clipping.values()) or
+            not 0 < clipping["clip_start"] < clipping["clip_end"]):
+        raise ValueError("saved camera scale/shifts/clipping must be finite with positive ordered clips")
+    if record.get("projection", "ORTHO") != "ORTHO":
+        raise ValueError("saved camera projection must be orthographic")
+    camera.data.type = "ORTHO"
+    camera.data.shift_x, camera.data.shift_y = shifts
+    for name in ("clip_start", "clip_end"):
+        if name in record:
+            setattr(camera.data, name, clipping[name])
+    camera.matrix_world = Matrix(matrix)
+    camera.data.ortho_scale = scale
+
+
+def _renders(obj, directory, bounds, views, *, camera_records=None,
+             captured_cameras=None, inspection_passes=("mask", "neutral", "normals")):
+    """Replay identical frozen framing inputs for each pass, without mesh edits.
+
+    Reassigning an already evaluated native matrix would decompose/round it a
+    second time; actual pass frames are compared strictly after original replay.
+    """
     import bpy
     from integration.blender_ops.silhouette_render import silhouette_session, render_silhouette_frame
     from reconstruction.native_geometry import evaluated_arrays
+    from evaluation.canonical_artifacts import camera_record, camera_frame_sha256, INSPECTION_PASSES
+    if not inspection_passes or "mask" not in inspection_passes or any(
+            name not in INSPECTION_PASSES for name in inspection_passes):
+        raise ValueError("inspection passes must include mask and use known pass names")
     before = evaluated_arrays(obj).content_hash
-    paths = {}
+    paths, actual_cameras = {}, {}
+    def bind_pass(camera, view, name, path):
+        actual = camera_record(camera, resolution=(512, 512),
+            pixel_aspect=(session.scene.render.pixel_aspect_x, session.scene.render.pixel_aspect_y))
+        digest = camera_frame_sha256(actual)
+        if digest != camera_frame_sha256(actual_cameras[view]):
+            raise ValueError("render pass camera differs from captured mask frame")
+        actual_cameras[view].setdefault("pass_artifacts", {})[name] = {
+            "path": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "geometry_hash": before, "camera_sha256": digest}
+
     def frame(camera,view):
         if camera_records is None:
             _view(camera,view,*bounds)
         else:
-            from mathutils import Matrix
-            camera.matrix_world = Matrix(camera_records[view]["matrix_world"])
-            camera.data.ortho_scale = camera_records[view]["ortho_scale"]
+            _replay_orthographic_camera(camera, camera_records[view])
     with silhouette_session(target_objects=[obj], resolution=(512, 512), color_mode="BW",
                             transparent_bg=False, engine="BLENDER_EEVEE",
                             background_color=(1, 1, 1, 1), silhouette_color=(0, 0, 0, 1)) as session:
@@ -81,47 +127,70 @@ def _renders(obj, directory, bounds, views, *, camera_records=None):
             path = directory / (view + "-mask.png")
             render_silhouette_frame(session, path)
             paths[view] = str(path)
+            actual_cameras[view] = camera_record(session.camera,
+                resolution=(session.scene.render.resolution_x, session.scene.render.resolution_y),
+                pixel_aspect=(session.scene.render.pixel_aspect_x, session.scene.render.pixel_aspect_y))
+            actual_cameras[view]["png_sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+            actual_cameras[view]["geometry_hash"] = before
+            bind_pass(session.camera, view, "mask", path)
+            actual_cameras[view]["render_passes"] = {
+                "mask": {"engine": "BLENDER_EEVEE", "material": "black silhouette on white", "color_mode": "BW"},
+                "neutral": {"engine": "BLENDER_WORKBENCH", "light": "STUDIO", "color_type": "SINGLE",
+                            "single_color": [.65, .65, .65], "shadows": True, "cavity": False, "color_mode": "BW"},
+                "normals": {"engine": "BLENDER_EEVEE", "material": "world normal * .5 + .5 emission", "color_mode": "RGB"}}
         # Neutral inspection is a separate material/render pass in the same
         # cameras and unchanged evaluated geometry.
-        session.scene.render.engine = "BLENDER_WORKBENCH"
-        shading = session.scene.display.shading
-        shading.light = "STUDIO"
-        shading.color_type = "SINGLE"
-        shading.single_color = (.65, .65, .65)
-        shading.show_shadows = True
-        shading.show_cavity = False
-        shading.background_type = "WORLD"
-        for view in views:
-            frame(session.camera, view)
-            render_silhouette_frame(session, directory / (view + "-neutral.png"))
-        # World-space shading normal visualization. Geometric normal-angle
-        # metrics below remain independent of interpolated shading normals.
-        session.scene.render.engine = "BLENDER_EEVEE"
-        normal_mat = bpy.data.materials.new("SurfaceNormalInspection")
-        normal_mat.use_nodes = True
-        nodes, links = normal_mat.node_tree.nodes, normal_mat.node_tree.links
-        nodes.clear()
-        geometry = nodes.new("ShaderNodeNewGeometry")
-        scale = nodes.new("ShaderNodeVectorMath")
-        scale.operation = "SCALE"
-        scale.inputs[3].default_value = .5
-        offset = nodes.new("ShaderNodeVectorMath")
-        offset.operation = "ADD"
-        offset.inputs[1].default_value = (.5, .5, .5)
-        emission = nodes.new("ShaderNodeEmission")
-        output = nodes.new("ShaderNodeOutputMaterial")
-        links.new(geometry.outputs["Normal"], scale.inputs[0])
-        links.new(scale.outputs["Vector"], offset.inputs[0])
-        links.new(offset.outputs["Vector"], emission.inputs["Color"])
-        links.new(emission.outputs["Emission"], output.inputs["Surface"])
-        obj.data.materials.clear()
-        obj.data.materials.append(normal_mat)
-        for view in views:
-            frame(session.camera, view)
-            render_silhouette_frame(session, directory / (view + "-normals.png"))
+        if "neutral" in inspection_passes:
+            session.scene.render.engine = "BLENDER_WORKBENCH"
+            shading = session.scene.display.shading
+            shading.light = "STUDIO"
+            shading.color_type = "SINGLE"
+            shading.single_color = (.65, .65, .65)
+            shading.show_shadows = True
+            shading.show_cavity = False
+            shading.background_type = "WORLD"
+            for view in views:
+                frame(session.camera, view)
+                path = directory / (view + "-neutral.png")
+                render_silhouette_frame(session, path)
+                bind_pass(session.camera, view, "neutral", path)
+        if "normals" in inspection_passes:
+            # World-space shading normal visualization. Geometric normal-angle
+            # metrics below remain independent of interpolated shading normals.
+            session.scene.render.engine = "BLENDER_EEVEE"
+            session.scene.render.image_settings.color_mode = "RGB"
+            normal_mat = bpy.data.materials.new("SurfaceNormalInspection")
+            normal_mat.use_nodes = True
+            nodes, links = normal_mat.node_tree.nodes, normal_mat.node_tree.links
+            nodes.clear()
+            geometry = nodes.new("ShaderNodeNewGeometry")
+            scale = nodes.new("ShaderNodeVectorMath")
+            scale.operation = "SCALE"
+            scale.inputs[3].default_value = .5
+            offset = nodes.new("ShaderNodeVectorMath")
+            offset.operation = "ADD"
+            offset.inputs[1].default_value = (.5, .5, .5)
+            emission = nodes.new("ShaderNodeEmission")
+            output = nodes.new("ShaderNodeOutputMaterial")
+            links.new(geometry.outputs["Normal"], scale.inputs[0])
+            links.new(scale.outputs["Vector"], offset.inputs[0])
+            links.new(offset.outputs["Vector"], emission.inputs["Color"])
+            links.new(emission.outputs["Emission"], output.inputs["Surface"])
+            obj.data.materials.clear()
+            obj.data.materials.append(normal_mat)
+            for view in views:
+                frame(session.camera, view)
+                path = directory / (view + "-normals.png")
+                render_silhouette_frame(session, path)
+                bind_pass(session.camera, view, "normals", path)
     after = evaluated_arrays(obj).content_hash
     if after != before:
         raise ValueError("render passes changed evaluated geometry")
+    for record in actual_cameras.values():
+        record["geometry_unchanged_after_passes"] = True
+        record["executed_passes"] = list(inspection_passes)
+    if captured_cameras is not None:
+        captured_cameras.update(actual_cameras)
     return paths
 
 
@@ -136,6 +205,8 @@ def main():
     from reconstruction.grouped_solids import solid_guard
     from evaluation.comparable_geometry import export_evaluated_object
     from evaluation.surface_quality import compare_surface_arrays
+    from evaluation.canonical_artifacts import (canonical_artifact_inventory, raw_surface_observation,
+                                                triangle_diagnostic_control_screen)
     from synthetic.quality_contracts import quality_workload, rounded_triangle_mesh, triangle_preservation
 
     parser = argparse.ArgumentParser()
@@ -212,14 +283,24 @@ def main():
         np.savez_compressed(folder / "evaluated-exact.npz", vertices=arrays.vertices, faces=arrays.faces)
         entry = {"geometry_hash": arrays.content_hash, "obj_sha256": hashlib.sha256(mesh.read_bytes()).hexdigest(),
                  "topology_screen": solid_guard(arrays), "surface": None,
-                 "editability": {"status": "not_measured"}, "silhouette": {"status": "pending_render"}}
+                 "editability": {"status": "not_measured"},
+                 "silhouette": {"status": "unrun" if args.skip_renders else "pending_render"}}
         if obj in {reference, smooth, stepped}:
             entry["surface"] = compare_surface_arrays(ref_arrays, arrays)
         elif obj in {triangle, circle, bands}:
-            entry["surface"] = compare_surface_arrays(tri_arrays, arrays)
+            entry["surface"] = raw_surface_observation(tri_arrays, arrays)
+            entry["diagnostic_control_screen"] = triangle_diagnostic_control_screen(entry["surface"])
+            entry["family_acceptance"] = {"status": "blocked", "qualified_limits": None,
+                "reason": "independent triangle family approximation tolerance is unavailable"}
             entry["authored_shape"] = triangle_preservation(arrays.vertices)
+        cameras = {}
         if not args.skip_renders:
-            mask_paths[obj.name] = _renders(obj, folder, triangle_bounds if obj in {triangle, circle, bands} else vase_bounds, workload["views"])
+            mask_paths[obj.name] = _renders(obj, folder, triangle_bounds if obj in {triangle, circle, bands} else vase_bounds,
+                                            workload["views"], captured_cameras=cameras)
+        entry["canonical_inspection"] = canonical_artifact_inventory(
+            folder, geometry_hash=arrays.content_hash, camera_records=cameras,
+            pass_states={name: "unrun" if args.skip_renders else "completed" for name in ("mask", "neutral", "normals")})
+        _write(folder / "canonical-inspection.json", entry["canonical_inspection"])
         receipt["cases"][obj.name] = entry
         _write(output / "results.json", receipt)
     for name, paths in mask_paths.items():
@@ -242,10 +323,11 @@ def main():
         "stepped_surface_rejected": not receipt["cases"][stepped.name]["surface"]["surface_passed"],
         "triangle_reference_shape_pass": receipt["cases"][triangle.name]["authored_shape"]["passed"],
         "circularized_triangle_rejected": not receipt["cases"][circle.name]["authored_shape"]["passed"],
-        "banded_triangle_surface_rejected": not receipt["cases"][bands.name]["surface"]["surface_passed"],
+        "banded_triangle_surface_diagnostic_detected": not receipt["cases"][bands.name]["diagnostic_control_screen"]["diagnostic_passed"],
         "sharp_control_not_smoothed": not any(p.use_smooth for p in sharp.data.polygons),
     }
     receipt["control_contracts"] = expected
+    receipt["control_acceptance_scope"] = "deliberate control detection only; triangular family surface acceptance remains unqualified"
     receipt["status"] = "controls_passed" if all(expected.values()) else "controls_failed"
     receipt["coverage_acceptance"] = "pending twelve-family reconstruction, independent family noise qualification and editability"
     receipt["historical_vase_acceptance"] = "pending repaired reconstruction against retained observed input/evaluated mesh; analytic control pass is not historical vase acceptance"

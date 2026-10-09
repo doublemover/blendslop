@@ -1,0 +1,444 @@
+{
+  "protocol": "rounded_box_source_certificate_execution_v1",
+  "started_utc": "2026-10-09T05:31:03.301126+00:00",
+  "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+  "actual_source_certificate_calls": 1,
+  "elapsed_seconds": 0.7520091999904253,
+  "native_processes": 0,
+  "renders": 0,
+  "surface_samples": 0,
+  "candidate_inputs": 0,
+  "inputs_receipt": {
+    "path": "docs\\quality-rounded-box-reference-continuation-20261009\\calculation-inputs.json",
+    "sha256": "6f3870ae51f7fa6b7c0e3d03308882f22110279b771f7f24bf20ec28b543d845",
+    "bytes": 2218
+  },
+  "source_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+  "source_vertices": 488,
+  "source_triangles": 972,
+  "certificate": {
+    "status": "certified",
+    "protocol": "authored_rounded_box_patch_cover_v1",
+    "complete_analytic_patches": 26,
+    "patch_cover": [
+      {
+        "kind": "planar_rectangle",
+        "axes": [
+          0
+        ],
+        "signs": [
+          -1
+        ],
+        "triangles": 2,
+        "exact_edges": 5,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "planar_rectangle",
+        "axes": [
+          0
+        ],
+        "signs": [
+          1
+        ],
+        "triangles": 2,
+        "exact_edges": 5,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          0,
+          1
+        ],
+        "signs": [
+          -1,
+          -1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          0,
+          1
+        ],
+        "signs": [
+          -1,
+          1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          0,
+          1
+        ],
+        "signs": [
+          1,
+          -1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          0,
+          1
+        ],
+        "signs": [
+          1,
+          1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "spherical_octant",
+        "axes": [
+          0,
+          1,
+          2
+        ],
+        "signs": [
+          -1,
+          -1,
+          -1
+        ],
+        "triangles": 96,
+        "exact_edges": 156,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "spherical_octant",
+        "axes": [
+          0,
+          1,
+          2
+        ],
+        "signs": [
+          -1,
+          -1,
+          1
+        ],
+        "triangles": 96,
+        "exact_edges": 156,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "spherical_octant",
+        "axes": [
+          0,
+          1,
+          2
+        ],
+        "signs": [
+          -1,
+          1,
+          -1
+        ],
+        "triangles": 96,
+        "exact_edges": 156,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "spherical_octant",
+        "axes": [
+          0,
+          1,
+          2
+        ],
+        "signs": [
+          -1,
+          1,
+          1
+        ],
+        "triangles": 96,
+        "exact_edges": 156,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "spherical_octant",
+        "axes": [
+          0,
+          1,
+          2
+        ],
+        "signs": [
+          1,
+          -1,
+          -1
+        ],
+        "triangles": 96,
+        "exact_edges": 156,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "spherical_octant",
+        "axes": [
+          0,
+          1,
+          2
+        ],
+        "signs": [
+          1,
+          -1,
+          1
+        ],
+        "triangles": 96,
+        "exact_edges": 156,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "spherical_octant",
+        "axes": [
+          0,
+          1,
+          2
+        ],
+        "signs": [
+          1,
+          1,
+          -1
+        ],
+        "triangles": 96,
+        "exact_edges": 156,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "spherical_octant",
+        "axes": [
+          0,
+          1,
+          2
+        ],
+        "signs": [
+          1,
+          1,
+          1
+        ],
+        "triangles": 96,
+        "exact_edges": 156,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          0,
+          2
+        ],
+        "signs": [
+          -1,
+          -1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          0,
+          2
+        ],
+        "signs": [
+          -1,
+          1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          0,
+          2
+        ],
+        "signs": [
+          1,
+          -1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          0,
+          2
+        ],
+        "signs": [
+          1,
+          1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "planar_rectangle",
+        "axes": [
+          1
+        ],
+        "signs": [
+          -1
+        ],
+        "triangles": 2,
+        "exact_edges": 5,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "planar_rectangle",
+        "axes": [
+          1
+        ],
+        "signs": [
+          1
+        ],
+        "triangles": 2,
+        "exact_edges": 5,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          1,
+          2
+        ],
+        "signs": [
+          -1,
+          -1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          1,
+          2
+        ],
+        "signs": [
+          -1,
+          1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          1,
+          2
+        ],
+        "signs": [
+          1,
+          -1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "cylindrical_strip",
+        "axes": [
+          1,
+          2
+        ],
+        "signs": [
+          1,
+          1
+        ],
+        "triangles": 16,
+        "angular_intervals": 8,
+        "axial_rings": 2,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "planar_rectangle",
+        "axes": [
+          2
+        ],
+        "signs": [
+          -1
+        ],
+        "triangles": 2,
+        "exact_edges": 5,
+        "complete_nonoverlapping_cover": true
+      },
+      {
+        "kind": "planar_rectangle",
+        "axes": [
+          2
+        ],
+        "signs": [
+          1
+        ],
+        "triangles": 2,
+        "exact_edges": 5,
+        "complete_nonoverlapping_cover": true
+      }
+    ],
+    "maximum_source_facet_distance_world": 0.00164591151346016,
+    "maximum_normal_angle_degrees": 8.587767753658063,
+    "radial_facet_distance_bound_world": 0.0016458430829130511,
+    "maximum_vertex_radial_construction_error_world": 8.195504838104384e-08,
+    "radial_bound_includes_vertex_construction": true,
+    "maximum_vertex_snapping_shift_world": 2.9802322387695312e-08,
+    "native_to_ideal_core_shift_world": 3.862822472100175e-08,
+    "affine_construction_shift_bound_world": 6.843054710869706e-08,
+    "construction_distance_bound_world": 1.5038559548974092e-07,
+    "construction_scope": "native vertex radial error plus snapping/core shift, source-only; radial error already included in the facet radial bound, not added twice",
+    "normal_correspondence": "same patch radial/axial correspondence; actual source cross-product normals, not custom shading normals or nearest-normal theorem",
+    "distance_correspondence": "bidirectional continuous facet/analytic patch coverage; filled-triangle radial bounds plus affine construction shifts",
+    "arithmetic": "exact binary64 rational coordinates/cover; rationally checked directed sqrt and Machin pi; atan(t)<=t",
+    "source_closed_oriented_indexing": true,
+    "positive_actual_normal_cones": true,
+    "self_intersection_qualification": "not a native boundary qualification; actual source indexing/outward cones and analytic cover only",
+    "candidate_boundary_qualified": false,
+    "artist_limits": null,
+    "aggregate_accepted": false,
+    "sampled": false,
+    "reference_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+    "interpretation": {
+      "radius_exact_decimal": ".15",
+      "inset_half_extents_exact_decimal": [
+        ".65",
+        ".40",
+        ".50"
+      ],
+      "geometry": "authored BEVEL8; weighted normals separate"
+    },
+    "historical_exposure": "source diagnostics were inspected before freeze; no candidate values are proof inputs"
+  },
+  "focused_checks": {
+    "tests": 9,
+    "passed": 9,
+    "portable_fixtures_only": true
+  },
+  "artist_limits": null,
+  "aggregate_accepted": false
+}

@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "name": "native-plan.json",
+      "sha256": "436ef7233e7beaf29243616a98650423fb6e0852e5405ca750c1e97d755e4cf7"
+    },
+    {
+      "name": "launch-command.json",
+      "sha256": "cc5c3b61fbef49b16c61ac904d952a01507c487f64b586c80c58040d27fd58db"
+    },
+    {
+      "name": "preflight.json",
+      "sha256": "a2769d094f3bd4833db53d6c4758ff3c646c5a73bae5d987be0bfe960f556df7"
+    }
+  ],
+  "native_launched": false,
+  "reason": "native qualifier working newline correction plus production live-union compiler import-path correction; no native evidence existed",
+  "status": "superseded_before_launch"
+}

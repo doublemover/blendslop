@@ -1,0 +1,215 @@
+{
+  "date": "2026-10-08",
+  "branch_base": "69eb23128a18006501b2a1f89e8df129bfdc048f",
+  "source_scope": "separate local quality continuation; not published",
+  "environment": {
+    "blender": "5.2.2 LTS",
+    "numpy": "2.3.4",
+    "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "config": {
+    "cap_mode": "fan",
+    "num_samples": 129,
+    "num_slices": 65,
+    "radial_segments": 96,
+    "regularization_max_deviation_u": 0.003,
+    "regularization_window": 9,
+    "smoothing_window": 3,
+    "surface_mode": "smooth",
+    "surface_subdivisions": 2,
+    "unit_scale": 0.01
+  },
+  "reference_geometry_hash": "e61731bc458f5c6bf52a311b10a879ae5a4bd914dd2f7954f0f99a86275273c9",
+  "reference_file_sha256": {
+    "evaluated-exact.npz": "dddf93ec6e793d6a4ed4f3596d7c6fd767800708f194f225f40afbcf703f05ca",
+    "front-mask.png": "2a6b01070b49263e76715083e706b8cf9d5a3d6e0b0fcc562e26daacbcf17e92",
+    "oblique_145_40-mask.png": "a74c5cfbea095653b61aca4f15e07b6f90e88bdb7713b1d00f069beb66ec350d",
+    "oblique_35_28-mask.png": "1c2c3e3e508d8b2e6243a2bac4f2190419a9bbc6bf1a0a384d019142488ff54c",
+    "side-mask.png": "a276756778bedbb37181c62b671b6df02ef29c6f709f1bc17ebd7c190387f5e7",
+    "top-mask.png": "f83cefab3e08acef2f4ce1ac05b41035e1e3bb731143906505e636ce6c9ca65e"
+  },
+  "transfer": {
+    "lut_sha256": "14235757bdcc4659e905e7916587b38aca5b417e0b8e715846f13d74d2c84009",
+    "scope": "black/white linear coverage; declared display transfer",
+    "settings": {
+      "exposure": 0.0,
+      "gamma": 1.0,
+      "look": "None",
+      "view_transform": "AgX"
+    },
+    "settings_sha256": "20c333b7be94c42972b873a02225c220b8ae7b59adc31f31a66d92767da7b42d"
+  },
+  "transfer_reproduction": {
+    "encoded_samples_identical": true,
+    "renders": 0,
+    "state_restoration": true
+  },
+  "inferred_bounds": {
+    "max_x": 0.8003876319252963,
+    "max_y": 0.8003061015222919,
+    "max_z": 2.6004396744951888,
+    "min_x": -0.8004114716349255,
+    "min_y": -0.8004114716349255,
+    "min_z": -0.0004863444053757604
+  },
+  "geometry_hash": "7447cc402285c2a09daaa2098d4316d9808b5665fcc9f732c165bb7309af9c49",
+  "obj_sha256": "032d1dcc0e180d5ee7f73bacc59e5cf41dd6116dd01768a51f3e2d6e83ff6f88",
+  "npz_sha256": "68832ebdc89f0418d01338be07aea9cec118adfa84150ea129b69489557c1758",
+  "baseline": {
+    "geometry_hash": "922a9f0d4391971c256827b070496146b6c82ed2e3d8c565c47d6ffa9ae97b55",
+    "mean_surface_world": 0.0028685978900995224,
+    "normal_p95_degrees": 2.320508114573107,
+    "held_out_boundary_iou": 0.7890010090817356
+  },
+  "surface": {
+    "candidate_geometry_hash": "7447cc402285c2a09daaa2098d4316d9808b5665fcc9f732c165bb7309af9c49",
+    "distance_p95_world": 0.000675692205550149,
+    "editability_verdict": "independent",
+    "frozen_limits": {
+      "normal_angle_p95_degrees_max": 2.5,
+      "symmetric_mean_distance_world_max": 0.003
+    },
+    "normal_angle_mean_degrees": 0.710640461631222,
+    "normal_angle_p95_degrees": 1.1023958517158643,
+    "normal_interpretation": "geometric face normals, not shading normals",
+    "normal_orientation": "oriented; opposite normals are 180 degrees",
+    "protocol": "shared_world_area_sample_to_triangle_v1",
+    "reference_geometry_hash": "e61731bc458f5c6bf52a311b10a879ae5a4bd914dd2f7954f0f99a86275273c9",
+    "sample_count_per_direction": 4096,
+    "sampled_max_distance_world": 0.001026036567054689,
+    "seed": 61007,
+    "silhouette_verdict": "independent",
+    "surface_passed": true,
+    "symmetric_mean_distance_world": 0.00037735653809598327,
+    "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+    "units": "unchanged Blender world coordinates; no fitting or normalization"
+  },
+  "silhouette": {
+    "front": {
+      "area_iou": 0.9995294064919494,
+      "boundary_iou": 0.9909774436090225,
+      "signed_distance_loss": 6.50265175394793e-05,
+      "passed": true
+    },
+    "oblique_145_40": {
+      "area_iou": 0.9991799578000755,
+      "boundary_iou": 0.9795431299011251,
+      "signed_distance_loss": 0.0001318823702076699,
+      "passed": true
+    },
+    "oblique_35_28": {
+      "area_iou": 0.9993843743004254,
+      "boundary_iou": 0.9844140392623438,
+      "signed_distance_loss": 9.988992376097627e-05,
+      "passed": true
+    },
+    "side": {
+      "area_iou": 0.9995294064919494,
+      "boundary_iou": 0.9909774436090225,
+      "signed_distance_loss": 6.50265175394793e-05,
+      "passed": true
+    },
+    "top": {
+      "area_iou": 0.999826473242174,
+      "boundary_iou": 0.9961759082217974,
+      "signed_distance_loss": 1.946374204209178e-05,
+      "passed": true
+    }
+  },
+  "frame_scope": "frozen reference obliques touch image edges; visible-frame acceptance only; framing unchanged",
+  "topology_screen": {
+    "boundary_edges": 0,
+    "connected_components": 1,
+    "degenerate_faces": 0,
+    "edge_count": 37152,
+    "euler_characteristic": 2,
+    "face_count": 24768,
+    "geometric_degenerate_faces": 0,
+    "loose_vertices": 0,
+    "non_manifold_edges": 0,
+    "orientation_errors": 0,
+    "pass": true,
+    "passed": true,
+    "penalty": 0.0,
+    "reason": "",
+    "required": true,
+    "self_intersection_qualification": "not_established_by_index_topology",
+    "signed_volume": 3.1035056963184764,
+    "single_solid_qualified": false,
+    "topology_and_volume_valid": true,
+    "topology_score": 1.0,
+    "valid_solid": true,
+    "valid_solid_scope": "legacy topology/volume screen; boundary intersections untested",
+    "vertex_count": 12386,
+    "watertight": true
+  },
+  "native_boundary": {
+    "geometry_identical_between_runs": true,
+    "toolchain_identity": "dffb02f38d23af7f3f1cc31a578e9e9397b40b15fc8465761990f49a4f206b4e",
+    "first_run": {
+      "status": "qualified",
+      "boundary_qualified": true,
+      "manifold_validated": true,
+      "qualification_elapsed_s": 16.750985500009847,
+      "helper_timeout_s": null
+    },
+    "later_run": {
+      "status": "unavailable",
+      "reason": "helper_timeout",
+      "boundary_qualified": false,
+      "qualification_elapsed_s": 18.05254689999856,
+      "helper_timeout_s": 15.0
+    },
+    "policy": "both retained; latest helper timeout remains unavailable; no timeout increase or aggregate override"
+  },
+  "editability": {
+    "exact_restoration": true,
+    "passed": true,
+    "same_object": true,
+    "same_transform": true,
+    "scope": "actual fitted loft source-section radius edit and exact regeneration",
+    "semantic_x_radius_changed": true
+  },
+  "aggregate_accepted": false,
+  "first_run_failure": "saved-camera replay inherited a perspective camera; image comparison invalid; fixed by explicitly restoring orthographic projection",
+  "validation": {
+    "intermediate_affected_pure": {
+      "run": 43,
+      "passed": 43
+    },
+    "final_affected_pure": {
+      "run": 26,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": true,
+      "suites": [
+        "test_coverage_evidence",
+        "test_pixel_evidence",
+        "test_reconstruction_contracts"
+      ]
+    },
+    "native_camera_checks": {
+      "run": 2,
+      "passed": 2,
+      "renders": 0
+    },
+    "resource": {
+      "exit_code": 1,
+      "elapsed_seconds": 28.64574459999858,
+      "peak_tree_rss_bytes": 743944192,
+      "budget_seconds": 300,
+      "budget_rss_bytes": 8589934592,
+      "terminated_reason": null,
+      "blender_threads": 2,
+      "scope": "one changed calibrated vase; five masks, five neutral and five normal inspections; unchanged frozen gates",
+      "qualification_interpreter": "retained existing .venv312 Open3D toolchain; no installs or changes"
+    }
+  },
+  "remaining": {
+    "surface": "smooth calibrated vase observation gates fixed; historical scalloped inputs still need authored smooth intent",
+    "coverage": "ten actual family rows absent; independent non-vase surface/noise qualification absent",
+    "triangle": "surface reference-noise qualification and family limits remain unqualified",
+    "lifecycle": "cold DVX, render/variant producer ownership and promotion/crash/locked-file integration planned; no deletion executor"
+  }
+}

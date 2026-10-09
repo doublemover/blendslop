@@ -88,6 +88,7 @@ class VisualHullBackend(BaseBackend):
                 cache_namespace=run_config.cache_namespace,
                 cache_read=run_config.cache_read,
                 cache_write=run_config.cache_write,
+                cache_owned_writes=run_config.cache_owned_writes,
             )
 
             openvdb_status = getattr(grid, "openvdb_status", None)
@@ -168,6 +169,17 @@ class VisualHullBackend(BaseBackend):
                 if hasattr(cache_status, "to_dict")
                 else dict(cache_status)
             )
+            if run_config.cache_owned_writes:
+                receipt = getattr(grid, "chunk_cache_last_ownership_receipt", None)
+                cache_payload.update(
+                    owned_writes=True,
+                    ownership_status="retained" if receipt is not None else "unrun",
+                    last_ownership_receipt=str(receipt) if receipt is not None else None,
+                    ownership_scope=(
+                        "last fresh store during this grid construction; "
+                        "cache hits create no ownership"
+                    ),
+                )
             mesh_metrics["chunk_cache"] = cache_payload
             volume_metadata_extra["chunk_cache"] = cache_payload
 

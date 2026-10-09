@@ -1,0 +1,45 @@
+{
+  "image": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-families-continuation-20261009\\measured-heldout-pixels.png",
+  "sha256": "56b490420d86f6fa537f82c9df67edc225c41382d7835b63f736bdf0231084e9",
+  "source_pixels": [
+    {
+      "family": "capsule",
+      "label": "source-heldout",
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-01\\owned-ob7ghjvm\\capsule\\source-heldout\\oblique_145_40\\coverage.npy",
+      "sha256": "ae6a154238208f87b0ca0a66485b0f0aa5404c3118926b2b114a91b9a846fa65"
+    },
+    {
+      "family": "capsule",
+      "label": "baseline-heldout",
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-01\\owned-ob7ghjvm\\capsule\\baseline-heldout\\oblique_145_40\\coverage.npy",
+      "sha256": "a01f124d0ac27f21ad0546aff3ede5f9c7dd76757a12c66e051c62549c51b505"
+    },
+    {
+      "family": "capsule",
+      "label": "refined-heldout",
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-01\\owned-ob7ghjvm\\capsule\\refined-heldout\\oblique_145_40\\coverage.npy",
+      "sha256": "d1a4be63bde555cb3db7e4f3aeb7122bcb0b891111c1cf23c8fca33e2e83e9c4"
+    },
+    {
+      "family": "torus",
+      "label": "source-heldout",
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-02\\owned-ipr1val3\\torus\\source-heldout\\oblique_145_40\\coverage.npy",
+      "sha256": "bdc917b4bedfd0f060d6ea0754b5436118c7bfaec834e0239622d0bc5d3f6bc6"
+    },
+    {
+      "family": "torus",
+      "label": "baseline-heldout",
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-02\\owned-ipr1val3\\torus\\baseline-heldout\\oblique_145_40\\coverage.npy",
+      "sha256": "5d7376984c48f08b5f30cbbd134ef711bc9a5759fea842583c5303089282ebe7"
+    },
+    {
+      "family": "torus",
+      "label": "refined-heldout",
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-02\\owned-ipr1val3\\torus\\refined-heldout\\oblique_145_40\\coverage.npy",
+      "sha256": "fc87a62232da510b39db07156dac4ae0aa8bef54f0d74a534d7df0f74e6584bd"
+    }
+  ],
+  "visualization": "linear-alpha occupancy shown black on white; nearest interpolation; signed absolute-error improvement [-.15,.15], blue positive; no native render/new metrics",
+  "selection": "complete predeclared held-out viewport; no fit/ROI selection uses these pixels",
+  "new_native_frames": 0
+}

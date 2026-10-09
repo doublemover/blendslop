@@ -1,0 +1,197 @@
+{
+  "constraints": [],
+  "metadata": {
+    "camera_sha256": "29b2cb7df8d05f54d9d6b07c902d47d10c8b9f63e2410bf0d3cdf2763a9dab6e",
+    "censored_contour_scope": "observed internal half-coverage crossings only; no frame-edge closure or outside-frame support",
+    "censored_views": [
+      "oblique_35_28"
+    ],
+    "endpoint_refinement": {
+      "all_other_recipe_parameters_fixed": true,
+      "effective_positive_interval": [
+        -0.29030378158416265,
+        0.3252645386249629
+      ],
+      "elapsed_seconds": 0.15186939999694005,
+      "fit_view": "complementary_minus15_20",
+      "fixed_near": -0.30495654173362063,
+      "free_parameter": "short_arm_far_y",
+      "heldout_oblique145_fit_used": false,
+      "identifiability": "locally_identified",
+      "input_scope": "only newly acquired float32 coverage and actual camera",
+      "interval_bound_active": false,
+      "local_sensitivity_norm": 0.08658983767602194,
+      "objective": "exact projected union boundary; no interior box edges",
+      "original_far": 0.3252392459286524,
+      "original_interval": [
+        -0.29030378158416265,
+        0.3252645386249629
+      ],
+      "raw_surface_limits": null,
+      "refined_far": 0.1448482825466005,
+      "residual_calls": 22,
+      "scope": "local one-scalar observation; no global hidden-surface uniqueness claim",
+      "squared_residual": 1.0819707474923887e-08,
+      "termination": "solver_completed"
+    },
+    "fit_status": "locally_identified",
+    "fit_views": [
+      "front",
+      "side",
+      "top",
+      "oblique_35_28"
+    ],
+    "free_endpoint_count": 4,
+    "full_five_view_admission": "unrun; includes untouched oblique_145_40",
+    "held_out_view": "oblique_145_40",
+    "identifiability": {
+      "fitted_short_far": 0.3252392459286524,
+      "local_rank": 4,
+      "original_short_far_interval": [
+        -0.29030378158416265,
+        0.3252645386249629
+      ],
+      "parameter_names": [
+        "tall_y_min",
+        "tall_y_max",
+        "short_y_min",
+        "short_y_max"
+      ],
+      "scope": "local four-view projected residual rank; no global uniqueness claim",
+      "singular_values": [
+        0.29103301961689776,
+        0.27850691768421004,
+        0.24883046678596057,
+        0.10683418039033216
+      ],
+      "status": "locally_identified"
+    },
+    "join_overlap_world": 0.05000196344736248,
+    "join_scope": "concealed overlap within measured base is a construction choice",
+    "live_exact_union_modifiers": 2,
+    "node_budget": 3,
+    "proposal": "observed_three_box_four_view_fit",
+    "shared_far_plane": {
+      "arm_node_id": "observed_tall_arm",
+      "axis": "y",
+      "base_far_world": 0.3252679252986417,
+      "base_node_id": "observed_base",
+      "native_construction": "arm Y embedded in base native Y frame; far local coordinate exactly 0.5",
+      "original_arm_far_world": 0.3250613833509456,
+      "original_gap_world": 0.0002065419476960928,
+      "preserved_arm_near_world": -0.12498491023031844,
+      "protocol": "multipart_shared_far_y_plane_v1",
+      "scope": "explicit shared-plane model; near fixed, other leaves and X/Z controls unchanged",
+      "side": "far"
+    },
+    "source_geometry_read": false,
+    "support_elapsed_s": 0.4347611999983201,
+    "support_evaluations": 23,
+    "support_squared_residual": 3.4664797462776104e-08,
+    "termination": "solver_completed"
+  },
+  "program_id": "frozen-family-asymmetric_multipart_solid",
+  "residual_patches": [],
+  "root_nodes": [
+    {
+      "children": [],
+      "editable": true,
+      "name": "base",
+      "node_id": "observed_base",
+      "operation": "add",
+      "parameters": {
+        "depth_world": 0.6505698684303027,
+        "height_world": 0.5000196344736247,
+        "rotation": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "width_world": 1.6007063620619555,
+        "x": 0.0,
+        "y": -1.7008916509658745e-05,
+        "z": -0.24997877377173894
+      },
+      "primitive_type": "box"
+    },
+    {
+      "children": [],
+      "editable": true,
+      "name": "tall_arm",
+      "node_id": "observed_tall_arm",
+      "operation": "add",
+      "parameters": {
+        "depth_world": 0.4502528355289601,
+        "height_world": 0.9999759751152597,
+        "rotation": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "width_world": 0.4500565996476898,
+        "x": -0.3997710684957956,
+        "y": 0.10014150753416162,
+        "z": 0.45001706757534077
+      },
+      "primitive_type": "box"
+    },
+    {
+      "children": [],
+      "editable": true,
+      "name": "short_arm",
+      "node_id": "observed_short_arm",
+      "operation": "add",
+      "parameters": {
+        "depth_world": 0.44980482428022117,
+        "height_world": 0.49520149330683166,
+        "rotation": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "width_world": 0.34959914271188686,
+        "x": 0.44999909143257183,
+        "y": -0.08005412959351006,
+        "z": 0.1976298266711268
+      },
+      "primitive_type": "box"
+    }
+  ],
+  "schema_version": "1"
+}

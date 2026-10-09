@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import json
+import os
 from pathlib import Path
 import re
 import time
@@ -17,6 +19,9 @@ try:
     BLENDER_AVAILABLE = True
 except ImportError:
     BLENDER_AVAILABLE = False
+
+from utils.artifact_publication import publish_file_no_clobber
+from utils.run_ownership import OwnedRun
 
 from integration.blender_ops.camera_framing import (
     compute_bounds_world,
@@ -69,10 +74,11 @@ class RenderResult:
     transparent_bg: bool
     views: Tuple[RenderViewRecord, ...]
     warnings: Tuple[str, ...]
+    ownership_receipt: Optional[str] = None
 
     def to_dict(self) -> Dict[str, object]:
         """Return a JSON-safe dictionary."""
-        return {
+        result = {
             "paths": dict(self.paths),
             "requested_engine": self.requested_engine,
             "applied_engine": self.applied_engine,
@@ -85,6 +91,27 @@ class RenderResult:
             "views": [view.to_dict() for view in self.views],
             "warnings": list(self.warnings),
         }
+        if self.ownership_receipt is not None:
+            result["ownership_receipt"] = self.ownership_receipt
+        return result
+
+
+def _write_render_receipt(owner: OwnedRun, receipt: Mapping[str, Any]) -> None:
+    payload = (json.dumps(receipt, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    owner.reserve_bytes(len(payload))
+    partial = owner.root / "render-result.json.partial"
+    partial.write_bytes(payload)
+    os.replace(partial, owner.root / "render-result.json")
+    owner.register_file("render-result.json", "diagnostic")
+
+
+def _verified_png(path: Path, resolution: Tuple[int, int]) -> None:
+    from PIL import Image
+
+    with Image.open(path) as image:
+        if image.format != "PNG" or image.size != tuple(resolution):
+            raise ValueError("render stage is not a complete PNG at the requested resolution")
+        image.verify()
 
 
 def _config_value(config: Optional[Any], name: str, default: Any) -> Any:
@@ -348,7 +375,7 @@ def render_orthogonal_views_detailed(
         bounds_max = mathutils.Vector((1.0, 1.0, 1.0))
 
     def _unique_path(base_path: Path) -> Path:
-        if not base_path.exists():
+        if not os.path.lexists(base_path):
             return base_path
         stem = base_path.stem
         suffix = base_path.suffix
@@ -361,7 +388,7 @@ def render_orthogonal_views_detailed(
             start_at = 1
         for idx in range(start_at + 1, 10000):
             candidate = base_path.with_name(f"{base_stem}_{idx}{suffix}")
-            if not candidate.exists():
+            if not os.path.lexists(candidate):
                 return candidate
         return base_path.with_name(f"{base_stem}_{uuid.uuid4().hex[:8]}{suffix}")
 
@@ -379,7 +406,29 @@ def render_orthogonal_views_detailed(
         head_len = max(1, name_budget - len(digest) - 1)
         return base_path.with_name(f"{stem[:head_len]}-{digest}{suffix}")
 
+    # PNG can retain the scene's existing 16-bit depth: budget all eight RGBA
+    # bytes/pixel, filter/compression overhead, plus bounded receipt space.
+    width, height = (max(1, int(value)) for value in resolution)
+    raw_bytes = width * height * 8
+    frame_bytes = raw_bytes + raw_bytes // 100 + height + 65536
+    owner = OwnedRun(
+        output_path.resolve() / ".render-runs",
+        producer="orthographic_render",
+        max_generated_bytes=4 * 1024 * 1024 + frame_bytes * len(views),
+    )
+    receipt = {
+        "protocol": "orthographic-render-owned-v1",
+        "status": "running",
+        "output_dir": str(output_path),
+        "publication": "atomic hard link; immutable staging retained",
+        "subprocesses_started": 0,
+        "frames": [],
+        "paths": {},
+        "warnings": [],
+    }
+    error = None
     try:
+        _write_render_receipt(owner, receipt)
         with silhouette_session(
             scene=scene,
             target_objects=target_objects,
@@ -422,28 +471,96 @@ def render_orthogonal_views_detailed(
                     output_file = _unique_path(
                         _bounded_output_path(output_path / f"{stem}.png")
                     )
-                    render_start = time.perf_counter()
-                    render_silhouette_frame(session, output_file)
-                    elapsed_s = time.perf_counter() - render_start
-
-                    output_paths[view] = str(output_file)
-                    view_records.append(
-                        RenderViewRecord(
-                            view=view,
-                            path=str(output_file),
-                            elapsed_s=elapsed_s,
-                            camera_location=_camera_tuple(session.camera.location),
-                            camera_rotation=_camera_tuple(session.camera.rotation_euler),
-                            ortho_scale=float(session.camera.data.ortho_scale),
+                    staged = owner.root / f"frame-{len(receipt['frames']) + 1:04d}.png"
+                    frame = {"view": view, "stage": staged.name,
+                             "final_candidate": str(output_file), "status": "rendering"}
+                    receipt["frames"].append(frame)
+                    _write_render_receipt(owner, receipt)
+                    owner.reserve_bytes(frame_bytes)
+                    try:
+                        render_start = time.perf_counter()
+                        render_silhouette_frame(session, staged)
+                        elapsed_s = time.perf_counter() - render_start
+                        _verified_png(staged, resolution)
+                        owner.register_file(staged.name, "final_output")
+                        collisions = 0
+                        for _ in range(128):
+                            try:
+                                publish_file_no_clobber(staged, output_file)
+                                break
+                            except FileExistsError:
+                                collisions += 1
+                                output_file = _unique_path(output_file)
+                        else:
+                            raise FileExistsError("render publication collision retry bound exceeded")
+                        frame.update(
+                            status="published", path=str(output_file),
+                            bytes=owner.records[staged.name]["bytes"],
+                            sha256=owner.records[staged.name]["sha256"],
+                            publication_collisions=collisions,
                         )
-                    )
+                        output_paths[view] = str(output_file)
+                        view_records.append(
+                            RenderViewRecord(
+                                view=view,
+                                path=str(output_file),
+                                elapsed_s=elapsed_s,
+                                camera_location=_camera_tuple(session.camera.location),
+                                camera_rotation=_camera_tuple(session.camera.rotation_euler),
+                                ortho_scale=float(session.camera.data.ortho_scale),
+                            )
+                        )
+                        _write_render_receipt(owner, receipt)
+                    finally:
+                        # The legacy synchronous renderer leaves this pointing
+                        # at its requested/final output, never private staging.
+                        session.scene.render.filepath = str(output_file)
                     if progress_callback is not None:
                         progress_callback(1)
             finally:
                 _restore_view_settings(scene, view_snapshot)
                 _restore_sample_settings(sample_snapshot)
+    except BaseException as exc:
+        error = exc
+        raise
     finally:
-        pass
+        auxiliary = []
+        for frame in receipt["frames"]:
+            staged = owner.root / frame["stage"]
+            if staged.exists():
+                category = "final_output" if frame["status"] == "published" else "diagnostic"
+                try:
+                    owner.register_file(staged.name, category)
+                except Exception as exc:
+                    auxiliary.append(exc)
+        failure = error or (auxiliary[0] if auxiliary else None)
+        receipt.update(
+            status=("cancelled" if isinstance(failure, (KeyboardInterrupt, SystemExit))
+                    else "failed" if failure is not None else "succeeded"),
+            error=None if failure is None else repr(failure),
+            paths=dict(output_paths), warnings=list(warnings),
+        )
+        try:
+            _write_render_receipt(owner, receipt)
+        except Exception as exc:
+            auxiliary.append(exc)
+            partial = owner.root / "render-result.json.partial"
+            if partial.exists():
+                try:
+                    owner.register_file(partial.name, "diagnostic")
+                except Exception as partial_error:
+                    auxiliary.append(partial_error)
+        owner.auxiliary_errors.extend(repr(exc) for exc in auxiliary)
+        try:
+            owner.close(error=error or (auxiliary[0] if auxiliary else None))
+        except Exception as exc:
+            auxiliary.append(exc)
+        if error is not None:
+            for secondary in auxiliary:
+                if hasattr(error, "add_note"):
+                    error.add_note("Render receipt publication also failed: " + repr(secondary))
+        elif auxiliary:
+            raise auxiliary[0]
 
     return RenderResult(
         paths=output_paths,
@@ -457,6 +574,7 @@ def render_orthogonal_views_detailed(
         transparent_bg=transparent_bg,
         views=tuple(view_records),
         warnings=tuple(warnings),
+        ownership_receipt=str(owner.root / "render-result.json"),
     )
 
 
@@ -577,16 +695,157 @@ def render_orthogonal_views(
 
 
 def save_render(output_path: str) -> None:
-    """
-    Render and save the current scene.
+    """Save one current-scene still through an owned stage, without clobbering.
 
-    Args:
-        output_path: Path to save the render
+    Scene format, extension, frame, camera and presentation settings are kept.
+    Blender supplies the actual still filename; that exact name is published
+    once, without a naming retry. An existing final raises FileExistsError.
+    The legacy return is None. Success leaves the requested filepath; failure
+    restores its previous value and retains the stage and ownership receipt.
+
+    Single-file still outputs are supported. Movie/multiview outputs and path
+    templates in the parent directory require a separate publication contract.
+    Compositor File Output nodes and external engine outputs remain outside
+    this main-image publication contract. The 252 MiB stage bound is accounting,
+    not a native render memory/disk quota; oversized output is never published.
     """
     if not BLENDER_AVAILABLE:
         print("Warning: Blender API not available")
         return
 
-    bpy.context.scene.render.filepath = output_path
-    with _suppress_blender_render_stdout():
-        bpy.ops.render.render(write_still=True)
+    requested = os.fspath(output_path)
+    if not isinstance(requested, str) or not requested or requested.endswith(("/", "\\")):
+        raise ValueError("save_render requires an explicit still filename")
+    leaf = requested.replace("\\", "/").rsplit("/", 1)[-1]
+    if leaf in {"", ".", ".."}:
+        raise ValueError("save_render requires a non-directory filename leaf")
+    scene = bpy.context.scene
+    if getattr(scene.render, "is_movie_format", False) or getattr(scene.render, "use_multiview", False):
+        raise ValueError("save_render supports a single-file still, not movie/multiview output")
+    target = Path(bpy.path.abspath(requested)).absolute()
+    if target.name in {"", ".", ".."}:
+        raise ValueError("save_render requires a non-directory filename leaf")
+    if any(character in str(target.parent) for character in "{}"):
+        raise ValueError("save_render does not publish parent-directory path templates")
+    parent = target.parent.resolve()
+    previous_filepath = scene.render.filepath
+    owner = OwnedRun(parent / ".render-runs", producer="save_render",
+                     max_generated_bytes=256 * 1024 * 1024)
+    stage_dir = owner.root / "stage"
+    staged = None
+    final = None
+    published = False
+    primary = None
+    auxiliary = []
+    started = time.perf_counter()
+    receipt = {
+        "protocol": "save-render-owned-v1", "status": "running",
+        "run_id": owner.run_id, "requested_path": requested,
+        "resolved_parent": str(parent), "previous_filepath": previous_filepath,
+        "file_format": scene.render.image_settings.file_format,
+        "use_file_extension": bool(scene.render.use_file_extension),
+        "frame_current": int(scene.frame_current),
+        "stage_byte_bound": 252 * 1024 * 1024,
+        "subprocesses_started": 0, "native_call": "synchronous current-scene write_still",
+        "publication": "atomic no-clobber; exact native filename; no suffix",
+        "published": False, "stage": None, "final_path": None,
+        "reclamation": "unimplemented; all files retained",
+    }
+
+    def stage_entries():
+        entries = []
+        if stage_dir.is_dir():
+            for entry in stage_dir.iterdir():
+                if len(entries) >= 64:
+                    raise ValueError("single-still stage inventory exceeds 64 entries")
+                entries.append(entry)
+        return entries
+
+    try:
+        stage_dir.mkdir()
+        owner.reserve_bytes(receipt["stage_byte_bound"])
+        _write_render_receipt(owner, receipt)
+        # Keep the original leaf: native write_still performs format-extension
+        # and filename-template handling. frame_path is an animation path API.
+        scene.render.filepath = str(stage_dir / target.name)
+        with _suppress_blender_render_stdout():
+            result = bpy.ops.render.render(write_still=True)
+        receipt["operator_status"] = sorted(result)
+        if "FINISHED" not in result:
+            raise RuntimeError("current-scene still render did not finish")
+        entries = stage_entries()
+        if (len(entries) != 1 or entries[0].is_symlink() or
+                getattr(entries[0], "is_junction", lambda: False)() or not entries[0].is_file()):
+            raise ValueError("single-still render did not produce exactly one regular staged file")
+        staged = entries[0]
+        if staged.stat().st_size == 0 or staged.stat().st_size > receipt["stage_byte_bound"]:
+            raise ValueError("single-still stage is empty or exceeds its byte bound")
+        if receipt["file_format"] == "PNG":
+            from PIL import Image
+            with Image.open(staged) as image:
+                if image.format != "PNG":
+                    raise ValueError("current-scene PNG stage has the wrong image format")
+                image.verify()
+            receipt["stage_validation"] = "closed regular nonempty file; PNG readability"
+        else:
+            receipt["stage_validation"] = "closed regular nonempty native output; no format-specific pixel proof"
+        relative = staged.relative_to(owner.root).as_posix()
+        owner.register_file(relative, "diagnostic")
+        receipt["stage"] = dict(owner.records[relative.casefold() if os.name == "nt" else relative])
+        final = parent / staged.name
+        receipt["final_path"] = str(final)
+        publish_file_no_clobber(staged, final)
+        published = receipt["published"] = True
+    except BaseException as exc:
+        primary = exc
+    finally:
+        # The synchronous operator has returned/raised. No child is started or
+        # adopted here. Partial files are retained even when rendering failed.
+        try:
+            for entry in stage_entries():
+                if entry.is_file() and not entry.is_symlink():
+                    category = "final_output" if published and entry == staged else "diagnostic"
+                    owner.register_file(entry.relative_to(owner.root).as_posix(), category)
+        except BaseException as exc:
+            auxiliary.append(exc)
+        if staged is not None:
+            key = staged.relative_to(owner.root).as_posix()
+            key = key.casefold() if os.name == "nt" else key
+            if key in owner.records:
+                receipt["stage"] = dict(owner.records[key])
+        try:
+            scene.render.filepath = requested if primary is None and not auxiliary else previous_filepath
+        except BaseException as exc:
+            auxiliary.append(exc)
+        receipt.update(
+            status=("cancelled" if isinstance(primary, (KeyboardInterrupt, SystemExit)) else
+                    "failed" if primary is not None or auxiliary else "succeeded"),
+            elapsed_s=time.perf_counter() - started,
+            error=repr(primary)[:4096] if primary is not None else None,
+            auxiliary_errors=[repr(exc)[:4096] for exc in auxiliary],
+        )
+        try:
+            _write_render_receipt(owner, receipt)
+        except BaseException as exc:
+            auxiliary.append(exc)
+        owner.auxiliary_errors.extend(repr(exc)[:4096] for exc in auxiliary)
+        if primary is None and auxiliary:
+            try:
+                scene.render.filepath = previous_filepath
+            except BaseException as exc:
+                auxiliary.append(exc)
+                owner.auxiliary_errors.append(repr(exc)[:4096])
+        try:
+            owner.close(error=primary if primary is not None else auxiliary[0] if auxiliary else None)
+        except BaseException as exc:
+            auxiliary.append(exc)
+    if primary is not None:
+        if hasattr(primary, "add_note"):
+            primary.add_note("save_render stage and receipt retained at " + str(owner.root))
+            for exc in auxiliary:
+                primary.add_note("save_render finalization also failed: " + repr(exc))
+        raise primary.with_traceback(primary.__traceback__)
+    if auxiliary:
+        if hasattr(auxiliary[0], "add_note"):
+            auxiliary[0].add_note("save_render stage and receipt retained at " + str(owner.root))
+        raise auxiliary[0]

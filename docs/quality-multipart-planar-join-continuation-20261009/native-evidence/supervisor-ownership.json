@@ -1,0 +1,56 @@
+{
+  "artifacts": [
+    {
+      "bytes": 2280,
+      "category": "diagnostic",
+      "path": "command.json",
+      "sha256": "7471de34813a78c4072e9a94ebfb280dc299b7af390b7fe10cc582d6b4449994"
+    },
+    {
+      "bytes": 4385,
+      "category": "diagnostic",
+      "path": "provenance.json",
+      "sha256": "7dd432d948939830fd2796b7aebbf6d2b04b1b50b8e08af6448865e4e8ab7630"
+    },
+    {
+      "bytes": 2906,
+      "category": "diagnostic",
+      "path": "resource-receipt.json",
+      "sha256": "3a69ad1c4cd81f076b18471b61bb9e8d1b1f65d37cab9017b368dbc25273295a"
+    },
+    {
+      "bytes": 64,
+      "category": "diagnostic",
+      "path": "stdout.log",
+      "sha256": "1d6c49ba2bfb782409a31bc131c6505a67a533129b5bd039c9ecdb7d27f2c134"
+    },
+    {
+      "bytes": 341,
+      "category": "diagnostic",
+      "path": "run-result.json",
+      "sha256": "67d02010e03a46ccbbee60d5df5d8f9d7fd714ae41eedc615815e5af8d4e3c12"
+    }
+  ],
+  "auxiliary_errors": [],
+  "error": null,
+  "max_generated_bytes": 8388608,
+  "owner_token": "706ba961cd2048e89feeab9a985e7e88",
+  "pid": 18568,
+  "producer": "bounded_owned_command",
+  "reclamation": "unimplemented; all files retained",
+  "run_id": "7efedef6291d48d7a1e22891248fb6cb",
+  "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222",
+  "schema_version": 1,
+  "shared_inputs": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\inspection_camera.py": "7818917ccdb39f3d3d053dc25978004cc83b121d4a93c51a05aff814fd91b4ef",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py": "23b408f67d94034e78f568ba9933804f064db90119ce9c44b3ea72b278d29596",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py": "71f4481f54e4994ef5dc668217631203540fdd207e12a545ef71d0584b9962b2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\primary_process_cleanup.py": "ddc0f60642b536f64dda686d7d8e10c62e42916c70351c388564a5732785107f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json": "e38527b16063e5c550eb82fef6e75e9eedc4db67128bb261dd4086c86ca361cc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py": "23290344800e2650c7a6bfec08ed3d5350c426eeafdd32c3a4c29c346a66999a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\evaluated-exact.npz": "dd36b515004e8d7c81899fd960851f3cf60b1524235f897b491164001d8bedc4",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\program.json": "39f303d5ba564965f8c40027dbb4ca4153669d2436674d466fff9fe34ccd9948",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\asymmetric_multipart_solid\\evaluated-exact.npz": "6f2ac20580a3a5fb1f541e056a6c6dc9c5659a2838882f44ca54c5a9dfad2c83"
+  },
+  "state": "succeeded"
+}

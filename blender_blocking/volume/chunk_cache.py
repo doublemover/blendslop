@@ -81,7 +81,12 @@ class VolumeChunkCache:
         namespace: str = "volume",
         read: bool = True,
         write: bool = True,
+        owned_writes: bool = False,
     ) -> None:
+        if not isinstance(owned_writes, bool):
+            raise ValueError("owned_writes must be a boolean")
+        self.owned_writes = owned_writes
+        self.last_ownership_receipt: Optional[Path] = None
         self.directory = Path(directory)
         self.namespace = _safe_slug(namespace)
         self.read_enabled = bool(read)
@@ -152,18 +157,29 @@ class VolumeChunkCache:
             "dtype": str(np.asarray(data).dtype),
             **dict(metadata or {}),
         }
+        receipts = {}
+        if self.owned_writes:
+            self.last_ownership_receipt = None
         try:
-            np.savez_compressed(
-                path,
-                data=np.asarray(data),
-                metadata=np.array(json.dumps(_json_safe(payload), sort_keys=True)),
-            )
+            if self.owned_writes:
+                from .owned_chunk_cache import write_owned_chunk_cache
+                write_owned_chunk_cache(path, np.asarray(data),
+                    json.dumps(_json_safe(payload), sort_keys=True), receipt_artifacts=receipts)
+            else:
+                np.savez_compressed(
+                    path,
+                    data=np.asarray(data),
+                    metadata=np.array(json.dumps(_json_safe(payload), sort_keys=True)),
+                )
             self.writes += 1
             self.bytes_written += int(path.stat().st_size)
             return True
         except Exception:
             self.write_errors += 1
             return False
+        finally:
+            if self.owned_writes:
+                self.last_ownership_receipt = receipts.get("cache_store_ownership")
 
     def stats(self) -> ChunkCacheStats:
         return ChunkCacheStats(

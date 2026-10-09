@@ -1,0 +1,2024 @@
+{
+  "legacy_rows": [
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 5,
+      "normals": 5,
+      "required_pass_producer_bindings": 0,
+      "row": "candidate/calibrated_vase",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "unavailable",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "candidate/rounded_triangle_dot",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "corrected-reference/capsule",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "negative/filled_cavity",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "negative/incorrect_depth",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "negative/missing_multipart",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/anisotropic_ellipsoid",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/asymmetric_multipart_solid",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/capsule",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/concave_arch",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/cylinder",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/rounded_box",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/rounded_triangle_dot",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/smooth_vase",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/sphere",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/tapered_frustum",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/thin_plate",
+      "status": "incomplete"
+    },
+    {
+      "available_clipping_records": 0,
+      "gaps": [
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "front"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "side"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "top"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_35_28"
+        },
+        {
+          "artifact_status": "available",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "mask",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        },
+        {
+          "artifact_status": "unrun",
+          "camera_status": "available",
+          "clipping_status": "unavailable",
+          "geometry_binding": "unavailable",
+          "geometry_identity_status": "verified",
+          "pass_name": "neutral",
+          "reference_match": "unavailable",
+          "view": "oblique_145_40"
+        }
+      ],
+      "geometry_identity_status": "verified",
+      "mask": 5,
+      "neutral": 0,
+      "normals": 0,
+      "required_pass_producer_bindings": 0,
+      "row": "reference/torus",
+      "status": "incomplete"
+    }
+  ],
+  "protocol": "legacy_binding_gap_audit_v1",
+  "required_binding": "completed required passes need exact geometry archive identity, producer before/after geometry stability, imagehash/framehash/geometryhash binding and actual camera clipping record; legacy absent bindings are unavailable/incomplete",
+  "scope": "current strict producer binding and PNG readability requirements; all original files and first audit retained unchanged",
+  "source_inventory_sha256": "c867807f676cf2a082cb8cb030ff1eaba1b4afef458cc7cc3e3a702c0d57dc05"
+}

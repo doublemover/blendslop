@@ -1,0 +1,52 @@
+{
+  "protocol": "standalone-fallback-budget-adoption-v1",
+  "affected_guard_methods": [
+    "test_native_union_explicit_and_context_budget_create_only_one_pool",
+    "test_union_disabled_and_shared_defaults_do_not_create_or_adopt_pools",
+    "test_multistart_direct_budget_default_and_context_route_real_job_payload",
+    "test_multistart_owned_worker_client_stays_flat_and_mismatch_refuses",
+    "test_family_search_reuses_one_budget_across_all_families",
+    "test_public_resfit_request_forwards_context_before_failed_fit",
+    "test_program_search_admits_context_budget_without_compilation",
+    "test_dvx_fallback_budget_and_warm_helper_remain_distinct",
+    "test_hybrid_context_budget_only_opens_native_enabled_residual_scope"
+  ],
+  "unique_guard_methods_passed": 9,
+  "initial_run": {
+    "methods": 9,
+    "passed": 7,
+    "fixture_errors": 2,
+    "runtime_failures": 0,
+    "seconds": 1.209
+  },
+  "failed_only_fixture_continuation": {
+    "methods": 2,
+    "passed": 2,
+    "seconds": 1.0
+  },
+  "strengthened_valid_shape_node_guard": {
+    "methods": 1,
+    "passed": 1,
+    "seconds": 0.021
+  },
+  "source_working_bytes_sha256": {
+    "blender_blocking/reconstruction/backends/hybrid_loft_hull.py": "0dc0a8d794b8d43363ced6d3d4c840476a0566f1e9978c6b3c0f02efa19de318",
+    "blender_blocking/reconstruction/backends/shape_program/geometry_search.py": "6b5c8c5973c60cfea5dd1aacfb6f9258daa2187a87d3db163fc6218a64e32be0",
+    "blender_blocking/reconstruction/differentiable/dvx_adapter.py": "24ab50a4b70ad1c4122f02636ca98a8c0bbf401f7667287a48392d24335da075",
+    "blender_blocking/reconstruction/grouped_solids.py": "b8123731215d911270ea48934552afcb7926955572978bb20c242b37012d8ede",
+    "blender_blocking/placement/resfit/backend_adapter.py": "8080ba2dfa6244d5f4d31aa6a6c2150ce8a304d5e50d1a4c7bbd80392750b881",
+    "blender_blocking/placement/resfit/optimizer.py": "9e352f7ae2503b5a85087b56d3bda96e00a30b77e7873c3941a08e8a23773deb",
+    "blender_blocking/test_fallback_process_budget.py": "afa4c6bde1c8d91f97bf795fb8cb1e84cdace77d437f0b53d994ebbb2895e67f"
+  },
+  "native_jobs": 0,
+  "child_jobs": 0,
+  "numerical_fit_jobs": 0,
+  "adoption": "Explicit process_budget/context, or actual request.context, reaches executor_scope; existing owned pool/client is reused without entering or closing it or resetting its deadline.",
+  "boundaries": [
+    "One pool phase, not an inferred whole-workflow cap.",
+    "Native-disabled union and DVX warm-helper/probe lifecycles remain independent.",
+    "Generic compiler request-context forwarding is reviewed as the next concrete gap; this packet does not claim that path is complete.",
+    "No artifact deletion, lease adoption, ownership transfer or historical HANDLE recovery."
+  ],
+  "test_output_retention": "Original tool outputs; no persisted log file was found and no replacement log is presented as original."
+}

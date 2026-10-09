@@ -1,0 +1,696 @@
+{
+  "protocol": "authored_input_decisions_v1",
+  "status": "prepared_owner_decisions_only; no response inferred",
+  "reviewed_followup_head": "42e5fc890284bddebfb7da3463dd2cfb26e1e751",
+  "implementation_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+  "scope": "exclusive new documentation; no production/tests/source definition changes, native launch, broad tests, push, messages or publication",
+  "input_sha256": {
+    "blender_blocking/synthetic/quality_contracts.py": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9",
+    "blender_blocking/synthetic/quality_references.py": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef",
+    "blender_blocking/synthetic/blender_builders.py": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2",
+    "blender_blocking/evaluation/family_surface_contracts.py": "990739e870a7ca9b4ba2505784cc4b5c1c8fdaf154d70a5ecb0bb01718ac5aeb",
+    "blender_blocking/geometry/loft_surface.py": "715fd1a93317a34c607e7f479677af542a881cbd210a35b114252849eaa93dbe",
+    "blender_blocking/primitives/rounded_triangle.py": "42dd3eb646dab57cf7603c14a0dbc1f25bbfd9f348a20df2dd37e20364248bbf",
+    "scripts/run_profile_surface_repair.py": "521892a4c8940f9125ae988dca827605b03d87bbe334686b4b943146b3d419a4",
+    "docs/quality-implementation-20261008/profile-repair-evidence.json": "8bf83be20129884399b707ce04c7206995ac801d5ddb17c07824e42a2432cdfd",
+    "docs/quality-family-surface-contracts-continuation-20261009/README.md": "62a942726fd9b027a8d29a260ddfa2fe268ab9681ea8db7d4ae7a25b92425555",
+    "docs/quality-source-controls-continuation-20261009/README.md": "74e3988818165ed48a7a36c90e55bfea6a504b2136a921e8099b878324cbc7c5",
+    "docs/quality-structured-edits-continuation-20261009/README.md": "eeedc60aa56fc24a5e6304dbf199b284eb47f03de3b240f28369ce03a75cb635",
+    "docs/quality-rounded-style-continuation-20261009/README.md": "f9fa48d46384b78c35312baf18118ead9033b58406d94ab727c270a0699f22e1",
+    "docs/quality-calibration-20261008/native-allowance-evidence.json": "54f7ba2bef68cdedac529d45822152890b684702b84146738d1b6fdb6638a08f",
+    "docs/quality-adaptive-families-continuation-20261009/evidence.json": "618598253b97f2598810f4325fa538eae7c796955ed99850a7ec0df925c8637d",
+    "docs/quality-adaptive-families-continuation-20261009/evidence-03.json": "1c23c6fad50a6db15441299863d121bbb6be292ef957ce2ffae8df1249c942e5",
+    "docs/quality-adaptive-axis-families-continuation-20261009/native-evidence.json": "04fe71a913aa2b7b3df4cf57b721b0c9f4fb8f5eb1626da428fa6d8cf8851fd6",
+    "docs/quality-adaptive-arch-exterior-continuation-20261009/native-evidence.json": "96dc27af114dd1fe6f21ebb1022d87dcc62ae7f6e203f4edb8ad5964ac298952",
+    "docs/quality-adaptive-triangle-continuation-20261009/evidence.json": "6d0f75255dab39e26edd6ff81b9a4da26e32db1508e5f9c81d9013dcc34fc558",
+    "docs/quality-followup-continuation-20261009/pending-verification.md": "e93845126e935cdc1385162b49e72764be8265279ba24e988f9ae2fe7438108c",
+    "docs/quality-coverage-continuation-20261008/README.md": "86448e82f3b00ee78ad22fff59a79802713f007b12a8ababb1af59ccb32b1180",
+    "docs/quality-family-surface-contracts-continuation-20261009/expanded-evidence.json": "3e4a9167c993d1b16bf9c2ae993c2b2cceb1024ccc6549671605292a9f4a902f",
+    "docs/quality-reference-noise-continuation-20261008/README.md": "732d6c4849e915858b4acae640f6a61abe7e6540b3a7a0e172124334444cebb2",
+    "docs/quality-calibration-20261008/evidence.json": "ba3c4040faeffa12ca9648413e4346f6b9275afcdb182b7c8c295e245a8bb4f8"
+  },
+  "owner_questions": [
+    {
+      "id": "artist_surface_acceptance",
+      "required_for": "claiming independent non-vase artist surface acceptance",
+      "question": "Should the eleven non-vase families remain engineering diagnostics, or receive independently authored per-family artist distance/normal limits (and any required tail-distance caps)?",
+      "options": [
+        {
+          "id": "diagnostics_only",
+          "label": "Keep artist acceptance unqualified",
+          "effect": "No numeric artist cutoffs are adopted; existing engineering and reconstruction gates remain independent."
+        },
+        {
+          "id": "mean_and_normal",
+          "label": "Author mean-distance and normal-P95 limits",
+          "required_values": [
+            "explicit family names or named group membership",
+            "symmetric_mean_distance_world_max",
+            "oriented_geometric_normal_angle_p95_degrees_max"
+          ]
+        },
+        {
+          "id": "mean_normal_and_tail",
+          "label": "Also require tail-distance limits",
+          "required_values": [
+            "the same family/mean/normal table",
+            "distance_p95_world_max and/or sampled_max_distance_world_max; explicitly mark each unused metric null"
+          ]
+        }
+      ],
+      "units_contract": "Unchanged Blender world coordinates for distances and degrees for oriented geometric-face normals; if physical units are requested, provide the explicit physical-units-per-Blender-world-unit conversion. No scene scale, millimetre mapping or independent alignment is inferred.",
+      "numeric_response_contract": "Finite nonnegative distance limits; finite normal limits in[0,180]degrees; explicit null leaves that artist metric unqualified. Choose independently of observed candidate values; freeze before future admission. A sampled maximum is not a continuous worst-case/Hausdorff bound.",
+      "families": [
+        {
+          "name": "sphere",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "anisotropic_ellipsoid",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "cylinder",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "tapered_frustum",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "torus",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "capsule",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "rounded_box",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "thin_plate",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "concave_arch",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "asymmetric_multipart_solid",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "rounded_triangle_dot",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        }
+      ],
+      "already_fixed": "smooth_vase retains its existing analytic fixture mean<=0.003world and oriented normalP95<=2.5deg contract. Original silhouette/support/topology/edit gates are unchanged. The supplementary source-facet+half-pixel/+1deg engineering budgets are not suggested artist values.",
+      "owner_response": null
+    },
+    {
+      "id": "historical_scalloped_target",
+      "required_for": "a fidelity claim that repairs the historical scalloped input to the intended smooth vase",
+      "question": "For the historical ellipse-strip vase, are the scallops intended, should a new independent smooth profile be authored, or should the existing analytic fixture be explicitly adopted as a different target?",
+      "options": [
+        {
+          "id": "retain_strips",
+          "label": "Retain scalloped/stepped intent",
+          "effect": "Preserve the authored detail; do not claim that a smooth replacement is the hidden correct shape."
+        },
+        {
+          "id": "independent_profile",
+          "label": "Supply an independent smooth profile",
+          "required_values": [
+            "target formula or strictly increasing(z,rx,ry,cx,cy)world-unit sections from an independent authored source",
+            "height/pose/world-unit scale",
+            "intended sharp or stepped features and endpoints",
+            "solid flat caps versus an open/hollow design; hollow design needs explicit wall/bottom/rim controls"
+          ]
+        },
+        {
+          "id": "adopt_known_fixture",
+          "label": "Adopt the known analytic fixture as a new target",
+          "explicit_fixture": {
+            "z_interval_world": [
+              0,
+              2.6
+            ],
+            "rx_ry_formula": ".6+.2*cos(2*pi*z/2.6)",
+            "center_xy_world": [
+              0,
+              0
+            ],
+            "height_world": 2.6,
+            "radius_mean_world": 0.6,
+            "radius_amplitude_world": 0.2,
+            "solid": true,
+            "caps": "flat closed end caps",
+            "geometry_sections": 257,
+            "radial_segments": 192
+          },
+          "effect": "This is an explicit new target decision, not recovery of intent from the old images or evidence that the historical saved mesh was repaired."
+        }
+      ],
+      "not_inferable": "The old front/side/top strip images and a smoothing window do not uniquely define a smooth 3D profile, caps, hollow thickness, physical scale or allowed removal of scallops.",
+      "preserved_failure": {
+        "geometry_hash": "086ea0cb4d438128c9cf43eb69aaa9f5a7b28bc3d537cf1f60a6823e96e31188",
+        "boundary_status": "unavailable",
+        "boundary_reason": "helper_timeout",
+        "helper_timeout_s": 15.0,
+        "surface_acceptance": "blocked: source ellipse-strip scallops do not define an authored smooth reference",
+        "input_sha256": {
+          "front": "89a07560bc2c49478d9b5fdb6c2f200c2e01b14f57c7b185499fcbefc7c4d182",
+          "side": "89a07560bc2c49478d9b5fdb6c2f200c2e01b14f57c7b185499fcbefc7c4d182",
+          "top": "d9cd298514a8e5c2ef68bdd0f3484f3d48f559f3bdf7f6cd660a09c8dc9cd025"
+        }
+      },
+      "owner_response": null
+    },
+    {
+      "id": "meaning_of_smooth_for_new_targets",
+      "required_for": "only a requested design/style revision beyond the frozen fixture; current fixture-fidelity work needs no new style decision",
+      "question": "If a new smooth design is requested, should it change shading only or geometric profile/corners, and which families/features must retain their authored flat or sharp intent?",
+      "options": [
+        {
+          "id": "frozen_fixture_fidelity",
+          "label": "Keep frozen geometry and authored style",
+          "effect": "Use the already declared fixture/controller values; no owner choice is needed to preserve them."
+        },
+        {
+          "id": "shading_variant",
+          "label": "Create an explicit shading-only variant",
+          "required_values": [
+            "named families",
+            "smooth versus flat polygon regions and preserved caps/edges",
+            "weighted-normal enable/keep_sharp choices where applicable"
+          ],
+          "effect": "Retain exact geometry; shading normals do not substitute for oriented geometric-face normal metrics."
+        },
+        {
+          "id": "new_geometric_target",
+          "label": "Author a separate geometric smooth target",
+          "required_values": [
+            "named families and independent reference/controller values",
+            "geometry surface_mode smooth/sharp/stepped for lofts",
+            "maximum allowed source-section displacement in world units if radius regularization is intended",
+            "sharp features to preserve; rounded-corner radius or profile changes explicitly stated"
+          ],
+          "effect": "The new target needs its own frozen identity and acceptance policy; it never overwrites the original source or negative-control evidence."
+        }
+      ],
+      "known_controller_choices": {
+        "loft_modes": [
+          "smooth",
+          "sharp",
+          "stepped"
+        ],
+        "smooth_geometry": "shape-preserving PCHIP between supplied sections; interpolation remains a hypothesis",
+        "loft_subdivisions": {
+          "current_api_default": 4,
+          "supported_integer_range": [
+            1,
+            16
+          ]
+        },
+        "radius_regularization": {
+          "current_api_default_window": 0,
+          "current_api_default_max_source_section_deviation_world": 0.0,
+          "enabled_window": "odd integer5..129, bounded by available sections",
+          "polynomial_order": 3,
+          "endpoints": "first/last source radii retained",
+          "only_rx_ry_regularized": true,
+          "historical_attempt_values": {
+            "source_sections": 129,
+            "window": 9,
+            "max_source_section_deviation_world": 0.06,
+            "radial_segments": 96,
+            "surface_subdivisions": 2
+          },
+          "analytic_repair_attempt_values": {
+            "source_slices": 65,
+            "window": 9,
+            "max_source_section_deviation_world": 0.003,
+            "radial_segments": 96,
+            "surface_subdivisions": 2
+          },
+          "warning": "These are retained implementation/attempt values, not authored smooth target values or artist tolerances; section displacement does not bound the whole interpolated surface."
+        },
+        "rounded_box_authored_style": {
+          "bevel_segments": 8,
+          "weighted_normals": true,
+          "weighted_normals_keep_sharp": false
+        },
+        "rounded_triangle_authored_style": {
+          "shade_smooth": true,
+          "thickness_world": 0.48,
+          "front_fraction": 0.5,
+          "corner_radius_world": 0.16,
+          "corner_segments": 32,
+          "dome_segments": 64
+        }
+      },
+      "owner_response": null
+    }
+  ],
+  "question_count": 3,
+  "frozen_authored_targets": [
+    {
+      "name": "sphere",
+      "parameters": {
+        "primitive": "sphere",
+        "radius": 0.8
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "anisotropic_ellipsoid",
+      "parameters": {
+        "primitive": "ellipsoid",
+        "radii": [
+          0.9,
+          0.55,
+          0.7
+        ]
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "cylinder",
+      "parameters": {
+        "primitive": "cylinder",
+        "radius": 0.65,
+        "height": 1.6
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "tapered_frustum",
+      "parameters": {
+        "primitive": "frustum",
+        "radius_bottom": 0.8,
+        "radius_top": 0.35,
+        "height": 1.8
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "smooth_vase",
+      "parameters": {
+        "builder": "analytic_vase",
+        "height": 2.6,
+        "radius_mean": 0.6,
+        "radius_amplitude": 0.2
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "torus",
+      "parameters": {
+        "primitive": "torus",
+        "major_radius": 0.7,
+        "minor_radius": 0.22
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "capsule",
+      "parameters": {
+        "primitive": "capsule",
+        "radius": 0.4,
+        "segment_height": 1.2
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "rounded_box",
+      "parameters": {
+        "primitive": "rounded_box",
+        "dimensions": {
+          "width": 1.6,
+          "depth": 1.1,
+          "height": 1.3
+        },
+        "radius": 0.15
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "thin_plate",
+      "parameters": {
+        "primitive": "box",
+        "dimensions": {
+          "width": 1.6,
+          "depth": 0.08,
+          "height": 1.2
+        }
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "concave_arch",
+      "parameters": {
+        "builder": "compound",
+        "parts": [
+          {
+            "type": "box",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              1.8,
+              0.4,
+              1.8
+            ]
+          },
+          {
+            "type": "box",
+            "center": [
+              0,
+              0,
+              -0.3
+            ],
+            "size": [
+              1.0,
+              0.8,
+              1.4
+            ],
+            "boolean": "subtract"
+          }
+        ]
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "asymmetric_multipart_solid",
+      "parameters": {
+        "builder": "compound",
+        "parts": [
+          {
+            "type": "box",
+            "center": [
+              0,
+              0,
+              -0.25
+            ],
+            "size": [
+              1.6,
+              0.65,
+              0.5
+            ]
+          },
+          {
+            "type": "box",
+            "center": [
+              -0.4,
+              0.1,
+              0.4
+            ],
+            "size": [
+              0.45,
+              0.45,
+              1.1
+            ]
+          },
+          {
+            "type": "box",
+            "center": [
+              0.45,
+              -0.08,
+              0.12
+            ],
+            "size": [
+              0.35,
+              0.45,
+              0.65
+            ]
+          }
+        ]
+      },
+      "status": "unmeasured"
+    },
+    {
+      "name": "rounded_triangle_dot",
+      "parameters": {
+        "builder": "rounded_triangle",
+        "vertices_xy": [
+          [
+            0,
+            0.9
+          ],
+          [
+            -0.7794228634059948,
+            -0.45
+          ],
+          [
+            0.7794228634059948,
+            -0.45
+          ]
+        ],
+        "corner_radius": 0.16,
+        "thickness": 0.48,
+        "dome": "z=+-thickness/2*cos(phi), outline_scale=sin(phi)",
+        "corner_segments": 32,
+        "dome_segments": 64
+      },
+      "status": "unmeasured"
+    }
+  ],
+  "fixed_measurement_protocol": {
+    "units": "Blender world units; no independent centering, scaling or alignment",
+    "samples_per_direction": 4096,
+    "seed": 61007,
+    "normal_orientation": "oriented geometric triangle normals; no absolute-dot flip allowance",
+    "silhouette": {
+      "area_iou_min": 0.7,
+      "boundary_iou_min": 0.8,
+      "signed_distance_loss_max": 0.05,
+      "all_required_views_independent": true
+    },
+    "triangle_support_distance_world_max": 0.005,
+    "triangle_thickness_world_error_max": 0.005,
+    "engineering_allowance": "source facet certificate +0.5max source pixel pitch in world distance; source corresponding normal bound +1degree; supplementary only",
+    "artist_acceptance_inferred": false
+  },
+  "verified_controls_not_acceptance_limits": [
+    {
+      "family": "sphere",
+      "verified_control": "coupled fitted radial dimensions x1.05",
+      "fixed": "retained axis ratios/pose; exact restore"
+    },
+    {
+      "family": "anisotropic_ellipsoid",
+      "verified_control": "local depth x1.05",
+      "fixed": "other dimensions/pose; exact restore"
+    },
+    {
+      "family": "cylinder",
+      "verified_control": "both cap radii and diameter aliases x1.05",
+      "fixed": "height/pose; exact restore"
+    },
+    {
+      "family": "tapered_frustum",
+      "verified_control": "top radius x1.10",
+      "fixed": "bottom radius/height/pose; exact restore"
+    },
+    {
+      "family": "smooth_vase",
+      "verified_control": "source-section radius edit/regeneration",
+      "fixed": "saved source recipe; exact regeneration; not proof about historical target"
+    },
+    {
+      "family": "torus",
+      "verified_control": "tube/minor radius x1.05",
+      "fixed": "major radius; exact restore"
+    },
+    {
+      "family": "capsule",
+      "verified_control": "straight segment height x1.05",
+      "fixed": "cap radius; exact restore"
+    },
+    {
+      "family": "rounded_box",
+      "verified_control": "live bevel width x1.10",
+      "fixed": "outer dimensions and8segments; exact restore"
+    },
+    {
+      "family": "thin_plate",
+      "verified_control": "local depth x1.05",
+      "fixed": "width/height; exact restore"
+    },
+    {
+      "family": "concave_arch",
+      "verified_control": "opening width x1.10; separate exterior stage depth x1.05",
+      "fixed": "opening edit keeps exterior/roof; exterior depth edit keeps every localXY vertex; exact restore"
+    },
+    {
+      "family": "asymmetric_multipart_solid",
+      "verified_control": "short-box depth x1.05 in saved three-part recipe; earlier base-width/tall-height responses also retained",
+      "fixed": "other part dimensions/endpoints; exact restore; local endpoint identification is not global uniqueness"
+    },
+    {
+      "family": "rounded_triangle_dot",
+      "verified_control": "corner-radius edit with physicalXY support response",
+      "fixed": "thickness/pose; exact restore"
+    }
+  ],
+  "actual_regressions_preserved": {
+    "sphere": {
+      "status": "rejected_bounded_checkpoint",
+      "geometry_hash": "1a28cafe262f3cd7edabc01c831b46077655528d54af3853ee4c709adc9f80ca",
+      "alpha_error_relative_reduction": -0.022822881500548634,
+      "raw_mean_relative_reduction": -0.036395063012224504,
+      "normal_p95_baseline": 4.092355280183016,
+      "normal_p95_refined": 4.096600397972613,
+      "local_rank": 1,
+      "calls": 9,
+      "fit_seconds": 0.10456490000069607,
+      "exact_semantic_restore": true,
+      "frame_edges": {
+        "source-heldout": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0
+        },
+        "baseline-heldout": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0
+        },
+        "refined-heldout": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0
+        }
+      },
+      "current_row": "original unchanged",
+      "artist_surface_limits": null,
+      "aggregate_accepted": false
+    },
+    "anisotropic_ellipsoid": {
+      "status": "rejected_bounded_checkpoint",
+      "geometry_hash": "02bab3e39da316e08b49fd870ec01253d00c3bf896c8268126b2458a0f84ccf2",
+      "alpha_error_relative_reduction": -0.03232894120147201,
+      "raw_mean_relative_reduction": 0.03486484016637503,
+      "normal_p95_baseline": 3.927391055140527,
+      "normal_p95_refined": 3.9283618868413175,
+      "local_rank": 3,
+      "calls": 19,
+      "fit_seconds": 0.21153650000633206,
+      "exact_semantic_restore": true,
+      "frame_edges": {
+        "source-heldout": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0
+        },
+        "baseline-heldout": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0
+        },
+        "refined-heldout": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0
+        }
+      },
+      "current_row": "original unchanged",
+      "artist_surface_limits": null,
+      "aggregate_accepted": false
+    },
+    "arch_exterior": {
+      "bounded_checkpoint_improved": true,
+      "relative_alpha_l1_reduction": 0.8754206796251266,
+      "relative_raw_mean_reduction": 0.7459680380100504,
+      "relative_distance_p95_increase": 0.03796676980460312,
+      "relative_sampled_max_reduction": 0.09590805637364685,
+      "distance_p95_regressed": true,
+      "geometric_normal_p95_unchanged": true,
+      "semantic_edit_restoration": true,
+      "required_full_five_view": "unrun",
+      "native_boundary": "unrun",
+      "canonical_neutral_normal": "unrun",
+      "artist_surface_limits": null,
+      "current_selected_rows_unchanged": true,
+      "aggregate_accepted": false
+    },
+    "triangle": "raw mean and normalP95 improve; sampled max0.002880168147->0.002981405240world increases; full changed-geometry five-view/boundary/canonical/artist gates unrun",
+    "capsule_torus": "both bounded checkpoints improve mean/alpha; geometric normalP95 rises slightly and remains independent",
+    "historical_vase": "old15s boundary timeout and absent authored smooth target remain unchanged"
+  },
+  "independent_work_without_new_owner_intent": [
+    {
+      "work": "Complete bounded source-only analytic certificates for frozen rounded-box/triangle constructors where defensible; explicit unsupported otherwise",
+      "requires": "technical proof review/budget, not invented artist values"
+    },
+    {
+      "work": "Prepare missing complete actual source camera/pass provenance for arch/torus and bind engineering-only policies",
+      "requires": "separate bounded native plan/serial approval before acquisition; no retrospective provenance repair"
+    },
+    {
+      "work": "Reclassify only verified retained raw observations under existing frozen engineering contracts",
+      "requires": "exact source/candidate/producer protocol/hash binding; artist status stays null"
+    },
+    {
+      "work": "Prepare five-view/native/canonical follow-up for explicitly selected improved diagnostic identities",
+      "requires": "selection plus bounded native approval; current12 rows and negative checkpoints preserved"
+    },
+    {
+      "work": "Maintain failure/ownership/exposure histories and source/control documentation",
+      "requires": "read-only or exclusive docs; no target/tolerance guess"
+    }
+  ],
+  "not_owner_questions": [
+    "existing frozen fixture dimensions, seeded measurement count/protocol, strict silhouette/support gates, exact geometry restoration, current known authored shading style",
+    "whether a failed checkpoint can be relabeled passing; it cannot",
+    "whether source facet discretization proves acceptable artistic appearance; it does not"
+  ],
+  "native_runs": 0,
+  "tests_run": 0,
+  "production_changes": 0,
+  "aggregate_accepted": false,
+  "frozen_authored_target_status_scope": "Original declaration status values are preserved; prepared/unmeasured declaration fields are not a replacement for later actual reconstruction receipts."
+}

@@ -1,0 +1,167 @@
+{
+  "scope": "One retained calibrated smooth vase: independent saved silhouette/surface/edit evidence composed with fresh native qualification; frozen clipped-frame scope retained. No twelve-family or universal acceptance claim.",
+  "base_evidence_sha256": "ba3c4040faeffa12ca9648413e4346f6b9275afcdb182b7c8c295e245a8bb4f8",
+  "geometry_hash": "7447cc402285c2a09daaa2098d4316d9808b5665fcc9f732c165bb7309af9c49",
+  "original_timeout_preserved": true,
+  "helper_timeout_seconds_unchanged": 15.0,
+  "predicates_and_candidate_pairs_unchanged": true,
+  "implementation": "Exact xyz primitives use direct integer operations; immutable face coordinate maps, triangle tuples and vertex sets are reused across pairs.",
+  "qualification": {
+    "geometry_content_hash": "7447cc402285c2a09daaa2098d4316d9808b5665fcc9f732c165bb7309af9c49",
+    "toolchain_identity": "621104fa218dee053548a9d4270ca6eddc2184a45982d1277e50309c0dc472c8",
+    "manifold_validated": true,
+    "self_intersections": 0,
+    "reported_self_intersections": 0,
+    "exact_pair_verification": {
+      "predicate_version": "exact_binary64_triangle_contacts_v1",
+      "reported_pairs": 0,
+      "verified_pairs": 0,
+      "unverified_pairs": 0,
+      "complete": true,
+      "non_disjoint_pairs": 0,
+      "counts": {},
+      "relations": {},
+      "samples": [],
+      "component_count": 1,
+      "qualification_policy": "only exactly disjoint native reports are removed; contact/degenerate/unverified reports remain blocking"
+    },
+    "within_part_boundary_guard": {
+      "status": "checked",
+      "passed": true,
+      "tested_pairs": 168362,
+      "indexed_adjacency_contacts": 156768,
+      "component_count": 1,
+      "elapsed_s": 4.01600000000326,
+      "geometry_scope": "within indexed parts only; between-part overlap permitted",
+      "predicate_version": "exact_binary64_triangle_contacts_v1",
+      "sweep_axis": 2,
+      "reason": null,
+      "limitation": "surface guard; closed topology/volume and external single-solid qualification are separate"
+    },
+    "triangle_predicate_sha256": "621d32ca63daa37b2f8cecdf2b6689b66fade5d919f5958b6e77456953f6594b",
+    "helper_source_sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25",
+    "triangle_count": 24768,
+    "backend": "Open3D 0.19.0",
+    "status": "qualified",
+    "reason": null,
+    "single_solid_qualified": true,
+    "cache_hit": false,
+    "qualification_elapsed_s": 10.072614999997313,
+    "boundary_qualified": true,
+    "certificate_scope": "actual retained coordinates and connectivity; edits invalidate receipt"
+  },
+  "previous_guard_seconds": 8.297000000005937,
+  "resource": {
+    "exit_code": 0,
+    "elapsed_seconds": 14.010109199996805,
+    "peak_tree_rss_bytes": 387641344,
+    "budget_seconds": 60,
+    "budget_rss_bytes": 8589934592,
+    "terminated_reason": null,
+    "blender_threads": 2,
+    "scope": "one retained calibrated vase native qualification; no renders, fitting or metric rerun",
+    "qualification_interpreter": "retained existing .venv312 Open3D toolchain; no installs or changes"
+  },
+  "checks": {
+    "run": 22,
+    "failures": 0,
+    "errors": 0,
+    "skips": 1,
+    "skip_reason": "existing host symlink privilege fixture"
+  },
+  "artifact_sha256": {
+    "evaluated-exact.npz": "68832ebdc89f0418d01338be07aea9cec118adfa84150ea129b69489557c1758",
+    "evaluated.obj": "032d1dcc0e180d5ee7f73bacc59e5cf41dd6116dd01768a51f3e2d6e83ff6f88",
+    "front-mask.png": "a0917bb00818355fdc9117ef631b308dfab58cc2fb0ed07a01878421c80c19ee",
+    "front-neutral.png": "54b4639da8f090463f48e6a3fe0975bfb8bc08b3306a36703f44dd428c7ae880",
+    "front-normals.png": "353d27f2a987d84828e53a11cb700d4e75033bcad179771dd88d21a612aed306",
+    "oblique_145_40-mask.png": "860b53c0ec88955576c1c14de32a25ac7871df668ba74e03f81fc2caef887aea",
+    "oblique_145_40-neutral.png": "2c9c59ae09290e3318a881e03e68b6ee6fcff6da94a4cb27532e7e42a04f6f25",
+    "oblique_145_40-normals.png": "95b4da2e978d9f408f2cd675660e7200413261593655d77b5df33607a0eb4009",
+    "oblique_35_28-mask.png": "e9dc28246d706bc111e2344be15708970c5137de74428e159c9297c087be1bbf",
+    "oblique_35_28-neutral.png": "fe0f87867d0043d58e1e0c1213756b79ee042da2f41f36ffab46e7fadb2c53d2",
+    "oblique_35_28-normals.png": "23d8faea3cc60b28a98babcda57d3a0e9929bb23d39ce87cfeea3a6191ea49e8",
+    "side-mask.png": "cbec0d2d96c808af7427ec44b0a603f1dd5156d7c5c0ef381385186a3596ba5d",
+    "side-neutral.png": "008456252e41c39c00f44fae2fc019326df8fa79d2a52ef40888d388af7452ea",
+    "side-normals.png": "ea972b0dcc0b70421404f5b46d7a50a4232c21360593ddc85cef964072f4c874",
+    "top-mask.png": "9c60232420e6b61c863bb7f1cd1d84e8027440b022c10d2b0e4477db3b3fd57e",
+    "top-neutral.png": "6c5e164670587aead315a251195a4182a4402c5630f69dc68e92e0980d47b1bc",
+    "top-normals.png": "9678501a04fa5d197160a2c6ebb8e703c423e439411626a52ebc0f0f02fa0015"
+  },
+  "reference_sha256": {
+    "evaluated-exact.npz": "dddf93ec6e793d6a4ed4f3596d7c6fd767800708f194f225f40afbcf703f05ca",
+    "front-mask.png": "2a6b01070b49263e76715083e706b8cf9d5a3d6e0b0fcc562e26daacbcf17e92",
+    "oblique_145_40-mask.png": "a74c5cfbea095653b61aca4f15e07b6f90e88bdb7713b1d00f069beb66ec350d",
+    "oblique_35_28-mask.png": "1c2c3e3e508d8b2e6243a2bac4f2190419a9bbc6bf1a0a384d019142488ff54c",
+    "side-mask.png": "a276756778bedbb37181c62b671b6df02ef29c6f709f1bc17ebd7c190387f5e7",
+    "top-mask.png": "f83cefab3e08acef2f4ce1ac05b41035e1e3bb731143906505e636ce6c9ca65e"
+  },
+  "reused_surface": {
+    "candidate_geometry_hash": "7447cc402285c2a09daaa2098d4316d9808b5665fcc9f732c165bb7309af9c49",
+    "distance_p95_world": 0.000675692205550149,
+    "editability_verdict": "independent",
+    "frozen_limits": {
+      "normal_angle_p95_degrees_max": 2.5,
+      "symmetric_mean_distance_world_max": 0.003
+    },
+    "normal_angle_mean_degrees": 0.710640461631222,
+    "normal_angle_p95_degrees": 1.1023958517158643,
+    "normal_interpretation": "geometric face normals, not shading normals",
+    "normal_orientation": "oriented; opposite normals are 180 degrees",
+    "protocol": "shared_world_area_sample_to_triangle_v1",
+    "reference_geometry_hash": "e61731bc458f5c6bf52a311b10a879ae5a4bd914dd2f7954f0f99a86275273c9",
+    "sample_count_per_direction": 4096,
+    "sampled_max_distance_world": 0.001026036567054689,
+    "seed": 61007,
+    "silhouette_verdict": "independent",
+    "surface_passed": true,
+    "symmetric_mean_distance_world": 0.00037735653809598327,
+    "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+    "units": "unchanged Blender world coordinates; no fitting or normalization"
+  },
+  "reused_silhouette": {
+    "front": {
+      "area_iou": 0.9995294064919494,
+      "boundary_iou": 0.9909774436090225,
+      "signed_distance_loss": 6.50265175394793e-05,
+      "passed": true
+    },
+    "oblique_145_40": {
+      "area_iou": 0.9991799578000755,
+      "boundary_iou": 0.9795431299011251,
+      "signed_distance_loss": 0.0001318823702076699,
+      "passed": true
+    },
+    "oblique_35_28": {
+      "area_iou": 0.9993843743004254,
+      "boundary_iou": 0.9844140392623438,
+      "signed_distance_loss": 9.988992376097627e-05,
+      "passed": true
+    },
+    "side": {
+      "area_iou": 0.9995294064919494,
+      "boundary_iou": 0.9909774436090225,
+      "signed_distance_loss": 6.50265175394793e-05,
+      "passed": true
+    },
+    "top": {
+      "area_iou": 0.999826473242174,
+      "boundary_iou": 0.9961759082217974,
+      "signed_distance_loss": 1.946374204209178e-05,
+      "passed": true
+    }
+  },
+  "reused_editability": {
+    "exact_restoration": true,
+    "passed": true,
+    "same_object": true,
+    "same_transform": true,
+    "scope": "actual fitted loft source-section radius edit and exact regeneration",
+    "semantic_x_radius_changed": true
+  },
+  "accepted": true,
+  "native_renders": 0,
+  "metrics_rerun": false,
+  "reconstruction_rerun": false,
+  "qualification_path": "temp/tasks/boundary-allowance-20261008/qualification.json"
+}

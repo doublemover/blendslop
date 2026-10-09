@@ -405,6 +405,7 @@ def run_primitive_fit_pipeline(request: object) -> object:
                 config.get("share_budget_across_families", True)
             ),
             target=target if config.get("whole_support_search", False) else None,
+            context=getattr(request, "context", None),
         )
     except Exception as exc:
         return CandidateResult(
@@ -506,11 +507,11 @@ def _fit_best_primitive_family(
     max_attempts: int,
     share_budget_across_families: bool,
     target=None,
+    context=None,
+    process_budget=None,
 ) -> tuple[ResFitPipelineResult, str, ResFitPipelineConfig, Sequence[object] | None, str]:
-    from blender_blocking.reconstruction.process_executor import current_worker_client, PersistentProcessExecutor
-    from contextlib import nullcontext
-    worker = current_worker_client()
-    manager = nullcontext(worker) if worker is not None else PersistentProcessExecutor(2)
+    from blender_blocking.reconstruction.process_executor import executor_scope
+    manager = executor_scope(2, context=context, process_budget=process_budget)
     with manager as fit_executor:
         family_count = max(1, len(primitive_families))
         summaries: list[Mapping[str, Any]] = []

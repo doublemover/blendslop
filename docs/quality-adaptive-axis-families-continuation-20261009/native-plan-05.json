@@ -1,0 +1,625 @@
+{
+  "protocol": "bounded_adaptive_family_checkpoint_v1",
+  "cases": [
+    {
+      "family": "anisotropic_ellipsoid",
+      "baseline_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid",
+      "baseline_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\results.json",
+      "baseline_geometry_hash": "b40ab45f1aa7e00f353fba58b6a500a485cd1ddba73d9e3be2dd74ba5c857699",
+      "program_sha256": "895ff3f4cbe66f6c84a7855619804d006da8008f810e090c01451478ba6e866f",
+      "baseline_raw_surface": {
+        "candidate_geometry_hash": "b40ab45f1aa7e00f353fba58b6a500a485cd1ddba73d9e3be2dd74ba5c857699",
+        "distance_p95_world": 0.0007810156006598845,
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "normal_angle_mean_degrees": 2.104519510861647,
+        "normal_angle_p95_degrees": 3.927391055140527,
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "qualified_limits": null,
+        "reference_geometry_hash": "a0c0d42370a07c99b4386a641be8fab99a43db5bdc11ea8d0741ccf1c71a144e",
+        "sample_count_per_direction": 4096,
+        "sampled_max_distance_world": 0.0014217239804565907,
+        "seed": 61007,
+        "silhouette_verdict": "independent",
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+        "surface_status": "unqualified",
+        "symmetric_mean_distance_world": 0.0003251195182191434,
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "units": "unchanged Blender world coordinates; no fitting or normalization"
+      },
+      "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\anisotropic_ellipsoid\\evaluated-exact.npz",
+      "source_geometry_hash": "a0c0d42370a07c99b4386a641be8fab99a43db5bdc11ea8d0741ccf1c71a144e",
+      "source_case": {
+        "name": "anisotropic_ellipsoid",
+        "parameters": {
+          "primitive": "ellipsoid",
+          "radii": [
+            0.9,
+            0.55,
+            0.7
+          ]
+        },
+        "status": "unmeasured"
+      },
+      "cameras": {
+        "front": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.960464477539063e-08
+            ],
+            [
+              0.0,
+              -4.371138828673793e-08,
+              -1.0,
+              -2.1999998092651367
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0879995822906494,
+          "png_sha256": "8a0aa20308e58eb9f7245ce079df342b1ec13e7d4603990c832b2a04d44c23d0"
+        },
+        "oblique_145_40": {
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265407562255859,
+              -0.6275068521499634,
+              -3.9307022094726562
+            ],
+            [
+              -0.8191519975662231,
+              -0.3686879277229309,
+              0.43938499689102173,
+              2.752307415008545
+            ],
+            [
+              -7.623321351957202e-08,
+              0.7660443782806396,
+              0.6427876353263855,
+              4.026421070098877
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0879995822906494,
+          "png_sha256": "7d411cade848829393927bf340ab2c8f9dffd996110d4f62318612e76a6e0fa7"
+        },
+        "oblique_35_28": {
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.3845682740211487,
+              0.7232683300971985,
+              4.530551910400391
+            ],
+            [
+              0.8191518783569336,
+              -0.26927781105041504,
+              0.5064381957054138,
+              3.1723265647888184
+            ],
+            [
+              6.467210766913922e-08,
+              0.8829477429389954,
+              0.469471275806427,
+              2.9407691955566406
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0879995822906494,
+          "png_sha256": "02959d160da1f0fea2d510bd160532b542b4c8e218c79e5a2c1d854ca78eb7b5"
+        },
+        "side": {
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.599999189376831
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              5.960464477539063e-08
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0879995822906494,
+          "png_sha256": "356933b83399d0cec3c73a6fbb31271c8d3aa58ca698113e41178f5d9b937bea"
+        },
+        "top": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              5.960464477539063e-08
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              5.960464477539063e-08
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              2.799999952316284
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0879995822906494,
+          "png_sha256": "b795856a8fa285493c0aa1f0a2e543604d40d244d88e2bb398229fd7d3fe5928"
+        }
+      },
+      "fit_view": "oblique_35_28",
+      "parameter_bounds": {
+        "width_world": [
+          1.6193440086265263,
+          1.9791982327657545
+        ],
+        "depth_world": [
+          0.9894869290486575,
+          1.2093729132816926
+        ],
+        "height_world": [
+          1.2594592926434216,
+          1.5393391354530708
+        ]
+      },
+      "semantic_control": "depth_world",
+      "semantic_multiplier": 1.05,
+      "prior_view_exposure": {
+        "oblique_145_40": "all old display-derived canonical supports, including this ob145, entered original baseline fit; old masks/metrics/neutral pixels inspected for earlier admission. Newly acquired controlled ob145 remains excluded current update fitting, crop selection and candidate-only view choice."
+      },
+      "remaining_required_views": [
+        "front",
+        "side",
+        "top",
+        "oblique_35_28"
+      ],
+      "fixed_parameter_scope": "saved pose/style/tessellation and unselected fields; sphere retains axis ratios; cylinder retains equal cap radii and coupled diameters",
+      "candidate_only_view_diagnostic": {
+        "protocol": "candidate_only_axis_view_sensitivity_v1",
+        "family": "anisotropic_ellipsoid",
+        "control_names": [
+          "width_world",
+          "depth_world",
+          "height_world"
+        ],
+        "local_rank": 3,
+        "singular_values": [
+          0.0386163856134333,
+          0.02212755842690217,
+          0.015363578613723925
+        ],
+        "condition_number": 2.513502002647885,
+        "normalized_interval_pixel_sensitivity": {
+          "width_world": 25.145633362994307,
+          "depth_world": 17.791509513830153,
+          "height_world": 26.23743548834385
+        },
+        "observations": {
+          "oblique_35_28": {
+            "candidate_frame_censored": false,
+            "internal_candidate_samples": 192,
+            "frame_border_closure_added": false,
+            "source_complete_contour_claim": false
+          }
+        },
+        "source_observations": 0,
+        "heldout_fit_or_view_choice_used": false,
+        "global_uniqueness_established": false,
+        "source_identifiability": "unqualified until genuine observations",
+        "artist_surface_limits": null,
+        "native_candidate_acceptance": "not supplied"
+      },
+      "owned_baseline_files_verified": {
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\program.json": "895ff3f4cbe66f6c84a7855619804d006da8008f810e090c01451478ba6e866f",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\evaluated-exact.npz": "8afdb54c60c385c8bee1bf9c7542780134b83f24f5e8c1a6380b075a2c642e28",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\evaluated.obj": "cb295f4310b58790565b2ba65dae902e90ecf0892ea614587cb73e1af3dc317a",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\camera-snapshots.json": "42ed298674f419776385ed96dd9250509a39efbe5e0bc4b1ecefc13af0644561"
+      }
+    },
+    {
+      "family": "thin_plate",
+      "baseline_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate",
+      "baseline_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\results.json",
+      "baseline_geometry_hash": "ab4d231f32cf620a2b2e09019025b5fa1a65cad17b4ac9d2a5841e2fdf42a785",
+      "program_sha256": "b79f20a1c78af57691392c8b13f3b8d8058f85cbf72d3c77bb0dae2c1a6af4e6",
+      "baseline_raw_surface": {
+        "candidate_geometry_hash": "ab4d231f32cf620a2b2e09019025b5fa1a65cad17b4ac9d2a5841e2fdf42a785",
+        "distance_p95_world": 0.0008195692003937438,
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "normal_angle_mean_degrees": 0.047351248077104835,
+        "normal_angle_p95_degrees": 0.017960692093136842,
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "qualified_limits": null,
+        "reference_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+        "sample_count_per_direction": 4096,
+        "sampled_max_distance_world": 0.0010483970399945974,
+        "seed": 61007,
+        "silhouette_verdict": "independent",
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+        "surface_status": "unqualified",
+        "symmetric_mean_distance_world": 0.0006644591669413558,
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "units": "unchanged Blender world coordinates; no fitting or normalization"
+      },
+      "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\thin_plate\\evaluated-exact.npz",
+      "source_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+      "source_case": {
+        "name": "thin_plate",
+        "parameters": {
+          "primitive": "box",
+          "dimensions": {
+            "width": 1.6,
+            "depth": 0.08,
+            "height": 1.2
+          }
+        },
+        "status": "unmeasured"
+      },
+      "cameras": {
+        "front": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -4.371138828673793e-08,
+              -1.0,
+              -0.1599999964237213
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "png_sha256": "db6d12a64324a07abe87af639483a4563fd258f9cafbc7e5ed3477d40503dae5"
+        },
+        "oblique_145_40": {
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              0.5265406370162964,
+              -0.6275067925453186,
+              -3.493957996368408
+            ],
+            [
+              -0.8191518783569336,
+              -0.3686878979206085,
+              0.4393852949142456,
+              2.44649600982666
+            ],
+            [
+              4.4900009044113176e-08,
+              0.7660444974899292,
+              0.642787516117096,
+              3.5790417194366455
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "png_sha256": "8366fcd7abb5ef72b0b3c7b9f38cf0ec77ee8cea3b289fb919c41b5e10d0dfe8"
+        },
+        "oblique_35_28": {
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              -0.38456857204437256,
+              0.7232683300971985,
+              4.027158260345459
+            ],
+            [
+              0.8191519975662231,
+              -0.2692779302597046,
+              0.5064378976821899,
+              2.8198466300964355
+            ],
+            [
+              6.979900746273415e-08,
+              0.882947564125061,
+              0.46947160363197327,
+              2.6140177249908447
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "png_sha256": "6e33f4e78408d102b60eb2ca85007ac90fd63692a8a3723f7e8a30b1bb099013"
+        },
+        "side": {
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.200000047683716
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "png_sha256": "9de7668f7fa857d745c8136b1cca13abba60abde99103eeaaf6e8ca1080bc7b2"
+        },
+        "top": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              2.4000000953674316
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 1.8560000658035278,
+          "png_sha256": "6dc8d13d1850c6e960f28e52bd22f5cfef31a1c44c5a321817f1a23a3723ff19"
+        }
+      },
+      "fit_view": "oblique_35_28",
+      "parameter_bounds": {
+        "width_world": [
+          1.4391379501528552,
+          1.7589463835201564
+        ],
+        "depth_world": [
+          0.0708075607090211,
+          0.08654257419991468
+        ],
+        "height_world": [
+          1.0785062298029595,
+          1.3181742808702839
+        ]
+      },
+      "semantic_control": "depth_world",
+      "semantic_multiplier": 1.05,
+      "prior_view_exposure": {
+        "oblique_145_40": "all old display-derived canonical supports, including this ob145, entered original baseline fit; old masks/metrics/neutral pixels inspected for earlier admission. Newly acquired controlled ob145 remains excluded current update fitting, crop selection and candidate-only view choice."
+      },
+      "remaining_required_views": [
+        "front",
+        "side",
+        "top",
+        "oblique_35_28"
+      ],
+      "fixed_parameter_scope": "saved pose/style/tessellation and unselected fields; sphere retains axis ratios; cylinder retains equal cap radii and coupled diameters",
+      "candidate_only_view_diagnostic": {
+        "protocol": "candidate_only_axis_view_sensitivity_v1",
+        "family": "thin_plate",
+        "control_names": [
+          "width_world",
+          "depth_world",
+          "height_world"
+        ],
+        "local_rank": 3,
+        "singular_values": [
+          0.03579912460699773,
+          0.033715577245297744,
+          0.0009528477475853445
+        ],
+        "condition_number": 37.57066614022854,
+        "normalized_interval_pixel_sensitivity": {
+          "width_world": 25.305640555620176,
+          "depth_world": 1.7776949401892042,
+          "height_world": 27.727330383394126
+        },
+        "observations": {
+          "oblique_35_28": {
+            "candidate_frame_censored": false,
+            "internal_candidate_samples": 192,
+            "frame_border_closure_added": false,
+            "source_complete_contour_claim": false
+          }
+        },
+        "source_observations": 0,
+        "heldout_fit_or_view_choice_used": false,
+        "global_uniqueness_established": false,
+        "source_identifiability": "unqualified until genuine observations",
+        "artist_surface_limits": null,
+        "native_candidate_acceptance": "not supplied"
+      },
+      "owned_baseline_files_verified": {
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\program.json": "b79f20a1c78af57691392c8b13f3b8d8058f85cbf72d3c77bb0dae2c1a6af4e6",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\evaluated-exact.npz": "4c048d5b4a742dd74f1215cd4f198afe1cac696eb78765092664db79588291c1",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\evaluated.obj": "7c9a9bec80dfb75f743330a99566d59d5d795b9b4b1389a7e87e78ee4dba6b7e",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\camera-snapshots.json": "4cdc9e8089f5c738611ae098f1a51802015e1e59b1a1ea3b1fe1776bb65a50fa"
+      }
+    }
+  ],
+  "heldout_views": [
+    "oblique_145_40"
+  ],
+  "segments": 96,
+  "fit_budget": {
+    "residual_calls": 96,
+    "seconds": 1.0
+  },
+  "global_resolution": [
+    512,
+    512
+  ],
+  "crop_resolution": [
+    1024,
+    1024
+  ],
+  "crop_pixel_span": 160,
+  "samples": 64,
+  "filter_size": 1.5,
+  "rendered_frames": 12,
+  "source_frames": 6,
+  "candidate_frames": 6,
+  "new_raw_pairs": 2,
+  "baseline_raw_observations_reused": 2,
+  "raw_samples_per_direction": 4096,
+  "raw_seed": 61007,
+  "semantic_transactions": 2,
+  "qualification_children": 0,
+  "deadline_seconds": 90,
+  "threads": 2,
+  "memory_limit_bytes": 8589934592,
+  "parameter_interval_policy": "prior retained physical control x[.9,1.1], frozen before new acquisition; no authored source dimensions consumed by fitter/ROI selection",
+  "checkpoint_admission": "strict held-out gate passes; held-out alpha L1 strictly lower, boundary IoU and raw mean surface no worse; local rank complete/no active bound and exact semantic restoration; diagnostic checkpoint only",
+  "gates": {
+    "minimum_area_iou": 0.7,
+    "minimum_boundary_iou": 0.8,
+    "maximum_signed_distance_loss": 0.05
+  },
+  "artist_surface_limits": null,
+  "full_required_five_view_admission": "unrun for changed candidates",
+  "current_twelve_row_selection": "preserved; this bounded checkpoint cannot replace it",
+  "input_sha256": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_family_detail.py": "86fd8abb6ee544049cdc1d213f37daac64a6ad206c62358ad24d9973b81d92a6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\adaptive_family.py": "e35ae62dc46babde6c6b28971719a27daca1b780e5a0a7edda2ede1d927e2d96",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\capsule.py": "a30ae9883fbfc31d261570f15e7d4fe31ad40d78cd4ee757e7f4e9832bf42c9c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\adaptive_measurement.py": "a19e2f788b403a1dbec6f74caaeecc47d6b6bba5100555bdbc7c0f1d0ceb8278",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\comparable_geometry.py": "4226354476aea7a7785ea31e2860fba0084e2f0a5175e6a866e63deaba2ecb01",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_references.py": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\blender_builders.py": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_surface_quality_check.py": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_quality_coverage_check.py": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_family_source_edit_check.py": "91440893c490e8915be6ed8789262585c88ddfde90b1536ab8c95409619d33c1",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_structured_family_source_edits.py": "550d0efcd86d5eaf5460029b562a4a674d6c281f0e3478cdccfd9dc31ef4b39c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\adaptive_axis_family.py": "8bf619b932d6e5a0ec8d8e6650e8579a923faede359a435675d0d337f0872e67",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_adaptive_axis_family.py": "14e941fee73d34837e33690c2fab5236bfdfd5136eaad58e6efae3235cc61f4e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\results.json": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\program.json": "895ff3f4cbe66f6c84a7855619804d006da8008f810e090c01451478ba6e866f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\evaluated-exact.npz": "8afdb54c60c385c8bee1bf9c7542780134b83f24f5e8c1a6380b075a2c642e28",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\evaluated.obj": "cb295f4310b58790565b2ba65dae902e90ecf0892ea614587cb73e1af3dc317a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\camera-snapshots.json": "42ed298674f419776385ed96dd9250509a39efbe5e0bc4b1ecefc13af0644561",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\results.json": "0b7476b49c9179b6d46f8997ba9036c863f735550bda8e857c0221d4e9a8c82d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\run-ownership.json": "319accb9b70ce33142d42c18c1f0c7cbee3e62702ecdc0a5529130a1667c8b5d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\run-lease.json": "484fb5ce2c35bbdf641db13a7f7c473235318d0b8469a0eb73555caf935a8d00",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\anisotropic_ellipsoid\\evaluated-exact.npz": "de603d2ae95c99483ead1eafedecb98cd96f545b938055a2320a1ca40a447dea",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\anisotropic_ellipsoid\\evaluated.obj": "d3e1c4bce3dc34ff264850c6d6a170e77b8ad0680c37b4b28ed29c74a745954f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\anisotropic_ellipsoid\\front-mask.png": "8a0aa20308e58eb9f7245ce079df342b1ec13e7d4603990c832b2a04d44c23d0",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\anisotropic_ellipsoid\\oblique_145_40-mask.png": "7d411cade848829393927bf340ab2c8f9dffd996110d4f62318612e76a6e0fa7",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\anisotropic_ellipsoid\\oblique_35_28-mask.png": "02959d160da1f0fea2d510bd160532b542b4c8e218c79e5a2c1d854ca78eb7b5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\anisotropic_ellipsoid\\side-mask.png": "356933b83399d0cec3c73a6fbb31271c8d3aa58ca698113e41178f5d9b937bea",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\anisotropic_ellipsoid\\top-mask.png": "b795856a8fa285493c0aa1f0a2e543604d40d244d88e2bb398229fd7d3fe5928",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\program.json": "b79f20a1c78af57691392c8b13f3b8d8058f85cbf72d3c77bb0dae2c1a6af4e6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\evaluated-exact.npz": "4c048d5b4a742dd74f1215cd4f198afe1cac696eb78765092664db79588291c1",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\evaluated.obj": "7c9a9bec80dfb75f743330a99566d59d5d795b9b4b1389a7e87e78ee4dba6b7e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\camera-snapshots.json": "4cdc9e8089f5c738611ae098f1a51802015e1e59b1a1ea3b1fe1776bb65a50fa",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\thin_plate\\evaluated-exact.npz": "c17935dd161fb810e56b9ea65339f37ec921924fe4997145edb850462082330e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\thin_plate\\evaluated.obj": "9dcebc81006a2134b3a6a955f6e3b4089a235b31fb8e776f5c13c786419ed8b2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\thin_plate\\front-mask.png": "db6d12a64324a07abe87af639483a4563fd258f9cafbc7e5ed3477d40503dae5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\thin_plate\\oblique_145_40-mask.png": "8366fcd7abb5ef72b0b3c7b9f38cf0ec77ee8cea3b289fb919c41b5e10d0dfe8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\thin_plate\\oblique_35_28-mask.png": "6e33f4e78408d102b60eb2ca85007ac90fd63692a8a3723f7e8a30b1bb099013",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\thin_plate\\side-mask.png": "9de7668f7fa857d745c8136b1cca13abba60abde99103eeaaf6e8ca1080bc7b2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\thin_plate\\top-mask.png": "6dc8d13d1850c6e960f28e52bd22f5cfef31a1c44c5a321817f1a23a3723ff19"
+  },
+  "scope": "prepared bounded axis-family adaptive checkpoint; not executed; current12 rows preserved",
+  "case_order": [
+    "anisotropic_ellipsoid",
+    "thin_plate"
+  ],
+  "legacy_camera_scope": "original matrix_world/ortho_scale/PNG bindings frozen unchanged; old clips/shifts absent, historical clipping match unavailable; new controlled actual camera settings captured separately",
+  "proposal_approval": "pending root review and serial native release; no native launched by helper"
+}

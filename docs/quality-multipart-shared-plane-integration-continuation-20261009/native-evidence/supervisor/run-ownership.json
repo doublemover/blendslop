@@ -1,0 +1,69 @@
+{
+  "artifacts": [
+    {
+      "bytes": 2358,
+      "category": "diagnostic",
+      "path": "command.json",
+      "sha256": "411f502155304aad852bb682af6711844240a721b683b27205103021cdac5a89"
+    },
+    {
+      "bytes": 8470,
+      "category": "diagnostic",
+      "path": "provenance.json",
+      "sha256": "fd414a5b6c94455e7fc2f58fa52627f22df6425f40d34d9388d55d198b147315"
+    },
+    {
+      "bytes": 2560,
+      "category": "diagnostic",
+      "path": "resource-receipt.json",
+      "sha256": "9899308c07637c06c5821e4aa76021a46ed66269520d14c91e5fa831dec95155"
+    },
+    {
+      "bytes": 64,
+      "category": "diagnostic",
+      "path": "stdout.log",
+      "sha256": "1d6c49ba2bfb782409a31bc131c6505a67a533129b5bd039c9ecdb7d27f2c134"
+    },
+    {
+      "bytes": 341,
+      "category": "diagnostic",
+      "path": "run-result.json",
+      "sha256": "43d74f6a74752fc7237da804577ce2bfe66d9c1837b8f91550a3c89eee03af1b"
+    }
+  ],
+  "auxiliary_errors": [],
+  "error": null,
+  "max_generated_bytes": 8388608,
+  "owner_token": "e611606c0dd94e4d81bb9a6d3de6136a",
+  "pid": 9880,
+  "producer": "bounded_owned_command",
+  "reclamation": "unimplemented; all files retained",
+  "run_id": "699a58788dc94733ace23e5a96d26da4",
+  "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl",
+  "schema_version": 1,
+  "shared_inputs": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology.py": "3e97bc30c728c171cce2dcacc9ed249effcf374b4757e34a3dda9c502cfcfe9e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology_receipt.py": "a72f08ac2ea97dbeaa25ff059727dc9c87664f7274a1c57b4854f173ae403655",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program.py": "3226433f881a72446baca12a01181f9d2015e232a4f48cd2fbee726ea647b741",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py": "385d2cd95b67259821faed893073a494013d37e659aaf18c5e22b5546bd75b35",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_family.py": "6e8c609855fd757496b886465e229eac8026ee02b644191f80dd7aeeba9d7de5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py": "38a3bd79c8f54e27006a884d1589e0de900a1e9fdf2c8d6003a5a419aebcee14",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\oriented_support.py": "806234e3e5d5adf6774ba471613f8381fb59652e34fc1175ed5f3e2044916d4c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_targets.py": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\projection_contract.py": "c462f8ba7ac156aae37c7a48734405c6536ca5d89282a4823f314493c688428c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\types.py": "af95365b79715c94ff728f39084ebdcffd5c2eb0b221fcbfa1e8a0e3e51f0595",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_multipart_planar_join.py": "5ec73b3c97eb53395d65cc0ff422afc8f0463935f105e76c956044aa78ac8ad5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py": "78a483d2d2e8ed10592dffb889aff72106ec350acc170fec81f0571524562456",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_shape_program_shared_plane.py": "3f3b666025733059fc46f2d803d929a25075fce7ad0170921aafe8dbf0eb6bb7",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-evidence\\candidate-evaluated-exact.npz": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-evidence\\candidate-program.json": "980ab9dcc1f982eac5a15dcb5a3163471d159cbbea7818cc482185c3a12461ee",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-shared-plane-integration-continuation-20261009\\native-plan.json": "6a45591fa13d9f9774542b92174a2eeafcb19795b31d2ded7ad80a54de37c1b3",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_shared_plane_integration_check.py": "a3dc5a15b49be587b2788052faa5fee2831c83f114928761c476211ff7b90430"
+  },
+  "state": "succeeded"
+}

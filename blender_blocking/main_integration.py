@@ -1290,6 +1290,7 @@ class BlockingWorkflow:
             cost_recorder=cost_recorder,
             native_resident=self.config.ensemble.native_resident,
             projection_diagnostics=self.config.ensemble.projection_diagnostics,
+            worker_process_budget=self.config.ensemble.make_worker_process_budget(),
         )
 
         from blender_blocking.reconstruction.native_geometry import GeometryCache

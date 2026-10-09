@@ -1,0 +1,642 @@
+{
+  "aggregate_accepted": false,
+  "box_selection": {
+    "fallback": "none; guard failure is reported",
+    "family_acceptance": "unqualified",
+    "family_surface_limits": null,
+    "receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-measurement-02\\owned-w3yb18ba\\results.json",
+    "sha256": "7d5c35384dea15b7800bbd6b29fce73f795eeb362dd01b953b642c55349c1056",
+    "source": "explicit parent-selected admitted refined experiment"
+  },
+  "cases": {
+    "capsule": {
+      "camera_sha256": "8b179714e8409baaf6b1fd02fae5195fe1b00b64a03095f0de06c0e533faaa0c",
+      "geometry_hash": "bfd4411d02558b91d3ad137e2d6f156446b7a087247483eebc4c61653a36566a",
+      "geometry_unchanged": true,
+      "image": "capsule-beauty.png",
+      "image_sha256": "665fdaba7a87d043cffa21e327e7b2b787050c6d7ccac7831bf18e1e10934a07",
+      "metric_admission": "none; separate cosmetic presentation",
+      "render_settings": {
+        "color_mode": "RGB",
+        "engine": "BLENDER_EEVEE",
+        "exposure": 0.0,
+        "gamma": 1.0,
+        "look": "None",
+        "samples": 64,
+        "view_transform": "AgX"
+      },
+      "status": "display_preview_retained"
+    },
+    "rounded_box": {
+      "camera_sha256": "6398b6a034582dd0af775da73b39640eca60891449c12f1ca4a3b7e256a0fe3e",
+      "geometry_hash": "f5dd0942272c6060247e530d9faf71f3ca311b496c0e10361677b5cfa2ca9f50",
+      "geometry_unchanged": true,
+      "image": "rounded_box-beauty.png",
+      "image_sha256": "19602c67ba0ee8c7efaaa8512412c515f359bffa18c832244321d8e597e0fd87",
+      "metric_admission": "none; separate cosmetic presentation",
+      "render_settings": {
+        "color_mode": "RGB",
+        "engine": "BLENDER_EEVEE",
+        "exposure": 0.0,
+        "gamma": 1.0,
+        "look": "None",
+        "samples": 64,
+        "view_transform": "AgX"
+      },
+      "status": "display_preview_retained"
+    },
+    "rounded_triangle_dot": {
+      "camera_sha256": "80fafa8cb699fa14eff62beefb768d75dfcd73073dc9b44cdb88e3908abf6802",
+      "geometry_hash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+      "geometry_unchanged": true,
+      "image": "rounded_triangle_dot-beauty.png",
+      "image_sha256": "19e78226e1b7c16a85c3decceb57ee52cd05c84b77f2ffb877afc43d7a0d1989",
+      "metric_admission": "none; separate cosmetic presentation",
+      "render_settings": {
+        "color_mode": "RGB",
+        "engine": "BLENDER_EEVEE",
+        "exposure": 0.0,
+        "gamma": 1.0,
+        "look": "None",
+        "samples": 64,
+        "view_transform": "AgX"
+      },
+      "status": "display_preview_retained"
+    }
+  },
+  "fits": 0,
+  "measurements": 0,
+  "native_process": {
+    "elapsed_seconds": 7.9038533,
+    "exit_code": 0,
+    "expected_beauty_frames": 3,
+    "fits": 0,
+    "joined": true,
+    "mask_frames": 0,
+    "measurements": 0,
+    "normal_frames": 0,
+    "peak_working_set_bytes": 636239872,
+    "qualification_children": 0,
+    "resolution": [
+      1536,
+      1536
+    ],
+    "samples": 64,
+    "stopped_by_bound": false,
+    "threads": 2
+  },
+  "ownership_audit": {
+    "blockers": [],
+    "eligible": [],
+    "eligible_bytes": 0,
+    "mode": "read_only",
+    "mutation_supported": false,
+    "protocol": "run-ownership-dry-run-v1",
+    "retained_bytes": 6970061,
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-presentation-01\\owned-270lnlyn",
+    "status": "dry_run_ready",
+    "unknown_files": []
+  },
+  "protocol": "retained_families_cosmetic_presentation_v1",
+  "qualification_children": 0,
+  "raw_comparisons": 0,
+  "receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-presentation-01\\owned-270lnlyn\\results.json",
+  "receipt_sha256": "8fbd28021c7315dec431b83188e9a84b88c94e88e69029a794e13ac76fc3d463",
+  "status": "display_previews_retained",
+  "final_box_continuation": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-presentation-02\\owned-omgstiyg\\results.json",
+    "sha256": "14ad0c9db650144a88dd4d884d0b48fe0a61652f00a9caad11fbf6ec9f648d97",
+    "receipt": {
+      "aggregate_accepted": false,
+      "cases": {
+        "rounded_box": {
+          "artifact_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-presentation-02\\owned-omgstiyg\\rounded_box",
+          "beauty": {
+            "binding": "verified_by_producer",
+            "camera_sha256": "2487434282a891e0e08eecb6047da2baa635e37dfccae319165f729acea8aaed",
+            "geometry_hash": "9f6c8d4db73fdccedf0ac346682c33b626830259989f0f0069f60306938f9b9a",
+            "geometry_unchanged_after_render": true,
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-presentation-02\\owned-omgstiyg\\rounded_box\\beauty.png",
+            "resolution": [
+              1536,
+              1536
+            ],
+            "sha256": "a0088a365f866feb6d5dd12c7249c24e5344746f80936e88266a67c1a789e372"
+          },
+          "camera": {
+            "clip_end": 160.0029296875,
+            "clip_start": 0.009999999776482582,
+            "matrix_world": [
+              [
+                0.8430624604225159,
+                -0.243865966796875,
+                0.47934862971305847,
+                3.0678184032440186
+              ],
+              [
+                0.5378156900405884,
+                0.38227638602256775,
+                -0.7514113783836365,
+                -4.809036731719971
+              ],
+              [
+                6.2061040750904795e-09,
+                0.8912879228591919,
+                0.45343780517578125,
+                2.9020400047302246
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.4800455570220947,
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "resolution": [
+              1536,
+              1536
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "camera_sha256": "2487434282a891e0e08eecb6047da2baa635e37dfccae319165f729acea8aaed",
+          "geometry_hash": "9f6c8d4db73fdccedf0ac346682c33b626830259989f0f0069f60306938f9b9a",
+          "geometry_unchanged": true,
+          "metric_admission": "none; separate cosmetic presentation",
+          "npz_sha256": "5d8fdad82b8a852623f38fa33640c01f3c08e2b9c440760c53a4e354c353c4c7",
+          "obj_sha256": "ee6d19e27aa81c5d0fe75a038774302a0a87b466820b64a664d86bd7711f6a5f",
+          "presentation": {
+            "floor": {
+              "plane_z": -0.6896942853927612,
+              "roughness": 0.82,
+              "size": 320.0058698654175
+            },
+            "lights": [
+              {
+                "color": [
+                  1.0,
+                  0.8799999952316284,
+                  0.7599999904632568
+                ],
+                "energy": 3072.11279296875,
+                "matrix_world": [
+                  [
+                    0.800000011920929,
+                    0.42426398396492004,
+                    -0.42426416277885437,
+                    -4.800156593322754
+                  ],
+                  [
+                    -0.6000000238418579,
+                    0.5656853914260864,
+                    -0.5656854510307312,
+                    -6.400033473968506
+                  ],
+                  [
+                    6.368001237433418e-08,
+                    0.70710688829422,
+                    0.7071067094802856,
+                    8.000131607055664
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                ],
+                "name": "rounded_boxKey",
+                "size": 5.60010290145874,
+                "type": "AREA"
+              },
+              {
+                "color": [
+                  0.6899999976158142,
+                  0.8299999833106995,
+                  1.0
+                ],
+                "energy": 1664.06103515625,
+                "matrix_world": [
+                  [
+                    0.24253547191619873,
+                    -0.5029955506324768,
+                    0.8295613527297974,
+                    6.400048732757568
+                  ],
+                  [
+                    0.9701425433158875,
+                    0.12574885785579681,
+                    -0.20739015936851501,
+                    -1.5999454259872437
+                  ],
+                  [
+                    -6.521704420947572e-08,
+                    0.8550922274589539,
+                    0.5184758901596069,
+                    4.000057697296143
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                ],
+                "name": "rounded_boxFill",
+                "size": 6.40011739730835,
+                "type": "AREA"
+              },
+              {
+                "color": [
+                  1.0,
+                  0.9700000286102295,
+                  0.8899999856948853
+                ],
+                "energy": 4352.15966796875,
+                "matrix_world": [
+                  [
+                    -0.9701425433158875,
+                    -0.1788235604763031,
+                    0.16384634375572205,
+                    1.5999605655670166
+                  ],
+                  [
+                    0.2425355464220047,
+                    -0.7152946591377258,
+                    0.655385434627533,
+                    6.400201320648193
+                  ],
+                  [
+                    4.148384391555737e-08,
+                    0.6755558848381042,
+                    0.7373088002204895,
+                    7.200116157531738
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                ],
+                "name": "rounded_boxRim",
+                "size": 3.200058698654175,
+                "type": "AREA"
+              }
+            ],
+            "material": {
+              "bump": "none",
+              "displacement": "none",
+              "links": [
+                {
+                  "from_node": "Texture Coordinate",
+                  "from_socket": "Generated",
+                  "to_node": "Noise Texture",
+                  "to_socket": "Vector"
+                },
+                {
+                  "from_node": "Noise Texture",
+                  "from_socket": "Factor",
+                  "to_node": "Color Ramp",
+                  "to_socket": "Factor"
+                },
+                {
+                  "from_node": "Color Ramp",
+                  "from_socket": "Color",
+                  "to_node": "Principled BSDF",
+                  "to_socket": "Base Color"
+                },
+                {
+                  "from_node": "Noise Texture",
+                  "from_socket": "Factor",
+                  "to_node": "Map Range",
+                  "to_socket": "Value"
+                },
+                {
+                  "from_node": "Map Range",
+                  "from_socket": "Result",
+                  "to_node": "Principled BSDF",
+                  "to_socket": "Roughness"
+                },
+                {
+                  "from_node": "Principled BSDF",
+                  "from_socket": "BSDF",
+                  "to_node": "Material Output",
+                  "to_socket": "Surface"
+                }
+              ],
+              "name": "rounded_boxSatinCeramic",
+              "nodes": [
+                {
+                  "inputs": {
+                    "Displacement": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "Thickness": 0.0
+                  },
+                  "name": "Material Output",
+                  "type": "ShaderNodeOutputMaterial"
+                },
+                {
+                  "inputs": {
+                    "Alpha": 1.0,
+                    "Anisotropic": 0.0,
+                    "Anisotropic Rotation": 0.0,
+                    "Base Color": [
+                      0.800000011920929,
+                      0.800000011920929,
+                      0.800000011920929,
+                      1.0
+                    ],
+                    "Coat IOR": 1.5,
+                    "Coat Normal": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "Coat Roughness": 0.23000000417232513,
+                    "Coat Tint": [
+                      1.0,
+                      1.0,
+                      1.0,
+                      1.0
+                    ],
+                    "Coat Weight": 0.2199999988079071,
+                    "Diffuse Roughness": 0.0,
+                    "Emission Color": [
+                      1.0,
+                      1.0,
+                      1.0,
+                      1.0
+                    ],
+                    "Emission Strength": 0.0,
+                    "IOR": 1.5,
+                    "Metallic": 0.05000000074505806,
+                    "Normal": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "Roughness": 0.3100000023841858,
+                    "Sheen Roughness": 0.5,
+                    "Sheen Tint": [
+                      1.0,
+                      1.0,
+                      1.0,
+                      1.0
+                    ],
+                    "Sheen Weight": 0.0,
+                    "Specular IOR Level": 0.5,
+                    "Specular Tint": [
+                      1.0,
+                      1.0,
+                      1.0,
+                      1.0
+                    ],
+                    "Subsurface Anisotropy": 0.0,
+                    "Subsurface IOR": 1.399999976158142,
+                    "Subsurface Radius": [
+                      1.0,
+                      0.20000000298023224,
+                      0.10000000149011612
+                    ],
+                    "Subsurface Scale": 0.004999999888241291,
+                    "Subsurface Weight": 0.0,
+                    "Tangent": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "Thin Film IOR": 1.3300000429153442,
+                    "Thin Film Thickness": 0.0,
+                    "Thin Wall": false,
+                    "Transmission Weight": 0.0,
+                    "Weight": 0.0
+                  },
+                  "name": "Principled BSDF",
+                  "type": "ShaderNodeBsdfPrincipled"
+                },
+                {
+                  "inputs": {},
+                  "name": "Texture Coordinate",
+                  "type": "ShaderNodeTexCoord"
+                },
+                {
+                  "inputs": {
+                    "Detail": 2.0,
+                    "Distortion": 0.0,
+                    "Gain": 1.0,
+                    "Lacunarity": 2.0,
+                    "Offset": 0.0,
+                    "Roughness": 0.5,
+                    "Scale": 95.0,
+                    "Vector": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "W": 0.0
+                  },
+                  "name": "Noise Texture",
+                  "type": "ShaderNodeTexNoise"
+                },
+                {
+                  "inputs": {
+                    "Factor": 0.5
+                  },
+                  "name": "Color Ramp",
+                  "ramp": [
+                    {
+                      "color": [
+                        0.3783999979496002,
+                        0.09679999947547913,
+                        0.05719999969005585,
+                        1.0
+                      ],
+                      "position": 0.0
+                    },
+                    {
+                      "color": [
+                        0.4300000071525574,
+                        0.10999999940395355,
+                        0.06499999761581421,
+                        1.0
+                      ],
+                      "position": 1.0
+                    }
+                  ],
+                  "type": "ShaderNodeValToRGB"
+                },
+                {
+                  "inputs": {
+                    "From Max": [
+                      1.0,
+                      1.0,
+                      1.0
+                    ],
+                    "From Min": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "Steps": [
+                      4.0,
+                      4.0,
+                      4.0
+                    ],
+                    "To Max": [
+                      1.0,
+                      1.0,
+                      1.0
+                    ],
+                    "To Min": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "Value": 1.0,
+                    "Vector": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "name": "Map Range",
+                  "type": "ShaderNodeMapRange"
+                }
+              ],
+              "scope": "cosmetic generated-coordinate color/roughness only"
+            },
+            "world": {
+              "color": [
+                0.71,
+                0.74,
+                0.79,
+                1.0
+              ],
+              "strength": 0.35
+            }
+          },
+          "render_settings": {
+            "color_mode": "RGB",
+            "engine": "BLENDER_EEVEE",
+            "exposure": 0.0,
+            "gamma": 1.0,
+            "look": "None",
+            "samples": 64,
+            "view_transform": "AgX"
+          },
+          "retained_source_style": {
+            "evaluated_mesh": {
+              "flat_polygons": 486,
+              "has_custom_normals": true,
+              "polygon_style": "flat",
+              "polygons": 486,
+              "sharp_edge_attribute": "present",
+              "sharp_edge_flags_sha256": "96c5023576733f88726277165f7fa44936426956bcbcca126d7f1169216e1a4b",
+              "sharp_edges": 0,
+              "smooth_flags_sha256": "b2c5e4bd6785442e8deedce0d325629b0818a4c9e7635b3bd8c80e8c03f162fb",
+              "smooth_polygons": 0,
+              "vertices": 488
+            },
+            "modifiers": [
+              {
+                "affect": "EDGES",
+                "name": "Blendslop editable bevel",
+                "segments": 8,
+                "show_render": true,
+                "show_viewport": true,
+                "type": "BEVEL",
+                "width": 0.15037833154201508
+              },
+              {
+                "keep_sharp": false,
+                "mode": "FACE_AREA",
+                "name": "Blendslop weighted normals",
+                "show_render": true,
+                "show_viewport": true,
+                "thresh": 0.009999999776482582,
+                "type": "WEIGHTED_NORMAL",
+                "weight": 50
+              }
+            ],
+            "scope": "shading/style only; geometric-normal metrics remain separate",
+            "source_mesh": {
+              "flat_polygons": 6,
+              "has_custom_normals": false,
+              "polygon_style": "flat",
+              "polygons": 6,
+              "sharp_edge_attribute": "absent",
+              "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "sharp_edges": 0,
+              "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+              "smooth_polygons": 0,
+              "vertices": 8
+            },
+            "status": "native_observed"
+          },
+          "status": "display_preview_retained"
+        }
+      },
+      "elapsed_seconds": 2.178925399988657,
+      "protocol": "retained_families_cosmetic_presentation_v1",
+      "retained_frames": 1,
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-presentation-02\\owned-omgstiyg",
+      "status": "display_previews_retained"
+    },
+    "resource": {
+      "exit_code": 0,
+      "elapsed_seconds": 6.276178000000073,
+      "peak_tree_rss_bytes": 607358976,
+      "budget_seconds": 60,
+      "budget_rss_bytes": 8589934592,
+      "terminated_reason": null,
+      "blender_threads": 2,
+      "scope": "one1536square final box beauty render; unchanged geometry;no fit/measurement/raw/qualifier",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "--background",
+        "--factory-startup",
+        "--threads",
+        "2",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_family_presentation.py",
+        "--",
+        "--family-receipt",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\results.json",
+        "--rounded-style-receipt",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\rounded-style-02\\owned-n9i0pxq1\\results.json",
+        "--triangle-receipt",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\triangle-support-reconstruction-20261008\\output\\owned-c9cgx1f9\\results.json",
+        "--rounded-experiment",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-measurement-04\\owned-89f4s1lu\\results.json",
+        "--families",
+        "rounded_box",
+        "--output",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-presentation-02"
+      ]
+    },
+    "ownership_audit": {
+      "protocol": "run-ownership-dry-run-v1",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-presentation-02\\owned-omgstiyg",
+      "mode": "read_only",
+      "status": "dry_run_ready",
+      "mutation_supported": false,
+      "eligible": [],
+      "eligible_bytes": 0,
+      "retained_bytes": 2017469,
+      "blockers": [],
+      "unknown_files": []
+    }
+  }
+}

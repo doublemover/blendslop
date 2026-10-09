@@ -1,0 +1,72 @@
+{
+  "protocol": "retained-followup-evidence-index-v1",
+  "implementation_revision": "df922a96ab899ea7dcc552b73eb6c5255b7387f9",
+  "scope": "Read-only snapshots of already retained original evidence; not new validation",
+  "evidence": [
+    {
+      "path": "docs/quality-backend-recovery-continuation-20261009/evidence.json",
+      "sha256": "2b3936864cec8944926281411190d5625396898133406a7660ba46ec4cdac25f",
+      "bytes": 10014
+    },
+    {
+      "path": "docs/quality-family-surface-contracts-continuation-20261009/expanded-evidence.json",
+      "sha256": "3e4a9167c993d1b16bf9c2ae993c2b2cceb1024ccc6549671605292a9f4a902f",
+      "bytes": 50411
+    },
+    {
+      "path": "docs/quality-rectilinear-reference-continuation-20261009/evidence.json",
+      "sha256": "a2cfa19df2c9770930ca02f5b22c5e616bf3f8bd7031cb1649106ea35673956a",
+      "bytes": 7907
+    },
+    {
+      "path": "docs/quality-torus-reference-continuation-20261009/evidence.json",
+      "sha256": "742a77a73f37ee707872e0100b05ebee2e87490c101ceef7b3daa91b8ac3545d",
+      "bytes": 4541
+    },
+    {
+      "path": "docs/quality-process-supervisor-continuation-20261009/evidence.json",
+      "sha256": "ab61ace2792c299248c5f1d2e2c26477b963bfbc22c30df92fb929e0046f4027",
+      "bytes": 6344
+    },
+    {
+      "path": "docs/quality-adaptive-families-continuation-20261009/evidence.json",
+      "sha256": "618598253b97f2598810f4325fa538eae7c796955ed99850a7ec0df925c8637d",
+      "bytes": 36703
+    },
+    {
+      "path": "docs/quality-adaptive-families-continuation-20261009/evidence-03.json",
+      "sha256": "1c23c6fad50a6db15441299863d121bbb6be292ef957ce2ffae8df1249c942e5",
+      "bytes": 42020
+    },
+    {
+      "path": "docs/quality-adaptive-triangle-continuation-20261009/evidence.json",
+      "sha256": "6d0f75255dab39e26edd6ff81b9a4da26e32db1508e5f9c81d9013dcc34fc558",
+      "bytes": 20608
+    },
+    {
+      "path": "docs/quality-adaptive-axis-families-continuation-20261009/native-evidence.json",
+      "sha256": "04fe71a913aa2b7b3df4cf57b721b0c9f4fb8f5eb1626da428fa6d8cf8851fd6",
+      "bytes": 74753
+    },
+    {
+      "path": "docs/quality-selected-canonical-continuation-20261009/evidence.json",
+      "sha256": "3e2d2dfd9a567bb52269cabc082879e9c686b39e7acd5dacc13cf4a0e5d23dd6",
+      "bytes": 29213
+    },
+    {
+      "path": "docs/quality-owned-cache-continuation-20261009/evidence.json",
+      "sha256": "ca6420efdd3a62459935d09bbe7050222ef9078c20a4f6399828dfd2099f67fc",
+      "bytes": 3038
+    },
+    {
+      "path": "docs/quality-owned-cache-pipeline-continuation-20261009/evidence.json",
+      "sha256": "47feba67a723676c47acc837882b5c2fcb6502bb5faa8c948922f1ca50e132a7",
+      "bytes": 2701
+    },
+    {
+      "path": "docs/quality-adaptive-arch-exterior-continuation-20261009/native-evidence.json",
+      "sha256": "96dc27af114dd1fe6f21ebb1022d87dcc62ae7f6e203f4edb8ad5964ac298952",
+      "bytes": 47446
+    }
+  ]
+}

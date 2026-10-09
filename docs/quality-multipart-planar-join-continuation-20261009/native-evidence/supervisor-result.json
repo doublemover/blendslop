@@ -1,0 +1,11 @@
+{
+  "lease_release_decision": "permitted_complete_tree",
+  "lease_status_at_receipt": "active",
+  "lifecycle_complete": true,
+  "portable_primary_only": false,
+  "primary_returncode": 0,
+  "protocol": "bounded-owned-command-result-v1",
+  "run_id": "7efedef6291d48d7a1e22891248fb6cb",
+  "status": "succeeded",
+  "stdout_status": "retained"
+}

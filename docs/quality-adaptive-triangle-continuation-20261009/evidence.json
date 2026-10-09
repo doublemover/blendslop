@@ -1,0 +1,450 @@
+{
+  "protocol": "adaptive_triangle_checkpoint_evidence_v1",
+  "status": "bounded_checkpoint_improved",
+  "native_plan_sha256": "1752d37c230f2ec45ddc362c343806817908c637f2116c64f066fe7428e92640",
+  "count_labels_corrected_before_launch": true,
+  "child": {
+    "root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+    "results_sha256": "81dd1d598d16b461d312cb389c2cefca7fbb1f517f48419df7a3fb68c2e7cce7",
+    "result": {
+      "protocol": "bounded_adaptive_family_checkpoint_v1",
+      "status": "measured",
+      "cases": {
+        "rounded_triangle_dot": {
+          "status": "measured",
+          "baseline_geometry_hash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+          "refined_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+          "program": {
+            "schema_version": "1",
+            "program_id": "triangle-support",
+            "root_nodes": [
+              {
+                "node_id": "whole_rounded_triangle",
+                "operation": "add",
+                "primitive_type": "rounded_triangle",
+                "parameters": {
+                  "corner_radius_world": 0.15999492871479107,
+                  "front_fraction": 0.5054832174920212,
+                  "height_world": 0.4795511282050785,
+                  "rotation": [
+                    [
+                      -0.9999999959946931,
+                      -8.94975952512796e-05,
+                      -8.909592558977233e-07
+                    ],
+                    [
+                      -8.949598796384788e-05,
+                      0.9999986102235507,
+                      -0.00166479471223685
+                    ],
+                    [
+                      1.0399531409962387e-06,
+                      -0.001664794625831719,
+                      -0.9999986142279257
+                    ]
+                  ],
+                  "scale_xy": [
+                    0.9990873771106583,
+                    0.9989870843141089
+                  ],
+                  "x": -4.102666017005013e-05,
+                  "y": 0.0011442513795320297,
+                  "z": 0.0019401367792599173
+                },
+                "children": [],
+                "name": "whole_rounded_triangle",
+                "editable": true
+              }
+            ],
+            "constraints": [],
+            "residual_patches": [],
+            "metadata": {
+              "parts": 1,
+              "proposal": "fitted_whole_oriented_rounded_triangle",
+              "support_fit": {
+                "evidence_scope": "observed support bounds; full masks and retained geometry admission still required",
+                "family": "rounded_triangle",
+                "support_elapsed_s": 0.026690600003348663,
+                "support_evaluations": 139,
+                "support_squared_residual": 0.0,
+                "termination": "solver_completed"
+              },
+              "adaptive_detail": {
+                "protocol": "bounded_discrete_family_detail_v1",
+                "family": "rounded_triangle_dot",
+                "free_controls": [
+                  "corner_radius_world",
+                  "scale_x",
+                  "scale_y"
+                ],
+                "original_controls": {
+                  "scale_x": 0.9932650237777112,
+                  "scale_y": 0.9947676434297791,
+                  "corner_radius_world": 0.16555002099727076
+                },
+                "selected_controls": {
+                  "corner_radius_world": 0.15999492871479107,
+                  "scale_x": 0.9990873771106583,
+                  "scale_y": 0.9989870843141089
+                },
+                "frozen_intervals": [
+                  [
+                    0.14899501889754369,
+                    0.18210502309699786
+                  ],
+                  [
+                    0.8939385213999401,
+                    1.0925915261554824
+                  ],
+                  [
+                    0.8952908790868012,
+                    1.094244407772757
+                  ]
+                ],
+                "fixed_pose": true,
+                "segments": null,
+                "residual_calls": 27,
+                "elapsed_seconds": 0.34384119999594986,
+                "termination": "solver_completed",
+                "squared_residual": 1.8866958249735167e-07,
+                "observations": {
+                  "top": {
+                    "camera_sha256": "f3899f43127f4d170dbf479b61fe3d70c0b7e7f1b570745c540359f8db226bdb",
+                    "coverage_sha256": "e7b382dce491e360356f879fdab87018a71fdbe50d2ce3b91db904e2305f6db5",
+                    "all_observed_crossings": 1668,
+                    "fitted_crossings": 384,
+                    "frame_censored": false,
+                    "complete_contour_claim": true
+                  },
+                  "top_detail": {
+                    "camera_sha256": "4428546c3ed352e8035edd245b5c926c496abadd51177778bc2bbf27ea16fc70",
+                    "coverage_sha256": "6170b33e78151ac5732629da445937795d4ae6cd95f60998e0d70f741f398e8c",
+                    "all_observed_crossings": 1715,
+                    "fitted_crossings": 384,
+                    "frame_censored": true,
+                    "complete_contour_claim": false
+                  }
+                },
+                "local_sensitivity_singular_values": [
+                  0.19096880683831505,
+                  0.0658478861424357,
+                  0.007121972501071678
+                ],
+                "local_rank": 3,
+                "interval_bound_active": false,
+                "identifiability": "locally_identified",
+                "global_uniqueness_established": false,
+                "heldout_views": [
+                  "oblique_145_40"
+                ],
+                "heldout_fit_or_roi_used": false,
+                "prior_view_exposure": {
+                  "oblique_145_40": "Original display-managed silhouette inspected for earlier5view admission; original support fit used front/side/top. New controlled oblique excluded current fit/ROI; no historical blind claim."
+                },
+                "artist_surface_limits": null,
+                "full_native_silhouette_admission": "unrun",
+                "model_scope": "discrete projected boundary; actual native geometry and measurement remain independent",
+                "tessellation": {
+                  "corner_segments": 32,
+                  "dome_segments": 64,
+                  "fixed_from_recipe": true
+                },
+                "fixed_triangle_controls": [
+                  "height_world",
+                  "front_fraction",
+                  "vertices_xy",
+                  "position",
+                  "rotation",
+                  "corner_segments",
+                  "dome_segments"
+                ]
+              }
+            }
+          },
+          "baseline_heldout": {
+            "oblique_145_40": {
+              "view": "oblique_145_40",
+              "area_iou": 0.9942836678191159,
+              "boundary_iou": 0.8818740179974289,
+              "soft_iou": null,
+              "signed_distance_loss": 0.0007497725091933916,
+              "intersection": 72184,
+              "union": 72599,
+              "ref_area": 72193,
+              "render_area": 72590,
+              "required": true,
+              "passed": true,
+              "pass": true,
+              "reason": "",
+              "warnings": [],
+              "iou": 0.9942836678191159,
+              "threshold": 0.7,
+              "precision": 0.9944069431051109,
+              "recall": 0.9998753341736734,
+              "area_ratio": 1.0054991481168534,
+              "centroid_delta_px": [
+                -0.23863139363345454,
+                -0.09677978024600975
+              ],
+              "pixel_difference": 0.001583099365234375,
+              "thresholds": {
+                "min_area_iou": 0.7,
+                "min_boundary_iou": 0.8,
+                "max_signed_distance_loss": 0.05
+              },
+              "measurement_protocol": "opaque_linear_alpha_v1",
+              "coverage_l1": 0.001565778162330389,
+              "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+            }
+          },
+          "refined_heldout": {
+            "oblique_145_40": {
+              "view": "oblique_145_40",
+              "area_iou": 0.9985186825965972,
+              "boundary_iou": 0.9681709503885236,
+              "soft_iou": null,
+              "signed_distance_loss": 0.00019553938621008626,
+              "intersection": 72126,
+              "union": 72233,
+              "ref_area": 72193,
+              "render_area": 72166,
+              "required": true,
+              "passed": true,
+              "pass": true,
+              "reason": "",
+              "warnings": [],
+              "iou": 0.9985186825965972,
+              "threshold": 0.7,
+              "precision": 0.9994457223623313,
+              "recall": 0.9990719321817905,
+              "area_ratio": 0.9996260025210201,
+              "centroid_delta_px": [
+                -0.15742584992705133,
+                -0.08007739102572486
+              ],
+              "pixel_difference": 0.000408172607421875,
+              "thresholds": {
+                "min_area_iou": 0.7,
+                "min_boundary_iou": 0.8,
+                "max_signed_distance_loss": 0.05
+              },
+              "measurement_protocol": "opaque_linear_alpha_v1",
+              "coverage_l1": 0.0004130245069973171,
+              "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+            }
+          },
+          "baseline_raw_surface_reused": {
+            "candidate_geometry_hash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+            "distance_p95_world": 0.002281279978342354,
+            "editability_verdict": "independent",
+            "normal_angle_mean_degrees": 0.5603901620479966,
+            "normal_angle_p95_degrees": 2.9707811690593298,
+            "normal_interpretation": "geometric face normals, not shading normals",
+            "normal_orientation": "oriented; opposite normals are 180 degrees",
+            "protocol": "shared_world_area_sample_to_triangle_v1",
+            "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+            "sample_count_per_direction": 4096,
+            "sampled_max_distance_world": 0.0028801681473851204,
+            "seed": 61007,
+            "silhouette_verdict": "independent",
+            "surface_status": "blocked: independent reference tessellation/noise qualification absent",
+            "symmetric_mean_distance_world": 0.000923875637811559,
+            "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+            "units": "unchanged Blender world coordinates; no fitting or normalization"
+          },
+          "refined_raw_surface": {
+            "protocol": "shared_world_area_sample_to_triangle_v1",
+            "sample_count_per_direction": 4096,
+            "seed": 61007,
+            "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+            "candidate_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+            "normal_orientation": "oriented; opposite normals are 180 degrees",
+            "normal_interpretation": "geometric face normals, not shading normals",
+            "units": "unchanged Blender world coordinates; no fitting or normalization",
+            "symmetric_mean_distance_world": 0.0006732319122740825,
+            "distance_p95_world": 0.0022511934163048863,
+            "sampled_max_distance_world": 0.0029814052395522594,
+            "normal_angle_mean_degrees": 0.4440156891061259,
+            "normal_angle_p95_degrees": 1.4659143045971141,
+            "silhouette_verdict": "independent",
+            "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+            "editability_verdict": "independent",
+            "metric_status": "measured",
+            "surface_status": "unqualified",
+            "qualified_limits": null,
+            "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+          },
+          "baseline_mean_heldout_coverage_l1": 0.001565778162330389,
+          "refined_mean_heldout_coverage_l1": 0.0004130245069973171,
+          "relative_heldout_coverage_l1_reduction": 0.7362177370116072,
+          "semantic_edit_restoration": {
+            "control": "corner_radius_world x1.1",
+            "response": {
+              "protocol": "frozen_triangle_corner_edit_response_v1",
+              "passed": true,
+              "checks": {
+                "xy_corner_support_response": true,
+                "thickness_preserved": true
+              },
+              "observed_xy_span_delta_world": [
+                0.03196978569030784,
+                0.031966686248779075
+              ],
+              "expected_xy_span_delta_world": [
+                0.031969782736133504,
+                0.031966573468366594
+              ],
+              "thickness_delta_world": 0.0,
+              "physical_observation_tolerance_world": 1e-05,
+              "scope": "same frozen cardinal outline under explicit local corner edit; geometry identity/restoration remain exact and independent"
+            },
+            "geometry_changed": true,
+            "same_source_pointer": true,
+            "original_mesh_restored": true,
+            "exact_indexed_restoration": true,
+            "passed": true
+          },
+          "bounded_checkpoint_improved": true,
+          "source_original_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+          "source_replayed_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+          "source_exact_oriented_equivalence": true,
+          "fixed_inputs_geometry_stable": true,
+          "artist_surface_limits": null,
+          "full_required_five_view_admission": "unrun for refined geometry",
+          "native_boundary_qualification": "unrun",
+          "canonical_neutral_normal_passes": "unrun",
+          "selected_current_row_unchanged": true,
+          "aggregate_accepted": false
+        }
+      },
+      "rendered_frames": 6,
+      "source_frames": 3,
+      "candidate_frames": 3,
+      "reused_completed_measurements": 0,
+      "raw_comparisons": 1,
+      "baseline_raw_observations_reused": 1,
+      "qualification_children": 0,
+      "elapsed_seconds": 3.467908000005991,
+      "aggregate_accepted": false
+    },
+    "read_only_audit": {
+      "protocol": "run-ownership-dry-run-v1",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+      "mode": "read_only",
+      "status": "dry_run_ready",
+      "mutation_supported": false,
+      "eligible": [],
+      "eligible_bytes": 0,
+      "retained_bytes": 10984161,
+      "blockers": [],
+      "unknown_files": []
+    }
+  },
+  "supervisor": {
+    "root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-supervisor-01\\output-02\\owned-9g5gosyp",
+    "resource_receipt_sha256": "df2751458076ab6933719b6b0a16bfa643009812a94a0487b2e95542058485bc",
+    "resource": {
+      "protocol": "fresh_owned_process_supervision_v1",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "--background",
+        "--factory-startup",
+        "--threads",
+        "2",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_family_detail.py",
+        "--",
+        "--plan",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-triangle-continuation-20261009\\native-plan.json",
+        "--output",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01"
+      ],
+      "status": "succeeded",
+      "primary_joined": true,
+      "lifecycle_complete": true,
+      "job_assigned_before_resume": true,
+      "job_active_zero": true,
+      "ordinary_createprocess_tree_owned": true,
+      "broker_process_ownership": "unsupported",
+      "observed_processes": [
+        {
+          "pid": 21268,
+          "creation_filetime": 134359903873235095,
+          "kernel_joined": true,
+          "exit_status": 0
+        },
+        {
+          "pid": 15680,
+          "creation_filetime": 134359903876649735,
+          "kernel_joined": true,
+          "exit_status": 0
+        }
+      ],
+      "returncode": 0,
+      "limit_reason": null,
+      "timeout_s": 90,
+      "join_timeout_s": 5.0,
+      "max_job_committed_bytes": 8589934592,
+      "job_memory_limit_enforced": true,
+      "memory_scope": "job-accounted committed memory; not an RSS quota",
+      "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-supervisor-01\\output-02\\owned-9g5gosyp\\stdout.log",
+      "ownership_scope": "Windows no-breakaway job",
+      "max_rss_bytes": 8589934592,
+      "peak_observed_tree_rss_bytes": 658714624,
+      "rss_sample_count": 398,
+      "rss_unavailable_samples": [],
+      "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+      "total_declared_supervision_budget_s": 95.0,
+      "pid": 21268,
+      "primary_identity": {
+        "pid": 21268,
+        "creation_filetime": 134359903873235095
+      },
+      "job_accounting": {
+        "active_processes": 0,
+        "total_processes": 2,
+        "terminated_processes": 0,
+        "peak_job_committed_bytes": 3323772928
+      },
+      "observed_handles_joined": true,
+      "elapsed_seconds": 8.501073300009011
+    },
+    "read_only_audit": {
+      "protocol": "run-ownership-dry-run-v1",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-supervisor-01\\output-02\\owned-9g5gosyp",
+      "mode": "read_only",
+      "status": "dry_run_ready",
+      "mutation_supported": false,
+      "eligible": [],
+      "eligible_bytes": 0,
+      "retained_bytes": 3922,
+      "blockers": [],
+      "unknown_files": []
+    }
+  },
+  "pixels": {
+    "path": "measured-heldout-pixels.png",
+    "sha256": "bf50ef01c4acb331d1e0f2cd42d368c6295330292948e81ac0a1d1ee9b75edc2",
+    "data": "retained physical-alpha arrays; endpoint clipping to [0,1] and equal x16 absolute-error display; original producer metrics retained unchanged",
+    "inspection": "three actual held-out coverage PNGs viewed; original right frame contour is censored"
+  },
+  "prelaunch_failure": {
+    "parent": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-supervisor-01\\output",
+    "reason": "temporary root wrapper used nonexistent OwnedRun.register; exception before native Popen; active lease retained, no recovery/adoption"
+  },
+  "raw_mean_reduction": 0.271295957247224,
+  "independent_remaining": {
+    "artist_surface_limits": null,
+    "global_uniqueness": false,
+    "full5view": "unrun for changed geometry",
+    "native_boundary": "unrun for changed geometry",
+    "canonical_neutral_normals": "unrun for changed geometry",
+    "current12family_rows": "unchanged"
+  },
+  "sampled_max_distance_increased": {
+    "baseline": 0.0028801681473851204,
+    "refined": 0.0029814052395522594
+  }
+}

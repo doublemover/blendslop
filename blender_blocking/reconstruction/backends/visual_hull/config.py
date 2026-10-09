@@ -18,10 +18,14 @@ class VisualHullRunConfig:
     cache_read: bool
     cache_write: bool
     projection_metric_max_voxels: int
+    cache_owned_writes: bool = False
 
 
 def visual_hull_run_config(config: Mapping[str, Any]) -> VisualHullRunConfig:
     boundary_dilate_px = config.get("boundary_dilate_px")
+    cache_owned_writes = config.get("cache_owned_writes", False)
+    if not isinstance(cache_owned_writes, bool):
+        raise ValueError("cache_owned_writes must be a boolean")
     return VisualHullRunConfig(
         resolution=int(config.get("resolution", 64)),
         requested_backend=str(config.get("backend", "dense")).strip().lower(),
@@ -37,6 +41,7 @@ def visual_hull_run_config(config: Mapping[str, Any]) -> VisualHullRunConfig:
         cache_write=bool(
             config.get("cache_write", not bool(config.get("cache_read_only", False)))
         ),
+        cache_owned_writes=cache_owned_writes,
         projection_metric_max_voxels=int(
             config.get("projection_metric_max_voxels", 4_000_000)
         ),

@@ -1,0 +1,71 @@
+{
+  "protocol": "frozen_authored_torus_source_certificate_report_v1",
+  "source_only": true,
+  "native_runs": 0,
+  "candidate_inputs": 0,
+  "source_archive": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\torus\\evaluated-exact.npz",
+  "source_archive_sha256": "a38c4fa4fba581736bc1ba5d73f9fa002d9c778e719a9bde6382e9d764adcd07",
+  "certificate": {
+    "protocol": "authored_torus_parameter_cover_v1",
+    "status": "certified",
+    "family": "torus",
+    "reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+    "frozen_parameters_sha256": "155df3b8d98c584eb73f1383da40b1d627cdcbbc883954ec13c2dc323e813811",
+    "authored_parameter_lattice": {
+      "major_segments": 128,
+      "minor_segments": 24,
+      "triangles": 6144,
+      "diagonal": "00-to-11",
+      "periodic_seams_verified": true
+    },
+    "maximum_source_facet_distance_world": 0.0028693482129234916,
+    "analytic_interpolation_distance_bound_world": 0.002868728601282348,
+    "maximum_vertex_construction_shift_world": 6.196116411432303e-07,
+    "construction_scope": "actual vertex displacement, no construction acceptance tolerance; public API requires exact original authored source identity",
+    "maximum_normal_angle_degrees": 7.639090855364763,
+    "face_to_cell_center_tangent_upper_bound": 0.00014649771788354232,
+    "cell_analytic_normal_radius_radians_upper_bound": 0.1331807895672215,
+    "normal_correspondence": "each actual facet to every analytic normal in its corresponding parameter cell; edge nearest-normal uniqueness not asserted",
+    "distance_correspondence": "bidirectional continuous surface/facet cover via identical parameter barycentric coordinates",
+    "coverage_proof": "exact once-only inventory of both outward parameter triangles in every frozen periodic cell",
+    "distance_proof": "Hessian expectation bound with each parameter variance <= span squared/4, plus actual vertex construction shifts",
+    "normal_proof": "atan(tangent)<=tangent at cell center; analytic normal parameter metric bounded by identity; spherical triangle inequality over half-cell diagonal",
+    "arithmetic": "exact rational source crosses and bounds; Machin alternating-series pi enclosure; directed Decimal50 Taylor trig enclosures; float square-root/endpoints rationally checked",
+    "artist_surface_limits": null,
+    "candidate_boundary_qualification": "not supplied"
+  },
+  "proof_elapsed_seconds": 2.7508572999940952,
+  "runtime_sha256": {
+    "blender_blocking/evaluation/torus_reference.py": "6dceb4040d97baf65ac1e393af0d4ad5adc375268b7143ca387b93ef125a4e15",
+    "blender_blocking/test_torus_reference.py": "5f487f22a491b2e81dd043b1efbcec11968f52a6356090b2b4ae26bab437a047"
+  },
+  "frozen_declaration_sha256": {
+    "blender_blocking/synthetic/quality_contracts.py": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9",
+    "blender_blocking/synthetic/blender_builders.py": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2"
+  },
+  "pi_interval": {
+    "lower_numerator": "303813021619815211127537023598466762462928562451138810952817612641378096120015743457898362871679747853349789150531360108636072503870855753190962676",
+    "lower_denominator": "96706688332956914460496363220965927597026084493028663225706878412607962454259611629265419178415748337738523654483202562914812006056308746337890625",
+    "upper_numerator": "398907172869630098117422257486476202880195412962577875412979272217343686559665790743215939278838925583111817358716036231628307740643908609913888",
+    "upper_denominator": "126976096794029666576867128404132360599025863289808472224366097949013448365215435167362378781554614333264285885860545022296719253063201904296875",
+    "derivation": "16 atan(1/5) - 4 atan(1/239),40/12 rational alternating-series terms with explicit next-term remainder"
+  },
+  "construction_budgets": {
+    "source_vertices": 3072,
+    "source_triangles": 6144,
+    "parameter_cells": 3072,
+    "cached_trig_turns": 304,
+    "trig_taylor_terms": 24,
+    "decimal_precision": 50,
+    "new_source_acquisitions": 0
+  },
+  "tests": {
+    "passed": 8,
+    "runtime": "existing Blender5.2.2 bundled Python3.13.13",
+    "seconds": 8.551
+  },
+  "artist_surface_limits": null,
+  "candidate_boundary_qualification": "not supplied",
+  "acceptance_relabeling": "not supplied",
+  "remaining_scope": "only the original fixed authored128x24 source; different indexed source arrays unsupported"
+}

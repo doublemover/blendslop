@@ -4,6 +4,14 @@ from dataclasses import replace
 import numpy as np
 
 
+def _parameter_float(parameters, key, default):
+    """Use the editable compiler's numeric alias/fallback convention."""
+    try:
+        return float(parameters.get(key, default))
+    except (TypeError, ValueError):
+        return default
+
+
 def whole_program_geometry(program, *, resolution=16):
     from primitives.analytic_primitives import EllipsoidPrimitive
     from primitives.superfrustum import SuperFrustum
@@ -15,7 +23,12 @@ def whole_program_geometry(program, *, resolution=16):
                             for node in program.root_nodes])
     node = program.root_nodes[0]; params = node.parameters
     center = position_vector(params)
-    sizes = np.asarray([params.get(k, 1.) for k in DIMENSION_KEYS], float)
+    if node.primitive_type in {"cylinder", "frustum"}:
+        width = _parameter_float(params, "width_world", _parameter_float(params, "diameter", 1.))
+        depth = _parameter_float(params, "depth_world", width)
+        height = _parameter_float(params, "height_world", _parameter_float(params, "height", 1.))
+    else:
+        sizes = np.asarray([params.get(k, 1.) for k in DIMENSION_KEYS], float)
     frame = rotation_matrix(params)
     if node.primitive_type == "capsule":
         from primitives.capsule import CapsulePrimitive
@@ -49,12 +62,18 @@ def whole_program_geometry(program, *, resolution=16):
         mesh = EllipsoidPrimitive(center=center, radii=sizes*.5, rotation=frame).to_mesh_data(resolution)
         vertices, faces = mesh.vertices, mesh.faces
     elif node.primitive_type in {"cylinder", "frustum"}:
-        axis = frame[:,2]
-        mesh = SuperFrustum(position=center,
-            orientation=(float(np.arctan2(axis[1],axis[0])),float(np.arccos(np.clip(axis[2],-1.,1.)))),
-            radius_bottom=float(params.get('radius_bottom',sizes[0]*.5)),
-            radius_top=float(params.get('radius_top',sizes[0]*.5)),height=sizes[2]).to_mesh_data(resolution)
-        vertices, faces = mesh.vertices, mesh.faces
+        radius = max(width, depth) * .5
+        bottom = _parameter_float(params, "radius_bottom", _parameter_float(params, "radius", radius))
+        top = _parameter_float(params, "radius_top", bottom)
+        mesh = SuperFrustum(position=(0., 0., 0.), orientation=(0., 0.),
+            radius_bottom=bottom, radius_top=top, height=height).to_mesh_data(resolution)
+        vertices = mesh.vertices.copy()
+        if radius > 0:
+            vertices[:, 0] *= max(width * .5, 1e-6) / radius
+            vertices[:, 1] *= max(depth * .5, 1e-6) / radius
+        # Apply the complete artist frame after local scaling, including roll.
+        vertices = vertices @ frame.T + center
+        faces = mesh.faces
     else:
         raise ValueError("whole-program primitive is not supported by numeric screening")
     triangles = np.asarray([(f[0], f[i], f[i+1]) for f in faces for i in range(1,len(f)-1)], int)

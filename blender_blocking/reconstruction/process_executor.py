@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
+import json
 import os
 import pickle
 import subprocess
@@ -29,6 +30,86 @@ class JobOutcome:
     stop_reason: str = ""
     partial: bool = False
     recorded_evaluations: int | None = None
+
+
+@dataclass(frozen=True)
+class WorkerProcessBudget:
+    """Explicit opt-in bounds for the entire pool, including replacements.
+
+    Memory/RSS caps are divided across concurrent workers. The wall allowance
+    starts at the first launch and is never reset by a worker restart. Each tree
+    has a bounded join allowance. The supplied root becomes a scratch parent
+    for fresh IPC; no cleanup or artifact lease is implied.
+    """
+    wall_s: float
+    max_memory_bytes: int
+    join_timeout_s: float = 5.
+    max_rss_bytes: int | None = None
+    max_restarts: int = 8
+
+    def validate(self, workers):
+        from blender_blocking.utils.owned_process_supervisor import validate_process_bounds
+        validate_process_bounds([sys.executable], timeout_s=self.wall_s,
+            max_memory_bytes=self.max_memory_bytes, join_timeout_s=self.join_timeout_s,
+            max_rss_bytes=self.max_rss_bytes)
+        if (isinstance(self.max_restarts, bool) or not isinstance(self.max_restarts, int)
+                or not 0 <= self.max_restarts <= 32 or self.max_memory_bytes < workers
+                or (self.max_rss_bytes is not None and self.max_rss_bytes < workers)):
+            raise ValueError("worker budget requires nonempty per-worker caps and 0..32 restarts")
+
+
+def caller_process_budget(*, context=None, process_budget=None):
+    """Resolve an explicit pool allowance; context is a caller option, not a cap guess."""
+    contextual = getattr(context, "worker_process_budget", None)
+    for value in (process_budget, contextual):
+        if value is not None:
+            if not isinstance(value, WorkerProcessBudget):
+                raise TypeError("worker process budget must be an explicit WorkerProcessBudget")
+            value.validate(1)
+    if process_budget is not None and contextual is not None and process_budget != contextual:
+        raise ValueError("explicit and contextual worker process budgets disagree")
+    return process_budget if process_budget is not None else contextual
+
+
+def request_process_budget(requests, *, process_budget=None):
+    """One caller allowance covers every request in a shared ensemble/routing pool."""
+    effective = caller_process_budget(process_budget=process_budget)
+    for request in requests:
+        value = caller_process_budget(context=request.context)
+        if value is not None:
+            if effective is not None and effective != value:
+                raise ValueError("candidate contexts require different whole-pool budgets")
+            effective = value
+    return effective
+
+
+def executor_scope(max_workers=2, *, context=None, executor=None, process_budget=None,
+                   require_submit_result=False):
+    """Reuse the actual client/pool; never adopt or reset an existing allowance.
+
+    WorkerClient remains a map-only coordinated subjob client. Candidate callers
+    require submit/result and refuse recursive ensemble use before pool allocation.
+    A null budget preserves the ordinary unowned constructor path.
+    """
+    from contextlib import nullcontext
+    budget = caller_process_budget(context=context, process_budget=process_budget)
+    worker = current_worker_client()
+    contextual = getattr(context, "process_executor", None)
+    supplied = executor if executor is not None else contextual
+    if worker is not None and supplied is not None and supplied is not worker:
+        raise ValueError("an active worker cannot substitute a different process executor")
+    shared = worker if worker is not None else supplied
+    if shared is not None:
+        if budget is not None and getattr(shared, "process_budget", None) != budget:
+            raise ValueError("shared executor must already own the requested whole-pool budget")
+        if require_submit_result and not all(callable(getattr(shared, name, None))
+                                             for name in ("submit", "result")):
+            raise TypeError("candidate execution requires submit/result; WorkerClient supports scoped map subjobs only")
+        return nullcontext(shared)
+    if budget is None:
+        return PersistentProcessExecutor(max_workers)
+    budget.validate(max(1, min(4, int(max_workers))))
+    return PersistentProcessExecutor(max_workers, process_budget=budget)
 
 
 def write_packet(path, value):
@@ -73,11 +154,27 @@ class WorkerClient:
         self.root = Path(root)
         self.worker = str(worker)
         self.stack = []
+        self.process_budget = None
+        self._process_budget_bound = False
+
+    def bind_process_budget(self, budget):
+        """Carry the coordinator declaration, without creating a new deadline/owner."""
+        if budget is not None:
+            if not isinstance(budget, WorkerProcessBudget):
+                raise TypeError("worker transport requires an explicit pool budget")
+            budget.validate(1)
+        if self._process_budget_bound and self.process_budget != budget:
+            raise ValueError("a worker client cannot replace its owning pool budget")
+        self.process_budget = budget
+        self._process_budget_bound = True
 
     def execute(self, envelope):
         self.stack.append(envelope["id"])
         started = time.monotonic()
         try:
+            if "worker_process_budget" in envelope:
+                declaration = envelope["worker_process_budget"]
+                self.bind_process_budget(None if declaration is None else WorkerProcessBudget(**declaration))
             if envelope["deadline"] is not None and time.time() >= envelope["deadline"]:
                 outcome = JobOutcome("timeout", error="job deadline exhausted before execution")
             else:
@@ -167,6 +264,14 @@ def execute_job(kind, payload, *, deadline=None):
     from blender_blocking.reconstruction.native_geometry import GeometryArrays, GeometryCache
     from blender_blocking.evaluation.cost_model import CostRecorder
     request, settings, measured, backend = payload
+    declaration = settings.get("worker_process_budget")
+    pool_budget = None if declaration is None else WorkerProcessBudget(**declaration)
+    client = current_worker_client()
+    if client is not None:
+        client.bind_process_budget(pool_budget)
+    elif pool_budget is not None:
+        pool_budget.validate(1)
+    settings = {**settings, "worker_process_budget": pool_budget}
     if deadline is not None:
         remaining = max(0.001, deadline - time.time())
         limit = request.budget.timeout_s
@@ -181,6 +286,8 @@ def execute_job(kind, payload, *, deadline=None):
         pass
     recorder = CostRecorder(track_memory=bool(settings.get("diagnostic_allocations", False)))
     context = SimpleNamespace(**settings)
+    if client is not None:
+        context.process_executor = client
     context.blender_available = available
     context.geometry_cache = GeometryCache()
     context.cost_recorder = recorder
@@ -257,12 +364,34 @@ def worker_main(root, worker):
 
 class PersistentProcessExecutor:
     """Bounded persistent processes; individual failures do not break the pool."""
-    def __init__(self, max_workers=2, *, blender_binary=None, root=None, threads=4):
+    def __init__(self, max_workers=2, *, blender_binary=None, root=None, threads=4,
+                 process_budget=None):
         self.max_workers = max(1, min(4, int(max_workers)))
+        if process_budget is not None:
+            if not isinstance(process_budget, WorkerProcessBudget):
+                raise TypeError("process_budget must be an explicit WorkerProcessBudget")
+            process_budget.validate(self.max_workers)
+        self.process_budget = process_budget
+        self._budget_deadline = None
+        self._budget_exhausted = False
+        self._launch_count = 0
+        self.process_scopes = []
         self.blender_binary = blender_binary
         self.threads = max(1, min(int(threads), 4 // self.max_workers))
         self.total_threads = self.max_workers * self.threads
-        self.root = Path(root) if root else Path(tempfile.mkdtemp(prefix="blendslop-workers-"))
+        self.ownership_root = None
+        if self.process_budget is not None:
+            # Supplied root is a scratch parent, never transport/PID adoption.
+            supplied = (Path(root) if root else Path(tempfile.gettempdir())).absolute()
+            if (supplied != supplied.resolve() or supplied.is_symlink()
+                    or getattr(supplied, "is_junction", lambda: False)()):
+                raise ValueError("owned worker root must not be redirected")
+            supplied.mkdir(parents=True, exist_ok=True)
+            self.root = Path(tempfile.mkdtemp(prefix="blendslop-owned-workers-", dir=supplied))
+            self.ownership_root = self.root / "process-ownership"
+            self.ownership_root.mkdir()
+        else:
+            self.root = Path(root) if root else Path(tempfile.mkdtemp(prefix="blendslop-workers-"))
         for name in ("workers", "results", "spawns", "groups", "artifacts"):
             (self.root / name).mkdir(parents=True, exist_ok=True)
         self.pending = deque()
@@ -276,10 +405,19 @@ class PersistentProcessExecutor:
         self.start()
         return self
 
-    def __exit__(self, *args):
-        self.close()
+    def __exit__(self, kind, error, traceback):
+        try:
+            self.close()
+        except BaseException as cleanup_error:
+            if error is None:
+                raise
+            if hasattr(error, "add_note"):
+                error.add_note("Worker ownership close also failed: " + repr(cleanup_error))
+        return False
 
     def start(self):
+        if self.closed:
+            raise RuntimeError("executor is closed")
         if self.workers:
             return
         if self.blender_binary is None:
@@ -288,14 +426,24 @@ class PersistentProcessExecutor:
                 self.blender_binary = bpy.app.binary_path
             except ImportError:
                 pass
+        if self.process_budget is not None and self._budget_deadline is None:
+            self._budget_deadline = time.monotonic() + self.process_budget.wall_s
         try:
             for index in range(self.max_workers):
                 self._start_worker(str(index))
-        except Exception:
-            self.close()
+        except BaseException as error:
+            try:
+                self.close()
+            except BaseException as cleanup_error:
+                if hasattr(error, "add_note"):
+                    error.add_note("Worker startup cleanup also failed: " + repr(cleanup_error))
             raise
 
     def _start_worker(self, worker):
+        if self.process_budget is not None:
+            if (self._budget_deadline is None or time.monotonic() >= self._budget_deadline
+                    or self._launch_count >= self.max_workers + self.process_budget.max_restarts):
+                return False
         directory = self.root / "workers" / worker
         directory.mkdir(exist_ok=True)
         for name in ("ready.pkl", "inbox.pkl", "stop"):
@@ -309,15 +457,62 @@ class PersistentProcessExecutor:
         environment = dict(os.environ)
         for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
             environment[name] = str(self.threads)
-        log = (directory / "worker.log").open("ab")
-        try:
-            process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=environment,
-                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-        except Exception:
-            log.close()
-            raise
-        self.workers[worker] = {"process": process, "log": log, "stack": [], "waiting": set(),
-                                "started": time.monotonic(), "ready": False}
+        scope = None
+        if self.process_budget is not None:
+            from blender_blocking.utils.owned_process import OwnedProcess
+            generation = self.ownership_root / ("worker-" + worker + "-" + uuid.uuid4().hex)
+            generation.mkdir()
+            scope = OwnedProcess(command, log_path=generation / "worker.log",
+                timeout_s=max(.001, self._budget_deadline-time.monotonic()),
+                max_memory_bytes=self.process_budget.max_memory_bytes // self.max_workers,
+                join_timeout_s=self.process_budget.join_timeout_s,
+                max_rss_bytes=(None if self.process_budget.max_rss_bytes is None else
+                               self.process_budget.max_rss_bytes // self.max_workers), env=environment)
+            self.process_scopes.append(scope)
+            self._launch_count += 1
+            self._publish_process_receipt(scope)
+            try:
+                process = scope.start()
+            except BaseException as error:
+                try:
+                    self._publish_process_receipt(scope)
+                except BaseException as publication_error:
+                    if hasattr(error, "add_note"):
+                        error.add_note("Worker launch receipt also failed: " + repr(publication_error))
+                raise
+            self._publish_process_receipt(scope)
+            log = None
+        else:
+            log = (directory / "worker.log").open("ab")
+            try:
+                process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=environment,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            except BaseException:
+                log.close()
+                raise
+        self.workers[worker] = {"process": process, "log": log, "scope": scope,
+                                "stack": [], "waiting": set(), "started": time.monotonic(),
+                                "ready": False, "ownership_stopping": False}
+        return True
+
+    @staticmethod
+    def _publish_process_receipt(scope):
+        destination = scope.log_path.parent / "lifecycle.json"
+        temporary = destination.with_suffix(".json." + uuid.uuid4().hex + ".tmp")
+        temporary.write_text(json.dumps(scope.snapshot(), indent=2) + "\n", encoding="utf-8")
+        os.replace(temporary, destination)
+
+    def ownership_receipt(self):
+        scopes = [scope.snapshot() for scope in self.process_scopes]
+        return {"protocol": "persistent_worker_ownership_v1", "opted_in": self.process_budget is not None,
+                "closed": self.closed, "lifecycle_complete": bool(self.process_budget is not None
+                    and self.closed and all(row["lifecycle_complete"] for row in scopes)),
+                "artifact_lease_release": "unsupported", "files_retained": True,
+                "pool_wall_s": None if self.process_budget is None else self.process_budget.wall_s,
+                "pool_memory_cap_bytes": None if self.process_budget is None else self.process_budget.max_memory_bytes,
+                "maximum_close_join_s": None if self.process_budget is None else
+                    self.max_workers * self.process_budget.join_timeout_s,
+                "launch_count": self._launch_count, "processes": scopes}
 
     def submit(self, kind, payload, *, timeout_s=None, deadline=None):
         if self.closed:
@@ -382,6 +577,11 @@ class PersistentProcessExecutor:
     def _stop_worker(self, worker):
         state = self.workers[worker]
         process = state["process"]
+        if state.get("scope") is not None:
+            state["ownership_stopping"] = True
+            result = state["scope"].stop(reason="executor_worker_stopped")
+            self._publish_process_receipt(state["scope"])
+            return result["lifecycle_complete"]
         if process.poll() is None:
             if os.name == "nt":
                 subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
@@ -395,9 +595,12 @@ class PersistentProcessExecutor:
                 process.kill()
                 process.wait(timeout=5)
         state["log"].close()
+        return True
 
     def poll(self):
         now = time.time()
+        if self.process_budget is not None and self._budget_deadline is not None:
+            self._budget_exhausted = time.monotonic() >= self._budget_deadline
         for path in list((self.root / "results").glob("*.pkl")):
             if path.name.endswith(".progress.pkl"):
                 continue
@@ -405,6 +608,8 @@ class PersistentProcessExecutor:
             outcome = read_packet(path)
             path.unlink()
             if job_id in self.jobs:
+                if self._budget_exhausted and self.jobs[job_id]["outcome"] is None:
+                    outcome = JobOutcome("timeout", error="executor lifetime exceeded before result collection")
                 self._finish(job_id, outcome)
         for path in list((self.root / "spawns").glob("*.pkl")):
             packet = read_packet(path)
@@ -425,22 +630,35 @@ class PersistentProcessExecutor:
             directory = self.root / "workers" / worker
             if (directory / "ready.pkl").exists():
                 state["ready"] = True
+            ownership_failure = ""
+            scope = state.get("scope")
+            if scope is not None and not state["ownership_stopping"]:
+                try:
+                    observation = scope.poll()
+                    ownership_failure = observation["limit_reason"] or ""
+                except Exception as error:
+                    scope.receipt["errors"].append("worker observation: " + repr(error))
+                    ownership_failure = "owned process observation failed"
             exited = state["process"].poll() is not None
             startup_failed = not state["ready"] and time.monotonic() - state["started"] > 60
             expired = [j for j in state["stack"] if self.jobs[j]["deadline"] is not None and now >= self.jobs[j]["deadline"]]
-            if exited or startup_failed or expired:
+            if (exited or startup_failed or expired or ownership_failure
+                    or self._budget_exhausted or state["ownership_stopping"]):
                 for job_id in list(state["stack"]):
-                    self._finish(job_id, JobOutcome("timeout" if expired else "failed",
-                        error="worker deadline exceeded" if expired else "worker exited; see " + str(directory / "worker.log")))
-                self._stop_worker(worker)
+                    self._finish(job_id, JobOutcome("timeout" if expired or self._budget_exhausted or ownership_failure in {"wall_timeout", "tree_rss_limit", "log_byte_limit"} else "failed",
+                        error=("executor lifetime exceeded" if self._budget_exhausted else ownership_failure or
+                               ("worker deadline exceeded" if expired else "worker exited; see " +
+                                str(scope.log_path if scope is not None else directory / "worker.log")))))
+                if not self._stop_worker(worker):
+                    continue
                 del self.workers[worker]
-                if not self.closed and not startup_failed and state["ready"]:
+                if not self.closed and not startup_failed and not self._budget_exhausted and state["ready"]:
                     self._start_worker(worker)
         for job_id in list(self.pending):
             job = self.jobs[job_id]
-            if job["deadline"] is not None and now >= job["deadline"]:
+            if self._budget_exhausted or (job["deadline"] is not None and now >= job["deadline"]):
                 self.pending.remove(job_id)
-                self._finish(job_id, JobOutcome("timeout", error="job deadline exhausted in queue"))
+                self._finish(job_id, JobOutcome("timeout", error="executor lifetime exhausted in queue" if self._budget_exhausted else "job deadline exhausted in queue"))
         for group, (ids, parent, worker) in list(self.groups.items()):
             if all(self.jobs[j]["outcome"] is not None for j in ids):
                 write_packet(self.root / "groups" / (group + ".pkl"), [self.jobs[j]["outcome"] for j in ids])
@@ -448,7 +666,7 @@ class PersistentProcessExecutor:
                     self.workers[worker]["waiting"].discard(parent)
                 del self.groups[group]
         for worker, state in self.workers.items():
-            if not state["ready"]:
+            if not state["ready"] or self._budget_exhausted or state["ownership_stopping"]:
                 continue
             inbox = self.root / "workers" / worker / "inbox.pkl"
             if inbox.exists():
@@ -467,7 +685,10 @@ class PersistentProcessExecutor:
                 limit = time.time() + max(0.0, float(job["timeout_s"]))
                 job["deadline"] = limit if job["deadline"] is None else min(job["deadline"], limit)
             state["stack"].append(job_id)
-            write_packet(inbox, {k: job[k] for k in ("id", "kind", "payload", "deadline")})
+            from dataclasses import asdict
+            envelope = {k: job[k] for k in ("id", "kind", "payload", "deadline")}
+            envelope["worker_process_budget"] = None if self.process_budget is None else asdict(self.process_budget)
+            write_packet(inbox, envelope)
         if not self.workers:
             for job_id in list(self.pending):
                 self._finish(job_id, JobOutcome("failed", error="no worker could start"))
@@ -477,12 +698,30 @@ class PersistentProcessExecutor:
         self.closed = True
         for worker in list(self.workers):
             (self.root / "workers" / worker / "stop").touch()
+        errors = []
         for worker in list(self.workers):
-            self._stop_worker(worker)
-        self.workers.clear()
+            try:
+                if self._stop_worker(worker):
+                    del self.workers[worker]
+                else:
+                    errors.append("worker " + worker + " has an incomplete owned tree join")
+            except Exception as error:
+                errors.append(repr(error))
+        # Startup may have failed before its process entered the worker table.
+        for scope in self.process_scopes:
+            if not scope.released and not any(state.get("scope") is scope for state in self.workers.values()):
+                try:
+                    scope.stop(reason="executor_startup_cleanup")
+                    self._publish_process_receipt(scope)
+                    if not scope.released:
+                        errors.append("startup process tree join remains incomplete")
+                except Exception as error:
+                    errors.append(repr(error))
         for job_id, job in self.jobs.items():
             if job["outcome"] is None:
                 self._finish(job_id, JobOutcome("cancelled", error="executor closed"))
+        if errors:
+            raise RuntimeError("; ".join(errors))
 
 
 def candidate_payload(request, executor, *, measured=False):
@@ -492,6 +731,12 @@ def candidate_payload(request, executor, *, measured=False):
         ("native_resident", True), ("projection_diagnostics", False),
         ("diagnostic_allocations", False), ("requested_mode", "ensemble"),
     )}
+    from dataclasses import asdict
+    owning_budget = getattr(executor, "process_budget", None)
+    requested_budget = caller_process_budget(context=request.context)
+    if requested_budget is not None and owning_budget != requested_budget:
+        raise ValueError("candidate transport cannot adopt or change its owning pool budget")
+    settings["worker_process_budget"] = None if owning_budget is None else asdict(owning_budget)
     root = request.artifact_root or executor.root / "artifacts"
     from .registry import get_backend
     try:

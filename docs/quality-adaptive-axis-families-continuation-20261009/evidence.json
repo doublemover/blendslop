@@ -1,0 +1,716 @@
+{
+  "protocol": "adaptive_axis_family_implementation_and_candidate_view_preflight_v1",
+  "status": "pure model/API implemented; native checkpoint unrun",
+  "rows": {
+    "sphere": {
+      "recipe": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\sphere\\program.json",
+      "recipe_sha256": "ccd2faabce5edc6809f3c0fa86881497bd75a8a990c565f81069b2deccd575ab",
+      "baseline_geometry_hash": "833c2dcc96c1c9229e307e49c5680306158df26a35011ec7981164012d692297",
+      "baseline_owned_npz": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\sphere\\evaluated-exact.npz",
+      "baseline_npz_sha256": "1481416e9ba25e489af947d444724520e4b70ff6c474ae23ada05fa82154a9cf",
+      "baseline_owner_state": "succeeded",
+      "baseline_lease_state": "released",
+      "physical_controls": {
+        "radius_world": 0.7997684120666895
+      },
+      "candidate_only_view_diagnostics": {
+        "front": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "sphere",
+          "control_names": [
+            "radius_world"
+          ],
+          "local_rank": 1,
+          "singular_values": [
+            0.08612470062850563
+          ],
+          "condition_number": 1.0,
+          "normalized_interval_pixel_sensitivity": {
+            "radius_world": 44.10634511636618
+          },
+          "observations": {
+            "front": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "top": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "sphere",
+          "control_names": [
+            "radius_world"
+          ],
+          "local_rank": 1,
+          "singular_values": [
+            0.08612462960444156
+          ],
+          "condition_number": 1.0,
+          "normalized_interval_pixel_sensitivity": {
+            "radius_world": 44.11075801540171
+          },
+          "observations": {
+            "top": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "oblique_35_28": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "sphere",
+          "control_names": [
+            "radius_world"
+          ],
+          "local_rank": 1,
+          "singular_values": [
+            0.08611842589186211
+          ],
+          "condition_number": 1.0,
+          "normalized_interval_pixel_sensitivity": {
+            "radius_world": 44.10228402631927
+          },
+          "observations": {
+            "oblique_35_28": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "front_plus_top": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "sphere",
+          "control_names": [
+            "radius_world"
+          ],
+          "local_rank": 1,
+          "singular_values": [
+            0.1217986694625683
+          ],
+          "condition_number": 1.0,
+          "normalized_interval_pixel_sensitivity": {
+            "radius_world": 44.11075801540171
+          },
+          "observations": {
+            "front": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            },
+            "top": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        }
+      },
+      "recommended_new_source_fit_view": "front",
+      "reason": "coupled physical radius/front silhouette identified",
+      "native_parameter_lattice_diagnostic": {
+        "retained_candidate_vertices": 4514,
+        "proposal_vertices": 4514,
+        "maximum_sampled_retained_vertex_to_proposal_vertex_world": 2.01028047464706e-06,
+        "scope": "candidate-only construction/pose diagnostic, not a continuous bound, not geometry identity or acceptance; native exact replay remains required"
+      },
+      "source_arrays_or_parameters_consumed": false,
+      "heldout_pixels_or_metrics_consumed": false,
+      "prior_history": "all old canonical supports entered original baseline fit; old masks/metrics/neutral pixels inspected. New controlled ob145 excluded from model fit/crop/view choice; current old exposure cannot be erased"
+    },
+    "anisotropic_ellipsoid": {
+      "recipe": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\program.json",
+      "recipe_sha256": "895ff3f4cbe66f6c84a7855619804d006da8008f810e090c01451478ba6e866f",
+      "baseline_geometry_hash": "b40ab45f1aa7e00f353fba58b6a500a485cd1ddba73d9e3be2dd74ba5c857699",
+      "baseline_owned_npz": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\anisotropic_ellipsoid\\evaluated-exact.npz",
+      "baseline_npz_sha256": "8afdb54c60c385c8bee1bf9c7542780134b83f24f5e8c1a6380b075a2c642e28",
+      "baseline_owner_state": "succeeded",
+      "baseline_lease_state": "released",
+      "physical_controls": {
+        "width_world": 1.7992711206961403,
+        "depth_world": 1.099429921165175,
+        "height_world": 1.399399214048246
+      },
+      "candidate_only_view_diagnostics": {
+        "front": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "anisotropic_ellipsoid",
+          "control_names": [
+            "width_world",
+            "depth_world",
+            "height_world"
+          ],
+          "local_rank": 2,
+          "singular_values": [
+            0.05356404761868155,
+            0.03750380135491783,
+            0.0
+          ],
+          "condition_number": null,
+          "normalized_interval_pixel_sensitivity": {
+            "width_world": 44.10054283577257,
+            "depth_world": 0.0,
+            "height_world": 34.309034864631464
+          },
+          "observations": {
+            "front": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "top": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "anisotropic_ellipsoid",
+          "control_names": [
+            "width_world",
+            "depth_world",
+            "height_world"
+          ],
+          "local_rank": 2,
+          "singular_values": [
+            0.04691186956092045,
+            0.03217262925115903,
+            0.0
+          ],
+          "condition_number": null,
+          "normalized_interval_pixel_sensitivity": {
+            "width_world": 44.08845529782044,
+            "depth_world": 26.956161148270397,
+            "height_world": 0.0
+          },
+          "observations": {
+            "top": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "oblique_35_28": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "anisotropic_ellipsoid",
+          "control_names": [
+            "width_world",
+            "depth_world",
+            "height_world"
+          ],
+          "local_rank": 3,
+          "singular_values": [
+            0.0386163856134333,
+            0.02212755842690217,
+            0.015363578613723925
+          ],
+          "condition_number": 2.513502002647885,
+          "normalized_interval_pixel_sensitivity": {
+            "width_world": 25.145633362994307,
+            "depth_world": 17.791509513830153,
+            "height_world": 26.23743548834385
+          },
+          "observations": {
+            "oblique_35_28": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "front_plus_top": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "anisotropic_ellipsoid",
+          "control_names": [
+            "width_world",
+            "depth_world",
+            "height_world"
+          ],
+          "local_rank": 3,
+          "singular_values": [
+            0.06701037044826619,
+            0.04225919669102144,
+            0.035145617641671456
+          ],
+          "condition_number": 1.9066493903016042,
+          "normalized_interval_pixel_sensitivity": {
+            "width_world": 44.10054283577257,
+            "depth_world": 26.956161148270397,
+            "height_world": 34.309034864631464
+          },
+          "observations": {
+            "front": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            },
+            "top": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        }
+      },
+      "recommended_new_source_fit_view": "oblique_35_28",
+      "reason": "front depth sensitivity is weak/absent; generic permitted ob35 exposes all three retained dimensions without consulting reserved ob145",
+      "native_parameter_lattice_diagnostic": {
+        "retained_candidate_vertices": 4514,
+        "proposal_vertices": 4514,
+        "maximum_sampled_retained_vertex_to_proposal_vertex_world": 1.4870715936293138e-06,
+        "scope": "candidate-only construction/pose diagnostic, not a continuous bound, not geometry identity or acceptance; native exact replay remains required"
+      },
+      "source_arrays_or_parameters_consumed": false,
+      "heldout_pixels_or_metrics_consumed": false,
+      "prior_history": "all old canonical supports entered original baseline fit; old masks/metrics/neutral pixels inspected. New controlled ob145 excluded from model fit/crop/view choice; current old exposure cannot be erased"
+    },
+    "cylinder": {
+      "recipe": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\cylinder\\program.json",
+      "recipe_sha256": "ac4efa79117ec86dbea97d4a94c863b37d00a2077478ab62b062d21370f3103f",
+      "baseline_geometry_hash": "d40c3afafe582554646f0dd42226795a5d3a1896f3df6d92a30ded5c5093adde",
+      "baseline_owned_npz": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\cylinder\\evaluated-exact.npz",
+      "baseline_npz_sha256": "6d8aa1076314e53d1cea7db00e35ff92ef1bd68b4d24b50b0b83abc0baa6b0ad",
+      "baseline_owner_state": "succeeded",
+      "baseline_lease_state": "released",
+      "physical_controls": {
+        "radius_world": 0.6494688262452303,
+        "height_world": 1.5985926031190476
+      },
+      "candidate_only_view_diagnostics": {
+        "front": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "cylinder",
+          "control_names": [
+            "radius_world",
+            "height_world"
+          ],
+          "local_rank": 2,
+          "singular_values": [
+            0.05781498796449119,
+            0.05162502675955386
+          ],
+          "condition_number": 1.1199023340707865,
+          "normalized_interval_pixel_sensitivity": {
+            "radius_world": 35.81708567092603,
+            "height_world": 44.09910334518225
+          },
+          "observations": {
+            "front": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "top": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "cylinder",
+          "control_names": [
+            "radius_world",
+            "height_world"
+          ],
+          "local_rank": 2,
+          "singular_values": [
+            0.06994877857279717,
+            1.123229038732772e-05
+          ],
+          "condition_number": 6227.472417532354,
+          "normalized_interval_pixel_sensitivity": {
+            "radius_world": 35.8231669813658,
+            "height_world": 0.01830186408017648
+          },
+          "observations": {
+            "top": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "oblique_35_28": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "cylinder",
+          "control_names": [
+            "radius_world",
+            "height_world"
+          ],
+          "local_rank": 2,
+          "singular_values": [
+            0.06691201767813064,
+            0.02693735967941774
+          ],
+          "condition_number": 2.4839857534091094,
+          "normalized_interval_pixel_sensitivity": {
+            "radius_world": 35.83173816039069,
+            "height_world": 35.72634881994816
+          },
+          "observations": {
+            "oblique_35_28": {
+              "candidate_frame_censored": true,
+              "internal_candidate_samples": 134,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "front_plus_top": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "cylinder",
+          "control_names": [
+            "radius_world",
+            "height_world"
+          ],
+          "local_rank": 2,
+          "singular_values": [
+            0.08693989983341795,
+            0.05781004919739058
+          ],
+          "condition_number": 1.5038890476734317,
+          "normalized_interval_pixel_sensitivity": {
+            "radius_world": 35.8231669813658,
+            "height_world": 44.09910334518225
+          },
+          "observations": {
+            "front": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            },
+            "top": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        }
+      },
+      "recommended_new_source_fit_view": "front",
+      "reason": "front observes circular radius and height independently",
+      "native_parameter_lattice_diagnostic": {
+        "retained_candidate_vertices": 192,
+        "proposal_vertices": 2402,
+        "maximum_sampled_retained_vertex_to_proposal_vertex_world": 7.031562175273996e-08,
+        "scope": "candidate-only construction/pose diagnostic, not a continuous bound, not geometry identity or acceptance; native exact replay remains required"
+      },
+      "source_arrays_or_parameters_consumed": false,
+      "heldout_pixels_or_metrics_consumed": false,
+      "prior_history": "all old canonical supports entered original baseline fit; old masks/metrics/neutral pixels inspected. New controlled ob145 excluded from model fit/crop/view choice; current old exposure cannot be erased"
+    },
+    "thin_plate": {
+      "recipe": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\program.json",
+      "recipe_sha256": "b79f20a1c78af57691392c8b13f3b8d8058f85cbf72d3c77bb0dae2c1a6af4e6",
+      "baseline_geometry_hash": "ab4d231f32cf620a2b2e09019025b5fa1a65cad17b4ac9d2a5841e2fdf42a785",
+      "baseline_owned_npz": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\thin_plate\\evaluated-exact.npz",
+      "baseline_npz_sha256": "4c048d5b4a742dd74f1215cd4f198afe1cac696eb78765092664db79588291c1",
+      "baseline_owner_state": "succeeded",
+      "baseline_lease_state": "released",
+      "physical_controls": {
+        "width_world": 1.5990421668365058,
+        "depth_world": 0.07867506745446788,
+        "height_world": 1.1983402553366216
+      },
+      "candidate_only_view_diagnostics": {
+        "front": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "thin_plate",
+          "control_names": [
+            "width_world",
+            "depth_world",
+            "height_world"
+          ],
+          "local_rank": 2,
+          "singular_values": [
+            0.05647749422392377,
+            0.048533678276727825,
+            9.570866239634157e-10
+          ],
+          "condition_number": 59009804.138776265,
+          "normalized_interval_pixel_sensitivity": {
+            "width_world": 44.11150643822493,
+            "depth_world": 0.0005315236615154171,
+            "height_world": 33.057660052786055
+          },
+          "observations": {
+            "front": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "top": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "thin_plate",
+          "control_names": [
+            "width_world",
+            "depth_world",
+            "height_world"
+          ],
+          "local_rank": 3,
+          "singular_values": [
+            0.017918563048615357,
+            0.004141477690338432,
+            9.860498522645317e-07
+          ],
+          "condition_number": 18172.066054737636,
+          "normalized_interval_pixel_sensitivity": {
+            "width_world": 44.111505640271744,
+            "depth_world": 2.1703465463363547,
+            "height_world": 0.008097657810885266
+          },
+          "observations": {
+            "top": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "oblique_35_28": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "thin_plate",
+          "control_names": [
+            "width_world",
+            "depth_world",
+            "height_world"
+          ],
+          "local_rank": 3,
+          "singular_values": [
+            0.03579912460699773,
+            0.033715577245297744,
+            0.0009528477475853445
+          ],
+          "condition_number": 37.57066614022854,
+          "normalized_interval_pixel_sensitivity": {
+            "width_world": 25.305640555620176,
+            "depth_world": 1.7776949401892042,
+            "height_world": 27.727330383394126
+          },
+          "observations": {
+            "oblique_35_28": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        },
+        "front_plus_top": {
+          "protocol": "candidate_only_axis_view_sensitivity_v1",
+          "family": "thin_plate",
+          "control_names": [
+            "width_world",
+            "depth_world",
+            "height_world"
+          ],
+          "local_rank": 3,
+          "singular_values": [
+            0.059251237555194326,
+            0.04853438886562198,
+            0.0041419761780891115
+          ],
+          "condition_number": 14.305064782513961,
+          "normalized_interval_pixel_sensitivity": {
+            "width_world": 44.11150643822493,
+            "depth_world": 2.1703465463363547,
+            "height_world": 33.057660052786055
+          },
+          "observations": {
+            "front": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            },
+            "top": {
+              "candidate_frame_censored": false,
+              "internal_candidate_samples": 192,
+              "frame_border_closure_added": false,
+              "source_complete_contour_claim": false
+            }
+          },
+          "source_observations": 0,
+          "heldout_fit_or_view_choice_used": false,
+          "global_uniqueness_established": false,
+          "source_identifiability": "unqualified until genuine observations",
+          "artist_surface_limits": null,
+          "native_candidate_acceptance": "not supplied"
+        }
+      },
+      "recommended_new_source_fit_view": "oblique_35_28",
+      "reason": "front depth sensitivity is weak/absent; generic permitted ob35 exposes all three retained dimensions without consulting reserved ob145",
+      "native_parameter_lattice_diagnostic": {
+        "retained_candidate_vertices": 8,
+        "proposal_vertices": 8,
+        "maximum_sampled_retained_vertex_to_proposal_vertex_world": 2.3455961972090912e-08,
+        "scope": "candidate-only construction/pose diagnostic, not a continuous bound, not geometry identity or acceptance; native exact replay remains required"
+      },
+      "source_arrays_or_parameters_consumed": false,
+      "heldout_pixels_or_metrics_consumed": false,
+      "prior_history": "all old canonical supports entered original baseline fit; old masks/metrics/neutral pixels inspected. New controlled ob145 excluded from model fit/crop/view choice; current old exposure cannot be erased"
+    }
+  },
+  "source_observations": 0,
+  "native_runs": 0,
+  "current_twelve_rows_unchanged": true,
+  "candidate_audit_elapsed_seconds": 0.5547292999981437,
+  "runtime_sha256": {
+    "blender_blocking/reconstruction/adaptive_family.py": "e35ae62dc46babde6c6b28971719a27daca1b780e5a0a7edda2ede1d927e2d96",
+    "blender_blocking/reconstruction/adaptive_axis_family.py": "8bf619b932d6e5a0ec8d8e6650e8579a923faede359a435675d0d337f0872e67",
+    "blender_blocking/test_adaptive_axis_family.py": "14e941fee73d34837e33690c2fab5236bfdfd5136eaad58e6efae3235cc61f4e"
+  },
+  "baseline_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7\\results.json",
+  "baseline_receipt_sha256": "0b7476b49c9179b6d46f8997ba9036c863f735550bda8e857c0221d4e9a8c82d",
+  "original_camera_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\results.json",
+  "original_camera_receipt_sha256": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63",
+  "tests": {
+    "focused_passed": 25,
+    "existing_adaptive_passed": 15,
+    "new_axis_passed": 10,
+    "seconds": 4.357,
+    "runtime": "existing Blender5.2.2 bundled Python3.13.13"
+  },
+  "native_tested_previous_adapter": "frustum/arch checkpoint used old frozen runtime bytes retained at root local7be90e1; this extension is pure-tested only",
+  "artist_surface_limits": null,
+  "native_admission": "unrun; no selection changes",
+  "global_uniqueness_established": false,
+  "prepared_native_plans": {
+    "4": {
+      "plan": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-axis-families-continuation-20261009\\native-plan-04.json",
+      "plan_sha256": "056040c7c5cd8f893513d511fcdea846774122b8f18295bfbc052d52029d28dc",
+      "preflight": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-axis-families-continuation-20261009\\preflight-04.json",
+      "input_count": 44,
+      "output": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-04",
+      "cases": [
+        "sphere",
+        "cylinder"
+      ],
+      "fit_views": {
+        "sphere": "front",
+        "cylinder": "front"
+      }
+    },
+    "5": {
+      "plan": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-axis-families-continuation-20261009\\native-plan-05.json",
+      "plan_sha256": "d52f1c248c7bc42784d8eba585b027e2619ea2ba59dac8e01872d28cb79b52d3",
+      "preflight": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-axis-families-continuation-20261009\\preflight-05.json",
+      "input_count": 44,
+      "output": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-05",
+      "cases": [
+        "anisotropic_ellipsoid",
+        "thin_plate"
+      ],
+      "fit_views": {
+        "anisotropic_ellipsoid": "oblique_35_28",
+        "thin_plate": "oblique_35_28"
+      }
+    }
+  },
+  "final_runner_sha256": "86fd8abb6ee544049cdc1d213f37daac64a6ad206c62358ad24d9973b81d92a6"
+}

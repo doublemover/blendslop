@@ -1,0 +1,835 @@
+{
+  "protocol": "multipart_explicit_shared_plane_check_v1",
+  "status": "measured",
+  "completed_native_frames": 12,
+  "fits": 0,
+  "artist_surface_limits": null,
+  "aggregate_accepted": false,
+  "baseline_replay": {
+    "expected_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "actual_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "exact": true
+  },
+  "candidate_geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+  "candidate_artifacts": {
+    "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "obj_sha256": "b088d48ddd6135dbbf25217f3fd317cdc38ef0c8dde042d73d0e2226d98a8a8b",
+    "npz_sha256": "1d61a4609b54393583bdedf48d99fc4cc1bc31c5a9d48834a82d0d7e9a47fa1a"
+  },
+  "construction": {
+    "protocol": "multipart_shared_far_y_plane_v1",
+    "base_node_id": "observed_base",
+    "arm_node_id": "observed_tall_arm",
+    "exact_common_y_frame": true,
+    "far_local": 0.5,
+    "shared_far_world": 0.3252679191664356,
+    "near_world": -0.12498490777466831,
+    "declared_near_world": -0.12498491023031844,
+    "native_near_rounding_world": 2.4556501276862264e-09,
+    "flat_shading_preserved": true,
+    "edit_scope": "arm near-side depth from mesh Y coordinates; far plane fixed; other X/Z source controls remain live",
+    "scope": "construction observation only; final shape, surface, boundary and edit gates remain independent"
+  },
+  "exact_native_far_plane": {
+    "base": 0.3252679191664356,
+    "arm": 0.3252679191664356,
+    "equal": true
+  },
+  "source_edit": {
+    "control": "tall-arm near-side depth x1.05; shared far plane fixed",
+    "depth_ratio": 1.0499999924642645,
+    "fixed_far_plane": true,
+    "union_geometry_changed": true,
+    "same_source_and_mesh_pointers": true,
+    "original_controls": {
+      "root_pointer": 1730053370376,
+      "sources": [
+        {
+          "node": "observed_base",
+          "pointer": 1730053370376,
+          "mesh_pointer": 1730053447816,
+          "matrix_world": [
+            [
+              1.6007063388824463,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.5000196099281311,
+              -0.24997878074645996
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "node": "observed_tall_arm",
+          "pointer": 1730053365000,
+          "mesh_pointer": 1730053442440,
+          "matrix_world": [
+            [
+              0.45005661249160767,
+              0.0,
+              0.0,
+              -0.3997710645198822
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.9999759793281555,
+              0.4500170648097992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "node": "observed_short_arm",
+          "pointer": 1730053359624,
+          "mesh_pointer": 1730053204744,
+          "matrix_world": [
+            [
+              0.349599152803421,
+              0.0,
+              0.0,
+              0.4499990940093994
+            ],
+            [
+              0.0,
+              0.44980481266975403,
+              0.0,
+              -0.08005412667989731
+            ],
+            [
+              0.0,
+              0.0,
+              0.4952014982700348,
+              0.19762982428073883
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        }
+      ],
+      "modifiers": [
+        {
+          "name": "ObservedExactUnion1",
+          "type": "BOOLEAN",
+          "show_render": true,
+          "show_viewport": true,
+          "operation": "UNION",
+          "solver": "EXACT",
+          "operand_pointer": 1730053365000
+        },
+        {
+          "name": "ObservedExactUnion2",
+          "type": "BOOLEAN",
+          "show_render": true,
+          "show_viewport": true,
+          "operation": "UNION",
+          "solver": "EXACT",
+          "operand_pointer": 1730053359624
+        }
+      ]
+    },
+    "restored_controls": {
+      "root_pointer": 1730053370376,
+      "sources": [
+        {
+          "node": "observed_base",
+          "pointer": 1730053370376,
+          "mesh_pointer": 1730053447816,
+          "matrix_world": [
+            [
+              1.6007063388824463,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.5000196099281311,
+              -0.24997878074645996
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "node": "observed_tall_arm",
+          "pointer": 1730053365000,
+          "mesh_pointer": 1730053442440,
+          "matrix_world": [
+            [
+              0.45005661249160767,
+              0.0,
+              0.0,
+              -0.3997710645198822
+            ],
+            [
+              0.0,
+              0.6505698561668396,
+              0.0,
+              -1.700891698419582e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.9999759793281555,
+              0.4500170648097992
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "node": "observed_short_arm",
+          "pointer": 1730053359624,
+          "mesh_pointer": 1730053204744,
+          "matrix_world": [
+            [
+              0.349599152803421,
+              0.0,
+              0.0,
+              0.4499990940093994
+            ],
+            [
+              0.0,
+              0.44980481266975403,
+              0.0,
+              -0.08005412667989731
+            ],
+            [
+              0.0,
+              0.0,
+              0.4952014982700348,
+              0.19762982428073883
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        }
+      ],
+      "modifiers": [
+        {
+          "name": "ObservedExactUnion1",
+          "type": "BOOLEAN",
+          "show_render": true,
+          "show_viewport": true,
+          "operation": "UNION",
+          "solver": "EXACT",
+          "operand_pointer": 1730053365000
+        },
+        {
+          "name": "ObservedExactUnion2",
+          "type": "BOOLEAN",
+          "show_render": true,
+          "show_viewport": true,
+          "operation": "UNION",
+          "solver": "EXACT",
+          "operand_pointer": 1730053359624
+        }
+      ]
+    },
+    "baseline_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "edited_hash": "970b5d848f486db8539f7b25d78c0ee312cb3d813e0f1bb38836eef42d1aa648",
+    "restored_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "exact_indexed_restoration": true,
+    "passed": true
+  },
+  "silhouette": {
+    "all_five_passed": true,
+    "views": {
+      "front": {
+        "view": "front",
+        "area_iou": 1.0,
+        "boundary_iou": 1.0,
+        "soft_iou": null,
+        "signed_distance_loss": 0.0,
+        "intersection": 104658,
+        "union": 104658,
+        "ref_area": 104658,
+        "render_area": 104658,
+        "required": true,
+        "passed": true,
+        "pass": true,
+        "reason": "",
+        "warnings": [],
+        "iou": 1.0,
+        "threshold": 0.7,
+        "precision": 1.0,
+        "recall": 1.0,
+        "area_ratio": 1.0,
+        "centroid_delta_px": [
+          0.0,
+          0.0
+        ],
+        "pixel_difference": 0.0,
+        "thresholds": {
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8,
+          "max_signed_distance_loss": 0.05
+        }
+      },
+      "side": {
+        "view": "side",
+        "area_iou": 1.0,
+        "boundary_iou": 1.0,
+        "soft_iou": null,
+        "signed_distance_loss": 0.0,
+        "intersection": 62891,
+        "union": 62891,
+        "ref_area": 62891,
+        "render_area": 62891,
+        "required": true,
+        "passed": true,
+        "pass": true,
+        "reason": "",
+        "warnings": [],
+        "iou": 1.0,
+        "threshold": 0.7,
+        "precision": 1.0,
+        "recall": 1.0,
+        "area_ratio": 1.0,
+        "centroid_delta_px": [
+          0.0,
+          0.0
+        ],
+        "pixel_difference": 0.0,
+        "thresholds": {
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8,
+          "max_signed_distance_loss": 0.05
+        }
+      },
+      "top": {
+        "view": "top",
+        "area_iou": 1.0,
+        "boundary_iou": 1.0,
+        "soft_iou": null,
+        "signed_distance_loss": 0.0,
+        "intersection": 78320,
+        "union": 78320,
+        "ref_area": 78320,
+        "render_area": 78320,
+        "required": true,
+        "passed": true,
+        "pass": true,
+        "reason": "",
+        "warnings": [],
+        "iou": 1.0,
+        "threshold": 0.7,
+        "precision": 1.0,
+        "recall": 1.0,
+        "area_ratio": 1.0,
+        "centroid_delta_px": [
+          0.0,
+          0.0
+        ],
+        "pixel_difference": 0.0,
+        "thresholds": {
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8,
+          "max_signed_distance_loss": 0.05
+        }
+      },
+      "oblique_35_28": {
+        "view": "oblique_35_28",
+        "area_iou": 0.9997513327013039,
+        "boundary_iou": 0.9928490351872872,
+        "soft_iou": null,
+        "signed_distance_loss": 4.862235748959165e-05,
+        "intersection": 128654,
+        "union": 128686,
+        "ref_area": 128658,
+        "render_area": 128682,
+        "required": true,
+        "passed": true,
+        "pass": true,
+        "reason": "",
+        "warnings": [],
+        "iou": 0.9997513327013039,
+        "threshold": 0.7,
+        "precision": 0.999782409350181,
+        "recall": 0.9999689098229414,
+        "area_ratio": 1.0001865410623514,
+        "centroid_delta_px": [
+          -0.008987384199201642,
+          0.01773071261044379
+        ],
+        "pixel_difference": 0.0001220703125,
+        "thresholds": {
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8,
+          "max_signed_distance_loss": 0.05
+        }
+      },
+      "oblique_145_40": {
+        "view": "oblique_145_40",
+        "area_iou": 0.9997274413779157,
+        "boundary_iou": 0.9915091755683374,
+        "soft_iou": null,
+        "signed_distance_loss": 5.8100147394490875e-05,
+        "intersection": 113706,
+        "union": 113737,
+        "ref_area": 113706,
+        "render_area": 113737,
+        "required": true,
+        "passed": true,
+        "pass": true,
+        "reason": "",
+        "warnings": [],
+        "iou": 0.9997274413779157,
+        "threshold": 0.7,
+        "precision": 0.9997274413779157,
+        "recall": 1.0,
+        "area_ratio": 1.0002726329305403,
+        "centroid_delta_px": [
+          -0.003792001021508895,
+          0.009916804514148225
+        ],
+        "pixel_difference": 0.000118255615234375,
+        "thresholds": {
+          "min_area_iou": 0.7,
+          "min_boundary_iou": 0.8,
+          "max_signed_distance_loss": 0.05
+        }
+      }
+    },
+    "scope": "original display-calibrated mask gates unchanged; no controlled-alpha relabeling",
+    "original_legacy_clip_scope": "unavailable; fresh actual neutral clips matched separately"
+  },
+  "source_equivalence": {
+    "equivalent": true,
+    "indexed_reference_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+    "indexed_regenerated_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+    "reference_oriented_surface": "5e5036dba422d4f84ee59fb5e1712b8caccec2a319f30fdfaba3da2577ff2ea8",
+    "regenerated_oriented_surface": "5e5036dba422d4f84ee59fb5e1712b8caccec2a319f30fdfaba3da2577ff2ea8",
+    "scope": "exact binary64 vertex and oriented triangle-coordinate multisets; no topology identity qualification"
+  },
+  "styles": {
+    "source": {
+      "status": "native_observed",
+      "source_mesh": {
+        "vertices": 8,
+        "polygons": 6,
+        "smooth_polygons": 0,
+        "flat_polygons": 6,
+        "polygon_style": "flat",
+        "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+        "sharp_edge_attribute": "absent",
+        "sharp_edges": 0,
+        "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "has_custom_normals": false
+      },
+      "evaluated_mesh": {
+        "vertices": 26,
+        "polygons": 18,
+        "smooth_polygons": 0,
+        "flat_polygons": 18,
+        "polygon_style": "flat",
+        "smooth_flags_sha256": "60daa3a5f7dbfa200f8c82840ecf5b42640b70f3b7218a4c6bbd67db542e75a4",
+        "sharp_edge_attribute": "absent",
+        "sharp_edges": 0,
+        "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "has_custom_normals": false
+      },
+      "modifiers": [
+        {
+          "name": "Authored_box.001",
+          "type": "BOOLEAN",
+          "show_render": true,
+          "show_viewport": true
+        },
+        {
+          "name": "Authored_box.002",
+          "type": "BOOLEAN",
+          "show_render": true,
+          "show_viewport": true
+        }
+      ],
+      "scope": "shading/style only; geometric-normal metrics remain separate"
+    },
+    "candidate": {
+      "status": "native_observed",
+      "source_mesh": {
+        "vertices": 8,
+        "polygons": 6,
+        "smooth_polygons": 0,
+        "flat_polygons": 6,
+        "polygon_style": "flat",
+        "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+        "sharp_edge_attribute": "absent",
+        "sharp_edges": 0,
+        "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "has_custom_normals": false
+      },
+      "evaluated_mesh": {
+        "vertices": 26,
+        "polygons": 18,
+        "smooth_polygons": 0,
+        "flat_polygons": 18,
+        "polygon_style": "flat",
+        "smooth_flags_sha256": "60daa3a5f7dbfa200f8c82840ecf5b42640b70f3b7218a4c6bbd67db542e75a4",
+        "sharp_edge_attribute": "absent",
+        "sharp_edges": 0,
+        "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "has_custom_normals": false
+      },
+      "modifiers": [
+        {
+          "name": "ObservedExactUnion1",
+          "type": "BOOLEAN",
+          "show_render": true,
+          "show_viewport": true
+        },
+        {
+          "name": "ObservedExactUnion2",
+          "type": "BOOLEAN",
+          "show_render": true,
+          "show_viewport": true
+        }
+      ],
+      "scope": "shading/style only; geometric-normal metrics remain separate"
+    },
+    "comparison": {
+      "status": "observed",
+      "weighted_normal_controls_match": true,
+      "polygon_style_match": true,
+      "sharp_edge_count_match": true,
+      "custom_normal_state_match": true,
+      "modifier_type_sequence_match": true,
+      "source_polygon_style": "flat",
+      "candidate_polygon_style": "flat",
+      "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied"
+    }
+  },
+  "display_only": {
+    "source": {
+      "actual_camera": {
+        "projection": "ORTHO",
+        "matrix_world": [
+          [
+            -0.5735766887664795,
+            -0.38456857204437256,
+            0.7232681512832642,
+            4.050499439239502
+          ],
+          [
+            0.8191518783569336,
+            -0.2692779302597046,
+            0.506438136100769,
+            2.8361752033233643
+          ],
+          [
+            -3.967022621509386e-08,
+            0.882947564125061,
+            0.46947160363197327,
+            2.7854440212249756
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.2616024017333984,
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.10000000149011612,
+        "clip_end": 1000.0,
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ]
+      },
+      "projected_bounds": {
+        "projected_min": [
+          -0.7250718726979831,
+          -0.9746308369689953
+        ],
+        "projected_max": [
+          0.7250995178768561,
+          0.9748284658158657
+        ],
+        "depth_min": 4.930424529033049,
+        "depth_max": 6.65157417304057,
+        "projection_enclosed": true,
+        "clipping_enclosed": true,
+        "scope": "projected/clipping observation of these points only; no silhouette or family acceptance"
+      },
+      "png_sha256": "2d563e98a0f1efc99f6670c5f06e80b27a1d1c3a04cdb7b9e612d128c7a0a764",
+      "geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+      "render_settings": {
+        "engine": "BLENDER_WORKBENCH",
+        "color_mode": "BW",
+        "resolution": [
+          512,
+          512
+        ],
+        "resolution_percentage": 100,
+        "view_transform": "AgX",
+        "exposure": 0.0,
+        "gamma": 1.0,
+        "light": "STUDIO",
+        "color_type": "SINGLE",
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ],
+        "shadows": true,
+        "cavity": false,
+        "studio_light": "Default",
+        "background_type": "WORLD"
+      },
+      "scope": "fresh human inspection only; excluded from original gates and raw surface"
+    },
+    "candidate": {
+      "actual_camera": {
+        "projection": "ORTHO",
+        "matrix_world": [
+          [
+            -0.5735766887664795,
+            -0.38456857204437256,
+            0.7232681512832642,
+            4.050499439239502
+          ],
+          [
+            0.8191518783569336,
+            -0.2692779302597046,
+            0.506438136100769,
+            2.8361752033233643
+          ],
+          [
+            -3.967022621509386e-08,
+            0.882947564125061,
+            0.46947160363197327,
+            2.7854440212249756
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ortho_scale": 2.2616024017333984,
+        "shift_x": 0.0,
+        "shift_y": 0.0,
+        "clip_start": 0.10000000149011612,
+        "clip_end": 1000.0,
+        "resolution": [
+          512,
+          512
+        ],
+        "pixel_aspect": [
+          1.0,
+          1.0
+        ]
+      },
+      "projected_bounds": {
+        "projected_min": [
+          -0.7255217776358552,
+          -0.974828719962012
+        ],
+        "projected_max": [
+          0.725521557040496,
+          0.9747515296799676
+        ],
+        "depth_min": 4.930018845933356,
+        "depth_max": 6.651977160395032,
+        "projection_enclosed": true,
+        "clipping_enclosed": true,
+        "scope": "projected/clipping observation of these points only; no silhouette or family acceptance"
+      },
+      "png_sha256": "13d09c3e60d04c19a2c96f00e179e9d7d83fdd8deda3b7e8b31a2d4346773553",
+      "geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+      "render_settings": {
+        "engine": "BLENDER_WORKBENCH",
+        "color_mode": "BW",
+        "resolution": [
+          512,
+          512
+        ],
+        "resolution_percentage": 100,
+        "view_transform": "AgX",
+        "exposure": 0.0,
+        "gamma": 1.0,
+        "light": "STUDIO",
+        "color_type": "SINGLE",
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ],
+        "shadows": true,
+        "cavity": false,
+        "studio_light": "Default",
+        "background_type": "WORLD"
+      },
+      "scope": "fresh human inspection only; excluded from original gates and raw surface"
+    }
+  },
+  "shading_state_restored": true,
+  "raw_surface": {
+    "protocol": "shared_world_area_sample_to_triangle_v1",
+    "sample_count_per_direction": 4096,
+    "seed": 61007,
+    "reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+    "candidate_geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "normal_orientation": "oriented; opposite normals are 180 degrees",
+    "normal_interpretation": "geometric face normals, not shading normals",
+    "units": "unchanged Blender world coordinates; no fitting or normalization",
+    "symmetric_mean_distance_world": 0.00017615198169124158,
+    "distance_p95_world": 0.00035315752029418945,
+    "sampled_max_distance_world": 0.0003531575493980199,
+    "normal_angle_mean_degrees": 0.0439453125,
+    "normal_angle_p95_degrees": 0.0,
+    "silhouette_verdict": "independent",
+    "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+    "editability_verdict": "independent",
+    "metric_status": "measured",
+    "surface_status": "unqualified",
+    "qualified_limits": null,
+    "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+  },
+  "surface_engineering": {
+    "limits": {
+      "normal_angle_p95_degrees_max": 1.0,
+      "symmetric_mean_distance_world_max": 0.0018125506404794065
+    },
+    "passed": true,
+    "artist_limits": null
+  },
+  "boundary": {
+    "geometry_content_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "toolchain_identity": "967d79852f4572c41c399e3eb4c96832be59ae1c5e9a49c8deee0a230d59068a",
+    "manifold_validated": true,
+    "self_intersections": 0,
+    "reported_self_intersections": 0,
+    "exact_pair_verification": {
+      "predicate_version": "exact_binary64_triangle_contacts_v1",
+      "reported_pairs": 0,
+      "verified_pairs": 0,
+      "unverified_pairs": 0,
+      "complete": true,
+      "non_disjoint_pairs": 0,
+      "counts": {},
+      "relations": {},
+      "samples": [],
+      "component_count": 1,
+      "qualification_policy": "only exactly disjoint native reports are removed; contact/degenerate/unverified reports remain blocking"
+    },
+    "within_part_boundary_guard": {
+      "status": "checked",
+      "passed": true,
+      "tested_pairs": 376,
+      "indexed_adjacency_contacts": 287,
+      "component_count": 1,
+      "elapsed_s": 0.01600000000144064,
+      "geometry_scope": "within indexed parts only; between-part overlap permitted",
+      "predicate_version": "exact_binary64_triangle_contacts_v1",
+      "sweep_axis": 2,
+      "reason": null,
+      "limitation": "surface guard; closed topology/volume and external single-solid qualification are separate"
+    },
+    "self_intersections_scope": "exact non-disjoint reported triangle pairs; null when incomplete",
+    "triangle_predicate_sha256": "621d32ca63daa37b2f8cecdf2b6689b66fade5d919f5958b6e77456953f6594b",
+    "intersection_sample": [],
+    "intersection_pair_provenance": [],
+    "between_component_pairs": 0,
+    "within_component_pairs": 0,
+    "backend": "Open3D 0.19.0",
+    "helper_python": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+    "helper_source_sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25",
+    "triangle_count": 48,
+    "qualification": "Open3D edge/vertex/orientability screen plus exact verification of reported triangle pairs",
+    "status": "qualified",
+    "reason": null,
+    "single_solid_qualified": true,
+    "solid_guard": {
+      "vertex_count": 26,
+      "face_count": 48,
+      "edge_count": 72,
+      "boundary_edges": 0,
+      "non_manifold_edges": 0,
+      "degenerate_faces": 0,
+      "loose_vertices": 0,
+      "connected_components": 1,
+      "euler_characteristic": 2,
+      "watertight": true,
+      "topology_score": 1.0,
+      "penalty": 0.0,
+      "required": true,
+      "passed": true,
+      "pass": true,
+      "reason": "",
+      "signed_volume": 0.7832163089755896,
+      "orientation_errors": 0,
+      "geometric_degenerate_faces": 0,
+      "valid_solid": true,
+      "topology_and_volume_valid": true,
+      "single_solid_qualified": false,
+      "valid_solid_scope": "legacy topology/volume screen; boundary intersections untested",
+      "self_intersection_qualification": "not_established_by_index_topology"
+    },
+    "cache_hit": false,
+    "qualification_elapsed_s": 3.4690166000000318,
+    "owned_run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz",
+    "qualification_cost_boundary": "identity verification, solid guard, transfer and actual helper execution"
+  },
+  "independent_checks_passed": true,
+  "elapsed_seconds": 6.750283800000034
+}

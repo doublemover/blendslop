@@ -45,6 +45,106 @@ class ProgramPoseAliasTests(unittest.TestCase):
         np.testing.assert_allclose(local.min(axis=0),[-.6,-.4,-.85],atol=1e-14)
         np.testing.assert_allclose(local.max(axis=0),[.6,.4,.85],atol=1e-14)
 
+    def test_numeric_cylinder_preserves_independent_dimensions_in_artist_frame(self):
+        from primitives.shape_program import ShapeNode, ShapeProgram
+        from reconstruction.proposal_screening import whole_program_geometry
+        parameters = {**self.parameters(), 'width_world': 2., 'depth_world': 1., 'height_world': 3.}
+        original = deepcopy(parameters)
+        program = ShapeProgram('shape-program-v1', 'artist', (
+            ShapeNode('a', 'add', 'cylinder', parameters),))
+        data = whole_program_geometry(program, resolution=16)
+        frame, center = rotation_matrix(parameters), position_vector(parameters)
+        local = (data.vertices - center) @ frame
+        np.testing.assert_allclose(local.min(axis=0), [-1., -.5, -1.5], atol=1e-14)
+        np.testing.assert_allclose(local.max(axis=0), [1., .5, 1.5], atol=1e-14)
+        np.testing.assert_allclose(data.vertices[0], np.array([1., 0., -1.5]) @ frame.T + center,
+                                   atol=1e-14)
+        self.assertEqual(parameters, original)
+
+    def test_numeric_frustum_preserves_roll_about_a_tilted_axis(self):
+        from primitives.shape_program import ShapeNode, ShapeProgram
+        from reconstruction.proposal_screening import whole_program_geometry
+        frame = Rotation.from_rotvec([.4, -.2, .1]).as_matrix()
+        rolled = frame @ Rotation.from_euler('z', .8).as_matrix()
+        np.testing.assert_array_equal(frame[:, 2], rolled[:, 2])
+        parameters = {**self.parameters(), 'width_world': 2., 'depth_world': 1.,
+                      'height_world': 3., 'radius_bottom': 1., 'radius_top': .4}
+        rows = []
+        for pose in (frame, rolled):
+            posed = {**parameters, 'rotation_row_major': pose.ravel().tolist()}
+            program = ShapeProgram('shape-program-v1', 'artist', (
+                ShapeNode('a', 'add', 'frustum', posed),))
+            rows.append(whole_program_geometry(program, resolution=16))
+        center = position_vector(parameters)
+        local = (rows[0].vertices - center) @ frame
+        np.testing.assert_allclose(rows[1].vertices, local @ rolled.T + center, atol=1e-14)
+        self.assertGreater(np.max(np.linalg.norm(rows[1].vertices - rows[0].vertices, axis=1)), .3)
+        np.testing.assert_array_equal(rows[0].faces, rows[1].faces)
+        self.assertEqual(rows[0].connectivity_hash, rows[1].connectivity_hash)
+
+    def test_numeric_cone_aliases_agree_with_editable_compiler_dimensions(self):
+        from primitives.shape_program import ShapeNode, ShapeProgram
+        from primitives.shape_program_compiler import _cone_or_cylinder
+        from reconstruction.proposal_screening import whole_program_geometry
+        cases = (
+            ({'diameter': 2., 'height': 3.}, (1., 1., 3., 1., 1.)),
+            ({'radius': .75, 'height': 2.}, (.75, .75, 2., 1., 1.)),
+            ({'radius_bottom': .9, 'height': 2.}, (.9, .9, 2., 1., 1.)),
+            ({'width_world': 2., 'diameter': 9., 'depth_world': 1., 'height_world': 3.,
+              'height': 9., 'radius': .8, 'radius_bottom': .7, 'radius_top': .35},
+             (.7, .35, 3., 1., .5)),
+            ({'width_world': 'invalid', 'diameter': 2., 'depth_world': None,
+              'height_world': None, 'height': 3., 'radius_bottom': 'invalid',
+              'radius': .6, 'radius_top': None}, (.6, .6, 3., 1., 1.)),
+            ({'width_world': 0., 'depth_world': 2., 'height_world': 2.},
+             (1., 1., 2., 1e-6, 1.)),
+        )
+        for primitive in ('cylinder', 'frustum'):
+            for parameters, expected in cases:
+                with self.subTest(primitive=primitive, parameters=parameters):
+                    calls = []
+                    obj = SimpleNamespace(scale=SimpleNamespace(x=1., y=1.))
+                    fake = SimpleNamespace(context=SimpleNamespace(active_object=obj),
+                        ops=SimpleNamespace(mesh=SimpleNamespace(
+                            primitive_cone_add=lambda **kwargs: calls.append(kwargs))))
+                    with patch('primitives.shape_program_compiler.bpy', fake):
+                        _cone_or_cylinder(name='a', params=parameters, vertices=16)
+                    native = calls[0]
+                    self.assertEqual((native['radius1'], native['radius2'], native['depth'],
+                                      obj.scale.x, obj.scale.y), expected)
+                    program = ShapeProgram('shape-program-v1', 'artist', (
+                        ShapeNode('a', 'add', primitive, parameters),))
+                    data = whole_program_geometry(program, resolution=16)
+                    bottom, top, height, scale_x, scale_y = expected
+                    for z, radius in ((-height * .5, bottom), (height * .5, top)):
+                        ring = data.vertices[data.vertices[:, 2] == z]
+                        np.testing.assert_allclose(ring[:, :2].min(axis=0),
+                            [-radius * scale_x, -radius * scale_y], atol=1e-14)
+                        np.testing.assert_allclose(ring[:, :2].max(axis=0),
+                            [radius * scale_x, radius * scale_y], atol=1e-14)
+                    np.testing.assert_array_equal(data.vertices[:, 2].min(), -height * .5)
+                    np.testing.assert_array_equal(data.vertices[:, 2].max(), height * .5)
+
+    def test_numeric_cone_default_identity_mesh_is_unchanged(self):
+        from primitives.shape_program import ShapeNode, ShapeProgram
+        from primitives.superfrustum import SuperFrustum
+        from reconstruction.native_geometry import GeometryArrays
+        from reconstruction.proposal_screening import whole_program_geometry
+        mesh = SuperFrustum(position=(0., 0., 0.), orientation=(0., 0.),
+                            radius_bottom=.5, radius_top=.5, height=1.).to_mesh_data(16)
+        triangles = np.asarray([(face[0], face[i], face[i + 1])
+            for face in mesh.faces for i in range(1, len(face) - 1)], int)
+        original = GeometryArrays.capture(mesh.vertices, triangles)
+        for primitive in ('cylinder', 'frustum'):
+            with self.subTest(primitive=primitive):
+                program = ShapeProgram('shape-program-v1', 'artist', (
+                    ShapeNode('a', 'add', primitive, {}),))
+                result = whole_program_geometry(program)
+                np.testing.assert_array_equal(result.vertices, original.vertices)
+                np.testing.assert_array_equal(result.faces, original.faces)
+                self.assertEqual(result.content_hash, original.content_hash)
+                self.assertEqual(result.connectivity_hash, original.connectivity_hash)
+
     def test_compiler_dispatch_reads_row_major_pose_before_native_euler_conversion(self):
         from primitives.shape_program import ShapeNode
         from primitives.shape_program_compiler import _compile_node

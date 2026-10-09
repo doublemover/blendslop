@@ -1,0 +1,12 @@
+{
+  "blockers": [],
+  "eligible": [],
+  "eligible_bytes": 0,
+  "mode": "read_only",
+  "mutation_supported": false,
+  "protocol": "run-ownership-dry-run-v1",
+  "retained_bytes": 13793,
+  "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-shared-plane-integration-01\\supervisor-01\\owned-kl3dildl",
+  "status": "dry_run_ready",
+  "unknown_files": []
+}

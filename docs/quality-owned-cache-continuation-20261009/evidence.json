@@ -1,0 +1,66 @@
+{
+  "bounds": {
+    "allocation_guard": "member size, header version/shape/dtype/object checks before np.load",
+    "metadata_utf8_bytes": 1048576,
+    "npy_header_bytes": 65536,
+    "stage_bytes": "2 * array.nbytes + metadata_array.nbytes + 65536",
+    "uncompressed_array_bytes": 67108864,
+    "verification_read_bytes": "3 * stage_byte_bound + 65536; one extra detection byte refused"
+  },
+  "contracts": {
+    "default_overwrite": "preserved",
+    "default_owned_writes": false,
+    "deterministic_key_collision": "False/write_errors; earlier entry untouched; failed fresh stage retained",
+    "flag_type": "strict bool",
+    "inputs": "unmodified and unowned",
+    "last_ownership_receipt": "actual fresh cache-store.json or None before ownership creation",
+    "reader": "unchanged NPZ cache reader"
+  },
+  "focused_tests": {
+    "existing_tests": 3,
+    "new_tests": 8,
+    "passed": 11,
+    "seconds": 0.69,
+    "skipped": 0,
+    "suites": [
+      "test_owned_volume_chunk_cache",
+      "test_volume_chunk_cache"
+    ],
+    "tests": 11
+  },
+  "interpreter": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+  "protocol": "owned-volume-chunk-cache-focused-evidence-v1",
+  "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+  "remaining_scope": {
+    "backend_default_owned_writes_adoption": "not changed; opt-in only",
+    "other_cache_report_producers": "unchanged",
+    "reclamation": "read-only inspector; no deletion implemented",
+    "save_render_exact_overwrite": "unchanged"
+  },
+  "runtime_crlf_preserved": true,
+  "scope": {
+    "deletion_executed": false,
+    "failed_serialization": "injected partial write and exception; earlier real NPZ bytes retained",
+    "fits": 0,
+    "historical_adoption": false,
+    "native_dependencies_changed": false,
+    "new_blender_sessions": 0,
+    "new_process_children": 0,
+    "oversized_header_fixture": "small real compressed NPZ with oversized shape declaration; rejected before np.load",
+    "oversized_input_fixture": "virtual broadcast array; rejected before copying/serialization",
+    "qualifiers": 0,
+    "raw_metrics": 0,
+    "real_npz_roundtrip": true,
+    "real_two_thread_same_key_collision": true,
+    "renders": 0,
+    "security_changes": false
+  },
+  "source_base_commit": "fa95cddde6ec5f877c2b76b57004bf40823729fb",
+  "source_sha256": {
+    "blender_blocking/test_owned_volume_chunk_cache.py": "430d83b794b7123c5603b075df66cca2fb6f12dd3a5a7249437c0e248808bf86",
+    "blender_blocking/utils/artifact_publication.py": "3a2d8d76defe2522df6ed4b4560eb521592031f963ddf2b9bdf73d55c544f631",
+    "blender_blocking/utils/run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+    "blender_blocking/volume/chunk_cache.py": "53c6b7e07169ae5aa764aa940080a3094b75cf40eff5e43c9e06d3b9632e44c4",
+    "blender_blocking/volume/owned_chunk_cache.py": "81b358b3cb066b7047f8bfbd525397348c8b0678c47bd4e595bbdf50645460ec"
+  }
+}

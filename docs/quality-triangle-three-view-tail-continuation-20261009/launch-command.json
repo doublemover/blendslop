@@ -1,0 +1,277 @@
+{
+  "protocol": "frozen_triangle_three_view_tail_launch_v1",
+  "status": "prepared_not_executed",
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\native-plan.json",
+    "sha256": "608ff529c1ebf108309cf07bbf9764d3f543d6845c2b39e5af02c60ec12c5523"
+  },
+  "argv": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+    "--output-parent",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-supervisor-01",
+    "--timeout-s",
+    "85",
+    "--join-timeout-s",
+    "5",
+    "--max-memory-bytes",
+    "8589934592",
+    "--max-rss-bytes",
+    "8589934592",
+    "--threads",
+    "2",
+    "--cwd",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\native-plan.json",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\triangle_tail_refinement.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_qualification.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\primary_process_cleanup.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\qualify_native_solid.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\rounded_triangle.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\silhouette_render.py",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo\\program.json",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo\\results.json",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\cpu-plan.json",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\cpu-evidence.json",
+    "--input",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\results.json",
+    "--",
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\native-plan.json",
+    "--plan-sha256",
+    "608ff529c1ebf108309cf07bbf9764d3f543d6845c2b39e5af02c60ec12c5523",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-checkpoint-01"
+  ],
+  "cwd": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+  "prepared_command": {
+    "protocol": "bounded-owned-command-v1",
+    "requested_argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\native-plan.json",
+      "--plan-sha256",
+      "608ff529c1ebf108309cf07bbf9764d3f543d6845c2b39e5af02c60ec12c5523",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-checkpoint-01"
+    ],
+    "actual_argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\native-plan.json",
+      "--plan-sha256",
+      "608ff529c1ebf108309cf07bbf9764d3f543d6845c2b39e5af02c60ec12c5523",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-checkpoint-01"
+    ],
+    "cwd": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+    "timeout_s": 85,
+    "join_timeout_s": 5,
+    "total_supervision_budget_s": 90,
+    "max_job_committed_bytes": 8589934592,
+    "max_rss_bytes": 8589934592,
+    "threads": 2,
+    "thread_environment": {
+      "OMP_NUM_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "2",
+      "MKL_NUM_THREADS": "2",
+      "NUMEXPR_NUM_THREADS": "2",
+      "VECLIB_MAXIMUM_THREADS": "2"
+    },
+    "thread_scope": "explicit Blender option and numerical-library environment controls; no kernel thread quota",
+    "portable_primary_only": false,
+    "child_output_scope": "child artifacts remain with their own producer; no path substitution or adoption"
+  },
+  "prepared_provenance": {
+    "protocol": "bounded-owned-command-provenance-v1",
+    "executable": {
+      "path": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "bytes": 113022936,
+      "mtime_ns": 1789458008000000000,
+      "sha256": "f141a3c5754500e6f84361099a4cd53f0bb7662b6a0d2cfaaa8fbb63e92234a0"
+    },
+    "sources": [
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+        "bytes": 15240,
+        "mtime_ns": 1791529507046412600,
+        "sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+        "bytes": 23620,
+        "mtime_ns": 1791565532104309500,
+        "sha256": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py",
+        "bytes": 12563,
+        "mtime_ns": 1791495758958145800,
+        "sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+      }
+    ],
+    "explicit_shared_inputs": [
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\native-plan.json",
+        "bytes": 68482,
+        "mtime_ns": 1791571705405933700,
+        "sha256": "608ff529c1ebf108309cf07bbf9764d3f543d6845c2b39e5af02c60ec12c5523"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py",
+        "bytes": 30788,
+        "mtime_ns": 1791571513161794200,
+        "sha256": "5b14abefcd28848f1e13b47bfeb8146ba8f73705fea1693d69542c16fc1a816e"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+        "bytes": 33821,
+        "mtime_ns": 1791570688802270100,
+        "sha256": "78a483d2d2e8ed10592dffb889aff72106ec350acc170fec81f0571524562456"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\triangle_tail_refinement.py",
+        "bytes": 5160,
+        "mtime_ns": 1791566191551112000,
+        "sha256": "6e2208f29864470b07d9cd1011a4a4a99c5b983e791af9d87ee4d4411fdfa6a4"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_qualification.py",
+        "bytes": 10622,
+        "mtime_ns": 1791568167037214300,
+        "sha256": "009295c99a1381bd48383e0dc579c844a4315d79c9471dd6f54b796b62df05a9"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\primary_process_cleanup.py",
+        "bytes": 2383,
+        "mtime_ns": 1791566543240068500,
+        "sha256": "ddc0f60642b536f64dda686d7d8e10c62e42916c70351c388564a5732785107f"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\qualify_native_solid.py",
+        "bytes": 4380,
+        "mtime_ns": 1791495758892970500,
+        "sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py",
+        "bytes": 32129,
+        "mtime_ns": 1791570689050360500,
+        "sha256": "385d2cd95b67259821faed893073a494013d37e659aaf18c5e22b5546bd75b35"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\multipart_planar_join.py",
+        "bytes": 14016,
+        "mtime_ns": 1791570823269542100,
+        "sha256": "38a3bd79c8f54e27006a884d1589e0de900a1e9fdf2c8d6003a5a419aebcee14"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\rounded_triangle.py",
+        "bytes": 10250,
+        "mtime_ns": 1791495758864607500,
+        "sha256": "42dd3eb646dab57cf7603c14a0dbc1f25bbfd9f348a20df2dd37e20364248bbf"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py",
+        "bytes": 6356,
+        "mtime_ns": 1791506647545265600,
+        "sha256": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py",
+        "bytes": 3314,
+        "mtime_ns": 1791507068847092300,
+        "sha256": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\silhouette_render.py",
+        "bytes": 19466,
+        "mtime_ns": 1791495758881759600,
+        "sha256": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo\\program.json",
+        "bytes": 9452,
+        "mtime_ns": 1791571146152602500,
+        "sha256": "40c498d1598f01e03307881daea53ebd67520c0b1153c4f0199cb63b45c68792"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-three-view-tail-cpu-01\\owned-_otq1_xo\\results.json",
+        "bytes": 9507,
+        "mtime_ns": 1791571146158851200,
+        "sha256": "df28032c461f71c0e9767a831e1dcf422268d958d0519b3c4ab0d434abca3628"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\cpu-plan.json",
+        "bytes": 15750,
+        "mtime_ns": 1791571144463041600,
+        "sha256": "67ce97893736069f82e2fc1fd877a7b6d9658572c2aac73fe1dc31b8a91de88d"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-three-view-tail-continuation-20261009\\cpu-evidence.json",
+        "bytes": 11908,
+        "mtime_ns": 1791571146171325100,
+        "sha256": "803228c567d108454d1f9b858be61d672051c4169119f60307709e9170f46d7e"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\results.json",
+        "bytes": 76484,
+        "mtime_ns": 1791570512918417100,
+        "sha256": "6860bdb20d9b8d537283454439dfe100325ac3167ade16f2e67eb9d6d2afca0b"
+      }
+    ],
+    "scope": "read-only current byte snapshots; no historical ownership or input locking"
+  },
+  "native_execution_authority": "root serial review and launch only"
+}

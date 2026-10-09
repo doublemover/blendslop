@@ -1,0 +1,140 @@
+{
+  "final_test_source_sha256": {
+    "blender_blocking/test_owned_process_supervisor.py": "a1a35d86b2a83361873e0a7f4f4dfc9d9a8cb570b54056f9f16b127a25cc01c4",
+    "blender_blocking/utils/owned_process_supervisor.py": "9fc904a81aa357171fb3032f66684246c72546d281109b6d6c3e30fe9805904c"
+  },
+  "fixture_interpreter": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+  "fixture_source_sha256": {
+    "blender_blocking/test_owned_lifecycle_processes.py": "38a1b32ef63a60bff405069b8479971db964d318440f630df72121634837dfc1",
+    "blender_blocking/test_owned_process_supervisor.py": "08e7b0c58ff848d7b06d82ac0a77c4de2452588c09fe058faaeb84de6b2d2fd0",
+    "blender_blocking/utils/owned_process_supervisor.py": "5c3961c109606c0077fa7fc570372c7ef127bfaf64a2b113a4913e93e3f1009b",
+    "blender_blocking/utils/run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+  },
+  "fixture_validation_passed": true,
+  "focused_tests": {
+    "after_change": "preserve observed identity history/final accounting on exceptions without changing lifecycle completion",
+    "passed": 7,
+    "seconds": 12.614,
+    "skipped": 0,
+    "suite": "test_owned_process_supervisor",
+    "tests": 7
+  },
+  "focused_tests_history": [
+    {
+      "passed": 6,
+      "seconds": 8.518,
+      "skipped": 0,
+      "suite": "test_owned_process_supervisor",
+      "tests": 6
+    }
+  ],
+  "interpreter": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+  "limits": {
+    "broker_created_processes": "unsupported",
+    "committed_memory": "separate kernel Job Object commit quota; not RSS",
+    "legacy_selected_canonical_lifecycle": "remains failed/unconfirmed; absence-only follow-up is not a kernel join",
+    "portable": "actual primary Popen wait only; complete lifecycle unavailable",
+    "rss": "20 ms sampled current working sets on retained in-job handles; inter-poll and unobserved short-lived peaks unavailable"
+  },
+  "owned_run_closed": true,
+  "owned_run_state": "failed",
+  "ownership_audit": {
+    "blockers": [],
+    "eligible": [],
+    "eligible_bytes": 0,
+    "mode": "read_only",
+    "mutation_supported": false,
+    "protocol": "run-ownership-dry-run-v1",
+    "retained_bytes": 2807,
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\process-supervisor-pure-01\\owned-n9h8lfoy",
+    "status": "dry_run_ready",
+    "unknown_files": []
+  },
+  "protocol": "fresh-owned-supervisor-pure-evidence-v1",
+  "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+  "retained_log_sha256": "4832c3ae433aca8d2b8962463410e9d17a7ac4af2f4d7d05a0ffdd0ce0df5731",
+  "retained_run_root": "temp/tasks/quality-continuation-20261009/process-supervisor-pure-01/owned-n9h8lfoy",
+  "retained_supervision_sha256": "218604bb0f38082bf6b0732f0ef39971877f2c93c83aea1456656e129c463770",
+  "scope": {
+    "blender_sessions": 0,
+    "cleanup_executed": false,
+    "fits": 0,
+    "fresh_owned_job_termination_allowed_on_bounds": true,
+    "historical_lease_release": false,
+    "historical_process_adoption": false,
+    "qualifiers": 0,
+    "raw_metrics": 0,
+    "renders": 0
+  },
+  "source_base_commit": "3f8398b677ad87d6adea930e74a7e44b61909192",
+  "source_difference_from_retained_crash_fixture": "finally retains already-observed identities and final accounting if a later operation fails; original crash/join/RSS receipt and source hashes remain unchanged",
+  "supervision": {
+    "broker_process_ownership": "unsupported",
+    "command": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe",
+      "-c",
+      "import os,subprocess,sys;print('fixture_executable='+sys.executable,flush=True);print('fixture_prefix='+sys.prefix,flush=True);child=subprocess.Popen([sys.executable,'-c',\"import time;time.sleep(.35);print('descendant finished')\"],creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0),stdout=sys.stdout,stderr=sys.stderr);print('fixture_descendant_pid='+str(child.pid),flush=True);os._exit(17)"
+    ],
+    "elapsed_seconds": 3.880121299996972,
+    "job_accounting": {
+      "active_processes": 0,
+      "peak_job_committed_bytes": 17092608,
+      "terminated_processes": 0,
+      "total_processes": 4
+    },
+    "job_active_zero": true,
+    "job_assigned_before_resume": true,
+    "job_memory_limit_enforced": true,
+    "join_timeout_s": 5.0,
+    "lifecycle_complete": true,
+    "limit_reason": null,
+    "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\process-supervisor-pure-01\\owned-n9h8lfoy\\child.log",
+    "max_job_committed_bytes": 268435456,
+    "max_rss_bytes": 268435456,
+    "memory_scope": "job-accounted committed memory; not an RSS quota",
+    "observed_handles_joined": true,
+    "observed_processes": [
+      {
+        "creation_filetime": 134359900554964919,
+        "exit_status": 17,
+        "kernel_joined": true,
+        "pid": 30456
+      },
+      {
+        "creation_filetime": 134359900562271963,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 14620
+      },
+      {
+        "creation_filetime": 134359900566744791,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 13728
+      },
+      {
+        "creation_filetime": 134359900575320446,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 5504
+      }
+    ],
+    "ordinary_createprocess_tree_owned": true,
+    "ownership_scope": "Windows no-breakaway job",
+    "peak_observed_tree_rss_bytes": 28622848,
+    "pid": 30456,
+    "primary_identity": {
+      "creation_filetime": 134359900554964919,
+      "pid": 30456
+    },
+    "primary_joined": true,
+    "protocol": "fresh_owned_process_supervision_v1",
+    "returncode": 17,
+    "rss_sample_count": 154,
+    "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+    "rss_unavailable_samples": [],
+    "status": "failed",
+    "timeout_s": 5.0,
+    "total_declared_supervision_budget_s": 10.0
+  }
+}

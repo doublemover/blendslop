@@ -1,0 +1,151 @@
+{
+  "status": "prepared; no native process launched",
+  "plan": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-families-continuation-20261009\\native-plan-03.json",
+  "plan_sha256": "d6f5cd09df8ab8150bee83e1fb6417132d9e9effa75d73c9600df8e8a310433e",
+  "command": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_family_detail.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-families-continuation-20261009\\native-plan-03.json",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03"
+  ],
+  "resource_budget": {
+    "wall_seconds": 90,
+    "max_rss_bytes": 8589934592,
+    "threads": 2,
+    "direct_child_join_required": true,
+    "approval": "pending root"
+  },
+  "exact_counts": {
+    "controlled_frames": 12,
+    "source_frames": 6,
+    "candidate_frames": 6,
+    "source_fit512": 2,
+    "baseline_fit512": 2,
+    "new_source_crop1024": 2,
+    "source_heldout512": 2,
+    "baseline_heldout512": 2,
+    "refined_heldout512": 2,
+    "fits": 2,
+    "max_residual_calls_each": 96,
+    "max_fit_seconds_each": 1.0,
+    "new_raw_pairs": 2,
+    "raw_samples_per_direction": 4096,
+    "raw_seed": 61007,
+    "baseline_raw_receipts_reused": 2,
+    "semantic_transactions": 2,
+    "qualification_children": 0,
+    "canonical_neutral_normal_frames": 0
+  },
+  "frame_sequence_per_case": [
+    "source front512",
+    "baseline front512",
+    "genuine source front residual crop1024",
+    "source original ob145512",
+    "baseline original ob145512",
+    "refined original ob145512"
+  ],
+  "baseline_audits": {
+    "tapered_frustum": {
+      "baseline_owner_state": "succeeded",
+      "baseline_lease_state": "released",
+      "baseline_owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-03\\owned-g6x13jf7",
+      "owned_baseline_files_verified": 4,
+      "baseline_geometry_hash": "191bc75bef0fc10d61cb0bd8364274ab42aaa083513b7f39a5be26fa3cc0864e",
+      "source_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+      "original_camera_sha256": "29376bf34c697f3c1998b72675bca70e132638fe323adc2a7b164bd6438c93ac",
+      "front_model_compatibility": "passed for planned unshifted ORTHO512 acquisition; actual settings must still be captured/verified",
+      "front_projected_bounds": [
+        -0.7991990685466777,
+        -0.8992406868580554,
+        0.7990668812341628,
+        0.8998035364698004
+      ],
+      "physical_prior_controls": {
+        "radius_bottom": 0.7994570138284117,
+        "radius_top": 0.3495143304996846,
+        "height_world": 1.7988807296227824
+      },
+      "parameter_bounds": {
+        "radius_bottom": [
+          0.7195113124455705,
+          0.879402715211253
+        ],
+        "radius_top": [
+          0.31456289744971616,
+          0.3844657635496531
+        ],
+        "height_world": [
+          1.6189926566605042,
+          1.978768802585061
+        ]
+      },
+      "source_owner_scope": "legacy original source directory has no modern owned lease; exact NPZ/OBJ/receipt/mask hashes frozen read-only, no historical adoption",
+      "ready": true
+    },
+    "concave_arch": {
+      "baseline_owner_state": "succeeded",
+      "baseline_lease_state": "released",
+      "baseline_owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0",
+      "owned_baseline_files_verified": 4,
+      "baseline_geometry_hash": "a1e2a84a728d7d913f9bf454ac6cbd731e0ddb8dd837271d02bc47efb6308177",
+      "source_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+      "original_camera_sha256": "533b9609c97a8f0af22581a81bd03752d117b3364686f61ab4c23329d8daf44b",
+      "front_model_compatibility": "passed for planned unshifted ORTHO512 acquisition; actual settings must still be captured/verified",
+      "front_projected_bounds": [
+        -0.8971875254064798,
+        -0.8971875603757083,
+        0.8971875254064798,
+        0.8971874904372513
+      ],
+      "physical_prior_controls": {
+        "opening_width_world": 1.0032187784090638,
+        "cavity_roof_height_world": 1.2968437867239118
+      },
+      "parameter_bounds": {
+        "opening_width_world": [
+          0.9028969005681574,
+          1.1035406562499703
+        ],
+        "cavity_roof_height_world": [
+          1.1671594080515206,
+          1.4265281653963031
+        ]
+      },
+      "source_owner_scope": "legacy original source directory has no modern owned lease; exact NPZ/OBJ/receipt/mask hashes frozen read-only, no historical adoption",
+      "ready": true
+    }
+  },
+  "source_only_dims_for_acquisition": true,
+  "runtime_sha256": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_family_detail.py": "8717fd10ad921bb0343a6a95b267a1c11f9106299bca023e03b7d2a8ae538a1e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\adaptive_family.py": "7afa34df46629372ffd4056ef1a4a21584ec451b032ea858cd34443c5aabdbcc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\capsule.py": "a30ae9883fbfc31d261570f15e7d4fe31ad40d78cd4ee757e7f4e9832bf42c9c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\adaptive_measurement.py": "a19e2f788b403a1dbec6f74caaeecc47d6b6bba5100555bdbc7c0f1d0ceb8278",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\comparable_geometry.py": "4226354476aea7a7785ea31e2860fba0084e2f0a5175e6a866e63deaba2ecb01",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_references.py": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\blender_builders.py": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_surface_quality_check.py": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_quality_coverage_check.py": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_family_source_edit_check.py": "91440893c490e8915be6ed8789262585c88ddfde90b1536ab8c95409619d33c1",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_structured_family_source_edits.py": "550d0efcd86d5eaf5460029b562a4a674d6c281f0e3478cdccfd9dc31ef4b39c"
+  },
+  "failure_contract": "exact baseline/source guards; no replay repair or fitting fallback; rank deficiency, active bounds, failed gates, raw/semantic regressions remain failed/unqualified and owned evidence retained",
+  "current_twelve_rows": "preserved; no automatic selection/admission update",
+  "artist_surface_limits": null,
+  "frozen_input_count": 39
+}

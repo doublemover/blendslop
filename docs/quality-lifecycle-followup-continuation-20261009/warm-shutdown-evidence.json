@@ -1,0 +1,56 @@
+{
+  "protocol": "numeric_helper_bounded_shutdown_followup_v1",
+  "date": "2026-10-09",
+  "code_revision": "1896d783caa3037575d97f20039a785ffa729d04",
+  "preceding_checkpoint_revision": "6c25b90c855a8f85a29681e8893ae1531bd361ad",
+  "preceding_native_lifecycle_evidence_sha256": "4664424f97a7feb9935edae1fb3d821210c1099711f77294a30c1c2089530a1f",
+  "owner_decisions_sha256": "16b8da31ac5d116ab3eea15d3c2d49fff15527d529c1a28cca873c471c08e212",
+  "source_bytes": {
+    "blender_blocking/reconstruction/differentiable/helper_session.py": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\differentiable\\helper_session.py",
+      "bytes": 12726,
+      "sha256": "1ee27df232f48dec92ca3ec873393ede5bd148666709ce01a999096a82ea3464"
+    },
+    "blender_blocking/test_owned_lifecycle_processes.py": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_owned_lifecycle_processes.py",
+      "bytes": 14906,
+      "sha256": "79b630aa1512d8b052b2a7863a72ee09ac02712cb38e06372071ea4de6653099"
+    }
+  },
+  "change": [
+    "warm final primary-child kill wait bounded to one second",
+    "unconfirmed final joins retain process/log, active lease and failed/cancelled history",
+    "close(error) and context finalization preserve original exceptions with compact secondary notes",
+    "ordinary incomplete ownership publication remains retryable until owner.closed is true",
+    "later confirmed join/receipt retry releases prior failed/cancelled history rather than reporting success"
+  ],
+  "wait_phases_seconds": [
+    0.5,
+    1.0,
+    1.0
+  ],
+  "bounds_scope": "explicit primary wait phases only; no total OS/filesystem wall-clock guarantee or descendant claim",
+  "failure_recording": "in-memory before unconfirmed join; producer metadata bytes unchanged; subsequent confirmed close publishes history",
+  "verification": {
+    "test_class": "test_owned_lifecycle_processes.TestNumericHelperBoundedShutdown",
+    "registered_suite": "pure_owned_lifecycle_processes already in custom runner",
+    "tests": 4,
+    "root_elapsed_s": 0.366,
+    "helper_elapsed_s": 0.446,
+    "status": "passed",
+    "scope": "stdlib and mocks with real OwnedRun files and actual metadata-publication failure seam",
+    "cases": [
+      "confirmed .5/1/1 waits and release",
+      "direct _stop/close unconfirmed final join plus later failed-history release",
+      "ValueError/KeyboardInterrupt primary retention and cancelled/failed-history retries",
+      "ordinary OwnedRun metadata publication failure preserves primary and active lease then retries"
+    ]
+  },
+  "native_frames": 0,
+  "dvx_torch_executions": 0,
+  "complete_tree_adoption": false,
+  "deletion": false,
+  "historical_adoption": false,
+  "publication": "local only after approved6256",
+  "remaining": "warm helper shutdown still qualifies only primary child; full descendants require persistent Job seam and explicit budgets"
+}

@@ -9,7 +9,7 @@ import math
 
 
 def _sub(a, b):
-    return tuple(a[i] - b[i] for i in range(3))
+    return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
 
 
 def _cross(a, b):
@@ -17,7 +17,7 @@ def _cross(a, b):
 
 
 def _dot(a, b):
-    return sum(a[i]*b[i] for i in range(3))
+    return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
 
 
 def integer_vertices(vertices):
@@ -199,6 +199,13 @@ def within_part_boundary_guard(vertices, faces, *, timeout_s=None, progress=None
     vertices, faces = np.asarray(vertices, float), np.asarray(faces, int)
     labels = np.asarray(face_components(len(vertices), faces))
     exact = integer_vertices(vertices)
+    # Reuse each face's exact coordinates and indexed vertex set. The same
+    # immutable face participates in many pairs; rebuilding dictionaries and
+    # sets per pair spends the helper allowance without adding evidence.
+    face_indices = [tuple(int(index) for index in face) for face in faces]
+    face_vertex_sets = [frozenset(face) for face in face_indices]
+    exact_faces = [{index: exact[index] for index in face} for face in face_indices]
+    exact_triangles = [tuple(exact[index] for index in face) for face in face_indices]
     triangles = vertices[faces]
     lower, upper = triangles.min(axis=1), triangles.max(axis=1)
     # Sweep along the axis with the smallest average box extent relative to
@@ -230,11 +237,11 @@ def within_part_boundary_guard(vertices, faces, *, timeout_s=None, progress=None
             if timeout_s is not None and time.monotonic()-started >= max(0., timeout_s):
                 return result('unavailable', False, reason='remaining_candidate_allowance_exhausted')
             tested += 1
-            shared = set(faces[a]) & set(faces[b])
-            if shared and _indexed_adjacency_contact({i:exact[i] for i in faces[a]}, {i:exact[i] for i in faces[b]}, shared):
+            shared = face_vertex_sets[a] & face_vertex_sets[b]
+            if shared and _indexed_adjacency_contact(exact_faces[a], exact_faces[b], shared):
                 allowed += 1
                 continue
-            relation = integer_triangle_relation([exact[i] for i in faces[a]], [exact[i] for i in faces[b]])
+            relation = integer_triangle_relation(exact_triangles[a], exact_triangles[b])
             kind = relation['relation']
             if kind == 'disjoint':
                 continue

@@ -1,0 +1,2271 @@
+{
+  "protocol": "retained-frustum-final-evidence-v1",
+  "code_revision": "904bffc202db13ddde3fb9037ac6551eb12cee5d",
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-frustum-final-qualification-continuation-20261009\\native-plan.json",
+    "bytes": 39274,
+    "sha256": "09e3d3cea1e4031d9154dde90816756826c6307f8f14517687ce4d5b804a8c98"
+  },
+  "launch": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-frustum-final-qualification-continuation-20261009\\launch-command.json",
+    "bytes": 12659,
+    "sha256": "f83e6aa9168a41dc4a9e63d96e3a8de522667d61621fddb65cba41a9b108b43a"
+  },
+  "preflight": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-frustum-final-qualification-continuation-20261009\\preflight.json",
+    "bytes": 3178,
+    "sha256": "5b056a472f0d997f1234ca8b6f0419ef504943aefa29fccb884ca4bf5ffa37f9"
+  },
+  "status": "required_independent_gates_passed",
+  "producer_result": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\owned-82sluhkp\\results.json",
+    "bytes": 84336,
+    "sha256": "3b19a1dbc38ed13088cd79f9c0c8c2868a89efd3b18d5e53c88d16bab72c0f00"
+  },
+  "supervisor_result": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-supervisor-01\\owned-ed4wbxv1\\run-result.json",
+    "bytes": 341,
+    "sha256": "2bb66270a496d18ba4dc94b485bb34465a4b913dc1bb7803b9e5563dd40d2c33"
+  },
+  "boundary_receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\qualification-children\\owned-p9nrqtcn\\receipt.json",
+    "bytes": 3268,
+    "sha256": "fcc3209772696164ad99cc3681e9b16836a20d330928b68519b18a9fe2f4e596"
+  },
+  "source_declarations": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\owned-82sluhkp\\source-declarations.json",
+    "bytes": 3403,
+    "sha256": "78f8e62ab5808d32ef1f5c909aa171a05808ebb11800ba038771de503e8af933"
+  },
+  "native_counts": {
+    "completed_native_frames": 27,
+    "attempted_native_frames": 27,
+    "retained_alpha_passes_verified": 3,
+    "fits": 0,
+    "raw_comparisons": 0,
+    "semantic_transactions": 0,
+    "qualifier_children_invoked": 1
+  },
+  "producer_elapsed_seconds": 17.283526500000335,
+  "independent_case": {
+    "status": "complete",
+    "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+    "source_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+    "artifact_directory": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\owned-82sluhkp\\tapered_frustum\\candidate",
+    "artist_surface_limits": null,
+    "aggregate_accepted": false,
+    "source_equivalence": {
+      "equivalent": true,
+      "indexed_reference_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+      "indexed_regenerated_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+      "reference_oriented_surface": "a3ba917aac5d96e6b2c5d80257c81a48b48defba3b2733832c8709215522db6a",
+      "regenerated_oriented_surface": "a3ba917aac5d96e6b2c5d80257c81a48b48defba3b2733832c8709215522db6a",
+      "scope": "exact binary64 vertex and oriented triangle-coordinate multisets; no topology identity qualification"
+    },
+    "obj_sha256": "1c42b1fcb56c19fb220de0ea5d6399583e8933cbdee48aa9cea1b56a773f7ee9",
+    "npz_sha256": "69db13252c1dc30aac9e3bd50af7a467f9f8770f525eeeb6d043c3960cc615b8",
+    "candidate_replay": {
+      "expected_indexed_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+      "actual_indexed_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+      "exact": true
+    },
+    "program": {
+      "schema_version": "1",
+      "program_id": "frozen-family-tapered_frustum",
+      "root_nodes": [
+        {
+          "node_id": "observed_tapered_frustum",
+          "operation": "add",
+          "primitive_type": "frustum",
+          "parameters": {
+            "depth_world": 1.6005057735119061,
+            "height_world": 1.800596571917608,
+            "radius_bottom": 0.8002528867559531,
+            "radius_top": 0.34999817430714925,
+            "rotation": [
+              [
+                0.9947589398256749,
+                0.10224796110406155,
+                7.801898310031342e-05
+              ],
+              [
+                -0.10224795144406111,
+                0.9947589367448094,
+                -0.00011912946347976245
+              ],
+              [
+                -8.97908254230055e-05,
+                0.00011052781759737407,
+                0.9999999898606046
+              ]
+            ],
+            "width_world": 1.6005057735119061,
+            "x": 4.079766364487806e-06,
+            "y": -2.6265076567274056e-05,
+            "z": 0.0003135807097994219
+          },
+          "children": [],
+          "name": "observed_tapered_frustum",
+          "editable": true
+        }
+      ],
+      "constraints": [],
+      "residual_patches": [],
+      "metadata": {
+        "camera_sha256": "29376bf34c697f3c1998b72675bca70e132638fe323adc2a7b164bd6438c93ac",
+        "coverage_views": [
+          "front",
+          "oblique_145_40",
+          "oblique_35_28",
+          "side",
+          "top"
+        ],
+        "evidence_scope": "observed five-view mask supports; full silhouette gates still required",
+        "family": "frustum",
+        "input_bounds": {
+          "max_x": 0.7989069149566779,
+          "max_y": 0.7989069149566779,
+          "max_z": 0.9003045100327309,
+          "min_x": -0.7989803678505562,
+          "min_y": -0.7989803678505562,
+          "min_z": -0.9003367539500615
+        },
+        "support_censored_by_view": {
+          "front": 0,
+          "oblique_145_40": 7,
+          "oblique_35_28": 7,
+          "side": 0,
+          "top": 0
+        },
+        "support_censored_count": 14,
+        "support_elapsed_s": 0.027821899988339283,
+        "support_evaluations": 211,
+        "support_squared_residual": 5.337567425313213e-06,
+        "termination": "solver_completed",
+        "adaptive_detail": {
+          "protocol": "bounded_discrete_family_detail_v1",
+          "family": "tapered_frustum",
+          "free_controls": [
+            "radius_bottom",
+            "radius_top",
+            "height_world"
+          ],
+          "original_controls": {
+            "radius_bottom": 0.7994570138284117,
+            "radius_top": 0.3495143304996846,
+            "height_world": 1.7988807296227824
+          },
+          "selected_controls": {
+            "radius_bottom": 0.8002528867559531,
+            "radius_top": 0.34999817430714925,
+            "height_world": 1.800596571917608
+          },
+          "frozen_intervals": [
+            [
+              0.7195113124455705,
+              0.879402715211253
+            ],
+            [
+              0.31456289744971616,
+              0.3844657635496531
+            ],
+            [
+              1.6189926566605042,
+              1.978768802585061
+            ]
+          ],
+          "fixed_pose": true,
+          "segments": 96,
+          "residual_calls": 19,
+          "elapsed_seconds": 0.09241340000880882,
+          "termination": "solver_completed",
+          "squared_residual": 1.5467600090752776e-08,
+          "observations": {
+            "front": {
+              "camera_sha256": "1a3ec1a3aae0ae12c2b76e209a70fa54045d97db4486d3d265b60bce37dc3f86",
+              "coverage_sha256": "c27056d9bc03385a44010d2a3812e41e40eeb1922837f6b206396a76540ba733",
+              "all_observed_crossings": 1668,
+              "fitted_crossings": 384,
+              "frame_censored": false,
+              "complete_contour_claim": true
+            },
+            "front_detail": {
+              "camera_sha256": "8584ced019e96d542213e066723f51e6c2d34233b03df4e38fca84a5b94f39c4",
+              "coverage_sha256": "381e925e35bd7042da3e5ea155e73f9a76af7d48f388874e21359a68763ce42d",
+              "all_observed_crossings": 1638,
+              "fitted_crossings": 384,
+              "frame_censored": true,
+              "complete_contour_claim": false
+            }
+          },
+          "local_sensitivity_singular_values": [
+            0.19361659453406344,
+            0.15251191847754858,
+            0.016005817631485477
+          ],
+          "local_rank": 3,
+          "interval_bound_active": false,
+          "identifiability": "locally_identified",
+          "global_uniqueness_established": false,
+          "heldout_views": [
+            "oblique_145_40"
+          ],
+          "heldout_fit_or_roi_used": false,
+          "prior_view_exposure": {
+            "oblique_145_40": "old display-derived ob145 supports entered the original five-view baseline fit (7 censored supports); old view masks/metrics and paired neutral pixels were inspected for prior admission; this new controlled ob145 is excluded current fit/ROI selection"
+          },
+          "artist_surface_limits": null,
+          "full_native_silhouette_admission": "unrun",
+          "model_scope": "discrete projected boundary; actual native geometry and measurement remain independent"
+        }
+      }
+    },
+    "refined_geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+    "refined_raw_surface": {
+      "protocol": "shared_world_area_sample_to_triangle_v1",
+      "sample_count_per_direction": 4096,
+      "seed": 61007,
+      "reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+      "candidate_geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+      "normal_orientation": "oriented; opposite normals are 180 degrees",
+      "normal_interpretation": "geometric face normals, not shading normals",
+      "units": "unchanged Blender world coordinates; no fitting or normalization",
+      "symmetric_mean_distance_world": 0.0002059388352186886,
+      "distance_p95_world": 0.0005877632764168083,
+      "sampled_max_distance_world": 0.0007686835015192628,
+      "normal_angle_mean_degrees": 1.3468779723738886,
+      "normal_angle_p95_degrees": 2.0571472306208785,
+      "silhouette_verdict": "independent",
+      "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+      "editability_verdict": "independent",
+      "metric_status": "measured",
+      "surface_status": "unqualified",
+      "qualified_limits": null,
+      "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+    },
+    "raw_receipt_reuse": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\results.json",
+      "sha256": "1484219f42ee4f75e60ba8ea39d3f3969560ac70978ad470bad7b1dfabe00cda"
+    },
+    "editability": {
+      "status": "passed",
+      "passed": true,
+      "receipt": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\results.json",
+        "sha256": "1484219f42ee4f75e60ba8ea39d3f3969560ac70978ad470bad7b1dfabe00cda"
+      },
+      "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+      "semantic_edit_restoration": {
+        "control": "radius_top x1.1",
+        "response": {
+          "passed": true,
+          "checks": {
+            "extents_response": true,
+            "top_radius_response": true,
+            "bottom_radius_fixed": true
+          },
+          "extents_ratio": [
+            1.0,
+            1.0,
+            1.0000000000001656
+          ],
+          "physical_observation_absolute_tolerance": 1e-05,
+          "identity_comparison": "exact indexed binary64 arrays, without tolerance",
+          "top_radius_ratio": 1.1000000088568265
+        },
+        "geometry_changed": true,
+        "same_source_pointer": true,
+        "original_mesh_restored": true,
+        "exact_indexed_restoration": true,
+        "passed": true
+      },
+      "scope": "original body-specific actual pointer/mesh restoration; no new edit on this process"
+    },
+    "surface": {
+      "status": "unqualified",
+      "qualified_limits": null,
+      "raw": {
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "sample_count_per_direction": 4096,
+        "seed": 61007,
+        "reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+        "candidate_geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "units": "unchanged Blender world coordinates; no fitting or normalization",
+        "symmetric_mean_distance_world": 0.0002059388352186886,
+        "distance_p95_world": 0.0005877632764168083,
+        "sampled_max_distance_world": 0.0007686835015192628,
+        "normal_angle_mean_degrees": 1.3468779723738886,
+        "normal_angle_p95_degrees": 2.0571472306208785,
+        "silhouette_verdict": "independent",
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "surface_status": "unqualified",
+        "qualified_limits": null,
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+      }
+    },
+    "raw_regression_history": {
+      "baseline": {
+        "candidate_geometry_hash": "191bc75bef0fc10d61cb0bd8364274ab42aaa083513b7f39a5be26fa3cc0864e",
+        "distance_p95_world": 0.0009236007928848267,
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "normal_angle_mean_degrees": 1.3590374068505227,
+        "normal_angle_p95_degrees": 2.0571646692591217,
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "qualified_limits": null,
+        "reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+        "sample_count_per_direction": 4096,
+        "sampled_max_distance_world": 0.0010797285940498114,
+        "seed": 61007,
+        "silhouette_verdict": "independent",
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only",
+        "surface_status": "unqualified",
+        "symmetric_mean_distance_world": 0.0005079230022606851,
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "units": "unchanged Blender world coordinates; no fitting or normalization"
+      },
+      "refined": {
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "sample_count_per_direction": 4096,
+        "seed": 61007,
+        "reference_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+        "candidate_geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "units": "unchanged Blender world coordinates; no fitting or normalization",
+        "symmetric_mean_distance_world": 0.0002059388352186886,
+        "distance_p95_world": 0.0005877632764168083,
+        "sampled_max_distance_world": 0.0007686835015192628,
+        "normal_angle_mean_degrees": 1.3468779723738886,
+        "normal_angle_p95_degrees": 2.0571472306208785,
+        "silhouette_verdict": "independent",
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "surface_status": "unqualified",
+        "qualified_limits": null,
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+      },
+      "P95": "original observation retained; no new P95 cutoff"
+    },
+    "prior_view_exposure": {
+      "oblique_145_40": "old display-derived ob145 supports entered the original five-view baseline fit (7 censored supports); old view masks/metrics and paired neutral pixels were inspected for prior admission; this new controlled ob145 is excluded current fit/ROI selection"
+    },
+    "canonical_inspection": {
+      "status": "complete",
+      "actual_matched_views": {
+        "front": {
+          "actual_frame_match": true,
+          "actual_clipping_match": true,
+          "camera_sha256": "ac339c644deefbba5a72588d08d67853d90557337c1ddb06d9af858bb6403675",
+          "passes": {
+            "mask": {
+              "source": {
+                "path": "front-mask.png",
+                "sha256": "365afcea36d947f19c5bc436983f00d380de7d2025e0d90e2539910ac316547c",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        7.549790126404332e-08,
+                        -1.0,
+                        -3.200000047683716
+                      ],
+                      [
+                        0.0,
+                        1.0,
+                        7.549790126404332e-08,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              },
+              "candidate": {
+                "path": "front-mask.png",
+                "sha256": "365afcea36d947f19c5bc436983f00d380de7d2025e0d90e2539910ac316547c",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        7.549790126404332e-08,
+                        -1.0,
+                        -3.200000047683716
+                      ],
+                      [
+                        0.0,
+                        1.0,
+                        7.549790126404332e-08,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              }
+            },
+            "neutral": {
+              "source": {
+                "path": "front-neutral.png",
+                "sha256": "bafbb02522b998eb1b238b51b327aa6d8c31e9b5fc014246e6d15d9950031ffa",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              },
+              "candidate": {
+                "path": "front-neutral.png",
+                "sha256": "fb1f4fa7e130816bb1cd70bc570e9a92c1e3fbb4014eebd7ccfd81879f9747ba",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              }
+            },
+            "normals": {
+              "source": {
+                "path": "front-normals.png",
+                "sha256": "fccb8252e2cdbb4cd944150938c1f40f57c6eb2bf2ff12c2f36be42135f55cd2",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              },
+              "candidate": {
+                "path": "front-normals.png",
+                "sha256": "4bbf2b6c01ffd4e514dc1f6dd558d51f23b2d255294d0911077410568e302261",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              }
+            }
+          }
+        },
+        "side": {
+          "actual_frame_match": true,
+          "actual_clipping_match": true,
+          "camera_sha256": "a304e3740434c67513a4b3a7140659c5e8e18cd9780fbc57695eb8c669fc04f3",
+          "passes": {
+            "mask": {
+              "source": {
+                "path": "side-mask.png",
+                "sha256": "365afcea36d947f19c5bc436983f00d380de7d2025e0d90e2539910ac316547c",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        -4.371138828673793e-08,
+                        4.371138828673793e-08,
+                        1.0,
+                        3.200000047683716
+                      ],
+                      [
+                        1.0,
+                        1.910685676922942e-15,
+                        4.371138828673793e-08,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        1.0,
+                        -4.371138828673793e-08,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              },
+              "candidate": {
+                "path": "side-mask.png",
+                "sha256": "365afcea36d947f19c5bc436983f00d380de7d2025e0d90e2539910ac316547c",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        -4.371138828673793e-08,
+                        4.371138828673793e-08,
+                        1.0,
+                        3.200000047683716
+                      ],
+                      [
+                        1.0,
+                        1.910685676922942e-15,
+                        4.371138828673793e-08,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        1.0,
+                        -4.371138828673793e-08,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              }
+            },
+            "neutral": {
+              "source": {
+                "path": "side-neutral.png",
+                "sha256": "b3c46f438d5b5b789c16641ed813ab6b397f8b6affef59e14438003eef5a4bc3",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              },
+              "candidate": {
+                "path": "side-neutral.png",
+                "sha256": "abae1032378660526b3d617d93b4152ee180d70413bda75d38bc23d62c78d465",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              }
+            },
+            "normals": {
+              "source": {
+                "path": "side-normals.png",
+                "sha256": "21bddf5f823e50c90c3172f8fb08e1b9ef0fd39d347c8fbf161458f58c4dffb5",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              },
+              "candidate": {
+                "path": "side-normals.png",
+                "sha256": "292d7cc3117e581efb5bf980395d21be319f06d0581d9995c799dd2940623b9d",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              }
+            }
+          }
+        },
+        "top": {
+          "actual_frame_match": true,
+          "actual_clipping_match": true,
+          "camera_sha256": "c000619f83d488a9f4003c3cde12fe223bda429a0629e26007ab0086595e8c1d",
+          "passes": {
+            "mask": {
+              "source": {
+                "path": "top-mask.png",
+                "sha256": "34e1953fea5ab8e757472c08fc23d5728bd101914e075834a28a7e4722d57027",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        1.0,
+                        3.5999999046325684
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              },
+              "candidate": {
+                "path": "top-mask.png",
+                "sha256": "272e1b5f8152cc2c8d17aad73aad6b59fd15472f203e7109b724bb672ad669e8",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        1.0,
+                        3.5999999046325684
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              }
+            },
+            "neutral": {
+              "source": {
+                "path": "top-neutral.png",
+                "sha256": "91c2f59ab935bc12ae68ddbebea43b502233d872120d409158cdc3aa62ef174f",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              },
+              "candidate": {
+                "path": "top-neutral.png",
+                "sha256": "1d3b4d40913750a477a3b0b48ffd17dd66a78babaf301f16840ca7d3dba6066d",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              }
+            },
+            "normals": {
+              "source": {
+                "path": "top-normals.png",
+                "sha256": "2a8e58f4fade6454159342be765c027fb4f173836afdb514edb720b3a2c3c07e",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              },
+              "candidate": {
+                "path": "top-normals.png",
+                "sha256": "2166a4413fe14530d4493ceedb5bae24ca71325752dd13674e05e1ef532d74b0",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              }
+            }
+          }
+        },
+        "oblique_35_28": {
+          "actual_frame_match": true,
+          "actual_clipping_match": true,
+          "camera_sha256": "eb2b4f067300aac9eef4b6d460ec56039ad5332e150530f2482736c81de497fe",
+          "passes": {
+            "mask": {
+              "source": {
+                "path": "oblique_35_28-mask.png",
+                "sha256": "8e38a70f3aef695f2bfd0b6423bf779fa7841b261828750ba5a342fb8cd9108b",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        -0.5735766887664795,
+                        -0.3845684826374054,
+                        0.7232682108879089,
+                        4.530552864074707
+                      ],
+                      [
+                        0.8191518783569336,
+                        -0.26927807927131653,
+                        0.5064380764961243,
+                        3.1723272800445557
+                      ],
+                      [
+                        1.6287096116229804e-07,
+                        0.882947564125061,
+                        0.46947160363197327,
+                        2.940770149230957
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              },
+              "candidate": {
+                "path": "oblique_35_28-mask.png",
+                "sha256": "06a3e509041cd3cd589af3110436c44070b6a9c567c8722d61c5e4a16af916ec",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        -0.5735766887664795,
+                        -0.3845684826374054,
+                        0.7232682108879089,
+                        4.530552864074707
+                      ],
+                      [
+                        0.8191518783569336,
+                        -0.26927807927131653,
+                        0.5064380764961243,
+                        3.1723272800445557
+                      ],
+                      [
+                        1.6287096116229804e-07,
+                        0.882947564125061,
+                        0.46947160363197327,
+                        2.940770149230957
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              }
+            },
+            "neutral": {
+              "source": {
+                "path": "oblique_35_28-neutral.png",
+                "sha256": "f775d9e4af10022cb566641ee7e3a4eb406484b1213d3bb5c535d346aa7959a2",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              },
+              "candidate": {
+                "path": "oblique_35_28-neutral.png",
+                "sha256": "2605f11389452dcd91d90034475e5dbb42cf9694ec0d0ab037584082b4b1678f",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              }
+            },
+            "normals": {
+              "source": {
+                "path": "oblique_35_28-normals.png",
+                "sha256": "c65de0a5168d66ff557b4eda4fe4728ac110e0f7a653a5f347f65636107460cc",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              },
+              "candidate": {
+                "path": "oblique_35_28-normals.png",
+                "sha256": "8d6b1bfa4040ec9273ffb2c7e8b5d34deb61b5cdc8242767895bba7a3f7d269c",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              }
+            }
+          }
+        },
+        "oblique_145_40": {
+          "actual_frame_match": true,
+          "actual_clipping_match": true,
+          "camera_sha256": "63ef0731a7340140c7350a214102d8667766fa4d4208f47c6e82b47ac8991124",
+          "passes": {
+            "mask": {
+              "source": {
+                "path": "oblique_145_40-mask.png",
+                "sha256": "316e59a897d7664cf2f8e6a024b98c06b2e11a2891fb8a8a52ccd8bf650c32c1",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        -0.5735764503479004,
+                        0.5265406966209412,
+                        -0.6275068521499634,
+                        -3.9307029247283936
+                      ],
+                      [
+                        -0.8191519975662231,
+                        -0.3686877489089966,
+                        0.4393851161003113,
+                        2.752307891845703
+                      ],
+                      [
+                        4.58191067309599e-08,
+                        0.7660444378852844,
+                        0.6427875757217407,
+                        4.026422023773193
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              },
+              "candidate": {
+                "path": "oblique_145_40-mask.png",
+                "sha256": "b317733bcda4e5471b4e3c7395ccd873329c63a8d12f232bb9809daa05baee1f",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "protocol": "opaque_linear_alpha_v1",
+                  "hard_mask_threshold": 0.5,
+                  "camera": {
+                    "projection": "ORTHO",
+                    "matrix_world": [
+                      [
+                        -0.5735764503479004,
+                        0.5265406966209412,
+                        -0.6275068521499634,
+                        -3.9307029247283936
+                      ],
+                      [
+                        -0.8191519975662231,
+                        -0.3686877489089966,
+                        0.4393851161003113,
+                        2.752307891845703
+                      ],
+                      [
+                        4.58191067309599e-08,
+                        0.7660444378852844,
+                        0.6427875757217407,
+                        4.026422023773193
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                      ]
+                    ],
+                    "ortho_scale": 2.0880000591278076,
+                    "shift_x": 0.0,
+                    "shift_y": 0.0,
+                    "clip_start": 0.10000000149011612,
+                    "clip_end": 1000.0,
+                    "resolution": [
+                      512,
+                      512
+                    ],
+                    "pixel_aspect": [
+                      1.0,
+                      1.0
+                    ]
+                  },
+                  "renderer": {
+                    "engine": "BLENDER_EEVEE",
+                    "blender_version": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "build_hash": "d13f752e3b9c"
+                  },
+                  "sampling": {
+                    "taa_render_samples": 64,
+                    "filter_size": 1.5,
+                    "motion_blur": false,
+                    "depth_of_field": false
+                  },
+                  "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+                  "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+                  "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+                }
+              }
+            },
+            "neutral": {
+              "source": {
+                "path": "oblique_145_40-neutral.png",
+                "sha256": "c4ec525b9557035fb077854b173cfc82362810edb8a97342d91bd0138705d551",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              },
+              "candidate": {
+                "path": "oblique_145_40-neutral.png",
+                "sha256": "c395e35f752035f0c1722d0add8e79713dcd31ffabae587a4e33a075a9414764",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_WORKBENCH",
+                  "format": "PNG",
+                  "color_mode": "BW",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "light": "STUDIO",
+                  "color_type": "SINGLE",
+                  "single_color": [
+                    0.6499999761581421,
+                    0.6499999761581421,
+                    0.6499999761581421
+                  ],
+                  "shadows": true,
+                  "cavity": false,
+                  "background_type": "WORLD"
+                }
+              }
+            },
+            "normals": {
+              "source": {
+                "path": "oblique_145_40-normals.png",
+                "sha256": "3fd14888be822b34dd107a929ec4a9c9b840bbfe91e13a9cd634d4316f8d850f",
+                "geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              },
+              "candidate": {
+                "path": "oblique_145_40-normals.png",
+                "sha256": "706e3c2843f558f2cd4490a1b7bc7931f6eee66e10a9578171e845b84fe80051",
+                "geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+                "render_settings": {
+                  "engine": "BLENDER_EEVEE",
+                  "format": "PNG",
+                  "color_mode": "RGB",
+                  "color_depth": "8",
+                  "resolution_percentage": 100,
+                  "display": {
+                    "view_transform": "AgX",
+                    "look": "None",
+                    "exposure": 0.0,
+                    "gamma": 1.0
+                  },
+                  "purpose": "human inspection only; no geometric-normal metric",
+                  "material": "world shading normal * .5 + .5 emission",
+                  "samples": 64
+                }
+              }
+            }
+          }
+        }
+      },
+      "scope": "current recapture only; historical missing bindings remain unchanged",
+      "acceptance": "independent; no fitting, silhouette metrics, surface comparisons or qualifiers",
+      "legacy_original_declaration": {
+        "front": {
+          "actual_source_frame_matches_declared": false,
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; no backfill"
+        },
+        "side": {
+          "actual_source_frame_matches_declared": true,
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; no backfill"
+        },
+        "top": {
+          "actual_source_frame_matches_declared": true,
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; no backfill"
+        },
+        "oblique_35_28": {
+          "actual_source_frame_matches_declared": false,
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; no backfill"
+        },
+        "oblique_145_40": {
+          "actual_source_frame_matches_declared": false,
+          "original_clipping_status": "unavailable",
+          "original_geometry_binding": "legacy unavailable; no backfill"
+        }
+      }
+    },
+    "presentation": {
+      "status": "retained",
+      "styles": {
+        "source": {
+          "status": "native_observed",
+          "source_mesh": {
+            "vertices": 192,
+            "polygons": 98,
+            "smooth_polygons": 0,
+            "flat_polygons": 98,
+            "polygon_style": "flat",
+            "smooth_flags_sha256": "30274f1a3e86d58c63c688e25ae4e34231a6f0cc07d6fc55c8b1ab154aff2fdf",
+            "sharp_edge_attribute": "absent",
+            "sharp_edges": 0,
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "has_custom_normals": false
+          },
+          "evaluated_mesh": {
+            "vertices": 192,
+            "polygons": 98,
+            "smooth_polygons": 0,
+            "flat_polygons": 98,
+            "polygon_style": "flat",
+            "smooth_flags_sha256": "30274f1a3e86d58c63c688e25ae4e34231a6f0cc07d6fc55c8b1ab154aff2fdf",
+            "sharp_edge_attribute": "absent",
+            "sharp_edges": 0,
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "has_custom_normals": false
+          },
+          "modifiers": [],
+          "scope": "shading/style only; geometric-normal metrics remain separate"
+        },
+        "candidate": {
+          "status": "native_observed",
+          "source_mesh": {
+            "vertices": 192,
+            "polygons": 98,
+            "smooth_polygons": 0,
+            "flat_polygons": 98,
+            "polygon_style": "flat",
+            "smooth_flags_sha256": "30274f1a3e86d58c63c688e25ae4e34231a6f0cc07d6fc55c8b1ab154aff2fdf",
+            "sharp_edge_attribute": "absent",
+            "sharp_edges": 0,
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "has_custom_normals": false
+          },
+          "evaluated_mesh": {
+            "vertices": 192,
+            "polygons": 98,
+            "smooth_polygons": 0,
+            "flat_polygons": 98,
+            "polygon_style": "flat",
+            "smooth_flags_sha256": "30274f1a3e86d58c63c688e25ae4e34231a6f0cc07d6fc55c8b1ab154aff2fdf",
+            "sharp_edge_attribute": "absent",
+            "sharp_edges": 0,
+            "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "has_custom_normals": false
+          },
+          "modifiers": [],
+          "scope": "shading/style only; geometric-normal metrics remain separate"
+        },
+        "comparison": {
+          "status": "observed",
+          "weighted_normal_controls_match": true,
+          "polygon_style_match": true,
+          "sharp_edge_count_match": true,
+          "custom_normal_state_match": true,
+          "modifier_type_sequence_match": true,
+          "source_polygon_style": "flat",
+          "candidate_polygon_style": "flat",
+          "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied"
+        }
+      },
+      "pixel_review": "pending real output inspection; retained passes do not establish appearance"
+    },
+    "silhouette": {
+      "status": "passed",
+      "views": {
+        "front": {
+          "view": "front",
+          "area_iou": 1.0,
+          "boundary_iou": 1.0,
+          "soft_iou": null,
+          "signed_distance_loss": 0.0,
+          "intersection": 124644,
+          "union": 124644,
+          "ref_area": 124644,
+          "render_area": 124644,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 1.0,
+          "threshold": 0.7,
+          "precision": 1.0,
+          "recall": 1.0,
+          "area_ratio": 1.0,
+          "centroid_delta_px": [
+            0.0,
+            0.0
+          ],
+          "pixel_difference": 0.0,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.0001517923519713804,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "side": {
+          "view": "side",
+          "area_iou": 1.0,
+          "boundary_iou": 1.0,
+          "soft_iou": null,
+          "signed_distance_loss": 0.0,
+          "intersection": 124644,
+          "union": 124644,
+          "ref_area": 124644,
+          "render_area": 124644,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 1.0,
+          "threshold": 0.7,
+          "precision": 1.0,
+          "recall": 1.0,
+          "area_ratio": 1.0,
+          "centroid_delta_px": [
+            0.0,
+            0.0
+          ],
+          "pixel_difference": 0.0,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.000167614605743438,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "top": {
+          "view": "top",
+          "area_iou": 0.9991564112743152,
+          "boundary_iou": 0.9739685018872836,
+          "soft_iou": null,
+          "signed_distance_loss": 0.00014425630167735903,
+          "intersection": 120810,
+          "union": 120912,
+          "ref_area": 120821,
+          "render_area": 120901,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9991564112743152,
+          "threshold": 0.7,
+          "precision": 0.9992473180536141,
+          "recall": 0.9999089562244974,
+          "area_ratio": 1.0006621365491097,
+          "centroid_delta_px": [
+            -0.019777395844982948,
+            -0.02043685285804031
+          ],
+          "pixel_difference": 0.00038909912109375,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.00033440551487728953,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "oblique_35_28": {
+          "view": "oblique_35_28",
+          "area_iou": 0.9995232109574791,
+          "boundary_iou": 0.9829575249082328,
+          "soft_iou": null,
+          "signed_distance_loss": 8.48488607791964e-05,
+          "intersection": 138360,
+          "union": 138426,
+          "ref_area": 138360,
+          "render_area": 138426,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9995232109574791,
+          "threshold": 0.7,
+          "precision": 0.9995232109574791,
+          "recall": 1.0,
+          "area_ratio": 1.000477016478751,
+          "centroid_delta_px": [
+            0.043386875581205686,
+            -0.032893306256028154
+          ],
+          "pixel_difference": 0.00025177001953125,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.0003832032671198249,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "oblique_145_40": {
+          "view": "oblique_145_40",
+          "area_iou": 0.9996913239995591,
+          "boundary_iou": 0.9887369267900241,
+          "soft_iou": null,
+          "signed_distance_loss": 5.495346994877082e-05,
+          "intersection": 136023,
+          "union": 136065,
+          "ref_area": 136023,
+          "render_area": 136065,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9996913239995591,
+          "threshold": 0.7,
+          "precision": 0.9996913239995591,
+          "recall": 1.0,
+          "area_ratio": 1.0003087713107341,
+          "centroid_delta_px": [
+            -0.017241495080611458,
+            -0.013270610861241039
+          ],
+          "pixel_difference": 0.00016021728515625,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.0003129914402961731,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        }
+      }
+    },
+    "boundary": {
+      "geometry_content_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+      "toolchain_identity": "621104fa218dee053548a9d4270ca6eddc2184a45982d1277e50309c0dc472c8",
+      "manifold_validated": true,
+      "self_intersections": 0,
+      "reported_self_intersections": 0,
+      "exact_pair_verification": {
+        "predicate_version": "exact_binary64_triangle_contacts_v1",
+        "reported_pairs": 0,
+        "verified_pairs": 0,
+        "unverified_pairs": 0,
+        "complete": true,
+        "non_disjoint_pairs": 0,
+        "counts": {},
+        "relations": {},
+        "samples": [],
+        "component_count": 1,
+        "qualification_policy": "only exactly disjoint native reports are removed; contact/degenerate/unverified reports remain blocking"
+      },
+      "within_part_boundary_guard": {
+        "status": "checked",
+        "passed": true,
+        "tested_pairs": 5798,
+        "indexed_adjacency_contacts": 2880,
+        "component_count": 1,
+        "elapsed_s": 0.125,
+        "geometry_scope": "within indexed parts only; between-part overlap permitted",
+        "predicate_version": "exact_binary64_triangle_contacts_v1",
+        "sweep_axis": 0,
+        "reason": null,
+        "limitation": "surface guard; closed topology/volume and external single-solid qualification are separate"
+      },
+      "self_intersections_scope": "exact non-disjoint reported triangle pairs; null when incomplete",
+      "triangle_predicate_sha256": "621d32ca63daa37b2f8cecdf2b6689b66fade5d919f5958b6e77456953f6594b",
+      "intersection_sample": [],
+      "intersection_pair_provenance": [],
+      "between_component_pairs": 0,
+      "within_component_pairs": 0,
+      "backend": "Open3D 0.19.0",
+      "helper_python": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+      "helper_source_sha256": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25",
+      "triangle_count": 380,
+      "qualification": "Open3D edge/vertex/orientability screen plus exact verification of reported triangle pairs",
+      "status": "qualified",
+      "reason": null,
+      "single_solid_qualified": true,
+      "solid_guard": {
+        "vertex_count": 192,
+        "face_count": 380,
+        "edge_count": 570,
+        "boundary_edges": 0,
+        "non_manifold_edges": 0,
+        "degenerate_faces": 0,
+        "loose_vertices": 0,
+        "connected_components": 1,
+        "euler_characteristic": 2,
+        "watertight": true,
+        "topology_score": 1.0,
+        "penalty": 0.0,
+        "required": true,
+        "passed": true,
+        "pass": true,
+        "reason": "",
+        "signed_volume": 1.9652387083080314,
+        "orientation_errors": 0,
+        "geometric_degenerate_faces": 0,
+        "valid_solid": true,
+        "topology_and_volume_valid": true,
+        "single_solid_qualified": false,
+        "valid_solid_scope": "legacy topology/volume screen; boundary intersections untested",
+        "self_intersection_qualification": "not_established_by_index_topology"
+      },
+      "cache_hit": false,
+      "qualification_elapsed_s": 5.402078600000095,
+      "owned_run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\qualification-children\\owned-p9nrqtcn",
+      "qualification_cost_boundary": "identity verification, solid guard, transfer and actual helper execution",
+      "boundary_qualified": true,
+      "material_body_count": null,
+      "certificate_scope": "actual retained coordinates and connectivity; edits invalidate receipt",
+      "body_count_limitation": "surface component count does not establish material body count for cavities"
+    },
+    "current_twelve_row_selection": "preserved"
+  },
+  "complete_tree_supervision": {
+    "broker_process_ownership": "unsupported",
+    "command": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_retained_family_final_qualification.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-frustum-final-qualification-continuation-20261009\\native-plan.json",
+      "--plan-sha256",
+      "09e3d3cea1e4031d9154dde90816756826c6307f8f14517687ce4d5b804a8c98",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01"
+    ],
+    "elapsed_seconds": 24.996853099999953,
+    "job_accounting": {
+      "active_processes": 0,
+      "peak_job_committed_bytes": 2752155648,
+      "terminated_processes": 0,
+      "total_processes": 5
+    },
+    "job_active_zero": true,
+    "job_assigned_before_resume": true,
+    "job_memory_limit_enforced": true,
+    "join_timeout_s": 5.0,
+    "lifecycle_complete": true,
+    "limit_reason": null,
+    "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-supervisor-01\\owned-ed4wbxv1\\stdout.log",
+    "max_job_committed_bytes": 8589934592,
+    "max_rss_bytes": 8589934592,
+    "memory_scope": "job-accounted committed memory; not an RSS quota",
+    "observed_handles_joined": true,
+    "observed_processes": [
+      {
+        "creation_filetime": 134360337119612789,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 24344
+      },
+      {
+        "creation_filetime": 134360337120541197,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 21772
+      },
+      {
+        "creation_filetime": 134360337277937138,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 26260
+      },
+      {
+        "creation_filetime": 134360337278086788,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 27924
+      },
+      {
+        "creation_filetime": 134360337278300157,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 11168
+      }
+    ],
+    "ordinary_createprocess_tree_owned": true,
+    "ownership_scope": "Windows no-breakaway job",
+    "peak_observed_tree_rss_bytes": 698994688,
+    "pid": 24344,
+    "primary_identity": {
+      "creation_filetime": 134360337119612789,
+      "pid": 24344
+    },
+    "primary_joined": true,
+    "protocol": "fresh_owned_process_supervision_v1",
+    "returncode": 0,
+    "rss_sample_count": 1099,
+    "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+    "rss_unavailable_samples": [],
+    "status": "succeeded",
+    "timeout_s": 85.0,
+    "total_declared_supervision_budget_s": 90.0
+  },
+  "ownership_audits": {
+    "producer": {
+      "protocol": "run-ownership-dry-run-v1",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\owned-82sluhkp",
+      "mode": "read_only",
+      "status": "dry_run_ready",
+      "mutation_supported": false,
+      "eligible": [],
+      "eligible_bytes": 0,
+      "retained_bytes": 13909693,
+      "blockers": [],
+      "unknown_files": []
+    },
+    "supervisor": {
+      "protocol": "run-ownership-dry-run-v1",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-supervisor-01\\owned-ed4wbxv1",
+      "mode": "read_only",
+      "status": "dry_run_ready",
+      "mutation_supported": false,
+      "eligible": [],
+      "eligible_bytes": 0,
+      "retained_bytes": 11307,
+      "blockers": [],
+      "unknown_files": []
+    },
+    "boundary_helper": {
+      "protocol": "run-ownership-dry-run-v1",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\qualification-children\\owned-p9nrqtcn",
+      "mode": "read_only",
+      "status": "dry_run_ready",
+      "mutation_supported": false,
+      "eligible": [
+        {
+          "path": "input.npz",
+          "bytes": 14752,
+          "sha256": "6cdcbfd8303e3d8e4966d6972a77f90f7f9accb1dedeea4cea36a54d90f3286f"
+        }
+      ],
+      "eligible_bytes": 14752,
+      "retained_bytes": 3268,
+      "blockers": [],
+      "unknown_files": []
+    }
+  },
+  "input_bytes_unchanged_after_complete_tree": true,
+  "input_sha256_after": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\frozen-workload.json": "3b63f97aa72b6c8ab933bac9825ff97528f753acac285331d673748abb7a32b0",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\results.json": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\run-ownership.json": "2446f53ac3de07c74cf7a3cc94dc8d27ca7bfa92fc0f3704f862afdb4779d5e5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\run-lease.json": "f489f37ff7291e44813164774177d0887cfc559e4020aad83911ee3b1c7587e3",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\results.json": "1484219f42ee4f75e60ba8ea39d3f3969560ac70978ad470bad7b1dfabe00cda",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\frozen-workload.json": "4a6fecb71d1e09c303f0a9ba0393ec3435318b828ae901305db932325eb3162a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\evaluated-exact.npz": "b977567ef96650b8b7398441d553dff7a421758905b25044d268683e3cf6ce4c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\refined\\program.json": "232a87a396b0de8427cbbe8523f08357b45818ab84873be2cb08e3bea8d7a3a8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\refined\\evaluated-exact.npz": "69db13252c1dc30aac9e3bd50af7a467f9f8770f525eeeb6d043c3960cc615b8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\refined\\evaluated.obj": "1c42b1fcb56c19fb220de0ea5d6399583e8933cbdee48aa9cea1b56a773f7ee9",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\semantic-edited-program.json": "c3d36ec8c6c6520a55ad549f06a1e1dbe6f32b0ec64b067fe43d228adc845937",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\front-mask.png": "e1fea3fbb98e114d1072819dac72aa4a2a3c83378d8db6b57fcf3b3b9ec7fb47",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\side-mask.png": "e1fea3fbb98e114d1072819dac72aa4a2a3c83378d8db6b57fcf3b3b9ec7fb47",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\top-mask.png": "bd0f57588df78e9dd4bd09721d9156df611bb87d86bc6618d6e4838f595ce5c3",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\oblique_35_28-mask.png": "e9a85e6408650435e4f7103418d18b8019d2e37330cc34abbecf13c094e7e158",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\tapered_frustum\\oblique_145_40-mask.png": "d96d3b4e55653b4241e0cb428d419eb3948c8fe285d89b66e0883a804005d1a5",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\open3d-0.19.0.dist-info\\METADATA": "7020e4ea25bf1195edece73e72120cd2b86ead8ef3e8f9db10bafb05c9c2e572",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\open3d\\cpu\\pybind.cp312-win_amd64.pyd": "ab1b2f4a1126a11886a2a9f3eeab5ceaeac0bab1b53ee319eb363df7ef629d88",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\numpy-2.4.4.dist-info\\METADATA": "8f9e04338ffa930868a2d157ce44f6e4cb7ac524b968fb13d04187a6ac575282",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\numpy\\_core\\_multiarray_umath.cp312-win_amd64.pyd": "f4523c2dfe641a904605029ce4a5046388bd61b18afc0594d34018b5e6d848f8",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\pyvenv.cfg": "7629eb68ddb84edf4972de38284488d9c6e37a4badef61cecb67b945efe17d74",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely-2.1.1.dist-info\\METADATA": "3cead846ed6c3d8ebe3c5e8b2042f84853779894fd9d6bac6cce88c6e04e565d",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely.libs\\geos-a5c01bdebd805679c9540218609cd4b8.dll": "a0bb7a93b30bd7d1a072ce75832985c565c3fbf099dfa422ee847862ed510aa1",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely.libs\\geos_c-f79418bf8e5cda2d1933e2121ee44e49.dll": "f517acbc835b6af36ed680062803ee13b693253d213022040851a1b0095763d6",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely.libs\\msvcp140-8a79f4687fc453279df1092923244d9e.dll": "26cb454224ee93438311fb75124281a9ee7fd95ed2d6ed391e35d69f58012efd",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely\\_geometry_helpers.cp313-win_amd64.pyd": "fe5398a30c65d704e91cf9abebea9117ea0c4a178f845d7e48337bcab65ab5d6",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely\\_geos.cp313-win_amd64.pyd": "afcc2e3c26cb801ac195b137ae239db92ebecb8a32494b9fcdfcde109544e268",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely\\lib.cp313-win_amd64.pyd": "a652293a7321d4dad6597813081078cccb3e5b813262218427dd3613c5b47703",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\source-fit\\measurement.json": "8709616b53fda45eab423434262ff0af0f4cd9b2485960b83b4fd801d21ef3db",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\source-fit\\coverage.npy": "9dcecedba0380efeba11f99e15c6372e51f3e6f41ee8be676fbe3dcb7f7f87e5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\source-fit\\alpha.exr": "b726afaa6579e514a0125ebf12883f0b910e9bcbb86d2c9e84744c18603ab94a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\source-heldout\\oblique_145_40\\measurement.json": "345ee685901a8e5ba466e9f149d8f34028ae18f4303cf70faf39be99784a229f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\source-heldout\\oblique_145_40\\coverage.npy": "b5102d7254a2f3ae17c754d6bb30ff74a6f7c3103f94831a2477de7817f6a39e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\source-heldout\\oblique_145_40\\alpha.exr": "0a483737454629f9550e0f239aaaa9741dc22ff0b2b363dcf3e737247ee73074",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\refined-heldout\\oblique_145_40\\measurement.json": "55d65277e98f8eecf35678950f4c49a121534f68124b980ac8ba1ce1ad476745",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\refined-heldout\\oblique_145_40\\coverage.npy": "dcdaa6e73bcc839de4e85348383d233c49cee1aed9f998d7097798b3e611bdf6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\tapered_frustum\\refined-heldout\\oblique_145_40\\alpha.exr": "50b0f8bc8da1e774aa94c01ce306bebe6944a359d02000a3496de03be78ffc30",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Scripts\\python.exe": "d55736b9f3d6b4ca7985b82db8ce11edfa09994cf93ce31c6b506543b74f32eb",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_triangle_final_qualification.py": "e3c2656b02ead2fd22b802ddc55a3dddd435ccba85050efc3d0f066e43d79a47",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_selected_canonical_inspection.py": "c5f00d3a861d5bfa004d04cec912ed391d5ab5cd5f22ae919a36514664d408ce",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_reference_neutral_inspection.py": "28501a44fcefc55e2ca09412c82072233885d5ecf4ff83f18f2a9f4b6cae6ec6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_family_source_edit_check.py": "91440893c490e8915be6ed8789262585c88ddfde90b1536ab8c95409619d33c1",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_surface_quality_check.py": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_quality_coverage_check.py": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\qualify_native_solid.py": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py": "8175488c23e79ce96a06d6b0e12843935a16faafc94d0d55a781ab3cf74e3d95",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program.py": "3226433f881a72446baca12a01181f9d2015e232a4f48cd2fbee726ea647b741",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\rounded_triangle.py": "42dd3eb646dab57cf7603c14a0dbc1f25bbfd9f348a20df2dd37e20364248bbf",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\primitive_protocol.py": "52fb55574f7a41477f1f15d49b42211e5253fe48eb583344f2990aa4337fb9d7",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_targets.py": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\mesh_io.py": "2d3d6bb40a66232614940f4fd75ddbd7624075b5b839dc284161d24deca0f9b8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_qualification.py": "36793d9aa2f79d7573e955d42ce14d8f40822b46f7e9ad7910b829985bea367e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_qualification.py": "d09a5a8d165d57c74d2abea02f9208a9f2ee642c588cb7ad7638ade0cb49f3d2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\grouped_solids.py": "0dcc8d7ae0c95bb706c28ce42bdb372591ef64d7055491b3edc136111e3baada",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology_receipt.py": "a72f08ac2ea97dbeaa25ff059727dc9c87664f7274a1c57b4854f173ae403655",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology.py": "3e97bc30c728c171cce2dcacc9ed249effcf374b4757e34a3dda9c502cfcfe9e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\reference_noise.py": "841d1470fbfa7db2f81cf364455d94705342498b6bc1b304d1445b157a577460",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\silhouette_eval.py": "11aebcbfcaa4ad61d5decb7f63eea63b2b32e477bdfdf459f8b5d57c4aa5b40f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\triangle_contacts.py": "621d32ca63daa37b2f8cecdf2b6689b66fade5d919f5958b6e77456953f6594b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\silhouette_render.py": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_references.py": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_contracts.py": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py": "162c7e2282ae930419382ed2fc6fae63aa947ca7b7b000c46158dd2cd15dafb8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\artifact_publication.py": "3a2d8d76defe2522df6ed4b4560eb521592031f963ddf2b9bdf73d55c544f631",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\json_io.py": "915fecf4a182e6b53f632c6c1403a9f075f1bb94ca1e307bd0b6abde382974b9",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\blender_builders.py": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\specs.py": "b750d075ff5e7d07a388ce541b0defa515b89dfa91462cc9f4f1ec727f0fde4b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\profile_loft_mesh.py": "8ce2b13f2d4e9c802ed830778a4d852aaf69bf2e2edf5847b2681612857b6239",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\geometry\\profile_models.py": "7c2faf7ed2273d7547695cd4afd046aa5a5f154822f426d1af81469957b1f181",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_retained_family_final_qualification.py": "96a17494b2db91b1e589902fe49c58e9b85177352113074503a27b31364b5c23",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_retained_family_final_qualification.py": "6a893cb8d46d2f11995c6c7c2dedef20db7040d4f46324593138d0f166d678be"
+  },
+  "pixel_review": {
+    "status": "completed",
+    "images": [
+      {
+        "role": "source",
+        "native_original": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\owned-82sluhkp\\tapered_frustum\\source\\oblique_35_28-neutral.png",
+          "bytes": 81157,
+          "sha256": "f775d9e4af10022cb566641ee7e3a4eb406484b1213d3bb5c535d346aa7959a2"
+        },
+        "retained_copy": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-frustum-final-qualification-continuation-20261009\\pixels\\source-oblique_35_28-neutral.png",
+          "bytes": 81157,
+          "sha256": "f775d9e4af10022cb566641ee7e3a4eb406484b1213d3bb5c535d346aa7959a2"
+        },
+        "actually_viewed_by": "root",
+        "kind": "actual native PNG pixels"
+      },
+      {
+        "role": "source",
+        "native_original": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\owned-82sluhkp\\tapered_frustum\\source\\oblique_35_28-normals.png",
+          "bytes": 193195,
+          "sha256": "c65de0a5168d66ff557b4eda4fe4728ac110e0f7a653a5f347f65636107460cc"
+        },
+        "retained_copy": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-frustum-final-qualification-continuation-20261009\\pixels\\source-oblique_35_28-normals.png",
+          "bytes": 193195,
+          "sha256": "c65de0a5168d66ff557b4eda4fe4728ac110e0f7a653a5f347f65636107460cc"
+        },
+        "actually_viewed_by": "root",
+        "kind": "actual native PNG pixels"
+      },
+      {
+        "role": "candidate",
+        "native_original": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\owned-82sluhkp\\tapered_frustum\\candidate\\oblique_35_28-neutral.png",
+          "bytes": 81143,
+          "sha256": "2605f11389452dcd91d90034475e5dbb42cf9694ec0d0ab037584082b4b1678f"
+        },
+        "retained_copy": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-frustum-final-qualification-continuation-20261009\\pixels\\candidate-oblique_35_28-neutral.png",
+          "bytes": 81143,
+          "sha256": "2605f11389452dcd91d90034475e5dbb42cf9694ec0d0ab037584082b4b1678f"
+        },
+        "actually_viewed_by": "root",
+        "kind": "actual native PNG pixels"
+      },
+      {
+        "role": "candidate",
+        "native_original": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\frustum-final-qualification-01\\owned-82sluhkp\\tapered_frustum\\candidate\\oblique_35_28-normals.png",
+          "bytes": 194354,
+          "sha256": "8d6b1bfa4040ec9273ffb2c7e8b5d34deb61b5cdc8242767895bba7a3f7d269c"
+        },
+        "retained_copy": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-frustum-final-qualification-continuation-20261009\\pixels\\candidate-oblique_35_28-normals.png",
+          "bytes": 194354,
+          "sha256": "8d6b1bfa4040ec9273ffb2c7e8b5d34deb61b5cdc8242767895bba7a3f7d269c"
+        },
+        "actually_viewed_by": "root",
+        "kind": "actual native PNG pixels"
+      }
+    ],
+    "observations": [
+      "Root inspected both source/candidate oblique35 neutral and RGB-normal native images; top cap, tapered sides and visible base contour match visually.",
+      "Both neutral sides preserve the authored vertical facet shading. RGB-normal previews show corresponding cap and sloped side directions; neither is an artist or geometric-normal acceptance cutoff.",
+      "The original lower edge cropping remains visible. No smoothing, crop/camera repair, tessellation change or new reference was applied."
+    ],
+    "appearance_acceptance": "diagnostic only; no artist limits inferred"
+  },
+  "artist_surface_passed": null,
+  "aggregate_accepted": false,
+  "selection": "original twelve selected rows preserved",
+  "publication": "local only; no later push/PR/merge/deployment"
+}

@@ -65,6 +65,8 @@ def compile_shape_program(
     csg_options: Mapping[str, Any] | None = None,
     executor=None,
     timeout_s: float | None = None,
+    context=None,
+    process_budget=None,
 ) -> CompiledShapeProgram:
     """Create editable Blender objects for a ShapeProgram.
 
@@ -75,6 +77,13 @@ def compile_shape_program(
     errors = validate_compilable_program(program)
     if errors:
         raise ValueError("shape program cannot compile: " + "; ".join(errors))
+    shared_plane = None
+    if "shared_far_plane" in program.metadata:
+        # Support both the application top-level and ordinary package imports.
+        from importlib import import_module
+        prefix = __package__.rsplit(".", 1)[0] + "." if "." in __package__ else ""
+        shared_plane = import_module(prefix + "reconstruction.multipart_planar_join")
+        shared_plane._relation(program)  # Validate before Blender allocation.
     if not BLENDER_AVAILABLE:
         raise RuntimeError("shape program compilation requires Blender")
     collection = _ensure_collection(collection_name or f"ShapeProgram_{program.program_id}")
@@ -95,6 +104,9 @@ def compile_shape_program(
         _tag_object(obj, program=program, node=node)
         objects.append(obj)
 
+    if shared_plane is not None:
+        shared_plane.embed_shared_plane_sources(program, objects)
+
     operations = [(node,obj) for node,obj in zip(program.root_nodes,objects) if obj.type == "MESH"]
     if csg_options.get("native_union_execution", False) or any(node.operation in {"subtract","intersect","difference","intersection"} for node,obj in operations):
         from blender_blocking.reconstruction.native_geometry import NativeOwnedGeometry, evaluated_arrays, GeometryArrays
@@ -111,7 +123,8 @@ def compile_shape_program(
             thickness = min(float(node.parameters.get(key, 1.)) for node in positive_nodes
                             for key in ('width_world', 'depth_world', 'height_world'))
         data, union_report = production_union(positives, csg_options, executor=executor,
-                                             timeout_s=timeout_s, feature_thickness=thickness)
+                                             timeout_s=timeout_s, feature_thickness=thickness,
+                                             context=context, process_budget=process_budget)
         for node,obj in operations:
             if node.operation in {"subtract","intersect","difference","intersection"}:
                 data, _ = boolean_mesh(data,evaluated_arrays(obj),operation="DIFFERENCE" if node.operation in {"subtract", "difference"} else "INTERSECT")
@@ -225,6 +238,14 @@ def _compile_node(
 ) -> tuple[Any, tuple[str, ...]]:
     primitive = node.primitive_type or "empty"
     params = node.parameters
+    # An explicit source style survives a caller's global inspection default.
+    # Absence preserves the existing global behavior for every primitive.
+    node_weighted_normals = params.get("weighted_normals", weighted_normals)
+    if "weighted_normals" in params and not isinstance(node_weighted_normals, bool):
+        raise ValueError("weighted_normals recipe parameter must be a boolean")
+    keep_sharp = params.get("weighted_normals_keep_sharp", True)
+    if not isinstance(keep_sharp, bool):
+        raise ValueError("weighted_normals_keep_sharp recipe parameter must be a boolean")
     name = node.name or node.node_id
     warnings: list[str] = []
     if primitive == "capsule":
@@ -285,9 +306,10 @@ def _compile_node(
         owner = NativeOwnedGeometry(native_convex_mesh(params["points_world"]), name)
         obj = owner.attach(); obj.use_fake_user = False
     elif primitive in {"box", "rounded_box"}:
+        segments = _rounded_box_bevel_segments(params) if primitive == "rounded_box" and bevel_modifier else 3
         obj = _cube(name=name, params=params)
         if primitive == "rounded_box" and bevel_modifier:
-            _add_bevel(obj, _float(params, "corner_radius_world", 0.02))
+            _add_bevel(obj, _float(params, "corner_radius_world", 0.02), segments=segments)
     elif primitive == "superquadric":
         from .analytic_primitives import SuperquadricPrimitive
         size = [_float(params, key, 1.)*.5 for key in ("width_world","depth_world","height_world")]
@@ -316,8 +338,8 @@ def _compile_node(
     else:
         raise ValueError(f"unsupported compiler primitive {primitive!r}")
 
-    if weighted_normals and hasattr(obj, "modifiers") and primitive not in {"empty"}:
-        _add_weighted_normals(obj)
+    if node_weighted_normals and hasattr(obj, "modifiers") and primitive not in {"empty"}:
+        _add_weighted_normals(obj, keep_sharp=keep_sharp)
     if any(key in params for key in ('rotation','rotation_row_major','rotation_euler')):
         from mathutils import Matrix
         from reconstruction.program_transforms import rotation_matrix
@@ -605,19 +627,35 @@ def _tag_object(obj: Any, *, program: ShapeProgram, node: ShapeNode) -> None:
     obj["blendslop_shape_node_primitive_type"] = node.primitive_type or ""
 
 
-def _add_bevel(obj: Any, amount: float) -> None:
+def _rounded_box_bevel_segments(params: Mapping[str, Any]) -> int:
+    segments = params.get("bevel_segments", 3)
+    if isinstance(segments, bool) or not isinstance(segments, int) or not 1 <= segments <= 64:
+        raise ValueError("rounded-box bevel_segments must be an integer in [1, 64]")
+    return segments
+
+
+def _add_bevel(obj: Any, amount: float, *, segments: int = 3) -> None:
+    """Apply source scale so a declared world radius stays isotropic."""
+    amount = float(amount)
+    if not math.isfinite(amount):
+        raise ValueError("rounded-box world bevel radius must be finite")
+    segments = _rounded_box_bevel_segments({"bevel_segments": segments})
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     modifier = obj.modifiers.new("Blendslop editable bevel", "BEVEL")
-    modifier.width = max(0.0, float(amount))
-    modifier.segments = 3
+    modifier.width = max(0.0, amount)
+    modifier.segments = segments
     try:
         modifier.affect = "EDGES"
     except Exception:
         pass
 
 
-def _add_weighted_normals(obj: Any) -> None:
+def _add_weighted_normals(obj: Any, *, keep_sharp: bool = True) -> None:
     modifier = obj.modifiers.new("Blendslop weighted normals", "WEIGHTED_NORMAL")
-    modifier.keep_sharp = True
+    modifier.keep_sharp = keep_sharp
 
 
 def _add_subdivision(obj: Any, *, levels: int) -> None:

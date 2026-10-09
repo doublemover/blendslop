@@ -1,0 +1,48 @@
+{
+  "protocol": "approved-current-demo-publication-v1",
+  "date": "2026-10-09",
+  "authorization": "Owner approved the exact six-commit batch through d11d1b8 to existing draft PR7; no merge/deploy.",
+  "previous_head": "f5d7f4122273f8372fd8620bcb9df5b621a88810",
+  "published_head": "d11d1b84bd90d6265e59c0389c2b487fa90bcbcd",
+  "commits_pushed": 6,
+  "destination_repository": "doublemover/blendslop",
+  "destination_branch": "local/quality-continuation-20261008",
+  "pull_request": "https://github.com/doublemover/blendslop/pull/7",
+  "base": "main",
+  "base_head_observed_unchanged": "d5e981659a18c435ccbe7cc072b873e5b1707645",
+  "push": "nonforce fast-forward of exact commit SHA",
+  "verification": {
+    "remote_branch_head": "d11d1b84bd90d6265e59c0389c2b487fa90bcbcd",
+    "pr_api_head": "d11d1b84bd90d6265e59c0389c2b487fa90bcbcd",
+    "pr_state": "OPEN",
+    "is_draft": true,
+    "ci_runs_observed": [
+      {
+        "workflow": "Adaptive CI policy checks",
+        "event": "pull_request",
+        "head_sha": "d11d1b84bd90d6265e59c0389c2b487fa90bcbcd",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "workflow": "Blender Tests",
+        "event": "pull_request",
+        "head_sha": "d11d1b84bd90d6265e59c0389c2b487fa90bcbcd",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "evaluation_pages_run_for_this_head": "none in successful exact-head run listing; dispatch-only source",
+    "later_run_url_enrichment": "GitHub API returned rate limit403; not retried, earlier verified statuses retained"
+  },
+  "current_demo_bundle": {
+    "name": "blendslop-current-demo-d11d1b8.bundle",
+    "bytes": 3412282,
+    "sha256": "aca89ccc9893080de38acf62e5d03098d7a3151027160036758a1406a2860d3c"
+  },
+  "merge_performed": false,
+  "retarget_performed": false,
+  "workflow_dispatch_performed": false,
+  "pages_deployment_performed": false,
+  "later_implementation": "local only; additional publication approval required"
+}

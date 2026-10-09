@@ -1,0 +1,11 @@
+# Thin plate: completed missing final gates
+
+The exact saved candidate `0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0` completed its missing original five-view silhouettes, native solid boundary and matched source/candidate canonical packet. Both source and candidate retain eight vertices and twelve triangles. The source reference, recipes, styles and camera declarations are unchanged.
+
+The [native evidence](native-evidence.json) binds the [frozen plan](native-plan.json), [exact launch](launch-command.json), original released-owner alpha files, complete-tree receipt, raw/edit observations and six actual inspected PNGs. The packet acquired27 new512-square frames and reused3 original physical alpha passes. No fitting, raw sampling or semantic edit rerun occurred.
+
+All five unchanged silhouette gates passed. Boundary IoUs were front0.94207, side0.99904, top1.0, oblique35 0.99532 and oblique145 0.99285. The one uncached unchanged15-second helper qualified the exact retained boundary in5.136seconds. The producer took22.445seconds; the separate Windows Job supervisor took39.062seconds under85+5seconds, two threads and8GiB caps. All five observed creation-HANDLEs joined with exit0; Job active count was zero. Peak sampled tree RSS was694,448,128bytes and peak Job committed memory2,748,968,960bytes. All three read-only owner audits have no blockers or unknown files; no cleanup ran.
+
+Root inspected the paired original oblique35 neutral and RGB-normal views and paired side neutral views. They show matching broad flat faces, a thin continuous edge and uniform face normals without visible repeated banding. The [six retained pixel copies](pixels) match their native originals byte for byte. RGB normal previews remain presentation diagnostics, independent of the existing geometric-normal metric.
+
+Artist surface limits remain null and aggregate acceptance false. The original twelve selected rows, old failure/regression history and independent surface/editability verdicts remain intact. Capsule, torus, frustum and cylinder still need their separately bounded missing gates. Later local commits require parent approval before publication to the existing draft PR7.

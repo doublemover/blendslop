@@ -1,0 +1,421 @@
+{
+  "aggregate_accepted": false,
+  "contact_sheets": {
+    "anisotropic_ellipsoid-side-pair.png": "09c7ce4b56d6fa169a6fc43288716e3e2942f2775a9bc3bbc9a0ce27e693083f",
+    "capsule-side-pair.png": "6f323242061189aaeb7cc4084b5cc40da273402498efc9c832e41a6d45dcf6d4",
+    "cylinder-side-pair.png": "c5b85c42183df1156acc7f5d9a8f3e737332831cc042e19717f73b6d614c177b",
+    "rounded_box-side-pair.png": "172a7204a8366b53a81b96690ae1148b5039e25629701195dd7e8263c5244a71",
+    "sphere-side-pair.png": "0b918f72d073170b799b7b1d5895d8b81d92f92122d680bbf9291b6cba6741bc",
+    "tapered_frustum-side-pair.png": "02117f4d4b14d3198d0c325f21e1210a825e00fd4cd89735df17a31bb84de2f1",
+    "thin_plate-side-pair.png": "42456766c721d6eda80d0fca69032867f7e5478a0ab8afcab5facf6c0c034d0a"
+  },
+  "native_runs": {
+    "source_controls": {
+      "cases": {
+        "anisotropic_ellipsoid": {
+          "baseline_geometry_hash": "b40ab45f1aa7e00f353fba58b6a500a485cd1ddba73d9e3be2dd74ba5c857699",
+          "control": "local depth_world x 1.05",
+          "edited_geometry_hash": "a640b1965b48bf1ad31535103c75055aeb960beb77d146e65312a862d834b7b7",
+          "exact_restoration": true,
+          "original_mesh_pointer_restored": true,
+          "response": {
+            "checks": {
+              "extents_response": true
+            },
+            "extents_ratio": [
+              0.9999999999999973,
+              1.0500000097545859,
+              1.0
+            ],
+            "geometry_changed": true,
+            "identity_comparison": "exact indexed binary64 arrays, without tolerance",
+            "passed": true,
+            "physical_observation_absolute_tolerance": 1e-05,
+            "same_root_pointer": true,
+            "same_source_pointer": true
+          },
+          "restored_geometry_hash": "b40ab45f1aa7e00f353fba58b6a500a485cd1ddba73d9e3be2dd74ba5c857699",
+          "scope": "recipe parameter regeneration applied to the same owned root and mesh descendant",
+          "status": "passed"
+        },
+        "capsule": {
+          "baseline_geometry_hash": "bfd4411d02558b91d3ad137e2d6f156446b7a087247483eebc4c61653a36566a",
+          "control": "straight segment_height_world x 1.05 with cap radius fixed",
+          "edited_geometry_hash": "96479383fb84fb7e35e48d1227afa0b795e1970e25db468e7687cafd8706d47f",
+          "exact_restoration": true,
+          "original_mesh_pointer_restored": true,
+          "response": {
+            "checks": {
+              "axial_segment_response": true,
+              "extents_response": true
+            },
+            "expected_height_delta_world": 0.06000763439126351,
+            "extents_ratio": [
+              1.0000000000007052,
+              1.000000000000051,
+              1.0300125593648353
+            ],
+            "geometry_changed": true,
+            "height_delta_world": 0.0600076930309239,
+            "identity_comparison": "exact indexed binary64 arrays, without tolerance",
+            "passed": true,
+            "physical_observation_absolute_tolerance": 1e-05,
+            "same_root_pointer": true,
+            "same_source_pointer": true
+          },
+          "restored_geometry_hash": "bfd4411d02558b91d3ad137e2d6f156446b7a087247483eebc4c61653a36566a",
+          "scope": "recipe parameter regeneration applied to the same owned root and mesh descendant",
+          "status": "passed"
+        },
+        "cylinder": {
+          "baseline_geometry_hash": "d40c3afafe582554646f0dd42226795a5d3a1896f3df6d92a30ded5c5093adde",
+          "control": "coupled cylinder radii and radial dimensions x 1.05",
+          "edited_geometry_hash": "b284b17a7a3070e51ec98de62d57763e6d1a2ccf7e0d0a0a953e893351059c25",
+          "exact_restoration": true,
+          "original_mesh_pointer_restored": true,
+          "response": {
+            "checks": {
+              "extents_response": true
+            },
+            "extents_ratio": [
+              1.0500000045886138,
+              1.0500000045883828,
+              1.0000000000012625
+            ],
+            "geometry_changed": true,
+            "identity_comparison": "exact indexed binary64 arrays, without tolerance",
+            "passed": true,
+            "physical_observation_absolute_tolerance": 1e-05,
+            "same_root_pointer": true,
+            "same_source_pointer": true
+          },
+          "restored_geometry_hash": "d40c3afafe582554646f0dd42226795a5d3a1896f3df6d92a30ded5c5093adde",
+          "scope": "recipe parameter regeneration applied to the same owned root and mesh descendant",
+          "status": "passed"
+        },
+        "rounded_box": {
+          "baseline_geometry_hash": "aa683c0899ba9b98c077a6164ef87fca69c66ec60fad2cba2aa5e62b8bf14753",
+          "control": "live BEVEL width x 1.10 with eight segments fixed",
+          "edited_geometry_hash": "33c8fcdc203cd88dc50625baead1164ee2746b06b6a23a88c1f9a30f9b30fd5c",
+          "exact_restoration": true,
+          "original_mesh_pointer_restored": true,
+          "response": {
+            "checks": {
+              "extents_response": true,
+              "world_corner_radius_response": true
+            },
+            "corner_cut_ratio": 1.0999999213529494,
+            "extents_ratio": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "geometry_changed": true,
+            "identity_comparison": "exact indexed binary64 arrays, without tolerance",
+            "passed": true,
+            "physical_observation_absolute_tolerance": 1e-05,
+            "same_root_pointer": true,
+            "same_source_pointer": true
+          },
+          "restored_geometry_hash": "aa683c0899ba9b98c077a6164ef87fca69c66ec60fad2cba2aa5e62b8bf14753",
+          "scope": "live BEVEL width on the same owned mesh descendant; eight segments fixed",
+          "status": "passed"
+        },
+        "sphere": {
+          "baseline_geometry_hash": "833c2dcc96c1c9229e307e49c5680306158df26a35011ec7981164012d692297",
+          "control": "coupled fitted radial dimensions x 1.05",
+          "edited_geometry_hash": "5fcfc89008791472e4ec0bcd9336c0980da71feab060d4b31fd4a8b230849ac5",
+          "exact_restoration": true,
+          "original_mesh_pointer_restored": true,
+          "response": {
+            "checks": {
+              "extents_response": true
+            },
+            "extents_ratio": [
+              1.050000726641551,
+              1.0500003689104416,
+              1.050000048442799
+            ],
+            "geometry_changed": true,
+            "identity_comparison": "exact indexed binary64 arrays, without tolerance",
+            "passed": true,
+            "physical_observation_absolute_tolerance": 1e-05,
+            "same_root_pointer": true,
+            "same_source_pointer": true
+          },
+          "restored_geometry_hash": "833c2dcc96c1c9229e307e49c5680306158df26a35011ec7981164012d692297",
+          "scope": "recipe parameter regeneration applied to the same owned root and mesh descendant",
+          "status": "passed"
+        },
+        "tapered_frustum": {
+          "baseline_geometry_hash": "191bc75bef0fc10d61cb0bd8364274ab42aaa083513b7f39a5be26fa3cc0864e",
+          "control": "radius_top x 1.10 with bottom radius and height fixed",
+          "edited_geometry_hash": "ea82a89e7eb55afc86d3c69491dc686c7555a5c1fc4e3e4c8054e4ad03c5c426",
+          "exact_restoration": true,
+          "original_mesh_pointer_restored": true,
+          "response": {
+            "checks": {
+              "bottom_radius_fixed": true,
+              "extents_response": true,
+              "top_radius_response": true
+            },
+            "extents_ratio": [
+              1.0,
+              1.0,
+              1.0000000000001659
+            ],
+            "geometry_changed": true,
+            "identity_comparison": "exact indexed binary64 arrays, without tolerance",
+            "passed": true,
+            "physical_observation_absolute_tolerance": 1e-05,
+            "same_root_pointer": true,
+            "same_source_pointer": true,
+            "top_radius_ratio": 1.0999999249366053
+          },
+          "restored_geometry_hash": "191bc75bef0fc10d61cb0bd8364274ab42aaa083513b7f39a5be26fa3cc0864e",
+          "scope": "recipe parameter regeneration applied to the same owned root and mesh descendant",
+          "status": "passed"
+        },
+        "thin_plate": {
+          "baseline_geometry_hash": "ab4d231f32cf620a2b2e09019025b5fa1a65cad17b4ac9d2a5841e2fdf42a785",
+          "control": "local depth_world x 1.05",
+          "edited_geometry_hash": "8d19c1a567ae9dc577ece5fdcc677fd42a672d7d352d4b8fa694a938d8c78729",
+          "exact_restoration": true,
+          "original_mesh_pointer_restored": true,
+          "response": {
+            "checks": {
+              "extents_response": true
+            },
+            "extents_ratio": [
+              1.0,
+              1.0499999621004676,
+              0.9999999999993416
+            ],
+            "geometry_changed": true,
+            "identity_comparison": "exact indexed binary64 arrays, without tolerance",
+            "passed": true,
+            "physical_observation_absolute_tolerance": 1e-05,
+            "same_root_pointer": true,
+            "same_source_pointer": true
+          },
+          "restored_geometry_hash": "ab4d231f32cf620a2b2e09019025b5fa1a65cad17b4ac9d2a5841e2fdf42a785",
+          "scope": "recipe parameter regeneration applied to the same owned root and mesh descendant",
+          "status": "passed"
+        }
+      },
+      "native_process": {
+        "elapsed_seconds": 7.0941039,
+        "exit_code": 0,
+        "fits": 0,
+        "joined": true,
+        "peak_working_set_bytes": 229842944,
+        "qualification_children": 0,
+        "renders": 0,
+        "stopped_by_bound": false,
+        "threads": 2
+      },
+      "ordinary_native_world_bevel_tests": {
+        "passed": true,
+        "run": 2,
+        "skipped": 0
+      },
+      "ownership_audit": {
+        "blockers": [
+          "artifact bytes changed or exceed hash bound: results.json"
+        ],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 1579286,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-source-edits-01\\owned-5_o3o2jg",
+        "status": "blocked",
+        "unknown_files": []
+      },
+      "receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-source-edits-01\\owned-5_o3o2jg\\results.json",
+      "receipt_sha256": "8b72f6818c5aac9bd4614609c3433c4c1d9ab025890d5144f6f377f0e6411607",
+      "status": "passed"
+    },
+    "source_neutrals": {
+      "cases": {
+        "anisotropic_ellipsoid": {
+          "actual_clip_matches": 5,
+          "actual_frame_matches": 5,
+          "reference_equivalent": true,
+          "shading_style_comparison": {
+            "candidate_polygon_style": "flat",
+            "custom_normal_state_match": true,
+            "modifier_type_sequence_match": true,
+            "polygon_style_match": true,
+            "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+            "sharp_edge_count_match": true,
+            "source_polygon_style": "flat",
+            "status": "observed"
+          },
+          "source_geometry_hash": "981303b1cd1aedc8825c2b77621bd8cca6d8395a1c547c4dabfe972644901512",
+          "source_inventory_status": "incomplete",
+          "source_mask_frames": 0,
+          "source_normal_frames": 0,
+          "status": "matched_neutral_retained"
+        },
+        "capsule": {
+          "actual_clip_matches": 5,
+          "actual_frame_matches": 5,
+          "reference_equivalent": true,
+          "shading_style_comparison": {
+            "candidate_polygon_style": "smooth",
+            "custom_normal_state_match": true,
+            "modifier_type_sequence_match": true,
+            "polygon_style_match": true,
+            "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+            "sharp_edge_count_match": true,
+            "source_polygon_style": "smooth",
+            "status": "observed"
+          },
+          "source_geometry_hash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+          "source_inventory_status": "incomplete",
+          "source_mask_frames": 0,
+          "source_normal_frames": 0,
+          "status": "matched_neutral_retained"
+        },
+        "cylinder": {
+          "actual_clip_matches": 5,
+          "actual_frame_matches": 5,
+          "reference_equivalent": true,
+          "shading_style_comparison": {
+            "candidate_polygon_style": "flat",
+            "custom_normal_state_match": true,
+            "modifier_type_sequence_match": true,
+            "polygon_style_match": true,
+            "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+            "sharp_edge_count_match": true,
+            "source_polygon_style": "flat",
+            "status": "observed"
+          },
+          "source_geometry_hash": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a",
+          "source_inventory_status": "incomplete",
+          "source_mask_frames": 0,
+          "source_normal_frames": 0,
+          "status": "matched_neutral_retained"
+        },
+        "rounded_box": {
+          "actual_clip_matches": 5,
+          "actual_frame_matches": 5,
+          "reference_equivalent": true,
+          "shading_style_comparison": {
+            "candidate_polygon_style": "flat",
+            "custom_normal_state_match": false,
+            "modifier_type_sequence_match": false,
+            "polygon_style_match": true,
+            "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+            "sharp_edge_count_match": true,
+            "source_polygon_style": "flat",
+            "status": "observed"
+          },
+          "source_geometry_hash": "adafdbd9610c2951be09d956221f147b78a72984469d1fd2c3f12d67ca3a42f0",
+          "source_inventory_status": "incomplete",
+          "source_mask_frames": 0,
+          "source_normal_frames": 0,
+          "status": "matched_neutral_retained"
+        },
+        "sphere": {
+          "actual_clip_matches": 5,
+          "actual_frame_matches": 5,
+          "reference_equivalent": true,
+          "shading_style_comparison": {
+            "candidate_polygon_style": "flat",
+            "custom_normal_state_match": true,
+            "modifier_type_sequence_match": true,
+            "polygon_style_match": true,
+            "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+            "sharp_edge_count_match": true,
+            "source_polygon_style": "flat",
+            "status": "observed"
+          },
+          "source_geometry_hash": "1b359efb053ea37ea2f73c2cb77807406801cc1060d90fda52b72a3a3b19235a",
+          "source_inventory_status": "incomplete",
+          "source_mask_frames": 0,
+          "source_normal_frames": 0,
+          "status": "matched_neutral_retained"
+        },
+        "tapered_frustum": {
+          "actual_clip_matches": 5,
+          "actual_frame_matches": 5,
+          "reference_equivalent": true,
+          "shading_style_comparison": {
+            "candidate_polygon_style": "flat",
+            "custom_normal_state_match": true,
+            "modifier_type_sequence_match": true,
+            "polygon_style_match": true,
+            "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+            "sharp_edge_count_match": true,
+            "source_polygon_style": "flat",
+            "status": "observed"
+          },
+          "source_geometry_hash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+          "source_inventory_status": "incomplete",
+          "source_mask_frames": 0,
+          "source_normal_frames": 0,
+          "status": "matched_neutral_retained"
+        },
+        "thin_plate": {
+          "actual_clip_matches": 5,
+          "actual_frame_matches": 5,
+          "reference_equivalent": true,
+          "shading_style_comparison": {
+            "candidate_polygon_style": "flat",
+            "custom_normal_state_match": true,
+            "modifier_type_sequence_match": true,
+            "polygon_style_match": true,
+            "scope": "descriptive authored/candidate shading comparison; no surface acceptance or smoothing repair implied",
+            "sharp_edge_count_match": true,
+            "source_polygon_style": "flat",
+            "status": "observed"
+          },
+          "source_geometry_hash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+          "source_inventory_status": "incomplete",
+          "source_mask_frames": 0,
+          "source_normal_frames": 0,
+          "status": "matched_neutral_retained"
+        }
+      },
+      "native_process": {
+        "candidate_renders": 0,
+        "elapsed_seconds": 11.964627,
+        "exit_code": 0,
+        "expected_reference_neutral_frames": 35,
+        "fits": 0,
+        "joined": true,
+        "peak_working_set_bytes": 466145280,
+        "qualification_children": 0,
+        "stopped_by_bound": false,
+        "threads": 2
+      },
+      "ownership_audit": {
+        "blockers": [
+          "artifact bytes changed or exceed hash bound: results.json"
+        ],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 3693109,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-neutral-01\\owned-zhmkcyea",
+        "status": "blocked",
+        "unknown_files": []
+      },
+      "receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\reference-neutral-01\\owned-zhmkcyea\\results.json",
+      "receipt_sha256": "cd10cb95c0b96f252bba0373d6ed4dc81d60ff9009b028e9fb53a45e14849e85",
+      "status": "matched_neutrals_retained"
+    }
+  },
+  "protocol": "source_controls_and_matched_neutral_evidence_v1",
+  "remaining_limits": [
+    "independent non-vase surface acceptance contracts unavailable",
+    "source masks/normals not rerendered",
+    "legacy frame/binding gaps retained",
+    "two prior ownership receipts have final results digest drift; no reclamation is authorized"
+  ]
+}

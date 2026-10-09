@@ -1,0 +1,202 @@
+{
+  "protocol": "triangle_three_view_tail_cpu_v1",
+  "baseline_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+  "source_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+  "baseline_recipe": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined\\program.json",
+    "sha256": "5e6f69fff82aad0c7e7ffbe720547010c6691907dcce795b45a4a08b688e599b",
+    "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+    "producer": "bounded_adaptive_family_checkpoint",
+    "manifest": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\run-ownership.json",
+      "sha256": "affd0b1026cd2d6997a1bd687d85337158aafa62fa94d21b1202621a379155ad"
+    },
+    "lease": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\run-lease.json",
+      "sha256": "ffd8bae3da1f302c1e8bb4c9922e9b8a80c5b6cf5b03e69b139081bcf76ee1a3"
+    }
+  },
+  "baseline_archive": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined\\evaluated-exact.npz",
+    "sha256": "327571fa13131bc11ee9e082a13ceffc2d166272be15502be815da6c9c30f805",
+    "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+    "producer": "bounded_adaptive_family_checkpoint",
+    "manifest": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\run-ownership.json",
+      "sha256": "affd0b1026cd2d6997a1bd687d85337158aafa62fa94d21b1202621a379155ad"
+    },
+    "lease": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\run-lease.json",
+      "sha256": "ffd8bae3da1f302c1e8bb4c9922e9b8a80c5b6cf5b03e69b139081bcf76ee1a3"
+    }
+  },
+  "source_observations": {
+    "front": {
+      "coverage": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\front-coverage.npy",
+        "sha256": "02e7fa226c2aa70b7ced85e756a2acecd5a364268d2f5e1c1b83c884a4e09008",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+        "producer": "retained_triangle_final_qualification",
+        "manifest": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-ownership.json",
+          "sha256": "6e90e5fa63137593ee075d1685e48907fa0a93ceb18888eee132110f019671a1"
+        },
+        "lease": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-lease.json",
+          "sha256": "749b12871a055cc241d7da5c87bb6454eef2ccb635376f37a0f350de56ec35a3"
+        }
+      },
+      "measurement": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\front-measurement.json",
+        "sha256": "0027478df38ac5a998b9bef77b398f85f423505e8b7a06d8494667eefd34389d",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+        "producer": "retained_triangle_final_qualification",
+        "manifest": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-ownership.json",
+          "sha256": "6e90e5fa63137593ee075d1685e48907fa0a93ceb18888eee132110f019671a1"
+        },
+        "lease": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-lease.json",
+          "sha256": "749b12871a055cc241d7da5c87bb6454eef2ccb635376f37a0f350de56ec35a3"
+        }
+      },
+      "contract_sha256": "90ccc2ba502773e8e3450953986a3a4bdfc53b3d1dbcf3dc0002e170c6c4e48d"
+    },
+    "top": {
+      "coverage": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\top-coverage.npy",
+        "sha256": "ccb9f55a44fa1b5d13432334df98e26c0441bbfd3007127d6fe1a0b0d6d3dba4",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+        "producer": "retained_triangle_final_qualification",
+        "manifest": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-ownership.json",
+          "sha256": "6e90e5fa63137593ee075d1685e48907fa0a93ceb18888eee132110f019671a1"
+        },
+        "lease": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-lease.json",
+          "sha256": "749b12871a055cc241d7da5c87bb6454eef2ccb635376f37a0f350de56ec35a3"
+        }
+      },
+      "measurement": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\top-measurement.json",
+        "sha256": "d0b41368c665911cd64b80e08987922ecc52ec67162ac2b78c57f8fa4d568fed",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+        "producer": "retained_triangle_final_qualification",
+        "manifest": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-ownership.json",
+          "sha256": "6e90e5fa63137593ee075d1685e48907fa0a93ceb18888eee132110f019671a1"
+        },
+        "lease": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-lease.json",
+          "sha256": "749b12871a055cc241d7da5c87bb6454eef2ccb635376f37a0f350de56ec35a3"
+        }
+      },
+      "contract_sha256": "4bb5fb2fcf975fcae23ae43313565ce8cd4a3e8776b82dddfeacff616ec73284"
+    },
+    "oblique_35_28": {
+      "coverage": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_35_28-coverage.npy",
+        "sha256": "dd950fc8066e923bf576072d7258fe97a2ba965ebf8c0c873f85a39274bce6b8",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+        "producer": "retained_triangle_final_qualification",
+        "manifest": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-ownership.json",
+          "sha256": "6e90e5fa63137593ee075d1685e48907fa0a93ceb18888eee132110f019671a1"
+        },
+        "lease": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-lease.json",
+          "sha256": "749b12871a055cc241d7da5c87bb6454eef2ccb635376f37a0f350de56ec35a3"
+        }
+      },
+      "measurement": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_35_28-measurement.json",
+        "sha256": "0eb9b8dbf8dfa418e91a5384a7a4e702fc4004c4163b172ef5cc0f5950b2575c",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+        "producer": "retained_triangle_final_qualification",
+        "manifest": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-ownership.json",
+          "sha256": "6e90e5fa63137593ee075d1685e48907fa0a93ceb18888eee132110f019671a1"
+        },
+        "lease": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-lease.json",
+          "sha256": "749b12871a055cc241d7da5c87bb6454eef2ccb635376f37a0f350de56ec35a3"
+        }
+      },
+      "contract_sha256": "c571fa3185ddffec865bbabfb493d985e0410d055c07acae92dd64ab1e9aa9ed"
+    }
+  },
+  "parameter_bounds": {
+    "center_y_world": [
+      -0.007369268160897086,
+      0.009657770919961145
+    ],
+    "center_z_world": [
+      -0.006573382761169198,
+      0.010453656319689033
+    ],
+    "front_fraction": [
+      0.48548321749202117,
+      0.5254832174920212
+    ]
+  },
+  "free_controls": [
+    "center_y_world",
+    "center_z_world",
+    "front_fraction"
+  ],
+  "maximum_residual_calls": 96,
+  "fit_seconds": 1.0,
+  "attempts": 1,
+  "heldout_views": [
+    "oblique_145_40"
+  ],
+  "prior_exposure": {
+    "oblique_145_40": "prior selected and ddbf rejected native alpha/raw/inspection exposed; excluded from this fit, bounds, ROI and diagnosis"
+  },
+  "rejected_predecessor": {
+    "geometry_hash": "ddbf0ecf63d78353bbb79b92b8152228c0760979c93bf980084a6184b3ed03ab",
+    "recipe": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\rounded_triangle_dot\\program.json",
+      "sha256": "9150d659097fdaf33b6aa006541b7599ebaa536ed4db15cb6f4ac9544907a626",
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s",
+      "producer": "saved_arch_triangle_tail_checkpoint",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\run-ownership.json",
+        "sha256": "619963a6dc3e8b6311abe6b927f3663a64ae9b9b81ba71ed0720c0db238f6e7d"
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\run-lease.json",
+        "sha256": "aec0f8d4a43101111cba5b74d2893af308d371a1162f6f3199ebf954449bdc34"
+      }
+    },
+    "receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\results.json",
+      "sha256": "6860bdb20d9b8d537283454439dfe100325ac3167ade16f2e67eb9d6d2afca0b",
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s",
+      "producer": "saved_arch_triangle_tail_checkpoint",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\run-ownership.json",
+        "sha256": "619963a6dc3e8b6311abe6b927f3663a64ae9b9b81ba71ed0720c0db238f6e7d"
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-checkpoint-03\\owned-nzlocu3s\\run-lease.json",
+        "sha256": "aec0f8d4a43101111cba5b74d2893af308d371a1162f6f3199ebf954449bdc34"
+      }
+    },
+    "bounded_checkpoint_improved": false,
+    "reason": "heldout alpha regression; retained unchanged"
+  },
+  "source_mesh_arrays_consumed": false,
+  "native_jobs": 0,
+  "source_acquisitions": 0,
+  "current_selection_unchanged": true,
+  "artist_limits": null,
+  "aggregate_accepted": false,
+  "input_sha256": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\triangle_tail_refinement.py": "6e2208f29864470b07d9cd1011a4a4a99c5b983e791af9d87ee4d4411fdfa6a4",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\arch_tail_refinement.py": "1c692fb9277bf46e4200ff006177943b9c3752266a6ed34658dfb7cad28f0e24",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\adaptive_family.py": "e35ae62dc46babde6c6b28971719a27daca1b780e5a0a7edda2ede1d927e2d96",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\rounded_triangle.py": "42dd3eb646dab57cf7603c14a0dbc1f25bbfd9f348a20df2dd37e20364248bbf"
+  }
+}

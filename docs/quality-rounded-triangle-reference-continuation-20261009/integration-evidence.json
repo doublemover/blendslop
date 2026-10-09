@@ -1,0 +1,39 @@
+{
+  "protocol": "rounded-triangle-policy-integration-v1",
+  "implementation_base": "1100adab1953de031175510585a9decb6af75e3a",
+  "source_certificate_evidence": {
+    "path": "source-certificate-evidence.json",
+    "sha256": "f0aab4027760b69fb302ffe9973f3724865d6f1addacc3555a9017864b22108e"
+  },
+  "source_certificate_families_supported": 11,
+  "completed_actual_source_camera_policies": 10,
+  "triangle_five_view_acquisition": "pending separate bounded acquisition; no manufactured clipping history",
+  "focused_api_checks": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 0.23
+  },
+  "implementation": [
+    {
+      "path": "blender_blocking/evaluation/family_surface_contracts.py",
+      "bytes": 25536,
+      "sha256": "077dc3e5ce5ccf9b329cfb45ff4fff5fae41c99de2db125ef2cbd0fbed921800"
+    },
+    {
+      "path": "blender_blocking/test_family_surface_contracts.py",
+      "bytes": 14444,
+      "sha256": "53798dc975a3151213040cd13885a5c603158fb4a026cb3396229c81c1593ea1"
+    },
+    {
+      "path": "blender_blocking/test_runner.py",
+      "bytes": 33026,
+      "sha256": "6671f0fa5371f1d274ea0aa4edf8dba5de5e6194e730af55f92e1b091fa28337"
+    }
+  ],
+  "artist_surface_passed": null,
+  "aggregate_passed": false,
+  "new_native_runs": 0,
+  "new_renders": 0,
+  "source_only_certificate_calculations_repeated": 0
+}

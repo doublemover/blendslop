@@ -150,7 +150,10 @@ class OwnedProducerTests(unittest.TestCase):
         faces = np.asarray([triangle for face in mesh.faces for triangle in
                             ((face[0],face[i],face[i+1]) for i in range(1,len(face)-1))])
         data = GeometryArrays.capture(mesh.vertices,faces)
-        child = Mock(returncode=-1)
+        child = Mock(returncode=None)
+        child.poll.side_effect = lambda: child.returncode
+        child.kill.side_effect = lambda: setattr(child, "returncode", -1)
+        child.wait.return_value = -1
         child.communicate.side_effect = [subprocess.TimeoutExpired("helper",15), (b"bounded log",None)]
         with tempfile.TemporaryDirectory() as folder, patch.object(native,"toolchain_identity",return_value="fixture-id"), \
                 patch.object(native.subprocess,"Popen",return_value=child),patch.dict(native._CACHE,clear=True):

@@ -1,0 +1,27 @@
+{
+  "protocol": "caller-process-budget-adoption-v1",
+  "affected_new_guards_passed": 9,
+  "new_guard_seconds": 0.877,
+  "existing_compatibility_methods": [
+    "TestProcessExecutor.test_worker_pid_persists_across_completed_jobs",
+    "TestProcessExecutor.test_simultaneous_nested_multistart_jobs_share_flat_workers",
+    "TestProcessExecutor.test_transport_preserves_geometry_immutability_and_hashes"
+  ],
+  "existing_compatibility_methods_passed": 3,
+  "existing_compatibility_seconds": 6.57,
+  "new_source_sha256": {
+    "blender_blocking/reconstruction/process_executor.py": "418abc9e2cae525e65a77dfdbc09982083392b4d0b0bc54badcb4e4cc60eb02d",
+    "blender_blocking/reconstruction/ensemble.py": "feec61b6c0f397743b3efbc7d206847a74a9092a5c15a7f4e51b6a9f38183940",
+    "blender_blocking/reconstruction/measured_selection.py": "406c2a87f8deca34e4aca68ef921f84b44bd75e07429b64935e4dad1d8f1a63a"
+  },
+  "test_source_sha256": "5407f0d969bf5479500c40486a1282af3a47b8178c716907f94d3007f4b8ec2c",
+  "native_jobs": 0,
+  "original_budget_cap_or_deadline_reset": false,
+  "default_behavior_changed": false,
+  "scope": "Explicit EnsembleRunner/run_requests/routing_run process_budget or context.worker_process_budget; serialized owning declaration reaches same map-only WorkerClient.",
+  "limitations": [
+    "No recursive candidate ensemble protocol; scoped map subjobs only.",
+    "Other standalone backend fallbacks remain separately scoped; no automatic arbitrary caps.",
+    "No artifact reclamation, broker ownership or historical adoption claim."
+  ]
+}

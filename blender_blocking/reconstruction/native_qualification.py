@@ -89,13 +89,62 @@ def qualify_geometry(data, *, python, timeout_s=15., ownership_root=None):
         return {**_CACHE[key], 'cache_hit': True, 'qualification_elapsed_s': time.perf_counter()-started,
                 'qualification_cost_boundary': 'identity verification and cache lookup; no helper execution'}
     from utils.run_ownership import OwnedRun
+    from utils.primary_process_cleanup import finish_primary_process
+    from contextlib import contextmanager
     owner = OwnedRun(ownership_root or ROOT / 'temp/native-qualification',
                      producer="native_boundary_qualification",
                      shared_inputs={"qualification_interpreter": str(python),
                                     "toolchain_identity": identity,
                                     "input_geometry_hash": data.content_hash})
-    with owner:
-        owner.reserve_bytes(data.nbytes + 4096 + 8192 + 65536)
+    child = None
+    cleanup_receipt = None
+    pipes_drained = False
+
+    @contextmanager
+    def owned_helper_run():
+        nonlocal cleanup_receipt
+        error = None
+        try:
+            yield
+        except BaseException as original:
+            error = original
+            raise
+        finally:
+            auxiliary = []
+            if child is not None and cleanup_receipt is None:
+                try:
+                    _, _, cleanup_receipt = finish_primary_process(child, drain_pipes=not pipes_drained)
+                except BaseException as join_error:
+                    cleanup_receipt = getattr(join_error, "primary_process_receipt", None)
+                    auxiliary.append(join_error)
+            joined = child is None or bool(cleanup_receipt and cleanup_receipt["transport_closed"])
+            if not joined or (cleanup_receipt and cleanup_receipt["errors"]):
+                detail = "; ".join(cleanup_receipt["errors"]) if cleanup_receipt else "cleanup receipt unavailable"
+                auxiliary.insert(0, RuntimeError("Native helper cleanup remains unconfirmed: " + detail))
+            try:
+                if cleanup_receipt is not None:
+                    (owner.root / "helper-cleanup.json").write_text(
+                        json.dumps(cleanup_receipt, indent=2), encoding="utf-8")
+                    owner.register_file("helper-cleanup.json", "diagnostic")
+                failure = error or (auxiliary[0] if auxiliary else None)
+                if failure is not None:
+                    owner.mark_failed(repr(failure))
+                if joined:
+                    owner.close(error=failure)
+                else:
+                    # Keep the original fresh lease active; no historical adoption.
+                    owner._write_metadata("active")
+            except Exception as publication_error:
+                auxiliary.append(publication_error)
+            if error is not None:
+                for secondary in auxiliary:
+                    if hasattr(error, "add_note"):
+                        error.add_note("Native helper lifecycle also failed: " + repr(secondary))
+            elif auxiliary:
+                raise auxiliary[0]
+
+    with owned_helper_run():
+        owner.reserve_bytes(data.nbytes + 4096 + 8192 + 65536 + 8192)
         source, destination = owner.root / 'input.npz', owner.root / 'receipt.json'
         np.savez(source, vertices=data.vertices, faces=data.faces, content_hash=data.content_hash)
         owner.register_file("input.npz", "disposable")
@@ -106,14 +155,11 @@ def qualify_geometry(data, *, python, timeout_s=15., ownership_root=None):
         timed_out = False
         try:
             log, _ = child.communicate(timeout=max(.001, timeout_s))
+            pipes_drained = True
         except subprocess.TimeoutExpired:
-            child.kill()
-            log, _ = child.communicate()
+            log, _, cleanup_receipt = finish_primary_process(child)
+            log = log or b""
             timed_out = True
-        except BaseException:
-            child.kill()
-            child.communicate()
-            raise
         (owner.root / "helper-log-tail.txt").write_bytes(log[-8192:])
         owner.register_file("helper-log-tail.txt", "diagnostic")
         if timed_out or child.returncode:

@@ -1,0 +1,42 @@
+{
+  "protocol": "persistent-worker-ownership-continuation-v1",
+  "date": "2026-10-09",
+  "publication": "local only; beyond approved d11d1b8 PR7 head",
+  "scope": "explicit opt-in fresh Windows worker trees; no artifact reclamation",
+  "validation": {
+    "new_methods": 10,
+    "compatibility_methods": 5,
+    "distinct_passed": 15,
+    "focused_runs": [
+      {
+        "tests": 14,
+        "seconds": 15.051,
+        "result": "passed"
+      },
+      {
+        "tests": 3,
+        "seconds": 8.973,
+        "result": "passed",
+        "note": "fresh IPC branch and two affected repeat checks"
+      }
+    ],
+    "interpreter": "existing Blender 5.2 bundled CPython 3.13.13",
+    "native_renders": 0
+  },
+  "contracts": [
+    "assigned before resume",
+    "same worker reuse",
+    "exited primary descendants joined",
+    "automatic wall enforcement during idle caller",
+    "monitor fault kills only owned Job",
+    "incomplete joins retain owner for bounded retry",
+    "shared pool wall across replacements",
+    "bounded replacement count",
+    "fresh IPC preserves existing files",
+    "caller exception retained"
+  ],
+  "remaining": [
+    "opt-in adoption by callers where explicit budgets are available",
+    "artifact leases and reclamation remain separate; no deletion implemented"
+  ]
+}

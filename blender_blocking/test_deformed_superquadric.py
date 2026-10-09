@@ -1,6 +1,7 @@
 """Bounded deformation geometry checks; no native reconstruction score claims."""
 from copy import deepcopy
 from dataclasses import replace
+from fractions import Fraction
 import sys
 from types import SimpleNamespace
 import unittest
@@ -9,6 +10,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from primitives.analytic_primitives import SuperquadricPrimitive
+from primitives.primitive_protocol import MeshData
 from primitives.deformed_superquadric import DeformedSuperquadricPrimitive as Deformed
 from primitives.shape_program import ShapeNode, ShapeProgram
 from reconstruction.program_transforms import reflect_parameters, rotation_matrix, position_vector
@@ -87,7 +89,112 @@ class DeformedSuperquadricTests(unittest.TestCase):
             with self.subTest(params=params),self.assertRaises(ValueError):self.part(**params)
         part=self.part()
         with self.assertRaises(ValueError):part.forward_local([[np.inf,0,0]])
-        with self.assertRaises(NotImplementedError):part.profile_width_at_world_z(0.)
+        with self.assertRaises(ValueError):part.profile_width_at_world_z(np.nan)
+
+    @staticmethod
+    def exact_mesh_section_width(mesh, height):
+        # Independent scalar rational oracle for the stored binary vertices:
+        # no world/local proxy, interpolation rounding or section tolerance.
+        level = Fraction(float(height))
+        points = []
+        for face in mesh.faces:
+            for i in range(1, len(face)-1):
+                triangle = (face[0], face[i], face[i+1])
+                for a, b in zip(triangle, (triangle[1], triangle[2], triangle[0])):
+                    ax, az = Fraction(float(mesh.vertices[a, 0])), Fraction(float(mesh.vertices[a, 2]))
+                    bx, bz = Fraction(float(mesh.vertices[b, 0])), Fraction(float(mesh.vertices[b, 2]))
+                    if az == level:
+                        points.append(ax)
+                    if bz == level:
+                        points.append(bx)
+                    if az < level < bz or bz < level < az:
+                        points.append(ax + (level-az)*(bx-ax)/(bz-az))
+        return float(max(points)-min(points)) if points else 0.
+
+    def test_world_z_width_matches_exact_posed_deformed_mesh_sections(self):
+        for angle in (-.5, .5):
+            part = self.part(bend_angle=angle)
+            mesh = part.to_mesh_data(16)
+            for height in (float(mesh.vertices[73, 2]),
+                           float((mesh.vertices[:, 2].min()+mesh.vertices[:, 2].max())*.5)):
+                with self.subTest(angle=angle, height=height):
+                    expected = self.exact_mesh_section_width(mesh, height)
+                    self.assertAlmostEqual(part.profile_width_at_world_z(height, resolution=16), expected, places=13)
+
+    def test_world_z_width_includes_taper_bend_and_world_axis_pose(self):
+        tapered = self.part(center=(3., 2., -.4), rotation=np.eye(3), epsilon1=1., epsilon2=1.,
+                            taper_x=.3, taper_y=-.2, bend_angle=0.)
+        level = tapered.center[2]+tapered.radii[2]*np.sin(np.pi/4.)
+        expected = 2.*tapered.radii[0]*np.cos(np.pi/4.)*(1.+.3*np.sin(np.pi/4.))
+        self.assertAlmostEqual(tapered.profile_width_at_world_z(level, resolution=16), expected, places=14)
+        bent = self.part(center=(0., 0., 0.), rotation=np.eye(3))
+        rigid = self.part(center=(0., 0., 0.), rotation=np.eye(3), bend_angle=0.)
+        height = .45*bent.radii[2]
+        self.assertNotAlmostEqual(bent.profile_width_at_world_z(height),
+                                  rigid.profile_width_at_world_z(height), places=6)
+        posed = self.part(rotation=np.array(((0., 0., 1.), (0., 1., 0.), (-1., 0., 0.))),
+                          taper_x=0., taper_y=0., bend_angle=0.)
+        self.assertAlmostEqual(posed.profile_width_at_world_z(posed.center[2]), 2.*posed.radii[2], places=14)
+        proxy = SuperquadricPrimitive.from_dict(posed.to_dict()).profile_width_at_world_z(posed.center[2])
+        self.assertGreater(abs(posed.profile_width_at_world_z(posed.center[2])-proxy), .5)
+
+    def test_world_z_width_handles_exact_rings_poles_and_strict_outside_bounds(self):
+        part = self.part(rotation=np.eye(3), taper_x=.2, taper_y=-.15, bend_angle=0.)
+        mesh = part.to_mesh_data(16)
+        low, high = float(mesh.vertices[:, 2].min()), float(mesh.vertices[:, 2].max())
+        for height in (low, high):
+            self.assertEqual(part.profile_width_at_world_z(height, resolution=16), 0.)
+        self.assertEqual(part.profile_width_at_world_z(np.nextafter(low, -np.inf), resolution=16), 0.)
+        self.assertEqual(part.profile_width_at_world_z(np.nextafter(high, np.inf), resolution=16), 0.)
+        self.assertAlmostEqual(part.profile_width_at_world_z(part.center[2], resolution=16), 2.*part.radii[0], places=14)
+        for height in (np.nextafter(low, high), np.nextafter(high, low)):
+            self.assertAlmostEqual(part.profile_width_at_world_z(height, resolution=16),
+                                   self.exact_mesh_section_width(mesh, height), places=14)
+
+    def test_world_z_width_includes_coplanar_triangles_and_refuses_overflow(self):
+        part = self.part()
+        # Exact finite-mesh clipping fixtures complement the real generated
+        # ring/vertex checks; neither uses an analytic undeformed width.
+        capped = MeshData(np.array(((-2., -1., 0.), (1., -1., 0.), (0., 2., 0.), (0., 0., -1.))),
+                          ((0, 1, 2), (0, 3, 1), (1, 3, 2), (2, 3, 0)))
+        with patch.object(part, 'to_mesh_data', return_value=capped):
+            self.assertEqual(part.profile_width_at_world_z(0.), 3.)
+            self.assertEqual(part.profile_width_at_world_z(-.5), 1.5)
+            self.assertEqual(part.profile_width_at_world_z(-1.), 0.)
+        unresolved = MeshData(np.array(((0., 0., -1e308), (1., 0., 1e308), (0., 1., 1e308))), ((0, 1, 2),))
+        with patch.object(part, 'to_mesh_data', return_value=unresolved), self.assertRaisesRegex(ValueError, 'unresolved'):
+            part.profile_width_at_world_z(0.)
+
+    def test_world_z_width_default_mesh_and_fields_are_unchanged(self):
+        part = self.part()
+        before = part.to_dict()
+        original = part.to_mesh_data()
+        field = part.sdf_batch(np.array(((.2, -.1, .3), (1., 2., 3.))))
+        with patch.object(part, 'to_mesh_data', wraps=part.to_mesh_data) as generated:
+            width = part.profile_width_at_world_z(.3)
+            generated.assert_called_once_with(32)
+        self.assertIsInstance(width, float)
+        self.assertAlmostEqual(width, self.exact_mesh_section_width(original, .3), places=13)
+        after = part.to_mesh_data()
+        np.testing.assert_array_equal(original.vertices, after.vertices)
+        self.assertEqual(original.faces, after.faces)
+        self.assertEqual(before, part.to_dict())
+        self.assertFalse(part.deformation_fit_enabled)
+        np.testing.assert_array_equal(field, part.sdf_batch(np.array(((.2, -.1, .3), (1., 2., 3.)))))
+        mesh = part.to_mesh_data(8)
+        self.assertAlmostEqual(part.profile_width_at_world_z(.3, resolution=np.int64(8)),
+                               self.exact_mesh_section_width(mesh, .3), places=13)
+
+    def test_world_z_width_rejects_nonfinite_scalar_and_unbounded_resolution(self):
+        part = self.part()
+        with patch.object(part, 'to_mesh_data', wraps=part.to_mesh_data) as generated:
+            for height in (np.nan, np.inf, -np.inf, True, np.bool_(False), 1j, '0', [0.], np.array(0.), 10**400):
+                with self.subTest(height=height), self.assertRaises(ValueError):
+                    part.profile_width_at_world_z(height)
+            for resolution in (0, 7, 257, 8.5, np.float64(32), True, np.bool_(True), '32', None):
+                with self.subTest(resolution=resolution), self.assertRaises(ValueError):
+                    part.profile_width_at_world_z(.3, resolution=resolution)
+            generated.assert_not_called()
 
     def test_serialized_renderable_replays_actual_vertices(self):
         part=self.part(); record=renderable_from_primitive(part)

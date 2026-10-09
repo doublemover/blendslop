@@ -1,0 +1,1379 @@
+{
+  "protocol": "saved_arch_triangle_tail_checkpoint_v1",
+  "scope": {
+    "work_seconds": 85,
+    "join_seconds": 5,
+    "threads": 2,
+    "memory_limit_bytes": 8589934592,
+    "native_frames": 12,
+    "source_acquisitions": 0,
+    "candidate_alpha_frames": 10,
+    "candidate_neutral_frames": 2,
+    "native_fits": 0,
+    "raw_comparisons": 2,
+    "raw_count_per_direction": 4096,
+    "raw_seed": 61007,
+    "semantic_transactions": 2,
+    "qualification_children": 2,
+    "qualification_timeout_seconds": 15,
+    "resolution": [
+      512,
+      512
+    ],
+    "heldout_views": [
+      "oblique_145_40"
+    ]
+  },
+  "frozen_head": "a3ec5e0de0ce6ba78dd95645bde02aba30226f93",
+  "cases": [
+    {
+      "family": "concave_arch",
+      "baseline_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+      "source_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+      "baseline_program": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\refined\\program.json",
+        "sha256": "4f1c6df58ca7405ab6500ded28bfdea886d06fb5c3a640f6403fce32a589697a",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf",
+        "producer": "bounded_arch_exterior_checkpoint"
+      },
+      "proposed_program": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\arch-program.json",
+        "sha256": "76dc835cd7d73e67426e2cedbdaa32ac8ec4bf9cf684a38008cb88f751af5d3d",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u",
+        "producer": "bounded_arch_triangle_tail_cpu"
+      },
+      "baseline_npz": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\refined\\evaluated-exact.npz",
+        "sha256": "5b6e91bb40e29702dc2ebd8ef381781d255203b634e50fb39eddbd2ea7228b57"
+      },
+      "source_npz": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\evaluated-exact.npz",
+        "sha256": "a8bb29e00cc7bdf47cb154c476ed29b8858a2809a9081403b2b3cae2afb90ce3",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+        "producer": "retained_arch_final_qualification"
+      },
+      "baseline_evidence": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-arch-final-qualification-continuation-20261009\\native-evidence.json",
+        "sha256": "f9b09d51d3fb03d2743215236930ff14f38026424c7112720cfb8785b27b5c3e"
+      },
+      "baseline_raw_surface": {
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "sample_count_per_direction": 4096,
+        "seed": 61007,
+        "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "candidate_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "units": "unchanged Blender world coordinates; no fitting or normalization",
+        "symmetric_mean_distance_world": 0.00022957110319443697,
+        "distance_p95_world": 0.0029192864894866943,
+        "sampled_max_distance_world": 0.0029192864894866943,
+        "normal_angle_mean_degrees": 0.09887890053201959,
+        "normal_angle_p95_degrees": 8.537736462515945e-06,
+        "silhouette_verdict": "independent",
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "surface_status": "unqualified",
+        "qualified_limits": null,
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+      },
+      "baseline_views": {
+        "front": {
+          "view": "front",
+          "area_iou": 0.9978998053478128,
+          "boundary_iou": 0.9660227428414851,
+          "soft_iou": null,
+          "signed_distance_loss": 0.00024357995829049628,
+          "intersection": 116886,
+          "union": 117132,
+          "ref_area": 116886,
+          "render_area": 117132,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9978998053478128,
+          "threshold": 0.7,
+          "precision": 0.9978998053478128,
+          "recall": 1.0,
+          "area_ratio": 1.002104614752836,
+          "centroid_delta_px": [
+            0.0,
+            -0.11805323400935208
+          ],
+          "pixel_difference": 0.00093841552734375,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.00071420066524297,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "side": {
+          "view": "side",
+          "area_iou": 1.0,
+          "boundary_iou": 1.0,
+          "soft_iou": null,
+          "signed_distance_loss": 0.0,
+          "intersection": 43316,
+          "union": 43316,
+          "ref_area": 43316,
+          "render_area": 43316,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 1.0,
+          "threshold": 0.7,
+          "precision": 1.0,
+          "recall": 1.0,
+          "area_ratio": 1.0,
+          "centroid_delta_px": [
+            0.0,
+            0.0
+          ],
+          "pixel_difference": 0.0,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 5.2411051001399755e-05,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "top": {
+          "view": "top",
+          "area_iou": 1.0,
+          "boundary_iou": 1.0,
+          "soft_iou": null,
+          "signed_distance_loss": 0.0,
+          "intersection": 43316,
+          "union": 43316,
+          "ref_area": 43316,
+          "render_area": 43316,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 1.0,
+          "threshold": 0.7,
+          "precision": 1.0,
+          "recall": 1.0,
+          "area_ratio": 1.0,
+          "centroid_delta_px": [
+            0.0,
+            0.0
+          ],
+          "pixel_difference": 0.0,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.00010599254164844751,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "oblique_35_28": {
+          "view": "oblique_35_28",
+          "area_iou": 0.9996627806147028,
+          "boundary_iou": 0.9916429063022318,
+          "soft_iou": null,
+          "signed_distance_loss": 6.026568868033877e-05,
+          "intersection": 124506,
+          "union": 124548,
+          "ref_area": 124513,
+          "render_area": 124541,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9996627806147028,
+          "threshold": 0.7,
+          "precision": 0.999718968050682,
+          "recall": 0.9999437809706617,
+          "area_ratio": 1.0002248761173531,
+          "centroid_delta_px": [
+            0.0003800813864529573,
+            -0.0034714201249812504
+          ],
+          "pixel_difference": 0.00016021728515625,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.00023653186508454382,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "oblique_145_40": {
+          "view": "oblique_145_40",
+          "area_iou": 0.9996682931939,
+          "boundary_iou": 0.9919482996080093,
+          "soft_iou": null,
+          "signed_distance_loss": 2.9794952355111093e-05,
+          "intersection": 114521,
+          "union": 114559,
+          "ref_area": 114527,
+          "render_area": 114553,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9996682931939,
+          "threshold": 0.7,
+          "precision": 0.9997206533220431,
+          "recall": 0.9999476106071058,
+          "area_ratio": 1.0002270207025417,
+          "centroid_delta_px": [
+            -0.002147640246505489,
+            0.004894052857309816
+          ],
+          "pixel_difference": 0.00014495849609375,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.00021189644758123904,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        }
+      },
+      "source_views": {
+        "front": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\front-coverage.npy",
+            "sha256": "91a0ddcc07b836824687f944c14cedcfb0a9330451f7eb55b142018172b86753",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\front-measurement.json",
+            "sha256": "c842eea142b0b9c6127bb5a3b1b506cbceead47836b89ee0449b9dae4853950e",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          }
+        },
+        "side": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\side-coverage.npy",
+            "sha256": "db08e597ae14f35be37550b2f65b66e01545dd2e9d2f4e599bce64295dee1bee",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\side-measurement.json",
+            "sha256": "2b7b04f167b4ceaba2c6b2c41bbb40b80e88790810b448baff82073b5a6d59bd",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          }
+        },
+        "top": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\top-coverage.npy",
+            "sha256": "758c3e0756d1200ca8baf863435638ab99ef833ebd0643e61d107f39dbe36351",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\top-measurement.json",
+            "sha256": "7571738d479448b2ec2b5f65edab828103e75e07937d4acf2965a47e50cbc28e",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          }
+        },
+        "oblique_35_28": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_35_28-coverage.npy",
+            "sha256": "8991ac3bdb66e30e3d0a19408221947f1fe48a6d511fa2656083b1adc6b3d5fe",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_35_28-measurement.json",
+            "sha256": "69e049d1ac9c89475701d91eaaafaa44b9cb8089f4da40f58c3de56d3499e4b5",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          }
+        },
+        "oblique_145_40": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_145_40-coverage.npy",
+            "sha256": "cd2b61fbace6b5afe967922babb9f5081f4ea60fe5e0189c3b1535025ca7c648",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_145_40-measurement.json",
+            "sha256": "5285754375ee2f93a4191faef6fb913d1e6e2138f7bc5af494271cc87cad28fc",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+            "producer": "retained_arch_final_qualification"
+          }
+        }
+      },
+      "original_cameras": {
+        "front": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -4.371138828673793e-08,
+              -1.0,
+              -0.800000011920929
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "2f1582d53f3ea360874293232df855bd49f2a9c5d229cdcbee3d75b1a2f783b8"
+        },
+        "oblique_145_40": {
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265407562255859,
+              -0.6275068521499634,
+              -3.9307029247283936
+            ],
+            [
+              -0.8191519975662231,
+              -0.36868783831596375,
+              0.4393850862979889,
+              2.752307891845703
+            ],
+            [
+              1.8970785831129433e-08,
+              0.7660444378852844,
+              0.6427876353263855,
+              4.026422023773193
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "3d89c06a7bbfbf024b4704ced0f5f82228abcd4ba3450388d17636fe0e7f19f9"
+        },
+        "oblique_35_28": {
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.3845685124397278,
+              0.7232682108879089,
+              4.530552864074707
+            ],
+            [
+              0.8191518783569336,
+              -0.26927801966667175,
+              0.5064380764961243,
+              3.1723272800445557
+            ],
+            [
+              9.926917954317105e-08,
+              0.882947564125061,
+              0.46947160363197327,
+              2.940770149230957
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "01ae4d4fe9d7b709d6e2297166df71f79af2b42eb08014625b54262d53a16133"
+        },
+        "side": {
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.5999999046325684
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "9a9c6f7323955e2bdbdc2def605f3cb12b35acc5cbce1df5a9167a188c5e2c0b"
+        },
+        "top": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              3.5999999046325684
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.0880000591278076,
+          "png_sha256": "4eb7bf9c461212eee3708e361d328acfe338b90e75401d0877d87126e58ecc24"
+        }
+      },
+      "source_neutral": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_35_28-neutral.png",
+        "sha256": "ce83a50addd47e53036d127bcfc97c51a18bdb1f66c1c15554299bb8c1c471ee",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_",
+        "producer": "retained_arch_final_qualification"
+      },
+      "neutral_settings": {
+        "engine": "BLENDER_WORKBENCH",
+        "format": "PNG",
+        "color_mode": "BW",
+        "color_depth": "8",
+        "resolution_percentage": 100,
+        "display": {
+          "view_transform": "AgX",
+          "look": "None",
+          "exposure": 0.0,
+          "gamma": 1.0
+        },
+        "purpose": "human inspection only; no geometric-normal metric",
+        "light": "STUDIO",
+        "color_type": "SINGLE",
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ],
+        "shadows": true,
+        "cavity": false,
+        "background_type": "WORLD"
+      },
+      "prior_view_exposure": {
+        "oblique_145_40": "original reconstruction used five-view support including old ob145; original and inner-refined ob145 masks/metrics were inspected for prior admission. New exterior view/interval selection uses only retained 3aeca candidate and permitted ob35 orientation; current original ob145 is excluded fit, ROI and view selection."
+      },
+      "crop_history": {
+        "original_producer": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf",
+        "baseline_inner_geometry_hash": "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa",
+        "fit_view": "oblique_35_28_expanded",
+        "fit_global_resolution": [
+          512,
+          512
+        ],
+        "genuine_source_crop_resolution": [
+          1024,
+          1024
+        ],
+        "source_global_fit_censoring": "uncensored",
+        "source_detail_censoring": "censored; internal observed crossings only",
+        "original_ob145_censoring": "source touches top/bottom at133pixels each; no recovered hidden geometry claim",
+        "metadata_scope": "inner observations remain bound historical stages; exterior observations describe this exact saved e2b body",
+        "new_work": "original five declared cameras only, no expanded/crop view or fitting, no historical blind claim"
+      },
+      "source_geometry_diagnostic_exposure": "source arrays were inspected for independent tail localization; optimizer consumed only retained owned linear alpha/camera observations",
+      "fit_observations": {
+        "oblique_35_28_expanded": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\source-fit\\coverage.npy",
+            "sha256": "7ae607df021e0e1929d42d8e9da2a16504f4d8bc9b761ca6acaf2626c9fb65e3"
+          },
+          "measurement": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\source-fit\\measurement.json",
+            "sha256": "4da80099648f061992d4ff235557a0b6cbddf4545f7e889f30554fa62c22bca7"
+          },
+          "source_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+          "contract_sha256": "aff964ee32d75b6acc6066b0514219f4e6db4b906e78f45a596d12e2ed9674c1"
+        }
+      },
+      "frozen_control_bounds": {
+        "notch_height_from_bottom_world": [
+          1.2711216401500522,
+          1.3230041560745442
+        ]
+      },
+      "current_selection_unchanged": true,
+      "artist_surface_limits": null,
+      "aggregate_accepted": false
+    },
+    {
+      "family": "rounded_triangle_dot",
+      "baseline_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+      "source_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+      "baseline_program": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined\\program.json",
+        "sha256": "5e6f69fff82aad0c7e7ffbe720547010c6691907dcce795b45a4a08b688e599b",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+        "producer": "bounded_adaptive_family_checkpoint"
+      },
+      "proposed_program": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\triangle-program.json",
+        "sha256": "9150d659097fdaf33b6aa006541b7599ebaa536ed4db15cb6f4ac9544907a626",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u",
+        "producer": "bounded_arch_triangle_tail_cpu"
+      },
+      "baseline_npz": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined\\evaluated-exact.npz",
+        "sha256": "327571fa13131bc11ee9e082a13ceffc2d166272be15502be815da6c9c30f805"
+      },
+      "source_npz": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\evaluated-exact.npz",
+        "sha256": "f6abc19a7ee7efbc62f3bc403b5e61ce6c426c64950604d0fa5cd7181c698cff",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+        "producer": "retained_triangle_final_qualification"
+      },
+      "baseline_evidence": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-final-qualification-continuation-20261009\\native-evidence.json",
+        "sha256": "25b230d62af0a3bd72755d7e06e4b5a52917e43a9720e8127e9015714955cada"
+      },
+      "baseline_raw_surface": {
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "sample_count_per_direction": 4096,
+        "seed": 61007,
+        "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+        "candidate_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+        "normal_orientation": "oriented; opposite normals are 180 degrees",
+        "normal_interpretation": "geometric face normals, not shading normals",
+        "units": "unchanged Blender world coordinates; no fitting or normalization",
+        "symmetric_mean_distance_world": 0.0006732319122740825,
+        "distance_p95_world": 0.0022511934163048863,
+        "sampled_max_distance_world": 0.0029814052395522594,
+        "normal_angle_mean_degrees": 0.4440156891061259,
+        "normal_angle_p95_degrees": 1.4659143045971141,
+        "silhouette_verdict": "independent",
+        "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+        "editability_verdict": "independent",
+        "metric_status": "measured",
+        "surface_status": "unqualified",
+        "qualified_limits": null,
+        "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+      },
+      "baseline_views": {
+        "front": {
+          "view": "front",
+          "area_iou": 0.9967756794104099,
+          "boundary_iou": 0.9568874868559412,
+          "soft_iou": null,
+          "signed_distance_loss": 0.0002524042309168806,
+          "intersection": 38952,
+          "union": 39078,
+          "ref_area": 39044,
+          "render_area": 38986,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9967756794104099,
+          "threshold": 0.7,
+          "precision": 0.9991278920638178,
+          "recall": 0.9976436840487655,
+          "area_ratio": 0.998514496465526,
+          "centroid_delta_px": [
+            0.006790154964761541,
+            -0.018952931456425404
+          ],
+          "pixel_difference": 0.00048065185546875,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.0005333378212526441,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "side": {
+          "view": "side",
+          "area_iou": 0.9955403383588445,
+          "boundary_iou": 0.9407692307692308,
+          "soft_iou": null,
+          "signed_distance_loss": 0.0003443716594606627,
+          "intersection": 34601,
+          "union": 34756,
+          "ref_area": 34707,
+          "render_area": 34650,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9955403383588445,
+          "threshold": 0.7,
+          "precision": 0.9985858585858586,
+          "recall": 0.9969458610654911,
+          "area_ratio": 0.998357680006915,
+          "centroid_delta_px": [
+            0.22600364685592922,
+            0.11180010469837498
+          ],
+          "pixel_difference": 0.000591278076171875,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.0006572841666638851,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "top": {
+          "view": "top",
+          "area_iou": 0.9994312485540218,
+          "boundary_iou": 0.9869357284497842,
+          "soft_iou": null,
+          "signed_distance_loss": 5.625306356726867e-05,
+          "intersection": 103677,
+          "union": 103736,
+          "ref_area": 103733,
+          "render_area": 103680,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9994312485540218,
+          "threshold": 0.7,
+          "precision": 0.9999710648148148,
+          "recall": 0.9994601525069168,
+          "area_ratio": 0.999489072908332,
+          "centroid_delta_px": [
+            -0.010092485275436047,
+            -0.06205509220433214
+          ],
+          "pixel_difference": 0.000225067138671875,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.00081075937487185,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "oblique_35_28": {
+          "view": "oblique_35_28",
+          "area_iou": 0.9984320141800457,
+          "boundary_iou": 0.9693945442448436,
+          "soft_iou": null,
+          "signed_distance_loss": 0.0001878975127880267,
+          "intersection": 58582,
+          "union": 58674,
+          "ref_area": 58621,
+          "render_area": 58635,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9984320141800457,
+          "threshold": 0.7,
+          "precision": 0.9990961030101475,
+          "recall": 0.9993347094044797,
+          "area_ratio": 1.0002388222650587,
+          "centroid_delta_px": [
+            0.20187940923869974,
+            -0.05108988482186305
+          ],
+          "pixel_difference": 0.0003509521484375,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.00037052808329463005,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        },
+        "oblique_145_40": {
+          "view": "oblique_145_40",
+          "area_iou": 0.9985186825965972,
+          "boundary_iou": 0.9681709503885236,
+          "soft_iou": null,
+          "signed_distance_loss": 0.00019553938621008626,
+          "intersection": 72126,
+          "union": 72233,
+          "ref_area": 72193,
+          "render_area": 72166,
+          "required": true,
+          "passed": true,
+          "pass": true,
+          "reason": "",
+          "warnings": [],
+          "iou": 0.9985186825965972,
+          "threshold": 0.7,
+          "precision": 0.9994457223623313,
+          "recall": 0.9990719321817905,
+          "area_ratio": 0.9996260025210201,
+          "centroid_delta_px": [
+            -0.15742584992705133,
+            -0.08007739102572486
+          ],
+          "pixel_difference": 0.000408172607421875,
+          "thresholds": {
+            "min_area_iou": 0.7,
+            "min_boundary_iou": 0.8,
+            "max_signed_distance_loss": 0.05
+          },
+          "measurement_protocol": "opaque_linear_alpha_v1",
+          "coverage_l1": 0.0004130245069973171,
+          "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+        }
+      },
+      "source_views": {
+        "front": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\front-coverage.npy",
+            "sha256": "02e7fa226c2aa70b7ced85e756a2acecd5a364268d2f5e1c1b83c884a4e09008",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\front-measurement.json",
+            "sha256": "0027478df38ac5a998b9bef77b398f85f423505e8b7a06d8494667eefd34389d",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          }
+        },
+        "side": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\side-coverage.npy",
+            "sha256": "c769197159acf07ce161d479d67af82faaf3591be078569a40f73b635054ca9d",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\side-measurement.json",
+            "sha256": "b9c501ca70f415d76071c5d32ab034a230dd9bb6484970877cc260856b2e44c6",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          }
+        },
+        "top": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\top-coverage.npy",
+            "sha256": "ccb9f55a44fa1b5d13432334df98e26c0441bbfd3007127d6fe1a0b0d6d3dba4",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\top-measurement.json",
+            "sha256": "d0b41368c665911cd64b80e08987922ecc52ec67162ac2b78c57f8fa4d568fed",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          }
+        },
+        "oblique_35_28": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_35_28-coverage.npy",
+            "sha256": "dd950fc8066e923bf576072d7258fe97a2ba965ebf8c0c873f85a39274bce6b8",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_35_28-measurement.json",
+            "sha256": "0eb9b8dbf8dfa418e91a5384a7a4e702fc4004c4163b172ef5cc0f5950b2575c",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          }
+        },
+        "oblique_145_40": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_145_40-coverage.npy",
+            "sha256": "bf09fc0658db248a52ab7cdc70e033a61dcd1ddd51ed186e263222977182ea70",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          },
+          "metadata": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_145_40-measurement.json",
+            "sha256": "e45b127190fa21c3dc6a2f7f61d0dbdc19e20ce1f77247e3204e30ea6984588c",
+            "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+            "producer": "retained_triangle_final_qualification"
+          }
+        }
+      },
+      "original_cameras": {
+        "front": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -4.371138828673793e-08,
+              -1.0,
+              -3.115000009536743
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "53bf7d1cf2a8e9842fc6a4cb81e4c399f811c30d6f137fa7c8d535f18fd2310e"
+        },
+        "oblique_145_40": {
+          "matrix_world": [
+            [
+              -0.5735764503479004,
+              0.5265408754348755,
+              -0.6275067329406738,
+              -4.102880001068115
+            ],
+            [
+              -0.8191519975662231,
+              -0.3686879277229309,
+              0.4393850266933441,
+              3.097867727279663
+            ],
+            [
+              1.8614212393686103e-08,
+              0.7660443186759949,
+              0.642787754535675,
+              4.202792167663574
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "ef5d9f70173745884d15de950714e7a8d4e1b3344fb25c9a0710970003644756"
+        },
+        "oblique_35_28": {
+          "matrix_world": [
+            [
+              -0.5735766887664795,
+              -0.3845682740211487,
+              0.7232683300971985,
+              4.729005336761475
+            ],
+            [
+              0.8191518783569336,
+              -0.26927781105041504,
+              0.5064381957054138,
+              3.536285400390625
+            ],
+            [
+              6.467210766913922e-08,
+              0.8829477429389954,
+              0.469471275806427,
+              3.069585084915161
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "3417b4fc1365e7736850cdd1ee786d92d0fd88d6f8979efaff72783830f1816d"
+        },
+        "side": {
+          "matrix_world": [
+            [
+              -4.371138828673793e-08,
+              4.371138828673793e-08,
+              1.0,
+              3.7576913833618164
+            ],
+            [
+              1.0,
+              1.910685676922942e-15,
+              4.371138828673793e-08,
+              0.22499996423721313
+            ],
+            [
+              0.0,
+              1.0,
+              -4.371138828673793e-08,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "65a8b602b16c0d519522384d344a8c73d1ebcc59c696dd7c362385dd686b1a9d"
+        },
+        "top": {
+          "matrix_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.22499996423721313
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.9599999785423279
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "ortho_scale": 2.1794610023498535,
+          "png_sha256": "f678156f80dc39785cac2504b61d9bc6099db51038439e079ad1f7e0ea7f9d75"
+        }
+      },
+      "source_neutral": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_35_28-neutral.png",
+        "sha256": "51d4f6cb28602d38a5537d05ca23e1eb1f851b5c966a385671a32f915aa286cc",
+        "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4",
+        "producer": "retained_triangle_final_qualification"
+      },
+      "neutral_settings": {
+        "engine": "BLENDER_WORKBENCH",
+        "format": "PNG",
+        "color_mode": "BW",
+        "color_depth": "8",
+        "resolution_percentage": 100,
+        "display": {
+          "view_transform": "AgX",
+          "look": "None",
+          "exposure": 0.0,
+          "gamma": 1.0
+        },
+        "purpose": "human inspection only; no geometric-normal metric",
+        "light": "STUDIO",
+        "color_type": "SINGLE",
+        "single_color": [
+          0.6499999761581421,
+          0.6499999761581421,
+          0.6499999761581421
+        ],
+        "shadows": true,
+        "cavity": false,
+        "background_type": "WORLD"
+      },
+      "prior_view_exposure": {
+        "oblique_145_40": "Original display-managed silhouette inspected for earlier5view admission; original support fit used front/side/top. New controlled oblique excluded current fit/ROI; no historical blind claim."
+      },
+      "crop_history": {
+        "prior_checkpoint_owner": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi",
+        "frozen_workload": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\frozen-workload.json",
+          "sha256": "d1e23d1e5d2f37c2ff1198b55a96a5000c21d6b6ead5c2701258af175a8f4be7"
+        },
+        "fit_view": "top",
+        "global_resolution": [
+          512,
+          512
+        ],
+        "genuine_new_detail_resolution": [
+          1024,
+          1024
+        ],
+        "top_crop_clipping": "retained original checkpoint crop; no new crop, enlargement or fit",
+        "new_work": "original five frozen camera declarations only; oblique145 remains excluded from fitting"
+      },
+      "source_geometry_diagnostic_exposure": "source arrays were inspected for independent tail localization; optimizer consumed only retained owned linear alpha/camera observations",
+      "fit_observations": {
+        "front": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\front-coverage.npy",
+            "sha256": "02e7fa226c2aa70b7ced85e756a2acecd5a364268d2f5e1c1b83c884a4e09008"
+          },
+          "measurement": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\front-measurement.json",
+            "sha256": "0027478df38ac5a998b9bef77b398f85f423505e8b7a06d8494667eefd34389d"
+          },
+          "source_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+          "contract_sha256": "90ccc2ba502773e8e3450953986a3a4bdfc53b3d1dbcf3dc0002e170c6c4e48d"
+        },
+        "top": {
+          "coverage": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\top-coverage.npy",
+            "sha256": "ccb9f55a44fa1b5d13432334df98e26c0441bbfd3007127d6fe1a0b0d6d3dba4"
+          },
+          "measurement": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\top-measurement.json",
+            "sha256": "d0b41368c665911cd64b80e08987922ecc52ec67162ac2b78c57f8fa4d568fed"
+          },
+          "source_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+          "contract_sha256": "4bb5fb2fcf975fcae23ae43313565ce8cd4a3e8776b82dddfeacff616ec73284"
+        }
+      },
+      "frozen_control_bounds": {
+        "center_y_world": [
+          -0.007369268160897086,
+          0.009657770919961145
+        ],
+        "center_z_world": [
+          -0.006573382761169198,
+          0.010453656319689033
+        ],
+        "front_fraction": [
+          0.48548321749202117,
+          0.5254832174920212
+        ]
+      },
+      "current_selection_unchanged": true,
+      "artist_surface_limits": null,
+      "aggregate_accepted": false
+    }
+  ],
+  "replay_clips": {
+    "clip_start": 0.10000000149011612,
+    "clip_end": 1000.0
+  },
+  "qualification_python": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Scripts\\python.exe",
+  "qualification_package_files": [
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\open3d-0.19.0.dist-info\\METADATA",
+      "sha256": "7020e4ea25bf1195edece73e72120cd2b86ead8ef3e8f9db10bafb05c9c2e572"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\open3d\\cpu\\pybind.cp312-win_amd64.pyd",
+      "sha256": "ab1b2f4a1126a11886a2a9f3eeab5ceaeac0bab1b53ee319eb363df7ef629d88"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\numpy-2.4.4.dist-info\\METADATA",
+      "sha256": "8f9e04338ffa930868a2d157ce44f6e4cb7ac524b968fb13d04187a6ac575282"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\numpy\\_core\\_multiarray_umath.cp312-win_amd64.pyd",
+      "sha256": "f4523c2dfe641a904605029ce4a5046388bd61b18afc0594d34018b5e6d848f8"
+    },
+    {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\pyvenv.cfg",
+      "sha256": "7629eb68ddb84edf4972de38284488d9c6e37a4badef61cecb67b945efe17d74"
+    }
+  ],
+  "geometry_package_files": [
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely-2.1.1.dist-info\\METADATA",
+      "sha256": "3cead846ed6c3d8ebe3c5e8b2042f84853779894fd9d6bac6cce88c6e04e565d"
+    },
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely.libs\\geos-a5c01bdebd805679c9540218609cd4b8.dll",
+      "sha256": "a0bb7a93b30bd7d1a072ce75832985c565c3fbf099dfa422ee847862ed510aa1"
+    },
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely.libs\\geos_c-f79418bf8e5cda2d1933e2121ee44e49.dll",
+      "sha256": "f517acbc835b6af36ed680062803ee13b693253d213022040851a1b0095763d6"
+    },
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely.libs\\msvcp140-8a79f4687fc453279df1092923244d9e.dll",
+      "sha256": "26cb454224ee93438311fb75124281a9ee7fd95ed2d6ed391e35d69f58012efd"
+    },
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely\\_geometry_helpers.cp313-win_amd64.pyd",
+      "sha256": "fe5398a30c65d704e91cf9abebea9117ea0c4a178f845d7e48337bcab65ab5d6"
+    },
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely\\_geos.cp313-win_amd64.pyd",
+      "sha256": "afcc2e3c26cb801ac195b137ae239db92ebecb8a32494b9fcdfcde109544e268"
+    },
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely\\lib.cp313-win_amd64.pyd",
+      "sha256": "a652293a7321d4dad6597813081078cccb3e5b813262218427dd3613c5b47703"
+    }
+  ],
+  "bootstrap_package_files": [
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\cv2\\cv2.pyd",
+      "sha256": "c9ca31a70ea855ca9a463b69accda56930b0445921d2939034cbbd1703eb794a"
+    },
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\opencv_python-4.13.0.90.dist-info\\METADATA",
+      "sha256": "03eb1709623beae5080050b1261e13acd64f725578d352d5ec3e36bfdd16747d"
+    },
+    {
+      "path": "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\opencv_python_headless-4.12.0.88.dist-info\\METADATA",
+      "sha256": "4f1a95a6fc6459732e653b022eb9835da212770a1f32f5bc5a09b2ba776605f9"
+    }
+  ],
+  "preserved_bootstrap_failure": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-bootstrap-01\\failure-evidence.json",
+    "sha256": "ed63824ec5fae4f6b7b8c14e0247e58034e632e9bc8f00b74fbaf30c2b23bd2e"
+  },
+  "cpu_result": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\results.json",
+    "sha256": "268dbd6536f6f63d4d0f7e37c822142b5bf57864b231dc8122d490859bada4b6"
+  },
+  "cpu_history": [
+    {
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-j51vn8ro",
+      "producer": "bounded_arch_triangle_tail_cpu",
+      "state": "failed",
+      "lease_status": "released",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-j51vn8ro\\run-ownership.json",
+        "sha256": "f97432d6fd6887b78ddccd2f3934a8bd32aeffcd79e16690ae265f18acb754e8"
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-j51vn8ro\\run-lease.json",
+        "sha256": "095dfa008b8f581e8358bb05dad169208a5bdfd7a59c46069bd5037a3e3b6ef0"
+      },
+      "historical_adoption": false
+    },
+    {
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy",
+      "producer": "bounded_arch_triangle_tail_cpu",
+      "state": "succeeded",
+      "lease_status": "released",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy\\run-ownership.json",
+        "sha256": "2113bb1040a24d232b5c9ee51424abadf1e61f84748aed7964a66941c43fe3f8"
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy\\run-lease.json",
+        "sha256": "c7a72840b1a35f9717d675fcbc4ce1bbfbb573aaad71137396e425dc0b070e38"
+      },
+      "historical_adoption": false,
+      "results": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy\\results.json",
+        "sha256": "201dc1eb7025d0c3418acf6f330b029e605207c8c267067c43ce4964380d058c"
+      }
+    },
+    {
+      "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u",
+      "producer": "bounded_arch_triangle_tail_cpu",
+      "state": "succeeded",
+      "lease_status": "released",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\run-ownership.json",
+        "sha256": "acafcc3d675697b088697a5752a839dfbc0a32e30289531abceeb2d8c9c473e7"
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\run-lease.json",
+        "sha256": "0222f07d8fabbe72b5cbbcb6a271d5aace54c2bf8f748946e4a019ac3c493b7a"
+      },
+      "historical_adoption": false,
+      "results": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\results.json",
+        "sha256": "268dbd6536f6f63d4d0f7e37c822142b5bf57864b231dc8122d490859bada4b6"
+      }
+    }
+  ],
+  "current_twelve_row_selection": "unchanged; these two bodies are unselected proposals until independent native results are reviewed",
+  "checkpoint_rule": "all original five silhouette gates; original ob145 alpha L1 nonworse; raw mean/P95/sampled-max nonworse; exact edit restoration and actual solid boundary qualified",
+  "silhouette_gates": {
+    "min_area_iou": 0.7,
+    "min_boundary_iou": 0.8,
+    "max_signed_distance_loss": 0.05
+  },
+  "surface_policy": "raw geometry comparison and independent nonworse checkpoint; no new artist tolerance, no aggregate promotion",
+  "output_budget": {
+    "frame_reservations_bytes": 100663296,
+    "geometry_and_metadata_allowance_bytes": 16777216,
+    "planned_total_bytes": 117440512,
+    "limit_bytes": 268435456
+  },
+  "toolchain_scope": "existing exact Blender executable and Open3D package binary; stream hashes with512MiB/file and512MiB aggregate; no installs or version changes",
+  "toolchain_sha256": {
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\open3d\\cpu\\pybind.cp312-win_amd64.pyd": "ab1b2f4a1126a11886a2a9f3eeab5ceaeac0bab1b53ee319eb363df7ef629d88",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\cv2\\cv2.pyd": "c9ca31a70ea855ca9a463b69accda56930b0445921d2939034cbbd1703eb794a",
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe": "f141a3c5754500e6f84361099a4cd53f0bb7662b6a0d2cfaaa8fbb63e92234a0"
+  },
+  "input_sha256": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\results.json": "268dbd6536f6f63d4d0f7e37c822142b5bf57864b231dc8122d490859bada4b6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-tail-refinement-continuation-20261009\\failed-bootstrap-01\\failure-evidence.json": "ed63824ec5fae4f6b7b8c14e0247e58034e632e9bc8f00b74fbaf30c2b23bd2e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-arch-final-qualification-continuation-20261009\\native-plan.json": "cebae3ee4286d4c7aae1ada828b3b99abb864af470fbe7b064a3ed503d6b3c64",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\refined\\program.json": "4f1c6df58ca7405ab6500ded28bfdea886d06fb5c3a640f6403fce32a589697a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\run-ownership.json": "4ea06f6eeefd7c1df9356fea1a37cfd3def18df04bfde7f7dd904787261e9d50",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\run-lease.json": "b3b4012b968b2265a39178cd6da82ad29480e3bfbc6fe27eb878d47cad4139b5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\arch-program.json": "76dc835cd7d73e67426e2cedbdaa32ac8ec4bf9cf684a38008cb88f751af5d3d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\run-ownership.json": "acafcc3d675697b088697a5752a839dfbc0a32e30289531abceeb2d8c9c473e7",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\run-lease.json": "0222f07d8fabbe72b5cbbcb6a271d5aace54c2bf8f748946e4a019ac3c493b7a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\refined\\evaluated-exact.npz": "5b6e91bb40e29702dc2ebd8ef381781d255203b634e50fb39eddbd2ea7228b57",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\evaluated-exact.npz": "a8bb29e00cc7bdf47cb154c476ed29b8858a2809a9081403b2b3cae2afb90ce3",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\run-ownership.json": "17a143dcf5d4efe584d09b4cc81cb7f986e37cff1463e36a81af0015e305275c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\run-lease.json": "77ecd1b26ade0bf7564cef53251f3c39350799d5a00395794fc1a01bf9d49672",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-arch-final-qualification-continuation-20261009\\native-evidence.json": "f9b09d51d3fb03d2743215236930ff14f38026424c7112720cfb8785b27b5c3e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_35_28-neutral.png": "ce83a50addd47e53036d127bcfc97c51a18bdb1f66c1c15554299bb8c1c471ee",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\front-coverage.npy": "91a0ddcc07b836824687f944c14cedcfb0a9330451f7eb55b142018172b86753",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\front-measurement.json": "c842eea142b0b9c6127bb5a3b1b506cbceead47836b89ee0449b9dae4853950e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\side-coverage.npy": "db08e597ae14f35be37550b2f65b66e01545dd2e9d2f4e599bce64295dee1bee",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\side-measurement.json": "2b7b04f167b4ceaba2c6b2c41bbb40b80e88790810b448baff82073b5a6d59bd",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\top-coverage.npy": "758c3e0756d1200ca8baf863435638ab99ef833ebd0643e61d107f39dbe36351",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\top-measurement.json": "7571738d479448b2ec2b5f65edab828103e75e07937d4acf2965a47e50cbc28e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_35_28-coverage.npy": "8991ac3bdb66e30e3d0a19408221947f1fe48a6d511fa2656083b1adc6b3d5fe",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_35_28-measurement.json": "69e049d1ac9c89475701d91eaaafaa44b9cb8089f4da40f58c3de56d3499e4b5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_145_40-coverage.npy": "cd2b61fbace6b5afe967922babb9f5081f4ea60fe5e0189c3b1535025ca7c648",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\arch-final-qualification-01\\owned-d6194sv_\\concave_arch\\source\\oblique_145_40-measurement.json": "5285754375ee2f93a4191faef6fb913d1e6e2138f7bc5af494271cc87cad28fc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\source-fit\\coverage.npy": "7ae607df021e0e1929d42d8e9da2a16504f4d8bc9b761ca6acaf2626c9fb65e3",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\source-fit\\measurement.json": "4da80099648f061992d4ff235557a0b6cbddf4545f7e889f30554fa62c22bca7",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-final-qualification-continuation-20261009\\native-plan.json": "0a1b781aeac7900cc5f7e5aeb66cdc9149e50fabb2c52f2cfea7902c24553c65",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined\\program.json": "5e6f69fff82aad0c7e7ffbe720547010c6691907dcce795b45a4a08b688e599b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\run-ownership.json": "affd0b1026cd2d6997a1bd687d85337158aafa62fa94d21b1202621a379155ad",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\run-lease.json": "ffd8bae3da1f302c1e8bb4c9922e9b8a80c5b6cf5b03e69b139081bcf76ee1a3",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-er25pj8u\\triangle-program.json": "9150d659097fdaf33b6aa006541b7599ebaa536ed4db15cb6f4ac9544907a626",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\rounded_triangle_dot\\refined\\evaluated-exact.npz": "327571fa13131bc11ee9e082a13ceffc2d166272be15502be815da6c9c30f805",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\evaluated-exact.npz": "f6abc19a7ee7efbc62f3bc403b5e61ce6c426c64950604d0fa5cd7181c698cff",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-ownership.json": "6e90e5fa63137593ee075d1685e48907fa0a93ceb18888eee132110f019671a1",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\run-lease.json": "749b12871a055cc241d7da5c87bb6454eef2ccb635376f37a0f350de56ec35a3",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-triangle-final-qualification-continuation-20261009\\native-evidence.json": "25b230d62af0a3bd72755d7e06e4b5a52917e43a9720e8127e9015714955cada",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_35_28-neutral.png": "51d4f6cb28602d38a5537d05ca23e1eb1f851b5c966a385671a32f915aa286cc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\front-coverage.npy": "02e7fa226c2aa70b7ced85e756a2acecd5a364268d2f5e1c1b83c884a4e09008",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\front-measurement.json": "0027478df38ac5a998b9bef77b398f85f423505e8b7a06d8494667eefd34389d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\side-coverage.npy": "c769197159acf07ce161d479d67af82faaf3591be078569a40f73b635054ca9d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\side-measurement.json": "b9c501ca70f415d76071c5d32ab034a230dd9bb6484970877cc260856b2e44c6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\top-coverage.npy": "ccb9f55a44fa1b5d13432334df98e26c0441bbfd3007127d6fe1a0b0d6d3dba4",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\top-measurement.json": "d0b41368c665911cd64b80e08987922ecc52ec67162ac2b78c57f8fa4d568fed",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_35_28-coverage.npy": "dd950fc8066e923bf576072d7258fe97a2ba965ebf8c0c873f85a39274bce6b8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_35_28-measurement.json": "0eb9b8dbf8dfa418e91a5384a7a4e702fc4004c4163b172ef5cc0f5950b2575c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_145_40-coverage.npy": "bf09fc0658db248a52ab7cdc70e033a61dcd1ddd51ed186e263222977182ea70",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\triangle-final-qualification-01\\owned-1_y6bdf4\\rounded_triangle_dot\\source\\oblique_145_40-measurement.json": "e45b127190fa21c3dc6a2f7f61d0dbdc19e20ce1f77247e3204e30ea6984588c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-j51vn8ro\\run-ownership.json": "f97432d6fd6887b78ddccd2f3934a8bd32aeffcd79e16690ae265f18acb754e8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-j51vn8ro\\run-lease.json": "095dfa008b8f581e8358bb05dad169208a5bdfd7a59c46069bd5037a3e3b6ef0",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy\\run-ownership.json": "2113bb1040a24d232b5c9ee51424abadf1e61f84748aed7964a66941c43fe3f8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy\\run-lease.json": "c7a72840b1a35f9717d675fcbc4ce1bbfbb573aaad71137396e425dc0b070e38",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\tail-contour-cpu-01\\owned-nmdlk8dy\\results.json": "201dc1eb7025d0c3418acf6f330b029e605207c8c267067c43ce4964380d058c",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\open3d-0.19.0.dist-info\\METADATA": "7020e4ea25bf1195edece73e72120cd2b86ead8ef3e8f9db10bafb05c9c2e572",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\numpy-2.4.4.dist-info\\METADATA": "8f9e04338ffa930868a2d157ce44f6e4cb7ac524b968fb13d04187a6ac575282",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Lib\\site-packages\\numpy\\_core\\_multiarray_umath.cp312-win_amd64.pyd": "f4523c2dfe641a904605029ce4a5046388bd61b18afc0594d34018b5e6d848f8",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\pyvenv.cfg": "7629eb68ddb84edf4972de38284488d9c6e37a4badef61cecb67b945efe17d74",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely-2.1.1.dist-info\\METADATA": "3cead846ed6c3d8ebe3c5e8b2042f84853779894fd9d6bac6cce88c6e04e565d",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely.libs\\geos-a5c01bdebd805679c9540218609cd4b8.dll": "a0bb7a93b30bd7d1a072ce75832985c565c3fbf099dfa422ee847862ed510aa1",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely.libs\\geos_c-f79418bf8e5cda2d1933e2121ee44e49.dll": "f517acbc835b6af36ed680062803ee13b693253d213022040851a1b0095763d6",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely.libs\\msvcp140-8a79f4687fc453279df1092923244d9e.dll": "26cb454224ee93438311fb75124281a9ee7fd95ed2d6ed391e35d69f58012efd",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely\\_geometry_helpers.cp313-win_amd64.pyd": "fe5398a30c65d704e91cf9abebea9117ea0c4a178f845d7e48337bcab65ab5d6",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely\\_geos.cp313-win_amd64.pyd": "afcc2e3c26cb801ac195b137ae239db92ebecb8a32494b9fcdfcde109544e268",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\shapely\\lib.cp313-win_amd64.pyd": "a652293a7321d4dad6597813081078cccb3e5b813262218427dd3613c5b47703",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\controlled_measurement.py": "fede2bef2e63e657e954eee8e65ea344a56f61c42543929d9de53b0ffa7d4fa6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\reference_noise.py": "841d1470fbfa7db2f81cf364455d94705342498b6bc1b304d1445b157a577460",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\silhouette_eval.py": "11aebcbfcaa4ad61d5decb7f63eea63b2b32e477bdfdf459f8b5d57c4aa5b40f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\triangle_contacts.py": "621d32ca63daa37b2f8cecdf2b6689b66fade5d919f5958b6e77456953f6594b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\geometry\\profile_models.py": "7c2faf7ed2273d7547695cd4afd046aa5a5f154822f426d1af81469957b1f181",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\measurement_render.py": "4866aeedb578fd204c609d1a4460f9cb0089ddcba43fd39af0b14521965b6bba",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\profile_loft_mesh.py": "8ce2b13f2d4e9c802ed830778a4d852aaf69bf2e2edf5847b2681612857b6239",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\silhouette_render.py": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology.py": "3e97bc30c728c171cce2dcacc9ed249effcf374b4757e34a3dda9c502cfcfe9e",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology_receipt.py": "a72f08ac2ea97dbeaa25ff059727dc9c87664f7274a1c57b4854f173ae403655",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\polygon_extrusion.py": "7add42438a14c9373533a3d9e70cfa407eaedd141c0ef10a0fd7e1778bfaf9ea",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\primitive_protocol.py": "52fb55574f7a41477f1f15d49b42211e5253fe48eb583344f2990aa4337fb9d7",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\rounded_triangle.py": "42dd3eb646dab57cf7603c14a0dbc1f25bbfd9f348a20df2dd37e20364248bbf",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program.py": "3226433f881a72446baca12a01181f9d2015e232a4f48cd2fbee726ea647b741",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\primitives\\shape_program_compiler.py": "5a2e3f688863964b582c8599e8a5f43a853e9bbde45202b192388ab886b0dacb",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\frozen_family.py": "55a4aded72f654b5884685338db18f2d52e71dd3a228d5f308e89c83e927869a",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\grouped_solids.py": "0dcc8d7ae0c95bb706c28ce42bdb372591ef64d7055491b3edc136111e3baada",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\mesh_io.py": "2d3d6bb40a66232614940f4fd75ddbd7624075b5b839dc284161d24deca0f9b8",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_qualification.py": "009295c99a1381bd48383e0dc579c844a4315d79c9471dd6f54b796b62df05a9",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_qualification.py": "d09a5a8d165d57c74d2abea02f9208a9f2ee642c588cb7ad7638ade0cb49f3d2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_targets.py": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\blender_builders.py": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_contracts.py": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_references.py": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\specs.py": "b750d075ff5e7d07a388ce541b0defa515b89dfa91462cc9f4f1ec727f0fde4b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py": "71f4481f54e4994ef5dc668217631203540fdd207e12a545ef71d0584b9962b2",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\artifact_publication.py": "3a2d8d76defe2522df6ed4b4560eb521592031f963ddf2b9bdf73d55c544f631",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\json_io.py": "915fecf4a182e6b53f632c6c1403a9f075f1bb94ca1e307bd0b6abde382974b9",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py": "217661ee2715739790dfc7261e66ae5202d59318ed1c96cdca76e25ba0c49d9b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\qualify_native_solid.py": "a2e64dabd3d00cd8a21c2be7760eca2c77fc121faad9d2c46fb123f9d94e0c25",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_family_source_edit_check.py": "91440893c490e8915be6ed8789262585c88ddfde90b1536ab8c95409619d33c1",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_quality_coverage_check.py": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_reference_neutral_inspection.py": "28501a44fcefc55e2ca09412c82072233885d5ecf4ff83f18f2a9f4b6cae6ec6",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_selected_canonical_inspection.py": "c5f00d3a861d5bfa004d04cec912ed391d5ab5cd5f22ae919a36514664d408ce",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_surface_quality_check.py": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_arch_triangle_tail_check.py": "92f3d1f346cf827649a6f9266badb93c2fd4651ec13d8efa3d06b9c31d7d8a8d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\arch_tail_refinement.py": "1c692fb9277bf46e4200ff006177943b9c3752266a6ed34658dfb7cad28f0e24",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\triangle_tail_refinement.py": "6e2208f29864470b07d9cd1011a4a4a99c5b983e791af9d87ee4d4411fdfa6a4",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\adaptive_arch_exterior.py": "ef9210035f5a909899f0eda524edcfacd5da26a91b2d586e898031d8cb2581e7",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\adaptive_family.py": "e35ae62dc46babde6c6b28971719a27daca1b780e5a0a7edda2ede1d927e2d96",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_arch_tail_refinement.py": "750e69aa07aa821d650c9165a97f9890ba866159fc445d5eadb8b207688d213d",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_triangle_tail_refinement.py": "f3710652b3e5e926ff6a50917bcc6c02d8b757f69d86cf23a1b0a481d2c2d253",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\primary_process_cleanup.py": "ddc0f60642b536f64dda686d7d8e10c62e42916c70351c388564a5732785107f",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\comparable_geometry.py": "4226354476aea7a7785ea31e2860fba0084e2f0a5175e6a866e63deaba2ecb01",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\surface_quality.py": "f9448e3bdfc4d1065716b454a32dbe62a1ec242fa3a7f030f73d2a7a1ccc9712",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\geometry.py": "7d43a5e288dbf63a9b8de3089f91edb245dd65cb4f8bd522133b4b8541aa91d9",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\values.py": "9b5a50b0aa79e2d6e6203e7ac8c5730c3b11876b0558fcef33c25e892852ca68",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\artifacts.py": "2cc4fbbd5c9b5916c3cf159038714ca0f0d20d5044a6f7bd90f9a80a29e5f6fa",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\types.py": "af95365b79715c94ff728f39084ebdcffd5c2eb0b221fcbfa1e8a0e3e51f0595",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\oriented_support.py": "806234e3e5d5adf6774ba471613f8381fb59652e34fc1175ed5f3e2044916d4c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\projection_contract.py": "c462f8ba7ac156aae37c7a48734405c6536ca5d89282a4823f314493c688428c",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\path_safety.py": "9524dd9cec40a2c24282581a632e15f8b669ff2591cc4aacf37da7007fd73716",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\progress.py": "f37536919e255cb9c199c32d5badad3fae2dd7edfc8e47e085303b071423b1b6",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\opencv_python-4.13.0.90.dist-info\\METADATA": "03eb1709623beae5080050b1261e13acd64f725578d352d5ec3e36bfdd16747d",
+    "C:\\Users\\sneak\\AppData\\Roaming\\Python\\Python313\\site-packages\\opencv_python_headless-4.12.0.88.dist-info\\METADATA": "4f1a95a6fc6459732e653b022eb9835da212770a1f32f5bc5a09b2ba776605f9",
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\5.2\\python\\bin\\python.exe": "972eacf8de4f86a005084d8a687a81c0242f19bfeecb3169eba836d9bd2a654b",
+    "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Scripts\\python.exe": "d55736b9f3d6b4ca7985b82db8ce11edfa09994cf93ce31c6b506543b74f32eb"
+  }
+}

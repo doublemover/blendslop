@@ -1,0 +1,86 @@
+{
+  "broker_process_ownership": "unsupported",
+  "command": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+    "--background",
+    "--factory-startup",
+    "--threads",
+    "2",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_multipart_planar_join_check.py",
+    "--",
+    "--plan",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-multipart-planar-join-continuation-20261009\\native-plan.json",
+    "--output",
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01"
+  ],
+  "elapsed_seconds": 11.526352599999882,
+  "job_accounting": {
+    "active_processes": 0,
+    "peak_job_committed_bytes": 2710781952,
+    "terminated_processes": 0,
+    "total_processes": 5
+  },
+  "job_active_zero": true,
+  "job_assigned_before_resume": true,
+  "job_memory_limit_enforced": true,
+  "join_timeout_s": 5.0,
+  "lifecycle_complete": true,
+  "limit_reason": null,
+  "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\supervisor-01\\owned-u9r5n222\\stdout.log",
+  "max_job_committed_bytes": 8589934592,
+  "max_rss_bytes": 8589934592,
+  "memory_scope": "job-accounted committed memory; not an RSS quota",
+  "observed_handles_joined": true,
+  "observed_processes": [
+    {
+      "creation_filetime": 134360425284393786,
+      "exit_status": 0,
+      "kernel_joined": true,
+      "pid": 27588
+    },
+    {
+      "creation_filetime": 134360425286016657,
+      "exit_status": 0,
+      "kernel_joined": true,
+      "pid": 27736
+    },
+    {
+      "creation_filetime": 134360425377734310,
+      "exit_status": 0,
+      "kernel_joined": true,
+      "pid": 20372
+    },
+    {
+      "creation_filetime": 134360425377868673,
+      "exit_status": 0,
+      "kernel_joined": true,
+      "pid": 23892
+    },
+    {
+      "creation_filetime": 134360425378038819,
+      "exit_status": 0,
+      "kernel_joined": true,
+      "pid": 20848
+    }
+  ],
+  "ordinary_createprocess_tree_owned": true,
+  "ownership_scope": "Windows no-breakaway job",
+  "peak_observed_tree_rss_bytes": 667033600,
+  "pid": 27588,
+  "primary_identity": {
+    "creation_filetime": 134360425284393786,
+    "pid": 27588
+  },
+  "primary_joined": true,
+  "protocol": "fresh_owned_process_supervision_v1",
+  "returncode": 0,
+  "rss_sample_count": 553,
+  "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+  "rss_unavailable_samples": [],
+  "status": "succeeded",
+  "timeout_s": 85.0,
+  "total_declared_supervision_budget_s": 90.0
+}

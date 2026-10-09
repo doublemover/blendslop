@@ -1,0 +1,1137 @@
+{
+  "protocol": "actual_arch_exterior_checkpoint_evidence_v1",
+  "status": "bounded_checkpoint_improved_with_independent_p95_regression",
+  "execution_base_revision": "a7571fb8ac8b4d2132a3c5c41fd1a9842c4b8c7a; new stage working bytes frozen before launch",
+  "plan_sha256": "16ff4210916435ef26e64416d3567dbe59025e074a29030d897b288c16466ea9",
+  "preflight_sha256": "27ed258d27e9f3298726f5fdf24935bb9201ddc3472236b91013cffc7e80e613",
+  "frozen_plan_inputs": 51,
+  "supervisor_explicit_inputs": 52,
+  "producer": {
+    "root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf",
+    "result_sha256": "4083179014a61f1cb95a750c2294ca19db6225b7fe3efbfe01f40a847fca021f",
+    "result": {
+      "protocol": "bounded_arch_exterior_checkpoint_v1",
+      "status": "measured",
+      "cases": {
+        "concave_arch": {
+          "status": "measured",
+          "baseline_geometry_hash": "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa",
+          "refined_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+          "program": {
+            "schema_version": "1",
+            "program_id": "frozen-family-concave_arch",
+            "root_nodes": [
+              {
+                "node_id": "polygon_0",
+                "operation": "add",
+                "primitive_type": "polygon_extrusion",
+                "parameters": {
+                  "depth_world": 1.7999643993471974,
+                  "height_world": 0.3997957220835502,
+                  "holes": [],
+                  "outer": [
+                    [
+                      -0.9000495908071628,
+                      -0.8999660777149334
+                    ],
+                    [
+                      -0.9000495908071628,
+                      0.899998321632264
+                    ],
+                    [
+                      0.9000495908071628,
+                      0.899998321632264
+                    ],
+                    [
+                      0.9000495908071628,
+                      -0.8999660777149334
+                    ],
+                    [
+                      0.499969263839445,
+                      -0.8999660777149334
+                    ],
+                    [
+                      0.499969263839445,
+                      0.3970968203973648
+                    ],
+                    [
+                      -0.499969263839445,
+                      0.3970968203973648
+                    ],
+                    [
+                      -0.499969263839445,
+                      -0.8999660777149334
+                    ]
+                  ],
+                  "outline_source": "known foreground pixel-cell boundaries",
+                  "rotation": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      -1.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  ],
+                  "thickness_source": "other observed axis bounds",
+                  "width_world": 1.8000991816143257,
+                  "x": -5.551115123125783e-17,
+                  "y": 2.684301817823531e-06,
+                  "z": -1.6121958665293867e-05
+                },
+                "children": [],
+                "name": "polygon_0",
+                "editable": true
+              }
+            ],
+            "constraints": [],
+            "residual_patches": [],
+            "metadata": {
+              "camera_sha256": "533b9609c97a8f0af22581a81bd03752d117b3364686f61ab4c23329d8daf44b",
+              "coverage_views": [
+                "front",
+                "oblique_145_40",
+                "oblique_35_28",
+                "side",
+                "top"
+              ],
+              "evidence_scope": "known front pixel-cell exterior outline and independently observed axis thickness",
+              "full_five_view_admission": "unrun; required after actual native geometry",
+              "full_mask_admission_required": true,
+              "hole_count": 0,
+              "input_bounds": {
+                "max_x": 0.9003973222341002,
+                "max_y": 0.20001746148234734,
+                "max_z": 0.9003045100327309,
+                "min_x": -0.9003973222341003,
+                "min_y": -0.2000120928787117,
+                "min_z": -0.9003367539500615
+              },
+              "parts": 1,
+              "planar_thickness_ratio_cap": 0.3,
+              "proposal": "planar_polygon_extrusion",
+              "source_view": "front",
+              "support_elapsed_s": 0.0,
+              "support_evaluations": 0,
+              "support_squared_residual": null,
+              "thickness_is_evidence_bound": true,
+              "historical_adaptive_stages": [
+                {
+                  "source_metadata_key": "adaptive_detail",
+                  "scope": "historical inner stage at fixed exterior",
+                  "baseline_geometry_hash": "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa",
+                  "baseline_program_file_sha256": "c73da3da1e22eb92c51f434bc25891cb191523214d8d083ad825485ce18eeb25",
+                  "observations_apply_to_current_geometry": false,
+                  "record": {
+                    "protocol": "bounded_discrete_family_detail_v1",
+                    "family": "concave_arch",
+                    "free_controls": [
+                      "opening_width_world",
+                      "cavity_roof_height_world"
+                    ],
+                    "original_controls": {
+                      "opening_width_world": 1.0032187784090638,
+                      "cavity_roof_height_world": 1.2968437867239118
+                    },
+                    "selected_controls": {
+                      "opening_width_world": 0.99993852767889,
+                      "cavity_roof_height_world": 1.2970628981122982
+                    },
+                    "frozen_intervals": [
+                      [
+                        0.9028969005681574,
+                        1.1035406562499703
+                      ],
+                      [
+                        1.1671594080515206,
+                        1.4265281653963031
+                      ]
+                    ],
+                    "fixed_pose": true,
+                    "segments": 96,
+                    "residual_calls": 17,
+                    "elapsed_seconds": 0.046626800001831725,
+                    "termination": "solver_completed",
+                    "squared_residual": 1.3434384693841529e-05,
+                    "observations": {
+                      "front": {
+                        "camera_sha256": "7183dc5b6c4e893e7ac06a607275029b13fb66a68de7b1f59dfb5a246eb96618",
+                        "coverage_sha256": "56423f1f138697a2dfe97b30a5da2c261f29ad7ab10112f6f83670dce715211b",
+                        "all_observed_crossings": 2406,
+                        "fitted_crossings": 384,
+                        "frame_censored": false,
+                        "complete_contour_claim": true
+                      },
+                      "front_detail": {
+                        "camera_sha256": "3fb4c07b79c1df79083a497ba60230d290cda2212214f17c7e2055c73c4f8b3f",
+                        "coverage_sha256": "c2186ddebfdd8d879c3d257a7c9d1549f08c029491c5230453317a9efd228492",
+                        "all_observed_crossings": 2224,
+                        "fitted_crossings": 384,
+                        "frame_censored": true,
+                        "complete_contour_claim": false
+                      }
+                    },
+                    "local_sensitivity_singular_values": [
+                      0.09472771523457016,
+                      0.0395871143877561
+                    ],
+                    "local_rank": 2,
+                    "interval_bound_active": false,
+                    "identifiability": "locally_identified",
+                    "global_uniqueness_established": false,
+                    "heldout_views": [
+                      "oblique_145_40"
+                    ],
+                    "heldout_fit_or_roi_used": false,
+                    "prior_view_exposure": {
+                      "oblique_145_40": "baseline exterior came from old front mask; extrusion thickness came from independently observed five-view axis bounds, so historical ob145 influence is not excluded; old ob145 mask/metrics were inspected for admission; this new controlled ob145 is excluded current fit/ROI selection"
+                    },
+                    "artist_surface_limits": null,
+                    "full_native_silhouette_admission": "unrun",
+                    "model_scope": "discrete projected boundary; actual native geometry and measurement remain independent"
+                  }
+                }
+              ],
+              "adaptive_arch_exterior": {
+                "protocol": "bounded_arch_exterior_detail_v1",
+                "family": "concave_arch",
+                "free_controls": [
+                  "outer_width_world",
+                  "outer_height_world",
+                  "extrusion_depth_world"
+                ],
+                "original_controls": {
+                  "outer_width_world": 1.7943750508129597,
+                  "outer_height_world": 1.7943750508129597,
+                  "extrusion_depth_world": 0.400029554361059
+                },
+                "selected_controls": {
+                  "outer_width_world": 1.8000991816143257,
+                  "outer_height_world": 1.7999643993471974,
+                  "extrusion_depth_world": 0.3997957220835502
+                },
+                "frozen_intervals": [
+                  [
+                    1.6149375457316637,
+                    1.9738125558942559
+                  ],
+                  [
+                    1.6149375457316637,
+                    1.9738125558942559
+                  ],
+                  [
+                    0.36002659892495315,
+                    0.44003250979716496
+                  ]
+                ],
+                "fixed_pose": true,
+                "tessellation": "existing fixed polygon extrusion triangulation",
+                "residual_calls": 23,
+                "elapsed_seconds": 0.24078180000651628,
+                "termination": "solver_completed",
+                "squared_residual": 3.720024540630313e-08,
+                "observations": {
+                  "oblique_35_28_expanded": {
+                    "camera_sha256": "bbe1add06ce51c3756acc1a5c5cb16eeef257a90719ba7baa75c59b79418081b",
+                    "coverage_sha256": "20a3cb7a022162625c6b6868096c0202254ab0352585f094e6f31652062970f0",
+                    "all_observed_crossings": 1792,
+                    "fitted_crossings": 384,
+                    "frame_censored": false,
+                    "complete_contour_claim": true
+                  },
+                  "oblique_35_28_expanded_detail": {
+                    "camera_sha256": "77907ee93d24041a99ae602694681b2f53fcfdc81c9bd0fa84e8fd9cfcedc645",
+                    "coverage_sha256": "a6fcbc29715161563e709dcf85e6682821f98ec99322dedb0b3c2c473872c056",
+                    "all_observed_crossings": 1443,
+                    "fitted_crossings": 384,
+                    "frame_censored": true,
+                    "complete_contour_claim": false
+                  }
+                },
+                "local_sensitivity_singular_values": [
+                  0.15257339645077278,
+                  0.0842928760345821,
+                  0.021299316800672662
+                ],
+                "local_rank": 3,
+                "interval_bound_active": false,
+                "identifiability": "locally_identified",
+                "global_uniqueness_established": false,
+                "heldout_views": [
+                  "oblique_145_40"
+                ],
+                "heldout_fit_or_roi_used": false,
+                "prior_view_exposure": {
+                  "oblique_145_40": "original reconstruction used five-view support including old ob145; original and inner-refined ob145 masks/metrics were inspected for prior admission. New exterior view/interval selection uses only retained 3aeca candidate and permitted ob35 orientation; current original ob145 is excluded fit, ROI and view selection."
+                },
+                "artist_surface_limits": null,
+                "full_native_silhouette_admission": "unrun",
+                "model_scope": "discrete projected boundary; actual native geometry and measurement remain independent",
+                "parameter_convention": {
+                  "stage": "arch_exterior_dimension_preserving_v1",
+                  "fixed_notch_controls": [
+                    "opening_width_world",
+                    "notch_height_from_bottom_world"
+                  ],
+                  "outer_height_coupling": "outer midpoint fixed; bottom attachments and absolute notch roof move together",
+                  "distinct_from_inner_control": "inner stage varied bottom-relative cavity_roof_height_world at fixed exterior; this stage fixes that dimension while varying exterior",
+                  "pose_and_triangulation_generator_fixed": true
+                },
+                "fixed_notch_dimensions": {
+                  "opening_width_world": 0.99993852767889,
+                  "notch_height_from_bottom_world": 1.2970628981122982
+                },
+                "baseline_stage_provenance": {
+                  "geometry_hash": "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa",
+                  "program_file_sha256": "c73da3da1e22eb92c51f434bc25891cb191523214d8d083ad825485ce18eeb25",
+                  "program_content_sha256": "623cf431d07f51f0a27909545c522b178d5a937ead3dc71c30c38ce53b3138e8",
+                  "prior_observations_apply_to_current_geometry": false,
+                  "inner_dimension_values_remain_fixed": true
+                }
+              }
+            }
+          },
+          "baseline_heldout": {
+            "oblique_145_40": {
+              "view": "oblique_145_40",
+              "area_iou": 0.9926568816631596,
+              "boundary_iou": 0.835987105597343,
+              "soft_iou": null,
+              "signed_distance_loss": 0.0010603774880584282,
+              "intersection": 113688,
+              "union": 114529,
+              "ref_area": 114527,
+              "render_area": 113690,
+              "required": true,
+              "passed": true,
+              "pass": true,
+              "reason": "",
+              "warnings": [],
+              "iou": 0.9926568816631596,
+              "threshold": 0.7,
+              "precision": 0.9999824083032809,
+              "recall": 0.9926742165602871,
+              "area_ratio": 0.9926916796912518,
+              "centroid_delta_px": [
+                0.01615851335128582,
+                -0.05590539785569604
+              ],
+              "pixel_difference": 0.003208160400390625,
+              "thresholds": {
+                "min_area_iou": 0.7,
+                "min_boundary_iou": 0.8,
+                "max_signed_distance_loss": 0.05
+              },
+              "measurement_protocol": "opaque_linear_alpha_v1",
+              "coverage_l1": 0.0017008958384394646,
+              "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+            }
+          },
+          "refined_heldout": {
+            "oblique_145_40": {
+              "view": "oblique_145_40",
+              "area_iou": 0.9996682931939,
+              "boundary_iou": 0.9919482996080093,
+              "soft_iou": null,
+              "signed_distance_loss": 2.9794952355111093e-05,
+              "intersection": 114521,
+              "union": 114559,
+              "ref_area": 114527,
+              "render_area": 114553,
+              "required": true,
+              "passed": true,
+              "pass": true,
+              "reason": "",
+              "warnings": [],
+              "iou": 0.9996682931939,
+              "threshold": 0.7,
+              "precision": 0.9997206533220431,
+              "recall": 0.9999476106071058,
+              "area_ratio": 1.0002270207025417,
+              "centroid_delta_px": [
+                -0.002147640246505489,
+                0.004894052857309816
+              ],
+              "pixel_difference": 0.00014495849609375,
+              "thresholds": {
+                "min_area_iou": 0.7,
+                "min_boundary_iou": 0.8,
+                "max_signed_distance_loss": 0.05
+              },
+              "measurement_protocol": "opaque_linear_alpha_v1",
+              "coverage_l1": 0.00021189644758123904,
+              "coverage_l1_scope": "diagnostic only; no new acceptance cutoff"
+            }
+          },
+          "baseline_raw_surface_reused": {
+            "protocol": "shared_world_area_sample_to_triangle_v1",
+            "sample_count_per_direction": 4096,
+            "seed": 61007,
+            "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+            "candidate_geometry_hash": "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa",
+            "normal_orientation": "oriented; opposite normals are 180 degrees",
+            "normal_interpretation": "geometric face normals, not shading normals",
+            "units": "unchanged Blender world coordinates; no fitting or normalization",
+            "symmetric_mean_distance_world": 0.0009037095229911252,
+            "distance_p95_world": 0.002812504768371582,
+            "sampled_max_distance_world": 0.003228970803320408,
+            "normal_angle_mean_degrees": 0.5603046752094398,
+            "normal_angle_p95_degrees": 8.537736462515945e-06,
+            "silhouette_verdict": "independent",
+            "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+            "editability_verdict": "independent",
+            "metric_status": "measured",
+            "surface_status": "unqualified",
+            "qualified_limits": null,
+            "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+          },
+          "refined_raw_surface": {
+            "protocol": "shared_world_area_sample_to_triangle_v1",
+            "sample_count_per_direction": 4096,
+            "seed": 61007,
+            "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+            "candidate_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+            "normal_orientation": "oriented; opposite normals are 180 degrees",
+            "normal_interpretation": "geometric face normals, not shading normals",
+            "units": "unchanged Blender world coordinates; no fitting or normalization",
+            "symmetric_mean_distance_world": 0.00022957110319443697,
+            "distance_p95_world": 0.0029192864894866943,
+            "sampled_max_distance_world": 0.0029192864894866943,
+            "normal_angle_mean_degrees": 0.09887890053201959,
+            "normal_angle_p95_degrees": 8.537736462515945e-06,
+            "silhouette_verdict": "independent",
+            "topology_verdict": "independent; BVH proximity does not qualify a solid boundary",
+            "editability_verdict": "independent",
+            "metric_status": "measured",
+            "surface_status": "unqualified",
+            "qualified_limits": null,
+            "surface_qualification": "independent family reference tessellation/noise limits are unavailable; raw observations only"
+          },
+          "baseline_mean_heldout_coverage_l1": 0.0017008958384394646,
+          "refined_mean_heldout_coverage_l1": 0.00021189644758123904,
+          "relative_heldout_coverage_l1_reduction": 0.8754206796251266,
+          "semantic_edit_restoration": {
+            "control": "extrusion_depth_world x1.05",
+            "response": {
+              "control": "extrusion_depth_world",
+              "expected_multiplier": 1.05,
+              "before_depth_world": 0.3997957110404968,
+              "after_depth_world": 0.4197854995727539,
+              "opening_and_notch_height_fixed": "all local outline vertices verified unchanged",
+              "checks": {
+                "fixed_all_outline_vertices_xy": true,
+                "unchanged_triangle_inventory": true,
+                "depth_response": true
+              },
+              "passed": true
+            },
+            "geometry_changed": true,
+            "same_source_pointer": true,
+            "original_mesh_restored": true,
+            "exact_indexed_restoration": true,
+            "passed": true
+          },
+          "bounded_checkpoint_improved": true,
+          "source_original_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+          "source_replayed_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+          "source_exact_oriented_equivalence": true,
+          "fixed_inputs_geometry_stable": true,
+          "artist_surface_limits": null,
+          "full_required_five_view_admission": "unrun for refined geometry",
+          "native_boundary_qualification": "unrun",
+          "canonical_neutral_normal_passes": "unrun",
+          "selected_current_row_unchanged": true,
+          "aggregate_accepted": false
+        }
+      },
+      "rendered_frames": 6,
+      "source_frames": 3,
+      "candidate_frames": 3,
+      "reused_completed_measurements": 0,
+      "raw_comparisons": 1,
+      "baseline_raw_observations_reused": 1,
+      "qualification_children": 0,
+      "elapsed_seconds": 2.4558598000003258,
+      "aggregate_accepted": false
+    },
+    "manifest_sha256": "4ea06f6eeefd7c1df9356fea1a37cfd3def18df04bfde7f7dd904787261e9d50",
+    "lease_sha256": "b3b4012b968b2265a39178cd6da82ad29480e3bfbc6fe27eb878d47cad4139b5",
+    "read_only_audit": {
+      "protocol": "run-ownership-dry-run-v1",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf",
+      "mode": "read_only",
+      "status": "dry_run_ready",
+      "mutation_supported": false,
+      "eligible": [],
+      "eligible_bytes": 0,
+      "retained_bytes": 9684192,
+      "blockers": [],
+      "unknown_files": []
+    }
+  },
+  "supervision": {
+    "root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01-supervision\\owned-84rm896i",
+    "resource_sha256": "2085c186777e8baf59d04e05e0f3a0d44690704f366af79db5a34f0848a69c4d",
+    "resource": {
+      "broker_process_ownership": "unsupported",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "--background",
+        "--factory-startup",
+        "--threads",
+        "2",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_arch_exterior.py",
+        "--",
+        "--plan",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-adaptive-arch-exterior-continuation-20261009\\native-plan-01.json",
+        "--output",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01"
+      ],
+      "elapsed_seconds": 7.710927399995853,
+      "job_accounting": {
+        "active_processes": 0,
+        "peak_job_committed_bytes": 2784518144,
+        "terminated_processes": 0,
+        "total_processes": 2
+      },
+      "job_active_zero": true,
+      "job_assigned_before_resume": true,
+      "job_memory_limit_enforced": true,
+      "join_timeout_s": 5.0,
+      "lifecycle_complete": true,
+      "limit_reason": null,
+      "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01-supervision\\owned-84rm896i\\stdout.log",
+      "max_job_committed_bytes": 8589934592,
+      "max_rss_bytes": 8589934592,
+      "memory_scope": "job-accounted committed memory; not an RSS quota",
+      "observed_handles_joined": true,
+      "observed_processes": [
+        {
+          "creation_filetime": 134359943673360746,
+          "exit_status": 0,
+          "kernel_joined": true,
+          "pid": 27508
+        },
+        {
+          "creation_filetime": 134359943678453258,
+          "exit_status": 0,
+          "kernel_joined": true,
+          "pid": 23532
+        }
+      ],
+      "ordinary_createprocess_tree_owned": true,
+      "ownership_scope": "Windows no-breakaway job",
+      "peak_observed_tree_rss_bytes": 602030080,
+      "pid": 27508,
+      "primary_identity": {
+        "creation_filetime": 134359943673360746,
+        "pid": 27508
+      },
+      "primary_joined": true,
+      "protocol": "fresh_owned_process_supervision_v1",
+      "returncode": 0,
+      "rss_sample_count": 352,
+      "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+      "rss_unavailable_samples": [],
+      "status": "succeeded",
+      "timeout_s": 85.0,
+      "total_declared_supervision_budget_s": 90.0
+    },
+    "result": {
+      "lease_release_decision": "permitted_complete_tree",
+      "lease_status_at_receipt": "active",
+      "lifecycle_complete": true,
+      "portable_primary_only": false,
+      "primary_returncode": 0,
+      "protocol": "bounded-owned-command-result-v1",
+      "run_id": "6cf12896eb04423b8b2bfe2d2867381c",
+      "status": "succeeded",
+      "stdout_status": "retained"
+    },
+    "manifest_sha256": "1735962212a2fd3c204598661f09c70c70c1c91f35e4ba7e7c1a004302d467a7",
+    "lease_sha256": "bb0a281e88a56588765bff9ef3209832d769aed074c7af454565c031f45a868f",
+    "read_only_audit": {
+      "protocol": "run-ownership-dry-run-v1",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01-supervision\\owned-84rm896i",
+      "mode": "read_only",
+      "status": "dry_run_ready",
+      "mutation_supported": false,
+      "eligible": [],
+      "eligible_bytes": 0,
+      "retained_bytes": 23983,
+      "blockers": [],
+      "unknown_files": []
+    }
+  },
+  "frame_observations": {
+    "concave_arch/baseline-fit": {
+      "coverage_sha256": "a5d7a3b439ef3786c7bdf3041cdd3fefe2db4546a236e7c566c14e95b5691670",
+      "coverage_png_sha256": "7c8e7f72417d2f1ccb900d3a7e753e98d3f5b6b514e3a7c42e04bd55fbc6faae",
+      "shape": [
+        512,
+        512
+      ],
+      "frame_edge_foreground_pixels": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "frame_censored": false,
+      "measurement_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\baseline-fit\\measurement.json",
+      "measurement_sha256": "7f874a356c9506d8adc4f03aa40a1f4503c38399b1e6ab15a245397daa802c99",
+      "measurement": {
+        "contract": {
+          "protocol": "opaque_linear_alpha_v1",
+          "hard_mask_threshold": 0.5,
+          "camera": {
+            "projection": "ORTHO",
+            "matrix_world": [
+              [
+                -0.5735766887664795,
+                -0.3845684826374054,
+                0.7232682108879089,
+                4.530552864074707
+              ],
+              [
+                0.8191518783569336,
+                -0.26927807927131653,
+                0.5064380764961243,
+                3.1723272800445557
+              ],
+              [
+                1.6287096116229804e-07,
+                0.882947564125061,
+                0.46947160363197327,
+                2.940770149230957
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.6679739952087402,
+            "shift_x": 0.0,
+            "shift_y": 0.0,
+            "clip_start": 0.10000000149011612,
+            "clip_end": 1000.0,
+            "resolution": [
+              512,
+              512
+            ],
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ]
+          },
+          "renderer": {
+            "engine": "BLENDER_EEVEE",
+            "blender_version": [
+              5,
+              2,
+              2
+            ],
+            "build_hash": "d13f752e3b9c"
+          },
+          "sampling": {
+            "taa_render_samples": 64,
+            "filter_size": 1.5,
+            "motion_blur": false,
+            "depth_of_field": false
+          },
+          "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+          "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+          "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+        },
+        "contract_sha256": "aff964ee32d75b6acc6066b0514219f4e6db4b906e78f45a596d12e2ed9674c1",
+        "geometry_hashes": [
+          "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa"
+        ],
+        "geometry_unchanged": true,
+        "exr_sha256": "99a8e4114579152cf695b9260551aee512ff3adc65eea117919aa309b30563bf"
+      }
+    },
+    "concave_arch/source-detail": {
+      "coverage_sha256": "8aba28801f812af530eddbf49856c1e6c9b33a1cfe07e84af17c8609830b7815",
+      "coverage_png_sha256": "657c3e3b6b64bf9ae0dac3338e777228078a53f806e0aebb872092a9a7bbc5bf",
+      "shape": [
+        1024,
+        1024
+      ],
+      "frame_edge_foreground_pixels": {
+        "top": 515,
+        "bottom": 0,
+        "left": 0,
+        "right": 778
+      },
+      "frame_censored": true,
+      "measurement_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\source-detail\\measurement.json",
+      "measurement_sha256": "10f8a75f4a2e7907a700e403d8d14a01a26dc8d7380a55bcf5e44b1ec5f3119e",
+      "measurement": {
+        "contract": {
+          "protocol": "opaque_linear_alpha_v1",
+          "hard_mask_threshold": 0.5,
+          "camera": {
+            "projection": "ORTHO",
+            "matrix_world": [
+              [
+                -0.5735766887664795,
+                -0.384568452835083,
+                0.7232682108879089,
+                5.271796226501465
+              ],
+              [
+                0.8191518783569336,
+                -0.26927807927131653,
+                0.5064380764961243,
+                2.8643805980682373
+              ],
+              [
+                1.8553016900568764e-07,
+                0.882947564125061,
+                0.46947160363197327,
+                2.131004571914673
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 0.8337419033050537,
+            "shift_x": 0.0,
+            "shift_y": 0.0,
+            "clip_start": 0.10000000149011612,
+            "clip_end": 1000.0,
+            "resolution": [
+              1024,
+              1024
+            ],
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ]
+          },
+          "renderer": {
+            "engine": "BLENDER_EEVEE",
+            "blender_version": [
+              5,
+              2,
+              2
+            ],
+            "build_hash": "d13f752e3b9c"
+          },
+          "sampling": {
+            "taa_render_samples": 64,
+            "filter_size": 1.5,
+            "motion_blur": false,
+            "depth_of_field": false
+          },
+          "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+          "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+          "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+        },
+        "contract_sha256": "c08bf70a5ac18b5737eb6cbe220d4d11abbd04c25197d5563f883e05bd507064",
+        "geometry_hashes": [
+          "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1"
+        ],
+        "geometry_unchanged": true,
+        "exr_sha256": "aceb2b457875530681b439cb3e2eba64133d66de64b1907a47a94c588484e6f5"
+      }
+    },
+    "concave_arch/source-fit": {
+      "coverage_sha256": "7ae607df021e0e1929d42d8e9da2a16504f4d8bc9b761ca6acaf2626c9fb65e3",
+      "coverage_png_sha256": "b63ded7565852dd3ec14c05283eadfa649510e9cd786977e7042a877551ca1b0",
+      "shape": [
+        512,
+        512
+      ],
+      "frame_edge_foreground_pixels": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "frame_censored": false,
+      "measurement_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\source-fit\\measurement.json",
+      "measurement_sha256": "4da80099648f061992d4ff235557a0b6cbddf4545f7e889f30554fa62c22bca7",
+      "measurement": {
+        "contract": {
+          "protocol": "opaque_linear_alpha_v1",
+          "hard_mask_threshold": 0.5,
+          "camera": {
+            "projection": "ORTHO",
+            "matrix_world": [
+              [
+                -0.5735766887664795,
+                -0.3845684826374054,
+                0.7232682108879089,
+                4.530552864074707
+              ],
+              [
+                0.8191518783569336,
+                -0.26927807927131653,
+                0.5064380764961243,
+                3.1723272800445557
+              ],
+              [
+                1.6287096116229804e-07,
+                0.882947564125061,
+                0.46947160363197327,
+                2.940770149230957
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.6679739952087402,
+            "shift_x": 0.0,
+            "shift_y": 0.0,
+            "clip_start": 0.10000000149011612,
+            "clip_end": 1000.0,
+            "resolution": [
+              512,
+              512
+            ],
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ]
+          },
+          "renderer": {
+            "engine": "BLENDER_EEVEE",
+            "blender_version": [
+              5,
+              2,
+              2
+            ],
+            "build_hash": "d13f752e3b9c"
+          },
+          "sampling": {
+            "taa_render_samples": 64,
+            "filter_size": 1.5,
+            "motion_blur": false,
+            "depth_of_field": false
+          },
+          "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+          "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+          "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+        },
+        "contract_sha256": "aff964ee32d75b6acc6066b0514219f4e6db4b906e78f45a596d12e2ed9674c1",
+        "geometry_hashes": [
+          "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1"
+        ],
+        "geometry_unchanged": true,
+        "exr_sha256": "06b2e363b826a73c48cb585c655082d6ad05b9c73b72076c18018b00fc834533"
+      }
+    },
+    "concave_arch/source-heldout/oblique_145_40": {
+      "coverage_sha256": "cd2b61fbace6b5afe967922babb9f5081f4ea60fe5e0189c3b1535025ca7c648",
+      "coverage_png_sha256": "4f1fcc49aed55c1435628cb16b030223e6a2b751c7e567dee2760441c536c7f1",
+      "shape": [
+        512,
+        512
+      ],
+      "frame_edge_foreground_pixels": {
+        "top": 133,
+        "bottom": 133,
+        "left": 0,
+        "right": 0
+      },
+      "frame_censored": true,
+      "measurement_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\source-heldout\\oblique_145_40\\measurement.json",
+      "measurement_sha256": "fc8e8ac0613df823dd60e12e8d431f0350cb4354dd73d1e95028fe0c59be5d0c",
+      "measurement": {
+        "contract": {
+          "protocol": "opaque_linear_alpha_v1",
+          "hard_mask_threshold": 0.5,
+          "camera": {
+            "projection": "ORTHO",
+            "matrix_world": [
+              [
+                -0.5735764503479004,
+                0.5265406966209412,
+                -0.6275068521499634,
+                -3.9307029247283936
+              ],
+              [
+                -0.8191519975662231,
+                -0.3686877489089966,
+                0.4393851161003113,
+                2.752307891845703
+              ],
+              [
+                4.58191067309599e-08,
+                0.7660444378852844,
+                0.6427875757217407,
+                4.026422023773193
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.0880000591278076,
+            "shift_x": 0.0,
+            "shift_y": 0.0,
+            "clip_start": 0.10000000149011612,
+            "clip_end": 1000.0,
+            "resolution": [
+              512,
+              512
+            ],
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ]
+          },
+          "renderer": {
+            "engine": "BLENDER_EEVEE",
+            "blender_version": [
+              5,
+              2,
+              2
+            ],
+            "build_hash": "d13f752e3b9c"
+          },
+          "sampling": {
+            "taa_render_samples": 64,
+            "filter_size": 1.5,
+            "motion_blur": false,
+            "depth_of_field": false
+          },
+          "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+          "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+          "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+        },
+        "contract_sha256": "84d56d9dbf3197b00f68476dc701cde86e6a5b4ecd9d481c42ec28426861bfc1",
+        "geometry_hashes": [
+          "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1"
+        ],
+        "geometry_unchanged": true,
+        "exr_sha256": "8a1a6e872a384e892ffe5ab6c46f0dfbb45ba952fdd9c7d7d04e09ca4b7108a1"
+      }
+    },
+    "concave_arch/refined-heldout/oblique_145_40": {
+      "coverage_sha256": "1294e1e9c2e69e7c47a40a2483b8c587098607629cacd52f012642cfcecfe761",
+      "coverage_png_sha256": "7330bd4137a35cfb17ca01fb1c6e340f594ba2e79f96a616035b092d712dbe62",
+      "shape": [
+        512,
+        512
+      ],
+      "frame_edge_foreground_pixels": {
+        "top": 133,
+        "bottom": 133,
+        "left": 0,
+        "right": 0
+      },
+      "frame_censored": true,
+      "measurement_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\refined-heldout\\oblique_145_40\\measurement.json",
+      "measurement_sha256": "73464a49e6f3a433d0ad1cb79a7dbb5f70ef2f9c09a864d253591d5bb17b13c1",
+      "measurement": {
+        "contract": {
+          "protocol": "opaque_linear_alpha_v1",
+          "hard_mask_threshold": 0.5,
+          "camera": {
+            "projection": "ORTHO",
+            "matrix_world": [
+              [
+                -0.5735764503479004,
+                0.5265406966209412,
+                -0.6275068521499634,
+                -3.9307029247283936
+              ],
+              [
+                -0.8191519975662231,
+                -0.3686877489089966,
+                0.4393851161003113,
+                2.752307891845703
+              ],
+              [
+                4.58191067309599e-08,
+                0.7660444378852844,
+                0.6427875757217407,
+                4.026422023773193
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.0880000591278076,
+            "shift_x": 0.0,
+            "shift_y": 0.0,
+            "clip_start": 0.10000000149011612,
+            "clip_end": 1000.0,
+            "resolution": [
+              512,
+              512
+            ],
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ]
+          },
+          "renderer": {
+            "engine": "BLENDER_EEVEE",
+            "blender_version": [
+              5,
+              2,
+              2
+            ],
+            "build_hash": "d13f752e3b9c"
+          },
+          "sampling": {
+            "taa_render_samples": 64,
+            "filter_size": 1.5,
+            "motion_blur": false,
+            "depth_of_field": false
+          },
+          "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+          "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+          "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+        },
+        "contract_sha256": "84d56d9dbf3197b00f68476dc701cde86e6a5b4ecd9d481c42ec28426861bfc1",
+        "geometry_hashes": [
+          "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c"
+        ],
+        "geometry_unchanged": true,
+        "exr_sha256": "bffe00ac893600bc744cbb0515af43c2cd977acff2f37b47b2619512074b343c"
+      }
+    },
+    "concave_arch/baseline-heldout/oblique_145_40": {
+      "coverage_sha256": "5b085094ebedee1be17f8b2561d3e4f67afafb43b9cbb327243a876400af7e02",
+      "coverage_png_sha256": "884c5ea214b2fe184aeabe2d99513c209c4ef9b1de312c43c05bb4c7b332eb24",
+      "shape": [
+        512,
+        512
+      ],
+      "frame_edge_foreground_pixels": {
+        "top": 131,
+        "bottom": 131,
+        "left": 0,
+        "right": 0
+      },
+      "frame_censored": true,
+      "measurement_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\concave_arch\\baseline-heldout\\oblique_145_40\\measurement.json",
+      "measurement_sha256": "9accc4e1cb94b6051d2ba4eac05e29ef0353c1e48e62d5c02f86eefc8f9ab5c8",
+      "measurement": {
+        "contract": {
+          "protocol": "opaque_linear_alpha_v1",
+          "hard_mask_threshold": 0.5,
+          "camera": {
+            "projection": "ORTHO",
+            "matrix_world": [
+              [
+                -0.5735764503479004,
+                0.5265406966209412,
+                -0.6275068521499634,
+                -3.9307029247283936
+              ],
+              [
+                -0.8191519975662231,
+                -0.3686877489089966,
+                0.4393851161003113,
+                2.752307891845703
+              ],
+              [
+                4.58191067309599e-08,
+                0.7660444378852844,
+                0.6427875757217407,
+                4.026422023773193
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.0880000591278076,
+            "shift_x": 0.0,
+            "shift_y": 0.0,
+            "clip_start": 0.10000000149011612,
+            "clip_end": 1000.0,
+            "resolution": [
+              512,
+              512
+            ],
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ]
+          },
+          "renderer": {
+            "engine": "BLENDER_EEVEE",
+            "blender_version": [
+              5,
+              2,
+              2
+            ],
+            "build_hash": "d13f752e3b9c"
+          },
+          "sampling": {
+            "taa_render_samples": 64,
+            "filter_size": 1.5,
+            "motion_blur": false,
+            "depth_of_field": false
+          },
+          "pixel_convention": "top-left array; pixel (i,j) center=(j+.5,i+.5)",
+          "surface_policy": "opaque target meshes only; forced emission; no compositor/sequencer/world volume",
+          "encoding": "float32 OpenEXR linear alpha; display RGB ignored"
+        },
+        "contract_sha256": "84d56d9dbf3197b00f68476dc701cde86e6a5b4ecd9d481c42ec28426861bfc1",
+        "geometry_hashes": [
+          "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa"
+        ],
+        "geometry_unchanged": true,
+        "exr_sha256": "af70137d5898b632b633c4c4aba75cf3c30c99ec407643ed5e05690e7fdbe4b3"
+      }
+    }
+  },
+  "independent_outcome": {
+    "bounded_checkpoint_improved": true,
+    "relative_alpha_l1_reduction": 0.8754206796251266,
+    "relative_raw_mean_reduction": 0.7459680380100504,
+    "relative_distance_p95_increase": 0.03796676980460312,
+    "relative_sampled_max_reduction": 0.09590805637364685,
+    "distance_p95_regressed": true,
+    "geometric_normal_p95_unchanged": true,
+    "semantic_edit_restoration": true,
+    "required_full_five_view": "unrun",
+    "native_boundary": "unrun",
+    "canonical_neutral_normal": "unrun",
+    "artist_surface_limits": null,
+    "current_selected_rows_unchanged": true,
+    "aggregate_accepted": false
+  },
+  "figure": {
+    "path": "docs\\quality-adaptive-arch-exterior-continuation-20261009\\measured-heldout-pixels.png",
+    "sha256": "8817f996af77657c866a8aa0e943ce3997f1e44a7762aaab39034546fbb0a4b9",
+    "scope": "actual held-out NPY source alpha plus baseline/refined absolute errors at the same x16 display scale; values clipped to [0,1] for display only; producer metrics unchanged"
+  },
+  "qualified_runtime_unchanged": true,
+  "new_qualification_children": 0,
+  "reclamation_or_adoption": false
+}

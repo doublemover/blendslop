@@ -145,8 +145,10 @@ def fit_residual_primitives_multistart(
     max_attempts: int = 4,
     budget: OptimizationBudget | None = None,
     executor: Any = None,
+    process_budget=None,
+    context=None,
 ) -> ResFitPipelineResult:
-    """Run deterministic multi-start/schedule fitting and return the best result."""
+    """Fit starts on one pool; optional process_budget is distinct from objective budget."""
     attempts: list[tuple[str, ResFitPipelineConfig, Sequence[object] | None]] = []
     attempts.append(("default_seed_default_step", config, None))
     if whole_primitives:
@@ -219,11 +221,8 @@ def fit_residual_primitives_multistart(
         # Refine genuinely different best seeds, rather than identical geometry
         # with several step-size schedules. All screening calls are charged.
         bounded_attempts = [(label,cfg,seed) for _,label,cfg,seed in sorted(distinct,key=lambda r:r[0])[:min(2,max_attempts)]]
-    from blender_blocking.reconstruction.process_executor import current_worker_client, PersistentProcessExecutor
-    from contextlib import nullcontext
-    worker = current_worker_client()
-    shared_executor = executor if executor is not None else worker
-    manager = nullcontext(shared_executor) if shared_executor is not None else PersistentProcessExecutor(2)
+    from blender_blocking.reconstruction.process_executor import executor_scope
+    manager = executor_scope(2, context=context, executor=executor, process_budget=process_budget)
     remaining_count = budget.remaining_evaluations()
     remaining_seconds = budget.remaining_seconds()
     jobs = []

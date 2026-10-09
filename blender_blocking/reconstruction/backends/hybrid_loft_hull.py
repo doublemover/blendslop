@@ -79,7 +79,7 @@ class HybridLoftHullBackend(BaseBackend):
                 from ..native_geometry import GeometryCache
                 from ..native_queries import ResidentQueryBatch
                 from ..grouped_solids import production_union
-                from ..process_executor import current_worker_client, PersistentProcessExecutor
+                from blender_blocking.reconstruction.process_executor import current_worker_client, executor_scope
                 from mathutils import Vector
                 points = hull.vertices[np.linspace(0, len(hull.vertices)-1, min(4096, len(hull.vertices))).astype(int)]
                 scale = float(np.ptp(hull.vertices, axis=0).max())
@@ -92,8 +92,8 @@ class HybridLoftHullBackend(BaseBackend):
                     native = request.config.get('native_batch_queries', False)
                     query = resources.enter_context(ResidentQueryBatch(assembly)) if native else None
                     queue = current_worker_client() or getattr(request.context, 'process_executor', None)
-                    if request.config.get('native_union_execution', False) and queue is None:
-                        queue = resources.enter_context(PersistentProcessExecutor(2))
+                    if request.config.get('native_union_execution', False):
+                        queue = resources.enter_context(executor_scope(2, context=request.context))
                     cache = GeometryCache()
                     limit = min(4, int(request.config.get('hybrid_residual_parts', 3)))
                     for index in range(limit):

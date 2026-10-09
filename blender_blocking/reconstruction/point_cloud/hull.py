@@ -95,6 +95,7 @@ def visual_hull_grid_from_target(
     cache_namespace: str = "visual_hull",
     cache_read: bool = True,
     cache_write: bool = True,
+    cache_owned_writes: bool = False,
 ) -> (
     DenseVolumeGrid
     | ChunkedVolumeGrid
@@ -102,6 +103,8 @@ def visual_hull_grid_from_target(
     | OpenVDBVolumeGrid
 ):
     """Build a visual-hull volume grid by intersecting target silhouette cones."""
+    if not isinstance(cache_owned_writes, bool):
+        raise ValueError("cache_owned_writes must be a boolean")
     if adaptive or any(getattr(c, "valid_mask", None) is not None for c in target.constraints):
         from ..adaptive_geometry import hierarchical_hull
         return hierarchical_hull(target, resolution, conservative=conservative,
@@ -128,6 +131,7 @@ def visual_hull_grid_from_target(
             cache_namespace=cache_namespace,
             cache_read=cache_read,
             cache_write=cache_write,
+            cache_owned_writes=cache_owned_writes,
         )
     if requested_backend == "sparse_hash":
         return visual_hull_sparse_hash_grid_from_target(
@@ -141,6 +145,7 @@ def visual_hull_grid_from_target(
             cache_namespace=cache_namespace,
             cache_read=cache_read,
             cache_write=cache_write,
+            cache_owned_writes=cache_owned_writes,
         )
     if requested_backend == "openvdb":
         return visual_hull_openvdb_grid_from_target(
@@ -154,6 +159,7 @@ def visual_hull_grid_from_target(
             cache_namespace=cache_namespace,
             cache_read=cache_read,
             cache_write=cache_write,
+            cache_owned_writes=cache_owned_writes,
         )
     raise ValueError(f"unsupported visual hull backend: {requested_backend!r}")
 
@@ -201,6 +207,7 @@ def visual_hull_chunked_grid_from_target(
     cache_namespace: str = "visual_hull",
     cache_read: bool = True,
     cache_write: bool = True,
+    cache_owned_writes: bool = False,
 ) -> ChunkedVolumeGrid:
     """Build a ChunkedVolumeGrid by intersecting target silhouette cones."""
     return _visual_hull_chunked_grid_from_target(
@@ -215,6 +222,7 @@ def visual_hull_chunked_grid_from_target(
         cache_namespace=cache_namespace,
         cache_read=cache_read,
         cache_write=cache_write,
+        cache_owned_writes=cache_owned_writes,
     )
 
 
@@ -230,6 +238,7 @@ def visual_hull_sparse_hash_grid_from_target(
     cache_namespace: str = "visual_hull",
     cache_read: bool = True,
     cache_write: bool = True,
+    cache_owned_writes: bool = False,
 ) -> SparseHashVolumeGrid:
     """Build a SparseHashVolumeGrid by intersecting target silhouette cones."""
     return _visual_hull_chunked_grid_from_target(
@@ -244,6 +253,7 @@ def visual_hull_sparse_hash_grid_from_target(
         cache_namespace=cache_namespace,
         cache_read=cache_read,
         cache_write=cache_write,
+        cache_owned_writes=cache_owned_writes,
     )
 
 
@@ -259,6 +269,7 @@ def visual_hull_openvdb_grid_from_target(
     cache_namespace: str = "visual_hull",
     cache_read: bool = True,
     cache_write: bool = True,
+    cache_owned_writes: bool = False,
 ) -> OpenVDBVolumeGrid:
     """Build an OpenVDB-labeled sparse interchange grid directly from views."""
     return _visual_hull_chunked_grid_from_target(
@@ -274,6 +285,7 @@ def visual_hull_openvdb_grid_from_target(
         cache_namespace=cache_namespace,
         cache_read=cache_read,
         cache_write=cache_write,
+        cache_owned_writes=cache_owned_writes,
     )
 
 
@@ -363,7 +375,10 @@ def _visual_hull_chunked_grid_from_target(
     cache_namespace: str = "visual_hull",
     cache_read: bool = True,
     cache_write: bool = True,
+    cache_owned_writes: bool = False,
 ) -> ChunkedVolumeGrid:
+    if not isinstance(cache_owned_writes, bool):
+        raise ValueError("cache_owned_writes must be a boolean")
     # Non-vectorized behavior remains available for compatibility, but the direct
     # chunk path intentionally preserves projection semantics from the existing
     # vectorized kernel.
@@ -417,6 +432,7 @@ def _visual_hull_chunked_grid_from_target(
             namespace=cache_namespace,
             read=cache_read,
             write=cache_write,
+            owned_writes=cache_owned_writes,
         )
         if cache_directory is not None
         else None
@@ -506,4 +522,6 @@ def _visual_hull_chunked_grid_from_target(
 
     if cache is not None:
         setattr(grid, "chunk_cache_status", cache.stats())
+        if cache_owned_writes:
+            setattr(grid, "chunk_cache_last_ownership_receipt", cache.last_ownership_receipt)
     return grid

@@ -1,0 +1,190 @@
+{
+  "protocol": "current_authored_quality_decisions_v1",
+  "status": "prepared_for_parent; no owner answer inferred",
+  "code_revision": "236fe39879553a6e6a26ecaaa7914c07cb0dd815",
+  "current_lifecycle_evidence_sha256": "4664424f97a7feb9935edae1fb3d821210c1099711f77294a30c1c2089530a1f",
+  "prior_decision_packet": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-authored-input-decisions-continuation-20261009\\decisions.json",
+    "sha256": "04c32fda9a2a1fa92d6d812cc031864f7674cfbaa2199f3d37fbcc4c12b81ae0",
+    "history": "older snapshot preserved"
+  },
+  "questions": [
+    {
+      "id": "non_vase_artist_acceptance",
+      "plain_question": "Should the eleven non-vase shapes keep artist acceptance unqualified, or should they receive an independently chosen tolerance table?",
+      "choices": [
+        "Keep them as engineering diagnostics; artist acceptance stays null",
+        "Author per-family or named-group limits for mean distance and geometric normal P95",
+        "Author those limits plus an independent distance P95 and/or sampled maximum cap"
+      ],
+      "response_fields": [
+        "family names or explicit named-group membership",
+        "symmetric_mean_distance_world_max",
+        "oriented_geometric_normal_angle_p95_degrees_max",
+        "optional distance_p95_world_max; null when unused",
+        "optional sampled_max_distance_world_max; null when unused"
+      ],
+      "families": [
+        {
+          "name": "sphere",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "anisotropic_ellipsoid",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "cylinder",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "tapered_frustum",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "torus",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "capsule",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "rounded_box",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "thin_plate",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "concave_arch",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "asymmetric_multipart_solid",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        },
+        {
+          "name": "rounded_triangle_dot",
+          "artist_mean_distance_world_max": null,
+          "artist_normal_p95_degrees_max": null,
+          "optional_artist_distance_p95_world_max": null,
+          "optional_artist_sampled_max_distance_world_max": null
+        }
+      ],
+      "units": "Blender world units and degrees; physical units need an explicit units-per-world-unit conversion",
+      "guard": "choose independently of candidate values and freeze before future admission; sampled maximum is not a continuous Hausdorff bound",
+      "representative_evidence": [
+        {
+          "family": "concave_arch",
+          "change": "mean distance improves74.5968percent while distanceP95 worsens3.7967percent",
+          "distance_p95_before": 0.002812504768371582,
+          "distance_p95_after": 0.0029192864894866943,
+          "source": "docs/quality-adaptive-arch-exterior-continuation-20261009/native-evidence.json"
+        },
+        {
+          "family": "rounded_triangle_dot",
+          "change": "mean and normalP95 improve while sampled maximum distance rises",
+          "sampled_max_before": 0.0028801681473851204,
+          "sampled_max_after": 0.0029814052395522594,
+          "source": "docs/quality-adaptive-triangle-continuation-20261009/evidence.json"
+        }
+      ]
+    },
+    {
+      "id": "historical_vase_target",
+      "plain_question": "For the ridged historical vase, should we preserve those ridges, use an authored smooth profile, or adopt the existing analytic smooth fixture as a new target?",
+      "choices": [
+        "Preserve the historical ridges/steps as intentional geometry",
+        "Supply a smooth formula or strictly increasing section table with dimensions, pose, scale and caps",
+        "Adopt the known analytic smooth fixture as a new target"
+      ],
+      "authored_sections_fields": [
+        "strictly increasing z",
+        "rx",
+        "ry",
+        "cx",
+        "cy",
+        "height/pose/scale",
+        "preserved features",
+        "cap and any wall/rim controls"
+      ],
+      "known_fixture": {
+        "z_min": 0,
+        "z_max": 2.6,
+        "rx_formula": ".6+.2*cos(2*pi*z/2.6)",
+        "ry": "same as rx",
+        "center_xy": [
+          0,
+          0
+        ],
+        "caps": "solid flat top/bottom",
+        "section_count": 257,
+        "radial_count": 192,
+        "hollow_controls": "a hollow design additionally needs wall thickness, bottom and rim controls"
+      },
+      "pixels_inspected": {
+        "historical_front": {
+          "bytes": 83932,
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\profile-surface-repair-20261008\\output\\historical-vase\\front-neutral.png",
+          "sha256": "41cd00f9c57b3a6835e23937e53c55f025e3665122abbfcbbe998245e03eb6a5"
+        },
+        "historical_oblique": {
+          "bytes": 88597,
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\profile-surface-repair-20261008\\output\\historical-vase\\oblique_35_28-neutral.png",
+          "sha256": "99167d213407a44f6b78149ac2213cb76872b4b8b0553003c6f624c1ed2be229"
+        },
+        "historical_observation": "repeated geometric ridges and broad top cap visibly retained; pixels do not author a replacement smooth profile"
+      },
+      "guard": "historical masks and visible ridges do not uniquely define a replacement smooth profile; a smoothing window is a processing choice, not reference truth"
+    },
+    {
+      "id": "new_smooth_design_only",
+      "plain_question": "If a different smooth look is desired, which named regions should change shading or geometry?",
+      "choices": [
+        "Specify smooth/sharp/weighted normal regions without changing geometry",
+        "Author a new geometric profile/corner/features revision"
+      ],
+      "guard": "needed only for a new design request; existing frozen-reference fidelity needs no stylistic reinterpretation"
+    }
+  ],
+  "independent_ready_work": [
+    "capsule, torus, frustum, cylinder and plate changed positive candidates still need individually frozen missing five-view/native/canonical gates",
+    "persistent worker/numeric/variant complete-tree adoption needs a persistent process seam and explicit budgets; synchronous helper supervisor cannot wrap a per-job call without breaking worker reuse"
+  ],
+  "publication": "later lifecycle commits after6256 remain local; no merge or Pages authorization",
+  "aggregate_accepted": false,
+  "artist_acceptance_inferred": false,
+  "target_revision_inferred": false
+}

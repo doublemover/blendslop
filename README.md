@@ -33,7 +33,7 @@ Start in a fresh Blender process: reconstruction can clear scene objects. Inspec
 3. Compare source and output in fixed cameras, including held-out views where available.
 4. Check silhouette, surface, actual solid boundary and editability independently before using the asset.
 
-Three silhouettes cannot uniquely recover hidden geometry. A good outline does not establish a correct surface or a qualified solid. The current twelve-family suite has two actual reconstructions: the vase still fails one oblique boundary gate, and triangle surface qualification remains open. [See the evidence and missing verdicts](docs/EVALUATION.md).
+Three silhouettes cannot uniquely recover hidden geometry. A good outline does not establish a correct surface or a qualified solid. The current demo presents twelve actual retained reconstructions and their independent engineering checks. The calibrated vase passes its existing artist contract; eleven other families still lack authored artist surface criteria. Historical failed attempts remain available separately. [See the evidence and missing verdicts](docs/EVALUATION.md).
 
 No trained image-to-3D model or packaged add-on is required. Use the scripts or `BlockingWorkflow` API. Detailed [reference preparation and sample pack](docs/GETTING_STARTED.md), [configuration and refinement](docs/RECONSTRUCTION.md), [testing and architecture](docs/DEVELOPMENT.md), and [documentation index](docs/INDEX.md) live in focused guides.
 

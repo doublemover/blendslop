@@ -1,0 +1,44 @@
+{
+  "artifacts": [
+    {
+      "bytes": 2800,
+      "category": "disposable",
+      "path": "input.npz",
+      "sha256": "9df01f78c6c66e4272e4a64e1ca541c8523615320621864b72463788c406fb86"
+    },
+    {
+      "bytes": 0,
+      "category": "diagnostic",
+      "path": "helper-log-tail.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 3300,
+      "category": "diagnostic",
+      "path": "receipt.json",
+      "sha256": "5be62d35b56baf066f29ec3dacb4294f7f1a8d3efe04d7a451b7fcd6960b4097"
+    },
+    {
+      "bytes": 276,
+      "category": "diagnostic",
+      "path": "helper-cleanup.json",
+      "sha256": "302574afd225053929db6ea42b742cb647e50496c2eebfcd3230eaed7cccc214"
+    }
+  ],
+  "auxiliary_errors": [],
+  "error": null,
+  "max_generated_bytes": 16777216,
+  "owner_token": "ef32ad1dc2f84ca9b64a0e9609524de0",
+  "pid": 27588,
+  "producer": "native_boundary_qualification",
+  "reclamation": "unimplemented; all files retained",
+  "run_id": "a3bd878c16cd4a19bc18327beb598a21",
+  "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\multipart-planar-join-01\\producer-01\\owned-tnv72nfr\\qualification-children\\owned-pd7o3rkz",
+  "schema_version": 1,
+  "shared_inputs": {
+    "input_geometry_hash": "85dcaee9140c32afbbc5e6325bec2f3e0a7e2e27174c0f979a722fa5e4ed6012",
+    "qualification_interpreter": "C:\\Users\\sneak\\Development\\blendslop\\.venv312\\Scripts\\python.exe",
+    "toolchain_identity": "967d79852f4572c41c399e3eb4c96832be59ae1c5e9a49c8deee0a230d59068a"
+  },
+  "state": "succeeded"
+}

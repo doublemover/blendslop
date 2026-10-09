@@ -1,0 +1,2423 @@
+{
+  "acceptance_scope": "source provenance support only; artist acceptance and family surface limits remain separate",
+  "actual_resource_receipt": {
+    "broker_process_ownership": "unsupported",
+    "command": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_source_camera_coverage.py",
+      "--",
+      "--plan",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-source-camera-coverage-continuation-20261009\\frozen-plan.json",
+      "--plan-sha256",
+      "55653786cced6a4a6730b52684046236b92f5ae2e9561d70a91c99fe262ac7c6",
+      "--output",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture"
+    ],
+    "elapsed_seconds": 7.656172300004982,
+    "job_accounting": {
+      "active_processes": 0,
+      "peak_job_committed_bytes": 739299328,
+      "terminated_processes": 0,
+      "total_processes": 2
+    },
+    "job_active_zero": true,
+    "job_assigned_before_resume": true,
+    "job_memory_limit_enforced": true,
+    "join_timeout_s": 5.0,
+    "lifecycle_complete": true,
+    "limit_reason": null,
+    "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\supervision\\owned-obdguufm\\stdout.log",
+    "max_job_committed_bytes": 8589934592,
+    "max_rss_bytes": 8589934592,
+    "memory_scope": "job-accounted committed memory; not an RSS quota",
+    "observed_handles_joined": true,
+    "observed_processes": [
+      {
+        "creation_filetime": 134359959988841122,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 2024
+      },
+      {
+        "creation_filetime": 134359959994701426,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 7180
+      }
+    ],
+    "ordinary_createprocess_tree_owned": true,
+    "ownership_scope": "Windows no-breakaway job",
+    "peak_observed_tree_rss_bytes": 479023104,
+    "pid": 2024,
+    "primary_identity": {
+      "creation_filetime": 134359959988841122,
+      "pid": 2024
+    },
+    "primary_joined": true,
+    "protocol": "fresh_owned_process_supervision_v1",
+    "returncode": 0,
+    "rss_sample_count": 345,
+    "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+    "rss_unavailable_samples": [],
+    "status": "succeeded",
+    "timeout_s": 85.0,
+    "total_declared_supervision_budget_s": 90.0
+  },
+  "candidate_renders": 0,
+  "candidate_replays": 0,
+  "cases": {
+    "concave_arch": {
+      "authored_parameters": {
+        "builder": "compound",
+        "parts": [
+          {
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              1.8,
+              0.4,
+              1.8
+            ],
+            "type": "box"
+          },
+          {
+            "boolean": "subtract",
+            "center": [
+              0,
+              0,
+              -0.3
+            ],
+            "size": [
+              1.0,
+              0.8,
+              1.4
+            ],
+            "type": "box"
+          }
+        ]
+      },
+      "authored_style": {
+        "evaluated_mesh": {
+          "flat_polygons": 10,
+          "has_custom_normals": false,
+          "polygon_style": "flat",
+          "polygons": 10,
+          "sharp_edge_attribute": "absent",
+          "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "sharp_edges": 0,
+          "smooth_flags_sha256": "01d448afd928065458cf670b60f5a594d735af0172c8d67f22a81680132681ca",
+          "smooth_polygons": 0,
+          "vertices": 16
+        },
+        "modifiers": [
+          {
+            "name": "Authored_box.001",
+            "show_render": true,
+            "show_viewport": true,
+            "type": "BOOLEAN"
+          }
+        ],
+        "scope": "shading/style only; geometric-normal metrics remain separate",
+        "source_mesh": {
+          "flat_polygons": 6,
+          "has_custom_normals": false,
+          "polygon_style": "flat",
+          "polygons": 6,
+          "sharp_edge_attribute": "absent",
+          "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "sharp_edges": 0,
+          "smooth_flags_sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44",
+          "smooth_polygons": 0,
+          "vertices": 8
+        },
+        "status": "native_observed"
+      },
+      "camera_records": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\camera-snapshots.json",
+        "sha256": "fc67ecae4670b69974736f36b25e08149d52cbd96488012e633503c8481429f4"
+      },
+      "canonical_inventory_status": "incomplete",
+      "evaluated_obj": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\evaluated.obj",
+        "sha256": "d05a2f4e3c235dbbcb72538f3e9ca310964eb290c2af86540772fb8bbe791b4f"
+      },
+      "exact_archive": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\evaluated-exact.npz",
+        "sha256": "a8bb29e00cc7bdf47cb154c476ed29b8858a2809a9081403b2b3cae2afb90ce3"
+      },
+      "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+      "reference_equivalence": {
+        "equivalent": true,
+        "indexed_reference_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "indexed_regenerated_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "reference_oriented_surface": "77c40cfb97cf4a9d4a873c9c6337639af65b238e9541b325e5a34a4b1c9272e6",
+        "regenerated_oriented_surface": "77c40cfb97cf4a9d4a873c9c6337639af65b238e9541b325e5a34a4b1c9272e6",
+        "scope": "exact binary64 vertex and oriented triangle-coordinate multisets; no topology identity qualification"
+      },
+      "reference_equivalence_artifact": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\reference-equivalence.json",
+        "sha256": "b5c6af062ee93955c027ac5d6b8597353ef0f5992ee1c9bc391a4a859bf3a6ba"
+      },
+      "source_declaration": {
+        "authored_parameters": {
+          "builder": "compound",
+          "parts": [
+            {
+              "center": [
+                0,
+                0,
+                0
+              ],
+              "size": [
+                1.8,
+                0.4,
+                1.8
+              ],
+              "type": "box"
+            },
+            {
+              "boolean": "subtract",
+              "center": [
+                0,
+                0,
+                -0.3
+              ],
+              "size": [
+                1.0,
+                0.8,
+                1.4
+              ],
+              "type": "box"
+            }
+          ]
+        },
+        "camera_records": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\camera-snapshots.json",
+          "sha256": "fc67ecae4670b69974736f36b25e08149d52cbd96488012e633503c8481429f4"
+        },
+        "neutral_artifacts": {
+          "front": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\front-neutral.png",
+            "sha256": "f4c6de3b86006dbab80c693a229ffc9ef24bce51211fe6f96ba5c791283f4956"
+          },
+          "oblique_145_40": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\oblique_145_40-neutral.png",
+            "sha256": "6914a46cc682121f9febd7ee9d7c0d98a0e77f28c5bad53bbd44737dfc6afacc"
+          },
+          "oblique_35_28": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\oblique_35_28-neutral.png",
+            "sha256": "9e25491d6a9a954aee30dded3325cd639e0c55e54bb1ad666a283b4e3479ed5b"
+          },
+          "side": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\side-neutral.png",
+            "sha256": "a0d9c4735a3756393e657bc088941f732bc23b3817edb515dd9cec40503562db"
+          },
+          "top": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\top-neutral.png",
+            "sha256": "4a58ff5333ed6ff0c72874036506b8bab7a45be0beef3f5c78ee68a01e697436"
+          }
+        },
+        "oriented_surface_sha256": "77c40cfb97cf4a9d4a873c9c6337639af65b238e9541b325e5a34a4b1c9272e6",
+        "reference_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "reference_npz": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\evaluated-exact.npz",
+          "sha256": "a8bb29e00cc7bdf47cb154c476ed29b8858a2809a9081403b2b3cae2afb90ce3"
+        },
+        "regenerated_geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+        "regenerated_npz": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\evaluated-exact.npz",
+          "sha256": "a8bb29e00cc7bdf47cb154c476ed29b8858a2809a9081403b2b3cae2afb90ce3"
+        }
+      },
+      "status": "source_five_view_binding_complete",
+      "style_after": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\shading-style-after.json",
+        "sha256": "c5a528e7e92e71b1706962e805beddde64ecc95bb3d481b2057661eb58247162"
+      },
+      "style_before": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\shading-style-before.json",
+        "sha256": "c5a528e7e92e71b1706962e805beddde64ecc95bb3d481b2057661eb58247162"
+      },
+      "style_unchanged": true,
+      "three_pass_inventory_complete": false,
+      "triangle_count": 28,
+      "unrun_passes": [
+        "mask",
+        "normals"
+      ],
+      "vertex_count": 16,
+      "views": {
+        "front": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                7.549790126404332e-08,
+                -1.0,
+                -0.800000011920929
+              ],
+              [
+                0.0,
+                1.0,
+                7.549790126404332e-08,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.0880000591278076,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      7.549790126404332e-08,
+                      -1.0,
+                      -0.800000011920929
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      7.549790126404332e-08,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.0880000591278076,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "690d5611826312784b4bf4284205ba83f89cfcbce5dfe568df7d6553207dc9c0",
+                "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+                "path": "front-neutral.png",
+                "sha256": "f4c6de3b86006dbab80c693a229ffc9ef24bce51211fe6f96ba5c791283f4956"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "690d5611826312784b4bf4284205ba83f89cfcbce5dfe568df7d6553207dc9c0",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\front-neutral.png",
+            "sha256": "f4c6de3b86006dbab80c693a229ffc9ef24bce51211fe6f96ba5c791283f4956"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": false,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        },
+        "oblique_145_40": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                -0.5735764503479004,
+                0.5265406966209412,
+                -0.6275068521499634,
+                -3.9307029247283936
+              ],
+              [
+                -0.8191519975662231,
+                -0.3686877489089966,
+                0.4393851161003113,
+                2.752307891845703
+              ],
+              [
+                4.58191067309599e-08,
+                0.7660444378852844,
+                0.6427875757217407,
+                4.026422023773193
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.0880000591278076,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      -0.5735764503479004,
+                      0.5265406966209412,
+                      -0.6275068521499634,
+                      -3.9307029247283936
+                    ],
+                    [
+                      -0.8191519975662231,
+                      -0.3686877489089966,
+                      0.4393851161003113,
+                      2.752307891845703
+                    ],
+                    [
+                      4.58191067309599e-08,
+                      0.7660444378852844,
+                      0.6427875757217407,
+                      4.026422023773193
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.0880000591278076,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "63ef0731a7340140c7350a214102d8667766fa4d4208f47c6e82b47ac8991124",
+                "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+                "path": "oblique_145_40-neutral.png",
+                "sha256": "6914a46cc682121f9febd7ee9d7c0d98a0e77f28c5bad53bbd44737dfc6afacc"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "63ef0731a7340140c7350a214102d8667766fa4d4208f47c6e82b47ac8991124",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\oblique_145_40-neutral.png",
+            "sha256": "6914a46cc682121f9febd7ee9d7c0d98a0e77f28c5bad53bbd44737dfc6afacc"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": false,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        },
+        "oblique_35_28": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                -0.5735766887664795,
+                -0.3845684826374054,
+                0.7232682108879089,
+                4.530552864074707
+              ],
+              [
+                0.8191518783569336,
+                -0.26927807927131653,
+                0.5064380764961243,
+                3.1723272800445557
+              ],
+              [
+                1.6287096116229804e-07,
+                0.882947564125061,
+                0.46947160363197327,
+                2.940770149230957
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.0880000591278076,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      -0.5735766887664795,
+                      -0.3845684826374054,
+                      0.7232682108879089,
+                      4.530552864074707
+                    ],
+                    [
+                      0.8191518783569336,
+                      -0.26927807927131653,
+                      0.5064380764961243,
+                      3.1723272800445557
+                    ],
+                    [
+                      1.6287096116229804e-07,
+                      0.882947564125061,
+                      0.46947160363197327,
+                      2.940770149230957
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.0880000591278076,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "eb2b4f067300aac9eef4b6d460ec56039ad5332e150530f2482736c81de497fe",
+                "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+                "path": "oblique_35_28-neutral.png",
+                "sha256": "9e25491d6a9a954aee30dded3325cd639e0c55e54bb1ad666a283b4e3479ed5b"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "eb2b4f067300aac9eef4b6d460ec56039ad5332e150530f2482736c81de497fe",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\oblique_35_28-neutral.png",
+            "sha256": "9e25491d6a9a954aee30dded3325cd639e0c55e54bb1ad666a283b4e3479ed5b"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": false,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        },
+        "side": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                -4.371138828673793e-08,
+                4.371138828673793e-08,
+                1.0,
+                3.5999999046325684
+              ],
+              [
+                1.0,
+                1.910685676922942e-15,
+                4.371138828673793e-08,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                -4.371138828673793e-08,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.0880000591278076,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      -4.371138828673793e-08,
+                      4.371138828673793e-08,
+                      1.0,
+                      3.5999999046325684
+                    ],
+                    [
+                      1.0,
+                      1.910685676922942e-15,
+                      4.371138828673793e-08,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      -4.371138828673793e-08,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.0880000591278076,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "0efe23cbd5f8ae877f90a9e97ac7c8d1e5efad98561f0b37eb626e2f639a52f0",
+                "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+                "path": "side-neutral.png",
+                "sha256": "a0d9c4735a3756393e657bc088941f732bc23b3817edb515dd9cec40503562db"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "0efe23cbd5f8ae877f90a9e97ac7c8d1e5efad98561f0b37eb626e2f639a52f0",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\side-neutral.png",
+            "sha256": "a0d9c4735a3756393e657bc088941f732bc23b3817edb515dd9cec40503562db"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": true,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        },
+        "top": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                3.5999999046325684
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.0880000591278076,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      3.5999999046325684
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.0880000591278076,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "c000619f83d488a9f4003c3cde12fe223bda429a0629e26007ab0086595e8c1d",
+                "geometry_hash": "3efc8d0c7b67f6a229531ed3a7e9e5a51ae82dc03890a54d157a79af33a2d9a1",
+                "path": "top-neutral.png",
+                "sha256": "4a58ff5333ed6ff0c72874036506b8bab7a45be0beef3f5c78ee68a01e697436"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "c000619f83d488a9f4003c3cde12fe223bda429a0629e26007ab0086595e8c1d",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\top-neutral.png",
+            "sha256": "4a58ff5333ed6ff0c72874036506b8bab7a45be0beef3f5c78ee68a01e697436"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": true,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        }
+      }
+    },
+    "torus": {
+      "authored_parameters": {
+        "major_radius": 0.7,
+        "minor_radius": 0.22,
+        "primitive": "torus"
+      },
+      "authored_style": {
+        "evaluated_mesh": {
+          "flat_polygons": 3072,
+          "has_custom_normals": false,
+          "polygon_style": "flat",
+          "polygons": 3072,
+          "sharp_edge_attribute": "absent",
+          "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "sharp_edges": 0,
+          "smooth_flags_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "smooth_polygons": 0,
+          "vertices": 3072
+        },
+        "modifiers": [],
+        "scope": "shading/style only; geometric-normal metrics remain separate",
+        "source_mesh": {
+          "flat_polygons": 3072,
+          "has_custom_normals": false,
+          "polygon_style": "flat",
+          "polygons": 3072,
+          "sharp_edge_attribute": "absent",
+          "sharp_edge_flags_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "sharp_edges": 0,
+          "smooth_flags_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "smooth_polygons": 0,
+          "vertices": 3072
+        },
+        "status": "native_observed"
+      },
+      "camera_records": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\camera-snapshots.json",
+        "sha256": "fafe0f6fca40fac6192a112d48ce0e707b3dce47718d299b9f2be20cbb18ddcb"
+      },
+      "canonical_inventory_status": "incomplete",
+      "evaluated_obj": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\evaluated.obj",
+        "sha256": "749485e2aeac814aeeeb3404d44b8b00c5aa987f8b047a5581da8fc12a7447ce"
+      },
+      "exact_archive": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\evaluated-exact.npz",
+        "sha256": "a38c4fa4fba581736bc1ba5d73f9fa002d9c778e719a9bde6382e9d764adcd07"
+      },
+      "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+      "reference_equivalence": {
+        "equivalent": true,
+        "indexed_reference_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+        "indexed_regenerated_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+        "reference_oriented_surface": "a473f1ecc1e46c0ad4645270261adcff06a0e5f56724fa00ce46019ae546a927",
+        "regenerated_oriented_surface": "a473f1ecc1e46c0ad4645270261adcff06a0e5f56724fa00ce46019ae546a927",
+        "scope": "exact binary64 vertex and oriented triangle-coordinate multisets; no topology identity qualification"
+      },
+      "reference_equivalence_artifact": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\reference-equivalence.json",
+        "sha256": "70c416b8d392c852eec367c076b6598dea4821b00464f84f586c7b4b32409048"
+      },
+      "source_declaration": {
+        "authored_parameters": {
+          "major_radius": 0.7,
+          "minor_radius": 0.22,
+          "primitive": "torus"
+        },
+        "camera_records": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\camera-snapshots.json",
+          "sha256": "fafe0f6fca40fac6192a112d48ce0e707b3dce47718d299b9f2be20cbb18ddcb"
+        },
+        "neutral_artifacts": {
+          "front": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\front-neutral.png",
+            "sha256": "b08183703f4caeadf463431980fccc36f92f5b268102ac99e9b0ec43f7dd567b"
+          },
+          "oblique_145_40": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\oblique_145_40-neutral.png",
+            "sha256": "730a0d186df5f902973106d7247eef2b3271055a03258da69fca36076c736595"
+          },
+          "oblique_35_28": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\oblique_35_28-neutral.png",
+            "sha256": "5afb46b5ce4e0cf353b53a862524c71548298388cc56e38d3150061369939bca"
+          },
+          "side": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\side-neutral.png",
+            "sha256": "a73c0e2a5d6934d8df21c1ffac25b1ef051f6f5a16ca5339024a7e80abf68bb1"
+          },
+          "top": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\top-neutral.png",
+            "sha256": "68753846ea09620d28acae32afc717c734e6d8e5352dfcef01baec099661acf9"
+          }
+        },
+        "oriented_surface_sha256": "a473f1ecc1e46c0ad4645270261adcff06a0e5f56724fa00ce46019ae546a927",
+        "reference_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+        "reference_npz": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\torus\\evaluated-exact.npz",
+          "sha256": "a38c4fa4fba581736bc1ba5d73f9fa002d9c778e719a9bde6382e9d764adcd07"
+        },
+        "regenerated_geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+        "regenerated_npz": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\evaluated-exact.npz",
+          "sha256": "a38c4fa4fba581736bc1ba5d73f9fa002d9c778e719a9bde6382e9d764adcd07"
+        }
+      },
+      "status": "source_five_view_binding_complete",
+      "style_after": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\shading-style-after.json",
+        "sha256": "76b3c506c009fd749ce39bd64f0cfcfd3cf0cf3379566643857bdb866c2fb659"
+      },
+      "style_before": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\shading-style-before.json",
+        "sha256": "76b3c506c009fd749ce39bd64f0cfcfd3cf0cf3379566643857bdb866c2fb659"
+      },
+      "style_unchanged": true,
+      "three_pass_inventory_complete": false,
+      "triangle_count": 6144,
+      "unrun_passes": [
+        "mask",
+        "normals"
+      ],
+      "vertex_count": 3072,
+      "views": {
+        "front": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                7.549790126404332e-08,
+                -1.0,
+                -3.679999828338623
+              ],
+              [
+                0.0,
+                1.0,
+                7.549790126404332e-08,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.134399890899658,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      7.549790126404332e-08,
+                      -1.0,
+                      -3.679999828338623
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      7.549790126404332e-08,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.134399890899658,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "0566f36bc1f83b81926f970d45d65dc4933458c044aca25b9f210e058a115880",
+                "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+                "path": "front-neutral.png",
+                "sha256": "b08183703f4caeadf463431980fccc36f92f5b268102ac99e9b0ec43f7dd567b"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "0566f36bc1f83b81926f970d45d65dc4933458c044aca25b9f210e058a115880",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\front-neutral.png",
+            "sha256": "b08183703f4caeadf463431980fccc36f92f5b268102ac99e9b0ec43f7dd567b"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": false,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        },
+        "oblique_145_40": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                -0.5735766887664795,
+                0.5265406370162964,
+                -0.6275067329406738,
+                -4.018051624298096
+              ],
+              [
+                -0.8191518783569336,
+                -0.3686878979206085,
+                0.43938523530960083,
+                2.8134703636169434
+              ],
+              [
+                5.297210492472004e-08,
+                0.7660443782806396,
+                0.6427876353263855,
+                4.1158976554870605
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.134399890899658,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      -0.5735766887664795,
+                      0.5265406370162964,
+                      -0.6275067329406738,
+                      -4.018051624298096
+                    ],
+                    [
+                      -0.8191518783569336,
+                      -0.3686878979206085,
+                      0.43938523530960083,
+                      2.8134703636169434
+                    ],
+                    [
+                      5.297210492472004e-08,
+                      0.7660443782806396,
+                      0.6427876353263855,
+                      4.1158976554870605
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.134399890899658,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "14e0a41eefd0e119117f0fd05fcbaadcb03ecac3d1ecd7c3e29078c845049b75",
+                "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+                "path": "oblique_145_40-neutral.png",
+                "sha256": "730a0d186df5f902973106d7247eef2b3271055a03258da69fca36076c736595"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "14e0a41eefd0e119117f0fd05fcbaadcb03ecac3d1ecd7c3e29078c845049b75",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\oblique_145_40-neutral.png",
+            "sha256": "730a0d186df5f902973106d7247eef2b3271055a03258da69fca36076c736595"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": false,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        },
+        "oblique_35_28": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                -0.5735766887664795,
+                -0.38456839323043823,
+                0.7232682704925537,
+                4.631231307983398
+              ],
+              [
+                0.8191518783569336,
+                -0.26927798986434937,
+                0.5064380764961243,
+                3.2428231239318848
+              ],
+              [
+                1.2808588678581145e-07,
+                0.8829476237297058,
+                0.4694715142250061,
+                3.006120204925537
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.134399890899658,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      -0.5735766887664795,
+                      -0.38456839323043823,
+                      0.7232682704925537,
+                      4.631231307983398
+                    ],
+                    [
+                      0.8191518783569336,
+                      -0.26927798986434937,
+                      0.5064380764961243,
+                      3.2428231239318848
+                    ],
+                    [
+                      1.2808588678581145e-07,
+                      0.8829476237297058,
+                      0.4694715142250061,
+                      3.006120204925537
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.134399890899658,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "a2fcf4a0b86758148a44cb9905af30a7f790004e76d5231c5457da090c60fad7",
+                "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+                "path": "oblique_35_28-neutral.png",
+                "sha256": "5afb46b5ce4e0cf353b53a862524c71548298388cc56e38d3150061369939bca"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "a2fcf4a0b86758148a44cb9905af30a7f790004e76d5231c5457da090c60fad7",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\oblique_35_28-neutral.png",
+            "sha256": "5afb46b5ce4e0cf353b53a862524c71548298388cc56e38d3150061369939bca"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": false,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        },
+        "side": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                -4.371138828673793e-08,
+                4.371138828673793e-08,
+                1.0,
+                3.679999828338623
+              ],
+              [
+                1.0,
+                1.910685676922942e-15,
+                4.371138828673793e-08,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                -4.371138828673793e-08,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.134399890899658,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      -4.371138828673793e-08,
+                      4.371138828673793e-08,
+                      1.0,
+                      3.679999828338623
+                    ],
+                    [
+                      1.0,
+                      1.910685676922942e-15,
+                      4.371138828673793e-08,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      -4.371138828673793e-08,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.134399890899658,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "3402b89e0cb22028bd70225974f0a8a12d4b578aecc9f7a7d923d6c3d5feef25",
+                "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+                "path": "side-neutral.png",
+                "sha256": "a73c0e2a5d6934d8df21c1ffac25b1ef051f6f5a16ca5339024a7e80abf68bb1"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "3402b89e0cb22028bd70225974f0a8a12d4b578aecc9f7a7d923d6c3d5feef25",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\side-neutral.png",
+            "sha256": "a73c0e2a5d6934d8df21c1ffac25b1ef051f6f5a16ca5339024a7e80abf68bb1"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": true,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        },
+        "top": {
+          "actual_camera": {
+            "clip_end": 100.0,
+            "clip_start": 0.10000000149011612,
+            "executed_passes": [
+              "neutral"
+            ],
+            "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+            "geometry_unchanged_after_passes": true,
+            "matrix_world": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.8799999952316284
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "ortho_scale": 2.134399890899658,
+            "pass_artifacts": {
+              "neutral": {
+                "actual_camera": {
+                  "clip_end": 100.0,
+                  "clip_start": 0.10000000149011612,
+                  "matrix_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      0.8799999952316284
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      0.0,
+                      1.0
+                    ]
+                  ],
+                  "ortho_scale": 2.134399890899658,
+                  "pixel_aspect": [
+                    1.0,
+                    1.0
+                  ],
+                  "projection": "ORTHO",
+                  "resolution": [
+                    512,
+                    512
+                  ],
+                  "shift_x": 0.0,
+                  "shift_y": 0.0
+                },
+                "camera_sha256": "1c624a2cf441bacac2e25e5aaa59335d71fe737907d135fffcba69c9c59542f8",
+                "geometry_hash": "3d1743e165e096fc7e413237523e2402a809a7e71c6209f95d1de9f705b1738a",
+                "path": "top-neutral.png",
+                "sha256": "68753846ea09620d28acae32afc717c734e6d8e5352dfcef01baec099661acf9"
+              }
+            },
+            "pixel_aspect": [
+              1.0,
+              1.0
+            ],
+            "projection": "ORTHO",
+            "render_passes": {
+              "neutral": {
+                "background_type": "WORLD",
+                "cavity": false,
+                "color_depth": "8",
+                "color_mode": "BW",
+                "color_type": "SINGLE",
+                "display": {
+                  "exposure": 0.0,
+                  "gamma": 1.0,
+                  "look": "None",
+                  "view_transform": "AgX"
+                },
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "light": "STUDIO",
+                "purpose": "human inspection only; no geometric-normal metric",
+                "resolution_percentage": 100,
+                "shadows": true,
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ]
+              }
+            },
+            "resolution": [
+              512,
+              512
+            ],
+            "shift_x": 0.0,
+            "shift_y": 0.0
+          },
+          "actual_clipping_match": true,
+          "actual_frame_match": true,
+          "image": {
+            "format": "PNG",
+            "mode": "L",
+            "size": [
+              512,
+              512
+            ]
+          },
+          "matched_candidate_camera_sha256": "1c624a2cf441bacac2e25e5aaa59335d71fe737907d135fffcba69c9c59542f8",
+          "neutral": {
+            "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\top-neutral.png",
+            "sha256": "68753846ea09620d28acae32afc717c734e6d8e5352dfcef01baec099661acf9"
+          },
+          "original_legacy_clipping_available": false,
+          "original_legacy_declaration_frame_match": true,
+          "pass_binding_verified": true,
+          "render_settings": {
+            "background_type": "WORLD",
+            "cavity": false,
+            "color_depth": "8",
+            "color_mode": "BW",
+            "color_type": "SINGLE",
+            "display": {
+              "exposure": 0.0,
+              "gamma": 1.0,
+              "look": "None",
+              "view_transform": "AgX"
+            },
+            "engine": "BLENDER_WORKBENCH",
+            "format": "PNG",
+            "light": "STUDIO",
+            "purpose": "human inspection only; no geometric-normal metric",
+            "resolution_percentage": 100,
+            "shadows": true,
+            "single_color": [
+              0.6499999761581421,
+              0.6499999761581421,
+              0.6499999761581421
+            ]
+          }
+        }
+      }
+    }
+  },
+  "environment": {
+    "blender": "5.2.2 LTS",
+    "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "fits": 0,
+  "frozen_inputs_after": {
+    "checked": 58,
+    "records": [
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\canonical_artifacts.py",
+        "sha256": "9cb5c2a63b97e1aeeb28f569b286ba7ea5d19e05214f912421a1ad82180c7097"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\comparable_geometry.py",
+        "sha256": "4226354476aea7a7785ea31e2860fba0084e2f0a5175e6a866e63deaba2ecb01"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\family_surface_contracts.py",
+        "sha256": "990739e870a7ca9b4ba2505784cc4b5c1c8fdaf154d70a5ecb0bb01718ac5aeb"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\evaluation\\reference_noise.py",
+        "sha256": "841d1470fbfa7db2f81cf364455d94705342498b6bc1b304d1445b157a577460"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\geometry\\profile_models.py",
+        "sha256": "7c2faf7ed2273d7547695cd4afd046aa5a5f154822f426d1af81469957b1f181"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\camera_framing.py",
+        "sha256": "2d99b7d4d07a402a0c7955fd0f89bc4cd3b1492433b057ae1fe729f8983e724f"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\profile_loft_mesh.py",
+        "sha256": "8ce2b13f2d4e9c802ed830778a4d852aaf69bf2e2edf5847b2681612857b6239"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\silhouette_render.py",
+        "sha256": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology.py",
+        "sha256": "3e97bc30c728c171cce2dcacc9ed249effcf374b4757e34a3dda9c502cfcfe9e"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\metrics\\topology_receipt.py",
+        "sha256": "a72f08ac2ea97dbeaa25ff059727dc9c87664f7274a1c57b4854f173ae403655"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\mesh_io.py",
+        "sha256": "2d3d6bb40a66232614940f4fd75ddbd7624075b5b839dc284161d24deca0f9b8"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\native_geometry.py",
+        "sha256": "270d2bdfcd86d2d8590940309fbbf609e8552ca621a87424e512aa9ef674a52f"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\output_targets.py",
+        "sha256": "fb86161f97eaffe33d3996c43e1b7112b26bc85235d79b556b640c3a170d64cd"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\blender_builders.py",
+        "sha256": "ed57c0d7860c58e1f23e8d4bc64dc75faa7091c84be3bb6357e240a898844bf2"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_contracts.py",
+        "sha256": "35c609a71c090ed6c8b8d41bd0e918115f8b1ea33f447e468de865fe8bf08dc9"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\quality_references.py",
+        "sha256": "473be89971ec0fb7fbcea432b1267229986c9ee41fb593a4ade18bf8d99223ef"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\synthetic\\specs.py",
+        "sha256": "b750d075ff5e7d07a388ce541b0defa515b89dfa91462cc9f4f1ec727f0fde4b"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+        "sha256": "e4ee0175607f4e2e76a37103913649520211407361cbf8f32cbbf32bcd919664"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\json_io.py",
+        "sha256": "915fecf4a182e6b53f632c6c1403a9f075f1bb94ca1e307bd0b6abde382974b9"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+        "sha256": "9fc904a81aa357171fb3032f66684246c72546d281109b6d6c3e30fe9805904c"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py",
+        "sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+        "sha256": "4beda91b51a9e88d75a484e92501c9d9366612cbc3ff63e6d93d7a5b0a34c5f3"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_family_source_edit_check.py",
+        "sha256": "91440893c490e8915be6ed8789262585c88ddfde90b1536ab8c95409619d33c1"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_family_surface_contracts.py",
+        "sha256": "0335795e837f0e520c2024e523afc224cdb4312d031277aab40767a817f32df3"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_quality_coverage_check.py",
+        "sha256": "21d3dce22e52fbee29cb2b5a2fbadb5b5bf39b5828d888fe6e7ff9c6825ea14b"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_reference_neutral_inspection.py",
+        "sha256": "28501a44fcefc55e2ca09412c82072233885d5ecf4ff83f18f2a9f4b6cae6ec6"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_selected_canonical_inspection.py",
+        "sha256": "c5f00d3a861d5bfa004d04cec912ed391d5ab5cd5f22ae919a36514664d408ce"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_source_camera_coverage.py",
+        "sha256": "c8be49566ba69eeb241c24d4c36d799d58eff88b62566ff9407c099cc0fb293d"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_surface_quality_check.py",
+        "sha256": "9d4e267dd91430d67cec5475c82f1b14161f1f1fdeb183cae261610710655961"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\camera-snapshots.json",
+        "sha256": "ab13bdf09e1c7996b819ce67a45579f4706b0976f80c89516c784916b4d20479"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\evaluated-exact.npz",
+        "sha256": "43d3449769340cddf2a1419deb68dcaba0d09b35ce3ec6454ce18b4c474060b1"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\front-neutral.png",
+        "sha256": "b068e7933cf26f07abe5f91dea8fc9cf8e44a24cbde69ae1c5668bc8372df939"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\oblique_145_40-neutral.png",
+        "sha256": "340fc22a81f3afdb93a1a789497449070e226458e5fb00249d6bf78cdd1ecb93"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\oblique_35_28-neutral.png",
+        "sha256": "9e4056266ce035b24416533fbcd5c548ed44716456232e9274e9da3ff6778e68"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\side-neutral.png",
+        "sha256": "82d1d5a7bc77506c06346c9ecdec34a752315165213b066cdc1cff7c0948307b"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\concave_arch\\top-neutral.png",
+        "sha256": "fb7de77dd8e6f5de34231bb55f80e6ea6872ece340fd398d4d1a603f514a9a08"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\results.json",
+        "sha256": "b4582a618a66b7946047af5697bee9dd3a6b537b5be7ecda85033c4e04619e90"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\torus\\camera-snapshots.json",
+        "sha256": "a42372bf36998bc09ad9627c9d59d29a99ff19117f9437227a625e5178209889"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\torus\\evaluated-exact.npz",
+        "sha256": "22af5569270e8eb672f52a061d5e31f67044e33211ff209a35c0527067b61941"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\torus\\front-neutral.png",
+        "sha256": "302a7458993cc443f8be4ac9368b2341b6f4dee0b813998cb8ca37e282b6981a"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\torus\\oblique_145_40-neutral.png",
+        "sha256": "6e4dd1b92f0eca8ab37f1a15e7db6011f6f0c4d2b117fce22869a7b849663a5b"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\torus\\oblique_35_28-neutral.png",
+        "sha256": "49ca9b1de1b326ae78e055f79929292489d17ee1d2ba4f31cc201ce52aa578eb"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\torus\\side-neutral.png",
+        "sha256": "83ef33e8287ce123f0b239b728ce3c64a5c92187a979b92fb30a4bedbbfd1693"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\family-inspection-04\\owned-t44nr_f0\\torus\\top-neutral.png",
+        "sha256": "08cd87a6695c4f554e8f4ba30f403fd6c9ae5a4ae7c25b8704f6400b7f0b62fa"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\evaluated-exact.npz",
+        "sha256": "a8bb29e00cc7bdf47cb154c476ed29b8858a2809a9081403b2b3cae2afb90ce3"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\front-mask.png",
+        "sha256": "2f1582d53f3ea360874293232df855bd49f2a9c5d229cdcbee3d75b1a2f783b8"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\oblique_145_40-mask.png",
+        "sha256": "3d89c06a7bbfbf024b4704ced0f5f82228abcd4ba3450388d17636fe0e7f19f9"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\oblique_35_28-mask.png",
+        "sha256": "01ae4d4fe9d7b709d6e2297166df71f79af2b42eb08014625b54262d53a16133"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\side-mask.png",
+        "sha256": "9a9c6f7323955e2bdbdc2def605f3cb12b35acc5cbce1df5a9167a188c5e2c0b"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\concave_arch\\top-mask.png",
+        "sha256": "4eb7bf9c461212eee3708e361d328acfe338b90e75401d0877d87126e58ecc24"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\frozen-workload.json",
+        "sha256": "3b63f97aa72b6c8ab933bac9825ff97528f753acac285331d673748abb7a32b0"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\results.json",
+        "sha256": "53dbc727415ced0230602fe3a4a4c2de3bd65e8eafc7977a3dd66e06f0964f63"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\torus\\evaluated-exact.npz",
+        "sha256": "a38c4fa4fba581736bc1ba5d73f9fa002d9c778e719a9bde6382e9d764adcd07"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\torus\\front-mask.png",
+        "sha256": "d004d6fec7cc9a5a1826fd0ee19f4938f708453186ed982382b38a26044b42c4"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\torus\\oblique_145_40-mask.png",
+        "sha256": "a1d89802190d411823627bde4b82e1f18936cba045f4c3513a90f075c996b159"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\torus\\oblique_35_28-mask.png",
+        "sha256": "ee4f1890f8210f0b964870022868da5fc6e3852ee16daf155fc6897e94c3cdb5"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\torus\\side-mask.png",
+        "sha256": "a0f8d7e98c75d57930974618f36a109965300ecf7d9bd152f3bcb5c147f7b97f"
+      },
+      {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\quality-coverage-20261008\\output\\torus\\top-mask.png",
+        "sha256": "472148e616e2d7cbb8103b014d3f1b411d397030ca49cc4567ed993aa3c46a69"
+      }
+    ],
+    "unchanged": true
+  },
+  "historical_scope": "fresh source-camera/pass bindings only; original masks and historical ownership/geometry/clipping gaps unchanged",
+  "mask_frames": 0,
+  "native_frames": 10,
+  "no_cleanup_execution": true,
+  "normal_frames": 0,
+  "original_preflight": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-source-camera-coverage-continuation-20261009\\preflight.json",
+    "sha256": "d4797ecf6d7658d9ece4fc3aa652f0119a6263b3f60d7a9d1c625d3b340a0f11"
+  },
+  "owners": {
+    "supervisor": {
+      "audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 27001,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\supervision\\owned-obdguufm",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\supervision\\owned-obdguufm\\run-lease.json",
+        "sha256": "93bb96a23e4c4dd8840d112f830ab45e655db2d50512b80d898a87966653aab8"
+      },
+      "lease_status": "released",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\supervision\\owned-obdguufm\\run-ownership.json",
+        "sha256": "04e0d6136844aeb338e5f18b0db8efd0d8058a5bcf344aa0eb695b0e82f8bef2"
+      },
+      "manifest_state": "succeeded",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\supervision\\owned-obdguufm"
+    },
+    "workload": {
+      "audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 1340933,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "lease": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\run-lease.json",
+        "sha256": "deb60edf325549bc05c082dbf79cb710250e1a7853571ea922c90f5ba7f03aa9"
+      },
+      "lease_status": "released",
+      "manifest": {
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\run-ownership.json",
+        "sha256": "c34f3ca05b947b2948ef16e09e9b27239b48f992b991945a09a0e9f25c484b5d"
+      },
+      "manifest_state": "succeeded",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm"
+    }
+  },
+  "pixel_review": {
+    "checks": [
+      {
+        "artifact": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\torus\\oblique_35_28-neutral.png",
+          "sha256": "5afb46b5ce4e0cf353b53a862524c71548298388cc56e38d3150061369939bca"
+        },
+        "family": "torus",
+        "observed": "authored flat bands visible; central hole intact",
+        "view": "oblique_35_28"
+      },
+      {
+        "artifact": {
+          "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\concave_arch\\oblique_145_40-neutral.png",
+          "sha256": "6914a46cc682121f9febd7ee9d7c0d98a0e77f28c5bad53bbd44737dfc6afacc"
+        },
+        "family": "concave_arch",
+        "observed": "cavity intact; original top cropping preserved and matched",
+        "view": "oblique_145_40"
+      }
+    ],
+    "method": "actual PNGs opened with view_image",
+    "reviewer": "root",
+    "scope": "two representative actual source previews; descriptive pixel inspection, no new artist/surface acceptance gate"
+  },
+  "plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-source-camera-coverage-continuation-20261009\\frozen-plan.json",
+    "sha256": "55653786cced6a4a6730b52684046236b92f5ae2e9561d70a91c99fe262ac7c6"
+  },
+  "post_native_activity": "read-only binding/input/owner inspection; no native launch, rendering, tests or runtime code edits",
+  "protocol": "source-camera-native-evidence-v1",
+  "qualification_children": 0,
+  "raw_comparisons": 0,
+  "source_declarations": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\source-declarations.json",
+    "sha256": "0143df4bdb2ef60f7056a08f83bd98f11dc2484433f75768cd344215ae2a022b"
+  },
+  "status": "verified_completed",
+  "stdout_runtime": "Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)",
+  "supervisor_command": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\supervision\\owned-obdguufm\\command.json",
+    "sha256": "fd454422dfc141e43f5b456ec6f52f55cde5704b6315ee46ed06f24d24d6bad5"
+  },
+  "supervisor_provenance": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\supervision\\owned-obdguufm\\provenance.json",
+    "sha256": "3dceedaf61b3b8bafa9b4057b9061a90e236ef410d915444ec69d88f132f8516"
+  },
+  "supervisor_resource_receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\supervision\\owned-obdguufm\\resource-receipt.json",
+    "sha256": "81d52292f048aa00923b16a316039e51b17052df094180a2b58e1ef01799c740"
+  },
+  "supervisor_stdout": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\supervision\\owned-obdguufm\\stdout.log",
+    "sha256": "2d4de0c656bf7445e406b31278b76b4c296caaf3aaad41e639a490ef9228c3d8"
+  },
+  "verified_at_utc": "2026-10-09T05:10:19.042723+00:00",
+  "workload_elapsed_seconds": 1.9372276000067359,
+  "workload_receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\source-camera-01\\capture\\owned-58qbg8gm\\results.json",
+    "sha256": "9390d8cdf01006cd1c008dda02bc9493c8a3ef7856d2af820a54a5fffbe26e25"
+  }
+}

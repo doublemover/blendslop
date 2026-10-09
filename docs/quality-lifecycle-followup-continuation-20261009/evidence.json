@@ -1,0 +1,593 @@
+{
+  "actual_pixels_inspected": {
+    "historical_front": {
+      "bytes": 83932,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\profile-surface-repair-20261008\\output\\historical-vase\\front-neutral.png",
+      "sha256": "41cd00f9c57b3a6835e23937e53c55f025e3665122abbfcbbe998245e03eb6a5"
+    },
+    "historical_oblique": {
+      "bytes": 88597,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\quality-implementation-20261008\\source\\temp\\tasks\\profile-surface-repair-20261008\\output\\historical-vase\\oblique_35_28-neutral.png",
+      "sha256": "99167d213407a44f6b78149ac2213cb76872b4b8b0553003c6f624c1ed2be229"
+    },
+    "historical_observation": "repeated geometric ridges and broad top cap visibly retained; pixels do not author a replacement smooth profile",
+    "new_png": {
+      "bytes": 11976,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-0yyiwukd\\stage\\prior.png",
+      "sha256": "43aa3f3dcb5eab1401ab4624d00324f2937e84b941e2a679f8c45ffc61953679"
+    },
+    "observation": "128-square closed PNG shows the factory cube, no cropping or corrupted output"
+  },
+  "ci_at_published_revision": {
+    "full": "https://github.com/doublemover/blendslop/actions/runs/37896532026/job/113709046668",
+    "gallery": "https://github.com/doublemover/blendslop/actions/runs/37896532007/job/113709046584",
+    "quick": "https://github.com/doublemover/blendslop/actions/runs/37896532026/job/113709046226",
+    "status": "all three succeeded; deployment skipped; observed after approved exact push"
+  },
+  "code_revision": "236fe39879553a6e6a26ecaaa7914c07cb0dd815",
+  "date": "2026-10-09",
+  "focused_checks": {
+    "cancellation": {
+      "elapsed_s": 4.751,
+      "scope": "two actual cancellation types plus ordinary-observation failure and strict wrapper failure gates",
+      "unique_tests": 4
+    },
+    "poisson": {
+      "final_two_guard_verification": "secondary-primary retention passed root.893s; strict integer exit guard passed root.283s; helper three focused guards2.351s",
+      "fixture": "tiny real NumPy translation child with Windows Job kernel joins; no Open3D numerical qualification",
+      "initial_eight_root_elapsed_s": 2.544,
+      "unique_tests": 10
+    },
+    "render": {
+      "existing_compatibility_guard": "helper passed ten including legacy orthographic name guard in.946s",
+      "new_unique_tests": 9,
+      "root_elapsed_s": 0.896
+    },
+    "runner": "owned Poisson suite registered in PURE_PYTHON_TESTS",
+    "test_invocation_history": "one root final guard selector had an incorrect method name; loader error retained in turn output; corrected method passed without repeating other checks"
+  },
+  "initial_zero_frame_launch": {
+    "history": "old script hash preserved in original provenance; current source changed for explicit retry, no historical repair/adoption",
+    "native_frames": 0,
+    "reason": "launcher omitted existing test_runner dependency bootstrap; scipy unavailable before rendering",
+    "resource_receipt": {
+      "broker_process_ownership": "unsupported",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "--background",
+        "--factory-startup",
+        "--threads",
+        "2",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_save_render_ownership_check.py",
+        "--",
+        "--output-parent",
+        "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-01"
+      ],
+      "elapsed_seconds": 3.4199115999945207,
+      "job_accounting": {
+        "active_processes": 0,
+        "peak_job_committed_bytes": 270114816,
+        "terminated_processes": 0,
+        "total_processes": 2
+      },
+      "job_active_zero": true,
+      "job_assigned_before_resume": true,
+      "job_memory_limit_enforced": true,
+      "join_timeout_s": 5.0,
+      "lifecycle_complete": true,
+      "limit_reason": null,
+      "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-01\\owned-4eskzlfv\\stdout.log",
+      "max_job_committed_bytes": 8589934592,
+      "max_rss_bytes": 8589934592,
+      "memory_scope": "job-accounted committed memory; not an RSS quota",
+      "observed_handles_joined": true,
+      "observed_processes": [
+        {
+          "creation_filetime": 134360039944708452,
+          "exit_status": 1,
+          "kernel_joined": true,
+          "pid": 31708
+        },
+        {
+          "creation_filetime": 134360039949096121,
+          "exit_status": 0,
+          "kernel_joined": true,
+          "pid": 22960
+        }
+      ],
+      "ordinary_createprocess_tree_owned": true,
+      "ownership_scope": "Windows no-breakaway job",
+      "peak_observed_tree_rss_bytes": 207699968,
+      "pid": 31708,
+      "primary_identity": {
+        "creation_filetime": 134360039944708452,
+        "pid": 31708
+      },
+      "primary_joined": true,
+      "protocol": "fresh_owned_process_supervision_v1",
+      "returncode": 1,
+      "rss_sample_count": 146,
+      "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+      "rss_unavailable_samples": [],
+      "status": "failed",
+      "timeout_s": 20.0,
+      "total_declared_supervision_budget_s": 25.0
+    },
+    "retained_log": {
+      "bytes": 1235,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-01\\owned-4eskzlfv\\stdout.log",
+      "sha256": "a1d5fd72d088580c88116aa5eb6171846532086dc19a922bef577939657b33b0"
+    },
+    "status": "failed"
+  },
+  "limits": {
+    "committed_bytes": 8589934592,
+    "join_s": 5,
+    "new_native_frames": 2,
+    "poisson_log_scope": "4MiB supervisor sampled cap, inter-poll overshoot possible",
+    "render_owner_bytes": 268435456,
+    "render_stage_bytes": 264241152,
+    "rss_bytes": 8589934592,
+    "stage_budget_scope": "post-render accounting only, no native disk/RAM quota",
+    "threads": 2,
+    "work_s": 20
+  },
+  "local_commits": {
+    "cancellation": "fa1ca873f5029b8c86ab7bcf2c2e8a1622e4e071",
+    "owned_poisson": "236fe39879553a6e6a26ecaaa7914c07cb0dd815",
+    "save_render": "7a893383b5d9a59dabcd1af12ccc907dc2871b30"
+  },
+  "native_check": {
+    "blender": "5.2.2 LTS",
+    "build_hash": "d13f752e3b9c",
+    "cleanup": false,
+    "exr_final": {
+      "bytes": 8608,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\native-extension.exr",
+      "sha256": "97980c7384743536d3dde898c3cfa4f1966e93605b44f1544821370c2bc65c21"
+    },
+    "exr_owner": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-vh_fxjzg",
+    "exr_stage": {
+      "bytes": 8608,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-vh_fxjzg\\stage\\native-extension.exr",
+      "sha256": "97980c7384743536d3dde898c3cfa4f1966e93605b44f1544821370c2bc65c21"
+    },
+    "format_proof": "PNG readability/128-square; EXR magic and identical closed staged/final bytes",
+    "geometry_changes": 0,
+    "limits": "outer supervisor declares work/join/memory; stage budget is accounting only",
+    "native_frames": 2,
+    "png_owner": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-0yyiwukd",
+    "png_stage": {
+      "bytes": 11976,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-0yyiwukd\\stage\\prior.png",
+      "sha256": "43aa3f3dcb5eab1401ab4624d00324f2937e84b941e2a679f8c45ffc61953679"
+    },
+    "prior_final": {
+      "bytes": 36,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\prior.png",
+      "sha256": "32867c6d70267a0a659fdfca8407d2c5ecd68f46767694b9d1bbb15ae25b147b"
+    },
+    "protocol": "save-render-native-check-v1",
+    "scope": "two 128-square factory-cube frames; PNG collision and native EXR filename",
+    "status": "succeeded"
+  },
+  "native_evidence_file": {
+    "bytes": 2105,
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\native-evidence.json",
+    "sha256": "e48fccb46a35522fff6afd6239cb8f4e89dc9e36247b550e8a12f3f1b753315d"
+  },
+  "pr": "https://github.com/doublemover/blendslop/pull/7",
+  "protocol": "quality_lifecycle_followup_v1",
+  "publication_scope": "only6256 approved and pushed to existing draftPR7; later commits local",
+  "published_revision": "6256cdb79384fbab9e33b012f0794b8b98771966",
+  "read_only_owner_audits": {
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-0yyiwukd": {
+      "blockers": [],
+      "decision": "no_recovery_needed",
+      "descendant_joins_verified": false,
+      "lease_release_supported": false,
+      "lease_status": "released",
+      "mode": "read_only",
+      "owner_token_matched": true,
+      "ownership_audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 13401,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-0yyiwukd",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "process_identity_verified": false,
+      "producer": "save_render",
+      "producer_state": "failed",
+      "protocol": "owned-recovery-inspection-v1",
+      "recovery_execution_supported": false,
+      "registered_artifacts_verified": true,
+      "reported_pid": 32416,
+      "run_id": "fa1e775182aa4248a9222542fbf97e3f",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-0yyiwukd",
+      "snapshot": {
+        "lease_sha256": "ac16cc24bfe3a5d6eb7fd861d0a6e094b217fd5994d68adb00f03865a787580a",
+        "manifest_sha256": "2a69cc334a6faf20f8559c4412aa2444fb042e06de52e5a66491f06004a7c5cb",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-0yyiwukd"
+      },
+      "status": "complete"
+    },
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-vh_fxjzg": {
+      "blockers": [],
+      "decision": "no_recovery_needed",
+      "descendant_joins_verified": false,
+      "lease_release_supported": false,
+      "lease_status": "released",
+      "mode": "read_only",
+      "owner_token_matched": true,
+      "ownership_audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 10025,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-vh_fxjzg",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "process_identity_verified": false,
+      "producer": "save_render",
+      "producer_state": "succeeded",
+      "protocol": "owned-recovery-inspection-v1",
+      "recovery_execution_supported": false,
+      "registered_artifacts_verified": true,
+      "reported_pid": 32416,
+      "run_id": "53bd618d550f48749891cf84966291a0",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-vh_fxjzg",
+      "snapshot": {
+        "lease_sha256": "13acdfb552714aa00f2df51df3ac2a01e9e237ba0e160095032b135572c9a3a7",
+        "manifest_sha256": "b6f48f3ffbc79383cff449109ed3955a656391309f7b214e569ff58526a59eb3",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02\\.render-runs\\owned-vh_fxjzg"
+      },
+      "status": "complete"
+    },
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-01\\owned-4eskzlfv": {
+      "blockers": [],
+      "decision": "no_recovery_needed",
+      "descendant_joins_verified": false,
+      "lease_release_supported": false,
+      "lease_status": "released",
+      "mode": "read_only",
+      "owner_token_matched": true,
+      "ownership_audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 8632,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-01\\owned-4eskzlfv",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "process_identity_verified": false,
+      "producer": "bounded_owned_command",
+      "producer_state": "failed",
+      "protocol": "owned-recovery-inspection-v1",
+      "recovery_execution_supported": false,
+      "registered_artifacts_verified": true,
+      "reported_pid": 33548,
+      "run_id": "9cd82f5c124d4287a20ec636ad03b894",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-01\\owned-4eskzlfv",
+      "snapshot": {
+        "lease_sha256": "a1046de958636b64acd0ba912e2c48cebdfab791495ec78659cd578cdccc2ab6",
+        "manifest_sha256": "1efb792a386489e1148e0a390cee9ce1fd1fc8c09dfdd10052d766f3f6883fd3",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-01\\owned-4eskzlfv"
+      },
+      "status": "complete"
+    },
+    "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-02\\owned-pxr1cjpc": {
+      "blockers": [],
+      "decision": "no_recovery_needed",
+      "descendant_joins_verified": false,
+      "lease_release_supported": false,
+      "lease_status": "released",
+      "mode": "read_only",
+      "owner_token_matched": true,
+      "ownership_audit": {
+        "blockers": [],
+        "eligible": [],
+        "eligible_bytes": 0,
+        "mode": "read_only",
+        "mutation_supported": false,
+        "protocol": "run-ownership-dry-run-v1",
+        "retained_bytes": 9885,
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-02\\owned-pxr1cjpc",
+        "status": "dry_run_ready",
+        "unknown_files": []
+      },
+      "process_identity_verified": false,
+      "producer": "bounded_owned_command",
+      "producer_state": "succeeded",
+      "protocol": "owned-recovery-inspection-v1",
+      "recovery_execution_supported": false,
+      "registered_artifacts_verified": true,
+      "reported_pid": 33220,
+      "run_id": "890d35609c3844b7a44595428f9f84fd",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-02\\owned-pxr1cjpc",
+      "snapshot": {
+        "lease_sha256": "642bcb278f7dfa1249060439267e9372db03edf50422470357afb4f2f84b406a",
+        "manifest_sha256": "cd1aacec5300ff44ab3b8f202a5615c5a2135cf6dad29236eaaa92916ecfa73f",
+        "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-02\\owned-pxr1cjpc"
+      },
+      "status": "complete"
+    }
+  },
+  "remaining_production_paths": [
+    "legacy default Poisson direct-child path remains for backward compatibility",
+    "persistent reconstruction workers and warm numeric helpers need a separately scoped persistent Job seam with explicit budgets",
+    "direct-child variant/cold DVX/native qualification paths remain separately bounded adoption scopes",
+    "recovery/reclamation execution unsupported and unapproved"
+  ],
+  "scope": "three local production lifecycle batches; two native current-scene still frames only",
+  "source_bytes": {
+    "blender_blocking/config_models/backends.py": {
+      "bytes": 37649,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\config_models\\backends.py",
+      "sha256": "6e4b96d25c3e74fa3ffcf18958d09e3e6b5c2b6c2f8e4b8fcb3a1ac1f8238956"
+    },
+    "blender_blocking/integration/blender_ops/render_utils.py": {
+      "bytes": 34848,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\render_utils.py",
+      "sha256": "7b81a1a1eea59613c6f32f086a4c53c8549f44546e09d8e595a8be152f0bff2a"
+    },
+    "blender_blocking/reconstruction/backends/visual_hull/poisson_bridge.py": {
+      "bytes": 12156,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\backends\\visual_hull\\poisson_bridge.py",
+      "sha256": "bb6c284660489bf4b3ef06b22350474ceab39af416762ca4ca9a021bcd3de39d"
+    },
+    "blender_blocking/reconstruction/backends/visual_hull/postprocess.py": {
+      "bytes": 16322,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\backends\\visual_hull\\postprocess.py",
+      "sha256": "b584ee5a0a7f198189a8b95f823f7399c953e63237bedaa23a862ce9100d4181"
+    },
+    "blender_blocking/test_owned_poisson_bridge.py": {
+      "bytes": 18309,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_owned_poisson_bridge.py",
+      "sha256": "c324b8a2d8539242025215cf3500bc99da716a9b38930cd561b1bcf431b79706"
+    },
+    "blender_blocking/test_render_run_ownership.py": {
+      "bytes": 32677,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_render_run_ownership.py",
+      "sha256": "a719a5b4a150961c61fa5bbbfa935b81826c57590fe8484217e9aa02801e2f8b"
+    },
+    "blender_blocking/test_runner.py": {
+      "bytes": 33245,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+      "sha256": "8b77a1c1bc12871c513b751815a570798b0ae3469c7913d1deb738636e17bc6f"
+    },
+    "blender_blocking/utils/owned_process_supervisor.py": {
+      "bytes": 23522,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+      "sha256": "162c7e2282ae930419382ed2fc6fae63aa947ca7b7b000c46158dd2cd15dafb8"
+    },
+    "scripts/open3d_cpu_worker.py": {
+      "bytes": 10887,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\open3d_cpu_worker.py",
+      "sha256": "ebe08b40beaa55d5f85d3421e62e9dcda9d2e3f6ea71c550f53a2c5a867fc0b2"
+    },
+    "scripts/run_bounded_owned_command.py": {
+      "bytes": 15240,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+      "sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca"
+    },
+    "scripts/run_save_render_ownership_check.py": {
+      "bytes": 5527,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_save_render_ownership_check.py",
+      "sha256": "37118c14e0dab01c66972a72a138da29a82c1568f101ec132c9527f9d1a4071f"
+    }
+  },
+  "successful_launch_declaration": {
+    "actual_argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_save_render_ownership_check.py",
+      "--",
+      "--output-parent",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02"
+    ],
+    "child_output_scope": "child artifacts remain with their own producer; no path substitution or adoption",
+    "cwd": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source",
+    "join_timeout_s": 5.0,
+    "max_job_committed_bytes": 8589934592,
+    "max_rss_bytes": 8589934592,
+    "portable_primary_only": false,
+    "protocol": "bounded-owned-command-v1",
+    "requested_argv": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_save_render_ownership_check.py",
+      "--",
+      "--output-parent",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02"
+    ],
+    "thread_environment": {
+      "MKL_NUM_THREADS": "2",
+      "NUMEXPR_NUM_THREADS": "2",
+      "OMP_NUM_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "2",
+      "VECLIB_MAXIMUM_THREADS": "2"
+    },
+    "thread_scope": "explicit Blender option and numerical-library environment controls; no kernel thread quota",
+    "threads": 2,
+    "timeout_s": 20.0,
+    "total_supervision_budget_s": 25.0
+  },
+  "successful_launch_provenance": {
+    "executable": {
+      "bytes": 113022936,
+      "mtime_ns": 1789458008000000000,
+      "path": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "sha256": "f141a3c5754500e6f84361099a4cd53f0bb7662b6a0d2cfaaa8fbb63e92234a0"
+    },
+    "explicit_shared_inputs": [
+      {
+        "bytes": 5527,
+        "mtime_ns": 1791530492799931000,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_save_render_ownership_check.py",
+        "sha256": "37118c14e0dab01c66972a72a138da29a82c1568f101ec132c9527f9d1a4071f"
+      },
+      {
+        "bytes": 33245,
+        "mtime_ns": 1791530348591308800,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_runner.py",
+        "sha256": "8b77a1c1bc12871c513b751815a570798b0ae3469c7913d1deb738636e17bc6f"
+      },
+      {
+        "bytes": 34848,
+        "mtime_ns": 1791529940850374600,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\render_utils.py",
+        "sha256": "7b81a1a1eea59613c6f32f086a4c53c8549f44546e09d8e595a8be152f0bff2a"
+      },
+      {
+        "bytes": 801,
+        "mtime_ns": 1791510794578063800,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\artifact_publication.py",
+        "sha256": "3a2d8d76defe2522df6ed4b4560eb521592031f963ddf2b9bdf73d55c544f631"
+      },
+      {
+        "bytes": 19466,
+        "mtime_ns": 1791495758881759600,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\silhouette_render.py",
+        "sha256": "7be60f8d7c1271d511382b333609cff0174c7473450e1ab8bff3510b3f1d96d5"
+      },
+      {
+        "bytes": 3778,
+        "mtime_ns": 1791495758864607500,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\integration\\blender_ops\\camera_framing.py",
+        "sha256": "2d99b7d4d07a402a0c7955fd0f89bc4cd3b1492433b057ae1fe729f8983e724f"
+      }
+    ],
+    "protocol": "bounded-owned-command-provenance-v1",
+    "scope": "read-only current byte snapshots; no historical ownership or input locking",
+    "sources": [
+      {
+        "bytes": 15240,
+        "mtime_ns": 1791529507046412600,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_bounded_owned_command.py",
+        "sha256": "b1b1b4fc348a96dec3f281df80d39a5c607f0d8ed0d9313a9f5900a23d1a28ca"
+      },
+      {
+        "bytes": 23522,
+        "mtime_ns": 1791529407840880000,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\owned_process_supervisor.py",
+        "sha256": "162c7e2282ae930419382ed2fc6fae63aa947ca7b7b000c46158dd2cd15dafb8"
+      },
+      {
+        "bytes": 12563,
+        "mtime_ns": 1791495758958145800,
+        "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\utils\\run_ownership.py",
+        "sha256": "4961f4a0015ce63bc1afe2d7aa5650639b0d3be74d875c708c03bc01eaad46dc"
+      }
+    ]
+  },
+  "supervisor_receipt_file": {
+    "bytes": 2240,
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-02\\owned-pxr1cjpc\\resource-receipt.json",
+    "sha256": "ff207f4e3d44a34bf6e2bc7f7583cd54a6a1832d5f5ab1a834f19c70b966c128"
+  },
+  "supervisor_resource_receipt": {
+    "broker_process_ownership": "unsupported",
+    "command": [
+      "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--threads",
+      "2",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_save_render_ownership_check.py",
+      "--",
+      "--output-parent",
+      "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-current-scene-02"
+    ],
+    "elapsed_seconds": 6.339292499993462,
+    "job_accounting": {
+      "active_processes": 0,
+      "peak_job_committed_bytes": 669552640,
+      "terminated_processes": 0,
+      "total_processes": 2
+    },
+    "job_active_zero": true,
+    "job_assigned_before_resume": true,
+    "job_memory_limit_enforced": true,
+    "join_timeout_s": 5.0,
+    "lifecycle_complete": true,
+    "limit_reason": null,
+    "log_path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\save-render-supervisor-02\\owned-pxr1cjpc\\stdout.log",
+    "max_job_committed_bytes": 8589934592,
+    "max_rss_bytes": 8589934592,
+    "memory_scope": "job-accounted committed memory; not an RSS quota",
+    "observed_handles_joined": true,
+    "observed_processes": [
+      {
+        "creation_filetime": 134360041198452889,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 32416
+      },
+      {
+        "creation_filetime": 134360041205494075,
+        "exit_status": 0,
+        "kernel_joined": true,
+        "pid": 32136
+      }
+    ],
+    "ordinary_createprocess_tree_owned": true,
+    "ownership_scope": "Windows no-breakaway job",
+    "peak_observed_tree_rss_bytes": 410234880,
+    "pid": 32416,
+    "primary_identity": {
+      "creation_filetime": 134360041198452889,
+      "pid": 32416
+    },
+    "primary_joined": true,
+    "protocol": "fresh_owned_process_supervision_v1",
+    "returncode": 0,
+    "rss_sample_count": 274,
+    "rss_sampling_scope": "20ms polling; sum current WorkingSetSize from exact retained in-job HANDLEs; unsampled/inter-poll peaks unavailable",
+    "rss_unavailable_samples": [],
+    "status": "succeeded",
+    "timeout_s": 20.0,
+    "total_declared_supervision_budget_s": 25.0
+  },
+  "unchanged_claims": {
+    "deletion": false,
+    "full_suite_rerun": false,
+    "historical_lease_adoption": false,
+    "historical_smooth_target": null,
+    "non_vase_artist_acceptance": null,
+    "open3d_kernel_rerun": false,
+    "quality_aggregate_accepted": false,
+    "reclamation_execution": false
+  }
+}

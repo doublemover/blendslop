@@ -1,0 +1,97 @@
+{
+  "protocol": "fresh_variant_attempt_adoption_v1",
+  "quality_base_commit": "95f752c6c3ecafda3f5e1390ccf86d908edd6622",
+  "source_files": {
+    "blender_blocking\\refinement_lab\\runner.py": {
+      "sha256": "103de5fcafdf0b50b63e103e84e88d1eb7e0622aa5ef0063a8fa329a68aca248",
+      "bytes": 96880,
+      "crlf_lines": 2376,
+      "lf_lines": 2376
+    },
+    "blender_blocking\\test_variant_run_ownership.py": {
+      "sha256": "4848c71864b6d2def42380a72d73c6a92d962e1d111a75a060c1beb0c75900c3",
+      "bytes": 21498,
+      "crlf_lines": 316,
+      "lf_lines": 316
+    },
+    "blender_blocking\\utils\\artifact_publication.py": {
+      "sha256": "3a2d8d76defe2522df6ed4b4560eb521592031f963ddf2b9bdf73d55c544f631",
+      "bytes": 801,
+      "crlf_lines": 21,
+      "lf_lines": 21
+    }
+  },
+  "runtime_scope": [
+    "refinement_lab/runner.py"
+  ],
+  "new_tests": "test_variant_run_ownership.py",
+  "artifact_contract": {
+    "fresh_parent": ".variant-runs",
+    "producer": "refinement_variant",
+    "max_registered_bytes": 67108864,
+    "adoption": "fresh attempt diagnostics and result transport only",
+    "unchanged_external_paths": [
+      "variant/r",
+      "variant/a",
+      "references",
+      "caches"
+    ],
+    "final_result_policy": "atomic result.json then result_2.json and subsequent suffixes",
+    "retention": "all generated stages/results/logs retained; no deletion"
+  },
+  "child_contract": {
+    "launcher": "Popen",
+    "supervision": "directly owned child only",
+    "timeout_default": null,
+    "explicit_timeout_validation": "finite numeric positive, bool rejected",
+    "stop_sequence": "terminate own child; wait5s; kill same child if needed; wait5s",
+    "pipe_completion_wait_each_seconds": 1.0,
+    "stdout_tail_bytes": 32768,
+    "stderr_tail_bytes": 32768,
+    "read_chunk_bytes": 8192,
+    "continuous_drain": true,
+    "full_byte_counts": true,
+    "unconfirmed_join": "lease active; primary exception annotated; no automatic recovery"
+  },
+  "validation": {
+    "combined": {
+      "passed": 36,
+      "new_ownership_tests": 13,
+      "existing_compatibility_tests": 23,
+      "elapsed_seconds": 28.418,
+      "runtime": "existing Blender bundled Python3.13.13; standard-library child fixtures only"
+    },
+    "after_final_alias_change": {
+      "affected_failure_join_tests_passed": 3,
+      "elapsed_seconds": 2.365
+    },
+    "new_optional_alias_fixture": {
+      "passed": 1,
+      "elapsed_seconds": 0.941
+    },
+    "distinct_new_ownership_tests": 14,
+    "noisy_child": {
+      "written_bytes_each_stream": ">1048576",
+      "retained_bytes_each_stream": 32768,
+      "ending_markers_retained": true
+    },
+    "real_cache_hit": {
+      "source": "local_resume",
+      "created_new_owner": false
+    },
+    "native_blender_variants": 0,
+    "gpu_fixtures": 0,
+    "process_rss_observation": null
+  },
+  "parent_separate_checks": "Root reports three real concurrent/crash/Windows-locked-file publication fixtures passed; root owns their receipts.",
+  "remaining_limits": [
+    "same-filesystem hard-link support required; no copy/replace fallback",
+    "external backend/report/index/cache overwrite behavior unchanged",
+    "backend helper descendants not owned by this producer",
+    "inherited open pipes can leave drain completion unconfirmed and lease active",
+    "result artifact bound is registration/parse validation, not a live disk quota",
+    "crash recovery, reclamation and historical adoption unimplemented"
+  ],
+  "pending_standalone_commands": [],
+  "status": "runtime/test/docs stable for root integration; no commit performed"
+}

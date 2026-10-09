@@ -262,6 +262,7 @@ class ViewConstraint:
     diagnostics: Mapping[str, Any] = field(default_factory=dict)
 
     valid_mask: Any = None
+    coverage_mask: Any = None
 
     def to_dict(self) -> JsonMap:
         return {
@@ -270,6 +271,7 @@ class ViewConstraint:
             "bbox": _json_value(self.bbox),
             "diagnostics": _json_value(self.diagnostics),
             "has_valid_mask": self.valid_mask is not None,
+            "has_linear_coverage": self.coverage_mask is not None,
             "has_uncertainty": self.uncertainty is not None,
             "uncertainty": _uncertainty_summary(self.uncertainty),
         }
