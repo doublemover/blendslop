@@ -1,0 +1,122 @@
+{
+  "anisotropic_ellipsoid": {
+    "candidate_geometry_hash": "02bab3e39da316e08b49fd870ec01253d00c3bf896c8268126b2458a0f84ccf2",
+    "geometry_field": "refined_geometry_hash",
+    "observation_scope": "diagnostic_checkpoint",
+    "raw_field": [
+      "refined_raw_surface"
+    ],
+    "source_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-05\\owned-hkggish9\\results.json",
+      "sha256": "1cf653c1401601885eed8f901ecd0ab7874c65e7cc5a7434ef664dcb84150d09"
+    }
+  },
+  "asymmetric_multipart_solid": {
+    "candidate_geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "raw_field": [
+      "raw_surface",
+      "refined"
+    ],
+    "source_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\multipart-endpoint-01\\owned-csgelc1z\\results.json",
+      "sha256": "9dffc1c8cc65c240fefb90c6c2b402b46c246f2720d717e6090b01f0a59fdcb9"
+    }
+  },
+  "capsule": {
+    "candidate_geometry_hash": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b",
+    "geometry_field": "refined_geometry_hash",
+    "observation_scope": "diagnostic_checkpoint",
+    "raw_field": [
+      "refined_raw_surface"
+    ],
+    "source_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-02\\owned-ipr1val3\\results.json",
+      "sha256": "3c45d65f3d4cf61fbfe34ae995c8e260137a311930327f3a09b6704635409ef1"
+    }
+  },
+  "concave_arch": {
+    "candidate_geometry_hash": "e2b54f3511ccca10d456c3c52ac78ff2deb13915bf36905544e1943294b95e6c",
+    "geometry_field": "refined_geometry_hash",
+    "observation_scope": "diagnostic_checkpoint",
+    "raw_field": [
+      "refined_raw_surface"
+    ],
+    "source_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-arch-exterior-01\\owned-mmvv79sf\\results.json",
+      "sha256": "4083179014a61f1cb95a750c2294ca19db6225b7fe3efbfe01f40a847fca021f"
+    }
+  },
+  "cylinder": {
+    "candidate_geometry_hash": "ab6343943cb9a35006f1b1659d9b6cbad50520fff000ab9ca781fecf25c5ff88",
+    "geometry_field": "refined_geometry_hash",
+    "observation_scope": "diagnostic_checkpoint",
+    "raw_field": [
+      "refined_raw_surface"
+    ],
+    "source_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-04\\owned-7hmpyfeo\\results.json",
+      "sha256": "cc890cccd0d014616326f8c3517ad8f770edf02ac9c8d3a683be5011c1a347d4"
+    }
+  },
+  "rounded_triangle_dot": {
+    "candidate_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+    "geometry_field": "refined_geometry_hash",
+    "observation_scope": "diagnostic_checkpoint",
+    "raw_field": [
+      "refined_raw_surface"
+    ],
+    "source_receipt": {
+      "bytes": 13260,
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\adaptive-triangle-detail-01\\owned-5w48rxfi\\results.json",
+      "sha256": "81dd1d598d16b461d312cb389c2cefca7fbb1f517f48419df7a3fb68c2e7cce7"
+    }
+  },
+  "sphere": {
+    "candidate_geometry_hash": "1a28cafe262f3cd7edabc01c831b46077655528d54af3853ee4c709adc9f80ca",
+    "geometry_field": "refined_geometry_hash",
+    "observation_scope": "diagnostic_checkpoint",
+    "raw_field": [
+      "refined_raw_surface"
+    ],
+    "source_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-04\\owned-7hmpyfeo\\results.json",
+      "sha256": "cc890cccd0d014616326f8c3517ad8f770edf02ac9c8d3a683be5011c1a347d4"
+    }
+  },
+  "tapered_frustum": {
+    "candidate_geometry_hash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+    "geometry_field": "refined_geometry_hash",
+    "observation_scope": "diagnostic_checkpoint",
+    "raw_field": [
+      "refined_raw_surface"
+    ],
+    "source_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\results.json",
+      "sha256": "1484219f42ee4f75e60ba8ea39d3f3969560ac70978ad470bad7b1dfabe00cda"
+    }
+  },
+  "thin_plate": {
+    "candidate_geometry_hash": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0",
+    "geometry_field": "refined_geometry_hash",
+    "observation_scope": "diagnostic_checkpoint",
+    "raw_field": [
+      "refined_raw_surface"
+    ],
+    "source_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-05\\owned-hkggish9\\results.json",
+      "sha256": "1cf653c1401601885eed8f901ecd0ab7874c65e7cc5a7434ef664dcb84150d09"
+    }
+  },
+  "torus": {
+    "candidate_geometry_hash": "3afacdc32a140a1099cd304b101d8910a7e6e58701b3608f947039aaf2349417",
+    "geometry_field": "refined_geometry_hash",
+    "observation_scope": "diagnostic_checkpoint",
+    "raw_field": [
+      "refined_raw_surface"
+    ],
+    "source_receipt": {
+      "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-02\\owned-ipr1val3\\results.json",
+      "sha256": "3c45d65f3d4cf61fbfe34ae995c8e260137a311930327f3a09b6704635409ef1"
+    }
+  }
+}

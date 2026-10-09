@@ -1,0 +1,342 @@
+{
+  "protocol": "eleven-family-triangle-expansion-v1",
+  "implementation_base_revision": "d3184543f6a654dacdf26c996c7c327bd1a83f86",
+  "producer_result": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-05\\owned-ath7evq9\\results.json",
+    "sha256": "7f788e130f99167268560e2846587dbe2bdf486ad0633d39246fa35ee3035259",
+    "bytes": 32089
+  },
+  "frozen_contract_receipt": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-05\\owned-ath7evq9\\frozen-contracts.json",
+    "sha256": "fc4e647112346375319ea71cfe488a11decf540a716c8338e73c27e81e8fff70",
+    "bytes": 67896
+  },
+  "prior_ten_family_evidence": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\ten-family-evidence.json",
+    "sha256": "240d61c8ed0111aa33e4c1175be40295609f63a8c46b0ad550b4251dd5cbca18",
+    "bytes": 21008
+  },
+  "source_plan": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\source-plan-eleven-families.json",
+    "sha256": "5a41eb5184f806ee55bc10b4c054a2182d9127c56a2f6665c29a0f8d79262fed",
+    "bytes": 42228
+  },
+  "additional_bindings": {
+    "path": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\docs\\quality-family-surface-contracts-continuation-20261009\\diagnostic-observation-bindings-eleven.json",
+    "sha256": "82b1db5c5ee66b9ff8c6094842898262a2f24d63881d621b6f08246e2857e8bc",
+    "bytes": 6047
+  },
+  "families": 11,
+  "retained_observations": 21,
+  "previous_ten_contracts_and_nineteen_observations_identical": true,
+  "elapsed_seconds": 16.687542499988922,
+  "triangle_contract": {
+    "contract": {
+      "artist_acceptance_limits": null,
+      "artist_acceptance_status": "unqualified; supplementary engineering policy does not replace required family gates",
+      "authored_parameters": {
+        "builder": "rounded_triangle",
+        "corner_radius": 0.16,
+        "corner_segments": 32,
+        "dome": "z=+-thickness/2*cos(phi), outline_scale=sin(phi)",
+        "dome_segments": 64,
+        "thickness": 0.48,
+        "vertices_xy": [
+          [
+            0,
+            0.9
+          ],
+          [
+            -0.7794228634059948,
+            -0.45
+          ],
+          [
+            0.7794228634059948,
+            -0.45
+          ]
+        ]
+      },
+      "cameras": {
+        "front": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "369721a8d13c3d13b9f4e58d89b23cd2302a116e13e28c9dcbf8487cbb0c2a64",
+          "max_pixel_pitch_world": 0.004256759770214558
+        },
+        "oblique_145_40": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "0ba0b2c243bd8d36c17e408b722bc6644bb44b734ce26da886c3775451c4b741",
+          "max_pixel_pitch_world": 0.004256759770214558
+        },
+        "oblique_35_28": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "a69d1fc0625e44641d60ff00072daabe693e466c83566da3f90d1077e87e12e0",
+          "max_pixel_pitch_world": 0.004256759770214558
+        },
+        "side": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "e979fb7a25c214074458c1a7052ac920ae5e7f0b0690abbc3ef496200f655238",
+          "max_pixel_pitch_world": 0.004256759770214558
+        },
+        "top": {
+          "clip_end": 1000.0,
+          "clip_start": 0.10000000149011612,
+          "frame_sha256": "d7efd72d731bc9b5d954ea06a173b3cf2d210a919029b72c4f09b07e1dbb4903",
+          "max_pixel_pitch_world": 0.004256759770214558
+        }
+      },
+      "contract_sha256": "179fcbaaa9c185c18b8d656f6c72ca83e4385b6f7bfed70b7cdcc129fdd4ab14",
+      "engineering_limits": {
+        "normal_angle_p95_degrees_max": 7.5098278988276554,
+        "symmetric_mean_distance_world_max": 0.0025333805085126374
+      },
+      "engineering_status": "frozen",
+      "family": "rounded_triangle_dot",
+      "historical_candidate_exposure": "not claimed blind; algorithm consumes source inputs only",
+      "metric": {
+        "protocol": "shared_world_area_sample_to_triangle_v1",
+        "sample_count_per_direction": 4096,
+        "seed": 61007
+      },
+      "protocol": "source_conditioned_family_surface_v1",
+      "reason": null,
+      "reconstruction_allowance": {
+        "basis": "explicit engineering allowance; not an observed artist tolerance",
+        "normal_degrees": 1.0,
+        "source_pixels": 0.5,
+        "world": 0.002128379885107279
+      },
+      "reference_certificate": {
+        "candidate_boundary_qualified": false,
+        "distance_bound_world": 0.00040500062340535856,
+        "distance_scope": "bidirectional continuous analytic-cell to ideal planar chord-quad to actual-facet cover; poles collapse to complete triangular fans",
+        "family": "rounded_triangle_dot",
+        "normal_correspondence": "each actual facet to every outward analytic normal in its corresponding parameter cell; edge nearest-normal uniqueness not asserted",
+        "normal_correspondence_bound_degrees": 6.5098278988276554,
+        "protocol": "continuous_authored_facet_bound_v1",
+        "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+        "rounded_triangle_parameter_cover": {
+          "analytic_normal_length_lower_bound": 0.24,
+          "arithmetic": "exact rational binary64 author/source data and outward 100-bit interval grid; rational Machin pi and alternating atan; existing directed Decimal50 Taylor trig; rationally checked upper float endpoints and square roots",
+          "artist_surface_limits": null,
+          "authored_parameter_cover": {
+            "circular_cells": 6144,
+            "collapsed_pole_fans": 2,
+            "corner_segments": 32,
+            "diagonal": "00-to-11",
+            "dome_segments": 64,
+            "oriented_once_only": true,
+            "outline_points": 99,
+            "outline_seams_verified": true,
+            "pole_fan_triangles": 198,
+            "straight_cells": 192,
+            "triangles": 12474,
+            "vertices": 6239
+          },
+          "candidate_boundary_qualification": "not supplied",
+          "circular_outline_interpolation_distance_bound_world": 8.567364931501181e-05,
+          "circular_support_correction_angle_radians_upper_bound": 0.00035726048531963683,
+          "circular_support_correction_world_upper_bound": 8.571189500350621e-05,
+          "construction_scope": "actual exact binary64 source coordinates versus analytic interval vertices; no libm rounding assumption or construction acceptance tolerance",
+          "coverage_proof": "exact once-only oriented triangles for every cell and both collapsed pole fans, including cyclic outline seams",
+          "distance_correspondence": "bidirectional continuous analytic-cell to ideal planar chord-quad to actual-facet cover; poles collapse to complete triangular fans",
+          "distance_proof": "sequential meridian and circular-outline interpolation remainder <= maximum second derivative times span squared/8; all ideal chord quads planar; barycentric actual construction displacement",
+          "facet_to_endpoint_cone_tangent_upper_bound": 0.11326067008740726,
+          "family": "rounded_triangle_dot",
+          "frozen_parameters_sha256": "290223da6b6b0d1b6b658cf8b8c8e7b31fcf32b3f0ea476de87af9e154525df1",
+          "maximum_normal_angle_degrees": 6.5098278988276554,
+          "maximum_source_facet_distance_world": 0.00040500062340535856,
+          "maximum_vertex_construction_shift_world": 5.876531487310826e-08,
+          "meridian_interpolation_distance_bound_world": 0.0003192682087754737,
+          "normal_correspondence": "each actual facet to every outward analytic normal in its corresponding parameter cell; edge nearest-normal uniqueness not asserted",
+          "normal_proof": "exact facet cross and interval dot/cross endpoint cones; positive phi and theta endpoint coefficients; circular vertical support correction r*(sec(theta_span/2)-1); atan(t)<=t and angle triangle inequality",
+          "protocol": "authored_rounded_triangle_parameter_cover_v1",
+          "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+          "status": "certified",
+          "straight_outline_interpolation_distance_bound_world": 0.0
+        },
+        "sampled": false,
+        "vertex_construction_error_world": 5.876531487310826e-08
+      },
+      "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64"
+    },
+    "source_provenance": {
+      "indexed_reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+      "indexed_regenerated_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+      "original_and_regenerated_oriented_surface_sha256": "300792295fb47eaf504d554c815c058ad21556b0cfcea913d2a9bd706c0e91ee",
+      "scope": "actual recaptured source cameras bound to exactly equivalent oriented geometry; historical mask bindings unchanged"
+    }
+  },
+  "triangle_baseline": {
+    "aggregate_passed": false,
+    "artist_surface_passed": null,
+    "candidate_geometry_hash": "880bf1d1f34caa171442ce41d6fb4bde2b683654e1de265c5862ee0b172c80a6",
+    "contract_sha256": "179fcbaaa9c185c18b8d656f6c72ca83e4385b6f7bfed70b7cdcc129fdd4ab14",
+    "engineering_distance_passed": true,
+    "engineering_limits": {
+      "normal_angle_p95_degrees_max": 7.5098278988276554,
+      "symmetric_mean_distance_world_max": 0.0025333805085126374
+    },
+    "engineering_normal_passed": true,
+    "engineering_surface_passed": true,
+    "family": "rounded_triangle_dot",
+    "independent_verdicts": {
+      "editability": "unassessed",
+      "silhouette": "unassessed",
+      "topology": "unassessed"
+    },
+    "protocol": "source_conditioned_surface_observation_v1",
+    "raw_metrics": {
+      "distance_p95_world": 0.002281279978342354,
+      "normal_angle_mean_degrees": 0.5603901620479966,
+      "normal_angle_p95_degrees": 2.9707811690593298,
+      "sampled_max_distance_world": 0.0028801681473851204,
+      "symmetric_mean_distance_world": 0.000923875637811559
+    },
+    "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+    "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+  },
+  "triangle_diagnostic": {
+    "aggregate_passed": false,
+    "artist_surface_passed": null,
+    "candidate_geometry_hash": "bfe727380abc81d0215abec5687b77b83c251133605149a6f7ad2f714423a89d",
+    "contract_sha256": "179fcbaaa9c185c18b8d656f6c72ca83e4385b6f7bfed70b7cdcc129fdd4ab14",
+    "current_row_selection_changed": false,
+    "engineering_distance_passed": true,
+    "engineering_limits": {
+      "normal_angle_p95_degrees_max": 7.5098278988276554,
+      "symmetric_mean_distance_world_max": 0.0025333805085126374
+    },
+    "engineering_normal_passed": true,
+    "engineering_surface_passed": true,
+    "family": "rounded_triangle_dot",
+    "independent_verdicts": {
+      "editability": "unassessed",
+      "silhouette": "unassessed",
+      "topology": "unassessed"
+    },
+    "input_observation_scope": "diagnostic_checkpoint",
+    "producer_checkpoint_improved": true,
+    "producer_protocol": "bounded_adaptive_family_checkpoint_v1",
+    "protocol": "source_conditioned_surface_observation_v1",
+    "raw_metrics": {
+      "distance_p95_world": 0.0022511934163048863,
+      "normal_angle_mean_degrees": 0.4440156891061259,
+      "normal_angle_p95_degrees": 1.4659143045971141,
+      "sampled_max_distance_world": 0.0029814052395522594,
+      "symmetric_mean_distance_world": 0.0006732319122740825
+    },
+    "reference_geometry_hash": "2681272b491af3370176a3751e408ef36496ba592d230bce7c733b8c41cadc64",
+    "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+  },
+  "old_multipart_original_remains_failed": {
+    "aggregate_passed": false,
+    "artist_surface_passed": null,
+    "candidate_geometry_hash": "c367746d102dac33f3ad12b271c2ab00d46bd4da59a4bd8004a4bef7152eb0d1",
+    "contract_sha256": "efac34dfb3025b6fe34f6e26c001fb3460413ca40456ebf6deefb01efb106c6c",
+    "engineering_distance_passed": false,
+    "engineering_limits": {
+      "normal_angle_p95_degrees_max": 1.0,
+      "symmetric_mean_distance_world_max": 0.0018125506404794065
+    },
+    "engineering_normal_passed": true,
+    "engineering_surface_passed": false,
+    "family": "asymmetric_multipart_solid",
+    "independent_verdicts": {
+      "editability": "unassessed",
+      "silhouette": "unassessed",
+      "topology": "unassessed"
+    },
+    "protocol": "source_conditioned_surface_observation_v1",
+    "raw_metrics": {
+      "distance_p95_world": 0.00035315752029418945,
+      "normal_angle_mean_degrees": 2.406005859375,
+      "normal_angle_p95_degrees": 0.0,
+      "sampled_max_distance_world": 0.1802392154932022,
+      "symmetric_mean_distance_world": 0.004201645292114198
+    },
+    "reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+    "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+  },
+  "selected_multipart_repair": {
+    "aggregate_passed": false,
+    "artist_surface_passed": null,
+    "candidate_geometry_hash": "b2c937a949368471cb472b2d1cd3aa12f2d0a39871365d257a15154ff4edecb1",
+    "contract_sha256": "efac34dfb3025b6fe34f6e26c001fb3460413ca40456ebf6deefb01efb106c6c",
+    "current_row_selection_changed": false,
+    "engineering_distance_passed": true,
+    "engineering_limits": {
+      "normal_angle_p95_degrees_max": 1.0,
+      "symmetric_mean_distance_world_max": 0.0018125506404794065
+    },
+    "engineering_normal_passed": true,
+    "engineering_surface_passed": true,
+    "family": "asymmetric_multipart_solid",
+    "independent_verdicts": {
+      "editability": "unassessed",
+      "silhouette": "unassessed",
+      "topology": "unassessed"
+    },
+    "input_observation_scope": "selected_repair",
+    "producer_checkpoint_improved": null,
+    "producer_protocol": "multipart_one_endpoint_update_v1",
+    "protocol": "source_conditioned_surface_observation_v1",
+    "raw_metrics": {
+      "distance_p95_world": 0.00035315752029418945,
+      "normal_angle_mean_degrees": 0.032958984375,
+      "normal_angle_p95_degrees": 0.0,
+      "sampled_max_distance_world": 0.0005021347315050662,
+      "symmetric_mean_distance_world": 0.00016197755683688975
+    },
+    "reference_geometry_hash": "2142108d7cff97c2bbd65c222a799cbc308e913a4b5c4893abe6d23c839945ca",
+    "scope": "supplementary engineering evaluation; cannot replace artist or existing family acceptance"
+  },
+  "sphere_and_ellipsoid_updates_remain_rejected": {
+    "sphere": false,
+    "anisotropic_ellipsoid": false
+  },
+  "ownership_audit": {
+    "protocol": "run-ownership-dry-run-v1",
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-05\\owned-ath7evq9",
+    "mode": "read_only",
+    "status": "dry_run_ready",
+    "mutation_supported": false,
+    "eligible": [],
+    "eligible_bytes": 0,
+    "retained_bytes": 147509,
+    "blockers": [],
+    "unknown_files": []
+  },
+  "failed_initial_eleven_report": {
+    "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-04\\owned-q9ok9u30",
+    "phase": "source contracts frozen, baseline lookup failed because retained triangle is separate from10newactual rows",
+    "error": "KeyError: 'rounded_triangle_dot'",
+    "history": "preserved; no lease adoption/deletion or changedmeasurements",
+    "ownership_audit": {
+      "protocol": "run-ownership-dry-run-v1",
+      "run_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261009\\family-surface-report-04\\owned-q9ok9u30",
+      "mode": "read_only",
+      "status": "dry_run_ready",
+      "mutation_supported": false,
+      "eligible": [],
+      "eligible_bytes": 0,
+      "retained_bytes": 109598,
+      "blockers": [],
+      "unknown_files": []
+    }
+  },
+  "focused_report_binding_checks": {
+    "passed": 2,
+    "elapsed_seconds": 0.06
+  },
+  "new_native_jobs": 0,
+  "new_frames": 0,
+  "new_fits": 0,
+  "new_raw_comparisons": 0,
+  "qualification_children": 0,
+  "artist_surface_passed": null,
+  "aggregate_accepted": false
+}

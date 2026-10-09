@@ -41,6 +41,45 @@ class FamilySurfaceReportBindingsTests(unittest.TestCase):
         path.write_bytes(data)
         entry['source_receipt'] = {'path': str(path), 'sha256': hashlib.sha256(data).hexdigest()}
 
+    def reused_baseline(self, directory):
+        row = {'geometry_hash': 'a' * 64, 'aggregate_accepted': False,
+               'program': {'program_id': 'triangle-support',
+                           'root_nodes': [{'primitive_type': 'rounded_triangle'}]},
+               'surface_observation': {'candidate_geometry_hash': 'a' * 64,
+                                       'reference_geometry_hash': 'b' * 64}}
+        path = Path(directory) / 'original-triangle.json'
+        entry = {}; self.bind(entry, path, row)
+        coverage = {'actual_rows': {}, 'families': {'rounded_triangle_dot': {
+            'actual_status': 'reused', 'rerun': False, 'aggregate_accepted': False,
+            'source_receipt': entry['source_receipt']}}}
+        return row, path, coverage
+
+    def test_reused_original_triangle_baseline_binds_real_producer_without_selection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            row, path, coverage = self.reused_baseline(directory)
+            original = deepcopy(coverage)
+            geometry, raw = REPORT.read_baseline_observation(coverage, 'rounded_triangle_dot')
+            self.assertEqual(geometry, row['geometry_hash'])
+            self.assertEqual(raw, row['surface_observation'])
+            self.assertEqual(coverage, original)
+
+    def test_reused_baseline_refuses_other_family_claims_layout_and_identity_drift(self):
+        for change in ('family', 'rerun', 'accepted', 'primitive', 'program', 'identity', 'bytes'):
+            with self.subTest(change=change), tempfile.TemporaryDirectory() as directory:
+                row, path, coverage = self.reused_baseline(directory)
+                family = 'capsule' if change == 'family' else 'rounded_triangle_dot'
+                declaration = coverage['families']['rounded_triangle_dot']
+                if change == 'rerun': declaration['rerun'] = True
+                if change == 'accepted': declaration['aggregate_accepted'] = True
+                if change == 'primitive': row['program']['root_nodes'][0]['primitive_type'] = 'sphere'
+                if change == 'program': row['program']['program_id'] = 'unknown'
+                if change == 'identity': row['surface_observation']['candidate_geometry_hash'] = 'c' * 64
+                if change == 'bytes': path.write_bytes(path.read_bytes() + b' ')
+                else:
+                    entry = {}; self.bind(entry, path, row)
+                    declaration['source_receipt'] = entry['source_receipt']
+                with self.assertRaises(ValueError): REPORT.read_baseline_observation(coverage, family)
+
     def test_real_legacy_layout_remains_selected_repair_raw_only(self):
         with tempfile.TemporaryDirectory() as directory:
             family, producer, entry, path = self.fixture(directory, legacy=True)

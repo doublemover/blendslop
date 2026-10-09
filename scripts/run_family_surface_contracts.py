@@ -144,6 +144,31 @@ def read_additional_observation(family, entry):
                          'current_row_selection_changed': False}
 
 
+def read_baseline_observation(coverage, family):
+    """Read actual rows or the known retained triangle's original producer."""
+    candidate = coverage.get('actual_rows', {}).get(family)
+    if candidate is not None:
+        producer = json.loads(read_bound(candidate['source_receipt']))
+        row = producer['cases'][family]
+        if (row['geometry_hash'] != candidate['geometry_hash'] or
+                row['surface_observation'] != candidate['surface_observation']):
+            raise ValueError('raw metric summary differs from its retained producer')
+        return candidate['geometry_hash'], row['surface_observation']
+    reused = coverage.get('families', {}).get(family, {})
+    if (family != 'rounded_triangle_dot' or reused.get('actual_status') != 'reused' or
+            reused.get('rerun') is not False or reused.get('aggregate_accepted') is not False):
+        raise ValueError('family has no actual or explicitly reused baseline producer')
+    row = json.loads(read_bound(reused['source_receipt']))
+    program, observation = row.get('program', {}), row.get('surface_observation')
+    nodes = program.get('root_nodes', [])
+    if (program.get('program_id') != 'triangle-support' or len(nodes) != 1 or
+            nodes[0].get('primitive_type') != 'rounded_triangle' or
+            row.get('aggregate_accepted') is not False or not isinstance(observation, dict) or
+            row.get('geometry_hash') != observation.get('candidate_geometry_hash')):
+        raise ValueError('retained original triangle producer layout or identity differs')
+    return row['geometry_hash'], observation
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source-plan', type=Path, required=True)
@@ -176,16 +201,9 @@ def main():
         coverage = json.loads(read_bound(coverage_binding))
         observations = {}
         for family, declaration in frozen.items():
-            candidate = coverage['actual_rows'][family]
-            # Bind the summary to its real producer receipt, not just copied text.
-            producer = json.loads(read_bound(candidate['source_receipt']))
-            producer_row = producer['cases'][family]
-            if (producer_row['geometry_hash'] != candidate['geometry_hash'] or
-                    producer_row['surface_observation'] != candidate['surface_observation']):
-                raise ValueError('raw metric summary differs from its retained producer')
+            geometry, observation = read_baseline_observation(coverage, family)
             observations[family] = evaluate_family_surface_contract(
-                declaration['contract'], candidate['surface_observation'],
-                candidate_geometry_hash=candidate['geometry_hash'])
+                declaration['contract'], observation, candidate_geometry_hash=geometry)
         additional = {}
         if args.additional_observations:
             binding = {'path':str(args.additional_observations.absolute()),
