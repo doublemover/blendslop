@@ -84,21 +84,28 @@
     },
     {
       "task": "RUN-CLEANUP1",
-      "state": "ownership adoption continues; reclamation remains read-only",
+      "state": "production render and variant result/diagnostic ownership implemented; reclamation remains read-only",
       "completed": [
         "explicit manifest/lease ownership design and conservative read-only planner",
         "fresh native helper and warm numeric producer ownership",
         "cold DVX owned transport with eight focused stdlib/mock lifecycle checks",
         "child joining before release and active lease when joining is unconfirmed",
-        "original error preservation and retained failed history"
+        "original error preservation and retained failed history",
+        "fresh production .render-runs ownership; verified immutable PNG stages and atomic no-clobber final publication",
+        "fresh production .variant-runs attempts after cache lookup; immutable result suffixes and diagnostics",
+        "direct child timeout/cancel join and continuously drained32KiB stdout/stderr tails with actual byte counts",
+        "two real concurrent producers preserve separate active leases and shared inputs",
+        "joined crashed producer remains active and requires explicit recovery; no inferred adoption",
+        "actual Windows locked-existing-final publication preserves both original and completed stage",
+        "two128-square native production renders preserve identical pixels, indexed geometry, settings and released receipts"
       ],
       "remaining": [
-        "production render/variant ownership adoption",
-        "atomic final-output promotion integration",
-        "crash recovery ownership decision",
-        "concurrent lease and locked-file integration fixtures"
+        "backend export/cache/report ownership outside this bounded adoption",
+        "save_render exact-path overwrite API has not been changed",
+        "explicit crashed-run recovery execution and full child-tree supervision",
+        "a separately scoped reclamation executor, if later authorized; no historical adoption or blanket deletion"
       ],
-      "blocking_input": "No historical adoption, deletion executor or blanket cleanup is authorized."
+      "blocking_input": "Deletion/historical adoption remain outside authorization; recovery execution and other producers require an explicit bounded design."
     },
     {
       "task": "MEASUREMENT-ADAPTIVE-PRESENTATION",
@@ -112,7 +119,8 @@
         "selected9f6c8d geometry passes allfive alpha silhouettes, exact native boundary and live radius restoration",
         "three1536color/lit previews plusonefinal-box frame, exact geometry preserved",
         "local site/continuation.html with independently scoped metrics and hashed display assets",
-        "candidate-only selected camera and one-scalar multipart update reduce newviewalpha98.636percent and rawmean96.145percent"
+        "candidate-only selected camera and one-scalar multipart update reduce newviewalpha98.636percent and rawmean96.145percent",
+        "strict site builder admits four continuation assets with unchanged IDAT payloads; native originals retained;83total assets and11.58MB local build"
       ],
       "remaining": [
         "browser layout inspection when a browser surface is available",
@@ -140,8 +148,9 @@
   "local_commits": [
     "424759d06585f2bc589fc29bb16c70198a83395a",
     "723a553",
-    "f0a0b3f"
+    "f0a0b3f",
+    "95f752c6c3ecafda3f5e1390ccf86d908edd6622"
   ],
   "resource_policy": "existing Blender5.2.2/Python3.13.13/qualified packages; no installs, version changes, paid compute or new benchmark",
-  "completed_unpublished_batch": "authorednormals/multipart/controlledadaptive/presentation continuation, locally committing after final evidence review"
+  "completed_unpublished_batch": "quality95f752c committed; render/variant lifecycle and additive preview publication readiness completed in accompanying local batch"
 }

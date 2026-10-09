@@ -1,6 +1,6 @@
 # RUN-CLEANUP1: bounded production render and variant adoption
 
-This is a proposed implementation after the current quality batch is committed. No runtime source was changed, no native process was launched, and no historical output was adopted. The proposal creates ownership only for newly generated staging files and diagnostics. All files remain retained; there is no deletion executor, sweep, ACL change or crash recovery.
+This bounded design was implemented after the quality batch95f752c was committed. The implementation owns only fresh staging files, result transport and diagnostics. The call-path line references below describe the pre-change design review. Renderer and variant evidence now retain actual focused fixtures; the native production renderer canary passed exactly two128-square frames. All files remain retained; no deletion executor, sweep, ACL change or crash recovery execution was added.
 
 ## Actual call paths and present gaps
 
@@ -36,7 +36,7 @@ Route the two outer error-result writers through the same staged/result publicat
 
 For subprocess attempts use `Popen` and explicit `try/finally`: retain command before launch; join normally; on timeout or cancellation terminate only the directly owned child and join it before releasing the lease. Spawn failure can close a failed run because no child exists. Unconfirmed termination leaves the lease active and annotates the original error, matching the cold-DVX contract. A new optional `RunOptions.variant_timeout_s=None` keeps the present no-outer-timeout default; explicit values must be finite and positive. It is separate from backend fit budgets.
 
-Retain bounded stdout/stderr tails and byte counts in every joined outcome. The first implementation may preserve existing pipe/communicate capture while limiting retained diagnostics; that does **not** bound peak log-capture memory. Continuous draining into bounded buffers would be a separate explicit extension if required. Do not claim child-tree ownership: backend helper descendants remain governed by their own producers. In-process attempts need no child join but retain exceptions and result transport under the same fresh-attempt contract.
+The implementation continuously drains stdout and stderr into separate32KiB buffers and records actual byte counts and truncation. Live log memory is bounded independently of total child log volume; no unbounded capture_output/communicate buffer is used. Drainer completion is confirmed before lease release. Unconfirmed draining retains an active lease. Do not claim child-tree ownership: backend helper descendants remain governed by their own producers. In-process attempts need no child join but retain exceptions and result transport under the same fresh-attempt contract.
 
 ## Exact implementation files and focused checks
 
@@ -50,4 +50,6 @@ Runtime scope: new `utils/artifact_publication.py`; edits to `integration/blende
 
 ## Scope limits and readiness
 
-The design can proceed after root's current native sessions finish and the quality batch is committed. Atomic publication depends on hard-link support in the selected final filesystem; no incompatible fallback is proposed. `save_render` overwrite semantics, backend artifact overwrites under `a`, mutable report/cache files, full child-tree supervision, bounded live log transport, crash recovery and reclamation remain explicit follow-up scope. This chunk preserves render finals and attempt result/log history; it does not claim full ownership of every variant export or a cleanup implementation.
+The design can proceed after root's current native sessions finish and the quality batch is committed. Atomic publication depends on hard-link support in the selected final filesystem; no incompatible fallback is proposed. `save_render` overwrite semantics, backend artifact overwrites under `a`, mutable report/cache files, full child-tree supervision, explicit crash recovery execution and reclamation remain explicit follow-up scope. This chunk preserves render finals and attempt result/log history; it does not claim full ownership of every variant export or a cleanup implementation.
+
+Root additionally registered test_owned_lifecycle_processes.py: actual concurrent fresh producers, a joined os._exit crash that remains blocked for recovery, and an actual Windows locked-existing-final fixture. All three passed without adopting or deleting production outputs. The optional later native canary in the design has now passed; no repeat is pending.

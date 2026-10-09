@@ -6,11 +6,14 @@ from dataclasses import dataclass, is_dataclass, replace
 import copy
 import hashlib
 import json
+import math
+import numbers
 import platform
 from pathlib import Path
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from typing import Any, Mapping, Sequence
 
@@ -80,6 +83,223 @@ class RunOptions:
     batch_index_writes: bool = True
     moonshot_sidecars: bool = False
     moonshot_experiments: tuple[str, ...] = ()
+    variant_timeout_s: float | None = None
+
+    def __post_init__(self) -> None:
+        value = self.variant_timeout_s
+        if value is not None and (isinstance(value, bool) or not isinstance(value, numbers.Real)
+                                  or not math.isfinite(value) or value <= 0):
+            raise ValueError("variant_timeout_s must be finite and positive, or None")
+
+
+_VARIANT_LOG_TAIL_BYTES = 32768
+_VARIANT_ATTEMPT_BYTES = 64 * 1024 * 1024
+
+
+class _BoundedPipeTail:
+    """Continuously drain one binary pipe; memory never grows with log volume."""
+    def __init__(self, stream):
+        self.stream = stream
+        self.tail = bytearray()
+        self.byte_count = 0
+        self.error = None
+        self.lock = threading.Lock()
+        self.thread = threading.Thread(target=self._drain, daemon=True)
+
+    def _drain(self):
+        try:
+            while True:
+                chunk = self.stream.read1(8192)
+                if not chunk:
+                    break
+                with self.lock:
+                    self.byte_count += len(chunk)
+                    self.tail.extend(chunk)
+                    del self.tail[:-_VARIANT_LOG_TAIL_BYTES]
+        except BaseException as exc:
+            self.error = repr(exc)
+        finally:
+            self.stream.close()
+
+    def snapshot(self):
+        with self.lock:
+            return bytes(self.tail), self.byte_count
+
+
+class _VariantAttempt:
+    """Own new result transport/diagnostics only, never variant finals or caches."""
+    def __init__(self, variant_dir, *, shared_inputs=None):
+        from blender_blocking.utils.run_ownership import OwnedRun
+        self.variant_dir = Path(variant_dir)
+        self.owner = OwnedRun(self.variant_dir.resolve() / ".variant-runs",
+                              producer="refinement_variant",
+                              max_generated_bytes=_VARIANT_ATTEMPT_BYTES,
+                              shared_inputs=shared_inputs)
+        self.root = self.owner.root
+        self.result_path = self.root / "result.json"
+        self.known = {"command.txt", "config.json", "result.json", "result.json.partial",
+                      "stdout.txt", "stderr.txt", "logs.json", "attempt.json"}
+        self.publications = []
+        self.child_joined = True
+        self.drainers_joined = True
+        self.child_pid = None
+        self.status = "error"
+
+    def __enter__(self):
+        return self
+
+    def record(self, command, config):
+        _write_text(self.root / "command.txt", " ".join(command) + "\n")
+        _write_json(self.root / "config.json", config)
+        entrypoint = Path(__file__).resolve().parents[1] / "test_e2e_validation.py"
+        self.owner.manifest["shared_inputs"]["entrypoint"] = {
+            "path": str(entrypoint), "sha256": _file_hash(entrypoint),
+        }
+        self.owner.register_file("command.txt", "diagnostic")
+        self.owner.register_file("config.json", "diagnostic")
+
+    def publish_result(self, *, fallback):
+        from blender_blocking.utils.artifact_publication import publish_file_no_clobber
+        if not self.result_path.exists():
+            _write_json(self.result_path, fallback)
+        if self.result_path.stat().st_size > _VARIANT_ATTEMPT_BYTES:
+            raise ValueError("variant result transport exceeds the owned artifact bound")
+        payload = json.loads(self.result_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError("variant result transport must be a JSON object")
+        self.owner.register_file("result.json", "final_output")
+        for suffix in range(1, 10001):
+            name = "result.json" if suffix == 1 else f"result_{suffix}.json"
+            target = self.variant_dir / name
+            try:
+                published = publish_file_no_clobber(self.result_path, target)
+            except FileExistsError:
+                continue
+            self.publications.append({"staged": str(self.result_path), "published": str(published),
+                                      "sha256": _file_hash(self.result_path)})
+            return published, payload
+        raise FileExistsError("variant result suffix allowance exhausted")
+
+    def artifacts(self, published):
+        return {"result": published, "ownership_receipt": self.root / "run-ownership.json",
+                "variant_attempt": self.root / "attempt.json"}
+
+    def __exit__(self, kind, error, traceback):
+        try:
+            if error is not None or self.status != "pass":
+                self.owner.mark_failed(repr(error) if error is not None else "variant verdict: " + self.status)
+            # Only known newly generated files are registered. An existing final
+            # directory is never inventoried or adopted.
+            for name in sorted(self.known - {"attempt.json"}):
+                path = self.root / name
+                if path.is_file():
+                    self.owner.register_file(name, "final_output" if name == "result.json" else "diagnostic")
+            # Historical aliases are immutable; durable attempt records are the
+            # authority when a prior invocation already published an alias.
+            from blender_blocking.utils.artifact_publication import publish_file_no_clobber
+            for name in ("command.txt", "config.json", "stdout.txt", "stderr.txt"):
+                stage = self.root / name
+                if stage.is_file():
+                    try:
+                        final = publish_file_no_clobber(stage, self.variant_dir / name)
+                    except FileExistsError:
+                        self.publications.append({"staged": str(stage), "alias": name, "status": "existing_preserved"})
+                    except Exception as alias_error:
+                        self.publications.append({"staged": str(stage), "alias": name,
+                                                  "status": "publication_failed", "error": repr(alias_error)})
+                        self.owner.auxiliary_errors.append(repr(alias_error))
+                        if error is not None:
+                            error.add_note("Variant diagnostic alias publication also failed: " + repr(alias_error))
+                    else:
+                        self.publications.append({"staged": str(stage), "published": str(final), "sha256": _file_hash(stage)})
+            _write_json(self.root / "attempt.json", {
+                "protocol": "refinement_variant_attempt_v1", "status": self.status,
+                "child_pid": self.child_pid, "direct_child_joined": self.child_joined,
+                "log_drainers_joined": self.drainers_joined, "publications": self.publications,
+                "error": repr(error) if error is not None else None,
+                "scope": "fresh diagnostics/result transport; final r/a/cache paths external; no deletion",
+            })
+            self.owner.register_file("attempt.json", "diagnostic")
+            if self.child_joined and self.drainers_joined:
+                self.owner.close(error=error)
+            elif error is not None:
+                error.add_note("Variant attempt lease remains active: join unconfirmed at " + str(self.root))
+        except BaseException as secondary:
+            if error is None:
+                raise
+            error.add_note("Variant attempt receipt also failed: " + repr(secondary))
+        if error is not None:
+            try:
+                error.variant_ownership_receipt = self.root / "run-ownership.json"
+            except Exception:
+                pass
+        return False
+
+
+def _run_variant_child(command, *, cwd, timeout_s, attempt):
+    """Join only this directly owned child; continuously bounded binary logs."""
+    child = None
+    tails = []
+    primary = None
+    try:
+        child = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        attempt.child_pid = child.pid
+        attempt.child_joined = False
+        attempt.drainers_joined = False
+        tails = [_BoundedPipeTail(child.stdout), _BoundedPipeTail(child.stderr)]
+        for tail in tails:
+            tail.thread.start()
+        code = child.wait(timeout=timeout_s)
+        attempt.child_joined = True
+    except BaseException as exc:
+        primary = exc
+        if child is not None and not attempt.child_joined:
+            try:
+                if child.poll() is None:
+                    child.terminate()
+                child.wait(timeout=5.)
+                attempt.child_joined = True
+            except BaseException as first_join:
+                try:
+                    child.kill()
+                    child.wait(timeout=5.)
+                    attempt.child_joined = True
+                except BaseException as final_join:
+                    exc.add_note("Direct variant child join unconfirmed: " + repr(final_join))
+        raise
+    finally:
+        try:
+            for tail in tails:
+                tail.thread.join(timeout=1.)
+            attempt.drainers_joined = all(not tail.thread.is_alive() for tail in tails)
+            logs = {}
+            for name, tail in zip(("stdout", "stderr"), tails):
+                data, count = tail.snapshot()
+                (attempt.root / (name + ".txt")).write_bytes(data)
+                logs[name] = {"byte_count": count, "retained_bytes": len(data),
+                              "tail_limit_bytes": _VARIANT_LOG_TAIL_BYTES,
+                              "truncated": count > len(data), "drain_error": tail.error}
+            for name in ("stdout", "stderr"):
+                if name not in logs:
+                    (attempt.root / (name + ".txt")).write_bytes(b"")
+                    logs[name] = {"byte_count": 0, "retained_bytes": 0,
+                                  "tail_limit_bytes": _VARIANT_LOG_TAIL_BYTES,
+                                  "truncated": False, "drain_error": None}
+            _write_json(attempt.root / "logs.json", {"streams": logs,
+                        "direct_child_joined": attempt.child_joined,
+                        "drainers_joined": attempt.drainers_joined})
+            if not attempt.drainers_joined and primary is None:
+                raise RuntimeError("variant log drain completion unconfirmed; lease remains active")
+            if any(tail.error for tail in tails) and primary is None:
+                raise RuntimeError("variant log drain failed: " + repr([tail.error for tail in tails]))
+        except BaseException as secondary:
+            if primary is None:
+                raise
+            primary.add_note("Variant bounded logs also failed: " + repr(secondary))
+    stderr = (attempt.root / "stderr.txt").read_bytes().decode("utf-8", errors="replace")
+    return code, stderr
 
 
 class BaseRunner:
@@ -233,7 +453,6 @@ class BaseRunner:
         started = utc_now()
         variant_dir = self._case_variant_dir(case, variant)
         variant_dir.mkdir(parents=True, exist_ok=True)
-        result_json = variant_dir / "result.json"
         spec_payload = (
             case.metadata.get("spec", {}) if isinstance(case.metadata, Mapping) else {}
         )
@@ -249,10 +468,15 @@ class BaseRunner:
             "error": str(exc),
             "exception_type": type(exc).__name__,
         }
-        result_json.write_text(
-            json.dumps(json_safe(payload), indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
+        payload["exception_notes"] = list(getattr(exc, "__notes__", ()))
+        with _VariantAttempt(variant_dir, shared_inputs={"scope": "outer error result"}) as attempt:
+            attempt.record((), {"case_id": case.case_id, "variant_id": variant.variant_id})
+            _write_json(attempt.result_path, json_safe(payload))
+            result_json, _ = attempt.publish_result(fallback=payload)
+        error_artifacts = attempt.artifacts(result_json)
+        prior_owner = getattr(exc, "variant_ownership_receipt", None)
+        if prior_owner is not None:
+            error_artifacts["failed_variant_attempt"] = Path(prior_owner)
         return ExperimentResult(
             run_id=self.plan.run_id,
             case_id=case.case_id,
@@ -269,7 +493,7 @@ class BaseRunner:
                 "validation_mode": "render-iou",
                 "failure_code": "reference_generation_failed",
             },
-            artifacts={"result": result_json},
+            artifacts=error_artifacts,
             errors=(str(exc),),
         )
 
@@ -285,7 +509,6 @@ class BaseRunner:
     ) -> ExperimentResult:
         variant_dir = self._case_variant_dir(case, variant)
         variant_dir.mkdir(parents=True, exist_ok=True)
-        result_json = variant_dir / "result.json"
         error = f"{type(exc).__name__}: {exc}"
         payload = {
             "schema_version": "refinement_candidate_execution_error_v1",
@@ -301,10 +524,15 @@ class BaseRunner:
             "error": str(exc),
             "exception_type": type(exc).__name__,
         }
-        result_json.write_text(
-            json.dumps(json_safe(payload), indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
+        payload["exception_notes"] = list(getattr(exc, "__notes__", ()))
+        with _VariantAttempt(variant_dir, shared_inputs={"scope": "outer error result"}) as attempt:
+            attempt.record((), {"case_id": case.case_id, "variant_id": variant.variant_id})
+            _write_json(attempt.result_path, json_safe(payload))
+            result_json, _ = attempt.publish_result(fallback=payload)
+        error_artifacts = attempt.artifacts(result_json)
+        prior_owner = getattr(exc, "variant_ownership_receipt", None)
+        if prior_owner is not None:
+            error_artifacts["failed_variant_attempt"] = Path(prior_owner)
         return ExperimentResult(
             run_id=self.plan.run_id,
             case_id=case.case_id,
@@ -325,7 +553,7 @@ class BaseRunner:
                     "exception_type": type(exc).__name__,
                 },
             },
-            artifacts={"result": result_json},
+            artifacts=error_artifacts,
             errors=(error,),
         )
 
@@ -1060,45 +1288,25 @@ class InProcessBlenderRunner(BaseRunner):
         variant_dir.mkdir(parents=True, exist_ok=True)
         render_dir = variant_dir / "r"
         artifact_root = variant_dir / "a"
-        result_json = variant_dir / "result.json"
-        command = _variant_command(
-            variant,
-            result_json=result_json,
-            render_dir=render_dir,
-            artifact_root=artifact_root,
-            reference_paths=reference_paths,
-        )
-        _write_text(variant_dir / "command.txt", " ".join(command) + "\n")
-        config = copy.deepcopy(self.base_config)
-        _apply_variant_to_config(config, variant)
-        self._apply_run_option_config(config)
-        config.validate()
-        _write_json(variant_dir / "config.json", config.to_dict())
-        try:
-            from blender_blocking.test_e2e_validation import test_with_custom_images
-
-            passed = test_with_custom_images(
-                str(reference_paths["front"]),
-                str(reference_paths["side"]),
-                str(reference_paths["top"]),
-                num_slices=config.reconstruction.num_slices,
-                iou_threshold=0.7,
-                render_config=config.render_silhouette,
-                workflow_config=config,
-                config_label=variant.variant_id,
-                validation_mode=variant.validation_mode,
-                render_output_dir=render_dir,
-                artifact_root=artifact_root,
+        with _VariantAttempt(variant_dir, shared_inputs={
+                "reference_sha256": _reference_hashes(reference_paths),
+                "runner_sha256": _file_hash(Path(__file__)),
+                "external_render_dir": str(render_dir), "external_backend_dir": str(artifact_root),
+        }) as attempt:
+            result_json = attempt.result_path
+            command = _variant_command(
+                variant,
                 result_json=result_json,
-                run_id=f"{self.plan.run_id}-{case.case_id}-{variant.variant_id}",
-                progress=self.options.progress,
-                debug_output_dir=variant_dir / "dbg",
-                debug_artifact_policy=self.options.debug_artifact_policy,
+                render_dir=render_dir,
+                artifact_root=artifact_root,
+                reference_paths=reference_paths,
             )
-            status = "pass" if passed else "fail"
-            exit_code = 0 if passed else 1
-            errors: tuple[str, ...] = ()
-        except TypeError:
+            config = copy.deepcopy(self.base_config)
+            attempt.record(command, {"base_config": config.to_dict(), "variant": variant.to_dict()})
+            _apply_variant_to_config(config, variant)
+            self._apply_run_option_config(config)
+            attempt.record(command, config.to_dict())
+            config.validate()
             try:
                 from blender_blocking.test_e2e_validation import test_with_custom_images
 
@@ -1117,35 +1325,66 @@ class InProcessBlenderRunner(BaseRunner):
                     result_json=result_json,
                     run_id=f"{self.plan.run_id}-{case.case_id}-{variant.variant_id}",
                     progress=self.options.progress,
+                    debug_output_dir=variant_dir / "dbg",
+                    debug_artifact_policy=self.options.debug_artifact_policy,
                 )
                 status = "pass" if passed else "fail"
                 exit_code = 0 if passed else 1
-                errors = ()
+                errors: tuple[str, ...] = ()
+            except TypeError:
+                try:
+                    from blender_blocking.test_e2e_validation import test_with_custom_images
+
+                    passed = test_with_custom_images(
+                        str(reference_paths["front"]),
+                        str(reference_paths["side"]),
+                        str(reference_paths["top"]),
+                        num_slices=config.reconstruction.num_slices,
+                        iou_threshold=0.7,
+                        render_config=config.render_silhouette,
+                        workflow_config=config,
+                        config_label=variant.variant_id,
+                        validation_mode=variant.validation_mode,
+                        render_output_dir=render_dir,
+                        artifact_root=artifact_root,
+                        result_json=result_json,
+                        run_id=f"{self.plan.run_id}-{case.case_id}-{variant.variant_id}",
+                        progress=self.options.progress,
+                    )
+                    status = "pass" if passed else "fail"
+                    exit_code = 0 if passed else 1
+                    errors = ()
+                except Exception as exc:
+                    status = "error"
+                    exit_code = 2
+                    errors = (str(exc),)
             except Exception as exc:
                 status = "error"
                 exit_code = 2
                 errors = (str(exc),)
-        except Exception as exc:
-            status = "error"
-            exit_code = 2
-            errors = (str(exc),)
-        elapsed = time.perf_counter() - started_monotonic
-        payload = _load_json(result_json)
-        return _result_from_payload(
-            plan_id=self.plan.run_id,
-            case=case,
-            variant=variant,
-            status=status,
-            exit_code=exit_code,
-            started_utc=started,
-            finished_utc=utc_now(),
-            elapsed_s=elapsed,
-            command=command,
-            result_json=result_json,
-            payload=payload,
-            reference_paths=reference_paths,
-            errors=errors,
-        )
+            elapsed = time.perf_counter() - started_monotonic
+            attempt.status = status
+            result_json, payload = attempt.publish_result(fallback={
+                "schema_version": "refinement_variant_missing_transport_v1",
+                "status": status, "errors": list(errors), "passed": status == "pass",
+                "transport_diagnostic": "invocation did not produce a result JSON",
+            })
+            result = _result_from_payload(
+                plan_id=self.plan.run_id,
+                case=case,
+                variant=variant,
+                status=status,
+                exit_code=exit_code,
+                started_utc=started,
+                finished_utc=utc_now(),
+                elapsed_s=elapsed,
+                command=command,
+                result_json=result_json,
+                payload=payload,
+                reference_paths=reference_paths,
+                errors=errors,
+            )
+            return replace(result, artifacts={**dict(result.artifacts), **attempt.artifacts(result_json)})
 
     def _apply_run_option_config(self, config: BlockingConfig) -> None:
         if self.options.cache_root is None:
@@ -1183,49 +1422,38 @@ class SubprocessRunner(BaseRunner):
         variant_dir.mkdir(parents=True, exist_ok=True)
         render_dir = (variant_dir / "r").resolve(strict=False)
         artifact_root = (variant_dir / "a").resolve(strict=False)
-        result_json = (variant_dir / "result.json").resolve(strict=False)
-        command = _variant_command(
-            variant,
-            result_json=result_json,
-            render_dir=render_dir,
-            artifact_root=artifact_root,
-            reference_paths=reference_paths,
-            blender_executable=self.options.blender_executable,
-        )
-        _write_text(variant_dir / "command.txt", " ".join(command) + "\n")
-        stdout_path = variant_dir / "stdout.txt"
-        stderr_path = variant_dir / "stderr.txt"
-        completed = subprocess.run(
-            command,
-            cwd=Path(__file__).resolve().parents[2],
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        stdout_path.write_text(completed.stdout, encoding="utf-8")
-        stderr_path.write_text(completed.stderr, encoding="utf-8")
-        payload = _load_json(result_json)
-        status = "pass" if completed.returncode == 0 else "fail"
-        errors = (
-            (completed.stderr.strip(),)
-            if completed.returncode and completed.stderr.strip()
-            else ()
-        )
-        return _result_from_payload(
-            plan_id=self.plan.run_id,
-            case=case,
-            variant=variant,
-            status=status,
-            exit_code=completed.returncode,
-            started_utc=started,
-            finished_utc=utc_now(),
-            elapsed_s=time.perf_counter() - started_monotonic,
-            command=tuple(command),
-            result_json=result_json,
-            payload=payload,
-            reference_paths=reference_paths,
-            errors=errors,
-        )
+        with _VariantAttempt(variant_dir, shared_inputs={
+                "reference_sha256": _reference_hashes(reference_paths),
+                "runner_sha256": _file_hash(Path(__file__)),
+                "external_render_dir": str(render_dir), "external_backend_dir": str(artifact_root),
+                "timeout_seconds": self.options.variant_timeout_s,
+        }) as attempt:
+            command = _variant_command(
+                variant, result_json=attempt.result_path, render_dir=render_dir,
+                artifact_root=artifact_root, reference_paths=reference_paths,
+                blender_executable=self.options.blender_executable,
+            )
+            attempt.record(command, {"base_config": self.base_config.to_dict(),
+                "variant": variant.to_dict(), "execution": "CLI command is authoritative"})
+            code, stderr = _run_variant_child(command,
+                cwd=Path(__file__).resolve().parents[2],
+                timeout_s=self.options.variant_timeout_s, attempt=attempt)
+            status = "pass" if code == 0 else "fail"
+            errors = (stderr.strip(),) if code and stderr.strip() else ()
+            attempt.status = status
+            result_json, payload = attempt.publish_result(fallback={
+                "schema_version": "refinement_variant_missing_transport_v1",
+                "status": status, "errors": list(errors), "passed": status == "pass",
+                "transport_diagnostic": "child did not produce a result JSON",
+            })
+            result = _result_from_payload(
+                plan_id=self.plan.run_id, case=case, variant=variant,
+                status=status, exit_code=code, started_utc=started, finished_utc=utc_now(),
+                elapsed_s=time.perf_counter() - started_monotonic, command=tuple(command),
+                result_json=result_json, payload=payload, reference_paths=reference_paths,
+                errors=errors,
+            )
+            return replace(result, artifacts={**dict(result.artifacts), **attempt.artifacts(result_json)})
 
 
 def runner_for_plan(
