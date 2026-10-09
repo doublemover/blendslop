@@ -1,0 +1,185 @@
+{
+  "protocol": "candidate_only_arch_outer_stage_proposal_v1",
+  "status": "inspected only; not implemented or native-approved",
+  "baseline_receipt": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\results.json",
+  "baseline_receipt_sha256": "1484219f42ee4f75e60ba8ea39d3f3969560ac70978ad470bad7b1dfabe00cda",
+  "baseline_program": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh\\concave_arch\\refined\\program.json",
+  "baseline_program_sha256": "c73da3da1e22eb92c51f434bc25891cb191523214d8d083ad825485ce18eeb25",
+  "baseline_geometry_hash": "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa",
+  "controls": {
+    "outer_width_world": 1.7943750508129597,
+    "outer_height_world": 1.7943750508129597,
+    "extrusion_depth_world": 0.400029554361059
+  },
+  "prior_bounds": {
+    "outer_width_world": [
+      1.6149375457316637,
+      1.9738125558942559
+    ],
+    "outer_height_world": [
+      1.6149375457316637,
+      1.9738125558942559
+    ],
+    "extrusion_depth_world": [
+      0.36002659892495315,
+      0.44003250979716496
+    ]
+  },
+  "fixed_notch": {
+    "opening_width_world": 0.99993852767889,
+    "cavity_roof_height_from_bottom_world": 1.2970628981122982
+  },
+  "height_semantics": "outer center and pose fixed; move bottom attachments together and roof with bottom to preserve notch height. Absolute roof location shifts with outer-height update; this tradeoff must remain explicit.",
+  "front": {
+    "local_rank": 2,
+    "singular_values": [
+      0.052131726475211713,
+      0.05192506828288802,
+      2.9508683194335063e-10
+    ],
+    "condition_number": 176665716.09410113,
+    "candidate_frame_censored": false,
+    "visible_candidate_boundary_samples": 384,
+    "bounds_pixel": [
+      35.5,
+      35.500006431,
+      475.5,
+      475.500010719
+    ],
+    "projection_metadata": {
+      "triangles": 20,
+      "components": 1,
+      "projection_representation": "mesh_triangle_union",
+      "unresolved_small_components": 0,
+      "loops": 1,
+      "union_precision_grid_px": 1e-09,
+      "unresolved_hole_diameter_px": 1e-07,
+      "unresolved_small_holes": 0,
+      "precision_scope": "proposal contours only; topology below grid unresolved"
+    },
+    "source_observations": 0,
+    "frame_border_closure_added": false,
+    "global_uniqueness_established": false
+  },
+  "original_ob35": {
+    "local_rank": 3,
+    "singular_values": [
+      0.035292408977144314,
+      0.03353296920534075,
+      0.008333484512988312
+    ],
+    "condition_number": 4.235012247534468,
+    "candidate_frame_censored": true,
+    "visible_candidate_boundary_samples": 324,
+    "bounds_pixel": [
+      89.138048482,
+      -36.560341935,
+      421.863700738,
+      547.560626167
+    ],
+    "projection_metadata": {
+      "triangles": 28,
+      "components": 1,
+      "projection_representation": "mesh_triangle_union",
+      "unresolved_small_components": 0,
+      "loops": 1,
+      "union_precision_grid_px": 1e-09,
+      "unresolved_hole_diameter_px": 1e-07,
+      "unresolved_small_holes": 0,
+      "precision_scope": "proposal contours only; topology below grid unresolved"
+    },
+    "source_observations": 0,
+    "frame_border_closure_added": false,
+    "global_uniqueness_established": false
+  },
+  "candidate_expanded_ob35": {
+    "local_rank": 3,
+    "singular_values": [
+      0.03350471909943493,
+      0.02514825728167468,
+      0.007787120694692118
+    ],
+    "condition_number": 4.302581199527641,
+    "candidate_frame_censored": false,
+    "visible_candidate_boundary_samples": 384,
+    "bounds_pixel": [
+      125.302412542,
+      26.928793873,
+      385.698956426,
+      484.071428572
+    ],
+    "projection_metadata": {
+      "triangles": 28,
+      "components": 1,
+      "projection_representation": "mesh_triangle_union",
+      "unresolved_small_components": 0,
+      "loops": 1,
+      "union_precision_grid_px": 1e-09,
+      "unresolved_hole_diameter_px": 1e-07,
+      "unresolved_small_holes": 0,
+      "precision_scope": "proposal contours only; topology below grid unresolved"
+    },
+    "source_observations": 0,
+    "frame_border_closure_added": false,
+    "global_uniqueness_established": false
+  },
+  "proposed_fit_camera": {
+    "matrix_world": [
+      [
+        -0.5735766887664795,
+        -0.3845685124397278,
+        0.7232682108879089,
+        4.530552864074707
+      ],
+      [
+        0.8191518783569336,
+        -0.26927801966667175,
+        0.5064380764961243,
+        3.1723272800445557
+      ],
+      [
+        9.926917954317105e-08,
+        0.882947564125061,
+        0.46947160363197327,
+        2.940770149230957
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ortho_scale": 2.6679738955870023,
+    "coverage_binding": "unrun; new geometry-backed acquisition required; original PNG cannot bind the expanded frame"
+  },
+  "camera_policy": "same permitted original ob35 orientation; scale expanded by candidate-only full boundary envelope plus12% margin, never reserved ob145 or authored source dimensions",
+  "heldout": "original ob145 unchanged, excluded fit/crop/view choice; prior old admission exposure remains disclosed",
+  "future_small_native_scope": {
+    "cases": 1,
+    "frames": 6,
+    "fit_calls": 96,
+    "fit_seconds": 1.0,
+    "new_raw_pairs": 1,
+    "raw_samples_per_direction": 4096,
+    "seed": 61007,
+    "semantic_transactions": 1,
+    "qualifiers": 0,
+    "wall_seconds": 60,
+    "rss_bytes": 8589934592,
+    "threads": 2
+  },
+  "new_runtime_needed": "separate outer-stage control/update helper and concave full-extrusion projected triangle union; keep existing inner axis-only branch unchanged. Add meaningful notch/outer restoration and cropped-rank tests before plan freeze.",
+  "artist_surface_limits": null,
+  "source_observations": 0,
+  "native_runs": 0,
+  "elapsed_seconds": 0.093506699995487,
+  "original_ob35_png_sha256_provenance_only": "01ae4d4fe9d7b709d6e2297166df71f79af2b42eb08014625b54262d53a16133",
+  "baseline_owner": {
+    "state": "succeeded",
+    "lease": "released",
+    "manifest_sha256": "2446f53ac3de07c74cf7a3cc94dc8d27ca7bfa92fc0f3704f862afdb4779d5e5",
+    "source_npz_sha256": "442235ee421bccc46b552e7f3005e90a194a6adebb9ed8ba5f0b1132d627fd27",
+    "candidate_indexed_identity_verified": "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa"
+  }
+}

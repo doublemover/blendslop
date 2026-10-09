@@ -1,0 +1,94 @@
+{
+  "status": "pure implementation and frozen native plan; not executed",
+  "files": {
+    "model": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\reconstruction\\adaptive_arch_exterior.py",
+    "model_sha256": "ef9210035f5a909899f0eda524edcfacd5da26a91b2d586e898031d8cb2581e7",
+    "runner": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\scripts\\run_adaptive_arch_exterior.py",
+    "runner_sha256": "beb6bedecf8dd786cd606f272303e8a5796cb2f206fc367bcdc023bed1589d76",
+    "tests": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\blender_blocking\\test_adaptive_arch_exterior.py",
+    "tests_sha256": "5e8e804a1c7ca2c15bffe055c25d056d2097e2f7ac847034260e399297ef9a76",
+    "test_runner_sha256": "aad587069ddb81a6a2ebf936efd20d9503cf0b0f948dbbc3cd28b50e651c0978"
+  },
+  "plan_sha256": "16ff4210916435ef26e64416d3567dbe59025e074a29030d897b288c16466ea9",
+  "baseline": {
+    "owner_root": "C:\\Users\\sneak\\Development\\blendslop\\temp\\tasks\\latest-blender-only-20261008\\source\\temp\\tasks\\quality-continuation-20261008\\adaptive-family-detail-03\\owned-_r4c2moh",
+    "state": "succeeded",
+    "lease": "released",
+    "manifest_sha256": "2446f53ac3de07c74cf7a3cc94dc8d27ca7bfa92fc0f3704f862afdb4779d5e5",
+    "lease_sha256": "f489f37ff7291e44813164774177d0887cfc559e4020aad83911ee3b1c7587e3",
+    "verified_artifacts": {
+      "results.json": "1484219f42ee4f75e60ba8ea39d3f3969560ac70978ad470bad7b1dfabe00cda",
+      "concave_arch/refined/program.json": "c73da3da1e22eb92c51f434bc25891cb191523214d8d083ad825485ce18eeb25",
+      "concave_arch/refined/evaluated-exact.npz": "442235ee421bccc46b552e7f3005e90a194a6adebb9ed8ba5f0b1132d627fd27",
+      "concave_arch/refined/evaluated.obj": "fc94d47e331054d07866b75a2f916a23fce5664ecdf02d1035806693da96b053"
+    },
+    "geometry_hash": "3aeca53fd488e87f2c96b78e4d6a4f35877a24258f8553fe306a84561bb176fa",
+    "historical_adoption": false
+  },
+  "focused_checks": {
+    "count": 9,
+    "passed": 9,
+    "elapsed_seconds": 1.4592337999929441
+  },
+  "parameter_convention": {
+    "stage": "arch_exterior_dimension_preserving_v1",
+    "fixed_notch_controls": [
+      "opening_width_world",
+      "notch_height_from_bottom_world"
+    ],
+    "outer_height_coupling": "outer midpoint fixed; bottom attachments and absolute notch roof move together",
+    "distinct_from_inner_control": "inner stage varied bottom-relative cavity_roof_height_world at fixed exterior; this stage fixes that dimension while varying exterior",
+    "pose_and_triangulation_generator_fixed": true
+  },
+  "candidate_only_sensitivity": {
+    "protocol": "candidate_only_arch_exterior_sensitivity_v1",
+    "local_rank": 3,
+    "singular_values": [
+      0.03350471909943029,
+      0.025148257281664376,
+      0.007787120694697061
+    ],
+    "observations": {
+      "oblique_35_28_expanded": {
+        "candidate_frame_censored": false,
+        "internal_candidate_samples": 384,
+        "bounds_world_camera": [
+          -0.6784448527467767,
+          -1.1910597748186036,
+          0.6784519862836671,
+          1.1910586156829528
+        ],
+        "frame_border_closure_added": false,
+        "source_complete_contour_claim": false,
+        "projection_metadata": {
+          "triangles": 28,
+          "components": 1,
+          "projection_representation": "mesh_triangle_union",
+          "unresolved_small_components": 0,
+          "loops": 1,
+          "union_precision_grid_px": 1e-09,
+          "unresolved_hole_diameter_px": 1e-07,
+          "unresolved_small_holes": 0,
+          "precision_scope": "proposal contours only; topology below grid unresolved"
+        }
+      }
+    },
+    "source_observations": 0,
+    "heldout_fit_or_view_choice_used": false,
+    "global_uniqueness_established": false,
+    "source_identifiability": "unqualified until genuine observations",
+    "parameter_convention": {
+      "stage": "arch_exterior_dimension_preserving_v1",
+      "fixed_notch_controls": [
+        "opening_width_world",
+        "notch_height_from_bottom_world"
+      ],
+      "outer_height_coupling": "outer midpoint fixed; bottom attachments and absolute notch roof move together",
+      "distinct_from_inner_control": "inner stage varied bottom-relative cavity_roof_height_world at fixed exterior; this stage fixes that dimension while varying exterior",
+      "pose_and_triangulation_generator_fixed": true
+    }
+  },
+  "native_runs": 0,
+  "current_selection_unchanged": true,
+  "artist_limits": null
+}
