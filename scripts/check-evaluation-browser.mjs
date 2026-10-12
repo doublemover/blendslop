@@ -3,6 +3,7 @@
 import http from 'node:http';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { spawn } from 'node:child_process';
 function argument(name,fallback){const index=process.argv.indexOf(name);if(index<0)return fallback;if(!process.argv[index+1])throw new Error(name+' requires a directory');return process.argv[index+1];}
 const directory=path.resolve(argument('--dir','temp/pages-dist')), evidence=path.resolve(argument('--out','temp/pages-browser'));
@@ -11,13 +12,18 @@ let current=null;try{current=JSON.parse(await fs.readFile(path.join(directory,'l
 await fs.mkdir(evidence,{recursive:true});
 const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png'};
 const server=http.createServer(async(req,res)=>{try{const file=path.resolve(directory,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname==='/'?'/index.html':new URL(req.url,'http://localhost').pathname));if(!file.startsWith(directory+path.sep))throw new Error('outside site');const bytes=await fs.readFile(file);res.setHeader('Content-Type',mime[path.extname(file)]||'application/octet-stream');res.end(bytes);}catch{res.statusCode=404;res.end('Not found');}});
-await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
-const profile=await fs.mkdtemp(path.join(evidence,'chrome-'));
-const chrome=spawn(process.env.CHROME_BINARY||'google-chrome',['--headless=new','--disable-gpu','--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore','ignore','pipe']});
+let profile, chrome, chromeExited, timer;
 let socket, session, sequence=0, pending=new Map(), errors=[];
-const timer=setTimeout(()=>{for(const item of pending.values())item.reject(new Error('Browser deadline exceeded'));chrome.kill('SIGKILL');server.close();socket?.close();},60000);
 try{
- const endpoint=await new Promise((resolve,reject)=>{let log='';const timer=setTimeout(()=>reject(new Error('Chrome startup timeout')),15000);chrome.on('error',reject);chrome.on('exit',code=>reject(new Error('Chrome exited '+code)));chrome.stderr.on('data',chunk=>{log+=chunk;const match=log.match(/DevTools listening on (ws:\/\/[^\s]+)/);if(match){clearTimeout(timer);resolve(match[1]);}});});
+await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
+profile=await fs.mkdtemp(path.join(os.tmpdir(),'blendslop-browser-'));
+chrome=spawn(process.env.CHROME_BINARY||'google-chrome',['--headless=new','--disable-gpu','--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore','ignore','pipe']});
+chromeExited=new Promise(resolve=>chrome.once('close',resolve));
+timer=setTimeout(()=>{for(const item of pending.values())item.reject(new Error('Browser deadline exceeded'));chrome.kill('SIGKILL');server.close();socket?.close();},60000);
+ let endpoint, startupTimer;
+ try{
+  endpoint=await new Promise((resolve,reject)=>{let log='';startupTimer=setTimeout(()=>reject(new Error('Chrome startup timeout')),15000);chrome.on('error',reject);chrome.on('exit',code=>reject(new Error('Chrome exited '+code)));chrome.stderr.on('data',chunk=>{log+=chunk;const match=log.match(/DevTools listening on (ws:\/\/[^\s]+)/);if(match)resolve(match[1]);});});
+ }finally{clearTimeout(startupTimer);}
  socket=new WebSocket(endpoint);await new Promise((resolve,reject)=>{socket.onopen=resolve;socket.onerror=reject;});
  socket.onmessage=({data})=>{const value=JSON.parse(data);if(value.id){const item=pending.get(value.id);if(item){pending.delete(value.id);value.error?item.reject(new Error(value.error.message)):item.resolve(value.result);}}else if(value.method==='Runtime.exceptionThrown')errors.push(value.params.exceptionDetails.text);};
  function send(method,params={},sessionId=session){const id=++sequence;return new Promise((resolve,reject)=>{pending.set(id,{resolve,reject});socket.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}: {})}));});}
@@ -39,6 +45,12 @@ try{
  await assert(`(()=>{const canvas=document.querySelector('#difference-canvas'),p=JSON.parse(canvas.dataset.checkPixel),color=canvas.getContext('2d').getImageData(...p,1,1).data;return color[0]===203&&color[1]===72&&color[2]===112})()`,'Exact reference-only pixel must be painted pink');
  await evaluate(`document.querySelector('.comparison').scrollIntoView({behavior:'instant'})`);await screenshot('vase-difference.png');
  await click('[data-layer="filled"]');await wait(`document.querySelector('#difference-canvas')?.dataset.layer==='filled'`);await assert(`document.querySelector('#difference-counts').textContent.includes('998 missing') && document.querySelector('#difference-counts').textContent.includes('0 extra')`,'Filled difference counts must be exact');
+ await click('[data-layer="outline"]');await wait(`document.querySelector('#difference-canvas')?.dataset.layer==='outline'`);
+ await assert(`document.querySelector('#output-caption').textContent.includes('Blue solid: output') && document.querySelector('#output-caption').textContent.includes('65% opacity') && document.querySelector('#output-label').textContent==='Reference / output comparison' && document.querySelector('#difference-legend').hidden && !document.querySelector('#outline-legend').hidden`,'Outline roles, transparency and comparison label must match the requested treatment');
+ await assert(`document.querySelector('#difference-counts').textContent.includes('0.990799') && document.querySelector('#difference-counts').textContent.includes('0.789001')`,'Display contours must not change either score');
+ await screenshot('vase-outline-comparison.png');
+ await click('[data-layer="boundary"]');await wait(`document.querySelector('#difference-canvas')?.dataset.layer==='boundary'`);
+ await assert(`(()=>{const canvas=document.querySelector('#difference-canvas'),p=JSON.parse(canvas.dataset.checkPixel),color=canvas.getContext('2d').getImageData(...p,1,1).data;return color[0]===203&&color[1]===72&&color[2]===112&&!document.querySelector('#difference-legend').hidden})()`,'Returning from outlines must preserve exact band pixels');
  await click('[data-case="rounded_triangle_dot"]');await wait(`document.querySelector('#output-image img')?.getAttribute('src')==='assets/rounded_triangle_dot-inspection-oblique_35_28.png'`);
  await assert(`document.querySelectorAll('#view-metrics .badge.passed').length===5 && document.querySelector('#surface-note').textContent.includes('unqualified') && document.querySelector('#reason-title').textContent.includes('unfinished') && document.querySelector('#reason-body').textContent.includes('no pass/fail threshold')`,'Triangle missing qualification must be distinct from measured failure');
  await evaluate(`document.querySelector('#inspection').scrollIntoView({behavior:'instant'})`);await screenshot('triangle-rendered.png');
@@ -98,4 +110,23 @@ try{
  }
  await fs.writeFile(path.join(evidence,'result.json'),JSON.stringify({passed:true,chrome:version.product,checks:['desktop shaded actual defaults','exact measured vase failure explanation','scored boundary-band overlay and magnified pixels','exact filled-mask differences','triangle shaded output and unrun qualification distinction','secondary silhouettes and unavailable camera pass','unrun reference and actual filters','no browser exceptions',...(current?['main defaults to current calibrated vase','twelve exact current selector bodies and independent gates','current count/metric consistency','current image identity and unavailable-pair handling']:[])]},null,2)+'\n');
  console.log('Browser rendering and interaction checks passed on '+version.product);
-}finally{clearTimeout(timer);if(socket)socket.close();chrome.kill();server.close();}
+ }finally{
+ clearTimeout(timer);
+ try{
+  if(socket)socket.close();
+ }finally{
+  try{
+   if(chrome){
+    const forceKill=setTimeout(()=>chrome.kill('SIGKILL'),2000);
+    try{chrome.kill();await chromeExited;}finally{clearTimeout(forceKill);}
+   }
+  }finally{
+   try{
+    server.closeAllConnections();
+    if(server.listening)await new Promise(resolve=>server.close(resolve));
+   }finally{
+    if(profile)await fs.rm(profile,{recursive:true,force:true});
+   }
+  }
+ }
+}

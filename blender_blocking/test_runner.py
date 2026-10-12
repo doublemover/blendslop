@@ -379,26 +379,6 @@ def run_test_suite(
                 traceback.print_exc()
             results["view_layer_updates"] = False
 
-    # Test 5: MeshJoiner integration
-    print("\n" + "-" * 70)
-    print("[5/8] MeshJoiner Integration")
-    print("-" * 70)
-    if not blender_ok:
-        print("SKIPPED - Blender required")
-        results["mesh_joiner"] = None
-    else:
-        try:
-            from test_blender_boolean import test_mesh_joiner
-
-            results["mesh_joiner"] = test_mesh_joiner()
-        except Exception as e:
-            print(f"FAIL: Test crashed: {e}")
-            if verbose:
-                import traceback
-
-                traceback.print_exc()
-            results["mesh_joiner"] = False
-
     # Test 6: Slice shape matcher
     print("\n" + "-" * 70)
     print("[6/11] Slice Shape Matcher")

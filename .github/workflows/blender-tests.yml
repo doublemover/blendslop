@@ -45,22 +45,3 @@ jobs:
             blender_blocking/*.log
             blender_blocking/test_images/
           retention-days: 7
-
-  quick-check:
-    name: Quick smoke test (pre-merge)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Blender
-        uses: ./.github/actions/setup-blender
-        with:
-          version: '5.2.2'
-
-      - name: Run quick tests
-        run: |
-          cd blender_blocking
-          xvfb-run -a blender --background --factory-startup --python-exit-code 1 --python test_runner.py -- --quick

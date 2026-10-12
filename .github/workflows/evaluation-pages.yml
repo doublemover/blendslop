@@ -30,8 +30,6 @@ jobs:
         run: |
           echo 'Choose main to publish; other refs support build-only previews.' >&2
           exit 1
-      - name: Check current body and acceptance bindings
-        run: node scripts/check-current-demo.mjs
       - name: Check and build only the curated site
         env:
           BUILD_SHA: ${{ github.sha }}

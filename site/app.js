@@ -1,9 +1,10 @@
+import {maskContours, strokeContours} from './outline.js';
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const labels = {front:'Front',side:'Side',top:'Top',oblique_35_28:'Oblique 35° / 28°',oblique_145_40:'Oblique 145° / 40°'};
 const statusLabel = {passed:'Pass',failed:'Fail',unqualified:'Not qualified',unmeasured:'Not run',reference:'Reference only'};
 const badge = (status, label=statusLabel[status]) => `<span class="badge ${escape(status)}">${escape(label)}</span>`;
-let data, diagnostics, current='smooth_vase', view='oblique_35_28', mode='neutral', filter='all', layer='boundary', generation=0;
+let data, diagnostics, current='smooth_vase', view='oblique_35_28', mode='neutral', filter='all', layer='outline', generation=0;
 
 function image(slot, path, alt, unavailable='This pass was not retained. Choose another camera or inspect the silhouettes.') {
   const container=$(slot); container.replaceChildren();
@@ -41,6 +42,7 @@ function render() {
   const family=data.families.find(item=>item.id===current); if(!family)throw new Error('Unknown family');
   const token=++generation;
   $('#case-title').textContent=family.label;$('#case-summary').textContent=family.summary;$('#camera-label').textContent=labels[view];
+  $('#output-label').textContent=mode==='difference'?'Reference / output comparison':'Actual reconstructed output';
   $('#case-status').className=`badge ${family.status}`;$('#case-status').textContent=family.statusLabel;
   const isRender=mode==='neutral';
   const reference=isRender?family.referenceInspection?.[view]:family.reference?.[view];
@@ -70,17 +72,30 @@ async function paintDifference(family,token) {
   if(!record){$('#difference-counts').textContent='No actual output exists; difference evidence has not been run.';return;}
   const source=new Image();source.src=family.reference[view];await source.decode();if(token!==generation)return;
   const canvas=document.createElement('canvas');canvas.id='difference-canvas';canvas.width=record.width;canvas.height=record.height;
-  canvas.setAttribute('aria-label',`Exact ${layer==='boundary'?'boundary-band':'filled-mask'} differences for ${family.label}, ${labels[view]}`);
+  canvas.setAttribute('aria-label',`${layer==='outline'?'Solid output and translucent dashed reference outlines':layer==='boundary'?'Exact boundary-band differences':'Exact filled-mask differences'} for ${family.label}, ${labels[view]}`);
   const context=canvas.getContext('2d');context.drawImage(source,0,0);
   const missing=layer==='boundary'?record.missingBandRuns:record.missingRuns;
   const extra=layer==='boundary'?record.extraBandRuns:record.extraRuns;
+  if(layer==='outline') {
+    const pixels=context.getImageData(0,0,record.width,record.height).data;
+    const reference=Uint8Array.from({length:record.width*record.height},(_,i)=>pixels[i*4]<128?1:0);
+    const output=reference.slice();
+    for(const [y,x0,x1] of record.missingRuns)output.fill(0,y*record.width+x0,y*record.width+x1);
+    for(const [y,x0,x1] of record.extraRuns)output.fill(1,y*record.width+x0,y*record.width+x1);
+    strokeContours(context,maskContours(output,record.width,record.height),{color:'#167eaa'});
+    strokeContours(context,maskContours(reference,record.width,record.height),{color:'#e56490',alpha:.65,dash:[6,4]});
+  } else {
   context.fillStyle='#cb4870';for(const [y,x0,x1] of missing)context.fillRect(x0,y,x1-x0,1);
   context.fillStyle='#167eaa';for(const [y,x0,x1] of extra)context.fillRect(x0,y,x1-x0,1);
+  }
   canvas.dataset.missingPixels=record.missingPixels;canvas.dataset.extraPixels=record.extraPixels;canvas.dataset.layer=layer;
   if(missing.length)canvas.dataset.checkPixel=JSON.stringify([missing[0][1],missing[0][0]]);
   $('#output-image').replaceChildren(canvas);
-  $('#output-caption').textContent=layer==='boundary'?'Pink: reference band only. Blue: output band only. Scored bands use the original radius-2 elliptical kernel.':'Pink: reference foreground missing in output. Blue: extra output foreground. Exact original pixel grid; no alignment.';
-  $('#difference-counts').textContent=layer==='boundary'?`Boundary IoU ${record.boundaryIoU.toFixed(6)} = ${record.bandIntersection.toLocaleString()} overlapping / ${record.bandUnion.toLocaleString()} union band pixels. Cutoff ≥ ${data.silhouetteLimits.boundary.toFixed(6)}.`:`${record.missingPixels.toLocaleString()} missing foreground pixels; ${record.extraPixels.toLocaleString()} extra pixels. Filled-shape IoU ${record.areaIoU.toFixed(6)}.`;
+  $('#output-caption').textContent=layer==='outline'?'Blue solid: output outline. Pink dashed, 65% opacity: reference outline. Display-only contours of the original hard masks; scores unchanged.':layer==='boundary'?'Pink: reference-only band pixels. Blue: output-only band pixels. Shared band pixels are uncolored. Scored bands use the original radius-2 elliptical kernel.':'Pink: reference foreground missing in output. Blue: extra output foreground. Exact original pixel grid; no alignment.';
+  $('#difference-legend').hidden=layer==='outline';
+  $('#outline-legend').hidden=layer!=='outline';
+  $('#difference-note').textContent=layer==='outline'?'Solid output is drawn first; translucent dashed reference is drawn above it. Gaps keep coincident output visible. Pixel-cell outlines are a display aid, not the scored bands.':'Colors mark exclusive non-overlap only. Shared pixels keep the reference background. The 4× crop enlarges the original pixels without smoothing or changing the score.';
+  $('#difference-counts').textContent=layer==='outline'?`Filled-shape IoU ${record.areaIoU.toFixed(6)} · Boundary-band IoU ${record.boundaryIoU.toFixed(6)}. Outlines use the original grayscale < 128 mask threshold.`:layer==='boundary'?`Boundary IoU ${record.boundaryIoU.toFixed(6)} = ${record.bandIntersection.toLocaleString()} overlapping / ${record.bandUnion.toLocaleString()} union band pixels. Cutoff ≥ ${data.silhouetteLimits.boundary.toFixed(6)}.`:`${record.missingPixels.toLocaleString()} missing foreground pixels; ${record.extraPixels.toLocaleString()} extra pixels. Filled-shape IoU ${record.areaIoU.toFixed(6)}.`;
   document.querySelectorAll('[data-layer]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.layer===layer));
   function crop(x,y){const width=64,x0=Math.max(0,Math.min(record.width-width,Math.round(x)-width/2)),y0=Math.max(0,Math.min(record.height-width,Math.round(y)-width/2));const zoom=$('#difference-zoom').getContext('2d');zoom.imageSmoothingEnabled=false;zoom.clearRect(0,0,256,256);zoom.drawImage(canvas,x0,y0,width,width,0,0,256,256);$('#zoom-caption').textContent=`4× pixel crop · x ${x0}–${x0+width-1}, y ${y0}–${y0+width-1}. Move over the overlay to inspect another region.`;}
   crop(...record.focus);canvas.addEventListener('pointermove',event=>{const rect=canvas.getBoundingClientRect();crop((event.clientX-rect.left)/rect.width*record.width,(event.clientY-rect.top)/rect.height*record.height);});

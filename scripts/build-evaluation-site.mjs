@@ -12,7 +12,7 @@ const output=path.resolve(root,outIndex<0?'temp/pages-dist':process.argv[outInde
 if(output===root||!output.startsWith(root+path.sep)||output===source||output.startsWith(source+path.sep))throw new Error('Output must be a separate contained workspace directory');
 const data=JSON.parse(await fs.readFile(path.join(source,'data.json'),'utf8'));
 const manifest=JSON.parse(await fs.readFile(path.join(source,'assets.json'),'utf8'));
-const allowed=new Set(['index.html','styles.css','app.js','data.json','diagnostics.json','assets.json','.nojekyll']);
+const allowed=new Set(['index.html','styles.css','app.js','outline.js','data.json','diagnostics.json','assets.json','.nojekyll']);
 // Optional local continuation stays additive to the frozen historical gallery.
 let continuation=null;
 try{continuation=JSON.parse(await fs.readFile(path.join(source,'continuation-assets.json'),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}

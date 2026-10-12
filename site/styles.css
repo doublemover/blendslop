@@ -885,3 +885,6 @@ code{
 .extra-key { background: #167eaa; margin-left: 12px; }
 #difference-canvas { display: block; width: min(100%,370px); height: auto; cursor: crosshair; image-rendering: pixelated; }
 @media (max-width: 720px) { .reason-heading { display: block; } .reason-card { padding: 20px; } .difference-tools { grid-template-columns: 1fr; } }
+
+.output-outline-key,.reference-outline-key { display: inline-block; width: 24px; flex-shrink: 0; border-top: 2px solid #167eaa; }
+.reference-outline-key { border-top: 2px dashed #e56490; opacity: .65; }

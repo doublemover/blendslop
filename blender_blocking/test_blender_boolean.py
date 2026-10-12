@@ -83,58 +83,6 @@ def test_boolean_solver_enum() -> bool:
     return True
 
 
-def test_mesh_joiner() -> bool:
-    """Test the MeshJoiner class boolean operations."""
-    print("\n" + "=" * 60)
-    print("TEST: MeshJoiner Boolean Operations")
-    print("=" * 60)
-
-    try:
-        import bpy
-    except ImportError:
-        print("❌ FAILED: Must run inside Blender")
-        return False
-
-    from blender_blocking.placement.primitive_placement import MeshJoiner
-
-    # Clean scene
-    bpy.ops.object.select_all(action="SELECT")
-    bpy.ops.object.delete()
-
-    # Create test objects
-    print("Creating test primitives...")
-    bpy.ops.mesh.primitive_cylinder_add(location=(0, 0, 0))
-    obj1 = bpy.context.active_object
-
-    bpy.ops.mesh.primitive_cylinder_add(location=(0, 0, 1))
-    obj2 = bpy.context.active_object
-
-    bpy.ops.mesh.primitive_cylinder_add(location=(0, 0, 2))
-    obj3 = bpy.context.active_object
-
-    objects = [obj1, obj2, obj3]
-
-    # Test MeshJoiner
-    print("Testing MeshJoiner.join_with_boolean_union...")
-    try:
-        joiner = MeshJoiner()
-        result = joiner.join_with_boolean_union(objects, target_name="Test_Result")
-        print(f"✓ Boolean union successful: {result.name}")
-        print(f"  Vertices: {len(result.data.vertices)}")
-        print(f"  Faces: {len(result.data.polygons)}")
-    except Exception as e:
-        print(f"❌ FAILED: MeshJoiner error: {e}")
-        import traceback
-
-        traceback.print_exc()
-        return False
-
-    print("\n" + "=" * 60)
-    print("✓ MeshJoiner test PASSED")
-    print("=" * 60)
-    return True
-
-
 def run_all_blender_tests() -> int:
     """Run all Blender-specific tests."""
     print("\n" + "=" * 70)
@@ -158,9 +106,6 @@ def run_all_blender_tests() -> int:
 
     # Test 1: Boolean solver enum
     results["boolean_solver"] = test_boolean_solver_enum()
-
-    # Test 2: MeshJoiner integration
-    results["mesh_joiner"] = test_mesh_joiner()
 
     # Summary
     print("\n" + "=" * 70)

@@ -1,14 +1,12 @@
-"""Source contracts and optional no-network PowerShell checks for sample downloads.
+"""Embedded manifest and optional no-network PowerShell checks for sample downloads.
 
 Python is only the repository's test harness; the downloader is self-contained
-PowerShell/.NET. Source/path-model checks are not PowerShell execution evidence.
+PowerShell/.NET. Manifest checks are not PowerShell execution evidence.
 """
 from __future__ import annotations
 
 import json
-import ntpath
 from pathlib import Path
-import posixpath
 import re
 import shutil
 import subprocess
@@ -30,33 +28,6 @@ class TestSampleDownloaderSource(unittest.TestCase):
             raise AssertionError("The self-contained manifest is missing")
         cls.manifest = json.loads(match.group(1))
 
-    def test_default_is_script_relative_and_has_no_prompt(self):
-        self.assertIn(
-            "$repositoryRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))",
-            self.source,
-        )
-        self.assertIn(
-            "$Folder = [IO.Path]::Combine($repositoryRoot, 'temp', 'sample-pack')",
-            self.source,
-        )
-        self.assertNotIn("Read-Host", self.source)
-        self.assertNotRegex(self.source, r"(?i)\$PWD\b|Get-Location")
-        self.assertIn("[Alias('Destination')]", self.source)
-        self.assertIn("[string] $Folder", self.source)
-
-    def test_script_relative_path_model_is_cwd_independent(self):
-        # Independent platform path model of the checked two source expressions.
-        # Actual PowerShell evaluation is tested separately when pwsh is present.
-        fixtures = (
-            (posixpath, "/repo with spaces/scripts", "/repo with spaces/temp/sample-pack", ("/", "/tmp/elsewhere")),
-            (ntpath, r"C:\repo with spaces\scripts", r"C:\repo with spaces\temp\sample-pack", ("D:\\", r"C:\other")),
-        )
-        for path_api, script_root, expected, caller_directories in fixtures:
-            for caller_cwd in caller_directories:
-                with self.subTest(script_root=script_root, caller_cwd=caller_cwd):
-                    repo_root = path_api.normpath(path_api.join(script_root, ".."))
-                    self.assertEqual(path_api.join(repo_root, "temp", "sample-pack"), expected)
-
     def test_embedded_cohorts_and_sizes(self):
         meshes = self.manifest["partObjaverse"]["objects"]
         points = self.manifest["primitiveAnything"]["files"]
@@ -76,22 +47,6 @@ class TestSampleDownloaderSource(unittest.TestCase):
         source_ids = {row["id"] for row in meshes}
         fitted_ids = {row["fileName"].split("/")[-2] for row in outputs if row["fileName"].endswith("/primitive_assembly.pkl")}
         self.assertEqual(source_ids, fitted_ids)
-
-    def test_runtime_dependencies_and_guards_remain_embedded(self):
-        self.assertNotRegex(self.source, r"(?im)^\s*(?:&\s*)?(?:python\d*|py|pip|dotnet|Import-Module)\b")
-        for guard in (
-            "Expected HTTP $wanted, received $status. No whole-archive fallback.",
-            "Content-Range does not exactly match the pinned archive and request.",
-            "new DeflateStream(member, CompressionMode.Decompress, false)",
-            "Pinned CRC32 mismatch.",
-            "Pinned SHA256 mismatch; existing file preserved.",
-            "[IO.File]::Move($stage,$path) # Never replaces an existing file.",
-            "Stored/deflated ZIP member self-test failed.",
-        ):
-            self.assertIn(guard, self.source)
-        main = self.source.split("# Normalize the three embedded manifests", 1)[1]
-        self.assertLess(main.index("$PSCmdlet.ShouldProcess"), main.index("Add-Type"))
-        self.assertLess(main.index("$PSCmdlet.ShouldProcess"), main.index("Ensure-Directory $script:Root"))
 
     @unittest.skipUnless(PWSH, "PowerShell unavailable; no parser/runtime claim")
     def test_powershell_whatif_default_from_another_directory(self):

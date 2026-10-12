@@ -34,7 +34,7 @@ class NativeRuntimeTests(unittest.TestCase):
         created_names = []
         result = None
         try:
-            for x in (0.0, 0.5):
+            for x in (0.0, 0.5, 1.0):
                 bpy.ops.mesh.primitive_cube_add(location=(x, 0, 0))
                 objects.append(bpy.context.object)
                 created_names.append(bpy.context.object.name)
@@ -43,7 +43,7 @@ class NativeRuntimeTests(unittest.TestCase):
             created_names.append(result.name)
             bpy.context.view_layer.update()
             self.assertGreater(len(result.data.polygons), 0)
-            self.assertAlmostEqual(result.dimensions.x, 2.5, places=5)
+            self.assertAlmostEqual(result.dimensions.x, 3.0, places=5)
         finally:
             for name in set(created_names):
                 obj = bpy.data.objects.get(name)

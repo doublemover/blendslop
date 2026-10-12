@@ -16,8 +16,8 @@ class RefinementLabReportTests(unittest.TestCase):
             root = Path(tmp)
             result = ExperimentResult(
                 run_id="r",
-                case_id="c",
-                variant_id="v",
+                case_id="case-smoke",
+                variant_id="variant-smoke",
                 mode="profile_loft",
                 status="pass",
                 exit_code=0,
@@ -28,8 +28,8 @@ class RefinementLabReportTests(unittest.TestCase):
             )
             path = generate_report(run_root=root, results=[result])
             text = path.read_text(encoding="utf-8")
-        self.assertIn("Blendslop Refinement Report", text)
-        self.assertIn("Leaderboard", text)
+        self.assertIn("<td>case-smoke</td>", text)
+        self.assertIn("<td>variant-smoke</td>", text)
 
 
 if __name__ == "__main__":
