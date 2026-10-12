@@ -619,5 +619,12 @@
     "group_inspections_on_retained_outputs": 1,
     "deletion_or_lease_adoption": false,
     "count_scope": "Only these newer local ownership changes; no previous Blender/canonical counts reattributed."
+  },
+  "current_status_20261012": {
+    "authoritative_followup": "docs/PORTFOLIO_AUDIT_20261012.md",
+    "verified_main": "604f4bdb1867d437baa1bfe4abce44d9ba79fd40",
+    "historical_publication_notes": "Earlier PR7/local-only/approval-absent entries below are retained historical receipts, not current repository status. PR7 and the later main/demo integration are already published.",
+    "current_repair": "Preserved five-file comparison redesign plus bounded audit fixes are a new main-targeted draft; no merge or deployment authorized in this pass.",
+    "selection": "Current older selected geometry, rejected triangle proposals and independent artist gaps remain unchanged."
   }
 }

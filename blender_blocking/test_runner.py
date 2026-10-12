@@ -64,6 +64,7 @@ _add_dependency_path(
 from utils.progress import iter_progress, progress_print
 
 PURE_PYTHON_TESTS: List[Tuple[str, str]] = [
+    ("pure_dependency_receipt", "test_dependency_receipt"),
     ("pure_runner_cli", "test_runner_cli"),
     ("pure_blender_runtime", "test_blender_runtime"),
     ("pure_rounded_triangle", "test_rounded_triangle"),

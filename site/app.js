@@ -5,10 +5,12 @@ const labels = {front:'Front',side:'Side',top:'Top',oblique_35_28:'Oblique 35° 
 const statusLabel = {passed:'Pass',failed:'Fail',unqualified:'Not qualified',unmeasured:'Not run',reference:'Reference only'};
 const badge = (status, label=statusLabel[status]) => `<span class="badge ${escape(status)}">${escape(label)}</span>`;
 let data, diagnostics, current='smooth_vase', view='oblique_35_28', mode='neutral', filter='all', layer='outline', generation=0;
+const detail = {key: null, x: 0, y: 0, zoom: 4};
+let redrawDetail=null;
 
 function image(slot, path, alt, unavailable='This pass was not retained. Choose another camera or inspect the silhouettes.') {
   const container=$(slot); container.replaceChildren();
-  if (path) {const img=document.createElement('img');img.src=path;img.alt=alt;img.width=512;img.height=512;container.append(img);}
+  if (path) {const img=document.createElement('img');img.src=path;img.alt=alt;img.width=512;img.height=512;img.addEventListener('error',()=>{if(container.contains(img))image(slot,null,alt,'The declared image could not load. No other body or pass was substituted.');},{once:true});container.append(img);}
   else container.innerHTML=`<div class="unavailable"><span class="eyebrow">EVIDENCE UNAVAILABLE</span><strong>Not retained</strong><p>${escape(unavailable)}</p></div>`;
 }
 function select(id) {
@@ -40,9 +42,14 @@ function diagnosis(family) {
 }
 function render() {
   const family=data.families.find(item=>item.id===current); if(!family)throw new Error('Unknown family');
-  const token=++generation;
+  const token=++generation;redrawDetail=null;
   $('#case-title').textContent=family.label;$('#case-summary').textContent=family.summary;$('#camera-label').textContent=labels[view];
-  $('#output-label').textContent=mode==='difference'?'Reference / output comparison':'Actual reconstructed output';
+  const comparing=mode==='difference'&&Boolean(diagnostics.cases[family.id]?.[view]);
+  $('.comparison').classList.toggle('is-comparing',comparing);
+  $('#reference-label').textContent=comparing?'Detail':'Authored reference';
+  $('#camera-label').hidden=comparing;
+  $('#zoom-controls').hidden=!comparing;
+  $('#output-label').textContent=comparing?'Comparison':'Actual reconstructed output';
   $('#case-status').className=`badge ${family.status}`;$('#case-status').textContent=family.statusLabel;
   const isRender=mode==='neutral';
   const reference=isRender?family.referenceInspection?.[view]:family.reference?.[view];
@@ -63,8 +70,9 @@ function render() {
   $('#geometry-identity').innerHTML=`<dt>Reference geometry hash</dt><dd>${escape(family.referenceGeometry)}</dd>${family.geometry?`<dt>Actual geometry hash</dt><dd>${escape(family.geometry)}</dd><dt>Actual OBJ SHA-256</dt><dd>${escape(family.objSha256)}</dd>`:''}`;
   $('#case-evidence').href=current==='smooth_vase'?data.evidenceLinks.vase:current==='rounded_triangle_dot'?data.evidenceLinks.triangle:data.evidenceLinks.workload;
   diagnosis(family);
-  $('#difference-tools').hidden=mode!=='difference';
-  if(mode==='difference')paintDifference(family,token).catch(error=>{if(token===generation){$('#difference-counts').textContent='Difference evidence unavailable. Use the exact source receipt.';}console.error(error);});
+  $('#difference-tools').hidden=!comparing;
+  if(comparing)$('#difference-counts').textContent='Loading exact comparison evidence…';
+  if(mode==='difference')paintDifference(family,token).catch(error=>{if(token!==generation)return;$('#difference-counts').textContent='Difference evidence unavailable. Use the exact source receipt.';console.error(error);});
   renderFamilies();
 }
 async function paintDifference(family,token) {
@@ -72,18 +80,26 @@ async function paintDifference(family,token) {
   if(!record){$('#difference-counts').textContent='No actual output exists; difference evidence has not been run.';return;}
   const source=new Image();source.src=family.reference[view];await source.decode();if(token!==generation)return;
   const canvas=document.createElement('canvas');canvas.id='difference-canvas';canvas.width=record.width;canvas.height=record.height;
-  canvas.setAttribute('aria-label',`${layer==='outline'?'Solid output and translucent dashed reference outlines':layer==='boundary'?'Exact boundary-band differences':'Exact filled-mask differences'} for ${family.label}, ${labels[view]}`);
+  canvas.setAttribute('aria-label',`${layer==='outline'?'Output and reference outlines':layer==='boundary'?'Exact boundary-band differences':'Exact filled-mask differences'} for ${family.label}, ${labels[view]}`);
+  canvas.setAttribute('aria-describedby','difference-note');
+  canvas.tabIndex=0;
   const context=canvas.getContext('2d');context.drawImage(source,0,0);
   const missing=layer==='boundary'?record.missingBandRuns:record.missingRuns;
   const extra=layer==='boundary'?record.extraBandRuns:record.extraRuns;
+  let outputContours, referenceContours;
+  function outlines(ctx,scale=1) {
+    strokeContours(ctx,outputContours,{color:'#167eaa',width:2/scale});
+    strokeContours(ctx,referenceContours,{color:'#e56490',alpha:.65,dash:[6/scale,4/scale],width:2/scale});
+  }
   if(layer==='outline') {
     const pixels=context.getImageData(0,0,record.width,record.height).data;
     const reference=Uint8Array.from({length:record.width*record.height},(_,i)=>pixels[i*4]<128?1:0);
     const output=reference.slice();
     for(const [y,x0,x1] of record.missingRuns)output.fill(0,y*record.width+x0,y*record.width+x1);
     for(const [y,x0,x1] of record.extraRuns)output.fill(1,y*record.width+x0,y*record.width+x1);
-    strokeContours(context,maskContours(output,record.width,record.height),{color:'#167eaa'});
-    strokeContours(context,maskContours(reference,record.width,record.height),{color:'#e56490',alpha:.65,dash:[6,4]});
+    outputContours=maskContours(output,record.width,record.height);
+    referenceContours=maskContours(reference,record.width,record.height);
+    outlines(context);
   } else {
   context.fillStyle='#cb4870';for(const [y,x0,x1] of missing)context.fillRect(x0,y,x1-x0,1);
   context.fillStyle='#167eaa';for(const [y,x0,x1] of extra)context.fillRect(x0,y,x1-x0,1);
@@ -91,14 +107,36 @@ async function paintDifference(family,token) {
   canvas.dataset.missingPixels=record.missingPixels;canvas.dataset.extraPixels=record.extraPixels;canvas.dataset.layer=layer;
   if(missing.length)canvas.dataset.checkPixel=JSON.stringify([missing[0][1],missing[0][0]]);
   $('#output-image').replaceChildren(canvas);
-  $('#output-caption').textContent=layer==='outline'?'Blue solid: output outline. Pink dashed, 65% opacity: reference outline. Display-only contours of the original hard masks; scores unchanged.':layer==='boundary'?'Pink: reference-only band pixels. Blue: output-only band pixels. Shared band pixels are uncolored. Scored bands use the original radius-2 elliptical kernel.':'Pink: reference foreground missing in output. Blue: extra output foreground. Exact original pixel grid; no alignment.';
+  $('#output-caption').textContent=`${family.label} · ${labels[view]}`;
   $('#difference-legend').hidden=layer==='outline';
   $('#outline-legend').hidden=layer!=='outline';
-  $('#difference-note').textContent=layer==='outline'?'Solid output is drawn first; translucent dashed reference is drawn above it. Gaps keep coincident output visible. Pixel-cell outlines are a display aid, not the scored bands.':'Colors mark exclusive non-overlap only. Shared pixels keep the reference background. The 4× crop enlarges the original pixels without smoothing or changing the score.';
-  $('#difference-counts').textContent=layer==='outline'?`Filled-shape IoU ${record.areaIoU.toFixed(6)} · Boundary-band IoU ${record.boundaryIoU.toFixed(6)}. Outlines use the original grayscale < 128 mask threshold.`:layer==='boundary'?`Boundary IoU ${record.boundaryIoU.toFixed(6)} = ${record.bandIntersection.toLocaleString()} overlapping / ${record.bandUnion.toLocaleString()} union band pixels. Cutoff ≥ ${data.silhouetteLimits.boundary.toFixed(6)}.`:`${record.missingPixels.toLocaleString()} missing foreground pixels; ${record.extraPixels.toLocaleString()} extra pixels. Filled-shape IoU ${record.areaIoU.toFixed(6)}.`;
+  $('#difference-counts').textContent=layer==='outline'?`Filled-shape IoU ${record.areaIoU.toFixed(6)} · Boundary-band IoU ${record.boundaryIoU.toFixed(6)}`:layer==='boundary'?`Boundary IoU ${record.boundaryIoU.toFixed(6)} = ${record.bandIntersection.toLocaleString()} overlapping / ${record.bandUnion.toLocaleString()} union band pixels. Cutoff ≥ ${data.silhouetteLimits.boundary.toFixed(6)}.`:`${record.missingPixels.toLocaleString()} missing foreground pixels; ${record.extraPixels.toLocaleString()} extra pixels. Filled-shape IoU ${record.areaIoU.toFixed(6)}.`;
   document.querySelectorAll('[data-layer]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.layer===layer));
-  function crop(x,y){const width=64,x0=Math.max(0,Math.min(record.width-width,Math.round(x)-width/2)),y0=Math.max(0,Math.min(record.height-width,Math.round(y)-width/2));const zoom=$('#difference-zoom').getContext('2d');zoom.imageSmoothingEnabled=false;zoom.clearRect(0,0,256,256);zoom.drawImage(canvas,x0,y0,width,width,0,0,256,256);$('#zoom-caption').textContent=`4× pixel crop · x ${x0}–${x0+width-1}, y ${y0}–${y0+width-1}. Move over the overlay to inspect another region.`;}
-  crop(...record.focus);canvas.addEventListener('pointermove',event=>{const rect=canvas.getBoundingClientRect();crop((event.clientX-rect.left)/rect.width*record.width,(event.clientY-rect.top)/rect.height*record.height);});
+  document.querySelectorAll('[data-zoom]').forEach(button=>button.setAttribute('aria-pressed',Number(button.dataset.zoom)===detail.zoom));
+  const zoomCanvas=document.createElement('canvas');zoomCanvas.id='difference-zoom';zoomCanvas.width=record.width;zoomCanvas.height=record.height;
+  zoomCanvas.setAttribute('aria-label',`${detail.zoom} times magnified ${family.label} comparison detail`);
+  $('#reference-image').replaceChildren(zoomCanvas);
+  const focus=document.createElement('span');focus.className='difference-focus';focus.setAttribute('aria-hidden','true');$('#output-image').append(focus);
+  const key=`${family.id}/${view}`;
+  if(detail.key!==key){detail.key=key;[detail.x,detail.y]=record.focus;}
+  function crop(x,y) {
+    const width=record.width/detail.zoom,height=record.height/detail.zoom;
+    const x0=Math.max(0,Math.min(record.width-width,Math.round(x-width/2))),y0=Math.max(0,Math.min(record.height-height,Math.round(y-height/2)));
+    detail.x=x0+width/2;detail.y=y0+height/2;
+    const zoom=zoomCanvas.getContext('2d');zoom.imageSmoothingEnabled=false;
+    zoom.clearRect(0,0,zoomCanvas.width,zoomCanvas.height);
+    zoom.drawImage(layer==='outline'?source:canvas,x0,y0,width,height,0,0,zoomCanvas.width,zoomCanvas.height);
+    if(layer==='outline'){zoom.save();zoom.scale(detail.zoom,detail.zoom);zoom.translate(-x0,-y0);outlines(zoom,detail.zoom);zoom.restore();}
+    Object.assign(focus.style,{left:`${x0/record.width*100}%`,top:`${y0/record.height*100}%`,width:`${width/record.width*100}%`,height:`${height/record.height*100}%`});
+    zoomCanvas.dataset.crop=JSON.stringify([x0,y0,width,height]);
+    $('#reference-caption').textContent=`${detail.zoom}× detail · x ${x0}–${x0+width-1}, y ${y0}–${y0+height-1}`;
+  }
+  redrawDetail=()=>{zoomCanvas.setAttribute('aria-label',`${detail.zoom} times magnified ${family.label} comparison detail`);document.querySelectorAll('[data-zoom]').forEach(button=>button.setAttribute('aria-pressed',Number(button.dataset.zoom)===detail.zoom));crop(detail.x,detail.y);};
+  redrawDetail();
+  function inspect(event){const rect=canvas.getBoundingClientRect();crop((event.clientX-rect.left)/rect.width*record.width,(event.clientY-rect.top)/rect.height*record.height);}
+  canvas.addEventListener('pointermove',event=>{if(event.pointerType!=='touch')inspect(event);});
+  canvas.addEventListener('pointerdown',inspect);
+  canvas.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey)return;const directions={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]},direction=directions[event.key];if(!direction)return;event.preventDefault();const step=event.shiftKey?16:4;crop(detail.x+direction[0]*step,detail.y+direction[1]*step);});
 }
 function renderFamilies() {
   const shown=data.families.filter(family=>filter==='all'||(filter==='actual'?family.output:!family.output));
@@ -106,12 +144,13 @@ function renderFamilies() {
   $('#filter-count').textContent=`Showing ${shown.length} of 12 families. The ten reference-only families have not been reconstructed.`;
 }
 document.addEventListener('click',event=>{
-  const button=event.target.closest('button');if(!button)return;
+  const button=event.target.closest('button');if(!button||!data||!diagnostics)return;
   if(button.id==='inspect-failure'){view=button.dataset.failureView;mode='difference';layer='boundary';render();$('#difference-tools').scrollIntoView({behavior:'instant',block:'center'});}
   if(button.dataset.case)select(button.dataset.case);
   if(button.dataset.view){view=button.dataset.view;render();}
   if(button.dataset.mode){mode=button.dataset.mode;render();}
   if(button.dataset.layer){layer=button.dataset.layer;render();}
+  if(button.dataset.zoom){const zoom=Number(button.dataset.zoom);if([2,4,8].includes(zoom)){detail.zoom=zoom;if(redrawDetail)redrawDetail();else render();}}
   if(button.dataset.filter){filter=button.dataset.filter;document.querySelectorAll('[data-filter]').forEach(item=>item.setAttribute('aria-pressed',item.dataset.filter===filter));renderFamilies();}
   if(button.dataset.family){select(button.dataset.family);$('#inspection').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
 });

@@ -38,11 +38,11 @@ export function maskContours(mask, width, height) {
     return contours;
 }
 
-export function strokeContours(context, contours, {color, alpha = 1, dash = []}) {
+export function strokeContours(context, contours, {color, alpha = 1, dash = [], width = 2}) {
     context.save();
     context.strokeStyle = color;
     context.globalAlpha = alpha;
-    context.lineWidth = 1.5;
+    context.lineWidth = width;
     context.lineJoin = 'round';
     context.setLineDash(dash);
     for (const points of contours) {

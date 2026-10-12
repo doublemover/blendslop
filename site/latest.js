@@ -149,6 +149,11 @@ function renderComparison(family) {
         $('#pair-status').textContent = `No matched comparison: ${missing} pass unavailable. Each retained role is shown independently; view metrics and verdicts remain visible.`;
     }
 }
+function availability(family, selectedView, selectedStyle) {
+    const reference=imageFor(family,'reference',selectedView,selectedStyle),candidate=imageFor(family,'candidate',selectedView,selectedStyle);
+    return reference&&candidate?'paired':reference?'reference only':candidate?'candidate only':'unavailable';
+}
+
 function renderSelection() {
     const family=data.families.find(row => row.id===selected), [status,label]=headline(family);
     $('#case-title').textContent = family.label;
@@ -169,11 +174,11 @@ function renderSelection() {
     }
     $('#family-select').value = selected;
     $('#verdicts').innerHTML = verdictKeys.map(key => `<div class="verdict ${engineeringKeys.includes(key)?'engineering':'artist'}" data-verdict="${key}" data-status="${family.verdicts[key]}"><span>${escape(verdictLabels[key])}</span>${badge(family.verdicts[key])}</div>`).join('');
-    $('#view-select').innerHTML = views.map(camera => `<option value="${camera}">${viewLabels[camera]}</option>`).join('');
+    $('#view-select').innerHTML = views.map(camera => `<option value="${camera}">${viewLabels[camera]} · ${availability(family,camera,style)}</option>`).join('');
     $('#view-select').value = view;
     const styles = [...new Set(['neutral','normals','mask',...family.images.map(image => image.style)])];
     if (!styles.includes(style)) style='neutral';
-    $('#style-select').innerHTML = styles.map(pass => `<option value="${escape(pass)}">${escape(styleLabels[pass]||pass)}</option>`).join('');
+    $('#style-select').innerHTML = styles.map(pass => `<option value="${escape(pass)}">${escape(styleLabels[pass]||pass)} · ${availability(family,view,pass)}</option>`).join('');
     $('#style-select').value = style;
     $('#view-metrics').innerHTML = views.map(camera => {
         const metric=family.viewMetrics.find(row => row.view===camera);
