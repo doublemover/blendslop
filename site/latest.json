@@ -947,6 +947,20 @@
           "role": "candidate",
           "path": "assets/cylinder-latest-candidate-neutral.png",
           "geometryHash": "ab6343943cb9a35006f1b1659d9b6cbad50520fff000ab9ca781fecf25c5ff88"
+        },
+        {
+          "view": "oblique_35_28",
+          "style": "normals",
+          "role": "reference",
+          "path": "assets/cylinder-latest-reference-oblique_35_28-normals.png",
+          "geometryHash": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a"
+        },
+        {
+          "view": "oblique_35_28",
+          "style": "normals",
+          "role": "candidate",
+          "path": "assets/cylinder-latest-candidate-oblique_35_28-normals.png",
+          "geometryHash": "ab6343943cb9a35006f1b1659d9b6cbad50520fff000ab9ca781fecf25c5ff88"
         }
       ],
       "evidenceBindings": [
@@ -1329,6 +1343,60 @@
                 "cavity": false,
                 "background_type": "WORLD"
               }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/sha256",
+              "expected": "2196160782444d16160f38591523f64f3fd8976cc0e48bcf9471dd0b68715c92"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/geometry_hash",
+              "expected": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/render_settings",
+              "expected": {
+                "engine": "BLENDER_EEVEE",
+                "format": "PNG",
+                "color_mode": "RGB",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "material": "world shading normal * .5 + .5 emission",
+                "samples": 64
+              }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/sha256",
+              "expected": "28cfb4282ba0a4bd5431d15346493db8acfcb4869b819684c5d86fe1562a60aa"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/geometry_hash",
+              "expected": "ab6343943cb9a35006f1b1659d9b6cbad50520fff000ab9ca781fecf25c5ff88"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/render_settings",
+              "expected": {
+                "engine": "BLENDER_EEVEE",
+                "format": "PNG",
+                "color_mode": "RGB",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "material": "world shading normal * .5 + .5 emission",
+                "samples": 64
+              }
             }
           ]
         },
@@ -1447,6 +1515,20 @@
           "style": "neutral",
           "role": "candidate",
           "path": "assets/tapered_frustum-latest-candidate-neutral.png",
+          "geometryHash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45"
+        },
+        {
+          "view": "oblique_35_28",
+          "style": "normals",
+          "role": "reference",
+          "path": "assets/tapered_frustum-latest-reference-oblique_35_28-normals.png",
+          "geometryHash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d"
+        },
+        {
+          "view": "oblique_35_28",
+          "style": "normals",
+          "role": "candidate",
+          "path": "assets/tapered_frustum-latest-candidate-oblique_35_28-normals.png",
           "geometryHash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45"
         }
       ],
@@ -1829,6 +1911,60 @@
                 "shadows": true,
                 "cavity": false,
                 "background_type": "WORLD"
+              }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/sha256",
+              "expected": "c65de0a5168d66ff557b4eda4fe4728ac110e0f7a653a5f347f65636107460cc"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/geometry_hash",
+              "expected": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/render_settings",
+              "expected": {
+                "engine": "BLENDER_EEVEE",
+                "format": "PNG",
+                "color_mode": "RGB",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "material": "world shading normal * .5 + .5 emission",
+                "samples": 64
+              }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/sha256",
+              "expected": "8d6b1bfa4040ec9273ffb2c7e8b5d34deb61b5cdc8242767895bba7a3f7d269c"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/geometry_hash",
+              "expected": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/render_settings",
+              "expected": {
+                "engine": "BLENDER_EEVEE",
+                "format": "PNG",
+                "color_mode": "RGB",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "material": "world shading normal * .5 + .5 emission",
+                "samples": 64
               }
             }
           ]
@@ -2925,6 +3061,20 @@
           "role": "candidate",
           "path": "assets/capsule-latest-candidate-neutral.png",
           "geometryHash": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b"
+        },
+        {
+          "view": "oblique_35_28",
+          "style": "normals",
+          "role": "reference",
+          "path": "assets/capsule-latest-reference-oblique_35_28-normals.png",
+          "geometryHash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e"
+        },
+        {
+          "view": "oblique_35_28",
+          "style": "normals",
+          "role": "candidate",
+          "path": "assets/capsule-latest-candidate-oblique_35_28-normals.png",
+          "geometryHash": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b"
         }
       ],
       "evidenceBindings": [
@@ -3306,6 +3456,60 @@
                 "shadows": true,
                 "cavity": false,
                 "background_type": "WORLD"
+              }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/sha256",
+              "expected": "486195c9b7a331d6d9e5a8c935ebec17eea67167b9e7c809445e7d66eaeb54a8"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/geometry_hash",
+              "expected": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/render_settings",
+              "expected": {
+                "engine": "BLENDER_EEVEE",
+                "format": "PNG",
+                "color_mode": "RGB",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "material": "world shading normal * .5 + .5 emission",
+                "samples": 64
+              }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/sha256",
+              "expected": "876d6756b8834c4381a2d2290f77f12839dac4345235dc2292917892dc8d4725"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/geometry_hash",
+              "expected": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/render_settings",
+              "expected": {
+                "engine": "BLENDER_EEVEE",
+                "format": "PNG",
+                "color_mode": "RGB",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "material": "world shading normal * .5 + .5 emission",
+                "samples": 64
               }
             }
           ]
@@ -3949,6 +4153,34 @@
           "role": "candidate",
           "path": "assets/thin_plate-latest-candidate-neutral.png",
           "geometryHash": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0"
+        },
+        {
+          "view": "oblique_35_28",
+          "style": "normals",
+          "role": "reference",
+          "path": "assets/thin_plate-latest-reference-oblique_35_28-normals.png",
+          "geometryHash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50"
+        },
+        {
+          "view": "oblique_35_28",
+          "style": "normals",
+          "role": "candidate",
+          "path": "assets/thin_plate-latest-candidate-oblique_35_28-normals.png",
+          "geometryHash": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0"
+        },
+        {
+          "view": "side",
+          "style": "neutral",
+          "role": "reference",
+          "path": "assets/thin_plate-latest-reference-side-neutral.png",
+          "geometryHash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50"
+        },
+        {
+          "view": "side",
+          "style": "neutral",
+          "role": "candidate",
+          "path": "assets/thin_plate-latest-candidate-side-neutral.png",
+          "geometryHash": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0"
         }
       ],
       "evidenceBindings": [
@@ -4307,6 +4539,138 @@
             },
             {
               "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/neutral/candidate/render_settings",
+              "expected": {
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "color_mode": "BW",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "light": "STUDIO",
+                "color_type": "SINGLE",
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ],
+                "shadows": true,
+                "cavity": false,
+                "background_type": "WORLD"
+              }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/sha256",
+              "expected": "d46fe3616697ccbd95c403f1961d613af302ebf6e8037ab937564344d61a9d0b"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/geometry_hash",
+              "expected": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/render_settings",
+              "expected": {
+                "engine": "BLENDER_EEVEE",
+                "format": "PNG",
+                "color_mode": "RGB",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "material": "world shading normal * .5 + .5 emission",
+                "samples": 64
+              }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/sha256",
+              "expected": "7edfe32d47736236e363d16ff633ded7c95fe93d7e3bfff7e517476045856407"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/geometry_hash",
+              "expected": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/render_settings",
+              "expected": {
+                "engine": "BLENDER_EEVEE",
+                "format": "PNG",
+                "color_mode": "RGB",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "material": "world shading normal * .5 + .5 emission",
+                "samples": 64
+              }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/passes/neutral/source/sha256",
+              "expected": "c439f52aaa42cb45b6e629b22aca3614ebc963af9d66260622f6c2fe485b3cc3"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/passes/neutral/source/geometry_hash",
+              "expected": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/passes/neutral/source/render_settings",
+              "expected": {
+                "engine": "BLENDER_WORKBENCH",
+                "format": "PNG",
+                "color_mode": "BW",
+                "color_depth": "8",
+                "resolution_percentage": 100,
+                "display": {
+                  "view_transform": "AgX",
+                  "look": "None",
+                  "exposure": 0.0,
+                  "gamma": 1.0
+                },
+                "purpose": "human inspection only; no geometric-normal metric",
+                "light": "STUDIO",
+                "color_type": "SINGLE",
+                "single_color": [
+                  0.6499999761581421,
+                  0.6499999761581421,
+                  0.6499999761581421
+                ],
+                "shadows": true,
+                "cavity": false,
+                "background_type": "WORLD"
+              }
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/actual_frame_match",
+              "expected": true
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/actual_clipping_match",
+              "expected": true
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/passes/neutral/candidate/sha256",
+              "expected": "538b7a1f748f4067690d9240caaec34e7bc81d1dd8622a0d703b061d3f567cb2"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/passes/neutral/candidate/geometry_hash",
+              "expected": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0"
+            },
+            {
+              "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/passes/neutral/candidate/render_settings",
               "expected": {
                 "engine": "BLENDER_WORKBENCH",
                 "format": "PNG",

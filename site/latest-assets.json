@@ -551,6 +551,196 @@
         "evidencePath": "docs/quality-calibration-20261008/native-allowance-evidence.json",
         "pointer": "/artifact_sha256/oblique_35_28-neutral.png"
       }
+    },
+    {
+      "path": "assets/cylinder-latest-reference-oblique_35_28-normals.png",
+      "source": "docs/quality-cylinder-final-qualification-continuation-20261009/pixels/source-oblique_35_28-normals.png",
+      "bytes": 199623,
+      "sha256": "a634d3e98c7bd91879b31b1226f8c83ebc305b2a5467fd92d20b9d8aaf27bb39",
+      "original_sha256": "2196160782444d16160f38591523f64f3fd8976cc0e48bcf9471dd0b68715c92",
+      "idat_sha256": "d8de7b2388f885f6c4fc6a8ae72f7e88b623e91cc72ea9e3e6eefeb57d23df00",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "c68d770aa57f8185001ca8211b2342bbe29646a0ed78e548755b338f96f8c38a",
+      "role": "reference",
+      "style": "normals",
+      "view": "oblique_35_28",
+      "imageBinding": {
+        "evidencePath": "docs/quality-cylinder-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/sha256"
+      }
+    },
+    {
+      "path": "assets/cylinder-latest-candidate-oblique_35_28-normals.png",
+      "source": "docs/quality-cylinder-final-qualification-continuation-20261009/pixels/candidate-oblique_35_28-normals.png",
+      "bytes": 199363,
+      "sha256": "eecc6d20df36522341ea8d795ee1e7c12cad1f40e730b8e83f2416b06f938e87",
+      "original_sha256": "28cfb4282ba0a4bd5431d15346493db8acfcb4869b819684c5d86fe1562a60aa",
+      "idat_sha256": "7f930dfb0133d6e7a762b8eca1445aeb273ed47ab4bad38d40a5dafeeffab5f3",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "ab6343943cb9a35006f1b1659d9b6cbad50520fff000ab9ca781fecf25c5ff88",
+      "role": "candidate",
+      "style": "normals",
+      "view": "oblique_35_28",
+      "imageBinding": {
+        "evidencePath": "docs/quality-cylinder-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/sha256"
+      }
+    },
+    {
+      "path": "assets/tapered_frustum-latest-reference-oblique_35_28-normals.png",
+      "source": "docs/quality-frustum-final-qualification-continuation-20261009/pixels/source-oblique_35_28-normals.png",
+      "bytes": 192934,
+      "sha256": "aa9f3b5c5f55f69d90034392ed508983bd2c0ebca87386a9038e1a26562487f0",
+      "original_sha256": "c65de0a5168d66ff557b4eda4fe4728ac110e0f7a653a5f347f65636107460cc",
+      "idat_sha256": "f1a7c013820254e28c82cc82a26c6f7a2c616ca64a820d03d27d60cbef45720a",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "a05605528bbb310beef7f6a137ecd89521055cc1facaedc1383af8f42f5cfa1d",
+      "role": "reference",
+      "style": "normals",
+      "view": "oblique_35_28",
+      "imageBinding": {
+        "evidencePath": "docs/quality-frustum-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/sha256"
+      }
+    },
+    {
+      "path": "assets/tapered_frustum-latest-candidate-oblique_35_28-normals.png",
+      "source": "docs/quality-frustum-final-qualification-continuation-20261009/pixels/candidate-oblique_35_28-normals.png",
+      "bytes": 194093,
+      "sha256": "8efe6578e4c7ce450d0161311c6945ad5bb8190eedd298dd79053746d68120cf",
+      "original_sha256": "8d6b1bfa4040ec9273ffb2c7e8b5d34deb61b5cdc8242767895bba7a3f7d269c",
+      "idat_sha256": "66ee1695d98d4d2a5459c8fc8ac3bf818b6f200c020154125cfa57f3265e61b7",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "41cc2701f38d6328b8e72c8aa89c8169c2264eadd2c8b2c4159e3cb10226ac45",
+      "role": "candidate",
+      "style": "normals",
+      "view": "oblique_35_28",
+      "imageBinding": {
+        "evidencePath": "docs/quality-frustum-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/sha256"
+      }
+    },
+    {
+      "path": "assets/capsule-latest-reference-oblique_35_28-normals.png",
+      "source": "docs/quality-capsule-final-qualification-continuation-20261009/pixels/source-oblique_35_28-normals.png",
+      "bytes": 168073,
+      "sha256": "c9ef5e2056df0f53d23cf7fb36027ad0760a46ccf313a8d0f81b92721f686d62",
+      "original_sha256": "486195c9b7a331d6d9e5a8c935ebec17eea67167b9e7c809445e7d66eaeb54a8",
+      "idat_sha256": "1998558e7b55667d7688da33e29f7a12bb2e1a278b395e0334929243eeee9d47",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "85925adc8fa76ed6f0ed29eca90fc8cd2bd86680171a4c419a6e6e20f7f4938e",
+      "role": "reference",
+      "style": "normals",
+      "view": "oblique_35_28",
+      "imageBinding": {
+        "evidencePath": "docs/quality-capsule-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/sha256"
+      }
+    },
+    {
+      "path": "assets/capsule-latest-candidate-oblique_35_28-normals.png",
+      "source": "docs/quality-capsule-final-qualification-continuation-20261009/pixels/candidate-oblique_35_28-normals.png",
+      "bytes": 167822,
+      "sha256": "b6c6650c1c6e42cd18c51d1a118e410e86d900cfd8f8a7f002fcfd9e425a1ecb",
+      "original_sha256": "876d6756b8834c4381a2d2290f77f12839dac4345235dc2292917892dc8d4725",
+      "idat_sha256": "c6466470b64601f54e96a3e0f80f3ca3c95d747a0af00e5fad2fd5216660348e",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "d436a5924e7f8e7fca6dab582462a0794017721f3ca51a488403aee1cb2c2b6b",
+      "role": "candidate",
+      "style": "normals",
+      "view": "oblique_35_28",
+      "imageBinding": {
+        "evidencePath": "docs/quality-capsule-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/sha256"
+      }
+    },
+    {
+      "path": "assets/thin_plate-latest-reference-oblique_35_28-normals.png",
+      "source": "docs/quality-thin-plate-final-qualification-continuation-20261009/pixels/source-oblique_35_28-normals.png",
+      "bytes": 167126,
+      "sha256": "afd8211e1f4397149576144408b90ec294d09d80b3f4260c2854475817f4bae1",
+      "original_sha256": "d46fe3616697ccbd95c403f1961d613af302ebf6e8037ab937564344d61a9d0b",
+      "idat_sha256": "4c6b78c3e3a4ec965a9103254f7a6d5a43b60607c0fb8b1955ce068e37b56e60",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+      "role": "reference",
+      "style": "normals",
+      "view": "oblique_35_28",
+      "imageBinding": {
+        "evidencePath": "docs/quality-thin-plate-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/source/sha256"
+      }
+    },
+    {
+      "path": "assets/thin_plate-latest-candidate-oblique_35_28-normals.png",
+      "source": "docs/quality-thin-plate-final-qualification-continuation-20261009/pixels/candidate-oblique_35_28-normals.png",
+      "bytes": 165861,
+      "sha256": "8380440df0f5ce09ab217e3c7fe72eb4aa900a92a462aacd9ade4f211c0a2146",
+      "original_sha256": "7edfe32d47736236e363d16ff633ded7c95fe93d7e3bfff7e517476045856407",
+      "idat_sha256": "a38700799efc869eb19d521e914d30222976b69123994628ab9b065358a9857d",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0",
+      "role": "candidate",
+      "style": "normals",
+      "view": "oblique_35_28",
+      "imageBinding": {
+        "evidencePath": "docs/quality-thin-plate-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/oblique_35_28/passes/normals/candidate/sha256"
+      }
+    },
+    {
+      "path": "assets/thin_plate-latest-reference-side-neutral.png",
+      "source": "docs/quality-thin-plate-final-qualification-continuation-20261009/pixels/source-side-neutral.png",
+      "bytes": 75062,
+      "sha256": "495eaf31c13e4709e5b7f661f63a6aded0f740553a7a7938de03f211a34c4bc8",
+      "original_sha256": "c439f52aaa42cb45b6e629b22aca3614ebc963af9d66260622f6c2fe485b3cc3",
+      "idat_sha256": "0b920706b8e547155792f75e7f4033879adae80ef2a4adf2c017eab53e62c35c",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "6f0af9263586cd421c6c539c660f5d8b09c90efdf1b9bd810488fffeb24f7f50",
+      "role": "reference",
+      "style": "neutral",
+      "view": "side",
+      "imageBinding": {
+        "evidencePath": "docs/quality-thin-plate-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/passes/neutral/source/sha256"
+      }
+    },
+    {
+      "path": "assets/thin_plate-latest-candidate-side-neutral.png",
+      "source": "docs/quality-thin-plate-final-qualification-continuation-20261009/pixels/candidate-side-neutral.png",
+      "bytes": 75058,
+      "sha256": "7435371f3322cf2c3d103332e20e9f91a11989ca0ee6fed7855daa029fceff24",
+      "original_sha256": "538b7a1f748f4067690d9240caaec34e7bc81d1dd8622a0d703b061d3f567cb2",
+      "idat_sha256": "b8d576636b2758ab1e59cac71e16a8148fbf254cd59d0965d48c8db4948cc3e5",
+      "width": 512,
+      "height": 512,
+      "pixel_payload_preserved": true,
+      "geometryHash": "0b2cb7665eeb1a2680383a39c79f526ceee5359f6b8b55fd54aacf4b59aea7a0",
+      "role": "candidate",
+      "style": "neutral",
+      "view": "side",
+      "imageBinding": {
+        "evidencePath": "docs/quality-thin-plate-final-qualification-continuation-20261009/native-evidence.json",
+        "pointer": "/independent_case/canonical_inspection/actual_matched_views/side/passes/neutral/candidate/sha256"
+      }
     }
   ]
 }

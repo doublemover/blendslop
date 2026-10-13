@@ -93,18 +93,15 @@ function renderCounts() {
     $('#engineering-total').textContent = data.families.filter(engineeringComplete).length;
     $('#views-total').textContent = data.families.reduce((sum,family) => sum+family.viewMetrics.filter(metric => metric.passed).length,0);
     $('#accepted-total').textContent = data.families.filter(family => family.verdicts.aggregate === 'passed').length;
-    const artistPending = data.families.filter(family => family.verdicts.artistSurface === 'unqualified').length;
-    $('#artist-gaps').textContent = artistPending;
-    $('#snapshot-scope').textContent = `Evidence ${data.evidenceDate} / source ${data.sourceRevision.slice(0,7)} / ${artistPending} families await independent artist surface criteria. Negative controls are separate.`;
-    $('#build-id').textContent = `Current selected evidence: ${data.sourceRevision}. Image and verdict bindings retain their original scope.`;
+    $('[data-filter="gaps"]').hidden = data.families.every(engineeringComplete);
 }
 function renderFamilies() {
     const shown = data.families.filter(family => filter === 'all' || (filter === 'complete' ? engineeringComplete(family) : !engineeringComplete(family)));
     $('#family-grid').innerHTML = shown.length ? shown.map(family => {
         const image=thumbnail(family), [status,label]=headline(family);
-        return `<button class="family-card" data-family="${family.id}" aria-pressed="${family.id===selected}" aria-label="Inspect ${escape(family.label)}"><div class="family-image">${image?`<img src="${escape(image.path)}" alt="${escape(family.label)}: selected reconstruction, ${escape(styleLabels[image.style]||image.style)}" width="512" height="512" loading="lazy">`:'<span class="no-preview">Current geometry retained.<br>Preview unavailable.</span>'}</div><div class="family-meta"><h3>${escape(family.label)}</h3>${badge(status,label)}<p>Artist aggregate: ${escape(statusLabels[family.verdicts.aggregate])}</p><span class="family-hash">Geometry ${family.geometryHash.slice(0,12)}</span></div></button>`;
+        return `<button class="family-card" data-family="${family.id}" aria-pressed="${family.id===selected}" aria-label="Inspect ${escape(family.label)}"><div class="family-image">${image?`<img src="${escape(image.path)}" alt="${escape(family.label)}: selected reconstruction, ${escape(styleLabels[image.style]||image.style)}" width="512" height="512" loading="lazy">`:'<span class="no-preview">Current geometry retained.<br>Preview unavailable.</span>'}</div><div class="family-meta"><h3>${escape(family.label)}</h3><div class="family-status"><span>${escape(label)}</span><span>${family.verdicts.aggregate==='passed'?'Artist accepted':'Artist '+escape(statusLabels[family.verdicts.aggregate].toLowerCase())}</span></div></div></button>`;
     }).join('') : `<p class="empty-filter">${filter==='gaps'?'No engineering gaps remain in the selected rows.':'No selected row has all five engineering checks passed.'}</p>`;
-    $('#filter-count').textContent = `Showing ${shown.length} of ${data.families.length} selected reconstructions. Engineering completion does not imply artist acceptance.`;
+    $('#filter-count').textContent = `${shown.length} reconstructions`;
     document.querySelectorAll('[data-filter]').forEach(button => button.setAttribute('aria-pressed',button.dataset.filter===filter));
 }
 function renderList(selector, items, empty) {
@@ -115,13 +112,13 @@ function renderList(selector, items, empty) {
     }
 }
 function unavailable(slot, detail) {
-    $(slot).innerHTML = `<div class="unavailable"><span class="eyebrow">EXACT PASS UNAVAILABLE</span><strong>No matched preview</strong><p>${escape(detail)}</p></div>`;
+    $(slot).innerHTML = `<div class="unavailable"><span class="eyebrow">PASS UNAVAILABLE</span><strong>No recorded image</strong><p>${escape(detail)}</p></div>`;
 }
 function renderImage(slot, image, alt) {
     const element=document.createElement('img');element.src=image.path;element.alt=alt;element.width=512;element.height=512;
     element.dataset.role=image.role;element.dataset.view=image.view;element.dataset.style=image.style;element.dataset.geometryHash=image.geometryHash;
     element.addEventListener('error',() => {
-        if ($(slot).contains(element)) unavailable(slot,'The declared image could not be loaded. Its linked receipt remains the source of truth.');
+        if ($(slot).contains(element)) unavailable(slot,'This image could not be loaded. Try another camera or pass.');
     },{once:true});
     $(slot).replaceChildren(element);
 }
@@ -130,23 +127,23 @@ function renderComparison(family) {
     $('#reference-pass').textContent = $('#candidate-pass').textContent = `${viewLabels[view]} / ${styleLabels[style]||style}`;
     if (source) {
         renderImage('#reference-image',source,`${family.label}: authored reference, ${viewLabels[view]}, ${styleLabels[style]||style}`);
-        $('#reference-caption').textContent = `Reference geometry ${source.geometryHash}`;
+        $('#reference-caption').textContent = 'Authored reference';
     } else {
-        unavailable('#reference-image','The authored reference pass for this exact view, style and source geometry was not retained.');
+        unavailable('#reference-image','No reference image was retained for this camera and pass.');
         $('#reference-caption').textContent = 'Reference pass unavailable.';
     }
     if (candidate) {
         renderImage('#candidate-image',candidate,`${family.label}: exact selected reconstruction, ${viewLabels[view]}, ${styleLabels[style]||style}`);
-        $('#candidate-caption').textContent = `Selected geometry ${candidate.geometryHash}`;
+        $('#candidate-caption').textContent = 'Current reconstruction';
     } else {
-        unavailable('#candidate-image','The candidate pass for this exact view, style and selected geometry was not retained.');
+        unavailable('#candidate-image','No reconstruction image was retained for this camera and pass.');
         $('#candidate-caption').textContent = 'Selected candidate pass unavailable.';
     }
     if (source && candidate) {
-        $('#pair-status').textContent = 'Shared view and pass retained; each image is bound to its declared geometry.';
+        $('#pair-status').textContent = 'Paired camera and pass';
     } else {
         const missing = source?'candidate':candidate?'reference':'reference and candidate';
-        $('#pair-status').textContent = `No matched comparison: ${missing} pass unavailable. Each retained role is shown independently; view metrics and verdicts remain visible.`;
+        $('#pair-status').textContent = `No matched comparison: ${missing} pass unavailable.`;
     }
 }
 function availability(family, selectedView, selectedStyle) {
@@ -158,20 +155,8 @@ function renderSelection() {
     const family=data.families.find(row => row.id===selected), [status,label]=headline(family);
     $('#case-title').textContent = family.label;
     $('#checkpoint-label').textContent = family.checkpointLabel;
-    $('#case-summary').textContent = `${label}. Artist surface criteria: ${statusLabels[family.verdicts.artistSurface].toLowerCase()}. Aggregate acceptance: ${statusLabels[family.verdicts.aggregate].toLowerCase()}.`;
-    $('#selected-geometry').textContent = family.geometryHash;
     $('#inspection').dataset.family = family.id;
     $('#inspection').dataset.geometryHash = family.geometryHash;
-    $('#hero-family-label').textContent = family.label+' / current geometry';
-    $('#hero-acceptance').textContent = family.verdicts.aggregate==='passed'?'Artist aggregate accepted':label;
-    const hero=imageFor(family,'candidate',view,'neutral')||thumbnail(family);
-    if (hero) {
-        renderImage('#hero-image',hero,`${family.label}: exact selected reconstruction, ${viewLabels[hero.view]}, ${styleLabels[hero.style]||hero.style}`);
-        $('#hero-caption').textContent = `${viewLabels[hero.view]} / ${styleLabels[hero.style]||hero.style} / geometry ${family.geometryHash.slice(0,12)}. The recorded pass depicts this selected body.`;
-    } else {
-        unavailable('#hero-image','A preview for this exact selected geometry is unavailable. Its verdicts remain visible below.');
-        $('#hero-caption').textContent = 'Selected geometry '+family.geometryHash;
-    }
     $('#family-select').value = selected;
     $('#verdicts').innerHTML = verdictKeys.map(key => `<div class="verdict ${engineeringKeys.includes(key)?'engineering':'artist'}" data-verdict="${key}" data-status="${family.verdicts[key]}"><span>${escape(verdictLabels[key])}</span>${badge(family.verdicts[key])}</div>`).join('');
     $('#view-select').innerHTML = views.map(camera => `<option value="${camera}">${viewLabels[camera]} · ${availability(family,camera,style)}</option>`).join('');

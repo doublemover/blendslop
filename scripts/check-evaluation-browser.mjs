@@ -33,7 +33,7 @@ timer=setTimeout(()=>{for(const item of pending.values())item.reject(new Error('
  async function wait(expression){const deadline=Date.now()+10000;while(Date.now()<deadline){if(await evaluate(expression))return;await new Promise(resolve=>setTimeout(resolve,100));}throw new Error('Browser condition timeout: '+expression);}
  async function assert(expression,label){if(!await evaluate(expression))throw new Error(label);}
  async function click(selector){await evaluate(`document.querySelector(${JSON.stringify(selector)}).click()`);}
- async function screenshot(name){await wait(`Array.from(document.querySelectorAll('.hero-render img,.current-preview img,.comparison img')).every(i=>i.complete&&i.naturalWidth>0)`);const result=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});await fs.writeFile(path.join(evidence,name),Buffer.from(result.data,'base64'));}
+ async function screenshot(name){await wait(`Array.from(document.querySelectorAll('.hero-render img,.showcase-grid img,.comparison img')).every(i=>i.complete&&i.naturalWidth>0)`);const result=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});await fs.writeFile(path.join(evidence,name),Buffer.from(result.data,'base64'));}
  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});await send('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+(current?'/historical.html':'/')});
  await wait(`document.querySelectorAll('.family-card').length===12 && document.querySelector('#load-error').hidden===true`);
  await assert(`document.querySelectorAll('#view-metrics .badge.failed').length===1`,'Vase failure must remain visible');
@@ -81,15 +81,19 @@ timer=setTimeout(()=>{for(const item of pending.values())item.reject(new Error('
   const engineering=current.families.filter(f=>['silhouette','boundary','topology','editability','surfaceEngineering'].every(g=>f.verdicts[g]==='passed')).length;
   const accepted=current.families.filter(f=>f.verdicts.aggregate==='passed').length;
   const gaps=current.families.filter(f=>f.verdicts.artistSurface==='unqualified').length;
-  await assert(`document.querySelector('#family-total').textContent.trim()==='12' && document.querySelector('#engineering-total').textContent.trim()===${JSON.stringify(engineering.toString())} && document.querySelector('#accepted-total').textContent.trim()===${JSON.stringify(accepted.toString())} && document.querySelector('#artist-gaps').textContent.trim()===${JSON.stringify(gaps.toString())} && document.querySelector('#views-total').textContent.trim()===${JSON.stringify(current.families.reduce((n,f)=>n+f.viewMetrics.filter(m=>m.passed).length,0).toString())}`,'Current counts must match independent retained results');
-  await assert(`document.querySelector('#inspection').dataset.family==='smooth_vase' && document.querySelector('#selected-geometry').textContent.includes(${JSON.stringify(current.families.find(f=>f.id==='smooth_vase').geometryHash)})`,'Main demo must default to the accepted calibrated vase');
-  await wait(`document.querySelector('#hero-image img')?.complete===true`);
-  await assert(`(()=>{const image=document.querySelector('#hero-image img'),slot=document.querySelector('#hero-image');if(!image||!image.naturalWidth)return false;const i=image.getBoundingClientRect(),s=slot.getBoundingClientRect();return getComputedStyle(image).objectFit==='contain'&&i.width<=s.width+1&&i.height<=s.height+1&&i.top>=s.top-1&&i.bottom<=s.bottom+1})()`,'Current hero must retain the recorded image without additional CSS cropping');
+  await assert(`document.querySelector('#family-total').textContent.trim()==='12' && document.querySelector('#engineering-total').textContent.trim()===${JSON.stringify(engineering.toString())} && document.querySelector('#accepted-total').textContent.trim()===${JSON.stringify(accepted.toString())} && document.querySelector('#views-total').textContent.trim()===${JSON.stringify(current.families.reduce((n,f)=>n+f.viewMetrics.filter(m=>m.passed).length,0).toString())}`,'Current counts must match independent retained results');
+  await assert(`document.querySelector('#inspection').dataset.family==='smooth_vase'`,'Current inspection must default to the accepted calibrated vase');
+  await assert(`document.querySelectorAll('#gallery .showcase-grid img').length===3 && document.querySelector('#gallery').getBoundingClientRect().top<document.querySelector('#families').getBoundingClientRect().top`,'Presentation renders must lead the combined front page');
+  await assert(`document.querySelector('[data-filter="gaps"]').hidden===${JSON.stringify(engineering===current.families.length)}`,'Hide the engineering-gaps filter when there are no gaps');
+  await assert(`!document.querySelector('#selected-geometry') && !document.querySelector('.family-hash') && !document.querySelector('.acceptance-scope')`,'Hashes and duplicated evidence prose must stay out of the main gallery');
   await screenshot('current-main.png');
+  await evaluate(`document.querySelector('#families').scrollIntoView({behavior:'instant'})`);
+  await wait(`Array.from(document.querySelectorAll('#family-grid img')).every(i=>i.complete&&i.naturalWidth>0)`);
+  await screenshot('current-collection.png');
   for(const family of current.families){
    await evaluate(`(()=>{const select=document.querySelector('#family-select');select.value=${JSON.stringify(family.id)};select.dispatchEvent(new Event('change',{bubbles:true}));})()`);
    await wait(`document.querySelector('#inspection').dataset.family===${JSON.stringify(family.id)}`);
-   await assert(`document.querySelector('#inspection').dataset.geometryHash===${JSON.stringify(family.geometryHash)} && document.querySelector('#selected-geometry').textContent.includes(${JSON.stringify(family.geometryHash)})`,'Current selector body mismatch: '+family.id);
+   await assert(`document.querySelector('#inspection').dataset.geometryHash===${JSON.stringify(family.geometryHash)}`,'Current selector body mismatch: '+family.id);
    for(const [gate,status] of Object.entries(family.verdicts))await assert(`document.querySelector('#verdicts [data-verdict="'+${JSON.stringify(gate)}+'"]').dataset.status===${JSON.stringify(status)}`,'Independent current verdict mismatch: '+family.id+'/'+gate);
    await assert(`document.querySelectorAll('#view-metrics tr[data-view]').length===5`,'Missing current original-view metrics: '+family.id);
    for(const metric of family.viewMetrics)await assert(`document.querySelector('#view-metrics tr[data-view="'+${JSON.stringify(metric.view)}+'"]').dataset.status===${JSON.stringify(metric.passed?'passed':'failed')}`,'Original-view verdict mismatch: '+family.id+'/'+metric.view);
@@ -120,9 +124,19 @@ timer=setTimeout(()=>{for(const item of pending.values())item.reject(new Error('
   }
   const unavailable=current.families.find(f=>!f.images.length);
   if(unavailable){await click('#family-grid [data-family="'+unavailable.id+'"]');await assert(`!document.querySelector('#candidate-image img') && document.querySelector('#candidate-image').textContent.trim().length>0`,'Unavailable current pair must not substitute an old body');}
+  await evaluate(`(()=>{const select=document.querySelector('#family-select');select.value='rounded_box';select.dispatchEvent(new Event('change',{bubbles:true}));})()`);
+  for(const width of [320,390,650,768]){
+   await send('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:true});
+   await evaluate(`document.querySelector('.measurement-details').open=true;document.querySelector('#inspection').scrollIntoView({behavior:'instant'})`);
+   await assert(`document.documentElement.scrollWidth<=${width}`,'Combined page must fit at '+width+'px, including open measurements');
+   if(width===390){await screenshot('current-inspection-mobile.png');await evaluate('window.scrollTo(0,0)');await screenshot('current-main-mobile.png');}
+  }
+  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
+  await send('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/continuation.html#coverage'});
+  await wait(`location.pathname==='/index.html' && location.hash==='#coverage' && document.body.dataset.state==='ready'`);
   if(errors.length)throw new Error('Current browser runtime exceptions: '+errors.join('; '));
  }
- await fs.writeFile(path.join(evidence,'result.json'),JSON.stringify({passed:true,chrome:version.product,checks:['desktop shaded actual defaults','exact measured vase failure explanation','scored boundary-band overlay and magnified pixels','concise outline keys and adjacent detail','2x/4x/8x detail controls, touch and keyboard navigation','laptop and mobile comparison layout','exact filled-mask differences','triangle shaded output and unrun qualification distinction','secondary silhouettes and unavailable camera pass','unrun reference and actual filters','no browser exceptions',...(current?['main defaults to current calibrated vase','twelve exact current selector bodies and independent gates','current count/metric consistency','current image identity and unavailable-pair handling']:[])]},null,2)+'\n');
+ await fs.writeFile(path.join(evidence,'result.json'),JSON.stringify({passed:true,chrome:version.product,checks:['desktop shaded actual defaults','exact measured vase failure explanation','scored boundary-band overlay and magnified pixels','concise outline keys and adjacent detail','2x/4x/8x detail controls, touch and keyboard navigation','laptop and mobile comparison layout','exact filled-mask differences','triangle shaded output and unrun qualification distinction','secondary silhouettes and unavailable camera pass','unrun reference and actual filters','no browser exceptions',...(current?['combined showcase and main-page identity','compact collection without visible hashes','mobile320/390/650/768 with open measurements','old presentation deep-link redirect','main defaults to current calibrated vase','twelve exact current selector bodies and independent gates','current count/metric consistency','current image identity and unavailable-pair handling']:[])]},null,2)+'\n');
  console.log('Browser rendering and interaction checks passed on '+version.product);
  }finally{
  clearTimeout(timer);
