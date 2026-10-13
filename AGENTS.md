@@ -27,7 +27,7 @@ python create_test_images.py
 ```
 
 ## Agent & Environment Notes
-Automated agents do not have access to Blender in this environment and cannot run Blender at all while working on this repo. Changes must be reasoned about carefully and validated by code inspection. When you pick up changes from an agent, re-run the Blender tests locally before merging.
+Check the actual execution environment before claiming Blender is available or unavailable. Use the supported, verified official Blender installation and its bundled Python for native tests when available and authorized. Pure helper/contract checks may run outside Blender, but never count those as native Blender or browser visual acceptance. The 2026-10-12 assistant-cloud repair pass did not run native Blender or a real candidate browser; those qualifications remain pending. Re-run the required native/browser checks before merging changes that depend on them.
 
 We work from PowerShell 7.5. For multi-line inputs, prefer here-strings: `@'` ... `'@` (literal) and `@"` ... `"@` (expand variables). The closing marker must be on its own line with no indentation. Easiest quoting: use single quotes for most strings; use double quotes only when you need variable expansion or to embed a single quote.
 

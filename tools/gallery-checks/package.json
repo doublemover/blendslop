@@ -1,0 +1,9 @@
+{
+  "name": "blendslop-gallery-checks",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@napi-rs/canvas": "1.0.11",
+    "jsdom": "30.1.2"
+  }
+}

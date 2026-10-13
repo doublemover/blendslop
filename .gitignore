@@ -30,3 +30,6 @@ blender_blocking/test_output/
 
 # OS
 .DS_Store
+
+# Bounded gallery test dependencies; never publish installed packages.
+tools/gallery-checks/node_modules/

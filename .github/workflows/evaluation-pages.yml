@@ -1,6 +1,14 @@
 name: Evaluation Pages
 
 on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'scripts/build-evaluation-site.mjs'
+      - 'scripts/validate-current-demo.mjs'
+      - 'scripts/check-evaluation-browser.mjs'
+      - '.github/workflows/evaluation-pages.yml'
+      - 'tools/gallery-checks/**'
   workflow_dispatch:
     inputs:
       publish:
@@ -25,6 +33,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
       - name: Refuse publication from a non-main ref
         if: inputs.publish && github.ref != 'refs/heads/main'
         run: |
@@ -34,9 +45,17 @@ jobs:
         env:
           BUILD_SHA: ${{ github.sha }}
         run: node scripts/build-evaluation-site.mjs --out temp/pages-dist
+      - name: Install locked DOM contract tools
+        run: npm ci --prefix tools/gallery-checks --ignore-scripts --no-audit --no-fund
+      - name: Check races, zoom reuse and current evidence controls
+        run: |
+          node tools/gallery-checks/check-outline.mjs
+          node --experimental-vm-modules tools/gallery-checks/check-dom.mjs temp/pages-dist
+          node --experimental-vm-modules tools/gallery-checks/check-current-dom.mjs temp/pages-dist
       - name: Check desktop presentation and exact verdict interactions
         run: node scripts/check-evaluation-browser.mjs
       - name: Upload bounded browser inspection
+        if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: evaluation-browser-checks
@@ -51,13 +70,13 @@ jobs:
           path: temp/pages-dist
           retention-days: 7
       - name: Upload public Pages artifact
-        if: inputs.publish && github.ref == 'refs/heads/main'
+        if: github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: temp/pages-dist
   deploy:
     name: Deploy evaluation gallery
-    if: inputs.publish && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 5

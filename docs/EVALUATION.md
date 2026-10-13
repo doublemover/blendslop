@@ -12,7 +12,7 @@ The eleven non-vase families have source-conditioned engineering policies and ac
 
 The current UI displays identity-bound retained pairs where available and explains any missing pass. It never substitutes an older beauty body. Deliberate wrong-depth, filled-cavity and missing-part failures remain successful negative-control detections, separate from the twelve actual candidates.
 
-Published implementation `f5d7f4122273f8372fd8620bcb9df5b621a88810` passed Blender 5.2.2 CI: full 177 passed / 0 failed / 0 skipped and quick 175 passed / 0 failed / 2 intentional skips. [Completed full/quick run](https://github.com/doublemover/blendslop/actions/runs/37955420996). Correctness CI does not grant artist acceptance. The current demo integration and manual-only generation configuration must be reviewed and published separately; see [generation and publishing](EVALUATION_SITE.md).
+Published implementation `f5d7f4122273f8372fd8620bcb9df5b621a88810` passed Blender 5.2.2 CI: full 177 passed / 0 failed / 0 skipped and quick 175 passed / 0 failed / 2 intentional skips. [Completed full/quick run](https://github.com/doublemover/blendslop/actions/runs/37955420996). Correctness CI does not grant artist acceptance. That historical implementation check predates the current main/demo integration, which is published at `604f4bdb1867d437baa1bfe4abce44d9ba79fd40`. The 2026-10-12 comparison repair is a separate draft; see [current audit and remaining acceptance](PORTFOLIO_AUDIT_20261012.md) and [generation and publishing](EVALUATION_SITE.md).
 
 ## Historical snapshot: 2026-10-08
 
